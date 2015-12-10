@@ -1,0 +1,10 @@
+*.pyc
+/.cache
+/.coverage
+/.idea
+/dist/
+/build/
+*.egg-info
+/htmlcov
+/.tox
+/VERSION
