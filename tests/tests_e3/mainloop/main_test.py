@@ -23,5 +23,3 @@ def test_mainloop():
         parallelism=1)
 
     assert result == ['1', '2', '3']
-
-

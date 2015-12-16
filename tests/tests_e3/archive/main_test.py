@@ -1,11 +1,9 @@
 import e3.archive
 import e3.fs
-import tempfile
-import os
-
-import pytest
-
 import e3.log
+import os
+import pytest
+import tempfile
 
 e3.log.activate()
 
