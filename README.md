@@ -1,57 +1,60 @@
-E3 core
--------
+The `e3` Project
+================
 
-E3 is a python framework to ease development of testsuites and build
-infrastructure in a portable way.
+This present project (`e3`) is a Python framework to ease the development
+of portable automated build systems (compilation, dependencies management,
+binary code packaging, and automated testing).
 
-The E3 framework is splitted across multiple Python packages named `e3-<name>`
+The `e3` framework is split across multiple Python packages named `e3-<name>`
 and sharing the same namespace: `e3`.
 
-Core content
-------------
+`e3-core` content
+=================
 
-E3 core libary is splitted into several packages and modules:
+`e3-core` package is organized in several packages and modules:
 
-- archive: support for reading and writing tar and zip archives
-- binarydata: helpers for parsing binary data such as object files,
+- *archive*: support for reading and writing tar and zip archives
+- *binarydata*: helpers for parsing binary data such as object files,
   executables, …
-- collection: generic collections, e.g. an implementation of Direct Acyclic
+- *collection*: generic collections, e.g. an implementation of Direct Acyclic
   Graphs
-- decorator: python decorators, e.g. a memoize decorator
-- diff: functions to compute a diff or apply it
-- env: global environment handling
-- error: E3 exceptions
-- fs: high-level file system operations, using globbing, walk, ...
-- hash: computation of sha1, md5
-- log: logging helpers
-- main: main program initialization, command line parsing, ...
-- mainloop: generic loop for running jobs
-- net: network utilities
-  - net.smtp: helper for sending an email
-- os: platform independent interface to OS functions
-  - os.fs: low-level file system operations, no logging involved
-  - os.platform: tools to detect the platform
-  - os.process: interface to run process, control the execution time, ...
-  - os.timezone: platform independent interface to get the machine timezone
-- platform: generic interface for providing platform information
-- platform_db: knowledge base for computing platform information
-- sys: E3 information, sanity check, ...
-- text: text formatting and transformation
-- yaml: helpers for parsing yaml data
+- *decorator*: Python decorators, e.g. a memoize decorator
+- *diff*: functions to compute a diff or apply it
+- *env*: global environment handling
+- *error*: `e3` exceptions
+- *fs*: high-level file system operations, using globbing, walk,...
+- *hash*: computation of sha1, md5
+- *log*: logging helpers
+- *main*: main program initialization, command line parsing,...
+- *mainloop*: generic loop for running jobs
+- *net*: network utilities
+  - *net.smtp*: helper for sending emails through smtp.
+- *os*: platform independent interface to Operating System functions
+  - *os.fs*: low-level file system operations, no logging involved
+  - *os.platform*: tools to detect the platform
+  - *os.process*: interface to run process, to control the execution time,...
+  - *os.timezone*: platform independent interface to get the machine timezone
+- *platform*: generic interface for providing platform information
+- *platform_db*: knowledge base for computing platform information
+- *sys*: `e3` information, sanity check, ...
+- *text*: text formatting and transformation
+- *yaml*: helpers for parsing yaml data
 
 
 Install
--------
+=======
 
-To install E3, you'll need a 2.7.x version of Python.
+requires: Python 2.7.x
+
+To install `e3`, run:
 
 ```bash
 python setup.py install
 ```
 
-All E3 dependencies will also be installed.
+All `e3` dependencies will also be installed.
 
 Contributing
-------------
+============
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
