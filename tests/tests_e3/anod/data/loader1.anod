@@ -1,0 +1,5 @@
+from e3.anod.spec import Anod
+
+
+class Loader1(Anod):
+    pass
