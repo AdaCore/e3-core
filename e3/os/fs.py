@@ -105,15 +105,15 @@ def chmod(mode, filename):
 
                 if wholist == '':
                     action_mask = action_mask | \
-                                  action_mask << 3 | \
-                                  action_mask << 6
+                        action_mask << 3 | \
+                        action_mask << 6
                     action_mask &= ~umask
                     apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
                 else:
                     if 'a' in wholist:
                         action_mask = action_mask | \
-                                      action_mask << 3 | \
-                                      action_mask << 6
+                            action_mask << 3 | \
+                            action_mask << 6
                         apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
                     else:
                         final_action_mask = 0
@@ -134,7 +134,7 @@ def chmod(mode, filename):
                     current_mode &= ~action_mask
                 elif op == '=':
                     current_mode = (current_mode & ~apply_mask) | \
-                                   action_mask
+                        action_mask
                 else:
                     current_mode = current_mode | action_mask
 
