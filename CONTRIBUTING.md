@@ -61,3 +61,10 @@ In order to run the public testsuite of `e3-core`, do:
 ```bash
 tox
 ```
+
+To verify that the `e3-core` package is PEP8 compliant and that no error is
+reported by PyFlakes, do:
+
+```bash
+tox -e checkstyle
+```
