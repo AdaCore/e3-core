@@ -1,5 +1,5 @@
 [gerrit]
-host = git.eu.adacore.com
+host = git.adacore.com
 project = e3-core
 defaultbranch = master
 defaultremote = origin
