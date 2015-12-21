@@ -47,7 +47,8 @@ class BinaryFileBuffer(object):
     def __len__(self):
         return self.last - self.begin + 1
 
-    def __str__(self):
+    def read(self):
+        """Return the buffer content (in bytes)"""
         self.fd.seek(self.begin)
         result = self.fd.read(self.last - self.begin + 1)
         return result
@@ -88,8 +89,8 @@ class BinaryData(object):
 
     You should not use directly instances of that class
     """
-    ADDRESS_ENCODING = 'L'  # 32bits
-    ENDIANNESS = '='  # Native encoding
+    ADDRESS_ENCODING = b'L'  # 32bits
+    ENDIANNESS = b'='  # Native encoding
 
     def __init__(self):
         pass
@@ -107,7 +108,7 @@ class BinaryData(object):
         :param size: can be 32, 64 or 16
         :type size: int
         """
-        BinaryData.ADDRESS_ENCODING = {32: 'L', 64: 'Q', 16: 'H'}[size]
+        BinaryData.ADDRESS_ENCODING = {32: b'L', 64: b'Q', 16: b'H'}[size]
 
     @classmethod
     def set_endianness(cls, endian):
@@ -119,9 +120,9 @@ class BinaryData(object):
         :param endian: can be 'native' (default), 'little' or 'big'
         :type endian: str
         """
-        BinaryData.ENDIANNESS = {'native': '=',
-                                 'little': '<',
-                                 'big': '>'}[endian]
+        BinaryData.ENDIANNESS = {'native': b'=',
+                                 'little': b'<',
+                                 'big': b'>'}[endian]
 
     def image(self, indent=0):
         """Return an image of the current object.
@@ -131,7 +132,7 @@ class BinaryData(object):
 
         :rtype: str
         """
-        return ''
+        return b''
 
 
 class BasicType(BinaryData):
@@ -142,7 +143,7 @@ class BasicType(BinaryData):
     a valid decoding string for struct module. Note that endianness setting is
     automatically applied.
     """
-    DECODER = ''
+    DECODER = b''
 
     def __init__(self, value=None):
         """Initialize a BasicType.
@@ -167,7 +168,7 @@ class BasicType(BinaryData):
         :rtype: int
         """
         self.size = struct.calcsize(self.decoder)
-        self.value = struct.unpack(self.decoder, str(buffer[0:self.size]))[0]
+        self.value = struct.unpack(self.decoder, buffer[0:self.size].read())[0]
         return self.size
 
     def encode(self):
@@ -194,7 +195,7 @@ class BasicType(BinaryData):
 class Address(BasicType):
     """Address decoder."""
 
-    FORMATTER = '0x%x'
+    FORMATTER = b'0x%x'
 
     def __init__(self, value=None):
         super(Address, self).__init__(value)
@@ -220,7 +221,7 @@ class CharStr(BinaryData):
         self.value = value
 
     def decode(self, buffer):
-        self.value = str(buffer[0])
+        self.value = buffer[0].read()
         return 1
 
     def encode(self):
@@ -232,50 +233,50 @@ class CharStr(BinaryData):
 
 class Char(BasicType):
     """8bits signed integer decoder."""
-    DECODER = 'b'
-    FORMATTER = '0x%02x'
+    DECODER = b'b'
+    FORMATTER = b'0x%02x'
 
 
 class Int16(BasicType):
     """16bits signed integer decoder."""
-    DECODER = 'h'
-    FORMATTER = '0x%04x'
+    DECODER = b'h'
+    FORMATTER = b'0x%04x'
 
 
 class Int32(BasicType):
     """32bits signed integer decoder."""
-    DECODER = 'l'
-    FORMATTER = '0x%08x'
+    DECODER = b'l'
+    FORMATTER = b'0x%08x'
 
 
 class Int64(BasicType):
     """64bits signed integer decoder."""
-    DECODER = 'q'
-    FORMATTER = '0x%016x'
+    DECODER = b'q'
+    FORMATTER = b'0x%016x'
 
 
 class UChar(BasicType):
     """8bits unsigned integer decoder."""
-    DECODER = 'B'
-    FORMATTER = '0x%02x'
+    DECODER = b'B'
+    FORMATTER = b'0x%02x'
 
 
 class UInt16(BasicType):
     """16bits unsigned integer decoder."""
-    DECODER = 'H'
-    FORMATTER = '0x%04x'
+    DECODER = b'H'
+    FORMATTER = b'0x%04x'
 
 
 class UInt32(BasicType):
     """32bits unsigned integer decoder."""
-    DECODER = 'L'
-    FORMATTER = '0x%08x'
+    DECODER = b'L'
+    FORMATTER = b'0x%08x'
 
 
 class UInt64(BasicType):
     """64bits unsigned integer decoder."""
-    DECODER = 'Q'
-    FORMATTER = '0x%016x'
+    DECODER = b'Q'
+    FORMATTER = b'0x%016x'
 
 
 class Uleb128(BinaryData):
@@ -295,7 +296,7 @@ class Uleb128(BinaryData):
         shift = 0
 
         while True:
-            b = struct.unpack('B', str(buffer[size:size + 1]))[0]
+            b = struct.unpack('B', buffer[size:size + 1].read())[0]
             size += 1
             value |= b << shift
             shift += 7
@@ -309,7 +310,7 @@ class Uleb128(BinaryData):
         pass
 
     def image(self, indent=0):
-        return '%s' % self.value
+        return str(self.value)
 
 
 class String(BinaryData):
@@ -324,14 +325,14 @@ class String(BinaryData):
 
     def decode(self, buffer):
         end = 0
-        while "%s" % buffer[end] != '\0':
+        while buffer[end].read() != b'\0':
             end += 1
-        self.value = str(buffer[0:end])
+        self.value = buffer[0:end].read()
         self.size = len(self.value) + 1
         return self.size
 
     def encode(self):
-        return self.value + '\0'
+        return self.value + b'\0'
 
 
 class Field(object):

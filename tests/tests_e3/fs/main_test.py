@@ -33,5 +33,6 @@ def test_find():
 
 def test_tree_state():
     # Just check that get_filetree_state returns a string
-    assert isinstance(e3.fs.get_filetree_state(os.path.dirname(__file__)),
-                      str)
+    assert isinstance(
+        e3.fs.get_filetree_state(os.path.dirname(__file__)),
+        str)

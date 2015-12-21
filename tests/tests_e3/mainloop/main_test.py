@@ -10,7 +10,7 @@ def test_mainloop():
 
     def run_job(job_data, job_info):
         return e3.os.process.Run(
-            [sys.executable, '-c', 'print %s' % str(job_data)],
+            [sys.executable, '-c', 'print("%s")' % str(job_data)],
             bg=True)
 
     def collect_result(job_data, job_process, job_info):

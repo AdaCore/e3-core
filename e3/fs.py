@@ -160,6 +160,18 @@ def get_filetree_state(path, ignore_hidden=True):
     hash representing the state of the file tree without having to read the
     content of all files.
     """
+
+    def compute_state(file_path):
+        f_stat = os.lstat(file_path)
+
+        state = ':'.join([file_path, str(f_stat.st_mode),
+                         str(f_stat.st_size), str(f_stat.st_mtime)])
+        if isinstance(file_path, unicode):
+            # Make sure to encode unicode objects before hashing
+            return state.encode('utf-8')
+        else:
+            return state
+
     path = os.path.abspath(path)
     result = hashlib.sha1()
     if os.path.isdir(path):
@@ -178,17 +190,10 @@ def get_filetree_state(path, ignore_hidden=True):
                     continue
 
                 full_path = os.path.join(root, path)
-                path_stat = os.lstat(full_path)
-                result.update('%s:%s:%s:%s' % (full_path,
-                                               path_stat.st_mode,
-                                               path_stat.st_size,
-                                               path_stat.st_mtime))
+                result.update(compute_state(full_path))
+
     else:
-        path_stat = os.lstat(path)
-        result.update('%s:%s:%s:%s' % (path,
-                                       path_stat.st_mode,
-                                       path_stat.st_size,
-                                       path_stat.st_mtime))
+        result.update(compute_state(path))
     return result.hexdigest()
 
 

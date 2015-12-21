@@ -109,9 +109,9 @@ class ElfMagic(StructType):
 
     def is_elf_file(self):
         return self.EI_MAG0.value == 0x7f and \
-            self.EI_MAG1.value == 'E' and \
-            self.EI_MAG2.value == 'L' and \
-            self.EI_MAG3.value == 'F'
+            self.EI_MAG1.value == b'E' and \
+            self.EI_MAG2.value == b'L' and \
+            self.EI_MAG3.value == b'F'
 
 
 class ElfIdent(StructType):
@@ -274,7 +274,7 @@ class Elf(object):
 
         dyn_sect = ElfDynamicSection()
         dyn_sect.decode(self.get_section_content('.dynamic'))
-        dyn_str = str(self.get_section_content('.dynstr'))
+        dyn_str = self.get_section_content('.dynstr').read()
 
         so_list = []
         rpath = None

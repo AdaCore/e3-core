@@ -19,9 +19,9 @@ def test_elf():
 
     with BinaryFileBuffer(rlimit) as b:
         elf_f = Elf(b)
-        assert '.text' in elf_f.sections
-        assert 'ld-linux-x86-64.so.2' in str(
-            elf_f.get_section_content('.interp'))
+        assert b'.text' in elf_f.sections
+        assert b'ld-linux-x86-64.so.2' in \
+            elf_f.get_section_content(b'.interp').read()
 
 
 @pytest.mark.skipif(sys.platform != 'darwin',

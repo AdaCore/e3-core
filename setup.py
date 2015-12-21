@@ -53,11 +53,13 @@ setup(
     author_email='info@adacore.com',
     description='E3 core. Tools and library for building and testing software',
     namespace_packages=['e3'],
+    use_2to3=True,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience:: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Build Tools'],
     packages=find_packages(),
     package_data={

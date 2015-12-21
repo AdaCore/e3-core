@@ -68,3 +68,11 @@ reported by PyFlakes, do:
 ```bash
 tox -e checkstyle
 ```
+
+You can also verify the experimental support of Python 3 by running:
+
+```bash
+tox -e py34
+```
+
+All Python 2 code is converted to Python 3 using `2to3`.

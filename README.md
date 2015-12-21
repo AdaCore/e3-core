@@ -44,7 +44,7 @@ and sharing the same namespace: `e3`.
 Install
 =======
 
-requires: Python 2.7.x
+requires: Python 2.7.x (experimental support of Python >=3.4)
 
 To install `e3`, run:
 
