@@ -1,6 +1,27 @@
 from __future__ import absolute_import
 
+import collections
 import e3.anod.error
+
+
+class BuildVar(object):
+    """Declare a dependency between an Anod spec and a variable."""
+
+    def __init__(self, name, value):
+        """Initialize a BuildVar object.
+
+        :param name: name of the variable
+        :type name: str
+        :param value: variable value
+        :type value: collections.Hashable
+        """
+        assert isinstance(value, collections.Hashable)
+        self.name = name
+        self.value = value
+        self.kind = 'var'
+
+    def __str__(self):
+        return '%s=%s' % (self.name, self.value)
 
 
 class Dependency(object):

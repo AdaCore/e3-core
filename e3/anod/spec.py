@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 
 from e3.anod.error import AnodError, SpecError
+from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import SUCCESS
 
 import e3.anod.deps
@@ -87,7 +88,11 @@ class Anod(object):
         :raise: SpecError
         """
         self.deps = OrderedDict()
+        """:type: OrderedDict[e3.anod.deps.Dependency]"""
+
         self.build_vars = []
+        """:type: list[e3.anod.deps.BuildVar]"""
+
         self.kind = kind
 
         # Set when self.activate() is called
@@ -311,6 +316,18 @@ class Anod(object):
             return primitive_func
 
         return primitive_dec
+
+    def update_fingerprint(self):
+        # If self.fingerprint is not None it means that we have already
+        # computed the new fingerprint so just return and assume that
+        # self.fingerprint contains the right info.
+        if self.fingerprint is not None:
+            return
+
+        # ??? handle install fingerprint
+
+        self.fingerprint = Fingerprint()
+        self.fingerprint.add_instance(self)
 
     @property
     def has_package(self):

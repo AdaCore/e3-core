@@ -36,6 +36,28 @@ class Fingerprint(object):
 
         self.add('fingerprint_version', FINGERPRINT_VERSION)
 
+    def add_instance(self, anod_instance):
+        """Add the fingerprint of an Anod instance.
+
+        The fingerprint is based on the following elements:
+
+        - the .anod and associated .yaml files
+        - the sources used by this instanced
+        - the direct dependency fingerprints
+
+        :param anod_instance: an Anod instance
+        :type anod_instance: e3.anod.spec.Anod
+        """
+        # ??? add all anod specs related files (.anod and .yaml)
+
+        # Add build variables
+        for bv in anod_instance.build_vars:
+            self.add(bv.name, bv.value)
+
+        # ??? Do likewise for all the sources used by this anod instance
+
+        # ??? Update fingerprint for dependencies
+
     def add(self, name, value):
         """Add a fingerprint element.
 
