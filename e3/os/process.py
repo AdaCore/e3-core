@@ -17,11 +17,11 @@ import time
 import e3.log
 import e3.env
 
-logger = e3.log.getLogger('os_process')
+logger = e3.log.getLogger('os.process')
 
 # Special logger used for command line logging.
 # This allow user to filter easily the command lines log from the rest
-CMD_LOGGER_NAME = 'os_process.cmdline'
+CMD_LOGGER_NAME = 'os.process.cmdline'
 cmdlogger = e3.log.getLogger(CMD_LOGGER_NAME)
 
 

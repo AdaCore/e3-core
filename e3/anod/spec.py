@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import os
 from collections import OrderedDict
 
-from e3.anod.error import AnodError, SpecError
+from e3.anod.error import AnodError, SpecError, ShellError
 from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import SUCCESS
 
@@ -12,6 +12,8 @@ import e3.anod.package
 
 import e3.env
 import e3.log
+import e3.os.process
+import e3.text
 
 import sys
 
@@ -76,13 +78,16 @@ class Anod(object):
     SourceBuilder = e3.anod.package.SourceBuilder
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
-    def __init__(self, qualifier, kind, env=None):
+    def __init__(self, qualifier, kind, jobs=1, env=None):
         """Initialize an Anod instance.
 
         :param qualifier: the qualifier used when loading the spec
         :type qualifier: str
         :param kind: the action kind (build, install, test, ...)
         :type kind: str
+        :param jobs: max parallelism level allowed for jobs spawned by this
+            instance
+        :type jobs: int
         :param env: alternate platform environment
         :type env: Env
         :raise: SpecError
@@ -94,6 +99,7 @@ class Anod(object):
         """:type: list[e3.anod.deps.BuildVar]"""
 
         self.kind = kind
+        self.jobs = jobs
 
         # Set when self.activate() is called
         self.build_space = None
@@ -350,3 +356,57 @@ class Anod(object):
     def update_status(self, status=None, fingerprint=None):
         # not implemented yet ???
         pass
+
+    def parse_command(self, command):
+        """Parse a command line formatting each string.
+
+        :param command: the command line (a list of string)
+        :type command: list[str] | tuple[str]
+        """
+        cmd_dict = {}
+        cmd_dict.update(
+            dict((k.upper(), v)
+                 for (k, v) in self.build_space.__dict__.items()))
+        return [e3.text.format_with_dict(c, cmd_dict) for c in command]
+
+    def shell(self, *command, **kwargs):
+        """Run a subprocess using e3.os.process.Run."""
+        command = self.parse_command(command)
+        if 'parse_shebang' not in kwargs:
+            kwargs['parse_shebang'] = True
+        if 'output' not in kwargs:
+            kwargs['output'] = self.build_space.log_stream
+        r = e3.os.process.Run(command, **kwargs)
+        if r.status != 0:
+
+            active_log_filename = self.build_space.log_file
+            if active_log_filename is None:
+                # ??? active_log_filename can be None, e.g. when building the
+                # source package.
+                raise ShellError(
+                    message="%s failed (exit status: %d)" % (
+                        " ".join(command), r.status),
+                    origin='anod.shell',
+                    process=r)
+            else:
+                # Try to extract the command output that lead to that error
+                with open(active_log_filename, 'rb') as fd:
+                    content = fd.read()
+                index = content.rfind('e3.os.process.cmdline')
+                content = content[index:]
+                index = content.find(']')
+
+                # Create an exception with 2 messages: the log itself and
+                # then the status. This is important not have the log as
+                # last message as we might log it again otherwise (calls to
+                # error with the exception instance).
+
+                # ??? log analysis call should probably be inserted here.
+                exc = ShellError(
+                    message=content[index + 2:],
+                    origin='anod.shell',
+                    process=r)
+                exc += "%s failed (exit status: %d)" % (
+                    " ".join(command), r.status)
+                raise exc
+        return r
