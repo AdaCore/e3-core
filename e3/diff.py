@@ -34,7 +34,6 @@ def diff(a, b, ignore=None, item1name="expected", item2name="output",
     :return: A diff string. If the string is equal to '' it means that there
         is no difference
     :rtype: str
-    :raise DiffError: if an error occurs
     """
     contents = [[], []]
     """:type: list[list[str]]"""
@@ -105,8 +104,8 @@ def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
         p = e3.os.process.Run(cmd, cwd=working_dir, input=fname)
         if p.status != 0:
             raise DiffError(
-                'patch',
-                'running %s < %s in %s failed with %s' % (
+                origin='patch',
+                message='running %s < %s in %s failed with %s' % (
                     ' '.join(cmd), fname, working_dir, p.out))
         logger.debug(p.out)
 

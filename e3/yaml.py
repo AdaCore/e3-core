@@ -308,11 +308,12 @@ def load_with_config(filename, config):
             conf_data = load_ordered(f)
             result = parser.parse(conf_data)
         except IOError:
-            raise YamlError("cannot read: %s" % f), None, sys.exc_traceback
+            raise YamlError("cannot read: %s" % f,
+                            'load_with_config'), None, sys.exc_traceback
         except (yaml.parser.ParserError,
                 yaml.constructor.ConstructorError) as e:
-            raise YamlError('%s is an invalid yaml file: %s' % (f, e)), \
-                None, sys.exc_traceback
+            raise YamlError('%s is an invalid yaml file: %s' % (f, e),
+                            'load_with_config'), None, sys.exc_traceback
 
     return result
 

@@ -34,7 +34,8 @@ class AnodModule(object):
     def load(self):
         e3.log.debug('loading build spec: %s', self.path)
         if not os.path.exists(self.path):
-            raise SandBoxError('the spec %s does not exist' % self.path)
+            raise SandBoxError('the spec %s does not exist' % self.path,
+                               'load')
 
         # Create a new module
         mod_name = 'anod_' + self.name
@@ -74,7 +75,8 @@ class AnodModule(object):
                 self.anod_class = value
                 return
 
-        raise SandBoxError('Cannot find Anod subclass in %s' % self.path)
+        raise SandBoxError('cannot find Anod subclass in %s' % self.path,
+                           'load')
 
 
 def spec(name, from_sandbox=None):

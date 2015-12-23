@@ -55,12 +55,14 @@ def cp(source, target, copy_attrs=True, recursive=False,
 
     if file_number == 0:
         # If there is no source files raise an error
-        raise FSError('cp', 'can\'t find files matching "%s"' % source)
+        raise FSError(origin='cp',
+                      message='can\'t find files matching "%s"' % source)
     elif file_number > 1:
         # If we have more than one file to copy then check that target is a
         # directory
         if not os.path.isdir(target):
-            raise FSError('cp', 'target should be a directory')
+            raise FSError(origin='cp',
+                          message='target should be a directory')
 
     for f in file_list:
         try:
@@ -81,7 +83,8 @@ def cp(source, target, copy_attrs=True, recursive=False,
         except Exception as e:
             logger.error(e, exc_info=True)
             raise FSError(
-                'cp', 'error occurred while copying %s' % f), \
+                origin='cp',
+                message='error occurred while copying %s' % f), \
                 None, sys.exc_traceback
 
 
@@ -228,7 +231,7 @@ def mkdir(path, mode=0755):
         the procedure create them
     :param int mode: default is 0755
 
-    :raise FileUtilsError: if an error occurs
+    :raise FSError: if an error occurs
 
     This function behaves quite like mkdir -p command shell. So if the
     directory already exist no error is raised.
@@ -246,7 +249,8 @@ def mkdir(path, mode=0755):
                 # existence and the call to makedirs
                 return
             logger.error(e)
-            raise FSError('mkdir', 'can\'t create %s' % path), \
+            raise FSError(origin='mkdir',
+                          message='can\'t create %s' % path), \
                 None, sys.exc_traceback
 
 
@@ -259,7 +263,7 @@ def mv(source, target):
         several files then target should be a directory
     :type target: str
 
-    :raise FileUtilsError: if an error occurs
+    :raise FSError: if an error occurs
     """
     logger.debug('mv %s->%s', source, target)
 
@@ -269,7 +273,8 @@ def mv(source, target):
         nb_files = len(file_list)
 
         if nb_files == 0:
-            raise FSError('mv', 'cannot find files matching "%s"' % source)
+            raise FSError(origin='mv',
+                          message='cannot find files matching "%s"' % source)
         elif nb_files == 1:
             e3.os.fs.mv(file_list[0], target)
         elif not os.path.isdir(target):
@@ -291,7 +296,7 @@ def rm(path, recursive=False, glob=True):
     :param bool recursive: if True do a recursive deletion. Default is False
     :param bool glob: if True globbing pattern expansion is used
 
-    :raise FileUtilsError: if an error occurs
+    :raise FSError: if an error occurs
 
     Note that the function will not raise an error is there are no file to
     delete.
@@ -361,7 +366,8 @@ def rm(path, recursive=False, glob=True):
         except Exception as e:
             logger.error(e)
             raise FSError(
-                'rm', 'error occurred while removing %s' % f), None, \
+                origin='rm',
+                message='error occurred while removing %s' % f), None, \
                 sys.exc_traceback
 
 
@@ -697,7 +703,8 @@ def sync_tree(source, target, ignore=None,
                  (source, target, delete, preserve_timestamps))
 
     if not os.path.exists(source):
-        raise FSError('sync_tree', '%s does not exist' % source)
+        raise FSError(origin='sync_tree',
+                      message='%s does not exist' % source)
 
     # Keep track of deleted and updated files
     deleted_list = []

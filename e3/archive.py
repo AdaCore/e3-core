@@ -98,8 +98,8 @@ def __select_archiving_tool(filename, unpack=True,
             force_extension == '.zip'):
         ext = 'zip'
     else:
-        raise ArchiveError('unpack_archive',
-                           'unknown format "%s"' % filename)
+        raise ArchiveError(origin='unpack_archive',
+                           message='unknown format "%s"' % filename)
 
     if sys.platform == 'win32' or require_wilcard:
         # On windows, do not spawn tar/zip often provided by cygwin but calls
@@ -115,8 +115,8 @@ def __select_archiving_tool(filename, unpack=True,
             return ext, imp == has_python_lib_support
 
     raise ArchiveError(
-        'unpack_archive',
-        'no python module and no binary tools found')
+        origin='unpack_archive',
+        message='no python module and no binary tools found')
 
 
 def unpack_archive(filename,
@@ -147,9 +147,9 @@ def unpack_archive(filename,
     :param tar: path/to/tar binary (else use 'tar')
     :type tar: str
     :param unpack_cmd: command to run to unpack the archive, if None use
-        default methods or raise FileUtilsError if archive format is not
+        default methods or raise ArchiveError if archive format is not
         supported. If unpack_cmd is not None, then remove_root_dir is ignored.
-        The unpack_cmd must raise FileUtilsError in case of failure.
+        The unpack_cmd must raise ArchiveError in case of failure.
     :type unpack_cmd: callable | None
     :param force_extension: specify the archive extension if not in the
         filename. If filename has no extension and force_extension is None
@@ -166,7 +166,7 @@ def unpack_archive(filename,
         updated to current time.
     :type preserve_timestamps: bool
 
-    :raise FileUtilsError: in case of error
+    :raise ArchiveError: in case of error
 
     cygpath (win32) utilities might be needed when using remove_root_dir option
     """
@@ -174,11 +174,12 @@ def unpack_archive(filename,
     # First do some checks such as archive existence or destination directory
     # existence.
     if not os.path.isfile(filename):
-        raise ArchiveError('unpack_archive', 'cannot find %s' % filename)
+        raise ArchiveError(origin='unpack_archive',
+                           message='cannot find %s' % filename)
 
     if not os.path.isdir(dest):
-        raise ArchiveError('unpack_archive',
-                           'dest dir %s does not exist' % dest)
+        raise ArchiveError(origin='unpack_archive',
+                           message='dest dir %s does not exist' % dest)
 
     if selected_files is None:
         selected_files = []
@@ -234,7 +235,7 @@ def unpack_archive(filename,
                             :param pattern: string or regexp
                             :type pattern: str
 
-                            :raise FileutilsError: if no member match the
+                            :raise ArchiveError: if no member match the
                                 pattern.
 
                             :return: a list of tarfile members
@@ -244,8 +245,8 @@ def unpack_archive(filename,
                                  if fnmatch.fnmatch(mem.name, pattern)]
                             if not r:
                                 raise ArchiveError(
-                                    'unpack_archive',
-                                    'Cannot untar %s ' % pattern)
+                                    origin='unpack_archive',
+                                    message='Cannot untar %s ' % pattern)
                             return r
 
                         selected_files = [f for l in selected_files
@@ -262,8 +263,8 @@ def unpack_archive(filename,
 
                 except tarfile.TarError as e:
                     raise ArchiveError(
-                        'unpack_archive',
-                        'Cannot untar %s (%s)' % (filename, e)), \
+                        origin='unpack_archive',
+                        message='Cannot untar %s (%s)' % (filename, e)), \
                         None, sys.exc_traceback
 
             else:
@@ -272,8 +273,8 @@ def unpack_archive(filename,
                     fd = zipfile.ZipFile(filename, mode='r')
                 except zipfile.BadZipfile as e:
                     raise ArchiveError(
-                        'unpack_archive',
-                        'Cannot unzip %s (%s)' % (filename, e)), \
+                        origin='unpack_archive',
+                        message='Cannot unzip %s (%s)' % (filename, e)), \
                         None, sys.exc_traceback
 
             fd.extractall(tmp_dest,
@@ -300,8 +301,8 @@ def unpack_archive(filename,
 
             if p.status != 0:
                 # The extract command failed
-                raise ArchiveError('unpack_archive',
-                                   'extraction of %s failed:\n%s' % (
+                raise ArchiveError(origin='unpack_archive',
+                                   message='extraction of %s failed:\n%s' % (
                                        filename, p.out))
 
         if remove_root_dir:
@@ -314,8 +315,8 @@ def unpack_archive(filename,
             if nb_files > 1:
                 if remove_root_dir != 'auto':
                     raise ArchiveError(
-                        'unpack_archive',
-                        'archive does not have a unique root dir')
+                        origin='unpack_archive',
+                        message='archive does not have a unique root dir')
 
                 # We cannot remove root dir but remove_root_dir is set to
                 # 'auto' so fallback on non remove_root_dir method
@@ -374,7 +375,7 @@ def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
     :param no_root_dir: create archive without the root dir (zip only)
     :type no_root_dir: bool
 
-    :raise FileUtilsError: if an error occurs
+    :raise ArchiveError: if an error occurs
     """
     # Check extension
     from_dir = from_dir.rstrip('/')
@@ -411,8 +412,8 @@ def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
             elif ext == 'tar.gz':
                 tar_format = 'w:gz'
             else:
-                raise ArchiveError('create_archive',
-                                   'unsupported ext %s' % ext)
+                raise ArchiveError(origin='create_archive',
+                                   message='unsupported ext %s' % ext)
             archive = tarfile.open(filepath, tar_format)
             archive.add(from_dir, from_dir_rename, recursive=True)
             archive.close()
@@ -426,8 +427,9 @@ def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
             abs_archive_dir = os.path.join(command_dir, base_archive_dir)
 
             if os.path.isdir(abs_archive_dir):
-                raise ArchiveError('create_archive',
-                                   '%s should not exist' % abs_archive_dir)
+                raise ArchiveError(
+                    origin='create_archive',
+                    message='%s should not exist' % abs_archive_dir)
             e3.os.fs.mv(from_dir, abs_archive_dir)
 
         try:
@@ -451,12 +453,14 @@ def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
                     p = Run(['zip', '-r9', '-q', filepath, base_archive_dir],
                             cwd=command_dir)
             else:
-                raise ArchiveError('create_archive',
-                                   'unsupported ext %s' % ext)
+                raise ArchiveError(
+                    origin='create_archive',
+                    message='unsupported ext %s' % ext)
             if p.status != 0:
-                raise ArchiveError('create_archive',
-                                   'creation of %s failed:\n%s' % (
-                                       filename, p.out))
+                raise ArchiveError(
+                    origin='create_archive',
+                    message='creation of %s failed:\n%s' % (
+                        filename, p.out))
         finally:
             if from_dir_rename is not None:
                 e3.os.fs.mv(abs_archive_dir, from_dir)

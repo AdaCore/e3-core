@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import os
 from collections import OrderedDict
 
-from e3.anod.error import AnodError
+from e3.anod.error import AnodError, SpecError
 from e3.anod.status import SUCCESS
 
 import e3.anod.deps
@@ -27,9 +27,11 @@ logger = e3.log.getLogger('anod')
 def check_api_version(version):
     """Make sure there are no API mismatch."""
     if version.strip() not in SUPPORTED_API:
-        raise AnodError('API version mismatch. Anod specs are at %s but the '
-                        'driver is only supporting %s' % (
-                            version.strip(), ','.join(SUPPORTED_API)))
+        raise AnodError(
+            origin='check_api_version',
+            message='API version mismatch. Anod specs are at %s but the '
+            'driver is only supporting %s' % (
+                version.strip(), ','.join(SUPPORTED_API)))
 
 
 class Anod(object):
@@ -74,6 +76,16 @@ class Anod(object):
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
     def __init__(self, qualifier, kind, env=None):
+        """Initialize an Anod instance.
+
+        :param qualifier: the qualifier used when loading the spec
+        :type qualifier: str
+        :param kind: the action kind (build, install, test, ...)
+        :type kind: str
+        :param env: alternate platform environment
+        :type env: Env
+        :raise: SpecError
+        """
         self.deps = OrderedDict()
         self.build_vars = []
         self.kind = kind
@@ -114,7 +126,7 @@ class Anod(object):
             error_msg = "Error: %s.build_space_name should be a string"
             if callable(self.build_space_name):
                 error_msg += ". Is @property missing ?"
-            raise AnodError('anod', error_msg % self.name)
+            raise SpecError(error_msg % self.name, 'anod.__init__')
 
         # Register sources, source builders and repositories
         self.source_list = {}
@@ -135,13 +147,15 @@ class Anod(object):
           exists
         :rtype: T | ()
 
-        :raise AnodError: if we cannot iterate on the attribute.
+        :raise: SpecError if we cannot iterate on the attribute, or AnodError
         """
         if attribute_name in dir(self):
             item_list = getattr(self, attribute_name)
             """:type: list[T]"""
             if isinstance(item_list, basestring):
-                raise AnodError('%s cannot be a string' % attribute_name)
+                raise SpecError(
+                    '%s cannot be a string' % attribute_name,
+                    'anod.map_attribute_elements')
 
             try:
                 for item in item_list:
@@ -149,18 +163,18 @@ class Anod(object):
             except Exception as e:
                 # Check if the expected iterable is in fact a callable
                 if callable(item_list):
-                    raise AnodError(
-                        '%s is callable. Maybe you should add a '
-                        '@property' %
-                        attribute_name), None, sys.exc_traceback
+                    raise SpecError(
+                        '%s is callable. Maybe you should add a @property' %
+                        attribute_name,
+                        'map_attribute_elements'), None, sys.exc_traceback
 
                 # Ensure that the attribute is an iterable
                 try:
                     iter(item_list)
                 except TypeError:
-                    raise AnodError(
-                        '%s is not an iterable' % attribute_name), \
-                        None, sys.exc_traceback
+                    raise SpecError(
+                        '%s is not an iterable' % attribute_name,
+                        'map_attribute_elements'), None, sys.exc_traceback
 
                 if isinstance(e, AnodError):
                     raise
@@ -189,7 +203,8 @@ class Anod(object):
 
     def activate(self):
         if self.sandbox is None:
-            raise AnodError('cannot activate a spec without a sandbox')
+            raise AnodError('cannot activate a spec without a sandbox',
+                            'activate')
 
         self.build_space = self.sandbox.get_build_space(
             name=self.build_space_name,
@@ -239,6 +254,7 @@ class Anod(object):
             that will be evaluated as a string. This callback is called
             after running the primitive
         :type version: None | () -> str
+        :raise: AnodError
         """
 
         def primitive_dec(f, pre=pre, post=post, version=version):

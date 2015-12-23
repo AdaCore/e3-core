@@ -43,12 +43,14 @@ class Fingerprint(object):
         :type name: str
         :param value: associated value (should be a string)
         :type value: str | unicode
+        :raise: AnodError
         """
         if isinstance(value, str) or isinstance(value, unicode):
             self.elements[name] = value
         else:
             raise AnodError(
-                'value for %s should be a string got %s' % (name, value))
+                'value for %s should be a string got %s' % (name, value),
+                'fingerprint.add')
 
     def add_file(self, filename):
         """Add a file element to the fingerprint.

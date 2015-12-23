@@ -39,8 +39,9 @@ def cd(path):
         os.chdir(path)
     except Exception as e:
         logger.error(e, exc_info=True)
-        raise OSFSError('cd', 'can\'t chdir to %s\n' % path), None, \
-            sys.exc_traceback
+        raise OSFSError(
+            origin='cd',
+            message="can't chdir to %s\n" % path), None, sys.exc_traceback
 
 
 def chmod(mode, filename):
@@ -234,7 +235,7 @@ def ln(source, target):
 
     :param str source: a filename
     :param str target: the target filename
-    :raise FileUtilsError: in case of error
+    :raise OSFSError: in case of error
     """
     try:
         if hasattr(os, "link"):
@@ -244,7 +245,8 @@ def ln(source, target):
     except Exception as e:
         logger.error(e, exc_info=True)
         raise OSFSError(
-            'ln', 'can not link %s to %s' % (source, target)), \
+            origin='ln',
+            message='can not link %s to %s' % (source, target)), \
             None, sys.exc_traceback
 
 

@@ -34,10 +34,10 @@ FETCH_HEAD = 'FETCH_HEAD'
 
 
 class GitError(e3.error.E3Error):
-    def __init__(self, cmd, msg, process=None):
-        super(GitError, self).__init__(cmd, msg)
-        self.cmd = cmd
-        self.msg = msg
+    def __init__(self, message, origin, process=None):
+        super(GitError, self).__init__(message, origin)
+        self.origin = origin
+        self.message = message
         self.process = process
 
 
@@ -72,7 +72,7 @@ class GitRepository(object):
         if self.__class__.git is None:
             git_binary = e3.os.process.which('git', default=None)
             if git_binary is None:
-                raise GitError('git_cmd', 'cannot find git')
+                raise GitError('cannot find git', 'git_cmd')
             self.__class__.git = git_binary
 
         if 'output' not in kwargs:
@@ -83,11 +83,9 @@ class GitRepository(object):
 
         p = e3.os.process.Run(p_cmd, cwd=self.working_tree, **kwargs)
         if p.status != 0:
-            raise GitError(
-                'git_cmd',
-                '%s failed (exit status: %d)' %
-                (e3.os.process.command_line_image(p_cmd), p.status),
-                process=p)
+            raise GitError('%s failed (exit status: %d)' %
+                           (e3.os.process.command_line_image(p_cmd), p.status),
+                           origin='git_cmd', process=p)
         return p
 
     def init(self, url=None, remote='origin'):

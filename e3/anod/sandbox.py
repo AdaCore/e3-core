@@ -52,8 +52,9 @@ class SandBox(object):
         :rtype: str
         """
         if self.__root_dir is None:
-            raise SandBoxError('root_dir',
-                               'Sandbox not loaded. Please call load()')
+            raise SandBoxError(
+                origin='root_dir',
+                message='sandbox not loaded. Please call load()')
         return self.__root_dir
 
     @root_dir.setter
@@ -256,7 +257,6 @@ class BuildSpace(object):
             for l in traceback.format_tb(exc_traceback):
                 f_tb.write(l + '\n')
         msg = traceback.format_tb(exc_traceback)[-1]
-        raise AnodError(
-            '%s failed with %s\n(see %s)' % (
-                msg if '.anod' in msg else spec_name,
-                sys.exc_value, tb_filename)), None, sys.exc_traceback
+        raise AnodError('%s failed with %s\n(see %s)' % (
+            msg if '.anod' in msg else spec_name,
+            sys.exc_value, tb_filename)), None, sys.exc_traceback

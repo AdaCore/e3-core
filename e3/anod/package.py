@@ -152,6 +152,7 @@ class SourceBuilder(object):
 
         :return: the callback or None if no prepare_src is defined
         :rtype: (dict[str][str], str) -> None | None
+        :raise: SpecError
         """
         if self.__prepare_src is not None:
             return self.__prepare_src
@@ -164,11 +165,12 @@ class SourceBuilder(object):
         # Else provide a default function if we have exactly 1 checkout
         if not self.checkout:
             raise e3.anod.error.SpecError(
-                "no checkout associated to the builder %s" % self.name)
+                'no checkout associated to the builder %s' % self.name,
+                'prepare_src')
         elif len(self.checkout) > 1:
             raise e3.anod.error.SpecError(
-                "more than 1 checkout and no prepare_src function"
-                " given for %s" % self.name)
+                'more than 1 checkout and no prepare_src function'
+                ' given for %s' % self.name)
 
         # Set default function (a basic sync_tree call) that ignore
         # .svn, .git, .cvs, .cvsignore and .gitignore files
@@ -195,7 +197,8 @@ class SourceBuilder(object):
             del r, p, d
             raise e3.anod.error.AnodError(
                 'no apply_patch function defined in SourceBuilder %s'
-                % self.name)
+                % self.name,
+                'apply_path')
 
         if self.__apply_patch == self.DEFAULT_PATCH_CMD or (
                 self.prepare_src is not None and
