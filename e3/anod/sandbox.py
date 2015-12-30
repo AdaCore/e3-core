@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import abc
+import argparse
 import logging
 import logging.handlers
 
@@ -8,10 +10,16 @@ from e3.env import Env
 from e3.fs import mkdir
 
 import e3.error
+import e3.log
 import e3.os.process
 
 import os
+import stevedore
 import sys
+import yaml
+
+from e3.main import Main
+from e3.vcs.git import GitRepository
 
 
 class SandBoxError(e3.error.E3Error):
@@ -22,25 +30,22 @@ class SandBox(object):
 
     def __init__(self):
         self.__root_dir = None
-        self.config = {}
         self.build_id = None
         self.build_date = None
         self.build_version = None
 
         # Required directories for a sandbox
         self.dirs = ('meta', 'bin', 'tmp', os.path.join('tmp', 'cache'),
-                     'src', 'log', 'etc', 'vcs', 'lib', 'patch')
+                     'src', 'log', 'etc', 'vcs', 'patch')
 
         self.spec_dir = None
         self.meta_dir = None
-        self.bin_dir = None
         self.tmp_dir = None
         self.tmp_cache_dir = None
         self.src_dir = None
         self.log_dir = None
         self.etc_dir = None
         self.vcs_dir = None
-        self.lib_dir = None
         self.patch_dir = None
         self.conf = None
 
@@ -95,6 +100,20 @@ class SandBox(object):
         return BuildSpace(
             root_dir=os.path.join(self.root_dir, platform, name),
             primitive=primitive)
+
+    def dump_configuration(self):
+        # Compute command line for call to e3-sandbox create. Ensure that the
+        # paths are made absolute (path to sandbox, script).
+        cmd_line = [sys.executable, os.path.abspath(__file__)]
+        cmd_line += sys.argv[1:]
+        sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
+        with open(sandbox_conf, 'wb') as f:
+            yaml.dump({'cmd_line': cmd_line}, f)
+
+    def get_configuration(self):
+        sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
+        with open(sandbox_conf, 'rb') as f:
+            return yaml.load(f)
 
 
 class BuildSpace(object):
@@ -260,3 +279,151 @@ class BuildSpace(object):
         raise AnodError('%s failed with %s\n(see %s)' % (
             msg if '.anod' in msg else spec_name,
             sys.exc_value, tb_filename)), None, sys.exc_traceback
+
+
+class SandBoxAction(object):
+
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, subparsers):
+        self.parser = subparsers.add_parser(
+            self.name,
+            help=self.help)
+        self.parser.set_defaults(action=self.name)
+        self.add_parsers()
+        self.parser.add_argument('sandbox',
+                                 help='path to the sandbox root directory')
+
+    @abc.abstractproperty
+    def name(self):
+        """Return the action name.
+
+        :rtype: str
+        """
+        pass
+
+    @abc.abstractproperty
+    def help(self):
+        """Return the help string associated with this action.
+
+        :rtype: str
+        """
+        pass
+
+    @abc.abstractmethod
+    def add_parsers(self):
+        """Add new command line argument parsers."""
+        pass
+
+    @abc.abstractmethod
+    def run(self, args):
+        """Run the action.
+
+        :param args: command line arguments gotten with argparse"""
+        pass
+
+
+class SandBoxCreate(SandBoxAction):
+
+    name = 'create'
+    help = 'Create a new sandbox'
+
+    def add_parsers(self):
+        self.parser.add_argument(
+            '--spec-git-url',
+            help='URL to retrieve Anod specification files, hosted in a git'
+                 ' repository')
+        self.parser.add_argument(
+            '--spec-git-branch',
+            default='master',
+            help='Name of the branch to checkout to get the Anod '
+                 'specification files from the repository defined by '
+                 '``--spec-git-url``')
+
+    def run(self, args):
+        sandbox = SandBox()
+        sandbox.root_dir = args.sandbox
+
+        sandbox.create_dirs()
+
+        if args.spec_git_url:
+            mkdir(sandbox.spec_dir)
+            g = GitRepository(sandbox.spec_dir)
+            if e3.log.default_output_stream is not None:
+                g.log_stream = e3.log.default_output_stream
+            g.init()
+            g.update(args.spec_git_url, args.spec_git_branch, force=True)
+
+        sandbox.dump_configuration()
+
+
+class SandBoxShowConfiguration(SandBoxAction):
+
+    name = 'show-config'
+    help = 'Display sandbox configuration'
+
+    # List of configuration key to show
+    keys = ('spec_git_url', 'spec_git_branch', 'sandbox')
+
+    def add_parsers(self):
+        pass
+
+    def run(self, args):
+        sandbox = SandBox()
+        sandbox.root_dir = args.sandbox
+
+        cmd_line = sandbox.get_configuration()['cmd_line']
+
+        args_namespace = argparse.Namespace()
+        args_namespace.python = cmd_line[0]
+        argument_parser = main(get_argument_parser=True)
+
+        def error(message):
+            raise SandBoxError(message)
+
+        argument_parser.error = error
+        try:
+            args = argument_parser.parse_args(cmd_line[2:])
+        except SandBoxError as msg:
+            print 'the configuration is invalid, the argument parser got the' \
+                  'following error:'
+            print msg
+        for k, v in vars(args).iteritems():
+            if k in self.keys:
+                print '%s = %s' % (k, v)
+
+
+def main(get_argument_parser=False):
+    """Manipulate an Anod sandbox.
+
+    This function creates the main code for the entry-point e3-sandbox. To
+    create new actions it is possible to create new sandbox plugins. e.g. to
+    add a new plugin ``foo`` from a package ``e3-contrib``, derives the
+    class :class:`SandBoxAction` and register the extension by adding in
+    :file:`e3-contrib/setup.py`::
+
+        entry_points={
+            'e3.anod.sandbox.sandbox_action': [
+                'foo = e3_contrib.sandbox_actions.SandBoxFoo']
+        }
+    """
+    m = Main()
+    subparsers = m.argument_parser.add_subparsers(
+        title="action", description="valid actions")
+
+    # Load all sandbox actions plugins
+    ext = stevedore.ExtensionManager(
+        namespace='e3.anod.sandbox.sandbox_action',
+        invoke_on_load=True,
+        invoke_args=(subparsers, ))
+
+    if get_argument_parser:
+        return m.argument_parser
+
+    m.parse_args()
+
+    e3.log.debug('sandbox action plugins loaded: %s',
+                 ','.join(ext.names()))
+
+    # An action has been selected, run it
+    ext[m.args.action].obj.run(m.args)
