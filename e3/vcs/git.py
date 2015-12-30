@@ -112,7 +112,7 @@ class GitRepository(object):
         :type force: bool
         :raise: GitError
         """
-        cmd = ['checkout', '-f' if force else None, branch]
+        cmd = ['checkout', '-q', '-f' if force else None, branch]
         self.git_cmd(cmd)
 
     def describe(self, commit=HEAD):
