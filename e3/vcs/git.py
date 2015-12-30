@@ -76,7 +76,7 @@ class GitRepository(object):
             self.__class__.git = git_binary
 
         if 'output' not in kwargs:
-            kwargs['output'] = self.__class__.log_stream
+            kwargs['output'] = self.log_stream
 
         p_cmd = [arg for arg in cmd if arg is not None]
         p_cmd.insert(0, self.__class__.git)
