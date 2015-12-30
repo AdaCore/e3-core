@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 import logging
 import types
+import sys
 
 # Define a new log level for which level number is lower then DEBUG. This is
 # used to log output from a spawned subprocess
@@ -14,6 +15,10 @@ logging.addLevelName(RAW, 'RAW')
 # Define default format for StreamHandler and FileHandler
 DEFAULT_STREAM_FMT = '%(levelname)-8s %(message)s'
 DEFAULT_FILE_FMT = '%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s'
+
+# Default output stream (sys.stdout by default, or a file descriptor if
+# activate() is called with a filename.
+default_output_stream = sys.stdout
 
 
 class RawFilter(logging.Filter):
@@ -114,7 +119,7 @@ def getLogger(name=None, prefix='e3'):
     return logger
 
 
-def add_handlers(level, fmt=None, filename=None):
+def __add_handlers(level, fmt=None, filename=None):
     """Add handlers with support for 'RAW' logging.
 
     :param level: set the root logger level to the specified level
@@ -122,13 +127,16 @@ def add_handlers(level, fmt=None, filename=None):
     :param fmt: log formatter
     :type fmt: logging.Formatter
     :param filename: use of a FileHandler, using the specified filename,
-        instead of a StreamHandler
+        instead of a StreamHandler. Set default_output_stream to write in this
+        file.
     :type filename: str
     """
+    global default_output_stream
     if filename is None:
         handler = logging.StreamHandler()
     else:
         handler = logging.FileHandler(filename)
+        default_output_stream = handler.stream
 
     if fmt is not None:
         handler.setFormatter(fmt)
@@ -173,11 +181,11 @@ def activate(
     fmt = logging.Formatter(stream_format, datefmt)
 
     # Set logging handlers
-    add_handlers(level=level, fmt=fmt)
+    __add_handlers(level=level, fmt=fmt)
 
     # Log to a file if necessary
     if filename is not None:
-        add_handlers(
+        __add_handlers(
             level=min(level, RAW),
             fmt=logging.Formatter(file_format, datefmt),
             filename=filename)
