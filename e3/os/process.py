@@ -143,17 +143,16 @@ def enable_commands_handler(filename, mode='a'):
 class Run(object):
     """Class to handle processes.
 
-    ATTRIBUTES
-      cmds: The ``cmds`` argument passed to the __init__ method
+    :ivar cmds: The ``cmds`` argument passed to the __init__ method
         (a command line passed in a list, or a list of command lines passed as
         a list of list).
-      status: The exit status.  As the exit status is only meaningful after
+    :ivar status: The exit status. As the exit status is only meaningful after
         the process has exited, its initial value is None.  When a problem
         running the command is detected and a process does not get
         created, its value gets set to the special value 127.
-      out: process standard output  (if instanciated with output = PIPE)
-      err: same as out but for standard error
-      pid: PID.  Set to -1 if the command failed to run.
+    :ivar out: process standard output  (if instanciated with output = PIPE)
+    :ivar err: same as out but for standard error
+    :ivar pid: PID. Set to -1 if the command failed to run.
     """
 
     def __init__(self, cmds, cwd=None, output=subprocess.PIPE,
