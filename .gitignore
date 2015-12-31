@@ -7,4 +7,3 @@
 *.egg-info
 /htmlcov
 /.tox
-/VERSION
