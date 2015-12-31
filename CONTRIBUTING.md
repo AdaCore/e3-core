@@ -71,11 +71,14 @@ If not already installed, install it via:
 pip install tox
 ```
 
-In order to run the public testsuite of `e3-core`, do:
+In order to run the public testsuite of `e3-core` and check that there
+is no error when generating the documentation, do:
 
 ```bash
 tox
 ```
+
+The doc is generated in ``.tox/docs/html``.
 
 To verify that the `e3-core` package is PEP8 compliant and that no error is
 reported by PyFlakes, do:
