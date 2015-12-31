@@ -7,3 +7,4 @@
 *.egg-info
 /htmlcov
 /.tox
+/docs/_build

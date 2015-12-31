@@ -1,1 +1,9 @@
-include VERSION
+# To verify the content, run ``check-manifest``
+include README.md CONTRIBUTING.md
+include tox.ini
+include VERSION COPYING3
+recursive-include docs *.rst *.py
+recursive-include tests *.anod
+recursive-include tests *.py
+prune docs/_build
+exclude .gitreview

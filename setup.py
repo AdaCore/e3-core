@@ -9,7 +9,8 @@ install_requires = [
     'netifaces',
     'pyyaml',
     'python-dateutil',
-    'requests']
+    'requests',
+    'stevedore']
 
 if sys.platform in ('linux2', 'linux', 'win32', 'darwin'):
     install_requires.append('psutil')
