@@ -5,6 +5,7 @@ is a singleton so there is in fact only one instance.
 """
 from __future__ import absolute_import
 
+import abc
 import os
 import pickle
 import sys
@@ -23,59 +24,48 @@ CANADIAN_EXCEPTIONS = (('x86-windows', 'x86_64-windows'),
                        ('sparc-solaris', 'sparc64-solaris'))
 
 
-class BaseEnv(object):
+class AbstractBaseEnv(object):
     """Environment Handling.
 
-    :ivar build: default system (autodetected)
-    :ivar host: host system
-    :ivar target: target system
+    Abstract class to factorize code between BaseEnv and Env.
+    :ivar build: current build Platform
+    :vartype build: Platform
+    :ivar host: current host Platform
+    :vartype host: Platform
+    :ivar target: current target Platform
+    :vartype target: Platform
     :ivar main_options: The command-line switches, after parsing by
-        the e3.Main class (see the documentation of that class).
-
-    build, host and target attributes are instances of Platform
-
-    The only difference between Env and BaseEnv class is that Env is a
-    singleton. This is not the case for BaseEnv.
+    the e3.Main class (see the documentation of that class).
     """
 
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def __init__(self, build=None, host=None, target=None):
-        """BaseEnv constructor.
+        if not self._initialized:
+            self.build = Platform.get() if build is None else build
+            self.host = self.build if host is None else host
+            self.target = self.host if target is None else target
+            self.environ = None
+            self.cwd = None
+            self.main_options = None
 
-        On first instantiation, build attribute will be computed and host
-        and target set to the build attribute.
+    @abc.abstractproperty
+    def _initialized(self):
+        """Whether the new instance should be initialized.
 
-        :param build: build architecture. If None then it is set to default
-            build
-        :type build: Arch | None
-        :param host: host architecture. If None then it is set to build
-        :type host: Arch | None
-        :param target: target architecture. If None then it is set to target
-        :type target: Arch | None
+        This is mostly useful to implement a singleton, as done in Env()
+        :rtype: bool
         """
-        # class variable that holds the current environment
-        self._instance = {}
+        pass
 
-        # class variable that holds the stack of saved environments state
-        self._context = []
+    @abc.abstractmethod
+    def _items(self):
+        """Return the list of instance variables
 
-        if build is None:
-            self.build = Platform.get()
-        else:
-            self.build = build
-
-        if host is None:
-            self.host = self.build
-        else:
-            self.host = host
-
-        if target is None:
-            self.target = self.host
-        else:
-            self.target = target
-
-        self.environ = None
-        self.cwd = None
-        self.main_options = None  # Command line switches
+        :rtype: collections.Iterable
+        """
+        pass
 
     @property
     def platform(self):
@@ -95,21 +85,6 @@ class BaseEnv(object):
         else:
             # In native concept the platform is equivalent to target.platform
             return self.target.platform
-
-    def __getattr__(self, name):
-        try:
-            if name in ('_instance', '_context'):
-                return self.__dict__[name]
-            else:
-                return self._instance[name]
-        except KeyError as e:
-            raise AttributeError(e), None, sys.exc_traceback
-
-    def __setattr__(self, name, value):
-        if name in ('_instance', '_context'):
-            object.__setattr__(self, name, value)
-        else:
-            self._instance[name] = value
 
     @property
     def is_canadian(self):
@@ -327,63 +302,6 @@ class BaseEnv(object):
 
         return result
 
-    def store(self, filename=None):
-        """Save environment into memory or file.
-
-        :param filename: a string containing the path of the filename in which
-            the environment will be saved. If set to None the environment is
-            saved into memory in a stack like structure.
-        :type filename: str | None
-        """
-        # Store environment variables
-        self.environ = os.environ.copy()
-
-        # Store cwd
-        self.cwd = os.getcwd()
-
-        if filename is None:
-            self._context.append(pickle.dumps(self._instance))
-        else:
-            with open(filename, 'w+') as fd:
-                pickle.dump(self._instance, fd)
-
-    def restore(self, filename=None):
-        """Restore environment from memory or a file.
-
-        :param filename: a string containing the path of the filename from
-            which the environment will be restored. If set to None the
-            environment is pop the last saved one
-        :type filename: str | None
-        """
-        if filename is None:
-            # We are restoring from memory.  In that case, just double-check
-            # that we did store the Env object in memory beforehand (using
-            # the store method).
-            assert self.environ is not None
-
-        if filename is None and self._context:
-            self._instance = pickle.loads(self._context[-1])
-            self._context = self._context[:-1]
-        elif filename is not None:
-            with open(filename, 'r') as fd:
-                self._instance = pickle.load(fd)
-        else:
-            return
-
-        # Restore environment variables value
-        # Do not use os.environ = self.environ.copy()
-        # or it will break the os.environ object and child process
-        # will get the old environment.
-        for k in os.environ.keys():
-            if os.environ[k] != self.environ.get(k, None):
-                del os.environ[k]
-        for k in self.environ:
-            if os.environ.get(k, None) != self.environ[k]:
-                os.environ[k] = self.environ[k]
-
-        # Restore current directory
-        os.chdir(self.cwd)
-
     @classmethod
     def add_path(cls, path, append=False):
         """Set a path to PATH environment variable.
@@ -507,7 +425,7 @@ class BaseEnv(object):
             will appear with the key ``target_os_name``, ...
         :rtype: dict
         """
-        result = {k: v for k, v in self._instance.iteritems()}
+        result = {k: v for k, v in self._items()}
         result['is_canadian'] = self.is_canadian
         result['is_cross'] = self.is_cross
 
@@ -518,17 +436,60 @@ class BaseEnv(object):
         return result
 
 
-class Env(BaseEnv):
-    """Environment Handling.
+class BaseEnv(AbstractBaseEnv):
+    """BaseEnv."""
 
-    :ivar build: default system (autodetected)
-    :ivar host: host system
-    :ivar target: target system
+    _initialized = False
+    # Not a singleton, always initialize new instance
 
-    build, host and target attributes are instances of Platform
+    def __init__(self, build=None, host=None, target=None):
+        """Initialize a BaseEnv object.
 
-    The only difference between Env and BaseEnv class is that Env is a
-    singleton. This is not the case for BaseEnv.
+        On first instantiation, build attribute will be computed and host
+        and target set to the build attribute.
+
+        :param build: build architecture. If None then it is set to default
+            build
+        :type build: Arch | None
+        :param host: host architecture. If None then it is set to build
+        :type host: Arch | None
+        :param target: target architecture. If None then it is set to target
+        :type target: Arch | None
+        """
+        # class variable that holds the current environment
+        self._instance = {}
+
+        # class variable that holds the stack of saved environments state
+        self._context = []
+        super(BaseEnv, self).__init__(build, host, target)
+
+    def __setattr__(self, name, value):
+        if name in ('_instance', '_context'):
+            object.__setattr__(self, name, value)
+        else:
+            self._instance[name] = value
+
+    def __getattr__(self, name):
+        try:
+            if name in ('_instance', '_context'):
+                return self.__dict__[name]
+            else:
+                return self._instance[name]
+        except KeyError as e:
+            raise AttributeError(e), None, sys.exc_traceback
+
+    def _items(self):
+        return self._instance.iteritems()
+
+
+class Env(AbstractBaseEnv):
+    """Env shows the current environment in used.
+
+    Env is a singleton holding the current environment and platform
+    information. It is set by e3.main when the --build/--host/--target option
+    are passed to the command line and can be then changed by calling
+    :meth:`set_build`, :meth:`set_host`, and :meth:`set_target`.
+
     """
 
     # class variable that holds the current environment
@@ -538,18 +499,16 @@ class Env(BaseEnv):
     _context = []
 
     def __init__(self):
-        """Env constructor.
+        """Initialize or reuse an existing Env object (singleton).
 
         On first instantiation, build attribute will be computed and
         host and target set to the build attribute.
         """
-        if 'build' not in Env._instance:
-            self.build = Platform.get()
-            self.host = self.build
-            self.target = self.host
-            self.environ = None
-            self.cwd = None
-            self.main_options = None  # Command line switches
+        super(Env, self).__init__()
+
+    @property
+    def _initialized(self):
+        return 'build' in Env._instance
 
     def __setattr__(self, name, value):
         if name == '_instance':
@@ -558,6 +517,77 @@ class Env(BaseEnv):
             Env._context = value
         else:
             self._instance[name] = value
+
+    def __getattr__(self, name):
+        try:
+            if name == '_instance':
+                return Env._instance
+            elif name == '_context':
+                return Env._context
+            else:
+                return self._instance[name]
+        except KeyError as e:
+            raise AttributeError(e), None, sys.exc_traceback
+
+    def _items(self):
+        return self._instance.iteritems()
+
+    def store(self, filename=None):
+        """Save environment into memory or file.
+
+        :param filename: a string containing the path of the filename in which
+            the environment will be saved. If set to None the environment is
+            saved into memory in a stack like structure.
+        :type filename: str | None
+        """
+        # Store environment variables
+        self.environ = os.environ.copy()
+
+        # Store cwd
+        self.cwd = os.getcwd()
+
+        if filename is None:
+            self._context.append(pickle.dumps(self._instance))
+        else:
+            with open(filename, 'w+') as fd:
+                pickle.dump(self._instance, fd)
+
+    def restore(self, filename=None):
+        """Restore environment from memory or a file.
+
+        :param filename: a string containing the path of the filename from
+            which the environment will be restored. If set to None the
+            environment is pop the last saved one
+        :type filename: str | None
+        """
+        if filename is None:
+            # We are restoring from memory.  In that case, just double-check
+            # that we did store the Env object in memory beforehand (using
+            # the store method).
+            assert self.environ is not None
+
+        if filename is None and self._context:
+            self._instance = pickle.loads(self._context[-1])
+            self._context = self._context[:-1]
+        elif filename is not None:
+            with open(filename, 'r') as fd:
+                self._instance = pickle.load(fd)
+        else:
+            return
+
+        # Restore environment variables value
+        # Do not use os.environ = self.environ.copy()
+        # or it will break the os.environ object and child process
+        # will get the old environment.
+        for k in os.environ.keys():
+            if os.environ[k] != self.environ.get(k, None):
+                del os.environ[k]
+        for k in self.environ:
+            if os.environ.get(k, None) != self.environ[k]:
+                os.environ[k] = self.environ[k]
+
+        # Restore current directory
+        os.chdir(self.cwd)
 
 
 def main_platform_info():
