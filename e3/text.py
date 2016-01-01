@@ -18,5 +18,5 @@ def format_with_dict(pattern, values):
     :rtype: str
     """
     key_regexp = r"|".join([r'\(%s\)' % k for k in values])
-    result = re.sub(r'%(?!' + key_regexp + r')', r'%%', pattern)
+    result = re.sub(r'%%(?!%s)' % key_regexp, r'%%', pattern)
     return result % values
