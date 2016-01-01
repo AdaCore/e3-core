@@ -173,6 +173,7 @@ def df(path, full=False):
                 (2, 'freespace'),))
 
         def GetDiskFreeSpaceEx_errcheck(result, func, args):
+            del func
             if not result:
                 raise ctypes.WinError()
             return (args[1].value, args[2].value, args[3].value)
