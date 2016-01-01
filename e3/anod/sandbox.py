@@ -168,7 +168,7 @@ class BuildSpace(object):
         :type quiet: bool
         """
         for d in self.dirs:
-            mkdir(getattr(self, '%s_dir' % d))
+            mkdir(getattr(self, '%s_dir' % d), quiet=quiet)
 
     def reset(self, keep=None):
         """Reset build space.

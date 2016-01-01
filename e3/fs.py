@@ -224,13 +224,17 @@ def ls(path, emit_log_record=True):
         (glob.glob(p) for p in path))))
 
 
-def mkdir(path, mode=0755):
+def mkdir(path, mode=0755, quiet=False):
     """Create a directory.
 
-    :param str path: path to create. If intermediate directories do not exist
+    :param path: path to create. If intermediate directories do not exist
         the procedure create them
-    :param int mode: default is 0755
-
+    :type path: str
+    :param mode: default is 0755
+    :type mode: int
+    :param quiet: whether a log record should be emitted when creating the
+        directory
+    :type quiet: bool
     :raise FSError: if an error occurs
 
     This function behaves quite like mkdir -p command shell. So if the
@@ -239,7 +243,8 @@ def mkdir(path, mode=0755):
     if os.path.isdir(path):
         return
     else:
-        logger.debug('mkdir %s (mode=%s)', path, oct(mode))
+        if not quiet:
+            logger.debug('mkdir %s (mode=%s)', path, oct(mode))
         try:
             os.makedirs(path, mode)
         except Exception as e:
