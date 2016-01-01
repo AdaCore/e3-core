@@ -524,9 +524,6 @@ class Env(BaseEnv):
     :ivar build: default system (autodetected)
     :ivar host: host system
     :ivar target: target system
-    :ivar is_cross: true if we are in a cross environment
-    :ivar is_canadian: true if we are in a canadian environment
-    :ivar platform: platform name based on host and target
 
     build, host and target attributes are instances of Platform
 
