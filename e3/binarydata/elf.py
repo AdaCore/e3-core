@@ -3,8 +3,8 @@
 from __future__ import absolute_import
 from e3.binarydata import UChar, UInt16, BinaryData, Int32, UInt32, \
     CharStr, Address, Offset, UIntMax, Field, StructType, String, \
-    FieldArray, FieldNullTerminatedArray \
-
+    FieldArray, FieldNullTerminatedArray, \
+    BinaryFileBuffer
 from os.path import dirname, join, isfile
 
 E_TYPE_STR = {
@@ -274,7 +274,9 @@ class Elf(object):
 
         dyn_sect = ElfDynamicSection()
         dyn_sect.decode(self.get_section_content('.dynamic'))
-        dyn_str = self.get_section_content('.dynstr').read()
+        dyn_str = self.get_section_content('.dynstr')
+        if isinstance(dyn_str, BinaryFileBuffer):
+            dyn_str = dyn_str.read()
 
         so_list = []
         rpath = None
@@ -307,7 +309,7 @@ class Elf(object):
         :param index: can be either the index of the section in the section
             table (int) or a section name
 
-        :rtype: str
+        :rtype: str | BinaryFileBuffer
         """
         if isinstance(index, int):
             s = self.section_table[index]
