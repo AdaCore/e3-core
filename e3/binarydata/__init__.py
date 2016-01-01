@@ -5,6 +5,7 @@ as object files, executables, ...
 """
 
 from __future__ import absolute_import
+import abc
 import struct
 import os
 from collections import OrderedDict
@@ -108,7 +109,7 @@ class BinaryData(object):
         :param size: can be 32, 64 or 16
         :type size: int
         """
-        BinaryData.ADDRESS_ENCODING = {32: b'L', 64: b'Q', 16: b'H'}[size]
+        cls.ADDRESS_ENCODING = {32: b'L', 64: b'Q', 16: b'H'}[size]
 
     @classmethod
     def set_endianness(cls, endian):
@@ -120,9 +121,9 @@ class BinaryData(object):
         :param endian: can be 'native' (default), 'little' or 'big'
         :type endian: str
         """
-        BinaryData.ENDIANNESS = {'native': b'=',
-                                 'little': b'<',
-                                 'big': b'>'}[endian]
+        cls.ENDIANNESS = {'native': b'=',
+                          'little': b'<',
+                          'big': b'>'}[endian]
 
     def image(self, indent=0):
         """Return an image of the current object.
@@ -143,6 +144,8 @@ class BasicType(BinaryData):
     a valid decoding string for struct module. Note that endianness setting is
     automatically applied.
     """
+    __metaclass__ = abc.ABCMeta
+
     DECODER = b''
 
     def __init__(self, value=None):
@@ -154,7 +157,7 @@ class BasicType(BinaryData):
         super(BasicType, self).__init__()
         self.size = None
         self.value = value
-        self.decoder = BinaryData.ENDIANNESS + self.DECODER
+        self.decoder = self.ENDIANNESS + self.DECODER
 
     def decode(self, buffer):
         """Decode.
@@ -191,6 +194,15 @@ class BasicType(BinaryData):
         """
         return self.FORMATTER % self.value
 
+    @abc.abstractproperty
+    @staticmethod
+    def FORMATTER():
+        """image() returns the result of FORMATTER % value.
+
+        :rtype: str
+        """
+        pass
+
 
 class Address(BasicType):
     """Address decoder."""
@@ -199,7 +211,7 @@ class Address(BasicType):
 
     def __init__(self, value=None):
         super(Address, self).__init__(value)
-        self.decoder = BinaryData.ENDIANNESS + BinaryData.ADDRESS_ENCODING
+        self.decoder = self.ENDIANNESS + self.ADDRESS_ENCODING
 
 
 class Offset(Address):
