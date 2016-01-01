@@ -10,11 +10,13 @@ from functools import partial
 def enabled(func):
     """no-op. Do not change function behaviour.
 
-    >>> @enabled
-    ... def foo():
-    ...     print "I'm foo"
-    >>> foo()
-    I'm foo
+    If you write the following code::
+
+        @enabled
+        def foo():
+            print "I'm foo"
+
+    Then calling ``foo()`` will return "I'm foo"
 
     :param func: function to decorate
     """
@@ -24,10 +26,13 @@ def enabled(func):
 def disabled(func):
     """Disable the provided function, and does nothing.
 
-    >>> @disabled
-    ... def foo():
-    ...     print "I'm foo"
-    >>> foo()
+    If you write the following code::
+
+        @disabled
+        def foo():
+            print "I'm foo"
+
+    Then calling ``foo()`` will return None
 
     :param func: function to decorate
     """
@@ -45,19 +50,21 @@ class memoize(object):
     Avoid repeating the calculation of results for previously-processed
     inputs.
 
-    >>> import random
-    >>> @memoize
-    ... def long_computation(r):
-    ...     del r
-    ...     return random.random()
-    >>> k = long_computation(42)
-    >>> l = long_computation(42)
-    >>> k == l
-    True
-    >>> j = long_computation(666)
-    >>> k == j
-    False
-    """
+    If you write the following code::
+
+        import random
+        @memoize
+        def long_computation(r):
+            del r
+            return random.random()
+
+    Then you will have::
+
+       long_computation(42) == long_computation(42)
+
+   Calling the same function twice with the same paramaters returns the same
+   result.
+   """
 
     def __init__(self, func):
         """Initialize the decorator.
