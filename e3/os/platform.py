@@ -259,49 +259,24 @@ class SystemInfo(object):
         return cls._hostname
 
 
-class Immutable(object):
-    def __setattr__(self, name, value):
-        msg = "'%s' has no attribute %s" % (self.__class__,
-                                            name)
-        raise AttributeError(msg)
+class CPU(namedtuple('CPU', ['name', 'bits', 'endian', 'cores'])):
+    """Object representing a CPU.
 
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
+    CPU attributes are:
 
-        return tuple(getattr(self, slot) for slot in self.__slots__) == \
-            tuple(getattr(other, slot) for slot in self.__slots__)
-
-    def __hash__(self):
-        return hash(tuple(getattr(self, slot) for slot in self.__slots__))
-
-    def __getstate__(self):
-        return self.as_dict()
-
-    def __setstate__(self, state):
-        for s in self.__slots__:
-            object.__setattr__(self, s, state[s])
-
-    def as_dict(self):
-        return {k: getattr(self, k) for k in self.__slots__}
-
-    def __str__(self):
-        result = ["%s: %s" % (k, getattr(self, k)) for k in self.__slots__]
-        return "\n".join(result)
-
-
-class CPU(Immutable):
-    """CPU attributes.
-
-    :ivar name: string containing the cpu name
-    :ivar bits: int representing the number of bits for the cpu or 'unknown'
-    :ivar endian: 'big', 'little' or 'unknown'
-    :ivar cores: int representing the number of cores
+    - name: [str] the CPU name
+    - bits: number of bits for the cpu or 'unknown'
+    - endian: big, little, or unknown
+    - cores: number of cores available
     """
 
-    __slots__ = ["name", "bits", "endian", "cores"]
+    __slots__ = ()
 
-    def __init__(self, name, endian=None, compute_cores=False):
+    def as_dict(self):
+        return self._asdict()
+
+    @classmethod
+    def get(cls, name, endian=None, compute_cores=False):
         """Initialize CPU instance.
 
         :param name: cpu name
@@ -312,31 +287,38 @@ class CPU(Immutable):
         :type compute_cores: bool
         """
         assert name in CPU_INFO, "invalid cpu name"
-        set_attr = object.__setattr__
-        set_attr(self, "name", name)
-        set_attr(self, "bits", CPU_INFO[self.name]['bits'])
-        set_attr(self, "endian", endian)
-        set_attr(self, "cores", 1)
+        bits = CPU_INFO[name]['bits']
+        cores = 1
 
-        if self.endian is None:
-            set_attr(self, "endian", CPU_INFO[self.name]['endian'])
+        if endian is None:
+            endian = CPU_INFO[name]['endian']
         if compute_cores:
-            set_attr(self, "cores", SystemInfo.core_number)
+            cores = SystemInfo.core_number
+
+        return CPU(name, bits, endian, cores)
 
 
-class OS(Immutable):
-    """OS attributes.
+class OS(namedtuple('OS', ['name', 'version', 'kernel_version', 'exeext',
+                           'dllext', 'is_bareboard', 'mode'])):
+    """Object representing an OS.
 
-    :ivar name: os name
-    :ivar version: string containing the os version
-    :ivar exeext: default executable extension
-    :ivar dllext: default shared library extension
-    :ivar is_bareboard: True if the system is bareboard, False otherwise
+    Attributes are:
+
+    - name: the OS name
+    - version: the OS version
+    - kernel_version: the exact version of the kernel
+    - exeext: the default executable extension (e.g. .exe on Windows)
+    - dllext: the default shared library extension (e.g. .dll on Windows)
+    - is_bareboard: whether the system has an OS or not.
     """
 
-    __slots__ = ["name", "version", "exeext", "dllext", "is_bareboard", "mode"]
+    __slots__ = ()
 
-    def __init__(self, name, is_host=False, version=UNKNOWN, mode=UNKNOWN):
+    def as_dict(self):
+        return self._asdict()
+
+    @classmethod
+    def get(cls, name, is_host=False, version=UNKNOWN, mode=UNKNOWN):
         """Initialize OS instance.
 
         :param name: os name
@@ -348,31 +330,23 @@ class OS(Immutable):
         :param mode: os mode
         :type mode: str | None
         """
-        set_attr = object.__setattr__
-        set_attr(self, "name", name)
-        set_attr(self, "version", version)
-        set_attr(self, "exeext", "")
-        set_attr(self, "dllext", "")
-        set_attr(self, "is_bareboard", False)
-        set_attr(self, "kernel_version", None)
-        set_attr(self, "mode", mode)
+        is_bareboard = OS_INFO[name]['is_bareboard']
+        if name.startswith('vxworks') and mode == 'rtp':
+            exeext = '.vxe'
+        else:
+            exeext = OS_INFO[name]['exeext']
 
-        set_attr(self, "is_bareboard",
-                 OS_INFO[self.name]['is_bareboard'])
-        set_attr(self, "exeext", OS_INFO[self.name]['exeext'])
-
-        if self.name.startswith('vxworks') and self.mode == 'rtp':
-            set_attr(self, "exeext", ".vxe")
-
-        set_attr(self, "dllext", OS_INFO[self.name]['dllext'])
+        dllext = OS_INFO[name]['dllext']
 
         # If version is not given by the user guess it or set it to the
         # default (cross case)
-        if self.version == UNKNOWN:
+        if version == UNKNOWN:
             if is_host:
                 version, kernel_version = SystemInfo.os_version()
-                set_attr(self, "version", version)
-                set_attr(self, "kernel_version", kernel_version)
             else:
-                set_attr(self, "version", OS_INFO[self.name]['version'])
-                set_attr(self, "kernel_version", UNKNOWN)
+                version = OS_INFO[name]['version']
+                kernel_version = UNKNOWN
+        else:
+            kernel_version = UNKNOWN
+        return OS(name, version, kernel_version, exeext,
+                  dllext, is_bareboard, mode)

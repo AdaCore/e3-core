@@ -1,37 +1,42 @@
 from __future__ import absolute_import
 
+import collections
+
 import e3.os
 import e3.os.platform
 from e3.platform_db import PLATFORM_INFO, BUILD_TARGETS
 
 
-class Platform(e3.os.platform.Immutable):
+# noinspection PyUnresolvedReferences
+class Platform(
+    collections.namedtuple(
+        'Platform',
+        ['cpu', 'os', 'is_hie', 'platform', 'triplet',
+         'machine', 'domain', 'is_host', 'is_default'])):
     """Class that allow user to retrieve os/cpu specific information.
 
-    :ivar cpu: CPU information
-    :ivar os: Operating system information
-    :ivar is_hie: True if the system is a high integrity system
-    :ivar platform: platform name. Ex: x86-linux
-    :ivar triplet:  GCC target
-    :ivar machine:  machine name
-    :ivar domain:   domain name
-    :ivar is_host:  True if this is not a cross context
-    :ivar is_virtual: Set to True if the current system is a virtual one.
-        Currently set only for Solaris containers, Linux VMware and Windows on
-        VMware.
-    :ivar is_default: True if the platform is the default one
+    Attributes are:
+
+    - cpu: CPU information
+    - os: Operating System information
+    - is_hie: whether the system is a high integrity system
+    - platform: the platform name, e.g. arm-elf-linux
+    - triplet: the GCC target
+    - machine: machine name
+    - domain: domain name
+    - is_host: True if this is not a cross context
+    - is_default: True if the platform is the default one
     """
 
     default_arch = None
     system_info = e3.os.platform.SystemInfo
 
-    __slots__ = ["cpu", "os", "is_hie", "platform", "triplet",
-                 "machine", "domain", "is_host",
-                 "is_default"]
+    __slots__ = ()
 
-    def __init__(self, platform_name=None, version=None, is_host=False,
-                 machine=None, compute_default=False, mode=None):
-        """Initialize a Platform.
+    @classmethod
+    def get(cls, platform_name=None, version=None, is_host=False,
+            machine=None, compute_default=False, mode=None):
+        """Return a Platform object.
 
         :param platform_name: if None or empty then automatically detect
             current platform (native). Otherwise should be a valid platform
@@ -55,69 +60,58 @@ class Platform(e3.os.platform.Immutable):
         # normalize arguments
         if not version:
             version = e3.os.platform.UNKNOWN
-        if not machine or machine == e3.os.platform.UNKNOWN:
+        if machine is None or machine == e3.os.platform.UNKNOWN:
             machine = ''
         if not mode:
             mode = e3.os.platform.UNKNOWN
 
-        def set_attr(name, value):
-            object.__setattr__(self, name, value)
-
-        set_attr("cpu", None)
-        set_attr("os", None)
-        set_attr("platform", platform_name)
-
         # Initialize default arch class variable
-        if self.default_arch is None and not compute_default:
-            self.__class__.default_arch = Platform(compute_default=True)
+        if cls.default_arch is None and not compute_default:
+            cls.default_arch = Platform.get(compute_default=True)
 
-        set_attr("is_default", False)
-        set_attr("machine", machine)
-        set_attr("is_hie", False)
-        set_attr("domain", e3.os.platform.UNKNOWN)
+        is_default = False
+        domain = e3.os.platform.UNKNOWN
 
         if compute_default:
-            default_platform = self.system_info.platform()
+            default_platform = cls.system_info.platform()
         else:
-            default_platform = self.default_arch.platform
+            default_platform = cls.default_arch.platform
 
-        if self.platform is None or self.platform in ('', 'default'):
-            set_attr("platform", default_platform)
+        if platform_name in (None, '', 'default'):
+            platform_name = default_platform
 
-        if self.platform == default_platform or is_host:
-            set_attr("is_host", True)
+        if platform_name == default_platform or is_host:
+            is_host = True
 
             # This is host so we can guess the machine name and domain
-            machine, domain = self.system_info.hostname()
-            set_attr("machine", machine)
-            set_attr("domain", domain)
-            set_attr("is_default", self.platform == default_platform)
+            machine, domain = cls.system_info.hostname()
+            is_default = platform_name == default_platform
 
         else:
-            set_attr("is_host", False)
+            is_host = False
             # This is a target name. Sometimes it's suffixed by the host os
             # name. If the name is not a key in config.platform_info try to
             # to find a valid name by suppressing -linux, -solaris or -windows
-            if self.platform not in PLATFORM_INFO:
+            if platform_name not in PLATFORM_INFO:
                 for suffix in ('-linux', '-solaris', '-windows'):
-                    if self.platform.endswith(suffix):
-                        set_attr("platform", self.platform[:-len(suffix)])
+                    if platform_name.endswith(suffix):
+                        platform_name = platform_name[:-len(suffix)]
                         break
 
         # Fill other attributes
-        pi = PLATFORM_INFO[self.platform]
-        set_attr("cpu",
-                 e3.os.platform.CPU(
-                     pi['cpu'], pi.get('endian', None), self.is_host))
-        set_attr("os",
-                 e3.os.platform.OS(
-                     pi['os'], self.is_host, version=version, mode=mode))
-        set_attr("is_hie", pi['is_hie'])
+        pi = PLATFORM_INFO[platform_name]
+        cpu = e3.os.platform.CPU.get(
+            pi['cpu'], pi.get('endian', None), is_host)
+        os = e3.os.platform.OS.get(
+            pi['os'], is_host, version=version, mode=mode)
+        is_hie = pi['is_hie']
 
         # Find triplet
-        set_attr("triplet", None)
-        set_attr("triplet",
-                 BUILD_TARGETS[self.platform]['name'] % self.to_dict())
+        triplet = BUILD_TARGETS[platform_name]['name'] % {
+            'os_version': os.version}
+
+        return cls(cpu, os, is_hie, platform_name, triplet,
+                   machine, domain, is_host, is_default)
 
     @property
     def is_virtual(self):
@@ -136,7 +130,7 @@ class Platform(e3.os.platform.Immutable):
         :return: a dictionary representing the current Arch instance
         :rtype: dict
         """
-        str_dict = self.as_dict()
+        str_dict = self._asdict()
         str_dict['is_virtual'] = self.is_virtual
 
         for key, var in self.os.as_dict().iteritems():

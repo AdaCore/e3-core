@@ -29,9 +29,6 @@ class BaseEnv(object):
     :ivar build: default system (autodetected)
     :ivar host: host system
     :ivar target: target system
-    :ivar is_cross: true if we are in a cross environment
-    :ivar is_canadian: true if we are in a canadian environment
-    :ivar platform: platform name based on host and target
     :ivar main_options: The command-line switches, after parsing by
         the e3.Main class (see the documentation of that class).
 
@@ -62,7 +59,7 @@ class BaseEnv(object):
         self._context = []
 
         if build is None:
-            self.build = Platform()
+            self.build = Platform.get()
         else:
             self.build = build
 
@@ -160,9 +157,9 @@ class BaseEnv(object):
             'set_build (build_name=%s, build_version=%s)',
             build_name, build_version)
         if build_name is not None:
-            self.build = Platform(platform_name=build_name,
-                                  is_host=True,
-                                  version=build_version)
+            self.build = Platform.get(platform_name=build_name,
+                                      is_host=True,
+                                      version=build_version)
         self.host = self.build
         self.target = self.build
 
@@ -199,10 +196,10 @@ class BaseEnv(object):
                 # our methods to guess some information such as os version,...
                 is_host = True
 
-            self.host = Platform(platform_name=host_name,
-                                 is_host=is_host,
-                                 version=host_version,
-                                 machine=self.build.machine)
+            self.host = Platform.get(platform_name=host_name,
+                                     is_host=is_host,
+                                     version=host_version,
+                                     machine=self.build.machine)
         else:
             self.host = self.build
 
@@ -247,10 +244,10 @@ class BaseEnv(object):
                 target_machine = self.build.machine
 
         if target_name is not None and target_name != self.host.platform:
-            self.target = Platform(platform_name=target_name,
-                                   version=target_version,
-                                   machine=target_machine,
-                                   mode=target_mode)
+            self.target = Platform.get(platform_name=target_name,
+                                       version=target_version,
+                                       machine=target_machine,
+                                       mode=target_mode)
         else:
             self.target = self.host
 
@@ -550,7 +547,7 @@ class Env(BaseEnv):
         host and target set to the build attribute.
         """
         if 'build' not in Env._instance:
-            self.build = Platform()
+            self.build = Platform.get()
             self.host = self.build
             self.target = self.host
             self.environ = None
