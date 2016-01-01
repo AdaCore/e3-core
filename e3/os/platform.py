@@ -1,6 +1,6 @@
 """Provides function to detect platform specific information."""
 from __future__ import absolute_import
-import platform
+from platform import uname as platform_uname, linux_distribution
 from collections import namedtuple
 
 import re
@@ -69,12 +69,11 @@ class SystemInfo(object):
         beginning of this class.
         """
         # Compute result of uname
-        cls.uname = Uname(*platform.uname())
+        cls.uname = Uname(*platform_uname())
 
         # Fetch the linux release file
         if cls.uname.system == 'Linux':
-            cls.linux_distrib = \
-                platform.linux_distribution()
+            cls.linux_distrib = linux_distribution()
         else:
             cls.linux_distrib = None
 
