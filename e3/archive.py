@@ -49,18 +49,21 @@ def __select_archiving_tool(filename, unpack=True,
         :type archive_ext: str
         :rtype: bool
         """
-        try:
-            if archive_ext == 'zip':
-                # We need to check for zlib presence to be sure that we can
-                # compress otherwise zipfile will be used a an archiver
-                # (no compression)
+        if archive_ext == 'zip':
+            # We need to check for zlib presence to be sure that we can
+            # compress otherwise zipfile will be used a an archiver
+            # (no compression)
+            try:
                 import zlib
-                return bool(zlib.__name__)  # Avoid unused warning
-            else:
+            except ImportError:
+                zlib = None
+            return zlib is not None
+        else:
+            try:
                 import tarfile
-                return bool(tarfile.__name__)  # Avoid unused warning
-        except ImportError:
-            return False
+            except ImportError:
+                tarfile = None
+            return tarfile is not None
 
     def has_binary_tools(archive_ext):
         """Return True if binary tools ar found else False.

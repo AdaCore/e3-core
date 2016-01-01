@@ -223,11 +223,16 @@ class BuildSpace(object):
 
                 try:
                     from threading import Thread, Event
+                except ImportError:
+                    Thread = None
+                    Event = None
+
+                if Event is not None and Thread is not None:
                     self.stop_event = Event()
                     self.tail_thread = Thread(target=follow, args=(
                         self.stop_event, self.log_file,))
                     self.tail_thread.start()
-                except ImportError:
+                else:
                     if not info_msg:
                         print '-v not supported on this machine'
                         print 'output redirected to %s' % self.log_file

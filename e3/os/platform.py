@@ -106,8 +106,14 @@ class SystemInfo(object):
                 pass
 
         cls.nis_domain = UNKNOWN
+
         try:
             import nis
+        except ImportError:
+            e3.log.debug('cannot import nis', exc_info=True)
+            nis = None
+
+        if nis is not None:
             try:
                 cls.nis_domain = nis.get_default_domain()
                 if not cls.nis_domain:
@@ -115,9 +121,6 @@ class SystemInfo(object):
             except nis.error:
                 e3.log.debug('nis error', exc_info=True)
                 pass
-        except ImportError:
-            e3.log.debug('cannot import nis', exc_info=True)
-            pass
 
     @classmethod
     def platform(cls):
