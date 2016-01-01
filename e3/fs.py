@@ -290,7 +290,7 @@ def mv(source, target):
                 shutil.move(f, os.path.join(target, os.path.basename(f)))
     except Exception as e:
         logger.error(e)
-        raise FSError('mv', e), None, sys.exc_traceback
+        raise FSError(origin='mv', message=str(e)), None, sys.exc_traceback
 
 
 def rm(path, recursive=False, glob=True):
