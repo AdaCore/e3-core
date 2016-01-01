@@ -117,9 +117,9 @@ class DAG(object):
         """Release a node.
 
         :param node: a node id
-        :type node: int
+        :type node: int | None
 
         Do nothing when the node is not locked
         """
-        if self.states[node] == LOCKED:
+        if node is not None and self.states[node] == LOCKED:
             self.__release_locked_node(node)
