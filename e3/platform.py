@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import e3.os
+import e3.os.platform
 from e3.platform_db import PLATFORM_INFO, BUILD_TARGETS
 
 
