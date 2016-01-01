@@ -4,10 +4,9 @@ The `e3-core` package
 Code conventions
 ----------------
 
-All code should follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
-(the only exception is `e3/platform_db.py`). We also expect that
-[PyFlakes](https://pypi.python.org/pypi/pyflakes) has been run before sending
-a patch.
+All code should follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
+We also expect that [PyFlakes](https://pypi.python.org/pypi/pyflakes) has been
+run before sending a patch.
 
 All logging done by `E3` must be done via a logger returned by the function
 `e3.log.getLogger`. Very verbose logging can be achieved by adding calls to
