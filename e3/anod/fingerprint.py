@@ -180,5 +180,9 @@ class Fingerprint(object):
         key_list.sort()
         checksum = hashlib.sha1()
         for key in key_list:
-            checksum.update('%s:%s;' % (key, self.elements[key]))
+            for chunk in (key, self.elements[key]):
+                if isinstance(chunk, unicode):
+                    checksum.update(chunk.encode('utf-8'))
+                else:
+                    checksum.update(chunk)
         return checksum.hexdigest()

@@ -23,7 +23,7 @@ class TestLoader(object):
     def test_spec_without_anod(self):
         anod_file = tempfile.NamedTemporaryFile(delete=False)
         try:
-            anod_file.write('import os\n')
+            anod_file.write(b'import os\n')
             e3.anod.loader.sandbox = SandBox()
             e3.anod.loader.sandbox.spec_dir = os.path.dirname(anod_file.name)
 
