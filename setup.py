@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 install_requires = [
+    'clint',
     'netifaces',
     'pyyaml',
     'python-dateutil',

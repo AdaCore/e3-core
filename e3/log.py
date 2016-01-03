@@ -20,6 +20,26 @@ DEFAULT_FILE_FMT = '%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s'
 # activate() is called with a filename.
 default_output_stream = sys.stdout
 
+# Pretty cli UI
+pretty_cli = True
+
+
+def no_progress_bar(it, **kwargs):
+    del kwargs
+    return it
+
+try:
+    from clint.textui.progress import bar as clint_progress_bar
+except ImportError:
+    clint_progress_bar = no_progress_bar
+
+
+def progress_bar(it, expected_size=None, **kwargs):
+    if pretty_cli and expected_size != 0:
+        return clint_progress_bar(it, expected_size=expected_size, **kwargs)
+    else:
+        return no_progress_bar(it, expected_size=expected_size, **kwargs)
+
 
 class RawFilter(logging.Filter):
     """Filters out non RAW level records.
