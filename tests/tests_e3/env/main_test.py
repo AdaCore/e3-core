@@ -20,3 +20,17 @@ def test_autodetect():
     assert '--build=x86-linux,rhES7' in b.cmd_triplet()
     assert '--host=x86_64-linux,rhES7' in b.cmd_triplet()
     assert b.get_attr('build.os.version') == 'rhES7'
+
+
+def test_store():
+    c = e3.env.Env()
+
+    c.abc = 'foo'
+
+    c.store()
+
+    c.abc = 'bar'
+
+    c.restore()
+
+    assert c.abc == 'foo'
