@@ -72,6 +72,16 @@ setup(
             'create = e3.anod.sandbox:SandBoxCreate',
             'show-config = e3.anod.sandbox:SandBoxShowConfiguration',
         ],
+        'e3.store': [
+            'http-simple-store = e3.store.backends.'
+            'http_simple_store:HTTPSimpleStore',
+        ],
+        'e3.store.cache.backend': [
+            'file-cache = e3.store.cache.backends.filecache:FileCache',
+        ],
+        'sandbox_scripts': [
+            'anod = e3.anod.sandbox.scripts:anod',
+        ],
         'console_scripts': [
             'e3 = e3.sys:main',
             'e3-sandbox = e3.anod.sandbox:main',
