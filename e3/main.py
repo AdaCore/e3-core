@@ -155,10 +155,6 @@ class Main(object):
             else:
                 level = self.args.loglevel
 
-            # By default do not filter anything. What is effectively logged
-            # will be defined by setting/unsetting handlers
-            logging.getLogger('').setLevel(e3.log.RAW)
-
             e3.log.activate(level=level, filename=self.args.log_file,
                             e3_debug=self.args.verbose > 1)
             self.__log_handlers_set = True

@@ -198,6 +198,9 @@ def activate(
     :param e3_debug: activate full debug of the e3 library
     :type e3_debug: bool
     """
+    # By default do not filter anything. What is effectively logged
+    # will be defined by setting/unsetting handlers
+    logging.getLogger('').setLevel(RAW)
     fmt = logging.Formatter(stream_format, datefmt)
 
     # Set logging handlers
