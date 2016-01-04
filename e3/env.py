@@ -481,6 +481,16 @@ class BaseEnv(AbstractBaseEnv):
     def _items(self):
         return self._instance.iteritems()
 
+    @classmethod
+    def from_env(cls):
+        """Return a new BaseEnv object from the current Env value.
+
+        :rtype: BaseEnv
+        """
+        return BaseEnv(build=Env().build,
+                       host=Env().host,
+                       target=Env().target)
+
 
 class Env(AbstractBaseEnv):
     """Env shows the current environment in used.
