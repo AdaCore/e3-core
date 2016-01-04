@@ -5,9 +5,11 @@ import argparse
 import logging
 import logging.handlers
 
+from pkg_resources import get_distribution
+
 from e3.anod.error import AnodError
 from e3.env import Env
-from e3.fs import mkdir
+from e3.fs import mkdir, rm
 
 import e3.error
 import e3.log
@@ -19,6 +21,7 @@ import sys
 import yaml
 
 from e3.main import Main
+from e3.os.fs import chmod
 from e3.vcs.git import GitRepository
 
 
@@ -47,6 +50,7 @@ class SandBox(object):
         self.etc_dir = None
         self.vcs_dir = None
         self.patch_dir = None
+        self.bin_dir = None
         self.conf = None
 
     @property
@@ -114,6 +118,32 @@ class SandBox(object):
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
         with open(sandbox_conf, 'rb') as f:
             return yaml.load(f)
+
+    def write_scripts(self):
+        from setuptools.command.easy_install import get_script_args
+        import pkg_resources
+
+        # Retrieve sandbox_scripts entry points
+        for ep in pkg_resources.iter_entry_points(group='sandbox_scripts'):
+            print ep
+
+        e3_distrib = get_distribution('e3-core')
+
+        class SandboxDist(object):
+            def get_entry_map(self, group):
+                if group != 'console_scripts':
+                    return {}
+                return e3_distrib.get_entry_map('sandbox_scripts')
+
+            def as_requirement(self):
+                return e3_distrib.as_requirement()
+
+        for ep_name, script in get_script_args(dist=SandboxDist()):
+            target = os.path.join(self.bin_dir, ep_name)
+            rm(target)
+            with open(target, 'wb') as f:
+                f.write(script.replace('console_scripts', 'sandbox_scripts'))
+            chmod('a+x', target)
 
 
 class BuildSpace(object):
@@ -360,6 +390,7 @@ class SandBoxCreate(SandBoxAction):
             g.update(args.spec_git_url, args.spec_git_branch, force=True)
 
         sandbox.dump_configuration()
+        sandbox.write_scripts()
 
 
 class SandBoxShowConfiguration(SandBoxAction):
@@ -411,6 +442,10 @@ def main(get_argument_parser=False):
             'e3.anod.sandbox.sandbox_action': [
                 'foo = e3_contrib.sandbox_actions.SandBoxFoo']
         }
+
+    :param get_argument_parser: return e3.main.Main argument_parser instead
+        of running the action.
+    :type get_argument_parser: bool
     """
     m = Main()
     subparsers = m.argument_parser.add_subparsers(
