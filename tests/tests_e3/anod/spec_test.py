@@ -11,9 +11,32 @@ import tempfile
 import pytest
 
 
+def test_qualifier_format():
+
+    class A(Anod):
+
+        build_qualifier_format = (
+            ('a', True),
+            ('b', False),
+            ('c', True))
+
+    A(qualifier='a=1,c', kind='build')  # this will not raise an exception
+
+    with pytest.raises(AnodError) as err:
+        A(qualifier='a=1', kind='build')
+    assert 'c is required' in err.value.message
+
+    with pytest.raises(AnodError) as err:
+        A(qualifier='a=1,c,zzz', kind='build')
+    assert 'zzz' in err.value.message
+
+
 def test_simple_spec():
 
     class Simple(Anod):
+
+        test_qualifier_format = (
+            ('with_bar', False),)
 
         build_source_list = [
             Anod.Source('foo-src', publish=False),
@@ -27,10 +50,10 @@ def test_simple_spec():
                     Anod.Source('bar-test-src', publish=False))
             return result
 
-    simple_build = Simple('noqual', kind='build')
+    simple_build = Simple('', kind='build')
     assert len(simple_build.source_list) == 2
 
-    simple_test = Simple('noqual', kind='test')
+    simple_test = Simple('', kind='test')
     assert len(simple_test.source_list) == 1
 
     simple_test_with_bar = Simple('with_bar=true', kind='test')
@@ -48,6 +71,9 @@ def test_primitive():
     assert no_primitive.has_primitive('build') is False
 
     class WithPrimitive(Anod):
+
+        build_qualifier_format = (
+            ('error', False),)
 
         @Anod.primitive()
         def build(self):

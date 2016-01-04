@@ -117,27 +117,8 @@ class Anod(object):
         self.builder_registered = None
 
         self.parsed_qualifier = OrderedDict()
-        if qualifier:
-            for key, _, value in sorted(
-                    (item.partition('=') for item in qualifier.split(','))):
-                self.parsed_qualifier[key] = value
-
-        # If the Anod module declares some properties, and the function call
-        # raises an Exception, the call to hasatt() will return False (meaning
-        # that the attribute is not defined). To check whether the attribute is
-        # defined we get the list of all defined attributes using `dir`
-        attributes = dir(self)
-
-        # Get the module build space, the name of the build space is
-        # build_space_name if defined or name (required in .anod specs)
-        if 'build_space_name' not in attributes:
-            self.build_space_name = self.name
-
-        if not isinstance(self.build_space_name, basestring):
-            error_msg = "Error: %s.build_space_name should be a string"
-            if callable(self.build_space_name):
-                error_msg += ". Is @property missing ?"
-            raise SpecError(error_msg % self.name, 'anod.__init__')
+        self.build_space_name = self.name
+        self.__parse_qualifier(qualifier=qualifier)
 
         # Register sources, source builders and repositories
         self.source_list = {}
@@ -145,6 +126,34 @@ class Anod(object):
         self.map_attribute_elements(
             lambda x: self.source_list.update({x.name: x}),
             kind + '_source_list')
+
+    def __parse_qualifier(self, qualifier):
+        if qualifier:
+            qual_dict = dict((key, value) for key, _, value in sorted(
+                (item.partition('=') for item in qualifier.split(','))))
+        else:
+            qual_dict = {}
+
+        for qual_key in getattr(self, '%s_qualifier_format' % self.kind, ()):
+            key, is_required = qual_key
+            value = qual_dict.get(key)
+            if not is_required and value is None:
+                pass
+            elif value is None:
+                raise AnodError(
+                    message='the qualifier key %s is required for running'
+                            ' %s %s' % (key, self.kind, self.name),
+                    origin='anod.__parse_qualifier')
+            else:
+                self.parsed_qualifier[key] = qual_dict[key]
+                self.build_space_name += '%s=%s' % (key, qual_dict[key])
+                del qual_dict[key]
+
+        if qual_dict:
+            raise AnodError(
+                message='the following keys in the qualifier'
+                ' were not parsed: %s' % ','.join(qual_dict.keys()),
+                origin='anod.__parse_qualifier')
 
     def map_attribute_elements(self, function, attribute_name):
         """Iterate other an attribute an apply a function on all elements.

@@ -23,7 +23,7 @@ def test_make():
         Anod.sandbox.root_dir = tempd
         Anod.sandbox.create_dirs()
 
-        am = AnodMake('qual', 'build', jobs=10)
+        am = AnodMake(qualifier='', kind='build', jobs=10)
         am.activate()
         am.build_space.create()
         assert am.build()['cmd'] == ['make', '-j', '10']
@@ -47,7 +47,7 @@ def test_configure():
         Anod.sandbox.root_dir = tempd
         Anod.sandbox.create_dirs()
 
-        ac = AnodConf('qual', 'build', jobs=10)
+        ac = AnodConf(qualifier='', kind='build', jobs=10)
         ac.activate()
         ac.build_space.create()
         assert ac.build()['cmd'] == [
