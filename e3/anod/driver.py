@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 
 from functools import wraps
+import os
 
-from e3.anod.spec import AnodError
+from e3.anod.spec import AnodError, has_primitive
 
 import e3.log
 import e3.store
@@ -14,8 +15,10 @@ def primitive_check():
     def decorator(func):
         @wraps(func)
         def wrapper(self):
-            if not self.anod_instance.has_primitive(func.__name__):
+            if not has_primitive(self.anod_instance, func.__name__):
                 raise AnodError('no primitive %s' % func.__name__)
+            elif not self.is_active():
+                raise AnodError('.activate() has not been called')
         return wrapper
     return decorator
 
@@ -34,8 +37,30 @@ class AnodDriver(object):
         :type store: e3.store.backends.base.Store
         """
         self.anod_instance = anod_instance
-        self.anod_instance.activate()
         self.store = store
+
+    def activate(self):
+        sbx = self.anod_instance.sandbox
+        if sbx is None:
+            raise AnodError('cannot activate a spec without a sandbox',
+                            'activate')
+
+        self.anod_instance.build_space = sbx.get_build_space(
+            name=self.anod_instance.name +
+            self.anod_instance.build_space_suffix,
+            primitive=self.anod_instance.kind,
+            platform=self.anod_instance.env.platform)
+
+        # Compute an id that should be unique
+        self.anod_instance.anod_id = '%s.%s' % (
+            os.path.relpath(
+                self.anod_instance.build_space.root_dir,
+                sbx.root_dir).replace('/', '.').replace('\\', '.'),
+            self.anod_instance.kind)
+
+        self.anod_instance.log = e3.log.getLogger(
+            'spec.' + self.anod_instance.anod_id)
+        e3.log.debug('activating spec %s', self.anod_instance.anod_id)
 
     def call(self, action):
         """Call an Anod action.
@@ -55,7 +80,7 @@ class AnodDriver(object):
         # First check whether there is a download primitive implemented by
         # the Anod spec.
         self.anod_instance.build_space.create(quiet=True)
-        if self.anod_instance.has_primitive('download'):
+        if self.has_primitive(self.anod_instance, 'download'):
             download_data = self.anod_instance.download()
             metadata = self.store.get_resource_metadata(download_data)
             self.store.download_resource(

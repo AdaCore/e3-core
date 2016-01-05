@@ -186,3 +186,16 @@ class Fingerprint(object):
                 else:
                     checksum.update(chunk)
         return checksum.hexdigest()
+
+    @classmethod
+    def update_anod_fingerprint(cls, anod_instance):
+        # If anod_instance.fingerprint is not None it means that we have
+        # alreadycomputed the new fingerprint so just return and assume that
+        # anod_instance.fingerprint contains the right info.
+        if anod_instance.fingerprint is not None:
+            return
+
+        # ??? handle install fingerprint
+        fingerprint = cls()
+        fingerprint.add_instance(anod_instance=anod_instance)
+        anod_instance.fingerprint = fingerprint

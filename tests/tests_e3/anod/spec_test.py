@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
+from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError
-from e3.anod.spec import Anod
+from e3.anod.spec import Anod, has_primitive
 from e3.anod.sandbox import SandBox
 import e3.log
 import e3.fs
@@ -68,7 +69,7 @@ def test_primitive():
             return 2
 
     no_primitive = NoPrimitive('', 'build')
-    assert no_primitive.has_primitive('build') is False
+    assert has_primitive(no_primitive, 'build') is False
 
     class WithPrimitive(Anod):
 
@@ -94,10 +95,12 @@ def test_primitive():
             'data')
         Anod.sandbox.create_dirs()
         # Activate the logging
-        with_primitive.activate()
-        with_primitive2.activate()
+        AnodDriver(anod_instance=with_primitive, store=None).activate()
+        AnodDriver(anod_instance=with_primitive2, store=None).activate()
 
-        assert with_primitive.has_primitive('build') is True
+        with_primitive.build_space.create()
+
+        assert has_primitive(with_primitive, 'build') is True
         assert with_primitive.build() == 3
 
         with_primitive2.build_space.create()

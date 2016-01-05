@@ -4,7 +4,6 @@ import os
 from collections import OrderedDict
 
 from e3.anod.error import AnodError, SpecError, ShellError
-from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import SUCCESS
 
 import e3.anod.deps
@@ -37,8 +36,109 @@ def check_api_version(version):
                 version.strip(), ','.join(SUPPORTED_API)))
 
 
-class Anod(object):
+def parse_command(command, build_space):
+    """Parse a command line formatting each string.
 
+    :param command: the command line (a list of string)
+    :type command: list[str] | tuple[str]
+    :param build_space: a build space object
+    :type build_space: e3.anod.sandbox.BuildSpace
+    """
+    cmd_dict = {}
+    cmd_dict.update(
+        dict((k.upper(), v)
+             for (k, v) in build_space.__dict__.items()))
+    return [e3.text.format_with_dict(c, cmd_dict) for c in command]
+
+
+def map_attribute_elements(anod_instance, function, attribute_name):
+    """Iterate other an attribute an apply a function on all elements.
+
+    :param anod_instance: an anod instance
+    :type anod_instance: Anod
+    :param function: function to be called on each element
+    :type function: T -> T
+    :param attribute_name: the attribute on which we want to iterate
+    :type attribute_name: str
+
+    :return: the attribute value or empty tuple is the attribute does not
+      exists
+    :rtype: T | ()
+
+    :raise: SpecError if we cannot iterate on the attribute, or AnodError
+    """
+    if attribute_name in dir(anod_instance):
+        item_list = getattr(anod_instance, attribute_name)
+        """:type: list[T]"""
+        if isinstance(item_list, basestring):
+            raise SpecError(
+                '%s cannot be a string' % attribute_name,
+                'map_attribute_elements')
+
+        try:
+            for item in item_list:
+                function(item)
+        except Exception as e:
+            # Check if the expected iterable is in fact a callable
+            if callable(item_list):
+                raise SpecError(
+                    '%s is callable. Maybe you should add a @property' %
+                    attribute_name,
+                    'map_attribute_elements'), None, sys.exc_traceback
+
+            # Ensure that the attribute is an iterable
+            try:
+                iter(item_list)
+            except TypeError:
+                raise SpecError(
+                    '%s is not an iterable' % attribute_name,
+                    'map_attribute_elements'), None, sys.exc_traceback
+
+            if isinstance(e, AnodError):
+                raise
+
+            import traceback
+            error_msg = 'unknown error when parsing in {anod_id}' \
+                ' attribute {attr}=[{item_list}]'.format(
+                    anod_id=anod_instance.anod_id,
+                    attr=attribute_name,
+                    item_list=", ".join(
+                        '({})'.format(it) for it in item_list))
+            _, _, exc_traceback = sys.exc_info()
+            error_msg += '\nError: {}\n'.format(e)
+
+            if 'invalid syntax' in error_msg:
+                # Syntax error when executing the code
+                pass
+            else:
+                # Unknown error, add a traceback
+                error_msg += "Traceback for map_attribute_elements:\n"
+                error_msg += "\n".join(traceback.format_tb(exc_traceback))
+            raise AnodError(error_msg)
+        return item_list
+    else:
+        return ()
+
+
+def has_primitive(anod_instance, name):
+    """Return True if the primitive `name` is supported.
+
+    :param anod_instance: an Anod instance
+    :type anod_instance: Anod
+    :param name: name of the primitive ('build', 'install'...)
+    :type name: str
+
+    :rtype: bool
+    """
+    try:
+        func = getattr(anod_instance, name)
+        is_primitive = getattr(func, 'is_primitive')
+    except AttributeError:
+        return False
+    return bool(is_primitive)
+
+
+class Anod(object):
     """Anod base class.
 
     To write an Anod specification file, you'll need to subclass Anod. A very
@@ -60,12 +160,8 @@ class Anod(object):
     :cvar package: ???
 
     :ivar anod_id: unique identifier for the instance, None until the instance
-        has been activated with self.activate()
+        has been activated with AnodDriver.activate()
     :vartype anod_id: str | None
-
-    :ivar builder_registered: set a flag to mark the builder as not registered.
-        This will be done later when needed.
-
     """
     sandbox = None
     source_pkg_build = None
@@ -95,16 +191,16 @@ class Anod(object):
         self.deps = OrderedDict()
         """:type: OrderedDict[e3.anod.deps.Dependency]"""
 
-        self.build_vars = []
-        """:type: list[e3.anod.deps.BuildVar]"""
-
         self.kind = kind
         self.jobs = jobs
 
-        # Set when self.activate() is called
+        # Set when AnodDriver.activate() is called
         self.build_space = None
         self.anod_id = None
         self.log = None
+
+        # Build space name is computed as self.name + self.build_space_suffix
+        self.build_space_suffix = ''
 
         if env is None:
             self.env = e3.env.BaseEnv(build=e3.env.Env().build,
@@ -114,20 +210,8 @@ class Anod(object):
             self.env = env
 
         self.fingerprint = None
-        self.builder_registered = None
 
         self.parsed_qualifier = OrderedDict()
-        self.build_space_name = self.name
-        self.__parse_qualifier(qualifier=qualifier)
-
-        # Register sources, source builders and repositories
-        self.source_list = {}
-
-        self.map_attribute_elements(
-            lambda x: self.source_list.update({x.name: x}),
-            kind + '_source_list')
-
-    def __parse_qualifier(self, qualifier):
         if qualifier:
             qual_dict = dict((key, value) for key, _, value in sorted(
                 (item.partition('=') for item in qualifier.split(','))))
@@ -142,118 +226,26 @@ class Anod(object):
             elif value is None:
                 raise AnodError(
                     message='the qualifier key %s is required for running'
-                            ' %s %s' % (key, self.kind, self.name),
+                    ' %s %s' % (key, self.kind, self.name),
                     origin='anod.__parse_qualifier')
             else:
                 self.parsed_qualifier[key] = qual_dict[key]
-                self.build_space_name += '%s=%s' % (key, qual_dict[key])
+                self.build_space_suffix = '%s=%s' % (key, qual_dict[key])
                 del qual_dict[key]
 
         if qual_dict:
             raise AnodError(
-                message='the following keys in the qualifier'
-                ' were not parsed: %s' % ','.join(qual_dict.keys()),
+                message='the following keys in the qualifier were not '
+                'parsed: %s' % ','.join(qual_dict.keys()),
                 origin='anod.__parse_qualifier')
 
-    def map_attribute_elements(self, function, attribute_name):
-        """Iterate other an attribute an apply a function on all elements.
+        # Register sources, source builders and repositories
+        self.source_list = {}
 
-        :param function: function to be called on each element
-        :type function: T -> T
-        :param attribute_name: the attribute on which we want to iterate
-        :type attribute_name: str
-
-        :return: the attribute value or empty tuple is the attribute does not
-          exists
-        :rtype: T | ()
-
-        :raise: SpecError if we cannot iterate on the attribute, or AnodError
-        """
-        if attribute_name in dir(self):
-            item_list = getattr(self, attribute_name)
-            """:type: list[T]"""
-            if isinstance(item_list, basestring):
-                raise SpecError(
-                    '%s cannot be a string' % attribute_name,
-                    'anod.map_attribute_elements')
-
-            try:
-                for item in item_list:
-                    function(item)
-            except Exception as e:
-                # Check if the expected iterable is in fact a callable
-                if callable(item_list):
-                    raise SpecError(
-                        '%s is callable. Maybe you should add a @property' %
-                        attribute_name,
-                        'map_attribute_elements'), None, sys.exc_traceback
-
-                # Ensure that the attribute is an iterable
-                try:
-                    iter(item_list)
-                except TypeError:
-                    raise SpecError(
-                        '%s is not an iterable' % attribute_name,
-                        'map_attribute_elements'), None, sys.exc_traceback
-
-                if isinstance(e, AnodError):
-                    raise
-
-                import traceback
-                error_msg = 'unknown error when parsing in {anod_id}' \
-                            ' attribute {attr}=[{item_list}]'.format(
-                                anod_id=self.anod_id,
-                                attr=attribute_name,
-                                item_list=", ".join(
-                                    '({})'.format(it) for it in item_list))
-                _, _, exc_traceback = sys.exc_info()
-                error_msg += '\nError: {}\n'.format(e)
-
-                if 'invalid syntax' in error_msg:
-                    # Syntax error when executing the code
-                    pass
-                else:
-                    # Unknown error, add a traceback
-                    error_msg += "Traceback for map_attribute_elements:\n"
-                    error_msg += "\n".join(traceback.format_tb(exc_traceback))
-                raise AnodError(error_msg)
-            return item_list
-        else:
-            return ()
-
-    def activate(self):
-        if self.sandbox is None:
-            raise AnodError('cannot activate a spec without a sandbox',
-                            'activate')
-
-        self.build_space = self.sandbox.get_build_space(
-            name=self.build_space_name,
-            primitive=self.kind,
-            platform=self.env.platform)
-
-        # Compute an id that should be unique
-        self.anod_id = os.path.relpath(
-            self.build_space.root_dir,
-            self.sandbox.root_dir).replace('/', '.').replace(
-            '\\', '.') + '.' + self.kind
-
-        self.log = e3.log.getLogger('spec.' + self.anod_id)
-        e3.log.debug('activating spec %s', self.anod_id)
-
-    def has_primitive(self, name):
-        """Return True if the primitive `name` is supported.
-
-        :param name: name of the primitive ('build', 'install'...)
-        :type name: str
-
-        :rtype: bool
-        """
-        try:
-            func = getattr(self, name)
-            is_primitive = getattr(func, 'is_primitive')
-        except AttributeError:
-            return False
-        return bool(is_primitive)
+        map_attribute_elements(
+            self,
+            lambda x: self.source_list.update({x.name: x}),
+            kind + '_source_list')
 
     @classmethod
     def primitive(cls, pre=None, post=None, version=None):
@@ -283,7 +275,7 @@ class Anod(object):
                 # Check whether the instance has been activated
                 if self.anod_id is None:
                     # Not yet activated, fail
-                    raise AnodError('.activate() has not been run')
+                    raise AnodError('AnodDriver.activate() has not been run')
 
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
@@ -293,7 +285,7 @@ class Anod(object):
                 # First reset last build status and actual fingerprint. This
                 # ensure that even a crash will keep the module in a mode that
                 # force its rebuild.
-                self.update_status()
+                self.build_space.update_status()
 
                 # Ensure temporary directory is set to a directory local to
                 # the current sandbox. This avoid mainly to loose track of
@@ -319,7 +311,7 @@ class Anod(object):
                     if success:
                         # Don't update status or fingerprint if the primitive
                         # is an installation outside the build space.
-                        self.update_status(
+                        self.build_space.update_status(
                             status=SUCCESS,
                             fingerprint=self.fingerprint)
                 return result
@@ -331,18 +323,6 @@ class Anod(object):
             return primitive_func
 
         return primitive_dec
-
-    def update_fingerprint(self):
-        # If self.fingerprint is not None it means that we have already
-        # computed the new fingerprint so just return and assume that
-        # self.fingerprint contains the right info.
-        if self.fingerprint is not None:
-            return
-
-        # ??? handle install fingerprint
-
-        self.fingerprint = Fingerprint()
-        self.fingerprint.add_instance(self)
 
     @property
     def has_package(self):
@@ -362,25 +342,9 @@ class Anod(object):
         return self.kind == 'build' and self.env.build.os.name == 'windows' \
             and self.has_package and self.package.nsis_cb is not None
 
-    def update_status(self, status=None, fingerprint=None):
-        # not implemented yet ???
-        pass
-
-    def parse_command(self, command):
-        """Parse a command line formatting each string.
-
-        :param command: the command line (a list of string)
-        :type command: list[str] | tuple[str]
-        """
-        cmd_dict = {}
-        cmd_dict.update(
-            dict((k.upper(), v)
-                 for (k, v) in self.build_space.__dict__.items()))
-        return [e3.text.format_with_dict(c, cmd_dict) for c in command]
-
     def shell(self, *command, **kwargs):
         """Run a subprocess using e3.os.process.Run."""
-        command = self.parse_command(command)
+        command = parse_command(command, self.build_space)
         if 'parse_shebang' not in kwargs:
             kwargs['parse_shebang'] = True
         if 'output' not in kwargs:

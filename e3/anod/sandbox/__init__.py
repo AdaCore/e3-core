@@ -217,6 +217,10 @@ class BuildSpace(object):
         for d in (d for d in self.dirs if d not in keep):
             e3.fs.rm(os.path.join(self.root_dir, d), True)
 
+    def update_status(self, status=None, fingerprint=None):
+        # not implemented yet ???
+        pass
+
     def set_logging(self, stdout_logs=False, info_msg=False):
         """Set logging if needed and add new primitive marker.
 

@@ -1,6 +1,7 @@
 """Helpers classes and functions for ANOD."""
 
 import e3.log
+from e3.anod.spec import parse_command
 from e3.anod.error import AnodError
 from e3.fs import find
 from e3.fs import rm
@@ -127,8 +128,11 @@ class Make(object):
             'cwd': exec_dir or self.exec_dir,
             'timeout': timeout}
 
-        return {'cmd': self.anod_instance.parse_command(cmd_arg_list),
-                'options': options}
+        return {
+            'cmd': parse_command(
+                command=cmd_arg_list,
+                build_space=self.anod_instance.build_space),
+            'options': options}
 
 
 class Configure(object):
@@ -226,8 +230,11 @@ class Configure(object):
                        'ignore_environ': False,
                        'env': self.env}
 
-        return {'cmd': self.anod_instance.parse_command(cmd),
-                'options': cmd_options}
+        return {
+            'cmd': parse_command(
+                command=cmd,
+                build_space=self.anod_instance.build_space),
+            'options': cmd_options}
 
     def __call__(self):
         cmd, options = self.cmdline()

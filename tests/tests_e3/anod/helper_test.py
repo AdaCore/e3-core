@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import tempfile
 
+from e3.anod.driver import AnodDriver
 from e3.anod.helper import Make, Configure
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod
@@ -24,7 +25,7 @@ def test_make():
         Anod.sandbox.create_dirs()
 
         am = AnodMake(qualifier='', kind='build', jobs=10)
-        am.activate()
+        AnodDriver(anod_instance=am, store=None).activate()
         am.build_space.create()
         assert am.build()['cmd'] == ['make', '-j', '10']
 
@@ -48,7 +49,7 @@ def test_configure():
         Anod.sandbox.create_dirs()
 
         ac = AnodConf(qualifier='', kind='build', jobs=10)
-        ac.activate()
+        AnodDriver(anod_instance=ac, store=None).activate()
         ac.build_space.create()
         assert ac.build()['cmd'] == [
             '../src/configure', '--build=%s' % ac.env.build.triplet]

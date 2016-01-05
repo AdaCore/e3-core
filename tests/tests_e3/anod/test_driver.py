@@ -21,7 +21,7 @@ def test_simple_driver():
         anod_instance.sandbox = None
         e3.anod.driver.AnodDriver(
             anod_instance=anod_instance,
-            store=None)
+            store=None).activate()
 
     tempd = tempfile.mkdtemp(suffix='pytest-e3-core')
     sandbox.root_dir = tempd
