@@ -1,7 +1,11 @@
 from __future__ import absolute_import
 
-# Return values for anod commands
-SUCCESS = 0
-FAILURE = 1
-MISSING = 2
-NOTREADY = 75
+from enum import Enum
+
+
+class ReturnValue(Enum):
+    """Return values for anod commands."""
+    success = 0
+    failure = 1
+    missing = 2
+    notready = 75

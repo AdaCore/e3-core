@@ -5,9 +5,13 @@ import argparse
 import logging
 import logging.handlers
 
+from datetime import datetime as dt
+
 from pkg_resources import get_distribution
 
 from e3.anod.error import AnodError
+from e3.anod.fingerprint import Fingerprint
+from e3.anod.status import ReturnValue
 from e3.env import Env
 from e3.fs import mkdir, rm
 
@@ -19,10 +23,15 @@ import os
 import stevedore
 import sys
 import yaml
+from yaml.reader import ReaderError
 
+from e3.hash import sha1
 from e3.main import Main
 from e3.os.fs import chmod
 from e3.vcs.git import GitRepository
+
+
+logger = e3.log.getLogger('sandbox')
 
 
 class SandBoxError(e3.error.E3Error):
@@ -217,9 +226,108 @@ class BuildSpace(object):
         for d in (d for d in self.dirs if d not in keep):
             e3.fs.rm(os.path.join(self.root_dir, d), True)
 
-    def update_status(self, status=None, fingerprint=None):
-        # not implemented yet ???
-        pass
+    def update_status(self, kind, status=ReturnValue.failure,
+                      fingerprint=None):
+        """Update meta information on disk.
+
+        :param kind: the primitive name
+        :type kind: str
+        :param status: the last action return code
+        :type status: ReturnValue
+        :param fingerprint: the anod fingerprint
+        :type fingerprint: Fingerprint
+        """
+        if fingerprint is None:
+            fingerprint = Fingerprint()
+        self.save_fingerprint(kind, fingerprint)
+        self.save_last_status(kind, status)
+
+        if kind == 'build':
+            self.update_status('install', status, fingerprint)
+
+    def load_fingerprint(self, kind, sha1_only=False):
+        """Load the content of the fingerprint from disc.
+
+        :param kind: the primitive name
+        :type kind: str
+        :param sha1_only: if true returns only the checksum of the
+            fingerprint file
+        :type sha1_only: bool
+
+        :return: if sha1_only is True, returns a sha1 hexdigest else returns
+            a Fingerprint object (the content of the fingerprint file or an
+            empty Fingerprint when the fingerprint is invalid or does not
+            exist)
+        :rtype: str | Fingerprint
+        """
+        fingerprint_file = os.path.join(
+            self.meta_dir, kind + '_fingerprint.yaml')
+        if sha1_only:
+            return sha1(fingerprint_file)
+
+        result = None
+        if os.path.exists(fingerprint_file):
+            with open(fingerprint_file) as f:
+                try:
+                    result = yaml.load(f)
+                except ReaderError as e:
+                    logger.warning(e)
+                    # Invalid fingerprint
+                    logger.warning('invalid fingerprint, discard it')
+                    result = None
+
+        if not isinstance(result, Fingerprint):
+            # The fingerprint file did not exist or was invalid
+            # returns an empty fingerprint
+            result = Fingerprint()
+        return result
+
+    def save_fingerprint(self, kind, fingerprint):
+        """Save a fingerprint object to disk.
+
+        :param kind: the primitive name
+        :type kind: str
+        :param fingerprint: the fingerprint object to save
+        :type fingerprint: Fingerprint
+        """
+        fingerprint_file = os.path.join(
+            self.meta_dir, kind + '_fingerprint.yaml')
+        with open(fingerprint_file, 'wb') as f:
+            yaml.dump(fingerprint, f)
+
+    def get_last_status(self, kind):
+        """Return the last status for a primitive.
+
+        :param kind: the primitive name
+        :type kind: str
+
+        :return: a tuple contanining: the last status (and ReturnValue.missing
+            if nothing found), and the last modification time or None if
+            missing.
+        :rtype: (ReturnValue, datetime | None)
+        """
+        status_file = os.path.join(
+            self.meta_dir, kind + '_last_status')
+        if os.path.exists(status_file):
+            with open(status_file) as f:
+                status_name = f.read().strip()
+                return ReturnValue[status_name], dt.fromtimestamp(
+                    os.path.getmtime(status_file))
+        return ReturnValue.missing
+
+    def save_last_status(self, kind, status):
+        """Save last status.
+
+        :param kind: the primitive name
+        :type kind: str
+        :param status: the last status
+        :type status: ReturnValue
+        """
+        status_file = os.path.join(
+            self.meta_dir, kind + '_last_status')
+        with open(status_file, 'wb') as f:
+            f.write(status.name)
+        return None
 
     def set_logging(self, stdout_logs=False, info_msg=False):
         """Set logging if needed and add new primitive marker.
@@ -358,7 +466,8 @@ class SandBoxAction(object):
     def run(self, args):
         """Run the action.
 
-        :param args: command line arguments gotten with argparse"""
+        :param args: command line arguments gotten with argparse.
+        """
         pass
 
 

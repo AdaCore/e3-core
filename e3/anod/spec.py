@@ -4,7 +4,7 @@ import os
 from collections import OrderedDict
 
 from e3.anod.error import AnodError, SpecError, ShellError
-from e3.anod.status import SUCCESS
+from e3.anod.status import ReturnValue
 
 import e3.anod.deps
 import e3.anod.package
@@ -285,7 +285,7 @@ class Anod(object):
                 # First reset last build status and actual fingerprint. This
                 # ensure that even a crash will keep the module in a mode that
                 # force its rebuild.
-                self.build_space.update_status()
+                self.build_space.update_status(self.kind)
 
                 # Ensure temporary directory is set to a directory local to
                 # the current sandbox. This avoid mainly to loose track of
@@ -312,7 +312,8 @@ class Anod(object):
                         # Don't update status or fingerprint if the primitive
                         # is an installation outside the build space.
                         self.build_space.update_status(
-                            status=SUCCESS,
+                            kind=self.kind,
+                            status=ReturnValue.success,
                             fingerprint=self.fingerprint)
                 return result
 
