@@ -1,4 +1,4 @@
-"""High-Level interface to Git repository
+"""High-Level interface to Git repository.
 
 Example::
 
@@ -49,6 +49,7 @@ class GitRepository(object):
         (default is stdout)
     :ivar working_tree: path to the git working tree
     """
+
     git = None
     log_stream = sys.stdout
 
@@ -195,8 +196,7 @@ class GitRepository(object):
             the following keys: sha, email, date, message, diff). Note that
             the key diff is only set when max_diff_size is bigger than 0.
         :rtype: collections.Iterable[dict[str][str]]
-       """
-
+        """
         def to_commit(object_content):
             """Return commit information.
 

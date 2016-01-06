@@ -1,4 +1,4 @@
-"""Extensions to the standard Python logging system"""
+"""Extensions to the standard Python logging system."""
 from __future__ import absolute_import
 
 import logging
@@ -49,7 +49,7 @@ class RawFilter(logging.Filter):
     """
 
     def __init__(self):
-        """Initialize a RawFilter"""
+        """Initialize a RawFilter."""
         super(RawFilter, self).__init__()
 
     def filter(self, record):
@@ -109,7 +109,7 @@ __null_handler_set = set()
 
 
 def getLogger(name=None, prefix='e3'):
-    """Get a logger with a default handler doing nothing
+    """Get a logger with a default handler doing nothing.
 
     Calling this function instead of logging.getLogger will avoid warnings
     such as::
@@ -122,9 +122,8 @@ def getLogger(name=None, prefix='e3'):
     :type prefix:  str
     :rtype: logging.Logger
     """
-
     class NullHandler(logging.Handler):
-        """Handler doing nothing"""
+        """Handler doing nothing."""
 
         def emit(self, _):
             pass
@@ -183,7 +182,7 @@ def activate(
         level=logging.INFO,
         filename=None,
         e3_debug=False):
-    """Activate default E3 logging
+    """Activate default E3 logging.
 
     :param level: set the root logger level to the specified level
     :type level: int

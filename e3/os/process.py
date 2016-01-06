@@ -370,7 +370,7 @@ class Run(object):
         return command_line_image(self.cmds)
 
     def close_files(self):
-        """Closes all file descriptors"""
+        """Close all file descriptors."""
         self.output_file.close()
         self.error_file.close()
         self.input_file.close()
@@ -384,6 +384,7 @@ class Run(object):
 
         def not_found(path):
             """Raise OSError.
+
             :param path: path of the executable
             :type path: str
             """

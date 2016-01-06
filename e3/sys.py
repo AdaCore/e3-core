@@ -108,7 +108,7 @@ def interpreter(prefix=None):
 
 
 def python_script(name, prefix=None):
-    """Return command line prefix to spawn a script part of Python distribution
+    """Return path to scripts contained in this Python distribution.
 
     :param name: the script name
     :type name: str

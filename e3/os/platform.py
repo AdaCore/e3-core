@@ -32,6 +32,7 @@ class SystemInfo(object):
         machine
     :cvar nis_domain: host nis domain
     """
+
     network_ifs = None
     linux_distrib = None
     uname = None

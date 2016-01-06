@@ -49,7 +49,7 @@ class BinaryFileBuffer(object):
         return self.last - self.begin + 1
 
     def read(self):
-        """Return the buffer content (in bytes)"""
+        """Return the buffer content (in bytes)."""
         self.fd.seek(self.begin)
         result = self.fd.read(self.last - self.begin + 1)
         return result
@@ -90,6 +90,7 @@ class BinaryData(object):
 
     You should not use directly instances of that class
     """
+
     ADDRESS_ENCODING = b'L'  # 32bits
     ENDIANNESS = b'='  # Native encoding
 
@@ -144,6 +145,7 @@ class BasicType(BinaryData):
     a valid decoding string for struct module. Note that endianness setting is
     automatically applied.
     """
+
     __metaclass__ = abc.ABCMeta
 
     DECODER = b''
@@ -216,16 +218,19 @@ class Address(BasicType):
 
 class Offset(Address):
     """Offset decoder (same as Address)."""
+
     pass
 
 
 class UIntMax(Address):
     """System max unsigned integer decoder (same as Address)."""
+
     pass
 
 
 class CharStr(BinaryData):
     """Char as string decoder."""
+
     def __init__(self, value=None):
         super(CharStr, self).__init__()
         self.size = 1
@@ -245,54 +250,63 @@ class CharStr(BinaryData):
 
 class Char(BasicType):
     """8bits signed integer decoder."""
+
     DECODER = b'b'
     FORMATTER = b'0x%02x'
 
 
 class Int16(BasicType):
     """16bits signed integer decoder."""
+
     DECODER = b'h'
     FORMATTER = b'0x%04x'
 
 
 class Int32(BasicType):
     """32bits signed integer decoder."""
+
     DECODER = b'l'
     FORMATTER = b'0x%08x'
 
 
 class Int64(BasicType):
     """64bits signed integer decoder."""
+
     DECODER = b'q'
     FORMATTER = b'0x%016x'
 
 
 class UChar(BasicType):
     """8bits unsigned integer decoder."""
+
     DECODER = b'B'
     FORMATTER = b'0x%02x'
 
 
 class UInt16(BasicType):
     """16bits unsigned integer decoder."""
+
     DECODER = b'H'
     FORMATTER = b'0x%04x'
 
 
 class UInt32(BasicType):
     """32bits unsigned integer decoder."""
+
     DECODER = b'L'
     FORMATTER = b'0x%08x'
 
 
 class UInt64(BasicType):
     """64bits unsigned integer decoder."""
+
     DECODER = b'Q'
     FORMATTER = b'0x%016x'
 
 
 class Uleb128(BinaryData):
     """Unsigned LEB128 integer decoder."""
+
     def __init__(self, value=None):
         super(Uleb128, self).__init__()
         self.value = value
@@ -327,6 +341,7 @@ class Uleb128(BinaryData):
 
 class String(BinaryData):
     """C string decoder (null terminated string)."""
+
     def __init__(self, value=None):
         super(String, self).__init__()
         self.value = value
@@ -419,6 +434,7 @@ class FieldNullTerminatedArray(Field):
 
 class MetaStructType(type):
     """StructType metaclass."""
+
     def __new__(mcs, name, bases, dict):
         new_dict = {'META': OrderedDict()}
 
@@ -470,6 +486,7 @@ class StructType(BinaryData):
     When declaring a field for a given structure you can use Field, FieldArray
     or FieldNullTerminatedArray classes.
     """
+
     __metaclass__ = MetaStructType
 
     def __init__(self, **kwargs):

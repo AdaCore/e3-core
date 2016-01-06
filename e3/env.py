@@ -61,7 +61,7 @@ class AbstractBaseEnv(object):
 
     @abc.abstractmethod
     def _items(self):
-        """Return the list of instance variables
+        """Return the list of instance variables.
 
         :rtype: collections.Iterable
         """

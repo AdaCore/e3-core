@@ -1,4 +1,4 @@
-"""Support for reading and writing tar and zip archives"""
+"""Support for reading and writing tar and zip archives."""
 from __future__ import absolute_import
 
 import fnmatch

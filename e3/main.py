@@ -141,7 +141,6 @@ class Main(object):
             ``sys.argv[1:]`` is used
         :type: list[str] | None
         """
-
         # log_stream_format=e3.log.DEFAULT_STREAM_FMT,
         # log_file_format=e3.log.DEFAULT_FILE_FMT,
         # log_datefmt=None,

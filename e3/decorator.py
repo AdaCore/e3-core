@@ -62,9 +62,9 @@ class memoize(object):
 
        long_computation(42) == long_computation(42)
 
-   Calling the same function twice with the same paramaters returns the same
-   result.
-   """
+    Calling the same function twice with the same paramaters returns the same
+    result.
+    """
 
     def __init__(self, func):
         """Initialize the decorator.

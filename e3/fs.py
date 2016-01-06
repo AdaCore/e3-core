@@ -163,7 +163,6 @@ def get_filetree_state(path, ignore_hidden=True):
     hash representing the state of the file tree without having to read the
     content of all files.
     """
-
     def compute_state(file_path):
         f_stat = os.lstat(file_path)
 
@@ -320,6 +319,7 @@ def rm(path, recursive=False, glob=True):
 
     def onerror(func, path, exc_info):
         """When shutil.rmtree fail, try again to delete the file.
+
         :param func: function to call on error
         :type func: () -> None
         :param path: file or directory to remove

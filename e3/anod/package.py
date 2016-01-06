@@ -94,6 +94,7 @@ class SharedSource(Source):
     modules/platforms and you don't need to write in the sources
     directory
     """
+
     pass
 
 
@@ -185,7 +186,6 @@ class SourceBuilder(object):
         :return: the callback
         :rtype: (str, str, str) -> None
         """
-
         def default_apply_patch(_, patch_file, dest):
             """Default patch function to apply patches."""
             e3.log.debug('applying patch %s on %s', patch_file, dest)

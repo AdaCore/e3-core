@@ -331,7 +331,6 @@ def which(prog, paths=None, default=''):
       or default value if not found
     :rtype: str | None | T
     """
-
     def is_exe(file_path):
         return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
 

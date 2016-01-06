@@ -163,6 +163,7 @@ class Anod(object):
         has been activated with AnodDriver.activate()
     :vartype anod_id: str | None
     """
+
     sandbox = None
     source_pkg_build = None
     name = ''
@@ -268,7 +269,6 @@ class Anod(object):
         :type version: None | () -> str
         :raise: AnodError
         """
-
         def primitive_dec(f, pre=pre, post=post, version=version):
 
             def primitive_func(self, *args, **kwargs):

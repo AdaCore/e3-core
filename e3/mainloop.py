@@ -40,6 +40,7 @@ SKIP_EXECUTION = -1
 
 class NeedRequeue(Exception):
     """Raised by collect_result if a job need to be requeued."""
+
     pass
 
 
@@ -49,6 +50,7 @@ class TooManyErrors(Exception):
     This exception is raised when the number of consecutive errors
     is higher than the value defined by --max-consecutive-failures
     """
+
     pass
 
 
@@ -328,7 +330,6 @@ def compute_next_dyn_poll(poll_counter, poll_sleep):
 
 def mainloop_argument_parser():
     """Add command line arguments to control mainloop default."""
-
     argument_parser = argparse.ArgumentParser()
     mgroup = argument_parser.add_argument_group(
         title='Mainloop control')

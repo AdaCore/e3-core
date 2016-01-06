@@ -155,6 +155,7 @@ class ElfSectionHeader(StructType):
 
 class ElfDyn(StructType):
     """One element of the .dynamic section."""
+
     d_tag = Field(Int32)
     # The next field in the struct is actually a union.  We currently
     # do not support unions, but luckily this union only contains
@@ -180,6 +181,7 @@ class ElfDyn(StructType):
 
 class ElfDynamicSection(StructType):
     """The .dynamic section."""
+
     dyn_dynamic = FieldNullTerminatedArray(ElfDyn)
 
 
