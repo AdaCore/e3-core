@@ -1,5 +1,6 @@
 import os
 import tempfile
+import sys
 
 import pytest
 
@@ -7,6 +8,8 @@ import e3.fs
 import e3.os.fs
 
 
+@pytest.mark.xfail(sys.platform == 'win32',
+                   reason='windows specific rm not yet added to e3-core')
 def test_rm():
     base = tempfile.mkdtemp()
     try:
