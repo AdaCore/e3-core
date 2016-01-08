@@ -10,7 +10,7 @@ def timezone():
     """Return current timezone offset in hours.
 
     :return: offset from utc in hours
-    :rtype: int
+    :rtype: float
     """
     if sys.platform == 'win32':
         from ctypes import windll, Structure, pointer
@@ -38,4 +38,4 @@ def timezone():
         else:
             result = result.total_seconds() / 3600
 
-    return result
+    return float(result)
