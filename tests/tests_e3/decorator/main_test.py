@@ -1,4 +1,4 @@
-import time
+from random import random
 import e3.decorator
 
 
@@ -6,7 +6,7 @@ def test_memoize():
 
     @e3.decorator.memoize
     def t(arg):
-        return time.time()
+        return random()
 
     assert t(1) == t(1)
     assert t(1) != t(2)
