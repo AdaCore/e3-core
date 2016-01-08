@@ -1,6 +1,7 @@
 """Support for reading and writing tar and zip archives."""
 from __future__ import absolute_import
 
+from contextlib import closing
 import fnmatch
 import os
 import subprocess
@@ -225,44 +226,47 @@ def unpack_archive(filename,
             if ext in ('tar', 'tar.bz2', 'tar.gz'):
                 import tarfile
                 try:
-                    fd = tarfile.open(filename, mode='r')
-                    # selected_files must be converted to tarfile members
-                    if selected_files:
-                        members = fd.getmembers()
+                    with closing(tarfile.open(filename, mode='r')) as fd:
+                        # selected_files must be converted to tarfile members
+                        if selected_files:
+                            members = fd.getmembers()
 
-                        def is_matched(members, pattern):
-                            """Return a list of matched tarfile members.
+                            def is_matched(members, pattern):
+                                """Return a list of matched tarfile members.
 
-                            :param members: TarInfo list
-                            :type members: list[TarInfo]
-                            :param pattern: string or regexp
-                            :type pattern: str
+                                :param members: TarInfo list
+                                :type members: list[TarInfo]
+                                :param pattern: string or regexp
+                                :type pattern: str
 
-                            :raise ArchiveError: if no member match the
-                                pattern.
+                                :raise ArchiveError: if no member match the
+                                    pattern.
 
-                            :return: a list of tarfile members
-                            :rtype: list[TarInfo]
-                            """
-                            r = [mem for mem in members
-                                 if fnmatch.fnmatch(mem.name, pattern)]
-                            if not r:
-                                raise ArchiveError(
-                                    origin='unpack_archive',
-                                    message='Cannot untar %s ' % pattern)
-                            return r
+                                :return: a list of tarfile members
+                                :rtype: list[TarInfo]
+                                """
+                                r = [mem for mem in members
+                                     if fnmatch.fnmatch(mem.name, pattern)]
+                                if not r:
+                                    raise ArchiveError(
+                                        'unpack_archive',
+                                        'Cannot untar %s ' % pattern)
+                                return r
 
-                        selected_files = [f for l in selected_files
-                                          for f in is_matched(members, l)]
+                            selected_files = [f for l in selected_files
+                                              for f in is_matched(members, l)]
 
-                    # detect directories. This is not done by default
-                    # For each directory, select all the tree
-                    selected_dirnames = [
-                        d.name for d in selected_files if d.isdir()]
-                    for dname in selected_dirnames:
-                        selected_files += [
-                            fd.getmember(n) for n in fd.getnames()
-                            if n.startswith(dname + '/')]
+                        # detect directories. This is not done by default
+                        # For each directory, select all the tree
+                        selected_dirnames = [
+                            d.name for d in selected_files if d.isdir()]
+                        for dname in selected_dirnames:
+                            selected_files += [
+                                fd.getmember(n) for n in fd.getnames()
+                                if n.startswith(dname + '/')]
+                        fd.extractall(tmp_dest,
+                                      selected_files if selected_files
+                                      else None)
 
                 except tarfile.TarError as e:
                     raise ArchiveError(
@@ -273,16 +277,15 @@ def unpack_archive(filename,
             else:
                 import zipfile
                 try:
-                    fd = zipfile.ZipFile(filename, mode='r')
+                    with closing(zipfile.ZipFile(filename, mode='r')) as fd:
+                        fd.extractall(tmp_dest,
+                                      selected_files if selected_files
+                                      else None)
                 except zipfile.BadZipfile as e:
                     raise ArchiveError(
                         origin='unpack_archive',
                         message='Cannot unzip %s (%s)' % (filename, e)), \
                         None, sys.exc_traceback
-
-            fd.extractall(tmp_dest,
-                          selected_files if selected_files else None)
-            fd.close()
 
         else:
             # Spawn tar, gzip, bunzip2 or zip
