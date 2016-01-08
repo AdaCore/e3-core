@@ -28,7 +28,8 @@ def test_echo():
 
 
 def test_find():
-    assert __file__ in e3.fs.find(os.path.dirname(__file__))
+    assert os.path.abspath(__file__) in {
+        os.path.abspath(f) for f in e3.fs.find(os.path.dirname(__file__))}
 
 
 def test_tree_state():

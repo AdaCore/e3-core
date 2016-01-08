@@ -1,6 +1,7 @@
 import e3.archive
 import e3.fs
 import e3.log
+import e3.os.fs
 import os
 import pytest
 import tempfile
@@ -43,8 +44,9 @@ def test_unpack(ext):
         e3.archive.unpack_archive(
             os.path.join(dest, archive_name),
             os.path.join(dest, 'dest2'),
-            selected_files=(os.path.join(test_dir,
-                                         os.path.basename(__file__)), ),
+            selected_files=(
+                e3.os.fs.unixpath(
+                    os.path.join(test_dir, os.path.basename(__file__))), ),
             remove_root_dir=True)
 
         assert os.path.exists(os.path.join(
