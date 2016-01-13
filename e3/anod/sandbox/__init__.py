@@ -147,11 +147,16 @@ class SandBox(object):
             def as_requirement(self):
                 return e3_distrib.as_requirement()
 
-        for ep_name, script in get_script_args(dist=SandboxDist()):
-            target = os.path.join(self.bin_dir, ep_name)
+        for script in get_script_args(dist=SandboxDist()):
+            script_name = script[0]
+            script_content = script[1]
+            target = os.path.join(self.bin_dir, script_name)
             rm(target)
+            if not script_name.endswith('.exe'):
+                script_content = script_content.replace(
+                    'console_scripts', 'sandbox_scripts')
             with open(target, 'wb') as f:
-                f.write(script.replace('console_scripts', 'sandbox_scripts'))
+                f.write(script_content)
             chmod('a+x', target)
 
 
