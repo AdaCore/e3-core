@@ -70,7 +70,8 @@ class AnodDriver(object):
         """
         return getattr(self, action, self.unknown_action)()
 
-    def unknown_action(self):
+    @staticmethod
+    def unknown_action():
         logger.critical('unknown action')
         return False
 
