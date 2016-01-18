@@ -94,6 +94,8 @@ class Store(object):
                                    metadata.uid)
                     # Discard invalid cache entry
                     self.cache_backend.delete(metadata.uid)
+                else:
+                    return local_path
 
         # else not in cache
         local_path = self.download_resource_content(metadata, dest)
