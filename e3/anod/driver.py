@@ -14,11 +14,12 @@ logger = e3.log.getLogger('e3.anod.driver')
 def primitive_check():
     def decorator(func):
         @wraps(func)
-        def wrapper(self):
+        def wrapper(self, *args, **kwargs):
             if not has_primitive(self.anod_instance, func.__name__):
                 raise AnodError('no primitive %s' % func.__name__)
             elif self.anod_instance.anod_id is None:
                 raise AnodError('.activate() has not been called')
+            return func(self, *args, **kwargs)
         return wrapper
     return decorator
 
