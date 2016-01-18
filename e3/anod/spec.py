@@ -186,10 +186,9 @@ class Anod(object):
     # set when loading the spec
     spec_checksum = ''
     sandbox = None
-    source_pkg_build = None
     name = ''
-    package = None
 
+    # API
     Dependency = e3.anod.deps.Dependency
     Package = e3.anod.package.Package
     Source = e3.anod.package.Source
@@ -260,14 +259,6 @@ class Anod(object):
                 message='the following keys in the qualifier were not '
                 'parsed: %s' % ','.join(qual_dict.keys()),
                 origin='anod.__parse_qualifier')
-
-        # Register sources, source builders and repositories
-        self.source_list = {}
-
-        map_attribute_elements(
-            self,
-            lambda x: self.source_list.update({x.name: x}),
-            kind + '_source_list')
 
     @classmethod
     def primitive(cls, pre=None, post=None, version=None):
@@ -347,12 +338,19 @@ class Anod(object):
         return primitive_dec
 
     @property
-    def has_package(self):
-        """Whether a binary package can be created by the spec.
+    def package(self):
+        """Return binary package creation recipe.
 
-        :rtype: bool
+        If None don't create a binary package.
+
+        :rtype: e3.anod.package.Package | None
         """
-        return self.package is not None and self.package.name is not None
+        return None
+
+    @property
+    def source_pkg_build(self):
+        """Return list of SourceBuilder defined in the specification file."""
+        return None
 
     @property
     def has_nsis(self):
@@ -362,7 +360,7 @@ class Anod(object):
         """
         # nsis is used only during the builds
         return self.kind == 'build' and self.env.build.os.name == 'windows' \
-            and self.has_package and self.package.nsis_cb is not None
+            and self.package is not None and self.package.nsis_cb is not None
 
     def shell(self, *command, **kwargs):
         """Run a subprocess using e3.os.process.Run."""

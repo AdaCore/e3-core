@@ -52,13 +52,13 @@ def test_simple_spec():
             return result
 
     simple_build = Simple('', kind='build')
-    assert len(simple_build.source_list) == 2
+    assert len(simple_build.build_source_list) == 2
 
     simple_test = Simple('', kind='test')
-    assert len(simple_test.source_list) == 1
+    assert len(simple_test.test_source_list) == 1
 
     simple_test_with_bar = Simple('with_bar=true', kind='test')
-    assert len(simple_test_with_bar.source_list) == 2
+    assert len(simple_test_with_bar.test_source_list) == 2
 
 
 def test_primitive():
