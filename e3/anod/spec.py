@@ -151,19 +151,40 @@ class Anod(object):
         class MyProduct(Anod):
             pass
 
+    All attributes starting with spec_ are reserved by the driver and must not
+    be overwritten.
+
+    Three attributes are set when loading the spec:
+
+    :cvar spec_checksum: the sha1 of the specification file content
+    :cvar name: the basename of the specification file (without the .anod
+         extension)
     :cvar sandbox: e3.anod.sandbox.SandBox object shared by all Anod instances
     :vartype sandbox: e3.anod.sandbox.SandBox | None
+
+    Some attributes are meant the be overwritten in the specification file:
+
     :cvar source_pkg_build: a dictionary associating Anod.SourceBuilder to the
         Anod.Source names
-    :cvar name: specification file baseline without the .anod extension. This
-        is set when loading the spec.
-    :cvar package: ???
+
+    Some attributes are here to simply the writing of specification files.
+    They are part of the Anod API:
+
+    :cvar Dependency: the e3.anod.deps.Dependency class
+    :cvar Package: the e3.anod.package.Package class
+    :cvar Source: the e3.anod.package.Source class
+    :cvar SourceBuilder: the e3.anod.package.SourceBuilder class
+    :cvar ThirdPartySourceBuilder: the e3.anod.package.ThirdPartySourceBuilder
+
+
 
     :ivar anod_id: unique identifier for the instance, None until the instance
         has been activated with AnodDriver.activate()
     :vartype anod_id: str | None
     """
 
+    # set when loading the spec
+    spec_checksum = ''
     sandbox = None
     source_pkg_build = None
     name = ''

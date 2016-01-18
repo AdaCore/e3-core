@@ -17,7 +17,7 @@ def primitive_check():
         def wrapper(self):
             if not has_primitive(self.anod_instance, func.__name__):
                 raise AnodError('no primitive %s' % func.__name__)
-            elif not self.is_active():
+            elif self.anod_instance.anod_id is None:
                 raise AnodError('.activate() has not been called')
         return wrapper
     return decorator

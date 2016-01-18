@@ -46,7 +46,7 @@ class AnodModule(object):
             exec code in self.anod_module.__dict__
 
         # Compute module checksum, it will be used to track
-        # changes and force rebuild. Added in _checksum attribute
+        # changes and force rebuild. Added in spec_checksum attribute
         # of the Anod subclass.
 
         checksum = e3.hash.sha1(self.path)
@@ -64,7 +64,7 @@ class AnodModule(object):
                 # Note that even if we won't use directly the
                 # module we need to keep a reference on it in order
                 # to avoid garbage collector issues.
-                value._checksum = checksum
+                value.spec_checksum = checksum
 
                 # Give a name to our Anod class: the basename of the
                 # anod spec file (without the .anod extension)
