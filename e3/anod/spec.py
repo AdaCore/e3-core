@@ -260,6 +260,26 @@ class Anod(object):
                 'parsed: %s' % ','.join(qual_dict.keys()),
                 origin='anod.__parse_qualifier')
 
+    def __getitem__(self, key):
+        """Access build_space attributes and pre callback values directly.
+
+        Allow accessing all build_space attributes directly by using
+        __getitem__, e.g. self['PKG_DIR'] to access
+        self.build_space.pkg_dir values.
+
+        Also directly access items returned by the ``pre`` callback.
+
+        :type key: str
+        :rtype: T
+        """
+        # first look in the build_space config dictionary
+        if key in self.build_space.config:
+            return self.build_space.config[key]
+
+        # Then check if the key (in lowercase) in build_space
+        elif key.isupper() and hasattr(self.build_space, key.lower()):
+            return getattr(self.build_space, key.lower())
+
     @classmethod
     def primitive(cls, pre=None, post=None, version=None):
         """Decorator for anod primitives.
