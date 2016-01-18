@@ -171,7 +171,7 @@ class GitRepository(object):
         self.fetch(url, refspec)
         self.checkout('FETCH_HEAD', force=force)
 
-    def write_log(self, stream, max_count=50):
+    def write_log(self, stream, max_count=50, rev_range=None):
         """Write formatted log to a stream.
 
         :param stream: an open stream where to write the log content
@@ -182,7 +182,8 @@ class GitRepository(object):
         """
         cmd = ['log', '--format=format:%H %ae %cI%n%B',
                '--log-size',
-               '--max-count=%d' % max_count if max_count else None]
+               '--max-count=%d' % max_count if max_count else None,
+               rev_range]
         self.git_cmd(cmd, output=stream)
 
     def parse_log(self, stream, max_diff_size=0):
