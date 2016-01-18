@@ -134,7 +134,7 @@ class GitRepository(object):
         """Write local changes in the working tree in stream.
 
         :param commit: write the diff between the first parent of `commit` and
-            `cammit`.
+            `commit`.
         :type commit: str
         :param stream: an open file descriptor
         :type stream: file
