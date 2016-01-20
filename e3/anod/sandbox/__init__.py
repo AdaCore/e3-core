@@ -121,7 +121,7 @@ class SandBox(object):
         cmd_line += sys.argv[1:]
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
         with open(sandbox_conf, 'wb') as f:
-            yaml.dump({'cmd_line': cmd_line}, f)
+            yaml.dump({'cmd_line': cmd_line}, f, encoding='utf-8')
 
     def get_configuration(self):
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
@@ -156,7 +156,10 @@ class SandBox(object):
                 script_content = script_content.replace(
                     'console_scripts', 'sandbox_scripts')
             with open(target, 'wb') as f:
-                f.write(script_content)
+                if isinstance(script_content, unicode):
+                    f.write(script_content.encode('utf-8'))
+                else:
+                    f.write(script_content)
             chmod('a+x', target)
 
 
@@ -298,7 +301,7 @@ class BuildSpace(object):
         fingerprint_file = os.path.join(
             self.meta_dir, kind + '_fingerprint.yaml')
         with open(fingerprint_file, 'wb') as f:
-            yaml.dump(fingerprint, f)
+            yaml.dump(fingerprint, f, encoding='utf-8')
 
     def get_last_status(self, kind):
         """Return the last status for a primitive.
@@ -331,7 +334,10 @@ class BuildSpace(object):
         status_file = os.path.join(
             self.meta_dir, kind + '_last_status')
         with open(status_file, 'wb') as f:
-            f.write(status.name)
+            if isinstance(status.name, unicode):
+                f.write(status.name.encode('utf-8'))
+            else:
+                f.write(status.name)
         return None
 
     def set_logging(self, stdout_logs=False, info_msg=False):
