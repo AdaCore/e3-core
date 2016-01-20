@@ -1,6 +1,11 @@
 language: python
-python:
-  - "3.5"
 install:
   - pip install tox
-script: tox -e py27,py35,docs,checkstyle
+sudo: false
+script: tox
+matrix:
+    include:
+        - python: 2.7
+          env: TOXENV=py27,checkstyle,docs
+        - python: 3.5
+          env: TOXENV=py35
