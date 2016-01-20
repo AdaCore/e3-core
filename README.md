@@ -1,4 +1,4 @@
-The `e3` Project
+The `e3` Project [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core)
 ================
 
 This present project (`e3`) is a Python framework to ease the development
