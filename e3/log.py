@@ -28,10 +28,11 @@ def no_progress_bar(it, **kwargs):
     del kwargs
     return it
 
-try:
-    from clint.textui.progress import bar as clint_progress_bar
-except ImportError:
-    clint_progress_bar = no_progress_bar
+if sys.platform != 'win32':
+    try:
+        from clint.textui.progress import bar as clint_progress_bar
+    except ImportError:
+        clint_progress_bar = no_progress_bar
 
 
 def progress_bar(it, expected_size=None, **kwargs):
