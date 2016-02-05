@@ -12,7 +12,8 @@ NTSTATUS = LONG
 
 
 class FileAttribute(Structure):
-    """List of file attributes constants"""
+    """List of file attributes constants."""
+
     READONLY = 0x01
     HIDDEN = 0x02
     SYSTEM = 0x04
@@ -43,7 +44,8 @@ class FileAttribute(Structure):
 
 
 class Access(object):
-    """Desired Access constants"""
+    """Desired Access constants."""
+
     LIST_DIR = 0x0001
     READ_ATTRS = 0x0080
     READ_EA = 0x8
@@ -53,7 +55,8 @@ class Access(object):
 
 
 class Share(object):
-    """Share Access constants"""
+    """Share Access constants."""
+
     READ = 0x01
     WRITE = 0x02
     DELETE = 0x04
@@ -61,14 +64,16 @@ class Share(object):
 
 
 class OpenOptions(object):
-    """File Open options"""
+    """File Open options."""
+
     BACKUP_INTENT = 0x00004000
     SYNCHRONOUS_IO_NON_ALERT = 0x00000020
     DELETE_ON_CLOSE = 0x00001000
 
 
 class Status(object):
-    """Error constants"""
+    """Error constants."""
+
     OBJECT_NAME_NOT_FOUND = 0xC0000034
     OBJECT_PATH_NOT_FOUND = 0xC000003A
     SHARING_VIOLATION = 0xC0000043
@@ -81,14 +86,14 @@ class Status(object):
 
 
 class IOStatusBlock(Structure):
-    """Map IO_STATUS_BLOCK structure"""
+    """Map IO_STATUS_BLOCK structure."""
 
     _fields_ = [('pointer', LPVOID),
                 ('information', POINTER(ULONG))]
 
 
 class UnicodeString(Structure):
-    """Map UNICODE_STRING structure"""
+    """Map UNICODE_STRING structure."""
 
     _fields_ = [('length', USHORT),
                 ('maximum_length', USHORT),
@@ -109,7 +114,7 @@ class UnicodeString(Structure):
 
 
 class FileTime(Structure):
-    """Map FILETIME structure"""
+    """Map FILETIME structure."""
 
     _fields_ = [('filetime', LARGE_INTEGER)]
 
@@ -118,7 +123,7 @@ class FileTime(Structure):
 
 
 class FileInfo(object):
-    """Declaration of structures returned by QueryInformationFile"""
+    """Declaration of structures returned by QueryInformationFile."""
 
     class Names(object):
         class_id = 12
@@ -157,7 +162,8 @@ class FileInfo(object):
 
 
 class ObjectAttributes(Structure):
-    """OBJECT_ATTRIBUTES structure"""
+    """OBJECT_ATTRIBUTES structure."""
+
     OBJ_CASE_INSENSITIVE = 0x00000040
 
     _fields_ = [('length', ULONG),
@@ -168,7 +174,7 @@ class ObjectAttributes(Structure):
                 ('security_quality_of_service', LPVOID)]
 
     def __init__(self, name, parent=None):
-        """Initiliaze ObjectAttributes
+        """Initialize ObjectAttributes.
 
         :param name: full path to the file if parent is None else filename
             inside parent directory
