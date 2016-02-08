@@ -1,9 +1,11 @@
 from __future__ import absolute_import
 
+from e3.error import E3Error
 from ctypes import (Structure, create_unicode_buffer, pointer, cast, c_wchar_p,
                     sizeof, POINTER)
 from ctypes.wintypes import (USHORT, LPWSTR, DWORD, LONG, BOOLEAN, INT, BOOL,
                              LARGE_INTEGER, LPVOID, ULONG, HANDLE)
+from datetime import datetime
 import ctypes
 import sys
 import time
@@ -46,12 +48,21 @@ class FileAttribute(Structure):
 class Access(object):
     """Desired Access constants."""
 
-    LIST_DIR = 0x0001
+    LIST_DIRECTORY = 0x0001
+    READ_DATA = 0x0001
+    ADD_FILE = 0x0002
+    WRITE_DATA = 0x0002
+    ADD_SUBDIR = 0x0004
+    APPEND_DATA = 0x0004
+    READ_EA = 0x0008
+    WRITE_EA = 0x0010
+    EXECUTE = 0x0020
+    TRAVERSE = 0x0020
+    DELETE_CHILD = 0x0040
     READ_ATTRS = 0x0080
-    READ_EA = 0x8
     WRITE_ATTRS = 0x0100
     DELETE = 0x010000
-    SYNC = 0x100000
+    SYNCHRONIZE = 0x100000
 
 
 class Share(object):
@@ -74,21 +85,27 @@ class OpenOptions(object):
 class Status(object):
     """Error constants."""
 
+    ACCESS_DENIED = 0xC0000022
     OBJECT_NAME_NOT_FOUND = 0xC0000034
     OBJECT_PATH_NOT_FOUND = 0xC000003A
     SHARING_VIOLATION = 0xC0000043
     DELETE_PENDING = 0xC0000056
+    DIRECTORY_NOT_EMPTY = 0xC0000101
+    CANNOT_DELETE = 0xC0000121
 
-    msgs = {0xC0000034: 'object name not found',
+    msgs = {0xC0000022: 'access denied',
+            0xC0000034: 'object name not found',
             0xC0000043: 'sharing violation',
             0xC0000056: 'delete pending',
-            0xC000003A: 'object path not found'}
+            0xC000003A: 'object path not found',
+            0xC0000101: 'directory is not empty',
+            0xC0000121: 'cannot delete'}
 
 
 class IOStatusBlock(Structure):
     """Map IO_STATUS_BLOCK structure."""
 
-    _fields_ = [('pointer', LPVOID),
+    _fields_ = [('status', NTSTATUS),
                 ('information', POINTER(ULONG))]
 
 
@@ -112,11 +129,23 @@ class UnicodeString(Structure):
         Structure.__init__(self, length * 2, max_length * 2,
                            cast(strbuf, LPWSTR))
 
+    def __len__(self):
+        return self.length
+
 
 class FileTime(Structure):
     """Map FILETIME structure."""
 
     _fields_ = [('filetime', LARGE_INTEGER)]
+
+    def __init__(self, t):
+        timestamp = (t - datetime(1970, 1, 1)).total_seconds()
+        timestamp = (int(timestamp) + 11644473600) * 10000000
+        Structure.__init__(self, timestamp)
+
+    @property
+    def as_datetime(self):
+        return datetime.fromtimestamp(self.filetime / 10000000 - 11644473600)
 
     def __str__(self):
         return str(time.ctime(self.filetime / 10000000 - 11644473600))
@@ -180,7 +209,7 @@ class ObjectAttributes(Structure):
             inside parent directory
         :type name: UnicodeString
         :param parent: handle of the parent directory
-        :type parent: HANDLE
+        :type parent: HANDLE | None
         """
         Structure.__init__(self,
                            sizeof(ObjectAttributes),
@@ -193,6 +222,14 @@ class ObjectAttributes(Structure):
 
 # Declare the Win32 functions return types and signature
 class NT(object):
+    Sleep = None
+    GetVolumePathName = None
+    SetInformationFile = None
+    QueryInformationFile = None
+    QueryAttributesFile = None
+    OpenFile = None
+    QueryDirectoryFile = None
+    Close = None
 
     @classmethod
     def init_api(cls):
@@ -254,13 +291,13 @@ if sys.platform == 'win32':
     NT.init_api()
 
 
-class NTException(Exception):
-    def __init__(self, status, message):
+class NTException(E3Error):
+    def __init__(self, status, message, origin=None):
         self.status = status
         if self.status < 0:
             self.status = self.status + 2**32
-        Exception.__init__(self, message)
+        E3Error.__init__(self, message, origin=origin)
 
     def __str__(self):
-        return "%X (%s): %s" % (self.status, Status.msgs.get(self.status, ''),
-                                Exception.__str__(self))
+        return E3Error.__str__(self) + "(status=%X '%s')" % \
+            (self.status, Status.msgs.get(self.status, "unknown"))
