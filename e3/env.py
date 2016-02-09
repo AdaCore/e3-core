@@ -111,18 +111,28 @@ class AbstractBaseEnv(object):
         else:
             return False
 
-    def set_build(self, build_name=None, build_version=None):
+    def set_build(self,
+                  name=None,
+                  version=None,
+                  machine=None,
+                  mode=None):
         """Set build platform.
 
-        :param build_name: a string that identify the system to be considered
+        :param name: a string that identify the system to be considered
             as the build. If None then build is unchanged. Note that passing
             an empty value will force the autodetection and possibly reset to
             the default value.
-        :type build_name: str | None
-        :param build_version: a string containing the system version. If set
+        :type name: str | None
+        :param version: a string containing the system version. If set
             to None the version is either a default or autodetected when
             possible
-        :type build_version: str | None
+        :type version: str | None
+        :param machine: a string containing the name of the target
+            machine.
+        :type machine: str | None
+        :param mode: a string containing the name of the mode. This
+            notion is needed on some targets such as VxWorks to switch between
+            kernel mode and other modes such as rtp
 
         When calling set_build, the target and host systems are reset to the
         build one. Thus you should call set_build before calling either
@@ -130,101 +140,94 @@ class AbstractBaseEnv(object):
         """
         e3.log.debug(
             'set_build (build_name=%s, build_version=%s)',
-            build_name, build_version)
-        if build_name is not None:
-            self.build = Platform.get(platform_name=build_name,
-                                      is_host=True,
-                                      version=build_version)
+            name, version)
+        self.build = Platform.get(platform_name=name,
+                                  version=version,
+                                  machine=machine,
+                                  mode=mode)
         self.host = self.build
         self.target = self.build
 
-    def set_host(self, host_name=None, host_version=None):
+    def set_host(self,
+                 name=None,
+                 version=None,
+                 machine=None,
+                 mode=None):
         """Set host platform.
 
-        :param host_name: a string that identify the system to be considered
+        :param name: a string that identify the system to be considered
             as the host. If None then host is set to the build one (the
             autodetected platform). If set to 'build' or 'target' then host
             is set respectively to current 'build' or 'target' value
-        :type host_name: str | None
-        :param host_version: a string containing the system version. If set to
+        :type name: str | None
+        :param version: a string containing the system version. If set to
             None the version is either a default or autodetected when possible
-        :type host_version: str | None
+        :type version: str | None
+        :param machine: a string containing the name of the target
+            machine.
+        :type machine: str | None
+        :param mode: a string containing the name of the mode. This
+            notion is needed on some targets such as VxWorks to switch between
+            kernel mode and other modes such as rtp
 
         When calling set_host, the target system is reset to the host one.
         Thus you should call set_host before set_target otherwise your call
         to set_target will be ignored. Note also that is the host_name is
         equal to the build platform, host_version will be ignored.
         """
-        # Handle special parameters 'target' and 'build'
-        if host_name is not None:
-            if host_name == 'target':
-                host_name = self.target.platform
-                host_version = self.target.os.version
-            elif host_name == 'build':
-                host_name = self.build.platform
-                host_version = self.target.os.version
+        if name is None:
+            name = 'build'
 
-        if host_name is not None and host_name != self.build.platform:
-            is_host = False
-            if (self.build.platform, host_name) in CANADIAN_EXCEPTIONS:
-                # We are not in a canadian configuration, so we can invoke
-                # our methods to guess some information such as os version,...
-                is_host = True
-
-            self.host = Platform.get(platform_name=host_name,
-                                     is_host=is_host,
-                                     version=host_version,
-                                     machine=self.build.machine)
-        else:
+        if name == 'target':
+            self.host = self.target
+        elif name == 'build':
             self.host = self.build
-
+        else:
+            self.host = Platform.get(platform_name=name,
+                                     version=version,
+                                     machine=machine,
+                                     mode=mode)
         self.target = self.host
 
     def set_target(self,
-                   target_name=None,
-                   target_version=None,
-                   target_machine=None,
-                   target_mode=None):
+                   name=None,
+                   version=None,
+                   machine=None,
+                   mode=None):
         """Set target platform.
 
-        :param target_name: a string that identify the system to be considered
+        :param name: a string that identify the system to be considered
             as the host. If None then host is set to the host one. If set to
             'build' or 'host' then target is set respectively to current
             'build' or 'host' value. In that case target_version and
             target_machine are ignored.
-        :type target_name: str | None
-        :param target_version: a string containing the system version. If set
+        :type name: str | None
+        :param version: a string containing the system version. If set
             to None the version is either a default or autodetected when
             possible.
-        :type target_version: str | None
-        :param target_machine: a string containing the name of the target
+        :type version: str | None
+        :param machine: a string containing the name of the target
             machine.
-        :type target_machine: str | None
-        :param target_mode: a string containing the name of the mode. This
+        :type machine: str | None
+        :param mode: a string containing the name of the mode. This
             notion is needed on some targets such as VxWorks to switch between
             kernel mode and other modes such as rtp
 
         The target parameters are ignored if the target_name is equal to the
         host platform.
         """
-        # Handle special values
-        if target_name is not None:
-            if target_name == 'host':
-                target_name = self.host.platform
-                target_version = self.host.os.version
-                target_machine = self.host.machine
-            elif target_name == 'build':
-                target_name = self.build.platform
-                target_version = self.build.os.version
-                target_machine = self.build.machine
+        if name is None:
+            name = 'host'
 
-        if target_name is not None and target_name != self.host.platform:
-            self.target = Platform.get(platform_name=target_name,
-                                       version=target_version,
-                                       machine=target_machine,
-                                       mode=target_mode)
-        else:
+        if name == 'host':
             self.target = self.host
+        elif name == 'build':
+            self.target = self.build
+        else:
+            self.target = Platform.get(platform_name=name,
+                                       version=version,
+                                       machine=machine,
+                                       mode=mode)
 
     def set_env(self, build='', host='', target=''):
         """Set build/host/target.
@@ -236,9 +239,9 @@ class AbstractBaseEnv(object):
         :param target: string as passed to --target
         :type target: str
         """
-        # We expect 2 fields for build and host and 4 for target
-        build_opts = [k if k else None for k in build.split(',')][0:2]
-        host_opts = [k if k else None for k in host.split(',')][0:2]
+        # We expect 4 fields for build and host and target
+        build_opts = [k if k else None for k in build.split(',')][0:4]
+        host_opts = [k if k else None for k in host.split(',')][0:4]
         target_opts = [k if k else None for k in target.split(',')][0:4]
 
         self.set_build(*build_opts)

@@ -14,7 +14,7 @@ def test_platform():
     assert hash(b) == hash(a)
 
     c = e3.platform.Platform.get(
-        platform_name='arm-linux-linux')
+        platform_name='arm-linux')
 
     assert b != c
 

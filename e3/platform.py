@@ -24,7 +24,8 @@ class Platform(
     - triplet: the GCC target
     - machine: machine name
     - domain: domain name
-    - is_host: True if this is not a cross context
+    - is_host: True if the instance represent information for the current
+        machine
     - is_default: True if the platform is the default one
     """
 
@@ -34,7 +35,7 @@ class Platform(
     __slots__ = ()
 
     @classmethod
-    def get(cls, platform_name=None, version=None, is_host=False,
+    def get(cls, platform_name=None, version=None,
             machine=None, compute_default=False, mode=None):
         """Return a Platform object.
 
@@ -46,10 +47,6 @@ class Platform(
             automatically (native case only). Otherwise should be a valid
             version string.
         :type version: str | None
-        :param is_host:  if True the system is not a cross one. Default is
-            False except if a platform_name is not specified or if the
-            platform_name is equal to the automatically detected one.
-        :type is_host: bool
         :param machine: name of the machine
         :type machine: str | None
         :param compute_default: if True compute the default Arch for the
@@ -70,6 +67,7 @@ class Platform(
             cls.default_arch = Platform.get(compute_default=True)
 
         is_default = False
+        is_host = False
         domain = e3.os.platform.UNKNOWN
 
         if compute_default:
@@ -77,26 +75,18 @@ class Platform(
         else:
             default_platform = cls.default_arch.platform
 
+        # Check if the object correspond to the current machine and thus allow
+        # us to compute some additional info automatically
         if platform_name in (None, '', 'default'):
             platform_name = default_platform
-
-        if platform_name == default_platform or is_host:
+            is_host = True
+        if machine == cls.system_info.hostname():
             is_host = True
 
+        if is_host:
             # This is host so we can guess the machine name and domain
             machine, domain = cls.system_info.hostname()
             is_default = platform_name == default_platform
-
-        else:
-            is_host = False
-            # This is a target name. Sometimes it's suffixed by the host os
-            # name. If the name is not a key in config.platform_info try to
-            # to find a valid name by suppressing -linux, -solaris or -windows
-            if platform_name not in PLATFORM_INFO:
-                for suffix in ('-linux', '-solaris', '-windows'):
-                    if platform_name.endswith(suffix):
-                        platform_name = platform_name[:-len(suffix)]
-                        break
 
         # Fill other attributes
         pi = PLATFORM_INFO[platform_name]
