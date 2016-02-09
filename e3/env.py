@@ -311,15 +311,7 @@ class AbstractBaseEnv(object):
         :param append: if True append, otherwise prepend. Default is prepend
         :type append: bool
         """
-        if append:
-            new_path = os.path.pathsep + path
-            logger.debug('export PATH=$PATH{new_path}'.format(
-                new_path=new_path))
-            os.environ['PATH'] += new_path
-        else:
-            new_path = path + os.path.pathsep + os.environ['PATH']
-            logger.debug('export PATH={new_path}'.format(new_path=new_path))
-            os.environ['PATH'] = new_path
+        cls.add_search_path('PATH', path, append)
 
     @classmethod
     def add_search_path(cls, env_var, path, append=False):
