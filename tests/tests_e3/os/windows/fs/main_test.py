@@ -1,14 +1,17 @@
 from e3.os.fs import touch
 from e3.fs import mkdir
-from e3.os.windows.fs import NTFile
-from e3.os.windows.native_api import (Access, FileTime, NTException,
-                                      Share, FileAttribute)
 from e3.fs import rm
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 import os
 import pytest
 import sys
+
+
+if sys.platform == 'win32':
+    from e3.os.windows.fs import NTFile
+    from e3.os.windows.native_api import (Access, FileTime, NTException,
+                                          Share, FileAttribute)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
