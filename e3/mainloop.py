@@ -27,7 +27,7 @@ from time import sleep
 
 import e3.env
 import e3.log
-from e3.collection.dag import DAG
+from e3.collection.dag import DAG, DAGIterator
 from e3.os.platform import UNKNOWN
 
 logger = e3.log.getLogger('mainloop')
@@ -196,11 +196,13 @@ class MainLoop(object):
         self.locked_items = [None] * self.parallelism
 
         if not isinstance(item_list, DAG):
-            self.item_list = DAG(item_list)
+            self.item_list = DAG()
+            for index, item in enumerate(item_list):
+                self.item_list.add_vertex(str(index), item)
         else:
             self.item_list = item_list
 
-        self.iterator = self.item_list.__iter__()
+        self.iterator = DAGIterator(self.item_list, enable_busy_state=True)
         self.collect_result = collect_result
         active_workers = 0
         max_active_workers = self.parallelism
@@ -248,7 +250,7 @@ class MainLoop(object):
                             # If not the case free the worker slot
                             active_workers -= 1
                             self.workers[slot] = None
-                            self.item_list.release(self.locked_items[slot])
+                            self.iterator.leave(self.locked_items[slot])
                             no_free_item = False
                             self.locked_items[slot] = None
 

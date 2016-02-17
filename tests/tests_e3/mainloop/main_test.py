@@ -22,4 +22,5 @@ def test_mainloop():
         collect_result,
         parallelism=1)
 
+    result.sort()
     assert result == ['1', '2', '3']
