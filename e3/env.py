@@ -347,6 +347,14 @@ class AbstractBaseEnv(object):
                     new_path=new_path))
                 os.environ[env_var] = new_path
 
+    @property
+    def dll_path_var(self):
+        env_var_name = {'windows': 'PATH',
+                        'darwin': 'DYLD_FALLBACK_LIBRARY_PATH'}
+        return env_var_name.get(
+            self.host.os.name.lower(),
+            'LD_LIBRARY_PATH')
+
     def add_dll_path(self, path, append=False):
         """Add a path to the dynamic libraries search paths.
 
@@ -356,13 +364,7 @@ class AbstractBaseEnv(object):
         :type append: bool
         """
         # On most platforms LD_LIBRARY_PATH is used. For others use:
-        env_var_name = {'windows': 'PATH',
-                        'hp-ux': 'SHLIB_PATH',
-                        'darwin': 'DYLD_FALLBACK_LIBRARY_PATH'}
-        env_var = env_var_name.get(
-            self.host.os.name.lower(),
-            'LD_LIBRARY_PATH')
-        self.add_search_path(env_var, path, append)
+        self.add_search_path(self.dll_path_var, path, append)
 
     @property
     def discriminants(self):
