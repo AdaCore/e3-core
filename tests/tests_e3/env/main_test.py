@@ -1,4 +1,6 @@
 import sys
+import tempfile
+
 import e3.env
 import e3.platform
 import os
@@ -121,6 +123,31 @@ def test_add_path():
     assert saved_path == os.environ['PATH']
 
 
+def test_add_dll_path():
+    e = e3.env.Env()
+    saved_path = os.environ.get(e.dll_path_var)
+    e.store()
+    e.add_dll_path('/dummy_for_test')
+    assert os.environ[e.dll_path_var].startswith('/dummy_for_test')
+    e.add_dll_path('/dummy_for_test', append=True)
+    assert os.environ[e.dll_path_var].endswith('/dummy_for_test')
+    e.restore()
+    assert saved_path == os.environ.get(e.dll_path_var)
+
+
+def test_discriminants():
+    e = e3.env.Env()
+    e.store()
+    assert 'native' in e.discriminants
+    e.set_target('arm-elf')
+    assert 'native' not in e.discriminants
+    e.restore()
+
+
+def test_to_dict():
+    assert e3.env.Env().to_dict()['is_cross'] is False
+
+
 def test_store():
     c = e3.env.Env()
 
@@ -133,3 +160,17 @@ def test_store():
     c.restore()
 
     assert c.abc == 'foo'
+
+    c.store()
+    c.abc = 'one'
+    tempf = tempfile.NamedTemporaryFile(delete=False)
+    tempf.close()
+    try:
+        c.store(tempf.name)
+        c.abc = 'two'
+        c.restore(tempf.name)
+        assert c.abc == 'one'
+        c.restore()
+        assert c.abc == 'foo'
+    finally:
+        e3.fs.rm(tempf.name)

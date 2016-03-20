@@ -13,6 +13,21 @@ def test_cp():
     finally:
         e3.fs.rm(tf.name)
 
+    tempd = tempfile.mkdtemp()
+    try:
+        a = os.path.join(tempd, 'a')
+        e3.fs.mkdir(a)
+        e3.fs.echo_to_file(os.path.join(a, 'a1'), 'a1')
+        e3.fs.mkdir(os.path.join(a, 'b'))
+        e3.fs.echo_to_file(os.path.join(a, 'b', 'b1'), 'b1')
+        dest = os.path.join(tempd, 'dest')
+        e3.fs.mkdir(dest)
+        e3.fs.cp(a, dest, recursive=True)
+        assert os.path.exists(os.path.join(dest, 'a', 'b', 'b1'))
+        assert os.path.exists(os.path.join(dest, 'a', 'a1'))
+    finally:
+        e3.fs.rm(tempd, True)
+
 
 def test_echo():
     tf = tempfile.NamedTemporaryFile(delete=False)
