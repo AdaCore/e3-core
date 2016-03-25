@@ -8,6 +8,7 @@ import sys
 install_requires = [
     'clint',
     'enum34',
+    'ld',
     'netifaces',
     'pyyaml',
     'python-dateutil',

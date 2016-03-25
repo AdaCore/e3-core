@@ -1,7 +1,8 @@
 """Provides function to detect platform specific information."""
 from __future__ import absolute_import
-from platform import uname as platform_uname, linux_distribution
+from platform import uname as platform_uname
 from collections import namedtuple
+import ld
 
 import re
 
@@ -24,8 +25,6 @@ class SystemInfo(object):
     :cvar network_ifs: dictionary addressed by network interface name for which
         each value is the result of netifaces.ifaddresses function on the given
         interface
-    :cvar linux_distrib: tuple of strings containing respectively the
-        Linux distribution name and version.
     :cvar uname: instance of Uname namedtuple containing the result of
         ``uname`` system call.
     :cvar core_number: integer containing the number of processor cores on the
@@ -34,10 +33,10 @@ class SystemInfo(object):
     """
 
     network_ifs = None
-    linux_distrib = None
     uname = None
     core_number = None
     nis_domain = None
+    ld_info = None
 
     # Cache for SystemInfo methods
     _platform = None
@@ -49,8 +48,8 @@ class SystemInfo(object):
     def reset_cache(cls):
         """Reset SystemInfo cache."""
         cls.network_ifs = None
-        cls.linux_distrib = None
         cls.uname = None
+        cls.ld_info = None
         cls.core_number = None
         cls._is_virtual = None
         cls._platform = None
@@ -72,11 +71,11 @@ class SystemInfo(object):
         # Compute result of uname
         cls.uname = Uname(*platform_uname())
 
-        # Fetch the linux release file
+        # Fetch linux distribution info on linux OS
         if cls.uname.system == 'Linux':
-            cls.linux_distrib = linux_distribution()
-        else:
-            cls.linux_distrib = None
+            cls.ld_info = {'name': ld.name(),
+                           'major_version': ld.major_version(),
+                           'version': ld.version()}
 
         # Fetch network interfaces
         try:
@@ -176,19 +175,19 @@ class SystemInfo(object):
             version = re.sub('-.*', '', cls.uname.release)
         elif system == 'Linux':
             kernel_version = cls.uname.release
-            distrib = cls.linux_distrib
-            for name in ('red hat', 'ubuntu', 'debian', 'suse'):
-                if name in distrib[0].lower():
-                    version = '%s%s' % (
-                        name.replace('red hat', 'rhES'),
-                        distrib[1].split('.')[0])
-                    if name == 'debian':
-                        version = version.replace('/sid', '')
-                        version = version.replace('wheezy', '7')
-                    break
-            if version == UNKNOWN:
-                version = '%s%s' % (distrib[0].replace(' ', ''),
-                                    distrib[1].split('.')[0])
+            name = cls.ld_info['name'].lower()
+            if 'redhat' in name:
+                name = 'rhES'
+                version_number = cls.ld_info['major_version']
+            elif 'suse' in name:
+                name = 'suse'
+                version_number = cls.ld_info['major_version']
+            elif 'debian' in name:
+                name = 'debian'
+                version_number = cls.ld_info['major_version']
+            else:
+                version_number = cls.ld_info['version']
+            version = name + version_number
         elif system == 'AIX':
             version = cls.uname.version + '.' + cls.uname.release
         elif system == 'SunOS':
