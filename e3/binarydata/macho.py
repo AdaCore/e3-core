@@ -59,7 +59,7 @@ def localize_distrib(distrib_dir, executables):
                     # broken.
                     e3.os.process.Run(
                         ['install_name_tool',
-                         'change', d,
+                         '-change', d,
                          '/usr/lib/libgcc_s.1.dylib', bin_file])
                 else:
                     e3.os.process.Run(
