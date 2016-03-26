@@ -8,17 +8,17 @@ All code should follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
 We also expect that [PyFlakes](https://pypi.python.org/pypi/pyflakes) has been
 run before sending a patch.
 
-All logging done by `E3` must be done via a logger returned by the function
+All logging done by `e3` must be done via a logger returned by the function
 `e3.log.getLogger`. Very verbose logging can be achieved by adding calls to
 `e3.log.debug()`. This will be activated when an application using
 `e3.main.Main` is run with: `-v -v`.
 
 All entry points must instanciate `e3.main.Main` to parse their options.
 
-Exceptions raised by `E3` should derived from `e3.error.E3Error`.
+Exceptions raised by `e3` should derived from `e3.error.E3Error`.
 
-All import used in `E3` should be _absolute imports_. To force this, we add at
-the beginning of each `E3` module:
+All import used in `e3` should be _absolute imports_. To force this, we add at
+the beginning of each `e3` module:
 
 ```python
 from __future__ import absolute_import
