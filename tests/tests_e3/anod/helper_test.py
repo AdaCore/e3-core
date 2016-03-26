@@ -67,10 +67,10 @@ def test_configure():
 
 def test_text_replace():
     tempf = tempfile.NamedTemporaryFile(delete=False)
-    tempf.write('what who when')
+    tempf.write(b'what who when')
     tempf.close()
     try:
-        text_replace(tempf.name, [('who', 'replaced')])
+        text_replace(tempf.name, [(b'who', b'replaced')])
         with open(tempf.name) as f:
             assert f.read() == 'what replaced when'
     finally:

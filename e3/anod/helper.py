@@ -10,6 +10,7 @@ from e3.yaml import custom_repr
 
 from StringIO import StringIO
 
+import io
 import os
 import re
 import yaml
@@ -256,7 +257,7 @@ def text_replace(filename, pattern):
     :return: the number of substitution performed for each pattern
     :rtype: list[int]
     """
-    output = StringIO()
+    output = io.BytesIO()
     nb_substitution = [0 for _ in pattern]
     with open(filename, 'rb') as f:
         for line in f:

@@ -13,8 +13,8 @@ def test_run_shebang():
     try:
         prog_filename = os.path.join(tempd, 'prog')
         with open(prog_filename, 'wb') as f:
-            f.write('#!/usr/bin/env python\n')
-            f.write('print "running python prog"\n')
+            f.write(b'#!/usr/bin/env python\n')
+            f.write(b'print("running python prog")\n')
         e3.os.fs.chmod('a+x', prog_filename)
         p = e3.os.process.Run([prog_filename], parse_shebang=True)
         assert p.out == 'running python prog\n'
@@ -26,8 +26,8 @@ def test_rlimit():
     """rlimit kill the child process after a timeout."""
     p = e3.os.process.Run(
         [sys.executable, '-c',
-         "print 'hello'; import sys; sys.stdout.flush(); "
-         "import time; time.sleep(10); print 'world'"],
+         "print('hello'); import sys; sys.stdout.flush(); "
+         "import time; time.sleep(10); print('world')"],
         timeout=1)
     assert 'hello' in p.out
     assert 'world' not in p.out

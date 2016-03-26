@@ -556,7 +556,7 @@ class Env(AbstractBaseEnv):
         if filename is None:
             self._context.append(pickle.dumps(self._instance))
         else:
-            with open(filename, 'w+') as fd:
+            with open(filename, 'wb+') as fd:
                 pickle.dump(self._instance, fd)
 
     def restore(self, filename=None):
@@ -577,7 +577,7 @@ class Env(AbstractBaseEnv):
             self._instance = pickle.loads(self._context[-1])
             self._context = self._context[:-1]
         elif filename is not None:
-            with open(filename, 'r') as fd:
+            with open(filename, 'rb') as fd:
                 self._instance = pickle.load(fd)
         else:
             return
