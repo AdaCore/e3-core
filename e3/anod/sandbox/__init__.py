@@ -130,12 +130,8 @@ class SandBox(object):
 
     def write_scripts(self):
         from setuptools.command.easy_install import get_script_args
-        import pkg_resources
 
         # Retrieve sandbox_scripts entry points
-        for ep in pkg_resources.iter_entry_points(group='sandbox_scripts'):
-            print ep
-
         e3_distrib = get_distribution('e3-core')
 
         class SandboxDist(object):
