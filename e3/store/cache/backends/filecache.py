@@ -52,9 +52,7 @@ class FileCache(Cache):
         exp = pickle.load(fd)
         if exp is not None and exp < time.time():
             fd.close()
-            print exp
-            print '??? will deleted'
-            #  rm(fd.name)
+            rm(fd.name)
             return True
         return False
 
