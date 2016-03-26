@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 
 import e3.anod.loader
 from e3.anod.loader import spec

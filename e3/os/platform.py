@@ -1,5 +1,6 @@
 """Provides function to detect platform specific information."""
 from __future__ import absolute_import
+from __future__ import print_function
 from platform import uname as platform_uname
 from collections import namedtuple
 import ld

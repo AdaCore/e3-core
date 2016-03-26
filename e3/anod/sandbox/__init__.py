@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 
 import abc
 import argparse
@@ -367,8 +368,8 @@ class BuildSpace(object):
                             if not line:
                                 time.sleep(0.1)
                                 continue
-                            print line.rstrip()
-                        print log_file.read()
+                            print(line.rstrip())
+                        print(log_file.read())
 
                 try:
                     from threading import Thread, Event
@@ -383,8 +384,8 @@ class BuildSpace(object):
                     self.tail_thread.start()
                 else:
                     if not info_msg:
-                        print '-v not supported on this machine'
-                        print 'output redirected to %s' % self.log_file
+                        print('-v not supported on this machine')
+                        print('output redirected to %s' % self.log_file)
             elif not info_msg:
                 self.main_log_handler.setLevel(logging.DEBUG)
                 self.main_log_handler.setFormatter(
@@ -408,7 +409,7 @@ class BuildSpace(object):
             self.stop_event.set()
             self.tail_thread.join()
             self.stop_event = None
-            print 'output redirected to %s' % self.log_file
+            print('output redirected to %s' % self.log_file)
 
     def dump_traceback(self, spec_name, kind):
         """Dump traceback in log dir and raise an AnodError with the last line.
@@ -541,12 +542,12 @@ class SandBoxShowConfiguration(SandBoxAction):
         try:
             args = argument_parser.parse_args(cmd_line[2:])
         except SandBoxError as msg:
-            print 'the configuration is invalid, the argument parser got the' \
-                  'following error:'
-            print msg
+            print('the configuration is invalid, the argument parser got the'
+                  'following error:')
+            print(msg)
         for k, v in vars(args).iteritems():
             if k in self.keys:
-                print '%s = %s' % (k, v)
+                print('%s = %s' % (k, v))
 
 
 def main(get_argument_parser=False):

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 
 from e3.error import E3Error
 from ctypes import (Structure, create_unicode_buffer, pointer, cast, c_wchar_p,

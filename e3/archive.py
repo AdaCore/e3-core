@@ -1,5 +1,6 @@
 """Support for reading and writing tar and zip archives."""
 from __future__ import absolute_import
+from __future__ import print_function
 
 from contextlib import closing
 import fnmatch

@@ -1,5 +1,6 @@
 """Return the current timezone offset."""
 from __future__ import absolute_import
+from __future__ import print_function
 
 from dateutil.tz import gettz
 from datetime import datetime

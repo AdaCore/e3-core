@@ -24,6 +24,12 @@ the beginning of each `e3` module:
 from __future__ import absolute_import
 ```
 
+All `e3` Python 2 code is converted to Python 3 using `2to3`, to simply the writing of tests also import the Python 3 print function with:
+
+```python
+from __future__ import print_function
+```
+
 The `e3` namespace
 ------------------
 
@@ -91,5 +97,3 @@ You can also verify the experimental support of Python 3 by running:
 ```bash
 tox -e py34
 ```
-
-All Python 2 code is converted to Python 3 using `2to3`.

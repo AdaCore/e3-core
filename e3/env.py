@@ -4,6 +4,7 @@ This package provide a class called Env used to store global information. Env
 is a singleton so there is in fact only one instance.
 """
 from __future__ import absolute_import
+from __future__ import print_function
 
 import abc
 import os
@@ -606,4 +607,4 @@ def main_platform_info():
         default='build',
         help='Select which platform info to show')
     m.parse_args()
-    print getattr(Env(), m.args.show)
+    print(getattr(Env(), m.args.show))
