@@ -2,6 +2,7 @@ import sys
 import tempfile
 
 import e3.env
+import e3.fs
 import e3.platform
 import os
 
