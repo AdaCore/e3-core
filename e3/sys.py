@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 
 import os
 import sys
@@ -12,33 +13,30 @@ def version():
 def sanity_check():
     """Sanity check the E3 install."""
     errors = 0
-    sys.stdout.write('YAMLCheck: ')
+    print('YAMLCheck:', end=' ')
     try:
         import yaml
         yaml.dump({'Yaml': 'works'})
-        sys.stdout.write('PASSED\n')
+        print('PASSED')
     except Exception:
-        sys.stdout.write('FAILED\n')
+        print('FAILED')
         errors += 1
 
-    sys.stdout.write('HashlibCheck: ')
+    print('HashlibCheck:', end=' ')
     try:
         from e3.hash import sha1, md5
         sha1(__file__)
         md5(__file__)
-        sys.stdout.write('PASSED\n')
+        print('PASSED')
     except Exception:
-        sys.stdout.write('FAILED\n')
+        print('FAILED')
         errors += 1
 
+    print('Version:', end=' ')
     try:
-        revision = version()
-        major, num, git_rev = revision.split('-')
-        sys.stdout.write('MajorVersion: %s\n' % major)
-        sys.stdout.write('ChangeNumber: %s\n' % num)
+        print(version())
     except Exception:
-        sys.stdout.write('MajorVersion: FAILED\n')
-        sys.stdout.write('ChangeNumber: FAILED\n')
+        errors += 1
     return errors
 
 
@@ -61,17 +59,17 @@ def main():
     m.parse_args()
 
     if m.args.version:
-        print version()
+        print(version())
         return
     elif m.args.check:
         errors = sanity_check()
         if errors:
             sys.exit('sanity checking failed!')
         else:
-            print 'Everything OK!'
+            print('Everything OK!')
             return
     elif m.args.platform_info:
-        print getattr(Env(), m.args.platform_info)
+        print(getattr(Env(), m.args.platform_info))
 
 
 def set_python_env(prefix):

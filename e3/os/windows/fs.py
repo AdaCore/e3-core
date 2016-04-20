@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 from e3.os.windows.native_api import (IOStatusBlock, UnicodeString,
                                       NTException, NT, FileInfo,
                                       ObjectAttributes, Share, Access,

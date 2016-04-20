@@ -1,6 +1,7 @@
 """Basic ELF reader."""
 
 from __future__ import absolute_import
+from __future__ import print_function
 from e3.binarydata import UChar, UInt16, BinaryData, Int32, UInt32, \
     CharStr, Address, Offset, UIntMax, Field, StructType, String, \
     FieldArray, FieldNullTerminatedArray, \

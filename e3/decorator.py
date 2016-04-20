@@ -3,6 +3,7 @@
 to enable/disable a function, to memoize a function results...
 """
 from __future__ import absolute_import
+from __future__ import print_function
 
 from functools import partial
 
@@ -14,7 +15,7 @@ def enabled(func):
 
         @enabled
         def foo():
-            print "I'm foo"
+            print("I'm foo")
 
     Then calling ``foo()`` will return "I'm foo"
 
@@ -30,7 +31,7 @@ def disabled(func):
 
         @disabled
         def foo():
-            print "I'm foo"
+            print("I'm foo")
 
     Then calling ``foo()`` will return None
 

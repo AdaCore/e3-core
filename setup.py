@@ -1,8 +1,6 @@
 from setuptools import setup, find_packages
 
 import os
-import re
-import subprocess
 import sys
 
 install_requires = [
@@ -18,35 +16,12 @@ install_requires = [
 if sys.platform in ('linux2', 'linux', 'win32', 'darwin'):
     install_requires.append('psutil')
 
-# Get E3 version using git describe and store it in a VERSION file.
-# When building from a source package, reads the version from the VERSION file.
+# Get e3 version from the VERSION file. This version follows PEP 286:
+# 'N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]'
 version_file = os.path.join(os.path.dirname(__file__), 'VERSION')
 
-GIT_DESC_RE = r'^v(?P<ver>.*?)-(?P<commits>\d+)-g(?P<full>[\da-f]+)$'
-
-try:
-    git_version = subprocess.check_output([
-        'git', 'describe', '--long',
-        '--match', 'v[0-9]*.[0-9]*.[0-9]*']).strip()
-
-except Exception:
-    with open(version_file) as f:
-        e3_version = f.read().strip()
-
-else:
-
-    # Generate a version number that conforms to the versioning scheme defined
-    # in PEP 286 ('N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]')
-
-    version_m = re.search(GIT_DESC_RE, git_version)
-    if version_m is None:
-        raise ValueError('git describe does not returns a valid version')
-
-    # Get number of additional commit since last tag
-    nb_commits = int(version_m.group('commits'))
-    e3_version = version_m.group('ver')
-    with open(version_file, 'w') as f:
-        f.write(e3_version + '\n')
+with open(version_file) as f:
+    e3_version = f.read().strip()
 
 setup(
     name='e3-core',

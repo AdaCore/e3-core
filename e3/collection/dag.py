@@ -1,6 +1,7 @@
 """Implementation of Direct Acyclic Graphs."""
 
 from __future__ import absolute_import
+from __future__ import print_function
 from e3.error import E3Error
 
 

@@ -20,6 +20,7 @@ The two user defined function run_job and collect_result are called
 sequentially.
 """
 from __future__ import absolute_import
+from __future__ import print_function
 
 import argparse
 import os
