@@ -1,4 +1,4 @@
-The `e3` Project [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core)
+The `e3` Project 
 ================
 
 This present project (`e3`) is a Python framework to ease the development
@@ -7,6 +7,15 @@ binary code packaging, and automated testing).
 
 The `e3` framework is split across multiple Python packages named `e3-<name>`
 and sharing the same namespace: `e3`.
+
+Test status
+===========
+
+Platform | Status
+---------|-------
+Linux    | [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core)
+Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/wb1f46qn4t7cqsjj/branch/master?svg=true)](https://ci.appveyor.com/project/enzbang/e3-core/branch/master)
+
 
 `e3-core` content
 =================
