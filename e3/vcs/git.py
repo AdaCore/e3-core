@@ -194,13 +194,13 @@ class GitRepository(object):
         """
         # Format:
         #   %H: commit hash
-        #   %ae: author email
+        #   %aE: author email respecting .mailmap
         #   %cI: committer date, strict ISO 8601 format
         #   %n: new line
         #   %B: raw body (unwrapped subject and body)
         #   %N: commit notes
         cmd = ['log',
-               '--format=format:%H%n%ae%n%cI%n' +
+               '--format=format:%H%n%aE%n%cI%n' +
                '%N%n' if with_gerrit_notes else '' + '%n%B',
                '--log-size',
                '--max-count=%d' % max_count if max_count else None,
