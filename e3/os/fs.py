@@ -205,8 +205,15 @@ def __safe_unlink_func():
     error. The typical scenario is when you spawn an executable and try to
     delete it just afterward.
     """
-    # ??? not supported yet
-    return os.remove, os.rmdir
+    if sys.platform == 'win32':
+        from e3.os.windows.fs import NTFile
+
+        def win_rm(x):
+            return NTFile(x).unlink()
+
+        return win_rm, win_rm
+    else:
+        return os.remove, os.rmdir
 
 
 safe_remove, safe_rmdir = __safe_unlink_func()
