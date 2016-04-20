@@ -124,12 +124,14 @@ def enable_commands_handler(filename, mode='a'):
     :type filename: str
     :param mode: mode used to open the file (default is 'a')
     :type mode: str
+    :return: the added handler
+    :type: logging.Handler
     """
     class CmdFilter(logging.Filter):
         """Keep only e3.os.process.cmdline records."""
 
         def filter(self, record):
-            return 1 if record.name == CMD_LOGGER_NAME else 0
+            return 1 if record.name == "e3." + CMD_LOGGER_NAME else 0
 
     # Here we don't attach the handler directly to the cmdline logger. Indeed
     # in class like e3.Main we do attach handlers to the root logger. In that
@@ -139,6 +141,18 @@ def enable_commands_handler(filename, mode='a'):
     fh.addFilter(CmdFilter())
     fh.setLevel(logging.DEBUG)
     rootlog.addHandler(fh)
+    return fh
+
+
+def disable_commands_handler(handler):
+    """Disable special handler for commands.
+
+    :param handler: Handler returned by enable_commands_handler
+    :type handler: logging.Handler
+    """
+    logging.getLogger().removeHandler(handler)
+    handler.flush()
+    handler.close()
 
 
 class Run(object):
