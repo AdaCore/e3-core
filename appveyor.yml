@@ -1,0 +1,13 @@
+version: 1.0.{build}
+environment:
+  PYTHON: C:\\Python27
+install:
+- cmd: >-
+    SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+
+    pip install tox
+
+    mkdir C:\\tmp\\Trash
+build: off
+test_script:
+- cmd: tox -e py
