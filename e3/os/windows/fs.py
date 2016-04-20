@@ -293,7 +293,9 @@ class NTFile(object):
                               message="cannot dispose",
                               origin="NTFile.dispose")
 
-    @WithOpenFile(Access.LIST_DIRECTORY | Access.SYNCHRONIZE)
+    @WithOpenFile(Access.LIST_DIRECTORY | Access.SYNCHRONIZE,
+                  None,
+                  OpenOptions.SYNCHRONOUS_IO_NON_ALERT)
     def iterate_on_dir(self, fun, default_result=None):
         """Iterate on directory.
 
@@ -308,16 +310,19 @@ class NTFile(object):
         status = NT.QueryDirectoryFile(self.handle,
                                        None,
                                        None,
-                                       0,
+                                       None,
                                        pointer(self.io_status),
                                        b, b_size, FileInfo.Names.class_id,
                                        False, None, True)
+        if status == Status.NO_MORE_FILES:
+            return result
+
         if status < 0:
             raise NTException(status=status,
                               message="can't read dir %s" % self.path,
                               origin="NTFile.iterate_on_dir")
 
-        while self.io_status.status == 0:
+        while status >= 0 and status != Status.NO_MORE_FILES:
             pos = 0
             while True:
                 off, _, size = struct.unpack_from("LLL", b.raw, pos)
@@ -333,14 +338,16 @@ class NTFile(object):
                 pos += off
 
             status = NT.QueryDirectoryFile(self.handle,
-                                           None, None, 0,
+                                           None, None, None,
                                            pointer(self.io_status),
                                            b, b_size, FileInfo.Names.class_id,
                                            False, None, False)
         return result
 
     @property
-    @WithOpenFile(Access.LIST_DIRECTORY | Access.SYNCHRONIZE)
+    @WithOpenFile(Access.LIST_DIRECTORY | Access.SYNCHRONIZE,
+                  None,
+                  OpenOptions.SYNCHRONOUS_IO_NON_ALERT)
     def is_dir_empty(self):
         """Check if dir is empty.
 
@@ -354,7 +361,6 @@ class NTFile(object):
                 f.read_attributes()
             except NTException:
                 return True, False
-
             return False, True
 
         return self.iterate_on_dir(check_file, True)

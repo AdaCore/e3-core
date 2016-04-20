@@ -93,6 +93,7 @@ class Status(object):
     DELETE_PENDING = 0xC0000056
     DIRECTORY_NOT_EMPTY = 0xC0000101
     CANNOT_DELETE = 0xC0000121
+    NO_MORE_FILES = 0x80000006
 
     msgs = {0xC0000022: 'access denied',
             0xC0000034: 'object name not found',
