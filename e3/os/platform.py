@@ -3,8 +3,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from platform import uname as platform_uname
 from collections import namedtuple
-import ld
-
 import re
 
 import e3.log
@@ -74,6 +72,7 @@ class SystemInfo(object):
 
         # Fetch linux distribution info on linux OS
         if cls.uname.system == 'Linux':
+            import ld
             cls.ld_info = {'name': ld.name(),
                            'major_version': ld.major_version(),
                            'version': ld.version()}

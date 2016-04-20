@@ -6,7 +6,6 @@ import sys
 install_requires = [
     'clint',
     'enum34',
-    'ld',
     'netifaces',
     'pyyaml',
     'python-dateutil',
@@ -15,6 +14,9 @@ install_requires = [
 
 if sys.platform in ('linux2', 'linux', 'win32', 'darwin'):
     install_requires.append('psutil')
+
+if sys.platform in ('linux', 'linux2'):
+    install_requires.append('ld')
 
 # Get e3 version from the VERSION file. This version follows PEP 286:
 # 'N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]'
