@@ -187,15 +187,25 @@ def test_iterate_on_dir():
         result.add(name)
         return True, False
 
-    for n in range(0, 40):
-        touch(os.path.join(test_dir_path, '%s.txt' % n))
     try:
-        ntfile = NTFile(test_dir_path)
-        status = ntfile.iterate_on_dir(fun, default_result=False)
-        assert status
-        assert len(result) == 40
+        try:
+            ntfile = NTFile(test_dir_path)
+            status = ntfile.iterate_on_dir(fun, default_result=False)
+            assert not result
+            assert not status
+        finally:
+            ntfile.close()
+
+        for n in range(0, 40):
+            touch(os.path.join(test_dir_path, '%s.txt' % n))
+        try:
+            ntfile = NTFile(test_dir_path)
+            status = ntfile.iterate_on_dir(fun, default_result=False)
+            assert status
+            assert len(result) == 40
+        finally:
+            ntfile.close()
     finally:
-        ntfile.close()
         rm(work_dir, recursive=True)
 
 
