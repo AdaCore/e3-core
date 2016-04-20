@@ -295,7 +295,7 @@ class NTException(E3Error):
     def __init__(self, status, message, origin=None):
         self.status = status
         if self.status < 0:
-            self.status = self.status + 2**32
+            self.status = self.status + 2 ** 32
         E3Error.__init__(self, message, origin=origin)
 
     def __str__(self):
