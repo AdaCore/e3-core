@@ -70,6 +70,8 @@ def test_enable_commands_handler():
         e3.fs.rm(tempd, True)
 
 
+@pytest.mark.xfailif(sys.platform != 'win32',
+                     reason="unix implem not complete")
 def test_wait_for_processes():
     p1 = e3.os.process.Run([sys.executable, '-c',
                             'import time; time.sleep(3); print "process1"'],
@@ -162,3 +164,24 @@ def test_pipe_input():
                            'import sys; print sys.stdin.read()'],
                           input='|dummy')
     assert p.out.strip() == 'dummy'
+
+
+def test_is_running():
+    import time
+    p = e3.os.process.Run([sys.executable,
+                           '-c',
+                           'import time; time.sleep(1)'],
+                          bg=True)
+    assert e3.os.process.is_running(p.pid)
+    time.sleep(2)
+
+    # On windows we don't want to wait as otherwise pid will be reused
+    # Note also that the semantic is slightly different between Unix
+    # and Windows. is_running will report false on Windows once the
+    # process is in a waitable state.
+    if sys.platform != 'win32':
+        p.wait()
+    assert not e3.os.process.is_running(p.pid)
+
+    p.wait()
+    assert p.status == 0
