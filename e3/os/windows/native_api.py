@@ -83,6 +83,16 @@ class OpenOptions(object):
     DELETE_ON_CLOSE = 0x00001000
 
 
+class Wait(object):
+    """Constants for WaitFor* functions."""
+
+    OBJECT = 0x0000
+    ABANDONED = 0x080
+    TIMEOUT = 0x0102
+    FAILED = 0xFFFFFFFF
+    INFINITE = 0xFFFFFFFF
+
+
 class Status(object):
     """Error constants."""
 
@@ -192,6 +202,20 @@ class FileInfo(object):
             return result
 
 
+class ProcessInfo(object):
+    """Declaration of structure returned by QueryInformationProcess."""
+
+    class Basic(Structure):
+        class_id = 0
+
+        _fields_ = [('exit_status', NTSTATUS),
+                    ('peb', LPVOID),
+                    ('affinity_mask', LPVOID),
+                    ('base_priority', LONG),
+                    ('pid', LPVOID),
+                    ('ppid', LPVOID)]
+
+
 class ObjectAttributes(Structure):
     """OBJECT_ATTRIBUTES structure."""
 
@@ -232,6 +256,8 @@ class NT(object):
     OpenFile = None
     QueryDirectoryFile = None
     Close = None
+    QueryInformationProcess = None
+    WaitForMultipleObjects = None
 
     @classmethod
     def init_api(cls):
@@ -287,6 +313,19 @@ class NT(object):
                                            BOOLEAN]
         cls.Close = ntdll.NtClose
         cls.Close.argtypes = [HANDLE]
+        cls.QueryInformationProcess = ntdll.NtQueryInformationProcess
+        cls.QueryInformationProcess.restype = NTSTATUS
+        cls.QueryInformationProcess.argtypes = [HANDLE,
+                                                INT,
+                                                POINTER(ProcessInfo.Basic),
+                                                ULONG,
+                                                LPVOID]
+        cls.WaitForMultipleObjects = kernel32.WaitForMultipleObjects
+        cls.WaitForMultipleObjects.restype = DWORD
+        cls.WaitForMultipleObjects.argtypes = [DWORD,
+                                               POINTER(HANDLE),
+                                               BOOLEAN,
+                                               DWORD]
 
 
 if sys.platform == 'win32':
