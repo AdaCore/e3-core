@@ -1,0 +1,7 @@
+*** file_to_patch.orig.txt	2016-04-21 15:12:21.019511300 +0100
+--- file_to_patch.new.txt	2016-04-21 15:12:54.407990800 +0100
+***************
+*** 1 ****
+! Sentense if conteining error
+--- 1 ----
+! Sentence is not containing any error
