@@ -48,7 +48,7 @@ def test_not_found():
 def test_invalid_executable():
     p = os.path.join(os.path.dirname(__file__), 'invalid.exe')
     with pytest.raises(WindowsError):
-        e3.os.process.Run([p])
+        e3.os.process.Run([p], timeout=4)
 
 
 def test_enable_commands_handler():
