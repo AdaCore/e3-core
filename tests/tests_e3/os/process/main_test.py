@@ -56,3 +56,39 @@ def test_enable_commands_handler():
 
     finally:
         e3.fs.rm(tempd, True)
+
+
+def test_wait_for_processes():
+    p1 = e3.os.process.Run([sys.executable, '-c',
+                            'import time; time.sleep(3); print "process1"'],
+                           bg=True)
+    p2 = e3.os.process.Run([sys.executable, '-c',
+                            'import time; time.sleep(4); print "process2"'],
+                           bg=True)
+
+    process_list = [p1, p2]
+    result = e3.os.process.wait_for_processes(process_list, 0)
+    del process_list[result]
+    e3.os.process.wait_for_processes(process_list, 0)
+
+    assert p1.status == 0
+    assert p1.out.strip() == 'process1'
+    assert p2.status == 0
+    assert p2.out.strip() == 'process2'
+
+
+def test_run_pipe():
+    p = e3.os.process.Run(
+        [[sys.executable, '-c', 'print "dummy"'],
+         [sys.executable, '-c',
+          'import sys; print sys.stdin.read().replace("y", "ies")']])
+    assert p.status == 0
+    assert p.out.strip() == 'dummies'
+
+
+def test_command_line_image():
+    result = e3.os.process.command_line_image(["echo", ""])
+    assert result == "echo ''"
+    result = e3.os.process.command_line_image([["echo", "dummy"],
+                                               ["grep", "m"]])
+    assert result == "echo dummy | grep m"

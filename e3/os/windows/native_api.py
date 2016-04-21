@@ -215,6 +215,8 @@ class ProcessInfo(object):
                     ('pid', LPVOID),
                     ('ppid', LPVOID)]
 
+    STILL_ACTIVE = 259
+
 
 class ObjectAttributes(Structure):
     """OBJECT_ATTRIBUTES structure."""

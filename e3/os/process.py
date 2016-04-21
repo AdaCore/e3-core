@@ -539,86 +539,93 @@ def wait_for_processes(process_list, timeout):
     if len(process_list) == 0:
         return None
 
+    start = time.time()
+
     if sys.platform == 'win32':
-        import ctypes
-        from ctypes.wintypes import HANDLE, DWORD
-        from ctypes import byref
+        from ctypes.wintypes import HANDLE
+        from ctypes import pointer, sizeof
+        from e3.os.windows.native_api import ProcessInfo, NT, Wait
 
         plen = len(process_list)
-        WAIT_OBJECT = 0x0
-        WAIT_ABANDONED = 0x80
-        WAIT_TIMEOUT = 0x102
-        WAIT_FAILED = 0xFFFFFFFF
-        INFINITE = DWORD(0xFFFFFFFF)
 
         # Compute timeout
-        if timeout == 0:
-            win_timeout = INFINITE
-        else:
-            win_timeout = DWORD(int(timeout * 1000))
+        win_timeout = Wait.INFINITE if timeout == 0 else int(timeout * 1000)
 
-        start = time.time()
-        # Build the handler array c structure
-        handle_arr = HANDLE * len(process_list)
+        # Build the handler array C structure
+        handle_arr = HANDLE * plen
         handles = handle_arr(*[int(p.internal._handle) for p in process_list])
 
         while True:
-            result = ctypes.windll.kernel32.WaitForMultipleObjects(
-                DWORD(plen),
-                handles, 0,
-                win_timeout)
-            if (WAIT_OBJECT <= result < WAIT_OBJECT + plen) or \
-                    (WAIT_ABANDONED <= result < WAIT_ABANDONED + plen):
-                # One process has been signaled. Check we have an exit code
-                if result >= WAIT_ABANDONED:
-                    result -= WAIT_ABANDONED
-                exit_code = DWORD()
-                ctypes.windll.kernel32.GetExitCodeProcess(handles[result],
-                                                          byref(exit_code))
-                if exit_code == DWORD(259):
-                    # Process is still active so loop
-                    # Update windows timeout
-                    if timeout == 0:
-                        win_timeout = INFINITE
+            p = NT.WaitForMultipleObjects(plen,
+                                          handles,
+                                          False,
+                                          win_timeout)
+
+            if (Wait.OBJECT <= p < Wait.OBJECT + plen) or \
+                    (Wait.ABANDONED <= p < Wait.ABANDONED + plen):
+
+                # One process has been signaled. Check if it has exit
+                p = p - Wait.ABANDONED if p >= Wait.ABANDONED else p
+
+                # We use the NT api here to ensure that the process stays in
+                # a waitable state.
+                process_info = ProcessInfo.Basic()
+                status = NT.QueryInformationProcess(handles[p],
+                                                    ProcessInfo.Basic.class_id,
+                                                    pointer(process_info),
+                                                    sizeof(process_info),
+                                                    None)
+                exit_code = process_info.exit_status
+
+                if status < 0:
+                    # We cannot get the process status
+                    raise WaitError
+
+                elif exit_code == ProcessInfo.STILL_ACTIVE:
+                    # Process is still active so wait after updating timeout
+                    remain = timeout - time.time() + start
+
+                    if remain <= 0:
+                        # No remaining time
+                        return None
                     else:
-                        remain_seconds = timeout - time.time() + start
-                        if remain_seconds <= 0:
-                            return None
-                        else:
-                            win_timeout = DWORD(int(remain_seconds * 1000))
+                        win_timeout = Wait.INFINITE if timeout == 0 \
+                            else int(remain * 1000)
+
                 else:
-                    # At the stage we need to set the process status and close
-                    # related handles. Indeed we will not be able to use the
-                    # wait method afterwards and retrieve it.
-                    process_list[result].status = exit_code
-                    process_list[result].close_files()
-                    return result
-            elif result == WAIT_TIMEOUT:
+                    # Process is exiting so finalize it by calling wait
+                    process_list[p].wait()
+                    return p
+            elif p == Wait.TIMEOUT:
                 return None
-            elif result == WAIT_FAILED:
+
+            elif p == Wait.FAILED:
                 raise WaitError
     else:
-        start = time.time()
         remain_seconds = timeout
 
+        # Choose between blocking or non-blocking call to wait3
         wait3_option = os.WNOHANG
         if timeout == 0:
             wait3_option = 0
 
         while remain_seconds >= 0.0 or timeout == 0:
-
+            # Retrieve first child process that ends. Note that that child
+            # process might not be in our watch list
             pid, exit_status, resource_usage = os.wait3(wait3_option)
+
             if (pid, exit_status) != (0, 0):
                 # We have a result
-                result = [(index, p) for index, p in
-                          enumerate(process_list) if p.pid == pid]
-                if len(result) > 0:
+                result = next((index for index, p in
+                               enumerate(process_list) if p.pid == pid), None)
+                if result is not None:
                     # At the stage we need to set the process status and close
                     # related handles. Indeed we will not be able to use the
                     # wait method afterwards and retrieve it.
-                    process_list[result[0][0]].status = exit_status
-                    process_list[result[0][0]].close_files()
-                    return result[0][0]
+                    process_list[result].status = exit_status
+
+                    process_list[result].close_files()
+                    return result
             time.sleep(1.0)
             remain_seconds = timeout - time.time() + start
         return None
@@ -635,6 +642,7 @@ def is_running(pid):
     if sys.platform == 'win32':
         import ctypes
         import ctypes.wintypes
+        from e3.os.windows.native_api import ProcessInfo
         h = ctypes.windll.kernel32.OpenProcess(1, 0, pid)
         try:
             if h == 0:
@@ -648,9 +656,7 @@ def is_running(pid):
                 # GetExitCodeProcess returns 0 when it could not get the value
                 # of the exit code
                 return True
-            if exit_code.value == 259:
-                # GetExitCodeProcess returns 259 is the process is still
-                # running
+            if exit_code.value == ProcessInfo.STILL_ACTIVE:
                 return True
 
             # Process not running
