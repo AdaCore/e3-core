@@ -23,7 +23,12 @@ logger = e3.log.getLogger('os.process')
 # Special logger used for command line logging.
 # This allow user to filter easily the command lines log from the rest
 CMD_LOGGER_NAME = 'os.process.cmdline'
+
 cmdlogger = e3.log.getLogger(CMD_LOGGER_NAME)
+
+# Make STDOUT subprocess constant visible in e3.os.process
+STDOUT = subprocess.STDOUT
+PIPE = subprocess.PIPE
 
 
 def subprocess_setup():
@@ -170,8 +175,8 @@ class Run(object):
     :ivar pid: PID. Set to -1 if the command failed to run.
     """
 
-    def __init__(self, cmds, cwd=None, output=subprocess.PIPE,
-                 error=subprocess.STDOUT, input=None, bg=False, timeout=None,
+    def __init__(self, cmds, cwd=None, output=PIPE,
+                 error=STDOUT, input=None, bg=False, timeout=None,
                  env=None, set_sigpipe=True, parse_shebang=False,
                  ignore_environ=True, python_executable=sys.executable):
         """Spawn a process.
@@ -392,8 +397,6 @@ class Run(object):
 
     def __error(self, error, cmds):
         """Set pid to -1 and status to 127 before closing files."""
-        self.pid = -1
-        self.status = 127
         self.close_files()
         logger.error(error)
 
@@ -420,10 +423,10 @@ class Run(object):
 
     def wait(self):
         """Wait until process ends and return its status."""
-        if self.status == 127:
-            return self.status
 
-        self.status = None
+        if self.status is not None:
+            # Wait has already been called
+            return self.status
 
         # If there is no pipe in the loop then just do a wait. Otherwise
         # in order to avoid blocked processes due to full pipes, use
@@ -455,16 +458,18 @@ class Run(object):
           the process exit status.
         :rtype: int | None
         """
-        if self.status == 127:
-            # Special value indicating that we failed to run the command,
-            # so there is nothing to poll.  Just return that as the exit
-            # code.
+        if self.status is not None:
+            # Process is already terminated and wait been called
             return self.status
 
         result = self.internal.poll()
+
         if result is not None:
-            self.status = result
-        return result
+            # Process is finished, call wait to finalize it (closing handles,
+            # ...)
+            return self.wait()
+        else:
+            return None
 
     def kill(self):
         """Kill the process."""
