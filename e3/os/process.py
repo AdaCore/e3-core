@@ -609,29 +609,18 @@ def is_running(pid):
     :rtype: bool
     """
     if sys.platform == 'win32':
-        import ctypes
-        import ctypes.wintypes
-        from e3.os.windows.native_api import ProcessInfo
-        h = ctypes.windll.kernel32.OpenProcess(1, 0, pid)
+        from e3.os.windows.native_api import Access, NT
+        from e3.os.windows.process import process_exit_code
+        handle = NT.OpenProcess(Access.PROCESS_QUERY_INFORMATION, False, pid)
+
         try:
-            if h == 0:
+            if handle == 0:
                 return False
 
-            # Pid exists for the handle, now check whether we can retrieve
-            # the exit code
-            exit_code = ctypes.wintypes.DWORD()
-            if ctypes.windll.kernel32.GetExitCodeProcess(
-                    h, ctypes.byref(exit_code)) == 0:
-                # GetExitCodeProcess returns 0 when it could not get the value
-                # of the exit code
-                return True
-            if exit_code.value == ProcessInfo.STILL_ACTIVE:
-                return True
+            return process_exit_code(handle) is None
 
-            # Process not running
-            return False
         finally:
-            ctypes.windll.kernel32.CloseHandle(h)
+            NT.Close(handle)
 
     else:
         try:

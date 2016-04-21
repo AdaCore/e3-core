@@ -64,6 +64,7 @@ class Access(object):
     WRITE_ATTRS = 0x0100
     DELETE = 0x010000
     SYNCHRONIZE = 0x100000
+    PROCESS_QUERY_INFORMATION = 0x0400
 
 
 class Share(object):
@@ -260,6 +261,7 @@ class NT(object):
     Close = None
     QueryInformationProcess = None
     WaitForMultipleObjects = None
+    OpenProcess = None
 
     @classmethod
     def init_api(cls):
@@ -328,6 +330,9 @@ class NT(object):
                                                POINTER(HANDLE),
                                                BOOLEAN,
                                                DWORD]
+        cls.OpenProcess = kernel32.OpenProcess
+        cls.OpenProcess.restype = HANDLE
+        cls.OpenProcess.argtypes = [DWORD, BOOL, DWORD]
 
 
 if sys.platform == 'win32':
