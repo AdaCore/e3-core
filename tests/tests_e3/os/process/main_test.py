@@ -38,6 +38,18 @@ def test_not_found():
         e3.os.process.Run(['e3-bin-not-found'])
         assert 'e3-bin-not-found not found' in err
 
+    with pytest.raises(OSError) as err:
+        e3.os.process.Run([[sys.executable, '-c', 'pass'],
+                           ['e3-bin-not-found2']])
+        assert 'e3-bin-not-found2 not found' in err
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
+def test_invalid_executable():
+    p = os.path.join(os.path.dirname(__file__), 'invalid.exe')
+    with pytest.raises(WindowsError):
+        e3.os.process.Run([p])
+
 
 def test_enable_commands_handler():
     tempd = tempfile.mkdtemp()
@@ -92,3 +104,61 @@ def test_command_line_image():
     result = e3.os.process.command_line_image([["echo", "dummy"],
                                                ["grep", "m"]])
     assert result == "echo dummy | grep m"
+
+
+def test_poll():
+    import time
+    result = e3.os.process.Run(
+        [sys.executable, '-c',
+         'import time; time.sleep(1); print "process"'], bg=True)
+
+    assert result.poll() is None
+    time.sleep(2)
+    assert result.poll() == 0
+    assert result.out.strip() == 'process'
+
+    # check that subsequent calls to poll or wait do not crash or alter the
+    # result
+    assert result.poll() == 0
+    assert result.wait() == 0
+    assert result.out.strip() == 'process'
+
+
+def test_file_redirection():
+    tempd = tempfile.mkdtemp()
+    try:
+        p_out = os.path.join(tempd, 'p.out')
+        result = e3.os.process.Run(
+            [sys.executable, '-c', 'print "dummy"'],
+            input=None,
+            output=p_out,
+            error=e3.os.process.STDOUT)
+        with open(p_out, 'rb') as fd:
+            content = fd.read().strip()
+        assert result.status == 0
+        assert content == 'dummy'
+    finally:
+        e3.fs.rm(tempd, True)
+
+
+def test_output_append():
+    tempd = tempfile.mkdtemp()
+    try:
+        p_out = os.path.join(tempd, 'p.out')
+        e3.os.process.Run([sys.executable, '-c', 'print "line1"'],
+                          output=p_out)
+        e3.os.process.Run([sys.executable, '-c', 'print "line2"'],
+                          output="+" + p_out)
+        with open(p_out, 'r') as fd:
+            content = fd.read().strip()
+        assert content == "line1\nline2"
+    finally:
+        e3.fs.rm(tempd, True)
+
+
+def test_pipe_input():
+    p = e3.os.process.Run([sys.executable,
+                           '-c',
+                           'import sys; print sys.stdin.read()'],
+                          input='|dummy')
+    assert p.out.strip() == 'dummy'
