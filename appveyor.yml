@@ -10,4 +10,4 @@ install:
     mkdir C:\\tmp\\Trash
 build: off
 test_script:
-- cmd: tox -e py
+- cmd: tox -e py-cov
