@@ -573,10 +573,11 @@ def wait_for_processes(process_list, timeout):
                 raise WaitError
 
     else:
+        import e3.os.unix.constant
         # Choose between blocking or non-blocking call to wait3
-        wait3_option = os.WNOHANG
-        if timeout == 0:
-            wait3_option = 0
+        wait3_option = e3.os.unix.constant.WNOWAIT
+        if timeout != 0:
+            wait3_option |= e3.os.unix.constant.WNOHANG
 
         while remain >= 0.0 or timeout == 0:
             # Retrieve first child process that ends. Note that that child
@@ -591,9 +592,7 @@ def wait_for_processes(process_list, timeout):
                     # At the stage we need to set the process status and close
                     # related handles. Indeed we will not be able to use the
                     # wait method afterwards and retrieve it.
-                    process_list[result].status = exit_status
-
-                    process_list[result].close_files()
+                    process_list[result].wait()
                     return result
             time.sleep(1.0)
             remain = timeout - time.time() + start
