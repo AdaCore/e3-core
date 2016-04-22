@@ -44,13 +44,6 @@ def test_not_found():
         assert 'e3-bin-not-found2 not found' in err
 
 
-@pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
-def test_invalid_executable():
-    p = os.path.join(os.path.dirname(__file__), 'invalid.exe')
-    with pytest.raises(WindowsError):
-        e3.os.process.Run([p], timeout=4)
-
-
 def test_enable_commands_handler():
     tempd = tempfile.mkdtemp()
     try:
