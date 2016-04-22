@@ -8,7 +8,7 @@ import os
 if __name__ == '__main__':
     os_name = Env().build.os.name
     script_dir = os.path.abspath(os.path.dirname(__file__))
-    p = Run(['py.test',
+    p = Run(['py.test' + Env().build.os.exeext,
              '--cov-config=%s/coverage_%s.rc' % (script_dir, os_name)] +
             sys.argv[1:],
             output=None,
