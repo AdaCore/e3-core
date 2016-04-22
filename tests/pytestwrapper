@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+from e3.os.process import Run
+from e3.env import Env
+import sys
+import os
+
+
+if __name__ == '__main__':
+    os_name = Env().build.os.name
+    script_dir = os.path.abspath(os.path.dirname(__file__))
+    Run(['py.test',
+         '--cov-config=%s/coverage_%s.rc' % (script_dir, os_name)] +
+        sys.argv[1:],
+        output=None,
+        error=None)

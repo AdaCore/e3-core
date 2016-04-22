@@ -1,0 +1,8 @@
+[run]
+omit =
+    */os/windows/*
+
+[report]
+exclude_lines =
+    unix: no cover
+    darwin: no cover
