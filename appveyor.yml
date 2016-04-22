@@ -5,7 +5,11 @@ install:
 - cmd: >-
     SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
 
-    pip install tox
+    python -m pip install --upgrade pip
+
+    python -m pip install --upgrade virtualenv
+
+    python -m pip install --upgrade tox
 
     mkdir C:\\tmp\\Trash
 build: off
