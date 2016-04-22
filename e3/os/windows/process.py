@@ -35,7 +35,7 @@ def process_exit_code(handle):
 def wait_for_objects(object_list,
                      timeout=0,
                      wait_for_all=False):
-    """Wait until list of object are in signaled state
+    """Wait until list of object are in signaled state.
 
     :param object_list: a list of handles
     :type object_list: list[int]

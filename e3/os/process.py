@@ -422,8 +422,11 @@ class Run(object):
                     not_found(cmd[0])
 
     def wait(self):
-        """Wait until process ends and return its status."""
+        """Wait until process ends and return its status.
 
+        :return: exit code of the process
+        :rtype: int
+        """
         if self.status is not None:
             # Wait has already been called
             return self.status
