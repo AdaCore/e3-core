@@ -576,18 +576,18 @@ def wait_for_processes(process_list, timeout):
                 raise WaitError
 
     else:
-        import e3.os.unix.constant
-        # Choose between blocking or non-blocking call to wait3
-        wait3_option = e3.os.unix.constant.WNOWAIT
+        import e3.os.unix.process
+        # Choose between blocking or non-blocking call to wait
+        blocking = True
         if timeout != 0:
-            wait3_option |= e3.os.unix.constant.WNOHANG
+            blocking = False
 
         while remain >= 0.0 or timeout == 0:
             # Retrieve first child process that ends. Note that that child
             # process might not be in our watch list
-            pid, exit_status, resource_usage = os.wait3(wait3_option)
+            pid = e3.os.unix.process.wait(blocking)
 
-            if (pid, exit_status) != (0, 0):
+            if pid != 0:
                 # We have a result
                 result = next((index for index, p in
                                enumerate(process_list) if p.pid == pid), None)
