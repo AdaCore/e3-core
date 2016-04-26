@@ -48,8 +48,8 @@ setup(
     install_requires=install_requires,
     entry_points={
         'e3.anod.sandbox.sandbox_action': [
-            'create = e3.anod.sandbox:SandBoxCreate',
-            'show-config = e3.anod.sandbox:SandBoxShowConfiguration',
+            'create = e3.anod.sandbox.action:SandBoxCreate',
+            'show-config = e3.anod.sandbox.action:SandBoxShowConfiguration',
         ],
         'e3.store': [
             'http-simple-store = e3.store.backends.'
@@ -63,5 +63,5 @@ setup(
         ],
         'console_scripts': [
             'e3 = e3.sys:main',
-            'e3-sandbox = e3.anod.sandbox:main',
+            'e3-sandbox = e3.anod.sandbox.main:main',
         ]})
