@@ -13,7 +13,7 @@ def timezone():
     :return: offset from utc in hours
     :rtype: float
     """
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         from ctypes import windll, Structure, pointer
         from ctypes.wintypes import DWORD, WCHAR, LONG
 

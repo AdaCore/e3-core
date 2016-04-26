@@ -80,7 +80,7 @@ def set_python_env(prefix):
     """
     import e3.env
     env = e3.env.Env()
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         env.add_path(prefix)
         env.add_path(os.path.join(prefix, 'Scripts'))
     else:
@@ -99,7 +99,7 @@ def interpreter(prefix=None):
     """
     if prefix is None:
         return sys.executable
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         return os.path.join(prefix, 'python.exe')
     else:
         return os.path.join(prefix, 'bin', 'python')
@@ -117,12 +117,12 @@ def python_script(name, prefix=None):
     :rtype: list[str]
     """
     if prefix is None:
-        if sys.platform == 'win32':
+        if sys.platform == 'win32':  # unix: no cover
             prefix = os.path.dirname(sys.executable)
         else:
             prefix = os.path.dirname(os.path.dirname(sys.executable))
 
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         script = os.path.join(prefix, 'Scripts', name)
         if os.path.isfile(script + '.exe'):
             return [script + '.exe']

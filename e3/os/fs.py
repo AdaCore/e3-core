@@ -158,7 +158,7 @@ def df(path, full=False):
     """
     _ntuple_diskusage = collections.namedtuple(
         'usage', 'total used free')
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         import ctypes
         path = ctypes.c_wchar_p(path)
         GetDiskFreeSpaceEx = ctypes.WINFUNCTYPE(
@@ -205,7 +205,7 @@ def __safe_unlink_func():
     error. The typical scenario is when you spawn an executable and try to
     delete it just afterward.
     """
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         from e3.os.windows.fs import NTFile
 
         def win_rm(x):
@@ -265,7 +265,7 @@ def max_path():
     :return: the maximum length
     :rtype: int
     """
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         from ctypes.wintypes import MAX_PATH
         return MAX_PATH
     else:
@@ -311,7 +311,7 @@ def unixpath(path):
     On Unix systems this function is identity. On Win32 systems it removes
     drive letter information and replace \\ by /.
     """
-    if path and sys.platform == 'win32':
+    if path and sys.platform == 'win32':  # unix: no cover
         # Cygpath is not available so just replace \ by / and remove drive
         # information. This should work in most cases
         result = path.replace('\\', '/')
@@ -344,7 +344,7 @@ def which(prog, paths=None, default=''):
 
     def possible_names(file_path):
         names = [file_path]
-        if sys.platform == 'win32':
+        if sys.platform == 'win32':  # unix: no cover
             names.extend([file_path + ext for ext in
                           os.environ.get('PATHEXT', '').split(';')])
         return names

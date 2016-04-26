@@ -361,7 +361,7 @@ def rm(path, recursive=False, glob=True):
             # able to remove these files. On Unix don't do that as
             # we got some strange unicode "ascii codec" errors
             # (need some further investigation at some point)
-            if sys.platform == 'win32':
+            if sys.platform == 'win32':  # unix: no cover
                 f = unicode(f)
 
             if recursive and os.path.isdir(f):

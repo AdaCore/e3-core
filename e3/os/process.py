@@ -276,7 +276,7 @@ class Run(object):
                             interpreter_cmds[2:] + cmd_line
                     else:
                         return [python_executable] + cmd_line
-                elif sys.platform == 'win32':
+                elif sys.platform == 'win32':  # unix: no cover
                     if interpreter_cmds[0] == '/usr/bin/env':
                         return interpreter_cmds[1:] + cmd_line
                     elif interpreter_cmds[0] in ('/bin/bash', '/bin/sh') and \
@@ -550,7 +550,7 @@ def wait_for_processes(process_list, timeout):
     start = time.time()
     remain = timeout
 
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         from e3.os.windows.process import process_exit_code, wait_for_objects
 
         handles = [int(p.internal._handle) for p in process_list]
@@ -610,7 +610,7 @@ def is_running(pid):
 
     :rtype: bool
     """
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         from e3.os.windows.native_api import Access, NT
         from e3.os.windows.process import process_exit_code
         handle = NT.OpenProcess(Access.PROCESS_QUERY_INFORMATION, False, pid)
@@ -655,7 +655,7 @@ def which(prog, paths=None, default=''):
 
     def possible_names(exe_fpath):
         names = [exe_fpath]
-        if sys.platform == 'win32':
+        if sys.platform == 'win32':  # unix: no cover
             names.extend([exe_fpath + ext for ext in
                           os.environ.get('PATHEXT', '').split(';')])
         return names
@@ -692,7 +692,7 @@ def kill_processes_with_handle(path):
         purposes)
     :rtype: str
     """
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # unix: no cover
         path = re.sub('^[a-zA-Z]:(.*)', r'\1', path).replace('/', '\\')
         mod_dir = os.path.dirname(__file__)
         handle_path = os.path.abspath(
