@@ -69,7 +69,7 @@ class Main(object):
             action='count',
             default=0,
             help='make the log outputted on the console more verbose (this '
-                 'sets the log level to RAW)')
+                 'sets the log level to DEBUG)')
         log_group.add_argument(
             '--log-file',
             metavar='FILE',
@@ -80,7 +80,6 @@ class Main(object):
             default=logging.INFO,
             help='set the console log level',
             choices={
-                'RAW': e3.log.RAW,
                 'DEBUG': logging.DEBUG,
                 'INFO': logging.INFO,
                 'ERROR': logging.ERROR,
@@ -151,7 +150,7 @@ class Main(object):
         if not self.__log_handlers_set:
             # First set level of verbosity
             if self.args.verbose:
-                level = e3.log.RAW
+                level = logging.DEBUG
             else:
                 level = self.args.loglevel
 
