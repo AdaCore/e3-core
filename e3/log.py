@@ -140,7 +140,7 @@ def getLogger(name=None, prefix='e3'):
     return logger
 
 
-def __add_handlers(level, fmt=None, filename=None):
+def __add_handlers(level, fmt, filename=None):
     """Add handlers with support for 'RAW' logging.
 
     :param level: set the root logger level to the specified level
