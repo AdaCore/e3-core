@@ -5,6 +5,7 @@ from __future__ import print_function
 import logging
 import types
 import sys
+import time
 
 # Define a new log level for which level number is lower then DEBUG. This is
 # used to log output from a spawned subprocess
@@ -159,8 +160,8 @@ def __add_handlers(level, fmt, filename=None):
         handler = logging.FileHandler(filename)
         default_output_stream = handler.stream
 
-    if fmt is not None:
-        handler.setFormatter(fmt)
+    fmt.converter = time.gmtime
+    handler.setFormatter(fmt)
 
     if level <= RAW:
         handler.setLevel(logging.DEBUG)
