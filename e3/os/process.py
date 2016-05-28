@@ -17,6 +17,7 @@ import time
 
 import e3.log
 import e3.env
+from e3.os.fs import which
 
 logger = e3.log.getLogger('os.process')
 
@@ -632,53 +633,6 @@ def is_running(pid):
             # If the process is not found, errno will be set to ESRCH
             return e.errno != errno.ESRCH
         return True
-
-
-def which(prog, paths=None, default=''):
-    """Locate executable.
-
-    :param prog: program to find
-    :type prog: str
-    :param paths: if not None then we use this value instead of PATH to look
-        for the executable.
-    :type paths: str | None
-    :param default: default value to return if not found
-    :type default: str | None | T
-
-    :return: absolute path to the program on success, found by searching for an
-      executable in the directories listed in the environment variable PATH
-      or default value if not found
-    :rtype: str | None | T
-    """
-    def is_exe(exe_fpath):
-        return os.path.isfile(exe_fpath) and os.access(exe_fpath, os.X_OK)
-
-    def possible_names(exe_fpath):
-        names = [exe_fpath]
-        if sys.platform == 'win32':  # unix: no cover
-            names.extend([exe_fpath + ext for ext in
-                          os.environ.get('PATHEXT', '').split(';')])
-        return names
-
-    fpath, fname = os.path.split(prog)
-    if fpath:
-        # Full path given, check if executable
-        for progname in possible_names(prog):
-            if is_exe(progname):
-                return progname
-    else:
-        # Check for all directories listed in $PATH
-        if paths is None:
-            paths = os.environ["PATH"]
-
-        for pathdir in paths.split(os.pathsep):
-            exe_file = os.path.join(pathdir, prog)
-            for progname in possible_names(exe_file):
-                if is_exe(progname):
-                    return progname
-
-    # Not found.
-    return default
 
 
 def kill_processes_with_handle(path):
