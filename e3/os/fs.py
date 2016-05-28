@@ -349,7 +349,7 @@ def which(prog, paths=None, default=''):
                           os.environ.get('PATHEXT', '').split(';')])
         return names
 
-    fpath, fname = os.path.split(prog)
+    fpath, _ = os.path.split(prog)
     if fpath:
         # Full path given, check if executable
         for progname in possible_names(prog):
