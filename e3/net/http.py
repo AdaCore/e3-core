@@ -109,7 +109,8 @@ class HTTPSession(object):
                             response.iter_content(self.CHUNK_SIZE),
                             expected_size=expected_size):
                         fd.write(chunk)
-                return path
+                if validate is None or validate(path):
+                    return path
             except (socket.timeout, requests.exceptions.RequestException,
                     requests.packages.urllib3.exceptions.HTTPError) as e:
                 # An error (timeout?) occurred while downloading the file

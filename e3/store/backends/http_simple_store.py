@@ -56,11 +56,5 @@ class HTTPSimpleStore(Store):
         :rtype: str
         """
         with HTTPSession() as http:
-            path = http.download_file(metadata.url, dest)
-            if path is None:
-                return None
-            elif not metadata.verify(path):
-                # Error when downloading the resource?
-                return None
-            else:
-                return path
+            return http.download_file(
+                metadata.url, dest, validate=metadata.verify)
