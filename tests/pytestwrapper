@@ -8,9 +8,13 @@ import os
 if __name__ == '__main__':
     os_name = Env().build.os.name
     script_dir = os.path.abspath(os.path.dirname(__file__))
-    p = Run(['py.test' + Env().build.os.exeext,
-             '--cov-config=%s/coverage_%s.rc' % (script_dir, os_name)] +
-            sys.argv[1:],
+    cmd = ['py.test' + Env().build.os.exeext]
+
+    if '--cov' in sys.argv[1:]:
+        cmd.append(
+            '--cov-config=%s/coverage_%s.rc' % (script_dir, os_name))
+
+    p = Run(cmd + sys.argv[1:],
             output=None,
             error=None)
     sys.exit(p.status)
