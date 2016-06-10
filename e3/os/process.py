@@ -603,7 +603,7 @@ def wait_for_processes(process_list, timeout):
                     # Process is exiting so finalize it by calling wait
                     process_list[idx].wait()
                     return idx
-            except WindowsError:
+            except OSError:
                 raise WaitError
 
     else:
