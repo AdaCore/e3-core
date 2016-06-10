@@ -32,6 +32,16 @@ STDOUT = subprocess.STDOUT
 PIPE = subprocess.PIPE
 
 
+# Use psutil.Popen when available to get psutil.Process properties and
+# methods available in Run.internal
+try:
+    import psutil
+    from psutil import Popen
+except ImportError:
+    from subprocess import Popen
+    psutil = None
+
+
 def subprocess_setup():
     """Reset SIGPIPE handler.
 
@@ -335,7 +345,7 @@ class Run(object):
                     # preexec_fn is no supported on windows
                     popen_args['preexec_fn'] = subprocess_setup
 
-                self.internal = subprocess.Popen(self.cmds, **popen_args)
+                self.internal = Popen(self.cmds, **popen_args)
 
             else:
                 runs = []
@@ -368,7 +378,7 @@ class Run(object):
                         # preexec_fn is no supported on windows
                         popen_args['preexec_fn'] = subprocess_setup
 
-                    runs.append(subprocess.Popen(cmd, **popen_args))
+                    runs.append(Popen(cmd, **popen_args))
                     self.internal = runs[-1]
 
         except Exception as e:
@@ -478,6 +488,26 @@ class Run(object):
     def kill(self):
         """Kill the process."""
         self.internal.kill()
+
+    def is_running(self):
+        """Check whether the process is running.
+
+        :rtype: bool
+        """
+        if psutil is None:
+            # psutil not imported, use our is_running function
+            return is_running(self.pid)
+        else:
+            return self.internal.is_running()
+
+    def children(self):
+        """Return list of child processes (using psutil).
+
+        :rtype: list[psutil.Process]
+        """
+        if psutil is None:
+            raise NotImplementedError('Run.children() require psutil')
+        return self.internal.children()
 
 
 class File(object):
