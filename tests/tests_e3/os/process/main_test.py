@@ -50,8 +50,8 @@ def test_enable_commands_handler():
         log_file = os.path.join(tempd, 'cmds.log')
         h = e3.os.process.enable_commands_handler(log_file)
         try:
-            e3.os.process.Run([sys.executable, '-c', 'print "dummy"'])
-            e3.os.process.Run([sys.executable, '-c', 'print "dummy2"'])
+            e3.os.process.Run([sys.executable, '-c', 'print("dummy")'])
+            e3.os.process.Run([sys.executable, '-c', 'print("dummy2")'])
         finally:
             e3.os.process.disable_commands_handler(h)
 
@@ -67,10 +67,10 @@ def test_enable_commands_handler():
                      reason="unix implem not complete")
 def test_wait_for_processes():
     p1 = e3.os.process.Run([sys.executable, '-c',
-                            'import time; time.sleep(3); print "process1"'],
+                            'import time; time.sleep(3); print("process1")'],
                            bg=True)
     p2 = e3.os.process.Run([sys.executable, '-c',
-                            'import time; time.sleep(4); print "process2"'],
+                            'import time; time.sleep(4); print("process2")'],
                            bg=True)
 
     process_list = [p1, p2]
@@ -86,9 +86,9 @@ def test_wait_for_processes():
 
 def test_run_pipe():
     p = e3.os.process.Run(
-        [[sys.executable, '-c', 'print "dummy"'],
+        [[sys.executable, '-c', 'print("dummy")'],
          [sys.executable, '-c',
-          'import sys; print sys.stdin.read().replace("y", "ies")']])
+          'import sys; print(sys.stdin.read().replace("y", "ies"))']])
     assert p.status == 0
     assert p.out.strip() == 'dummies'
 
@@ -105,7 +105,7 @@ def test_poll():
     import time
     result = e3.os.process.Run(
         [sys.executable, '-c',
-         'import time; time.sleep(1); print "process"'], bg=True)
+         'import time; time.sleep(1); print("process")'], bg=True)
 
     assert result.poll() is None
     time.sleep(2)
@@ -124,11 +124,11 @@ def test_file_redirection():
     try:
         p_out = os.path.join(tempd, 'p.out')
         result = e3.os.process.Run(
-            [sys.executable, '-c', 'print "dummy"'],
+            [sys.executable, '-c', 'print("dummy")'],
             input=None,
             output=p_out,
             error=e3.os.process.STDOUT)
-        with open(p_out, 'rb') as fd:
+        with open(p_out) as fd:
             content = fd.read().strip()
         assert result.status == 0
         assert content == 'dummy'
@@ -140,9 +140,9 @@ def test_output_append():
     tempd = tempfile.mkdtemp()
     try:
         p_out = os.path.join(tempd, 'p.out')
-        e3.os.process.Run([sys.executable, '-c', 'print "line1"'],
+        e3.os.process.Run([sys.executable, '-c', 'print("line1")'],
                           output=p_out)
-        e3.os.process.Run([sys.executable, '-c', 'print "line2"'],
+        e3.os.process.Run([sys.executable, '-c', 'print("line2")'],
                           output="+" + p_out)
         with open(p_out, 'r') as fd:
             content = fd.read().strip()
@@ -154,7 +154,7 @@ def test_output_append():
 def test_pipe_input():
     p = e3.os.process.Run([sys.executable,
                            '-c',
-                           'import sys; print sys.stdin.read()'],
+                           'import sys; print(sys.stdin.read())'],
                           input='|dummy')
     assert p.out.strip() == 'dummy'
 

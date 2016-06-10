@@ -129,7 +129,7 @@ def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
         for line in f:
             if line_buffer:
                 # We got a patch start. Now check the next line
-                m2 = re.search(r'^[\+-]{3} ([^ \n\t]+)', line)
+                m2 = re.search(br'^[\+-]{3} ([^ \n\t]+)', line)
                 if m2 is not None:
                     discard = False
                     if callable(discarded_files):
@@ -142,6 +142,8 @@ def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
                                 break
                     else:
                         for pattern in discarded_files:
+                            if isinstance(pattern, unicode):
+                                pattern = pattern.encode('utf-8')
                             for fn in (line_buffer[1].group(1), m2.group(1)):
                                 if fn != '/dev/null' and fnmatch.fnmatch(
                                         fn, pattern):
@@ -157,11 +159,11 @@ def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
             else:
                 # Find lines starting with '*** filename' (contextual diff) or
                 # with '--- filename' (unified diff)
-                m = re.search(r'^[\*-]{3} ([^ \t\n]+)', line)
+                m = re.search(br'^[\*-]{3} ([^ \t\n]+)', line)
                 if m is not None:
                     # Ensure this is not a hunk start of the form
                     # '*** n,m ****' or '--- n,m ----'
-                    if not re.search(r'[\*-]{4}$', line):
+                    if not re.search(br'[\*-]{4}$', line):
                         # We have a patch start. Get the next line that
                         # contains other possibility for the filename
                         line_buffer = (line, m)

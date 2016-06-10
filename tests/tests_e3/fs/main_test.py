@@ -104,7 +104,7 @@ def test_tree_state():
         assert isinstance(state, str)
 
         e3.fs.sync_tree(d, os.path.join(tempd))
-        state2 = e3.fs.get_filetree_state(unicode(tempd))
+        state2 = e3.fs.get_filetree_state(tempd)
         assert state != state2
 
         state3 = e3.fs.get_filetree_state(tempd)
