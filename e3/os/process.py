@@ -696,3 +696,63 @@ def kill_processes_with_handle(path):
         return msg
     else:
         return ''
+
+
+def kill_process_tree(pid, timeout=3):
+    """Kill a hierarchy of processes.
+
+    :param pid: pid of the toplevel process
+    :type pid: int | psutil.Process
+    :return: True if all processes either don't exist or have been killed,
+        False if there are some processes still alive.
+    :rtype: bool
+    """
+    import psutil
+
+    if isinstance(pid, psutil.Process):
+        parent_process = pid
+    else:
+        try:
+            parent_process = psutil.Process(pid)
+        except psutil.NoSuchProcess as err:
+            e3.log.debug(err)
+            return True
+
+    logger.debug('kill_process_tree %s', parent_process)
+
+    def kill_process(proc):
+        """Kill a process, catching all psutil exceptions.
+
+        :param proc: process to kill
+        :type proc: psutil.Process
+        """
+        try:
+            logger.debug('kill_process_tree %s', pid)
+            proc.kill()
+            logging.info('%s process killed pid:%s (%s)',
+                         'parent' if proc.pid == pid else 'child',
+                         proc.pid,
+                         proc.cmdline())
+        except psutil.Error as err:
+            e3.log.debug(err)
+            pass
+
+    try:
+        children = parent_process.children(recursive=True)
+    except psutil.NoSuchProcess as err:
+        e3.log.debug(err)
+        return True
+
+    # Kill the parent first to not let him spawn new child processes
+    kill_process(parent_process)
+
+    for child_process in children:
+        kill_process(child_process)
+
+    try:
+        psutil.wait_procs(children, timeout=timeout)
+        parent_process.wait(timeout=timeout)
+        return True
+    except psutil.TimeoutExpired as err:
+        e3.log.debug(err)
+        return False

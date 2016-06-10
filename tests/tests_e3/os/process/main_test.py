@@ -5,6 +5,7 @@ import os
 import pytest
 import tempfile
 import sys
+import time
 
 
 def test_run_shebang():
@@ -178,3 +179,31 @@ def test_is_running():
 
     p.wait()
     assert p.status == 0
+
+
+def test_kill_process_tree():
+    p1 = e3.os.process.Run(
+        [sys.executable, '-c',
+         'import time; time.sleep(10); import sys; sys.exit(2)'],
+        bg=True)
+    e3.os.process.kill_process_tree(p1.pid)
+    p1.wait()
+    assert p1.status != 2
+
+    p2 = e3.os.process.Run(
+        [sys.executable, '-c',
+         'import e3.os.process; import time; import sys;'
+         ' e3.os.process.Run([sys.executable, "-c",'
+         ' "import time; time.sleep(10)"]);'
+         'time.sleep(10)'],
+        bg=True)
+    time.sleep(1)
+    p2_children = p2.children()
+    assert len(p2_children) == 1
+    e3.os.process.kill_process_tree(p2.pid)
+    p2.wait()
+
+    assert not p1.is_running()
+    assert not p2.is_running()
+    for p in p2_children:
+        assert not p.is_running()
