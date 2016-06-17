@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from datetime import datetime
 
 import os
 import sys
@@ -18,12 +19,16 @@ if sys.platform in ('linux2', 'linux', 'win32', 'darwin'):
 if sys.platform in ('linux', 'linux2'):
     install_requires.append('ld')
 
-# Get e3 version from the VERSION file. This version follows PEP 286:
-# 'N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]'
+# Get e3 version from the VERSION file.
 version_file = os.path.join(os.path.dirname(__file__), 'VERSION')
-
 with open(version_file) as f:
     e3_version = f.read().strip()
+
+# If the version contains only the two first digits, add the date in
+# YYYYMMDD format to create a version following PEP 286:
+# 'N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]'
+if e3_version.count('.') == 1:
+    e3_version = e3_version + '.' + datetime.utcnow().strftime('%Y%m%d')
 
 setup(
     name='e3-core',
