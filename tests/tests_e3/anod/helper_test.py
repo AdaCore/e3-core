@@ -59,7 +59,10 @@ def test_configure():
         ac = AnodConf(qualifier='', kind='build', jobs=10)
         AnodDriver(anod_instance=ac, store=None).activate()
         ac.build_space.create()
-        assert ac.build()['cmd'] == [
+
+        # Configure() can add $CONFIG_SHELL in the command line
+        # Check that the two other arguments are as expected
+        assert ac.build()['cmd'][-2:] == [
             '../src/configure', '--build=%s' % ac.env.build.triplet]
 
     finally:
