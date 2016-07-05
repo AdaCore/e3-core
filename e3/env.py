@@ -234,20 +234,55 @@ class AbstractBaseEnv(object):
         """Set build/host/target.
 
         :param build: string as passed to --build option
-        :type build: str
+        :type build: str | None
         :param host: string as passed to --host
-        :type host: str
+        :type host: str | None
         :param target: string as passed to --target
-        :type target: str
+        :type target: str | None
         """
-        # We expect 4 fields for build and host and target
-        build_opts = [k if k else None for k in build.split(',')][0:4]
-        host_opts = [k if k else None for k in host.split(',')][0:4]
-        target_opts = [k if k else None for k in target.split(',')][0:4]
+        saved_build = self.build
+        saved_host = self.host
+        saved_target = self.target
 
-        self.set_build(*build_opts)
-        self.set_host(*host_opts)
-        self.set_target(*target_opts)
+        def get_platform(value):
+            """Platform based on string value
+
+            :param value: a string representing a platform or None
+            :type value: str | None
+            :rtype: a Platform instance or None
+            """
+            if value is None:
+                return None
+
+            # We expect 4 fields for build and host and target
+            split_value = [k if k else None for k in value.split(',')][0:4]
+
+            if split_value[0] == 'build':
+                return saved_build
+            elif split_value[0] == 'host':
+                return saved_host
+            elif split_value[0] == 'target':
+                return saved_target
+            else:
+                return Platform.get(*split_value)
+
+        # Retrieve final values for build, host and target
+        build_opts = get_platform(build)
+        host_opts = get_platform(host)
+        target_opts = get_platform(target)
+
+        # Apply new build, host and target in the right order
+        if build_opts is not None:
+            self.build = build_opts
+            self.host = build_opts
+            self.target = build_opts
+
+        if host_opts is not None:
+            self.host = host_opts
+            self.target = host_opts
+
+        if target_opts is not None:
+            self.target = target_opts
 
     def cmd_triplet(self):
         """Return command line parameters corresponding to current env.
