@@ -3,10 +3,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 from platform import uname as platform_uname
 from collections import namedtuple
+
 import re
 
 import e3.log
-from e3.platform_db import HOST_GUESS, CPU_INFO, OS_INFO
+from e3.platform_db import get_knowledge_base
+
+KNOWLEDGE_BASE = get_knowledge_base()
 
 UNKNOWN = 'unknown'
 
@@ -138,7 +141,7 @@ class SystemInfo(object):
         if cls.uname is None:
             cls.fetch_system_data()
 
-        result = [p for p, v in HOST_GUESS.iteritems()
+        result = [p for p, v in KNOWLEDGE_BASE.host_guess.iteritems()
                   if cls.uname.system == v['os'] and
                   (v['cpu'] is None or
                    re.match(v['cpu'], cls.uname.machine) or
@@ -289,12 +292,12 @@ class CPU(namedtuple('CPU', ['name', 'bits', 'endian', 'cores'])):
         :param compute_cores: if True compute the number of cores
         :type compute_cores: bool
         """
-        assert name in CPU_INFO, "invalid cpu name"
-        bits = CPU_INFO[name]['bits']
+        assert name in KNOWLEDGE_BASE.cpu_info, "invalid cpu name"
+        bits = KNOWLEDGE_BASE.cpu_info[name]['bits']
         cores = 1
 
         if endian is None:
-            endian = CPU_INFO[name]['endian']
+            endian = KNOWLEDGE_BASE.cpu_info[name]['endian']
         if compute_cores:
             cores = SystemInfo.core_number
 
@@ -333,13 +336,13 @@ class OS(namedtuple('OS', ['name', 'version', 'kernel_version', 'exeext',
         :param mode: os mode
         :type mode: str | None
         """
-        is_bareboard = OS_INFO[name]['is_bareboard']
+        is_bareboard = KNOWLEDGE_BASE.os_info[name]['is_bareboard']
         if name.startswith('vxworks') and mode == 'rtp':
             exeext = '.vxe'
         else:
-            exeext = OS_INFO[name]['exeext']
+            exeext = KNOWLEDGE_BASE.os_info[name]['exeext']
 
-        dllext = OS_INFO[name]['dllext']
+        dllext = KNOWLEDGE_BASE.os_info[name]['dllext']
 
         # If version is not given by the user guess it or set it to the
         # default (cross case)
@@ -347,7 +350,7 @@ class OS(namedtuple('OS', ['name', 'version', 'kernel_version', 'exeext',
             if is_host:
                 version, kernel_version = SystemInfo.os_version()
             else:
-                version = OS_INFO[name]['version']
+                version = KNOWLEDGE_BASE.os_info[name]['version']
                 kernel_version = UNKNOWN
         else:
             kernel_version = UNKNOWN

@@ -31,7 +31,7 @@ OS_INFO = {
                 'exeext': '', 'dllext': '.so'},
     'windows': {'is_bareboard': False, 'version': 'XP',
                 'exeext': '.exe', 'dllext': '.dll'},
-    'none': {'is_bareboard': True,  'version': 'unknown',
+    'none': {'is_bareboard': True, 'version': 'unknown',
              'exeext': '', 'dllext': ''}
 }
 
@@ -105,20 +105,20 @@ BUILD_TARGETS = {
 
 HOST_GUESS = {
     # platform : OS (uname[0]), machine (uname[1]), proc (uname[4 or 5])
-    'ppc-aix': {'os': 'AIX',       'cpu': None},
-    'x86_64-darwin': {'os': 'Darwin',    'cpu': 'i386'},
-    'x86-freebsd': {'os': 'FreeBSD',   'cpu': 'i386'},
-    'x86-openbsd': {'os': 'OpenBSD',   'cpu': None},
-    'x86-netbsd': {'os': 'NetBSD',    'cpu': None},
+    'ppc-aix': {'os': 'AIX', 'cpu': None},
+    'x86_64-darwin': {'os': 'Darwin', 'cpu': 'i386'},
+    'x86-freebsd': {'os': 'FreeBSD', 'cpu': 'i386'},
+    'x86-openbsd': {'os': 'OpenBSD', 'cpu': None},
+    'x86-netbsd': {'os': 'NetBSD', 'cpu': None},
     'x86-dragonfly': {'os': 'DragonFly', 'cpu': None},
-    'x86_64-freebsd': {'os': 'FreeBSD',   'cpu': 'amd64'},
-    'x86_64-openbsd': {'os': 'OpenBSD',   'cpu': None},
-    'x86_64-netbsd': {'os': 'NetBSD',    'cpu': None},
+    'x86_64-freebsd': {'os': 'FreeBSD', 'cpu': 'amd64'},
+    'x86_64-openbsd': {'os': 'OpenBSD', 'cpu': None},
+    'x86_64-netbsd': {'os': 'NetBSD', 'cpu': None},
     'x86_64-dragonfly': {'os': 'DragonFly', 'cpu': None},
-    'ppc-linux': {'os': 'Linux',     'cpu': 'powerpc.*|ppc64'},
-    'x86-linux': {'os': 'Linux',     'cpu': 'i.86|pentium'},
-    'x86_64-linux': {'os': 'Linux',     'cpu': 'x86_64'},
-    'sparc-solaris': {'os': 'SunOS',     'cpu': 'sparc'},
-    'x86-solaris': {'os': 'SunOS',     'cpu': 'i386'},
-    'x86-windows': {'os': 'Windows',   'cpu': None}
+    'ppc-linux': {'os': 'Linux', 'cpu': 'powerpc.*|ppc64'},
+    'x86-linux': {'os': 'Linux', 'cpu': 'i.86|pentium'},
+    'x86_64-linux': {'os': 'Linux', 'cpu': 'x86_64'},
+    'sparc-solaris': {'os': 'SunOS', 'cpu': 'sparc'},
+    'x86-solaris': {'os': 'SunOS', 'cpu': 'i386'},
+    'x86-windows': {'os': 'Windows', 'cpu': None}
 }

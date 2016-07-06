@@ -5,7 +5,10 @@ import collections
 
 import e3.os
 import e3.os.platform
-from e3.platform_db import PLATFORM_INFO, BUILD_TARGETS
+from e3.platform_db import get_knowledge_base
+
+
+KNOWLEDGE_BASE = get_knowledge_base()
 
 
 # noinspection PyUnresolvedReferences
@@ -90,7 +93,7 @@ class Platform(
             is_default = platform_name == default_platform
 
         # Fill other attributes
-        pi = PLATFORM_INFO[platform_name]
+        pi = KNOWLEDGE_BASE.platform_info[platform_name]
         cpu = e3.os.platform.CPU.get(
             pi['cpu'], pi.get('endian', None), is_host)
         os = e3.os.platform.OS.get(
@@ -98,7 +101,7 @@ class Platform(
         is_hie = pi['is_hie']
 
         # Find triplet
-        triplet = BUILD_TARGETS[platform_name]['name'] % {
+        triplet = KNOWLEDGE_BASE.build_targets[platform_name]['name'] % {
             'os_version': os.version}
 
         return cls(cpu, os, is_hie, platform_name, triplet,
