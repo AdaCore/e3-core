@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import collections
 import e3.anod.error
+from e3.env import BaseEnv
 
 
 class BuildVar(object):
@@ -79,3 +80,15 @@ class Dependency(object):
                      'installation': 'install',
                      'source_pkg': 'source'}[require]
         self.track = track
+
+    def env(self, parent):
+        """Retrieve env for the dependency.
+
+        :param parent: Anod spec in which the dep was declared
+        :type parent: Anod
+        :return: env object that should be used by the dependency
+        :rtype: BaseEnv
+        """
+        dep_env = BaseEnv(parent.env.build, parent.env.host, parent.env.target)
+        dep_env.set_env(self.build, self.host, self.target)
+        return dep_env
