@@ -40,7 +40,7 @@ class Platform(
 
     @classmethod
     def get(cls, platform_name=None, version=None,
-            machine=None, compute_default=False, mode=None):
+            machine=None, mode=None, compute_default=False):
         """Return a Platform object.
 
         :param platform_name: if None or empty then automatically detect
