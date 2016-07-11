@@ -178,6 +178,14 @@ class DAG(object):
     def __iter__(self):
         return DAGIterator(self)
 
+    def __contains__(self, vertex_id):
+        """Check if a vertex is present in the DAG."""
+        return vertex_id in self.vertex_data
+
+    def __getitem__(self, vertex_id):
+        """Get data associated with a vertex."""
+        return self.vertex_data[vertex_id]
+
     def __or__(self, other):
         """Merge two dags."""
         assert isinstance(other, DAG)
