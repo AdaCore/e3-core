@@ -1,8 +1,123 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
+import ast
+from enum import Enum
 import os
+import re
 import sys
+
+
+class RewriteNodeError(Exception):
+    pass
+
+
+class RewriteImportRule(object):
+    """Rewrite Import node from AST.
+
+    Skip or reject names imported by::
+
+        from <module> import <names>
+
+    or directly::
+
+        import <module>
+    """
+
+    class RuleAction(Enum):
+        reject = 0
+        skip = 1
+
+    def __init__(self, module, name='.*', action=None):
+        """Initialize the object.
+
+        :param module: regexp suitable for re.match() to match against the
+            module name (note that the string is automatically surrounded by
+            ^ and $)
+        :type module: str
+        :param name: regexp suitable for re.match() to match against the names
+            imported via "from <module> import <names>" (note that the
+            string is automatically surrounded by ^ and $)
+        :type name: str
+        :param action: skip (default) to avoid importing the name, or reject
+            to raise a RewriteNodeError
+        :type action: RewriteImportRule.RuleAction
+        :raise: RewriteNodeError
+        """
+        self.module = module
+        self.name = name
+        self.action = action if action is not None else self.RuleAction.skip
+
+    def rewrite_node(self, node):
+        """Rewrite a node
+
+        :param node: ast node
+        :return: a modified ast node
+        """
+        check_in_names = None
+
+        if isinstance(node, ast.ImportFrom):
+
+            # node: ImportFrom(module, names)
+            # first check whether the module match our rule
+
+            if re.match('^' + self.module + '$', node.module):
+
+                # then we need to check whether our 'name' is in the
+                # 'from' list (node.names)
+
+                check_in_names = self.name
+
+        elif isinstance(node, ast.Import):
+
+            # node: Import(names)
+            # We need to check whether our 'module' appears in the imported
+            # module names
+
+            check_in_names = self.module
+
+        if check_in_names is not None:
+            new_names = []
+            for idx, var in enumerate(node.names):
+                if re.match('^' + check_in_names + '$', var.name):
+                    if self.action == self.RuleAction.skip:
+                        # don't import this name
+                        pass
+                    elif self.action == self.RuleAction.reject:
+                        raise RewriteNodeError(
+                            'Rejected import found in ast: %s' % ast.dump(
+                                node))
+                    else:
+                        raise ValueError('unknown action %s', self.action)
+                else:
+                    new_names.append(var)
+            node.names = new_names
+        return node
+
+
+class RewriteImportNodeTransformer(ast.NodeTransformer):
+    """Walk the AST applying a set of rules.
+
+    Currently only the RewriteImportRule are supported.
+    """
+
+    def __init__(self, rules):
+        """Load a set of rules.
+
+        :param rules: list of rule objects
+        :type rules: list[RewriteImportRule]
+        """
+        self.rules = rules
+
+    def visit_ImportFrom(self, node):
+        for rule in self.rules:
+            node = rule.rewrite_node(node)
+        return node
+
+    def visit_Import(self, node):
+        for rule in self.rules:
+            node = rule.rewrite_node(node)
+        return node
 
 
 def version():
