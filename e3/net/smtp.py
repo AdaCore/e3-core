@@ -14,7 +14,7 @@ logger = e3.log.getLogger('net.smtp')
 system_sendmail_fallback = False
 
 
-def sendmail(from_email, to_emails, mail_as_string, smtp_server,
+def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
              max_size=20, message_id=None):
     """Send an email with stmplib.
 
@@ -27,8 +27,9 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_server,
     :type to_emails: list[str]
     :param mail_as_string: the message to send (with headers)
     :type mail_as_string: str
-    :param smtp_server: the smtp server name (hostname)
-    :type smtp_server: str
+    :param smtp_servers: list of smtp server names (hostname), in case of
+       exception on a server, the next server in the list will be tried
+    :type smtp_servers: list[str]
     :param max_size: do not send the email via smptlib if bigger than
         'max_size' Mo.
     :type max_size: int
@@ -66,34 +67,37 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_server,
 
     result = False
 
-    try:
-        s = smtplib.SMTP(smtp_server)
-    except (socket.error, smtplib.SMTPException) as e:
-        logger.debug(e)
-        logger.debug('cannot connect to smtp server')
-        result = system_sendmail()
-
-    else:
-
+    for smtp_server in smtp_servers:
         try:
-            if not s.sendmail(from_email, to_emails, mail_as_string):
-                # sendmail returns an empty dictionary if the message
-                # was accepted for delivery to all addresses
-                result = True
+            s = smtplib.SMTP(smtp_server)
         except (socket.error, smtplib.SMTPException) as e:
             logger.debug(e)
-            logger.debug("smtp server error: %s", smtp_server)
-        finally:
+            logger.debug('cannot connect to smtp server %s', smtp_server)
+            continue
+        else:
             try:
-                s.quit()
-            except (socket.error, smtplib.SMTPException):
-                # The message has already been delivered, ignore all errors
-                # when terminating the session.
-                pass
+                if not s.sendmail(from_email, to_emails, mail_as_string):
+                    # sendmail returns an empty dictionary if the message
+                    # was accepted for delivery to all addresses
+                    result = True
+                    break
+                continue
+            except (socket.error, smtplib.SMTPException) as e:
+                logger.debug(e)
+                logger.debug("smtp server error: %s", smtp_server)
+                continue
+            finally:
+                try:
+                    s.quit()
+                    logger.debug("smtp quit")
+                except (socket.error, smtplib.SMTPException):
+                    # The message has already been delivered, ignore all errors
+                    # when terminating the session.
+                    pass
 
-        if not result:
-            logger.warn('sendmail failed, retrying with system sendmail')
-            result = system_sendmail()
+    else:
+        logger.debug('no valid smtp server found')
+        result = system_sendmail()
 
     if result and message_id is not None:
         logger.debug('Message-ID: %s sent successfully', message_id)

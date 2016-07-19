@@ -11,7 +11,7 @@ def test_sendmail():
             from_addr,
             to_addresses,
             msg_as_string,
-            'smtp.localhost')
+            ['smtp.localhost'])
 
         smtp_mock = mock_smtp.return_value
         assert smtp_mock.sendmail.called
