@@ -306,12 +306,15 @@ def rm(path, recursive=False, glob=True):
     Note that the function will not raise an error is there are no file to
     delete.
     """
-    logger.debug('rm %s', str(path))
+    if recursive:
+        logger.debug('rm -r %s', str(path))
+    else:
+        logger.debug('rm %s', str(path))
 
     # We transform the list into a set in order to remove duplicate files in
     # the list
     if glob:
-        file_list = set(ls(path))
+        file_list = set(ls(path, emit_log_record=False))
     else:
         if isinstance(path, basestring):
             file_list = {path}
