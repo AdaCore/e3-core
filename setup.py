@@ -56,6 +56,9 @@ setup(
             'create = e3.anod.sandbox.action:SandBoxCreate',
             'show-config = e3.anod.sandbox.action:SandBoxShowConfiguration',
         ],
+        'e3.event.manager': [
+            'smtp = e3.event.backends.smtp:SMTPEventManager'
+        ],
         'e3.store': [
             'http-simple-store = e3.store.backends.'
             'http_simple_store:HTTPSimpleStore',
