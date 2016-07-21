@@ -82,10 +82,11 @@ from foo.bar2.module3 import name1
                 RewriteImportRule('.*\.bar\..*', 'name2')
             ]
         ).visit(node2)
-        # verify that import a is rejected
+
+    # verify that import a is rejected
     assert "Import(names=[alias(name='a', asname=None)," \
            " alias(name='b', asname=None)," \
-           " alias(name='c', asname=None)])" in err.value.message
+           " alias(name='c', asname=None)])" in str(err.value)
 
     node3 = ast.parse(script, '<string>')
     with pytest.raises(RewriteNodeError) as err3:
@@ -100,4 +101,4 @@ from foo.bar2.module3 import name1
             ]
         ).visit(node3)
     # verify that from foo.bar.module import name2 is rejected
-    assert "module='foo.bar." in err3.value.message
+    assert "module='foo.bar." in str(err3.value)

@@ -37,11 +37,11 @@ def test_cp():
 
         with pytest.raises(e3.fs.FSError) as err:
             e3.fs.cp('*.non_existing', dest2)
-            assert "can't find files matching" in err
+        assert "can't find files matching" in str(err.value)
 
         with pytest.raises(e3.fs.FSError) as err:
             e3.fs.cp([a1, b1], dest2)
-            assert 'target should be a directory' in err
+        assert 'target should be a directory' in str(err.value)
 
         e3.fs.mkdir(dest2)
         e3.fs.cp([a1, b1], dest2)

@@ -26,11 +26,11 @@ def test_qualifier_format():
 
     with pytest.raises(AnodError) as err:
         A(qualifier='a=1', kind='build')
-    assert 'c is required' in err.value.message
+    assert 'c is required' in str(err.value)
 
     with pytest.raises(AnodError) as err:
         A(qualifier='a=1,c,zzz', kind='build')
-    assert 'zzz' in err.value.message
+    assert 'zzz' in str(err.value)
 
 
 def test_simple_spec():
@@ -108,7 +108,7 @@ def test_primitive():
 
         with pytest.raises(AnodError) as err:
             with_primitive2.build()
-            assert 'foobar' in err.message
+        assert 'foobar' in str(err.value)
 
     finally:
         e3.fs.rm(tempd, True)

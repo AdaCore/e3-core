@@ -40,7 +40,7 @@ def test_fingerprint():
     f5 = Fingerprint()
     with pytest.raises(AnodError) as err:
         f5.add('f4', f4)
-    assert 'f4 should be a string' in err.value.message
+    assert 'f4 should be a string' in str(err.value)
 
 
 def test_fingerprint_version():

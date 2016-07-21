@@ -37,12 +37,12 @@ def test_rlimit():
 def test_not_found():
     with pytest.raises(OSError) as err:
         e3.os.process.Run(['e3-bin-not-found'])
-        assert 'e3-bin-not-found not found' in err
+    assert 'e3-bin-not-found not found' in str(err.value)
 
     with pytest.raises(OSError) as err:
         e3.os.process.Run([[sys.executable, '-c', 'pass'],
                            ['e3-bin-not-found2']])
-        assert 'e3-bin-not-found2 not found' in err
+    assert 'e3-bin-not-found2 not found' in str(err.value)
 
 
 def test_enable_commands_handler():
