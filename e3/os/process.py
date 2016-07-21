@@ -1,8 +1,9 @@
 """Suprocesses management.
 
-This module provides some functions and classes to ease spawn of processes
-in blocking or non blocking mode, redirection of its stdout, stderr and stdin.
-It also provides some helpers to check the process status
+This module provides some functions and classes to ease spawn of
+processes in blocking or non blocking mode, redirection of its stdout,
+stderr and stdin. It also provides some helpers to check the process
+status
 """
 from __future__ import absolute_import
 from __future__ import print_function

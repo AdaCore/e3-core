@@ -1,7 +1,7 @@
 """Global environment and platform information support.
 
-This package provide a class called Env used to store global information. Env
-is a singleton so there is in fact only one instance.
+This package provide a class called Env used to store global
+information. Env is a singleton so there is in fact only one instance.
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -245,7 +245,7 @@ class AbstractBaseEnv(object):
         saved_target = self.target
 
         def get_platform(value):
-            """Platform based on string value
+            """Platform based on string value.
 
             :param value: a string representing a platform or None
             :type value: str | None
@@ -532,7 +532,6 @@ class Env(AbstractBaseEnv):
     information. It is set by e3.main when the --build/--host/--target option
     are passed to the command line and can be then changed by calling
     :meth:`set_build`, :meth:`set_host`, and :meth:`set_target`.
-
     """
 
     # class variable that holds the current environment

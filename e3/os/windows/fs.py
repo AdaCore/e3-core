@@ -123,8 +123,8 @@ class NTFile(object):
     def close(self):
         """Close file.
 
-        If a call has been done to open, close the handle associated with the
-        file and reset the handle to None.
+        If a call has been done to open, close the handle associated
+        with the file and reset the handle to None.
         """
         if self.handle:
             NT.Close(self.handle)

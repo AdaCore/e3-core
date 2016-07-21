@@ -13,7 +13,6 @@ class E3Error(Exception):
         :param origin: the name of the function, class, or module having raised
             the exception
         :type origin: str
-
         """
         super(E3Error, self).__init__(message, origin)
         self.origin = origin

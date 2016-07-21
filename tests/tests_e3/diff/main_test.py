@@ -5,7 +5,7 @@ import tempfile
 
 
 def test_non_existing():
-    """Check that a non existing file will be considered as null string"""
+    """Check that a non existing file will be considered as null string."""
     assert e3.diff.diff('foo1', 'foo2') == ''
 
 

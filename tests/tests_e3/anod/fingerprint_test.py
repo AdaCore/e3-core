@@ -44,7 +44,7 @@ def test_fingerprint():
 
 
 def test_fingerprint_version():
-    """Changing the FINGERPRINT_VERSION modify the fingerprint sha1"""
+    """Changing the FINGERPRINT_VERSION modify the fingerprint sha1."""
     import e3.anod.fingerprint
 
     f1 = Fingerprint()
@@ -60,7 +60,7 @@ def test_fingerprint_version():
 
 
 def test_invalid_fingerprint():
-    """A fingerprint value should be hashable"""
+    """A fingerprint value should be hashable."""
     with pytest.raises(AnodError):
         f1 = Fingerprint()
         f1.add('invalid', {})

@@ -49,7 +49,7 @@ class RewriteImportRule(object):
         self.action = action if action is not None else self.RuleAction.skip
 
     def rewrite_node(self, node):
-        """Rewrite a node
+        """Rewrite a node.
 
         :param node: ast node
         :return: a modified ast node
