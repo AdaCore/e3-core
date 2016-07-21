@@ -224,7 +224,7 @@ class MainLoop(object):
                 for slot, worker in enumerate(self.workers):
                     if worker is None:
                         # a worker slot is free so use it for next job
-                        next_id, next_job = self.iterator.next()
+                        next_id, next_job = next(self.iterator)
                         if next_job is None:
                             no_free_item = True
                             break
