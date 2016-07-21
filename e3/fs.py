@@ -601,7 +601,14 @@ def sync_tree(source, target, ignore=None,
             copystat(src, dst)
         else:
             if isdir(dst):
+                # dst directory will be replaced by a file having the same
+                # content as 'src'
                 rm(dst.path, recursive=True, glob=False)
+            elif islink(dst):
+                # dst symlink will be replaced by a file having the same
+                #  content as 'src'
+                rm(dst.path, recursive=False, glob=False)
+
             try:
                 with open(src.path, 'rb') as fsrc:
                     with open(dst.path, 'wb') as fdst:

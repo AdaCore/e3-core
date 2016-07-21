@@ -1,8 +1,10 @@
 import e3.hash
 import e3.fs
+import e3.diff
 import os
 import tempfile
 import pytest
+import sys
 
 
 def test_cp():
@@ -117,5 +119,66 @@ def test_tree_state():
         e3.os.fs.touch(os.path.join(tempd, 'toto'))
         state4 = e3.fs.get_filetree_state(tempd)
         assert state4 != state3
+    finally:
+        e3.fs.rm(tempd, True)
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason='test using symlink')
+def test_sync_tree_with_symlinks():
+    tempd = tempfile.mkdtemp()
+    try:
+        a = os.path.join(tempd, 'a')
+        b = os.path.join(tempd, 'b')
+        m1 = os.path.join(tempd, 'm1')
+        m2 = os.path.join(tempd, 'm2')
+        m3 = os.path.join(tempd, 'm3')
+
+        e3.fs.mkdir(m1)
+        e3.fs.mkdir(m2)
+        e3.fs.mkdir(m3)
+
+        with open(a, 'w') as f:
+            f.write('a')
+
+        with open(b, 'w') as f:
+            f.write('b')
+
+        e3.fs.cp(a, os.path.join(m1, 'c'))
+        os.symlink(b, os.path.join(m2, 'c'))
+        os.symlink(m2, os.path.join(m3, 'c'))
+
+        # we start with m2/c -> b
+        # so m2/c and b points to the same content
+        assert e3.diff.diff(
+            b,
+            os.path.join(m2, 'c')) == ''
+        assert e3.diff.diff(
+            b,
+            os.path.join(m1, 'c'))
+        e3.fs.sync_tree(m1, m2)
+
+        # after the sync tree m1/c = m2/c
+        assert e3.diff.diff(
+            os.path.join(m1, 'c'),
+            os.path.join(m2, 'c')) == ''
+
+        # and m2/c is not a symlink anymore so does not
+        # have the same content as b
+        assert e3.diff.diff(
+            b,
+            os.path.join(m2, 'c'))
+
+        # we start with m3/c -> m2
+        assert os.path.exists(os.path.join(m3, 'c', 'c'))
+        e3.fs.sync_tree(m1, m3)
+        # after the sync tree m1/c = m3/c
+        assert e3.diff.diff(
+            os.path.join(m1, 'c'),
+            os.path.join(m3, 'c')) == ''
+
+        # and m3/c is not a link to m2
+        assert not os.path.exists(os.path.join(m3, 'c', 'c'))
+        assert os.path.exists(os.path.join(m2, 'c'))
+
     finally:
         e3.fs.rm(tempd, True)
