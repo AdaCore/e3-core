@@ -1,5 +1,6 @@
 """Helpers classes and functions for ANOD."""
 
+from __future__ import absolute_import
 import e3.log
 from e3.anod.spec import parse_command
 from e3.anod.error import AnodError
