@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 try:
     from StringIO import StringIO
 except ImportError:

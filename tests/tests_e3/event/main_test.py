@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import e3.event
 import contextlib
 import email

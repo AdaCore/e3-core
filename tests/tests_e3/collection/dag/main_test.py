@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from e3.collection.dag import DAG, DAGIterator, DAGError
 import pytest
 

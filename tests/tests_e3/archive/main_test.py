@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import e3.archive
 import e3.fs
 import e3.log

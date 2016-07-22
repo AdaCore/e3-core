@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from e3.os.fs import touch
 from e3.fs import mkdir
 from e3.fs import rm

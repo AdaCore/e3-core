@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import pytest
 import tempfile
 from e3.env import Env

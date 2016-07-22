@@ -47,7 +47,8 @@ class Event(object):
     def close(self):
         """Close the event. Once done it is not supposed to be modified.
 
-        Calling the method close() allow using it with contexlib.closing()
+        Calling the method close() allow using it with
+        contexlib.closing()
         """
         self.closed = True
 
@@ -68,7 +69,7 @@ class EventManager(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, configuration):
-        """Initialize an EventManager object. """
+        """Initialize an EventManager object."""
         self.configuration = configuration
 
     @abc.abstractmethod
