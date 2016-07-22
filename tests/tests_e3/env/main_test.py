@@ -168,3 +168,20 @@ def test_store():
     assert c.abc == 'one'
     c.restore()
     assert c.abc == 'foo'
+
+
+def test_from_platform_name():
+    e = e3.env.BaseEnv.from_platform_name('arm-linux-linux')
+    assert e.target.platform == 'arm-linux'
+    assert e.build.platform == 'x86-linux'
+    e = e3.env.BaseEnv.from_platform_name('arm-linux-linux64')
+    assert e.target.platform == 'arm-linux'
+    assert e.build.platform == 'x86_64-linux'
+    e = e3.env.BaseEnv.from_platform_name('x86_64-linux-darwin')
+    assert e.target.platform == 'x86_64-linux'
+    assert e.build.platform == 'x86_64-darwin'
+    assert e.is_cross
+    e = e3.env.BaseEnv.from_platform_name('x86_64-linux')
+    assert e.target.platform == 'x86_64-linux'
+    assert e.build.platform == 'x86_64-linux'
+    assert not e.is_cross

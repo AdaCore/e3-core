@@ -472,6 +472,44 @@ class AbstractBaseEnv(object):
             del result[c]
         return result
 
+    @classmethod
+    def from_platform_name(cls, platform):
+        """Return a BaseEnv object from a platform name.
+
+        That's the reverse of platform property
+        """
+        # Is it a native platform?
+        found = False
+        e = BaseEnv()
+        try:
+            # If it is a native then set_build will work
+            e.set_build(platform)
+            found = True
+        except KeyError:
+            # Check whether is this a cross, in that case the platform name is:
+            # <target-platform>-<host os name>[64]
+            target_name, host = platform.rsplit('-', 1)
+            if host == 'darwin':
+                host_cpu = 'x86_64'
+            elif host.endswith('64'):
+                host = host[:-2]
+                host_cpu = 'x86_64'
+            else:
+                host_cpu = 'x86'
+            try:
+                e.set_build('%s-%s' % (host_cpu, host))
+                e.set_target(target_name)
+                found = True
+            except KeyError:
+                # invalid platform name
+                pass
+        if not found:
+            return None
+        else:
+            # Verify that the computed platform is equal to what we had
+            assert e.platform == platform
+            return e
+
 
 class BaseEnv(AbstractBaseEnv):
     """BaseEnv."""
