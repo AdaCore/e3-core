@@ -79,10 +79,13 @@ class AbstractBaseEnv(object):
         :rtype: str
         """
         if self.is_cross:
-            # In cross we need to append '-linux', '-windows' or '-solaris'
-            # Currently we cannot handle the difference between a setup hosted
-            # on x86-linux and x86_64-linux, ... but we don't need it.
-            return self.target.platform + '-' + self.host.os.name
+            # In cross we need to append host information. For backward
+            # compatibility we don't append 64 to darwin host (which is
+            # always 64bits).
+            suffix = self.host.os.name
+            if self.host.cpu.bits == 64 and self.host.os.name != 'darwin':
+                suffix += '64'
+            return self.target.platform + '-' + suffix
         else:
             # In native concept the platform is equivalent to target.platform
             return self.target.platform
