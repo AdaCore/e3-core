@@ -40,7 +40,8 @@ def test_smtp_event():
         if part_type == 'multipart':
             pass
         elif part_type == 'application' and subpart_type == 'json':
-            evdata = json.loads(part.get_payload(decode=True))
+            part_content = part.get_payload(decode=True)
+            evdata = json.loads(part_content.decode('utf-8'))
         elif part.get_filename() == 'test.py':
             attachment_content = part.get_payload(decode=True)
 
@@ -50,4 +51,4 @@ def test_smtp_event():
 
     # attachment content contains this file content, including
     # the previous line
-    assert 'assert attachment_content is not None' in attachment_content
+    assert b'assert attachment_content is not None' in attachment_content
