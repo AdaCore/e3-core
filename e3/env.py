@@ -461,6 +461,7 @@ class AbstractBaseEnv(object):
         result = {k: v for k, v in self._items()}
         result['is_canadian'] = self.is_canadian
         result['is_cross'] = self.is_cross
+        result['platform'] = self.platform
 
         for c in ('host', 'target', 'build'):
             result.update({'%s_%s' % (c, k): v
