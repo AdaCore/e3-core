@@ -1,17 +1,15 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import tempfile
+import os
 
 from e3.anod.driver import AnodDriver
 from e3.anod.helper import Make, Configure, text_replace
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod
-import e3.fs
 
 
 def test_make():
-    tempd = tempfile.mkdtemp()
 
     class AnodMake(Anod):
 
@@ -24,25 +22,20 @@ def test_make():
                     m2.cmdline(['clean', 'install'])['cmd'],
                     m2.cmdline('all')['cmd'])
 
-    try:
-        Anod.sandbox = SandBox()
-        Anod.sandbox.root_dir = tempd
-        Anod.sandbox.create_dirs()
+    Anod.sandbox = SandBox()
+    Anod.sandbox.root_dir = os.getcwd()
+    Anod.sandbox.create_dirs()
 
-        am = AnodMake(qualifier='', kind='build', jobs=10)
-        AnodDriver(anod_instance=am, store=None).activate()
-        am.build_space.create()
-        assert am.build() == (
-            ['make', '-f', '/tmp/makefile', '-j', '10', 'prefix=/foo'],
-            ['make', '-j', '2', 'clean', 'install'],
-            ['make', '-j', '2', 'all'])
-
-    finally:
-        e3.fs.rm(tempd, True)
+    am = AnodMake(qualifier='', kind='build', jobs=10)
+    AnodDriver(anod_instance=am, store=None).activate()
+    am.build_space.create()
+    assert am.build() == (
+        ['make', '-f', '/tmp/makefile', '-j', '10', 'prefix=/foo'],
+        ['make', '-j', '2', 'clean', 'install'],
+        ['make', '-j', '2', 'all'])
 
 
 def test_configure():
-    tempd = tempfile.mkdtemp()
 
     class AnodConf(Anod):
 
@@ -51,31 +44,23 @@ def test_configure():
             c = Configure(self)
             return c.cmdline()
 
-    try:
-        Anod.sandbox = SandBox()
-        Anod.sandbox.root_dir = tempd
-        Anod.sandbox.create_dirs()
+    Anod.sandbox = SandBox()
+    Anod.sandbox.root_dir = os.getcwd()
+    Anod.sandbox.create_dirs()
 
-        ac = AnodConf(qualifier='', kind='build', jobs=10)
-        AnodDriver(anod_instance=ac, store=None).activate()
-        ac.build_space.create()
+    ac = AnodConf(qualifier='', kind='build', jobs=10)
+    AnodDriver(anod_instance=ac, store=None).activate()
+    ac.build_space.create()
 
-        # Configure() can add $CONFIG_SHELL in the command line
-        # Check that the two other arguments are as expected
-        assert ac.build()['cmd'][-2:] == [
-            '../src/configure', '--build=%s' % ac.env.build.triplet]
-
-    finally:
-        e3.fs.rm(tempd, True)
+    # Configure() can add $CONFIG_SHELL in the command line
+    # Check that the two other arguments are as expected
+    assert ac.build()['cmd'][-2:] == [
+        '../src/configure', '--build=%s' % ac.env.build.triplet]
 
 
 def test_text_replace():
-    tempf = tempfile.NamedTemporaryFile(delete=False)
-    tempf.write(b'what who when')
-    tempf.close()
-    try:
-        text_replace(tempf.name, [(b'who', b'replaced')])
-        with open(tempf.name) as f:
-            assert f.read() == 'what replaced when'
-    finally:
-        e3.fs.rm(tempf.name)
+    with open('myfile', 'w') as f:
+        f.write('what who when')
+    text_replace('myfile', [(b'who', b'replaced')])
+    with open('myfile') as f:
+        assert f.read() == 'what replaced when'

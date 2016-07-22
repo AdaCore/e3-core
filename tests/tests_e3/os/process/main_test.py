@@ -3,24 +3,19 @@ import e3.os.fs
 import e3.os.process
 import os
 import pytest
-import tempfile
 import sys
 import time
 
 
 def test_run_shebang():
     """Verify that the parse shebang option works."""
-    tempd = tempfile.mkdtemp(prefix='test_e3_os_process')
-    try:
-        prog_filename = os.path.join(tempd, 'prog')
-        with open(prog_filename, 'wb') as f:
-            f.write(b'#!/usr/bin/env python\n')
-            f.write(b'print("running python prog")\n')
-        e3.os.fs.chmod('a+x', prog_filename)
-        p = e3.os.process.Run([prog_filename], parse_shebang=True)
-        assert p.out == 'running python prog\n'
-    finally:
-        e3.fs.rm(tempd, True)
+    prog_filename = os.path.join(os.getcwd(), 'prog')
+    with open(prog_filename, 'wb') as f:
+        f.write(b'#!/usr/bin/env python\n')
+        f.write(b'print("running python prog")\n')
+    e3.os.fs.chmod('a+x', prog_filename)
+    p = e3.os.process.Run([prog_filename], parse_shebang=True)
+    assert p.out == 'running python prog\n'
 
 
 def test_rlimit():
@@ -46,22 +41,17 @@ def test_not_found():
 
 
 def test_enable_commands_handler():
-    tempd = tempfile.mkdtemp()
+    log_file = 'cmds.log'
+    h = e3.os.process.enable_commands_handler(log_file)
     try:
-        log_file = os.path.join(tempd, 'cmds.log')
-        h = e3.os.process.enable_commands_handler(log_file)
-        try:
-            e3.os.process.Run([sys.executable, '-c', 'print("dummy")'])
-            e3.os.process.Run([sys.executable, '-c', 'print("dummy2")'])
-        finally:
-            e3.os.process.disable_commands_handler(h)
-
-        with open(log_file, 'rb') as fd:
-            lines = fd.read().splitlines()
-        assert len(lines) == 2
-
+        e3.os.process.Run([sys.executable, '-c', 'print("dummy")'])
+        e3.os.process.Run([sys.executable, '-c', 'print("dummy2")'])
     finally:
-        e3.fs.rm(tempd, True)
+        e3.os.process.disable_commands_handler(h)
+
+    with open(log_file, 'rb') as fd:
+        lines = fd.readlines()
+    assert len(lines) == 2
 
 
 @pytest.mark.xfailif(sys.platform != 'win32',
@@ -121,35 +111,27 @@ def test_poll():
 
 
 def test_file_redirection():
-    tempd = tempfile.mkdtemp()
-    try:
-        p_out = os.path.join(tempd, 'p.out')
-        result = e3.os.process.Run(
-            [sys.executable, '-c', 'print("dummy")'],
-            input=None,
-            output=p_out,
-            error=e3.os.process.STDOUT)
-        with open(p_out) as fd:
-            content = fd.read().strip()
-        assert result.status == 0
-        assert content == 'dummy'
-    finally:
-        e3.fs.rm(tempd, True)
+    p_out = 'p.out'
+    result = e3.os.process.Run(
+        [sys.executable, '-c', 'print("dummy")'],
+        input=None,
+        output=p_out,
+        error=e3.os.process.STDOUT)
+    with open(p_out) as fd:
+        content = fd.read().strip()
+    assert result.status == 0
+    assert content == 'dummy'
 
 
 def test_output_append():
-    tempd = tempfile.mkdtemp()
-    try:
-        p_out = os.path.join(tempd, 'p.out')
-        e3.os.process.Run([sys.executable, '-c', 'print("line1")'],
-                          output=p_out)
-        e3.os.process.Run([sys.executable, '-c', 'print("line2")'],
-                          output="+" + p_out)
-        with open(p_out, 'r') as fd:
-            content = fd.read().strip()
-        assert content == "line1\nline2"
-    finally:
-        e3.fs.rm(tempd, True)
+    p_out = 'p.out'
+    e3.os.process.Run([sys.executable, '-c', 'print("line1")'],
+                      output=p_out)
+    e3.os.process.Run([sys.executable, '-c', 'print("line2")'],
+                      output="+" + p_out)
+    with open(p_out, 'r') as fd:
+        content = fd.read().strip()
+    assert content == "line1\nline2"
 
 
 def test_pipe_input():

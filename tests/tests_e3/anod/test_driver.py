@@ -5,9 +5,8 @@ import e3.anod.driver
 import e3.anod.sandbox
 import e3.anod.spec
 
+import os
 import pytest
-
-import tempfile
 
 
 def test_simple_driver():
@@ -24,8 +23,7 @@ def test_simple_driver():
             anod_instance=anod_instance,
             store=None).activate()
 
-    tempd = tempfile.mkdtemp(suffix='pytest-e3-core')
-    sandbox.root_dir = tempd
+    sandbox.root_dir = os.getcwd()
     anod_instance = Simple(
         qualifier='', kind='build')
     anod_instance.sandbox = sandbox

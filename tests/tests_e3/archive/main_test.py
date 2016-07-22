@@ -4,7 +4,6 @@ import e3.log
 import e3.os.fs
 import os
 import pytest
-import tempfile
 
 e3.log.activate()
 
@@ -15,7 +14,8 @@ def test_unpack(ext):
 
     test_dir = os.path.basename(dir_to_pack)
 
-    dest = tempfile.mkdtemp()
+    dest = 'dest'
+    e3.fs.mkdir(dest)
 
     archive_name = 'e3-core' + ext
 

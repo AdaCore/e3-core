@@ -1,7 +1,6 @@
 import e3.diff
 import e3.fs
 import os
-import tempfile
 
 
 def test_non_existing():
@@ -17,22 +16,21 @@ def test_patch():
     file_patch = os.path.join(test_dir, 'patch.txt')
     file_patch2 = os.path.join(test_dir, 'patch2.txt')
 
-    tempd = tempfile.mkdtemp()
-    try:
-        e3.fs.cp(file_to_patch, tempd)
-        e3.diff.patch(file_patch, tempd)
+    current_dir = os.getcwd()
 
-        with open(os.path.join(tempd, 'file_to_patch.orig.txt')) as fd:
-            output = fd.readlines()
+    e3.fs.cp(file_to_patch, current_dir)
+    e3.diff.patch(file_patch, current_dir)
 
-        with open(file_after_patch) as fd:
-            expected = fd.readlines()
+    with open('file_to_patch.orig.txt') as fd:
+        output = fd.readlines()
 
-        assert e3.diff.diff(expected, output) == ''
+    with open(file_after_patch) as fd:
+        expected = fd.readlines()
 
-        e3.diff.patch(file_patch2, tempd,
-                      discarded_files=['dummy_to_patch.new.txt'])
-        assert e3.diff.diff(os.path.join(tempd, 'file_to_patch.orig.txt'),
-                            file_after_patch2) == ''
-    finally:
-        e3.fs.rm(tempd, True)
+    assert e3.diff.diff(expected, output) == ''
+
+    e3.fs.cp(file_patch2, current_dir)
+    e3.diff.patch('patch2.txt', current_dir,
+                  discarded_files=['dummy_to_patch.new.txt'])
+    assert e3.diff.diff('file_to_patch.orig.txt',
+                        file_after_patch2) == ''

@@ -5,11 +5,8 @@ from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError
 from e3.anod.spec import Anod, has_primitive
 from e3.anod.sandbox import SandBox
-import e3.log
-import e3.fs
 
 import os
-import tempfile
 import pytest
 
 
@@ -86,29 +83,23 @@ def test_primitive():
     with_primitive = WithPrimitive('', 'build')
     with_primitive2 = WithPrimitive('error=foobar', 'build')
 
-    tempd = tempfile.mkdtemp()
+    Anod.sandbox = SandBox()
+    Anod.sandbox.root_dir = os.getcwd()
+    Anod.sandbox.spec_dir = os.path.join(
+        os.path.dirname(__file__),
+        'data')
+    Anod.sandbox.create_dirs()
+    # Activate the logging
+    AnodDriver(anod_instance=with_primitive, store=None).activate()
+    AnodDriver(anod_instance=with_primitive2, store=None).activate()
 
-    try:
-        Anod.sandbox = SandBox()
-        Anod.sandbox.root_dir = tempd
-        Anod.sandbox.spec_dir = os.path.join(
-            os.path.dirname(__file__),
-            'data')
-        Anod.sandbox.create_dirs()
-        # Activate the logging
-        AnodDriver(anod_instance=with_primitive, store=None).activate()
-        AnodDriver(anod_instance=with_primitive2, store=None).activate()
+    with_primitive.build_space.create()
 
-        with_primitive.build_space.create()
+    assert has_primitive(with_primitive, 'build') is True
+    assert with_primitive.build() == 3
 
-        assert has_primitive(with_primitive, 'build') is True
-        assert with_primitive.build() == 3
+    with_primitive2.build_space.create()
 
-        with_primitive2.build_space.create()
-
-        with pytest.raises(AnodError) as err:
-            with_primitive2.build()
-        assert 'foobar' in str(err.value)
-
-    finally:
-        e3.fs.rm(tempd, True)
+    with pytest.raises(AnodError) as err:
+        with_primitive2.build()
+    assert 'foobar' in str(err.value)

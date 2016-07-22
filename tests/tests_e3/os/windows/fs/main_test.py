@@ -1,7 +1,6 @@
 from e3.os.fs import touch
 from e3.fs import mkdir
 from e3.fs import rm
-from tempfile import mkdtemp
 from datetime import datetime, timedelta
 import os
 import pytest
@@ -16,70 +15,60 @@ if sys.platform == 'win32':
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_read_attributes():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, 'test_read_attr_file.txt')
     touch(test_file_path)
-    try:
-        ntfile = NTFile(test_file_path)
-        ntfile.read_attributes()
-        assert datetime.now() - \
-            ntfile.basic_info.creation_time.as_datetime < \
-            timedelta(seconds=10)
-    finally:
-        rm(work_dir, recursive=True)
+    ntfile = NTFile(test_file_path)
+    ntfile.read_attributes()
+    assert datetime.now() - \
+        ntfile.basic_info.creation_time.as_datetime < \
+        timedelta(seconds=10)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_write_attributes():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, 'test_write_attr_file.txt')
     touch(test_file_path)
+    ntfile = NTFile(test_file_path)
+    ntfile.read_attributes()
+    ntfile.open(Access.READ_ATTRS)
+    ntfile.basic_info.change_time = FileTime(
+        datetime.now() - timedelta(seconds=3600))
     try:
-        ntfile = NTFile(test_file_path)
-        ntfile.read_attributes()
-        ntfile.open(Access.READ_ATTRS)
-        ntfile.basic_info.change_time = FileTime(datetime.now() -
-                                                 timedelta(seconds=3600))
-        try:
-            with pytest.raises(NTException):
-                ntfile.write_attributes()
-        finally:
-            ntfile.close()
-        ntfile.basic_info.change_time = FileTime(datetime.now() -
-                                                 timedelta(days=3))
-        ntfile.write_attributes()
-        assert datetime.now() - \
-            ntfile.basic_info.change_time.as_datetime > \
-            timedelta(seconds=3000)
+        with pytest.raises(NTException):
+            ntfile.write_attributes()
     finally:
-        rm(work_dir, recursive=True)
+        ntfile.close()
+    ntfile.basic_info.change_time = FileTime(
+        datetime.now() - timedelta(days=3))
+    ntfile.write_attributes()
+    assert datetime.now() - \
+        ntfile.basic_info.change_time.as_datetime > \
+        timedelta(seconds=3000)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_uid():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, 'test_uid.txt')
     touch(test_file_path)
-    try:
-        ntfile = NTFile(test_file_path)
-        ntfile.read_attributes()
-        assert ntfile.uid > 0
+    ntfile = NTFile(test_file_path)
+    ntfile.read_attributes()
+    assert ntfile.uid > 0
 
-        ntfile2 = NTFile(os.path.join(work_dir, 'non_existing.txt'))
+    ntfile2 = NTFile(os.path.join(work_dir, 'non_existing.txt'))
 
-        with pytest.raises(NTException):
-            ntfile2.uid
-
-    finally:
-        rm(work_dir, recursive=True)
+    with pytest.raises(NTException):
+        ntfile2.uid
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_open_file_in_dir():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, 'dir')
     mkdir(test_dir_path)
@@ -92,91 +81,75 @@ def test_open_file_in_dir():
     finally:
         ntfile.close()
         ntfile2.close()
-        rm(work_dir, recursive=True)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_volume_path():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, 'test_vpath.txt')
     touch(test_file_path)
-    try:
-        ntfile = NTFile(test_file_path)
-        assert ntfile.volume_path
+    ntfile = NTFile(test_file_path)
+    assert ntfile.volume_path
 
-        with pytest.raises(NTException):
-            ntfile = NTFile('Y:/dummy')
-            ntfile.volume_path
-    finally:
-        rm(work_dir, recursive=True)
+    with pytest.raises(NTException):
+        ntfile = NTFile('Y:/dummy')
+        ntfile.volume_path
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_move_to_trash():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, 'test_mv_to_trash.txt')
     touch(test_file_path)
+    ntfile = NTFile(test_file_path)
+    ntfile.open(Access.READ_DATA)
     try:
-        ntfile = NTFile(test_file_path)
-        ntfile.open(Access.READ_DATA)
-        try:
-            with pytest.raises(NTException):
-                ntfile.move_to_trash()
-        finally:
-            ntfile.close()
-        trash_path = ntfile.trash_path
-        ntfile.move_to_trash()
-        rm(trash_path)
-
+        with pytest.raises(NTException):
+            ntfile.move_to_trash()
     finally:
-        rm(work_dir, recursive=True)
+        ntfile.close()
+    trash_path = ntfile.trash_path
+    ntfile.move_to_trash()
+    rm(trash_path)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_dispose():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, 'test_dispose.txt')
     touch(test_file_path)
+    ntfile = NTFile(test_file_path)
+    ntfile.open(Access.READ_DATA)
     try:
-        ntfile = NTFile(test_file_path)
-        ntfile.open(Access.READ_DATA)
-        try:
-            with pytest.raises(NTException):
-                ntfile.dispose()
-        finally:
-            ntfile.close()
-        ntfile.dispose()
-
+        with pytest.raises(NTException):
+            ntfile.dispose()
     finally:
-        rm(work_dir, recursive=True)
+        ntfile.close()
+    ntfile.dispose()
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_rename():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, 'test_rename.txt')
     touch(test_file_path)
+    ntfile = NTFile(test_file_path)
+    ntfile.open(Access.READ_DATA)
     try:
-        ntfile = NTFile(test_file_path)
-        ntfile.open(Access.READ_DATA)
-        try:
-            with pytest.raises(NTException):
-                ntfile.rename(os.path.join(work_dir, 'test_rename2.txt'))
-        finally:
-            ntfile.close()
-        ntfile.rename(os.path.join(work_dir, 'test_rename2.txt'))
-
+        with pytest.raises(NTException):
+            ntfile.rename(os.path.join(work_dir, 'test_rename2.txt'))
     finally:
-        rm(work_dir, recursive=True)
+        ntfile.close()
+    ntfile.rename(os.path.join(work_dir, 'test_rename2.txt'))
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_iterate_on_dir():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, 'dir')
     mkdir(test_dir_path)
@@ -188,30 +161,27 @@ def test_iterate_on_dir():
         return True, False
 
     try:
-        try:
-            ntfile = NTFile(test_dir_path)
-            status = ntfile.iterate_on_dir(fun, default_result=False)
-            assert not result
-            assert not status
-        finally:
-            ntfile.close()
-
-        for n in range(0, 40):
-            touch(os.path.join(test_dir_path, '%s.txt' % n))
-        try:
-            ntfile = NTFile(test_dir_path)
-            status = ntfile.iterate_on_dir(fun, default_result=False)
-            assert status
-            assert len(result) == 40
-        finally:
-            ntfile.close()
+        ntfile = NTFile(test_dir_path)
+        status = ntfile.iterate_on_dir(fun, default_result=False)
+        assert not result
+        assert not status
     finally:
-        rm(work_dir, recursive=True)
+        ntfile.close()
+
+    for n in range(0, 40):
+        touch(os.path.join(test_dir_path, '%s.txt' % n))
+    try:
+        ntfile = NTFile(test_dir_path)
+        status = ntfile.iterate_on_dir(fun, default_result=False)
+        assert status
+        assert len(result) == 40
+    finally:
+        ntfile.close()
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_is_dir_empty():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, 'dir')
     deleted_file_path = os.path.join(test_dir_path, 'deleted2.txt')
@@ -236,12 +206,11 @@ def test_is_dir_empty():
     finally:
         ntfile.close()
         ntfile2.close()
-        rm(work_dir, recursive=True)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_unlink():
-    work_dir = mkdtemp()
+    work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, 'dir')
     deleted_file_path = os.path.join(test_dir_path, 'deleted2.txt')
@@ -282,4 +251,3 @@ def test_unlink():
         ntfile.close()
         ntfile2.close()
         ntfile2.close()
-        rm(work_dir, recursive=True)

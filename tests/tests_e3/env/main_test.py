@@ -1,5 +1,4 @@
 import sys
-import tempfile
 
 import e3.env
 import e3.fs
@@ -163,14 +162,9 @@ def test_store():
 
     c.store()
     c.abc = 'one'
-    tempf = tempfile.NamedTemporaryFile(delete=False)
-    tempf.close()
-    try:
-        c.store(tempf.name)
-        c.abc = 'two'
-        c.restore(tempf.name)
-        assert c.abc == 'one'
-        c.restore()
-        assert c.abc == 'foo'
-    finally:
-        e3.fs.rm(tempf.name)
+    c.store('store')
+    c.abc = 'two'
+    c.restore('store')
+    assert c.abc == 'one'
+    c.restore()
+    assert c.abc == 'foo'
