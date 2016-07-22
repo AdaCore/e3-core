@@ -715,8 +715,8 @@ def sync_tree(source, target, ignore=None,
     target_top = os.path.normpath(target).rstrip(os.path.sep)
     copystat_dir_list = []
 
-    logger.debug('sync_tree %s -> %s [delete=%s, preserve_stmp=%s]' %
-                 (source, target, delete, preserve_timestamps))
+    logger.debug('sync_tree %s -> %s [delete=%s, preserve_stmp=%s]',
+                 source, target, delete, preserve_timestamps)
 
     if not os.path.exists(source):
         raise FSError(origin='sync_tree',
