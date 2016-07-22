@@ -5,6 +5,7 @@ and allow Anod to detect changes in these states. This is mainly used to
 decide if a given action has been done and is up-to-date.
 """
 
+from __future__ import absolute_import
 from collections import OrderedDict
 
 from e3.anod.error import AnodError
