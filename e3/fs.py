@@ -168,7 +168,7 @@ def get_filetree_state(path, ignore_hidden=True):
         f_stat = os.lstat(file_path)
 
         state = ':'.join([file_path, str(f_stat.st_mode),
-                         str(f_stat.st_size), str(f_stat.st_mtime)])
+                          str(f_stat.st_size), str(f_stat.st_mtime)])
         if isinstance(file_path, unicode):
             # Make sure to encode unicode objects before hashing
             return state.encode('utf-8')
