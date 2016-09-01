@@ -100,7 +100,8 @@ class DAG(object):
                            origin="DAG.add_vertex")
         self.update_vertex(vertex_id, data, predecessors)
 
-    def update_vertex(self, vertex_id, data=None, predecessors=None):
+    def update_vertex(self, vertex_id, data=None, predecessors=None,
+                      enable_checks=True):
         """Update a vertex into the DAG.
 
         :param vertex_id: the name of the vertex
@@ -112,6 +113,9 @@ class DAG(object):
             vertex already exists predecessors are added to the original
             predecessors
         :type predecessors: list[str] | None
+        :param enable_checks: if False check that all predecessors exists and
+            that no cycle is introduce is not perform (for performance)
+        :type enable_checks: bool
         :raise: DAGError if cycle is detected
         """
         if predecessors is None:
@@ -119,12 +123,14 @@ class DAG(object):
         else:
             predecessors = frozenset(predecessors)
 
-        non_existing_predecessors = [k for k in predecessors
-                                     if k not in self.vertex_data]
-        if non_existing_predecessors:
-            raise DAGError(message='predecessor on non existing vertices %s'
-                           % ", ".join(non_existing_predecessors),
-                           origin="DAG.update_vertex")
+        if enable_checks:
+            non_existing_predecessors = [k for k in predecessors
+                                         if k not in self.vertex_data]
+            if non_existing_predecessors:
+                raise DAGError(
+                    message='predecessor on non existing vertices %s'
+                    % ", ".join(non_existing_predecessors),
+                    origin="DAG.update_vertex")
 
         if vertex_id not in self.vertex_data:
             self.vertex_predecessors[vertex_id] = predecessors
@@ -133,18 +139,38 @@ class DAG(object):
             previous_predecessors = self.vertex_predecessors[vertex_id]
             self.vertex_predecessors[vertex_id] |= predecessors
 
-            # Will raise DAGError if a cycle is created
-            try:
-                self.get_closure(vertex_id)
-            except DAGError:
-                self.vertex_predecessors[vertex_id] = previous_predecessors
-                raise DAGError(
-                    message='cannot update vertex (%s create a cycle)'
-                    % vertex_id,
-                    origin='DAG.update_vertex')
+            if enable_checks:
+                # Will raise DAGError if a cycle is created
+                try:
+                    self.get_closure(vertex_id)
+                except DAGError:
+                    self.vertex_predecessors[vertex_id] = previous_predecessors
+                    raise DAGError(
+                        message='cannot update vertex (%s create a cycle)'
+                        % vertex_id,
+                        origin='DAG.update_vertex')
 
             if data is not None:
                 self.vertex_data[vertex_id] = data
+
+    def check(self):
+        """Check for cycles and inexisting nodes.
+
+        :raise: DAGError if the DAG is not valid
+        """
+        # First check predecessors validity
+        for node, preds in self.vertex_predecessors.iteritems():
+            if len([k for k in preds if k not in self.vertex_data]) > 0:
+                raise DAGError(
+                    message='invalid nodes in predecessors of %s' % node,
+                    origin='DAG.check')
+
+        nodes = set(self.vertex_predecessors.keys())
+
+        while nodes:
+            node = nodes.pop()
+            closure = self.get_closure(node)
+            nodes = nodes - closure
 
     def get_closure(self, vertex_id):
         """Retrieve closure of predecessors for a vertex.
