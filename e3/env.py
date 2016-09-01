@@ -233,7 +233,7 @@ class AbstractBaseEnv(object):
                                        machine=machine,
                                        mode=mode)
 
-    def set_env(self, build='', host='', target=''):
+    def set_env(self, build=None, host=None, target=None):
         """Set build/host/target.
 
         :param build: string as passed to --build option
@@ -247,7 +247,7 @@ class AbstractBaseEnv(object):
         saved_host = self.host
         saved_target = self.target
 
-        def get_platform(value):
+        def get_platform(value, machine=None):
             """Platform based on string value.
 
             :param value: a string representing a platform or None
@@ -258,7 +258,8 @@ class AbstractBaseEnv(object):
                 return None
 
             # We expect 4 fields for build and host and target
-            split_value = [k if k else None for k in value.split(',')][0:4]
+            split_value = ([k if k else None for k in value.split(',')] +
+                           [None] * 4)[0:4]
 
             if split_value[0] == 'build':
                 return saved_build
@@ -267,10 +268,13 @@ class AbstractBaseEnv(object):
             elif split_value[0] == 'target':
                 return saved_target
             else:
+                # Propagate machine name if necessary
+                if split_value[2] is None:
+                    split_value[2] = machine
                 return Platform.get(*split_value)
 
         # Retrieve final values for build, host and target
-        build_opts = get_platform(build)
+        build_opts = get_platform(build, saved_build.machine)
         host_opts = get_platform(host)
         target_opts = get_platform(target)
 
@@ -555,6 +559,22 @@ class BaseEnv(AbstractBaseEnv):
 
     def _items(self):
         return self._instance.iteritems()
+
+    def copy(self, build=None, host=None, target=None):
+        """Copy an env.
+
+        :param build: like build set_env parameter
+        :type build: str | None
+        :param host: like host set_env parameter
+        :type host: str | None
+        :param target: like target set_env parameter
+        :type target: str | None
+        :return: a deep copy of the current env
+        :rtype: BaseEnv
+        """
+        result = BaseEnv(self.build, self.host, self.target)
+        result.set_env(build, host, target)
+        return result
 
     @classmethod
     def from_env(cls):
