@@ -6,8 +6,8 @@ be significant in some context.
 """
 
 CPU_INFO = {
-    'aarch64': {'endian': 'big', 'bits': 64},
-    'arm': {'endian': 'big', 'bits': 32},
+    'aarch64': {'endian': 'little', 'bits': 64},
+    'arm': {'endian': 'little', 'bits': 32},
     'avr': {'endian': 'little', 'bits': 16},
     'powerpc': {'endian': 'big', 'bits': 32},
     'powerpc64': {'endian': 'big', 'bits': 64},
