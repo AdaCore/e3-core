@@ -1,3 +1,10 @@
+"""Knowledge base for CPU, OS, and Platform informations.
+
+Note that even if this is pure data this is not stored as a yaml. This
+knowledge base is very often read and the cost of parsing the data can
+be significant in some context.
+"""
+
 CPU_INFO = {
     'aarch64': {'endian': 'big', 'bits': 64},
     'arm': {'endian': 'big', 'bits': 32},
