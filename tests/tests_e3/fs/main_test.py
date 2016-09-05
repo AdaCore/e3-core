@@ -108,7 +108,7 @@ def test_tree_state():
     assert state4 != state3
 
 
-@pytest.mark.skipif(sys.platform != 'win32', reason='test using symlink')
+@pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
 def test_sync_tree_with_symlinks():
     current_dir = os.getcwd()
     a = os.path.join(current_dir, 'a')
