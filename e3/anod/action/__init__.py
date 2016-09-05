@@ -7,6 +7,7 @@ class Action(object):
     Action objects are used as node in DAG produced by anod scheduler. Only
     child classes are used directly.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, uid, data):
@@ -27,6 +28,7 @@ class Root(Action):
     the root of the DAG and can be "executed" only once all the scheduled
     Actions are completed.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self):
@@ -46,6 +48,7 @@ class GetSource(Action):
     access to a store) or provide the choice between DownloadSource or
     CreateSource using a Decision node.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, data):
@@ -61,6 +64,7 @@ class DownloadSource(Action):
     This action means the we need to download from the store a given
     source. DownloadSource is always a leaf of the DAG.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, data):
@@ -76,6 +80,7 @@ class InstallSource(Action):
     This means that a source should be installed. Child action is always
     a GetSource Action.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, uid, data):
@@ -86,11 +91,12 @@ class InstallSource(Action):
 
 
 class CreateSource(Action):
-    """CreateSource Action
+    """CreateSource Action.
 
     This means that we need to assemble the source package from a repositories
     checkouts. CreateSource has at least one Checkout child node.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, spec, source_name):
@@ -115,6 +121,7 @@ class Checkout(Action):
     This means that we need to perform the checkout/update of a given
     repository.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, repository):
@@ -129,6 +136,7 @@ class AnodAction(Action):
 
     Correspond to an Anod primitive call. Only subclasses should be used.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, data):
@@ -148,16 +156,19 @@ class AnodAction(Action):
 
 class Build(AnodAction):
     """Anod build primitive."""
+
     __slots__ = ('uid', 'data')
 
 
 class Test(AnodAction):
     """Anod test primitive."""
+
     __slots__ = ('uid', 'data')
 
 
 class Install(AnodAction):
     """Anod install primitive."""
+
     __slots__ = ('uid', 'data')
 
 
@@ -166,10 +177,11 @@ class DownloadBinary(Action):
 
     Download a binary package from the store.
     """
+
     __slots__ = ('uid', 'data')
 
     def __init__(self, data):
-        """Initialize a DownloadBinary object
+        """Initialize a DownloadBinary object.
 
         :param data: Anod instance
         :type data: Anod
@@ -181,13 +193,14 @@ class DownloadBinary(Action):
 
 
 class Decision(Action):
-    """Decision Action
+    """Decision Action.
 
     Decision nodes are used when computing the DAG of possible actions.
     A Decision node has two children corresponding to the decision to be
     made during computation of the effective list of actions to perform.
     After scheduling a DAG will not contain any Decision node.
     """
+
     LEFT = 0
     RIGHT = 1
     BOTH = 2

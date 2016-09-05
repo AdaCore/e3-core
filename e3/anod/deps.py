@@ -91,7 +91,6 @@ class Dependency(object):
         :return: env object that should be used by the dependency
         :rtype: BaseEnv
         """
-
         # Get the current environment associated with the Anod instance
         # and adjust it based on dependency parameters
         dep_env = BaseEnv(parent.env.build, parent.env.host, parent.env.target)
