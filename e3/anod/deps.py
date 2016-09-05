@@ -81,14 +81,28 @@ class Dependency(object):
                      'source_pkg': 'source'}[require]
         self.track = track
 
-    def env(self, parent):
+    def env(self, parent, default_env=None):
         """Retrieve env for the dependency.
 
-        :param parent: Anod spec in which the dep was declared
+        :param parent: Anod instance in which the dep was declared
         :type parent: Anod
+        :param default_env: default env for the current context
+        :type default_env: BaseEnv | None
         :return: env object that should be used by the dependency
         :rtype: BaseEnv
         """
+
+        # Get the current environment associated with the Anod instance
+        # and adjust it based on dependency parameters
         dep_env = BaseEnv(parent.env.build, parent.env.host, parent.env.target)
-        dep_env.set_env(self.build, self.host, self.target)
+
+        if self.build == 'default' and default_env is not None:
+            # For simulation purposes we sometimes load specs as if it was
+            # load on a non local machine thus 'default' does not correspond
+            # to the default build platform of the local machine.
+            build = default_env.build.platform
+        else:
+            build = self.build
+
+        dep_env.set_env(build, self.host, self.target)
         return dep_env
