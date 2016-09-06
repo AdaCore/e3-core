@@ -23,7 +23,7 @@ def test_read_attributes():
     ntfile = NTFile(test_file_path)
     ntfile.read_attributes()
     assert datetime.now() - \
-        ntfile.basic_info.creation_time.as_datetime < \
+        ntfile.basic_info.change_time.as_datetime < \
         timedelta(seconds=10)
 
 
