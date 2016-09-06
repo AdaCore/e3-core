@@ -158,7 +158,12 @@ class FileTime(Structure):
 
     @property
     def as_datetime(self):
-        return datetime.fromtimestamp(self.filetime / 10000000 - 11644473600)
+        try:
+            return datetime.fromtimestamp(
+                self.filetime / 10000000 - 11644473600)
+        except ValueError as err:
+            raise ValueError("filetime '%s' failed with %s" % (
+                             self.filetime, err))
 
     def __str__(self):
         return str(time.ctime(self.filetime / 10000000 - 11644473600))
