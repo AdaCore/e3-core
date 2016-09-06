@@ -4,18 +4,16 @@ from __future__ import print_function
 import os
 from collections import OrderedDict
 
-from e3.anod.error import AnodError, SpecError, ShellError
+from e3.anod.error import AnodError, ShellError
 from e3.anod.status import ReturnValue
-
+from e3.yaml import load_with_config
 import e3.anod.deps
 import e3.anod.package
-
+import yaml
 import e3.env
 import e3.log
 import e3.os.process
 import e3.text
-
-import sys
 
 # CURRENT API version
 __version__ = '1.4'
@@ -50,75 +48,6 @@ def parse_command(command, build_space):
         dict((k.upper(), v)
              for (k, v) in build_space.__dict__.items()))
     return [e3.text.format_with_dict(c, cmd_dict) for c in command]
-
-
-def map_attribute_elements(anod_instance, function, attribute_name):
-    """Iterate other an attribute an apply a function on all elements.
-
-    :param anod_instance: an anod instance
-    :type anod_instance: Anod
-    :param function: function to be called on each element
-    :type function: T -> T
-    :param attribute_name: the attribute on which we want to iterate
-    :type attribute_name: str
-
-    :return: the attribute value or empty tuple is the attribute does not
-      exists
-    :rtype: T | ()
-
-    :raise: SpecError if we cannot iterate on the attribute, or AnodError
-    """
-    if attribute_name in dir(anod_instance):
-        item_list = getattr(anod_instance, attribute_name)
-        """:type: list[T]"""
-        if isinstance(item_list, basestring):
-            raise SpecError(
-                '%s cannot be a string' % attribute_name,
-                'map_attribute_elements')
-
-        try:
-            for item in item_list:
-                function(item)
-        except Exception as e:
-            # Check if the expected iterable is in fact a callable
-            if callable(item_list):
-                raise SpecError(
-                    '%s is callable. Maybe you should add a @property' %
-                    attribute_name,
-                    'map_attribute_elements'), None, sys.exc_traceback
-
-            # Ensure that the attribute is an iterable
-            try:
-                iter(item_list)
-            except TypeError:
-                raise SpecError(
-                    '%s is not an iterable' % attribute_name,
-                    'map_attribute_elements'), None, sys.exc_traceback
-
-            if isinstance(e, AnodError):
-                raise
-
-            import traceback
-            error_msg = 'unknown error when parsing in {anod_id}' \
-                ' attribute {attr}=[{item_list}]'.format(
-                    anod_id=anod_instance.anod_id,
-                    attr=attribute_name,
-                    item_list=", ".join(
-                        '({})'.format(it) for it in item_list))
-            _, _, exc_traceback = sys.exc_info()
-            error_msg += '\nError: {}\n'.format(e)
-
-            if 'invalid syntax' in error_msg:
-                # Syntax error when executing the code
-                pass
-            else:
-                # Unknown error, add a traceback
-                error_msg += "Traceback for map_attribute_elements:\n"
-                error_msg += "\n".join(traceback.format_tb(exc_traceback))
-            raise AnodError(error_msg)
-        return item_list
-    else:
-        return ()
 
 
 def has_primitive(anod_instance, name):
@@ -177,11 +106,9 @@ class Anod(object):
     :cvar SourceBuilder: the e3.anod.package.SourceBuilder class
     :cvar ThirdPartySourceBuilder: the e3.anod.package.ThirdPartySourceBuilder
 
-
-
-    :ivar anod_id: unique identifier for the instance, None until the instance
+    :ivar uid: unique identifier for the instance, None until the instance
         has been activated with AnodDriver.activate()
-    :vartype anod_id: str | None
+    :vartype uid: str | None
     """
 
     # set when loading the spec
@@ -192,11 +119,14 @@ class Anod(object):
     # API
     Dependency = e3.anod.deps.Dependency
     Package = e3.anod.package.Package
+    BuildVar = e3.anod.deps.BuildVar
     Source = e3.anod.package.Source
+    SharedSource = e3.anod.package.SharedSource
     SourceBuilder = e3.anod.package.SourceBuilder
+    ExternalSourceBuilder = e3.anod.package.ExternalSourceBuilder
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
-    def __init__(self, qualifier, kind, jobs=1, env=None):
+    def __init__(self, qualifier, kind, jobs=1, env=None, data_files=None):
         """Initialize an Anod instance.
 
         :param qualifier: the qualifier used when loading the spec
@@ -208,6 +138,9 @@ class Anod(object):
         :type jobs: int
         :param env: alternate platform environment
         :type env: Env
+        :param data_files: list of data files (yaml files) associated with
+            the spec
+        :type data_files: list[str] | None
         :raise: SpecError
         """
         self.deps = OrderedDict()
@@ -218,48 +151,85 @@ class Anod(object):
 
         # Set when AnodDriver.activate() is called
         self.build_space = None
-        self.anod_id = None
         self.log = None
 
-        # Build space name is computed as self.name + self.build_space_suffix
-        self.build_space_suffix = ''
-
+        # Set spec environment
         if env is None:
             self.env = e3.env.BaseEnv(build=e3.env.Env().build,
                                       host=e3.env.Env().host,
                                       target=e3.env.Env().target)
         else:
-            self.env = env
+            self.env = e3.env.BaseEnv(build=env.build,
+                                      host=env.host,
+                                      target=env.target)
 
         self.fingerprint = None
 
+        # Parse qualifier
         self.parsed_qualifier = OrderedDict()
         if qualifier:
-            qual_dict = dict((key, value) for key, _, value in sorted(
-                (item.partition('=') for item in qualifier.split(','))))
+            qual_dict = [(key, value) for key, _, value in
+                         (item.partition('=')
+                         for item in qualifier.split(','))]
         else:
-            qual_dict = {}
+            qual_dict = []
 
-        for qual_key in getattr(self, '%s_qualifier_format' % self.kind, ()):
-            key, is_required = qual_key
-            value = qual_dict.get(key)
-            if not is_required and value is None:
-                pass
-            elif value is None:
-                raise AnodError(
-                    message='the qualifier key %s is required for running'
-                    ' %s %s' % (key, self.kind, self.name),
-                    origin='anod.__parse_qualifier')
-            else:
-                self.parsed_qualifier[key] = qual_dict[key]
-                self.build_space_suffix = '%s=%s' % (key, qual_dict[key])
-                del qual_dict[key]
+        # ??? In the future qualifier keys should be ordered
+        for k in qual_dict:
+            self.parsed_qualifier[k[0]] = k[1]
+        self.qualifier = qualifier
 
-        if qual_dict:
-            raise AnodError(
-                message='the following keys in the qualifier were not '
-                'parsed: %s' % ','.join(qual_dict.keys()),
-                origin='anod.__parse_qualifier')
+        # Default build space name is the spec name
+        if 'build_space_name' not in dir(self):
+            self.build_space_name = self.name
+
+        # UID of the spec instance
+        self.uid = ".".join((self.env.build.machine,
+                             self.env.platform,
+                             self.build_space_name,
+                             self.kind))
+
+    @property
+    def has_package(self):
+        """Return true if the spec defines a binary package.
+
+        :rtype: bool
+        """
+        return self.package is not None and self.package.name is not None
+
+    def load_config_file(self, extended=False, suffix='', selectors=None):
+        """Load a YAML config file associated with the current module.
+
+        This function looks for a YAML starting with the spec basename. The
+        list of available file is set by the data_files parameter when
+        initializing the spec.
+
+        :param suffix: suffix of the configuration file (default is '')
+        :type suffix: str | unicode
+        :param extended: if True then a special yaml parser is used with
+            ability to use case statement
+        :type extended: bool
+        :param selectors: additional selectors for extended mode
+        :type: dict | None
+        :rtype: T
+        """
+
+        # Compute data file location and check for existence
+        filename = "%s%s" % (self.name, '-' + suffix if suffix else '')
+        assert filename in self.data_files, "invalid data file: %s" % filename
+        filename = os.path.join(self.spec_dir, filename + '.yaml')
+
+        if extended:
+            # Ensure selectors is a dict
+            selectors = {} if selectors is None else selectors
+
+            # Add environment information to selectors
+            selectors.update(self.env.to_dict())
+
+            return load_with_config(filename, selectors)
+        else:
+            with open(filename) as f:
+                return yaml.load(f.read())
 
     def __getitem__(self, key):
         """Access build_space attributes and pre callback values directly.
@@ -273,6 +243,8 @@ class Anod(object):
         :type key: str
         :rtype: T
         """
+        if self.build_space is None:
+            return 'unknown'
         # first look in the build_space config dictionary
         if key in self.build_space.config:
             return self.build_space.config[key]
@@ -306,7 +278,7 @@ class Anod(object):
 
             def primitive_func(self, *args, **kwargs):
                 # Check whether the instance has been activated
-                if self.anod_id is None:
+                if self.uid is None:
                     # Not yet activated, fail
                     raise AnodError('AnodDriver.activate() has not been run')
 
