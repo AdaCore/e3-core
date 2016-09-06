@@ -9,6 +9,10 @@ from ctypes import (pointer, create_unicode_buffer, create_string_buffer,
 from ctypes.wintypes import HANDLE
 import os
 import struct
+import e3.log
+
+
+logger = e3.log.getLogger('os.windows.fs')
 
 
 class WithOpenFile(object):
@@ -179,6 +183,7 @@ class NTFile(object):
         """
         status = NT.QueryAttributesFile(pointer(self.attr),
                                         pointer(self.basic_info))
+        logger.debug('read_attributes status: %d', status)
         if status < 0:
             raise NTException(status=status,
                               message="cannot query attributes %s" % self.path,
