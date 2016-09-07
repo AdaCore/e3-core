@@ -219,7 +219,13 @@ class SourceBuilder(object):
         self.repositories[repository.name] = repository
 
 
-class ThirdPartySourceBuilder(SourceBuilder):
+class UnmanagedSourceBuilder(SourceBuilder):
+    """Source builder for sources not managed by anod."""
+
+    pass
+
+
+class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
     """SourceBuilder for thirdparty packages."""
 
     def __init__(self, name, fullname=None, checkout=None,
@@ -237,7 +243,7 @@ class ThirdPartySourceBuilder(SourceBuilder):
                                prepare_src, apply_patch, kind)
 
 
-class ExternalSourceBuilder(SourceBuilder):
+class ExternalSourceBuilder(UnmanagedSourceBuilder):
     """SourceBuilder to reference sources produced outside the setup."""
 
     def __init__(self, name, bid=None, setup=None, date=None, query_name=None):

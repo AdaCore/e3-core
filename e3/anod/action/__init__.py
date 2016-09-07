@@ -191,6 +191,9 @@ class DownloadBinary(Action):
         uid = '.'.join(uid)
         Action.__init__(self, uid, data)
 
+    def __str__(self):
+        return 'download binary of %s' % self.uid
+
 
 class Decision(Action):
     """Decision Action.
@@ -218,21 +221,39 @@ class Decision(Action):
         :type choice: int
         """
         Action.__init__(self, root.uid + '.decision', None)
+        self.initiator = root.uid
         self.choice = choice
+        self.expected_choice = None
         self.left = left.uid
         self.right = right.uid
-        self.invalid_choice = None
+        self.triggers = []
 
-    def set_invalid_choice(self, which):
-        """Mark a given decision as invalid.
+    def add_trigger(self, trigger, decision):
+        """Add a trigger.
 
-        :param which: can be LEFT, RIGHT or BOTH
-        :type which: int
+        A trigger will be used to set an expected choice depending on the
+        presence of a given action in the DAG of scheduled actions
+
+        :param trigger: action that will cause the trigger to be enabled
+        :type trigger: Action
+        :param decision: expected decision when the trigger action is
+            scheduled
+        :type decision: int
         """
-        if self.invalid_choice is None:
-            self.invalid_choice = which
-        elif self.invalid_choice != which:
-            self.invalid_choice = Decision.BOTH
+        self.triggers.append((trigger.uid, decision))
+
+    def apply_triggers(self, dag):
+        """Apply triggers.
+
+        :param dag: a dag of scheduled actions
+        :type dag: e3.collection.dag.DAG
+        """
+        for uid, decision in self.triggers:
+            if uid in dag:
+                if self.expected_choice is None:
+                    self.expected_choice = decision
+                elif self.expected_choice != decision:
+                    self.expected_choice = Decision.BOTH
 
     def get_decision(self):
         """Return uid of taken choice.
@@ -244,14 +265,27 @@ class Decision(Action):
         if self.choice is None or self.choice == Decision.BOTH:
             return None
         else:
-            if self.invalid_choice is not None and \
-                    (self.invalid_choice == Decision.BOTH or
-                     self.invalid_choice == self.choice):
+            if self.expected_choice is not None and \
+                    self.expected_choice != self.choice:
                 return None
             elif self.choice == Decision.LEFT:
                 return self.left
             else:
                 return self.right
+
+    def get_expected_decision(self):
+        """Get expected decision.
+
+        :return: uid of the expected action or None if no specific decision
+            is expected.
+        :rtype: str | None
+        """
+        if self.expected_choice == Decision.LEFT:
+            return self.left
+        elif self.expected_choice == Decision.RIGHT:
+            return self.right
+        else:
+            return None
 
     def set_decision(self, which):
         """Make a choice.
@@ -263,3 +297,46 @@ class Decision(Action):
             self.choice = which
         elif self.choice != which:
             self.choice = Decision.BOTH
+
+
+class CreateSourceOrDownload(Decision):
+    """Decision between creating or downloading a source package."""
+
+    CREATE = Decision.LEFT
+    DOWNLOAD = Decision.RIGHT
+
+    def __init__(self, root, left, right):
+        """Initialize a CreateSourceOrDownload instance.
+
+        :param root: parent node
+        :type root: Action
+        :param left: first choice
+        :type left: CreateSource
+        :param right: second choice
+        :type right: DownloadSource
+        """
+        assert isinstance(left, CreateSource)
+        assert isinstance(right, DownloadSource)
+        Decision.__init__(self, root, left, right)
+
+
+class BuildOrInstall(Decision):
+    """Decision between building or downloading a component."""
+
+    BUILD = Decision.LEFT
+    INSTALL = Decision.RIGHT
+
+    def __init__(self, root, left, right):
+        """Initialize a BuildOrInstall instance.
+
+        :param root: parent node
+        :type root: Install
+        :param left: first choice
+        :type left: Build
+        :param right: second choice
+        :type right: DownloadBinary
+        """
+        assert isinstance(left, Build)
+        assert isinstance(right, DownloadBinary)
+        assert isinstance(root, Install)
+        Decision.__init__(self, root, left, right)
