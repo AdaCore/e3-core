@@ -201,6 +201,26 @@ class DAG(object):
             closure_len = len(closure)
         return closure
 
+    def reverse_graph(self):
+        """Compute the reverse DAG.
+
+        :return: the reverse DAG (edge inverted)
+        :rtype: DAG
+        """
+        result = DAG()
+
+        # Note that we don't need to enable checks during this operation
+        # as the reverse graph of a DAG is still a DAG (no cycles).
+        for node, predecessors in self.vertex_predecessors.iteritems():
+            result.update_vertex(node,
+                                 data=self.vertex_data[node],
+                                 enable_checks=False)
+            for p in predecessors:
+                result.update_vertex(p,
+                                     predecessors=[node],
+                                     enable_checks=False)
+        return result
+
     def __iter__(self):
         return DAGIterator(self)
 
