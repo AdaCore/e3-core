@@ -187,7 +187,7 @@ class DownloadBinary(Action):
         :type data: Anod
         """
         uid = data.uid.split('.')
-        uid[-1] = '.download_bin'
+        uid[-1] = 'download_bin'
         uid = '.'.join(uid)
         Action.__init__(self, uid, data)
 
