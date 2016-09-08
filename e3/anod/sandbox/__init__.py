@@ -36,7 +36,6 @@ class SandBox(object):
         self.dirs = ('meta', 'bin', 'tmp', os.path.join('tmp', 'cache'),
                      'src', 'log', 'etc', 'vcs', 'patch')
 
-        self.spec_dir = None
         self.meta_dir = None
         self.tmp_dir = None
         self.tmp_cache_dir = None
@@ -68,8 +67,6 @@ class SandBox(object):
             return  # nothing to do
 
         self.__root_dir = new_dir
-
-        self.spec_dir = os.path.join(new_dir, 'specs')
 
         # For each directory create an attribute containing its path
         for d in self.dirs:

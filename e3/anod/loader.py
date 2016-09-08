@@ -39,7 +39,9 @@ class AnodSpecRepository(object):
 
         # ??? The use of singleton should be reviewed in order to support
         # several spec repositories.
-        assert os.path.isdir(spec_dir), "spec directory does not exist"
+        if not os.path.isdir(spec_dir):
+            raise SandBoxError(
+                'spec directory %s does not exist' % spec_dir)
         self.__class__.spec_dir = spec_dir
 
         # Look for all spec files and data files
@@ -207,8 +209,6 @@ def spec(name):
     key.
     :param name: name of the spec to load
     :type name:  str
-    :param from_sandbox: sandbox object
-    :type from_sandbox: e3.anod.sandbox.SandBox | None
 
     :return: and Anod class
     """

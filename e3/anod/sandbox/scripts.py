@@ -34,8 +34,9 @@ def anod():
     sandbox = e3.anod.sandbox.SandBox()
     sandbox.root_dir = sandbox_dir
 
-    # Configure the sandbox for other specs
-    e3.anod.loader.sandbox = sandbox
+    # Load the local specs
+    spec_repo = e3.anod.loader.AnodSpecRepository(
+        os.path.join(sandbox_dir, 'specs'))
 
     # Load the cache
     cache = e3.store.cache.load_cache(
@@ -54,7 +55,7 @@ def anod():
     spec = m.args.spec
     qualifier = m.args.qualifier
 
-    anod_cls = e3.anod.loader.spec(name=spec, from_sandbox=sandbox)
+    anod_cls = spec_repo.load(name=spec)
     driver = e3.anod.driver.AnodDriver(
         anod_instance=anod_cls(qualifier=qualifier,
                                kind=action,
