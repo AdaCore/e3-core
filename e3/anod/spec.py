@@ -213,7 +213,6 @@ class Anod(object):
         :type: dict | None
         :rtype: T
         """
-
         # Compute data file location and check for existence
         filename = "%s%s" % (self.name, '-' + suffix if suffix else '')
         assert filename in self.data_files, "invalid data file: %s" % filename
