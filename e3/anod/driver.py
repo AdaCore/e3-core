@@ -48,8 +48,7 @@ class AnodDriver(object):
                             'activate')
 
         self.anod_instance.build_space = sbx.get_build_space(
-            name=self.anod_instance.name +
-            self.anod_instance.build_space_suffix,
+            name=self.anod_instance.build_space_name,
             primitive=self.anod_instance.kind,
             platform=self.anod_instance.env.platform)
 

@@ -10,26 +10,6 @@ import os
 import pytest
 
 
-def test_qualifier_format():
-
-    class A(Anod):
-
-        build_qualifier_format = (
-            ('a', True),
-            ('b', False),
-            ('c', True))
-
-    A(qualifier='a=1,c', kind='build')  # this will not raise an exception
-
-    with pytest.raises(AnodError) as err:
-        A(qualifier='a=1', kind='build')
-    assert 'c is required' in str(err.value)
-
-    with pytest.raises(AnodError) as err:
-        A(qualifier='a=1,c,zzz', kind='build')
-    assert 'zzz' in str(err.value)
-
-
 def test_simple_spec():
 
     class Simple(Anod):
