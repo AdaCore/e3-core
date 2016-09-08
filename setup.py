@@ -3,7 +3,6 @@ from setuptools import setup, find_packages
 from datetime import datetime
 
 import os
-import sys
 
 install_requires = [
     'clint',
@@ -14,11 +13,13 @@ install_requires = [
     'requests',
     'stevedore']
 
-if sys.platform in ('linux2', 'linux', 'win32', 'darwin'):
-    install_requires.append('psutil')
+extras_require = {}
 
-if sys.platform in ('linux', 'linux2'):
-    install_requires.append('ld')
+for p in ('win32', 'darwin', 'linux', 'linux2'):
+    platform_string = ":sys_platform=='%s'" % p
+    extras_require[platform_string] = ['psutil']
+    if p in ('linux', 'linux2'):
+        extras_require[platform_string].append('ld')
 
 # Get e3 version from the VERSION file.
 version_file = os.path.join(os.path.dirname(__file__), 'VERSION')
@@ -52,6 +53,7 @@ setup(
     package_data={
         'e3': ['os/data/rlimit-*']},
     install_requires=install_requires,
+    extras_require=extras_require,
     entry_points={
         'e3.anod.sandbox.sandbox_action': [
             'create = e3.anod.sandbox.action:SandBoxCreate',
