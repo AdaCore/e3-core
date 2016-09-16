@@ -3,8 +3,10 @@ from __future__ import print_function
 
 import os
 
+import e3.env
 import e3.fs
 import e3.os.process
+import e3.anod.sandbox
 
 
 def test_deploy_sandbox():
@@ -37,3 +39,10 @@ def test_deploy_sandbox():
     assert 'cannot get resource metadata from store' in e3.os.process.Run(
         [os.path.join('bin', 'anod'),
          'download', 'b']).out
+
+
+def test_sandbox_env():
+    os.environ['GPR_PROJECT_PATH'] = '/foo'
+    sandbox = e3.anod.sandbox.SandBox()
+    sandbox.set_default_env()
+    assert os.environ['GPR_PROJECT_PATH'] == ''

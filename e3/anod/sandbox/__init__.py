@@ -47,6 +47,28 @@ class SandBox(object):
         self.bin_dir = None
         self.conf = None
 
+        self.default_env = {
+            'LANG': 'C',
+            'LC_ALL': 'C',
+            'LD_LIBRARY_PATH': '',
+            'LIBRARY_PATH': '',
+            'DYLD_LIBRARY_PATH': '',
+            'DYLD_FALLBACK_LIBRARY_PATH': '',
+            'PKG_CONFIG_PATH': '',
+            'ADA_PROJECT_PATH': '',
+            'GPR_PROJECT_PATH': '',
+            'CPATH': '',
+            'C_INCLUDE_PATH': '',
+            'CPLUS_INCLUDE_PATH': '',
+            'OBJC_INCLUDE_PATH': '',
+            'GPR_RUNTIME_PATH': ''}
+
+    def set_default_env(self):
+        """Reset all env variables that can influence the build outcome."""
+        for k, v in self.default_env.iteritems():
+            logger.debug('export %s="%s"', k, v)
+            os.environ[k] = v
+
     @property
     def root_dir(self):
         """Root path of the sandbox.
