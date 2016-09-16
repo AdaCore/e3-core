@@ -5,8 +5,7 @@ from __future__ import print_function
 import e3.hash
 import e3.log
 from e3.net.http import HTTPSession
-from e3.store.backends.base import ResourceInfo, Store
-
+from e3.store.backends.base import ResourceInfo, Store, StoreError
 
 logger = e3.log.getLogger('store.httpsimplestore')
 
@@ -42,7 +41,8 @@ class HTTPSimpleStore(Store):
             sha1sum of the resource and url is the remote url
         :type query:
         """
-        assert 'sha' in query and 'url' in query
+        if query is None or 'sha' not in query or 'url' not in query:
+            raise StoreError('missing either "sha" or "url" in query')
         return HTTPSimpleStoreResourceInfo(query['url'], query['sha'])
 
     def download_resource_content(self, metadata, dest):

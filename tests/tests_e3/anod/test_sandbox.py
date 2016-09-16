@@ -26,3 +26,14 @@ def test_deploy_sandbox():
     assert 'no primitive download' in e3.os.process.Run(
         [os.path.join('bin', 'anod'),
          'download', 'a']).out
+
+    with open(os.path.join('specs', 'b.anod'), 'w') as fd:
+        fd.write('from e3.anod.spec import Anod\n')
+        fd.write('class B(Anod):\n\n')
+        fd.write('    @Anod.primitive()\n')
+        fd.write('    def download(self):\n')
+        fd.write('        pass\n')
+
+    assert 'cannot get resource metadata from store' in e3.os.process.Run(
+        [os.path.join('bin', 'anod'),
+         'download', 'b']).out

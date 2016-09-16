@@ -3,6 +3,9 @@ from __future__ import print_function
 
 from functools import wraps
 import os
+import sys
+
+from e3.error import E3Error
 
 from e3.anod.spec import AnodError, has_primitive
 
@@ -82,9 +85,15 @@ class AnodDriver(object):
         # First check whether there is a download primitive implemented by
         # the Anod spec.
         self.anod_instance.build_space.create(quiet=True)
-        if self.has_primitive(self.anod_instance, 'download'):
-            download_data = self.anod_instance.download()
+        download_data = self.anod_instance.download()
+        try:
             metadata = self.store.get_resource_metadata(download_data)
+        except E3Error as err:
+            self.anod_instance.log.critical(err)
+            raise AnodError(
+                'cannot get resource metadata from store',
+                origin=self.anod_instance.anod_id), None, sys.exc_traceback
+        else:
             self.store.download_resource(
                 metadata,
                 self.anod_instance.build_space.binary_dir)

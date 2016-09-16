@@ -56,14 +56,20 @@ def anod():
     qualifier = m.args.qualifier
 
     anod_cls = spec_repo.load(name=spec)
+    anod_instance = anod_cls(qualifier=qualifier,
+                             kind=action,
+                             jobs=1,
+                             env=e3.env.BaseEnv.from_env())
+
+    # ??? inject the sandbox
+    anod_instance.sandbox = sandbox
+
     driver = e3.anod.driver.AnodDriver(
-        anod_instance=anod_cls(qualifier=qualifier,
-                               kind=action,
-                               jobs=1,
-                               env=e3.env.BaseEnv.from_env()),
+        anod_instance=anod_instance,
         store=store)
 
     try:
+        driver.activate()
         driver.call(action)
     except AnodError as err:
         sys.exit(err)

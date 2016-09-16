@@ -5,6 +5,8 @@ from collections import namedtuple
 import abc
 
 import e3.log
+from e3.error import E3Error
+
 
 logger = e3.log.getLogger('store')
 
@@ -43,6 +45,10 @@ class CachedResource(namedtuple(
     """Cached information about an already downloaded resource."""
 
     __slots__ = ()
+
+
+class StoreError(E3Error):
+    pass
 
 
 class Store(object):
