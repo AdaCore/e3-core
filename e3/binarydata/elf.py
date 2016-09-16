@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from e3.binarydata import UChar, UInt16, BinaryData, Int32, UInt32, \
+from e3.binarydata import UChar, UInt16, BinaryData, UInt32, \
     CharStr, Address, Offset, UIntMax, Field, StructType, String, \
     FieldArray, FieldNullTerminatedArray, \
     BinaryFileBuffer
@@ -157,7 +157,7 @@ class ElfSectionHeader(StructType):
 class ElfDyn(StructType):
     """One element of the .dynamic section."""
 
-    d_tag = Field(Int32)
+    d_tag = Field(UIntMax)
     # The next field in the struct is actually a union.  We currently
     # do not support unions, but luckily this union only contains
     # fields of the same type.  Define the next field using one of
