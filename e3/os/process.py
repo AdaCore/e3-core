@@ -13,6 +13,7 @@ import logging
 import os
 import re
 import subprocess
+import signal
 import sys
 import time
 
@@ -489,6 +490,13 @@ class Run(object):
     def kill(self):
         """Kill the process."""
         self.internal.kill()
+
+    def interrupt(self):
+        """Send SIGINT CTRL_C_EVENT to the process."""
+        # On windows CTRL_C_EVENT is available and SIGINT is not;
+        # and the other way around on other platforms.
+        interrupt_signal = getattr(signal, 'CTRL_C_EVENT', signal.SIGINT)
+        self.internal.send_signal(interrupt_signal)
 
     def is_running(self):
         """Check whether the process is running.

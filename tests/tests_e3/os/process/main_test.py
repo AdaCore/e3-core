@@ -144,7 +144,6 @@ def test_pipe_input():
 
 
 def test_is_running():
-    import time
     p = e3.os.process.Run([sys.executable,
                            '-c',
                            'import time; time.sleep(1)'],
@@ -162,6 +161,20 @@ def test_is_running():
 
     p.wait()
     assert p.status == 0
+
+
+def test_interrupt():
+    t0 = time.time()
+    p = e3.os.process.Run([sys.executable,
+                           '-c',
+                           'import time; time.sleep(30)'],
+                          bg=True)
+    p.interrupt()
+    t1 = time.time()
+    assert t1 - t0 < 2, 'process not interrupted after 2s?'
+
+    p.wait()
+    assert p.status != 0
 
 
 def test_kill_process_tree():
