@@ -572,7 +572,9 @@ class BaseEnv(AbstractBaseEnv):
         :return: a deep copy of the current env
         :rtype: BaseEnv
         """
-        result = BaseEnv(self.build, self.host, self.target)
+        result = BaseEnv()
+        for k, v in self._items():
+            setattr(result, k, v)
         result.set_env(build, host, target)
         return result
 
