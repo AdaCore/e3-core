@@ -69,7 +69,7 @@ class FileCache(Cache):
         return default
 
     def set(self, uid, value, timeout=DEFAULT_TIMEOUT):
-        # Make sure that teh cache dir exists
+        # Make sure that the cache dir exists
         self._create_cache_dir()
         dest_file = self.uid_to_file(uid)
 
