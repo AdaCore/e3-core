@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import e3.hash
 import e3.fs
 import e3.diff
+import e3.os.fs
 import os
 import pytest
 import sys
@@ -163,3 +164,11 @@ def test_sync_tree_with_symlinks():
     # and m3/c is not a link to m2
     assert not os.path.exists(os.path.join(m3, 'c', 'c'))
     assert os.path.exists(os.path.join(m2, 'c'))
+
+
+def test_rm_on_error():
+    e3.fs.mkdir('a')
+    e3.fs.mkdir('a/b')
+    e3.os.fs.touch('a/b/c')
+    os.chmod('a/b', 0000)
+    e3.fs.rm('a', True)

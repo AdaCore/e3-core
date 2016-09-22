@@ -333,6 +333,12 @@ def rm(path, recursive=False, glob=True):
         :type exc_info: tuple
         """
         del exc_info
+
+        # First check whether the file we are trying to delete exist. If not
+        # the work is already done, no need to continue trying removing it.
+        if not os.path.exists(path):
+            return
+
         if func == os.remove:
             # Cannot remove path, call chmod and redo an attempt
 
@@ -344,6 +350,7 @@ def rm(path, recursive=False, glob=True):
             # ??? It seems that this might be needed on windows
             os.chmod(path, 0700)
             e3.os.fs.safe_remove(path)
+
         elif func == os.rmdir:
             # Cannot remove path, call chmod and redo an attempt
             os.chmod(path, 0700)
@@ -355,6 +362,13 @@ def rm(path, recursive=False, glob=True):
                 # that we are already in a subdirectory.
                 os.chmod(os.path.dirname(path), 0700)
             e3.os.fs.safe_rmdir(path)
+
+        elif func == os.listdir:
+            # Cannot read the directory content, probably a permission issue
+            os.chmod(path, 0700)
+
+            # And continue to delete the subdir
+            shutil.rmtree(path, onerror=onerror)
 
     for f in file_list:
         try:
