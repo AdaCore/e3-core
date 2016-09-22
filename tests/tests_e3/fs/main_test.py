@@ -170,16 +170,16 @@ def test_rm_on_error():
     e3.fs.mkdir('a')
     e3.fs.mkdir('a/b')
     e3.os.fs.touch('a/b/c')
-    os.chmod('a/b/c', 0000)
-    os.chmod('a/b', 0000)
+    os.chmod('a/b/c', 0o000)
+    os.chmod('a/b', 0o000)
 
     e3.fs.mkdir('a/d')
     e3.os.fs.touch('a/d/e')
-    os.chmod('a/d/e', 0000)
-    os.chmod('a/d', 0500)
+    os.chmod('a/d/e', 0o000)
+    os.chmod('a/d', 0o500)
 
     e3.fs.mkdir('a/f')
     e3.fs.mkdir('a/f/g')
-    os.chmod('a/f', 0500)
+    os.chmod('a/f', 0o500)
 
     e3.fs.rm('a', True)

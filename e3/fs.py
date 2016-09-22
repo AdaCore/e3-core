@@ -345,27 +345,27 @@ def rm(path, recursive=False, glob=True):
             # This function is only called when deleting a file inside a
             # directory to remove, it is safe to change the parent directory
             # permission since the parent directory will also be removed.
-            os.chmod(os.path.dirname(path), 0700)
+            os.chmod(os.path.dirname(path), 0o700)
 
             # ??? It seems that this might be needed on windows
-            os.chmod(path, 0700)
+            os.chmod(path, 0o700)
             e3.os.fs.safe_remove(path)
 
         elif func == os.rmdir:
             # Cannot remove path, call chmod and redo an attempt
-            os.chmod(path, 0700)
+            os.chmod(path, 0o700)
 
             # Also change the parent directory permission if it will also
             # be removed.
             if recursive and path not in file_list:
                 # If path not in the list of directories to remove it means
                 # that we are already in a subdirectory.
-                os.chmod(os.path.dirname(path), 0700)
+                os.chmod(os.path.dirname(path), 0o700)
             e3.os.fs.safe_rmdir(path)
 
         elif func == os.listdir:
             # Cannot read the directory content, probably a permission issue
-            os.chmod(path, 0700)
+            os.chmod(path, 0o700)
 
             # And continue to delete the subdir
             shutil.rmtree(path, onerror=onerror)
