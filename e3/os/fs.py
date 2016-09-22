@@ -234,7 +234,7 @@ def force_remove_file(path):
         chmod('u+w', dir_path)
 
         # ??? It seems that this might be needed on windows
-        os.chmod(path, 0777)
+        os.chmod(path, 0700)
         safe_remove(path)
         os.chmod(dir_path, orig_mode)
 
