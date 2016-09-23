@@ -5,12 +5,12 @@ from datetime import datetime
 import os
 
 install_requires = [
-    'clint',
     'enum34',
     'netifaces',
     'pyyaml',
     'python-dateutil',
     'requests',
+    'tqdm',
     'stevedore']
 
 extras_require = {}

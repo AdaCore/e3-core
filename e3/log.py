@@ -5,6 +5,9 @@ from __future__ import print_function
 import logging
 import sys
 import time
+import re
+from colorama import Fore, Style
+from tqdm import tqdm
 
 # Define default format for StreamHandler and FileHandler
 DEFAULT_STREAM_FMT = '%(levelname)-8s %(message)s'
@@ -14,29 +17,59 @@ DEFAULT_FILE_FMT = '%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s'
 # activate() is called with a filename.
 default_output_stream = sys.stdout
 
-# Pretty cli UI
-pretty_cli = True
+# If sys.stdout is a terminal then enable "pretty" output for user
+# This includes progress bars and colors
+if sys.stdout.isatty():
+    pretty_cli = True
+else:
+    pretty_cli = False
 
 
-def no_progress_bar(it, **kwargs):
-    del kwargs
-    return it
+def progress_bar(it, **kwargs):
+    """Create a tqdm progress bar.
 
-if sys.platform != 'win32':
-    try:
-        from clint.textui.progress import bar as clint_progress_bar
-    except ImportError:
-        clint_progress_bar = no_progress_bar
-
-
-def progress_bar(it, expected_size=None, **kwargs):
-    if pretty_cli and expected_size != 0:
-        return clint_progress_bar(it, expected_size=expected_size, **kwargs)
+    :param kwargs: see tqdm documentation
+    :type kwargs: dict
+    :return: a tqdm progress bar iterator
+    """
+    if pretty_cli:
+        return tqdm(it, **kwargs)
     else:
-        return no_progress_bar(it, expected_size=expected_size, **kwargs)
+        # When pretty cli is disabled return a progress bar that do nothing.
+        # returning just the iterator will break calls to tqdm method
+        # otherwise.
+        return tqdm(it, disable=True, **kwargs)
 
 
 __null_handler_set = set()
+
+
+class TqdmHandler(logging.StreamHandler):
+    """Logging handler when used when progress bars are enabled."""
+
+    color_subst = ((re.compile(r'(OK|PASSED)', re.I), Fore.GREEN),
+                   (re.compile(r'(INFO)', re.I), Fore.BLUE),
+                   (re.compile(r'(ERROR|FAILED)', re.I), Fore.RED),
+                   (re.compile(r'(CRITICAL)', re.I), Fore.RED + Style.BRIGHT))
+
+    def __init__(self):
+        logging.StreamHandler.__init__(self)
+
+    def emit(self, record):
+        msg = self.format(record)
+
+        # Handle logging on several lines
+        msg = msg.replace(
+            '\n',
+            '\n_' + ' ' * (len(msg) - len(record.message) - 1))
+
+        # Add color
+        for reg, color in self.color_subst:
+            msg = re.sub(reg,
+                         color + r'\1' + Fore.RESET + Style.RESET_ALL,
+                         msg)
+
+        tqdm.write(msg)
 
 
 def getLogger(name=None, prefix='e3'):
@@ -83,7 +116,10 @@ def __add_handlers(level, fmt, filename=None):
     """
     global default_output_stream
     if filename is None:
-        handler = logging.StreamHandler()
+        if pretty_cli:
+            handler = TqdmHandler()
+        else:
+            handler = logging.StreamHandler()
     else:
         handler = logging.FileHandler(filename)
         default_output_stream = handler.stream

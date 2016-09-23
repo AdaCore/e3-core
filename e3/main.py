@@ -84,6 +84,11 @@ class Main(object):
                 'INFO': logging.INFO,
                 'ERROR': logging.ERROR,
                 'CRITICAL': logging.CRITICAL})
+        log_group.add_argument(
+            '--nocolor',
+            default=False,
+            action="store_true",
+            help='disable color and progress bars')
 
         if platform_args:
             plat_group = argument_parser.add_argument_group(
@@ -142,6 +147,9 @@ class Main(object):
         :type: list[str] | None
         """
         self.args = self.argument_parser.parse_args(args)
+
+        if self.args.nocolor:
+            e3.log.pretty_cli = False
 
         if not self.__log_handlers_set:
             # First set level of verbosity
