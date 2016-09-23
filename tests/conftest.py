@@ -4,6 +4,8 @@ import tempfile
 from e3.env import Env
 from e3.fs import rm
 from e3.os.fs import cd
+import logging
+import e3.log
 
 
 @pytest.fixture(autouse=True)
@@ -19,6 +21,7 @@ def env_protect(request):
     Env().store()
     tempd = tempfile.mkdtemp()
     cd(tempd)
+    e3.log.activate(level=logging.DEBUG, e3_debug=True)
 
     def restore_env():
         Env().restore()
