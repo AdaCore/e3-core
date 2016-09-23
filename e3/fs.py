@@ -333,13 +333,14 @@ def rm(path, recursive=False, glob=True):
         :type exc_info: tuple
         """
         del exc_info
+        e3.log.debug('error when running %s on %s', func, path)
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
         if not os.path.exists(path):
             return
 
-        if func == os.remove:
+        if func in (os.remove, os.unlink):
             # Cannot remove path, call chmod and redo an attempt
 
             # This function is only called when deleting a file inside a
@@ -363,7 +364,7 @@ def rm(path, recursive=False, glob=True):
                 os.chmod(os.path.dirname(path), 0o700)
             e3.os.fs.safe_rmdir(path)
 
-        elif func == os.listdir:
+        elif func in (os.listdir, os.open):
             # Cannot read the directory content, probably a permission issue
             os.chmod(path, 0o700)
 
