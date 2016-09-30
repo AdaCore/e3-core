@@ -191,12 +191,26 @@ class PlanContext(object):
         # a special processing is done to make the corresponding set_env
         # call on the result BaseEnv object
         platform = {'build': None, 'host': None, 'target': None}
+
+        # Likewise board argument is used to change only the machine name
+        # of the target. ??? change name ???
+        board = None
+
         for k, v in args.iteritems():
             if k in platform:
                 platform[k] = v
+            elif k == 'board':
+                board = v
             elif v is not None or not hasattr(result, k):
                 setattr(result, k, v)
         result.set_env(**platform)
+
+        # If necessary adjust target machine name
+        if board is not None:
+            result.set_target(result.target.platform,
+                              result.target.os.version,
+                              board,
+                              result.target.os.mode)
 
         # Set action attribute (with action name)
         setattr(result, 'action', name)
