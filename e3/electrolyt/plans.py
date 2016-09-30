@@ -203,6 +203,20 @@ class PlanContext(object):
                 board = v
             elif v is not None or not hasattr(result, k):
                 setattr(result, k, v)
+
+        # Handle propagation of environment from the context
+        if platform['host'] is None and result.is_canadian:
+            platform['host'] = 'host'
+        if platform['target'] is None and result.is_cross:
+            platform['target'] = 'target'
+        if platform['target'] == result.host.platform:
+            # ??? This special case is temporary ???
+            # the goal is avoid cross from a -> a which are
+            # not current supported.
+            # Plans should be updated to use target='host'
+            # instead of target=env.host.platform
+            platform['target'] = 'host'
+
         result.set_env(**platform)
 
         # If necessary adjust target machine name
