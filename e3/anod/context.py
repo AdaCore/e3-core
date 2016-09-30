@@ -4,6 +4,7 @@ from e3.collection.dag import DAG
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
 from e3.env import BaseEnv
+from e3.error import E3Error
 from e3.anod.spec import has_primitive
 from e3.anod.package import UnmanagedSourceBuilder
 from e3.anod.action import (Root, InstallSource, CreateSource, Checkout,
@@ -12,8 +13,25 @@ from e3.anod.action import (Root, InstallSource, CreateSource, Checkout,
                             CreateSourceOrDownload)
 
 
-class SchedulingError(Exception):
-    pass
+class SchedulingError(E3Error):
+    """Exception raised by scheduling algorithm."""
+
+    def __init__(self, message, origin=None, uid=None, initiators=None):
+        """Scheduling error initialization.
+
+        :param message: the exception message
+        :type message: str
+        :param origin: the name of the function, class, or module having raised
+            the exception
+        :type origin: str
+        :param uid: uid of action that cause the error
+        :type uid: str
+        :param initiators: list of uids involved in the failure
+        :type initiators: list[str] | None
+        """
+        super(SchedulingError, self).__init__(message, origin)
+        self.uid = uid
+        self.initiators = initiators
 
 
 class AnodContext(object):
@@ -429,11 +447,30 @@ class AnodContext(object):
                                           enable_checks=False)
                     elif choice is None:
                         # delegate to resolver
-                        if resolver(action, decision):
+                        try:
+                            if resolver(action, decision):
+                                dag.add_vertex(uid, action)
+                                dag.update_vertex(decision.initiator,
+                                                  predecessors=[uid],
+                                                  enable_checks=False)
+                        except SchedulingError as e:
+                            # In order to help the analysis of a scheduling
+                            # error compute the explicit initiators of that
+                            # action
                             dag.add_vertex(uid, action)
                             dag.update_vertex(decision.initiator,
-                                              predecessors=[uid],
+                                              predecessors=[action.uid],
                                               enable_checks=False)
+                            rev_graph = dag.reverse_graph()
+                            # Initiators are explicit actions (connected to
+                            # 'root') that are in the closure of the failing
+                            # node.
+                            initiators = [
+                                iuid for iuid in rev_graph.get_closure(uid)
+                                if 'root'
+                                in rev_graph.vertex_predecessors[iuid]]
+                            raise SchedulingError(e.message, uid=uid,
+                                                  initiators=initiators)
                 else:
                     # An action is scheduled only if one of its successors is
                     # scheduled.
