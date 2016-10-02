@@ -104,3 +104,14 @@ class HostDB(object):
 
     def __getitem__(self, key):
         return self.hosts[key]
+
+    def get(self, key, default=None):
+        """Return the Host named ``key`` of ``default``.
+
+        :param key: host name
+        :type key: str
+        :param default: default value to return if not found
+        :type default: None | Host
+        :rtype: Host
+        """
+        return self.hosts.get(key, default)
