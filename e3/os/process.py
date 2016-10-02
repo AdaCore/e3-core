@@ -380,7 +380,16 @@ class Run(object):
                         # preexec_fn is no supported on windows
                         popen_args['preexec_fn'] = subprocess_setup
 
-                    runs.append(Popen(cmd, **popen_args))
+                    try:
+                        runs.append(Popen(cmd, **popen_args))
+                    except OSError as e:
+                        logger.error('error when spawning %s', cmd)
+                        # We have an error (e.g. file not found), try to kill
+                        # all processes already started.
+                        for p in runs:
+                            p.terminate()
+                        raise
+
                     self.internal = runs[-1]
 
         except Exception as e:

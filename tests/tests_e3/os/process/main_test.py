@@ -36,8 +36,10 @@ def test_not_found():
     assert 'e3-bin-not-found not found' in str(err.value)
 
     with pytest.raises(OSError) as err:
-        e3.os.process.Run([[sys.executable, '-c', 'pass'],
-                           ['e3-bin-not-found2']])
+        e3.os.process.Run([
+            [sys.executable, '-c',
+             'print("a "); import time; time.sleep(10); print("test")'],
+            ['e3-bin-not-found2']])
     assert 'e3-bin-not-found2 not found' in str(err.value)
 
 
