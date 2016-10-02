@@ -72,4 +72,5 @@ def anod():
         driver.activate()
         driver.call(action)
     except AnodError as err:
-        sys.exit(err)
+        print(err, file=sys.stderr)
+        sys.exit(1)
