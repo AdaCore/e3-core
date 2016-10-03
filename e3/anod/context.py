@@ -245,10 +245,13 @@ class AnodContext(object):
         else:
             raise Exception(primitive)
 
-        if not spec.has_package and primitive == 'install':
+        if not spec.has_package and primitive == 'install' and \
+                has_primitive(spec, 'build'):
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
-            # dependency.
+            # dependency. In case there is no build primitive and no
+            # package keep the install primitive (usually this means there
+            # is an overloaded download procedure).
             return self.add_spec(name, env, 'build',
                                  qualifier,
                                  expand_build=False)
