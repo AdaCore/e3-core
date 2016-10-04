@@ -196,6 +196,8 @@ class AnodContext(object):
         :type qualifier: str | None
         :param upload: if True consider uploading to the store
         :type upload: bool
+        :return: the root added action
+        :rtype: Action
         """
         # First create the subtree for the spec
         result = self.add_spec(name, env, primitive, qualifier, upload=upload)
@@ -213,6 +215,7 @@ class AnodContext(object):
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrInstall):
                     el.set_decision(BuildOrInstall.INSTALL)
+        return result
 
     def add_spec(self,
                  name,
