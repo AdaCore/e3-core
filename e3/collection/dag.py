@@ -262,6 +262,21 @@ class DAG(object):
                 other.vertex_predecessors[nid])
         return result
 
+    def as_dot(self):
+        """Return a Graphviz graph representation of the graph.
+
+        :return: the dot source file
+        :rtype: str
+        """
+        result = ['digraph G {', 'rankdir="LR";']
+        for vertex in self.vertex_data:
+            result.append('"%s"' % vertex)
+        for vertex, predecessors in self.vertex_predecessors.iteritems():
+            for predecessor in predecessors:
+                result.append('"%s" -> "%s"' % (vertex, predecessor))
+        result.append("}")
+        return "\n".join(result)
+
     def __len__(self):
         return len(self.vertex_data)
 
