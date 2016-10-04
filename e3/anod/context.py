@@ -10,6 +10,8 @@ from e3.anod.package import UnmanagedSourceBuilder
 from e3.anod.action import (Root, InstallSource, CreateSource, Checkout,
                             DownloadSource, GetSource, Build, Test, Install,
                             DownloadBinary, Decision, BuildOrInstall,
+                            UploadComponent, UploadBinaryComponent,
+                            UploadSourceComponent,
                             CreateSourceOrDownload)
 
 
@@ -176,7 +178,12 @@ class AnodContext(object):
         """
         return [self[el] for el in self.tree.vertex_predecessors[action.uid]]
 
-    def add_anod_action(self, name, env=None, primitive=None, qualifier=None):
+    def add_anod_action(self,
+                        name,
+                        env=None,
+                        primitive=None,
+                        qualifier=None,
+                        upload=True):
         """Add an Anod action to the context.
 
         :param name: spec name
@@ -187,9 +194,11 @@ class AnodContext(object):
         :type primitive: str
         :param qualifier: qualifier
         :type qualifier: str | None
+        :param upload: if True consider uploading to the store
+        :type upload: bool
         """
         # First create the subtree for the spec
-        result = self.add_spec(name, env, primitive, qualifier)
+        result = self.add_spec(name, env, primitive, qualifier, upload=upload)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
@@ -211,7 +220,8 @@ class AnodContext(object):
                  primitive=None,
                  qualifier=None,
                  expand_build=True,
-                 source_name=None):
+                 source_name=None,
+                 upload=True):
         """Internal function.
 
         The function expand an anod action into a tree
@@ -229,6 +239,8 @@ class AnodContext(object):
         :param source_name: source name associated with the source
             primitive
         :type source_name: str | None
+        :param upload: if True consider uploading to the store
+        :type upload: bool
         """
         # Initialize a spec instance
         spec = self.load(name, qualifier=qualifier, env=env, kind=primitive)
@@ -254,14 +266,15 @@ class AnodContext(object):
             # is an overloaded download procedure).
             return self.add_spec(name, env, 'build',
                                  qualifier,
-                                 expand_build=False)
+                                 expand_build=False, upload=upload)
 
         if expand_build and primitive == 'build' and \
                 spec.has_package:
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
-            return self.add_spec(name, env, 'install', qualifier)
+            return self.add_spec(name, env, 'install', qualifier,
+                                 upload=upload)
 
         # Add this stage if the action is already in the DAG, then it has
         # already been added.
@@ -283,13 +296,23 @@ class AnodContext(object):
                                              env,
                                              'build',
                                              qualifier,
-                                             expand_build=False)
+                                             expand_build=False,
+                                             upload=upload)
                 self.add_decision(BuildOrInstall,
                                   result,
                                   build_action,
                                   download_action)
             else:
                 self.connect(result, download_action)
+        elif primitive == 'build':
+            if spec.component is not None and upload:
+                if spec.has_package:
+                    upload_bin = UploadBinaryComponent(spec)
+                else:
+                    upload_bin = UploadSourceComponent(spec)
+                self.add(upload_bin)
+                self.connect(self.root, upload_bin)
+                self.connect(upload_bin, result)
 
         # Look for dependencies
         if '%s_deps' % primitive in dir(spec):
@@ -305,7 +328,7 @@ class AnodContext(object):
                     child_action = self.add_spec(e.name,
                                                  e.env(spec, self.default_env),
                                                  e.kind,
-                                                 e.qualifier)
+                                                 e.qualifier, upload=False)
 
                     if e.kind == 'build' and \
                             self[child_action.uid].data.kind == 'install':
@@ -357,7 +380,8 @@ class AnodContext(object):
                                                   BaseEnv(),
                                                   'source',
                                                   None,
-                                                  source_name=s.name)
+                                                  source_name=s.name,
+                                                  upload=upload)
                     for repo in obj.checkout:
                         r = Checkout(repo)
                         self.add(r)
@@ -414,6 +438,7 @@ class AnodContext(object):
         :type resolver: (Action, Decision) -> bool
         """
         rev = self.tree.reverse_graph()
+        uploads = []
         dag = DAG()
 
         for uid, action in rev:
@@ -425,10 +450,16 @@ class AnodContext(object):
                 # to apply the triggers based on the current list of scheduled
                 # actions.
                 action.apply_triggers(dag)
+            elif isinstance(action, UploadComponent):
+                uploads.append((action,
+                                self.tree.vertex_predecessors[uid]))
             else:
                 # Compute the list of successors for the current node (i.e:
-                # predecessors in the reversed graph).
-                preds = list(rev.vertex_predecessors[uid])
+                # predecessors in the reversed graph). Ignore UploadComponent
+                # nodes as they will be processed only once the scheduling
+                # is done.
+                preds = list([k for k in rev.vertex_predecessors[uid]
+                              if not isinstance(rev[k], UploadComponent)])
 
                 if len(preds) == 1 and isinstance(rev[preds[0]], Decision):
                     decision = rev[preds[0]]
@@ -485,4 +516,14 @@ class AnodContext(object):
                                               predecessors=[uid],
                                               enable_checks=False)
 
+        # Handle UploadComponent nodes. Add the node only if all predecessors
+        # are scheduled.
+        for action, predecessors in uploads:
+            if len([p for p in predecessors if p not in dag]) == 0:
+                dag.update_vertex(action.uid,
+                                  action,
+                                  predecessors=predecessors,
+                                  enable_checks=False)
+                # connect upload to the root node
+                dag.update_vertex('root', predecessors=[action.uid])
         return dag

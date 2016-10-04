@@ -192,7 +192,42 @@ class DownloadBinary(Action):
         Action.__init__(self, uid, data)
 
     def __str__(self):
-        return 'download binary of %s' % self.uid
+        return 'download binary of %s' % \
+            self.uid.split('.', 1)[1].rsplit('.', 1)[0]
+
+
+class UploadComponent(Action):
+    """UploadComponent Action.
+
+    Upload a component to the store.
+    """
+
+    __slots__ = ('uid', 'data')
+
+    def __init__(self, data):
+        """Initialize a UploadComponent object.
+
+        :param data: Anod instance
+        :type data: Anod
+        """
+        uid = data.uid.split('.')
+        uid[-1] = 'upload_bin'
+        uid = '.'.join(uid)
+        Action.__init__(self, uid, data)
+
+    def __str__(self):
+        return 'upload binary of %s' % \
+            self.uid.split('.', 1)[1].rsplit('.', 1)[0]
+
+
+class UploadBinaryComponent(UploadComponent):
+    """Upload binary component."""
+    pass
+
+
+class UploadSourceComponent(UploadComponent):
+    """Upload source only component."""
+    pass
 
 
 class Decision(Action):
