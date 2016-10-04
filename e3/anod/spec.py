@@ -340,6 +340,14 @@ class Anod(object):
         return None
 
     @property
+    def component(self):
+        """Return component name.
+
+        :rtype: str | None
+        """
+        return None
+
+    @property
     def source_pkg_build(self):
         """Return list of SourceBuilder defined in the specification file."""
         return None
