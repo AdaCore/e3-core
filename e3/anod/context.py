@@ -200,16 +200,31 @@ class AnodContext(object):
         :rtype: Action
         """
         # First create the subtree for the spec
-        result = self.add_spec(name, env, primitive, qualifier, upload=upload)
+        result = self.add_spec(name, env, primitive, qualifier)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
 
         # Ensure decision is set in case of explicit build or install
         if primitive == 'build':
+            build_action = None
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrInstall):
                     el.set_decision(BuildOrInstall.BUILD)
+                    build_action = self[el.left]
+            if build_action is None and isinstance(result, Build):
+                build_action = result
+
+            if build_action is not None:
+                spec = build_action.data
+                if spec.component is not None and upload:
+                    if spec.has_package:
+                        upload_bin = UploadBinaryComponent(spec)
+                    else:
+                        upload_bin = UploadSourceComponent(spec)
+                    self.add(upload_bin)
+                    self.connect(self.root, upload_bin)
+                    self.connect(upload_bin, build_action)
 
         elif primitive == 'install':
             for el in self.predecessors(result):
@@ -223,8 +238,7 @@ class AnodContext(object):
                  primitive=None,
                  qualifier=None,
                  expand_build=True,
-                 source_name=None,
-                 upload=True):
+                 source_name=None):
         """Internal function.
 
         The function expand an anod action into a tree
@@ -242,8 +256,6 @@ class AnodContext(object):
         :param source_name: source name associated with the source
             primitive
         :type source_name: str | None
-        :param upload: if True consider uploading to the store
-        :type upload: bool
         """
         # Initialize a spec instance
         spec = self.load(name, qualifier=qualifier, env=env, kind=primitive)
@@ -269,15 +281,14 @@ class AnodContext(object):
             # is an overloaded download procedure).
             return self.add_spec(name, env, 'build',
                                  qualifier,
-                                 expand_build=False, upload=upload)
+                                 expand_build=False)
 
         if expand_build and primitive == 'build' and \
                 spec.has_package:
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
-            return self.add_spec(name, env, 'install', qualifier,
-                                 upload=upload)
+            return self.add_spec(name, env, 'install', qualifier)
 
         # Add this stage if the action is already in the DAG, then it has
         # already been added.
@@ -299,23 +310,13 @@ class AnodContext(object):
                                              env,
                                              'build',
                                              qualifier,
-                                             expand_build=False,
-                                             upload=upload)
+                                             expand_build=False)
                 self.add_decision(BuildOrInstall,
                                   result,
                                   build_action,
                                   download_action)
             else:
                 self.connect(result, download_action)
-        elif primitive == 'build':
-            if spec.component is not None and upload:
-                if spec.has_package:
-                    upload_bin = UploadBinaryComponent(spec)
-                else:
-                    upload_bin = UploadSourceComponent(spec)
-                self.add(upload_bin)
-                self.connect(self.root, upload_bin)
-                self.connect(upload_bin, result)
 
         # Look for dependencies
         if '%s_deps' % primitive in dir(spec):
@@ -331,7 +332,7 @@ class AnodContext(object):
                     child_action = self.add_spec(e.name,
                                                  e.env(spec, self.default_env),
                                                  e.kind,
-                                                 e.qualifier, upload=False)
+                                                 e.qualifier)
 
                     if e.kind == 'build' and \
                             self[child_action.uid].data.kind == 'install':
@@ -383,8 +384,7 @@ class AnodContext(object):
                                                   BaseEnv(),
                                                   'source',
                                                   None,
-                                                  source_name=s.name,
-                                                  upload=upload)
+                                                  source_name=s.name)
                     for repo in obj.checkout:
                         r = Checkout(repo)
                         self.add(r)
