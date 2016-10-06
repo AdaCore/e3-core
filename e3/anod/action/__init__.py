@@ -222,11 +222,13 @@ class UploadComponent(Action):
 
 class UploadBinaryComponent(UploadComponent):
     """Upload binary component."""
+
     pass
 
 
 class UploadSourceComponent(UploadComponent):
     """Upload source only component."""
+
     pass
 
 
