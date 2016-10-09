@@ -1,7 +1,10 @@
 from __future__ import absolute_import
+
 from e3.os.fs import touch
 from e3.fs import mkdir
 from e3.fs import rm
+
+import contextlib
 from datetime import datetime, timedelta
 import os
 import pytest
@@ -71,7 +74,7 @@ def test_uid():
     ntfile2 = NTFile(os.path.join(work_dir, 'non_existing.txt'))
 
     with pytest.raises(NTException):
-        ntfile2.uid
+        print(ntfile2.uid)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
@@ -81,14 +84,11 @@ def test_open_file_in_dir():
     test_dir_path = os.path.join(work_dir, 'dir')
     mkdir(test_dir_path)
     touch(os.path.join(test_dir_path, 'toto.txt'))
-    try:
-        ntfile = NTFile(test_dir_path)
+
+    with contextlib.closing(NTFile(test_dir_path)) as ntfile:
         ntfile.open()
-        ntfile2 = NTFile('toto.txt', parent=ntfile)
-        ntfile2.open()
-    finally:
-        ntfile.close()
-        ntfile2.close()
+        with contextlib.closing(NTFile('toto.txt', parent=ntfile)) as ntfile2:
+            ntfile2.open()
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
@@ -103,7 +103,7 @@ def test_volume_path():
     with pytest.raises(NTException):
         # Choose a volume name that is unlikely to exist 0:/
         ntfile = NTFile('0:/dummy')
-        ntfile.volume_path
+        print(ntfile.volume_path)
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
