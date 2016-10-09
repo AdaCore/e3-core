@@ -232,11 +232,11 @@ def unpack_archive(filename,
                         if selected_files:
                             members = fd.getmembers()
 
-                            def is_matched(members, pattern):
+                            def is_matched(tarfile_members, pattern):
                                 """Return a list of matched tarfile members.
 
-                                :param members: TarInfo list
-                                :type members: list[TarInfo]
+                                :param tarfile_members: TarInfo list
+                                :type tarfile_members: list[TarInfo]
                                 :param pattern: string or regexp
                                 :type pattern: str
 
@@ -246,7 +246,7 @@ def unpack_archive(filename,
                                 :return: a list of tarfile members
                                 :rtype: list[TarInfo]
                                 """
-                                r = [mem for mem in members
+                                r = [mem for mem in tarfile_members
                                      if fnmatch.fnmatch(mem.name, pattern)]
                                 if not r:
                                     raise ArchiveError(
