@@ -751,8 +751,8 @@ def kill_process_tree(pid, timeout=3):
                          'parent' if proc.pid == pid else 'child',
                          proc.pid,
                          proc.cmdline())
-        except psutil.Error as err:
-            e3.log.debug(err)
+        except psutil.Error as kill_err:
+            e3.log.debug(kill_err)
             pass
 
     try:

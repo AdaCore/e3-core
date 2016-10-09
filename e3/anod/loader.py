@@ -60,8 +60,8 @@ class AnodSpecRepository(object):
 
         # Match yaml files with associated specifications
         for data in data_list:
-            candidate_specs = [spec for spec in spec_list
-                               if data.startswith(spec)]
+            candidate_specs = [spec_file for spec_file in spec_list
+                               if data.startswith(spec_file)]
             # We pick the longuest spec name
             candidate_specs.sort(key=lambda x: len(x))
             if not candidate_specs:
