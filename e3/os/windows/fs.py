@@ -100,7 +100,7 @@ class NTFile(object):
         :type desired_access: int
         :param shared_access: sharing parameters
             (see e3.os.windows.native_api.Shared)
-        :type shared_acces: int
+        :type shared_access: int
         :param open_options: open options
             (see e3.os.windows.native_api.OpenOptions)
         :type open_options: int
