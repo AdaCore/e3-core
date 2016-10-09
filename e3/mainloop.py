@@ -197,13 +197,13 @@ class MainLoop(object):
         self.locked_items = [None] * self.parallelism
 
         if not isinstance(item_list, DAG):
-            self.item_list = DAG()
+            dag = DAG()
             for index, item in enumerate(item_list):
-                self.item_list.add_vertex(str(index), item)
+                dag.add_vertex(str(index), item)
         else:
-            self.item_list = item_list
+            dag = item_list
 
-        self.iterator = DAGIterator(self.item_list, enable_busy_state=True)
+        self.iterator = DAGIterator(dag, enable_busy_state=True)
         self.collect_result = collect_result
         active_workers = 0
         max_active_workers = self.parallelism
@@ -296,11 +296,11 @@ class MainLoop(object):
 
     def abort(self):
         """Abort the loop."""
-        # First force release of all elements to ensure that iteration
+        # First leave all elements to ensure that iteration
         # on the remaining DAG elements won't be blocked
         for job_id in self.locked_items:
             if job_id is not None:
-                self.item_list.release(job_id)
+                self.iterator.leave(job_id)
 
         # Wait for worker still active if necessary
         if self.abort_file is not None and os.path.isfile(self.abort_file):
@@ -310,7 +310,7 @@ class MainLoop(object):
 
         # Mark remaining jobs as skipped
         for job_id, job_list in self.iterator:
-            self.item_list.release(job_id)
+            self.iterator.leave(job_id)
             if not isinstance(job_list, list):
                 job_list = [job_list]
             for job in job_list:
