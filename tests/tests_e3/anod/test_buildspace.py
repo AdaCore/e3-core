@@ -64,6 +64,7 @@ def test_status():
 
     last_status, timestamp = bs.get_last_status(kind='test')
     assert last_status == ReturnValue.notready
+    assert timestamp is not None
     assert (datetime.datetime.now() - timestamp).total_seconds() < 5
     last_status, timestamp = bs.get_last_status(kind='install')
     assert last_status == ReturnValue.missing
