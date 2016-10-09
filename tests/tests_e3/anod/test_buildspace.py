@@ -68,3 +68,13 @@ def test_status():
     last_status, timestamp = bs.get_last_status(kind='install')
     assert last_status == ReturnValue.missing
     assert timestamp is None
+
+
+def test_logs():
+    bs = BuildSpace(root_dir=os.getcwd(), primitive='build')
+    bs.create()
+    bs.set_logging()
+    bs.end()
+    assert os.path.isfile(bs.log_file)
+    with open(bs.log_file) as f:
+        assert 'anod primitive: build' in f.read()
