@@ -239,7 +239,7 @@ class Elf(object):
             str_len = buf[offset:].find('\0')
             return buf[offset:offset + str_len]
 
-        def expanded_so_name(so_name, path_list):
+        def expanded_so_name(shared_lib_name, path_list):
             """The expanded shared library name.
 
             Implement the ELF shared library loading specs, minus the
@@ -251,8 +251,8 @@ class Elf(object):
             and return the path of the first so_name that can be found.
             If not found, return so_name unchanged.
 
-            :param so_name: The name of a shared library.
-            :type so_name: str
+            :param shared_lib_name: The name of a shared library.
+            :type shared_lib_name: str
             :param path_list: A list of directory names.  If not absolute,
                 these directory names are relative to the current
                 directory.
@@ -260,15 +260,15 @@ class Elf(object):
 
             :rtype: str
             """
-            if '/' in so_name:
-                return so_name
+            if '/' in shared_lib_name:
+                return shared_lib_name
 
             for so_path in path_list:
-                exp_so_name = join(so_path, so_name)
+                exp_so_name = join(so_path, shared_lib_name)
                 if isfile(exp_so_name):
                     return exp_so_name
             # Not found in path_list, return filename unchanged.
-            return so_name
+            return shared_lib_name
 
         if '.dynamic' not in self.sections:
             # No .dynamic section, which means no shared library
