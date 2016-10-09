@@ -38,8 +38,9 @@ class Cache(object):
     def has_resource(self, uid):
         """Return True if the uid is in the cache and has not expired.
 
-        :param key: the resource uid
-        :type key: uid
+        :param uid: the resource uid
+        :type uid: uid
+        :rtype: bool
         """
         return self.get(uid) is not None
 
