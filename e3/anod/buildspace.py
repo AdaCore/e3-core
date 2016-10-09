@@ -189,7 +189,7 @@ class BuildSpace(object):
                 status_name = f.read().strip()
                 return ReturnValue[status_name], dt.fromtimestamp(
                     os.path.getmtime(status_file))
-        return ReturnValue.missing
+        return ReturnValue.missing, None
 
     def save_last_status(self, kind, status):
         """Save last status.
