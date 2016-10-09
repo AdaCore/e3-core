@@ -277,6 +277,8 @@ class BuildSpace(object):
 
     def end(self):
         """Kill the tail thread if running."""
+        logging.getLogger('').removeHandler(self.main_log_handler)
+        self.main_log_handler.close()
         if self.stop_event is not None:
             self.stop_event.set()
             self.tail_thread.join()
