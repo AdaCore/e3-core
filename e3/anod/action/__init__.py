@@ -31,8 +31,9 @@ class Root(Action):
 
     __slots__ = ('uid', 'data')
 
-    def __init__(self):
+    def __init__(self, uid, data):
         """Initialize a root node."""
+        super(Root, self).__init__(uid, data)
         self.uid = 'root'
         self.data = 'root'
 
