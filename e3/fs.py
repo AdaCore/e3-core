@@ -650,13 +650,13 @@ def sync_tree(source, target, ignore=None,
             e3.os.fs.chmod('a+wx', os.path.dirname(dst.path))
             os.makedirs(dst.path)
 
-    def walk(source_top, target_top, entry=None):
+    def walk(root_dir, target_root_dir, entry=None):
         """Walk through source and target file trees.
 
-        :param source_top: path to source tree
-        :type source_top: str
-        :param target_top: path to target tree
-        :type target_top: str
+        :param root_dir: path to source tree
+        :type root_dir: str
+        :param target_root_dir: path to target tree
+        :type target_root_dir: str
         :param entry: a FilesInfo object (used internally for the recursion)
         :type entry: FilesInfo
 
@@ -665,12 +665,12 @@ def sync_tree(source, target, ignore=None,
         """
         if entry is None:
             target_stat = None
-            if os.path.exists(target_top):
-                target_stat = os.lstat(target_top)
+            if os.path.exists(target_root_dir):
+                target_stat = os.lstat(target_root_dir)
 
             entry = FilesInfo('',
-                              FileInfo(source_top, os.lstat(source_top)),
-                              FileInfo(target_top, target_stat))
+                              FileInfo(root_dir, os.lstat(root_dir)),
+                              FileInfo(target_root_dir, target_stat))
             yield entry
         try:
             source_names = set(os.listdir(entry.source.path))
@@ -719,7 +719,7 @@ def sync_tree(source, target, ignore=None,
             elif is_in_file_list(el.rel_path):
                 yield el
                 if isdir(el.source):
-                    for x in walk(source_top, target_top, el):
+                    for x in walk(root_dir, target_root_dir, el):
                         yield x
             else:
                 yield FilesInfo(el.rel_path,

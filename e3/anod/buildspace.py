@@ -4,16 +4,19 @@ from __future__ import print_function
 import os
 import sys
 import logging
+import logging.handlers
 import yaml
 from datetime import datetime as dt
 from yaml.reader import ReaderError
+from yaml.parser import ParserError
 import e3.error
 import e3.log
+import e3.os.process
 from e3.hash import sha1
 from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import ReturnValue
 from e3.anod.error import AnodError
-from e3.fs import mkdir
+from e3.fs import mkdir, rm
 
 
 logger = e3.log.getLogger('buildspace')
@@ -35,16 +38,16 @@ class BuildSpace(object):
         self.dirs = ('meta', 'install', 'tmp', 'src', 'binary',
                      'build', 'test', 'pkg', 'log', 'results')
 
-        self.meta_dir = os.path.join(self.root_dir, 'meta')
-        self.install_dir = os.path.join(self.root_dir, 'install')
-        self.tmp_dir = os.path.join(self.root_dir, 'tmp')
-        self.src_dir = os.path.join(self.root_dir, 'src')
-        self.binary_dir = os.path.join(self.root_dir, 'binary')
-        self.build_dir = os.path.join(self.root_dir, 'build')
-        self.test_dir = os.path.join(self.root_dir, 'test')
-        self.pkg_dir = os.path.join(self.root_dir, 'pkg')
-        self.log_dir = os.path.join(self.root_dir, 'log')
-        self.results_dir = os.path.join(self.root_dir, 'results')
+        self.meta_dir = self.get_subdir('meta')
+        self.install_dir = self.get_subdir('install')
+        self.tmp_dir = self.get_subdir('tmp')
+        self.src_dir = self.get_subdir('src')
+        self.binary_dir = self.get_subdir('binary')
+        self.build_dir = self.get_subdir('build')
+        self.test_dir = self.get_subdir('test')
+        self.pkg_dir = self.get_subdir('pkg')
+        self.log_dir = self.get_subdir('log')
+        self.results_dir = self.get_subdir('results')
 
         # Initialize attributes that are keeping track of the logger handlers
         self.main_log_handler = None
@@ -60,6 +63,17 @@ class BuildSpace(object):
 
         # Flag used to communicate with the tail thread in verbose mode
         self.stop_event = None
+
+    def get_subdir(self, name):
+        """Get path to the subdirectory named ``name``.
+
+        :param name: name of the subdirectory
+        :type name: str
+        :raise: ValueError when the subdirectory is not in self.dirs
+        """
+        if name not in self.dirs:
+            raise ValueError('%s not in self.dirs' % name)
+        return os.path.join(self.root_dir, name)
 
     def create(self, quiet=False):
         """Create a build space.
@@ -88,7 +102,7 @@ class BuildSpace(object):
         keep = set(keep) if keep is not None else set()
         keep.update(('results', 'log'))
         for d in (d for d in self.dirs if d not in keep):
-            e3.fs.rm(os.path.join(self.root_dir, d), True)
+            rm(os.path.join(self.root_dir, d), True)
 
     def update_status(self, kind, status=ReturnValue.failure,
                       fingerprint=None):
@@ -134,7 +148,7 @@ class BuildSpace(object):
             with open(fingerprint_file) as f:
                 try:
                     result = yaml.load(f)
-                except ReaderError as e:
+                except (ParserError, ReaderError) as e:
                     logger.warning(e)
                     # Invalid fingerprint
                     logger.warning('invalid fingerprint, discard it')
@@ -177,7 +191,7 @@ class BuildSpace(object):
                 status_name = f.read().strip()
                 return ReturnValue[status_name], dt.fromtimestamp(
                     os.path.getmtime(status_file))
-        return ReturnValue.missing
+        return ReturnValue.missing, None
 
     def save_last_status(self, kind, status):
         """Save last status.
@@ -264,6 +278,11 @@ class BuildSpace(object):
 
     def end(self):
         """Kill the tail thread if running."""
+        if self.main_log_handler is not None:
+            logging.getLogger('').removeHandler(
+                self.main_log_handler)
+            self.main_log_handler.close()
+            self.main_log_handler = None
         if self.stop_event is not None:
             self.stop_event.set()
             self.tail_thread.join()

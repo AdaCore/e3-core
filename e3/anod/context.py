@@ -171,8 +171,8 @@ class AnodContext(object):
     def predecessors(self, action):
         """Retrieve predecessors of a given action.
 
-        :param key: the parent action
-        :type key: Action
+        :param action: the parent action
+        :type action: Action
         :return: the predecessor list
         :rtype: list[Action]
         """
@@ -407,7 +407,7 @@ class AnodContext(object):
         :param action: action to consider
         :type action: Action
         :param decision: decisition to resolve
-        :type decison: Decision
+        :type decision: Decision
         :return: True if the action should be scheduled, False otherwise
         :rtype: False
         :raise SchedulingError: in case no decision can be taken

@@ -35,8 +35,6 @@ class AnodDriver(object):
 
         :param anod_instance: an Anod instance
         :type anod_instance: e3.anod.spec.Anod
-        :param sandbox: the sandbox where the build should be done
-        :type sandbox: e3.anod.sandbox.Sandbox
         :param store: the store backend for accessing source and
             binary packages
         :type store: e3.store.backends.base.Store

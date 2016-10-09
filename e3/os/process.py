@@ -382,7 +382,7 @@ class Run(object):
 
                     try:
                         runs.append(Popen(cmd, **popen_args))
-                    except OSError as e:
+                    except OSError:
                         logger.error('error when spawning %s', cmd)
                         # We have an error (e.g. file not found), try to kill
                         # all processes already started.
@@ -751,8 +751,8 @@ def kill_process_tree(pid, timeout=3):
                          'parent' if proc.pid == pid else 'child',
                          proc.pid,
                          proc.cmdline())
-        except psutil.Error as err:
-            e3.log.debug(err)
+        except psutil.Error as kill_err:
+            e3.log.debug(kill_err)
             pass
 
     try:

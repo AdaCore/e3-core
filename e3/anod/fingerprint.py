@@ -51,9 +51,7 @@ class Fingerprint(object):
         """
         # ??? add all anod specs related files (.anod and .yaml)
 
-        # Add build variables
-        for bv in anod_instance.build_vars:
-            self.add(bv.name, bv.value)
+        # ??? Add build variables (BuildVar)
 
         # ??? Do likewise for all the sources used by this anod instance
 
