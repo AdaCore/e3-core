@@ -15,6 +15,19 @@ def run_job(job_data, job_info):
         bg=True)
 
 
+def new_dag():
+    dag = e3.collection.dag.DAG()
+    dag.add_vertex(1, 1)
+    dag.add_vertex(2, 2)
+    dag.add_vertex(3, 3)
+    dag.add_vertex(4, 4)
+    dag.add_vertex(5, 5, predecessors=[1])
+    dag.add_vertex(6, 6, predecessors=[5])
+    dag.add_vertex(7, 7, predecessors=[6])
+    dag.check()
+    return dag
+
+
 def test_mainloop():
     result = []
 
@@ -92,23 +105,13 @@ def test_mainloop_abort():
 
     try:
 
-        dag = e3.collection.dag.DAG()
-        dag.add_vertex(1, 1)
-        dag.add_vertex(2, 2)
-        dag.add_vertex(3, 3)
-        dag.add_vertex(4, 4)
-        dag.add_vertex(5, 5, predecessors=[1])
-        dag.add_vertex(6, 6, predecessors=[5])
-        dag.add_vertex(7, 7, predecessors=[6])
-        dag.check()
-
         e3.mainloop.MainLoop(
-            dag,
+            new_dag(),
             run_job,
             collect_result_interrupt,
             parallelism=4)
     except KeyboardInterrupt as e:
-        assert 'mainlooptest' in e
+        assert 'mainlooptest' in str(e)
     assert 'interrupt' in result
     assert 'skip' in result
     assert 2 in result
@@ -130,7 +133,7 @@ def test_mainloop_errors(caplog):
             result.append(int(job_process.out.strip()))
 
     e3.mainloop.MainLoop(
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        new_dag(),
         run_job,
         collect_result_too_many_errors,
         parallelism=0)
