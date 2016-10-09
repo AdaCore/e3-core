@@ -111,6 +111,7 @@ class PlanContext(object):
         # works also because all scopes refer to the same stack of env
         # (because the object is mutable).
         self.actions = {}
+        self.action_list = []
 
     def register_action(self, name, fun):
         """Register a function that correspond to an action.
