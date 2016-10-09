@@ -33,8 +33,7 @@ class Root(Action):
 
     def __init__(self):
         """Initialize a root node."""
-        self.uid = 'root'
-        self.data = 'root'
+        super(Root, self).__init__(uid='root', data='root')
 
     def __str__(self):
         return 'root node'
