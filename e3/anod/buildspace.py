@@ -7,6 +7,7 @@ import logging
 import yaml
 from datetime import datetime as dt
 from yaml.reader import ReaderError
+from yaml.parser import ParserError
 import e3.error
 import e3.log
 from e3.hash import sha1
@@ -145,7 +146,7 @@ class BuildSpace(object):
             with open(fingerprint_file) as f:
                 try:
                     result = yaml.load(f)
-                except ReaderError as e:
+                except (ParserError, ReaderError) as e:
                     logger.warning(e)
                     # Invalid fingerprint
                     logger.warning('invalid fingerprint, discard it')
