@@ -199,7 +199,7 @@ class MainLoop(object):
         if not isinstance(item_list, DAG):
             dag = DAG()
             for index, item in enumerate(item_list):
-                dag.add_vertex(str(index), item)
+                dag.add_vertex(index, item)
         else:
             dag = item_list
 
