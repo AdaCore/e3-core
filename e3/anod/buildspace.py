@@ -11,11 +11,12 @@ from yaml.reader import ReaderError
 from yaml.parser import ParserError
 import e3.error
 import e3.log
+import e3.os.process
 from e3.hash import sha1
 from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import ReturnValue
 from e3.anod.error import AnodError
-from e3.fs import mkdir
+from e3.fs import mkdir, rm
 
 
 logger = e3.log.getLogger('buildspace')
@@ -101,7 +102,7 @@ class BuildSpace(object):
         keep = set(keep) if keep is not None else set()
         keep.update(('results', 'log'))
         for d in (d for d in self.dirs if d not in keep):
-            e3.fs.rm(os.path.join(self.root_dir, d), True)
+            rm(os.path.join(self.root_dir, d), True)
 
     def update_status(self, kind, status=ReturnValue.failure,
                       fingerprint=None):
