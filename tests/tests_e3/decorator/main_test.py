@@ -7,6 +7,7 @@ def test_memoize():
 
     @e3.decorator.memoize
     def t(arg):
+        del arg
         return random()
 
     assert t(1) == t(1)
