@@ -148,6 +148,7 @@ class Anod(object):
 
         self.kind = kind
         self.jobs = jobs
+        self.data_files = data_files
 
         # Set when AnodDriver.activate() is called
         self.build_space = None
