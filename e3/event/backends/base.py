@@ -26,6 +26,7 @@ class Event(object):
         :param uid: unique identifier
         :type uid: str
         """
+        del kwargs
         self.uid = uid if uid is not None else uuid.uuid1()
         self.env = env if env is not None else e3.env.BaseEnv()
         self.name = name

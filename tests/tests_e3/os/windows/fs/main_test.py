@@ -166,6 +166,7 @@ def test_iterate_on_dir():
     result = set()
 
     def fun(name, ntfile_instance):
+        del ntfile_instance
         result.add(name)
         return True, False
 

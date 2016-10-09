@@ -72,7 +72,7 @@ from foo.bar2.module3 import name1
 
     node2 = ast.parse(script, '<string>')
     with pytest.raises(RewriteNodeError) as err:
-        node2 = RewriteImportNodeTransformer(
+        RewriteImportNodeTransformer(
             [
                 RewriteImportRule(
                     'a',
@@ -90,7 +90,7 @@ from foo.bar2.module3 import name1
 
     node3 = ast.parse(script, '<string>')
     with pytest.raises(RewriteNodeError) as err3:
-        node3 = RewriteImportNodeTransformer(
+        RewriteImportNodeTransformer(
             [
                 RewriteImportRule('a'),
                 RewriteImportRule('b'),
