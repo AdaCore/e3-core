@@ -28,6 +28,8 @@ else:
 def progress_bar(it, **kwargs):
     """Create a tqdm progress bar.
 
+    :param it: an interator
+    :type it: collections.Iterator
     :param kwargs: see tqdm documentation
     :type kwargs: dict
     :return: a tqdm progress bar iterator
