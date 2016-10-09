@@ -35,16 +35,16 @@ class BuildSpace(object):
         self.dirs = ('meta', 'install', 'tmp', 'src', 'binary',
                      'build', 'test', 'pkg', 'log', 'results')
 
-        self.meta_dir = os.path.join(self.root_dir, 'meta')
-        self.install_dir = os.path.join(self.root_dir, 'install')
-        self.tmp_dir = os.path.join(self.root_dir, 'tmp')
-        self.src_dir = os.path.join(self.root_dir, 'src')
-        self.binary_dir = os.path.join(self.root_dir, 'binary')
-        self.build_dir = os.path.join(self.root_dir, 'build')
-        self.test_dir = os.path.join(self.root_dir, 'test')
-        self.pkg_dir = os.path.join(self.root_dir, 'pkg')
-        self.log_dir = os.path.join(self.root_dir, 'log')
-        self.results_dir = os.path.join(self.root_dir, 'results')
+        self.meta_dir = self.get_subdir('meta')
+        self.install_dir = self.get_subdir('install')
+        self.tmp_dir = self.get_subdir('tmp')
+        self.src_dir = self.get_subdir('src')
+        self.binary_dir = self.get_subdir('binary')
+        self.build_dir = self.get_subdir('build')
+        self.test_dir = self.get_subdir('test')
+        self.pkg_dir = self.get_subdir('pkg')
+        self.log_dir = self.get_subdir('log')
+        self.results_dir = self.get_subdir('results')
 
         # Initialize attributes that are keeping track of the logger handlers
         self.main_log_handler = None
@@ -61,6 +61,17 @@ class BuildSpace(object):
         # Flag used to communicate with the tail thread in verbose mode
         self.stop_event = None
 
+    def get_subdir(self, name):
+        """Get path to the subdirectory named ``name``.
+
+        :param name: name of the subdirectory
+        :type name: str
+        :raise: ValueError when the subdirectory is not in self.dirs
+        """
+        if name not in self.dirs:
+            raise ValueError('%s not in self.dirs' % name)
+        return os.path.join(self.root_dir, name)
+
     def create(self, quiet=False):
         """Create a build space.
 
@@ -71,7 +82,7 @@ class BuildSpace(object):
         :type quiet: bool
         """
         for d in self.dirs:
-            mkdir(getattr(self, '%s_dir' % d), quiet=quiet)
+            mkdir(self.get_subdir(name=d), quiet=quiet)
 
     def reset(self, keep=None):
         """Reset build space.
