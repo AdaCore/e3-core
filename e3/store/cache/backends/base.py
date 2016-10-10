@@ -25,7 +25,7 @@ class Cache(object):
         :type uid: str
         :param default: the default value if not found
         """
-        pass
+        pass  # all: no cover
 
     def get_expiry_time(self, timeout=DEFAULT_TIMEOUT):
         """Return the expiry time based upon the provided timeout.
@@ -55,7 +55,7 @@ class Cache(object):
             default cache timeout will be used.
         :type timeout: int
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def delete(self, uid):
@@ -65,12 +65,12 @@ class Cache(object):
         :param uid: the resource uid
         :type uid: str
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def clear(self):
         """Remove *all* values from the cache at once."""
-        pass
+        pass  # all: no cover
 
     def close(self):
         """Close the cache connection."""

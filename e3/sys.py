@@ -133,7 +133,7 @@ def sanity_check():
         import yaml
         yaml.dump({'Yaml': 'works'})
         print('PASSED')
-    except Exception:
+    except Exception:  # defensive code
         print('FAILED')
         errors += 1
 
@@ -143,14 +143,14 @@ def sanity_check():
         sha1(__file__)
         md5(__file__)
         print('PASSED')
-    except Exception:
+    except Exception:  # defensive code
         print('FAILED')
         errors += 1
 
     print('Version:', end=' ')
     try:
         print(version())
-    except Exception:
+    except Exception:  # defensive code
         errors += 1
     return errors
 
@@ -178,7 +178,7 @@ def main():
         return
     elif m.args.check:
         errors = sanity_check()
-        if errors:
+        if errors:  # defensive code
             sys.exit('sanity checking failed!')
         else:
             print('Everything OK!')

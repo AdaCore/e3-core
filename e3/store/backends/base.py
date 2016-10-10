@@ -26,7 +26,7 @@ class ResourceInfo(object):
         This is meant to be used to implement a cache system.
         :rtype: str
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def verify(self, resource_path):
@@ -37,7 +37,7 @@ class ResourceInfo(object):
         :type resource_path: str
         :rtype: bool
         """
-        pass
+        pass  # all: no cover
 
 
 class CachedResource(namedtuple(
@@ -77,7 +77,7 @@ class Store(object):
         :type query: dict
         :rtype: ResourceInfo
         """
-        pass
+        pass  # all: no cover
 
     def download_resource(self, metadata, dest):
         """Download a resource identified by its metadata in dest.
@@ -129,4 +129,4 @@ class Store(object):
         :return: resource path
         :rtype: str | None
         """
-        pass
+        pass  # all: no cover

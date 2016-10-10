@@ -1,3 +1,5 @@
 [report]
 exclude_lines =
     windows: no cover
+    all: no cover
+    defensive code

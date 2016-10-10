@@ -5,7 +5,7 @@ import errno
 
 try:
     import cPickle as pickle
-except ImportError:
+except ImportError:  # defensive code
     import pickle
 
 import os
