@@ -1,8 +1,11 @@
 [run]
 omit =
     */os/windows/*
+    */os/unix/constants.py
 
 [report]
 exclude_lines =
     unix: no cover
     linux: no cover
+    all: no cover
+    defensive code

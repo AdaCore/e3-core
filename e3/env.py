@@ -58,7 +58,7 @@ class AbstractBaseEnv(object):
         This is mostly useful to implement a singleton, as done in Env()
         :rtype: bool
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def _items(self):
@@ -66,7 +66,7 @@ class AbstractBaseEnv(object):
 
         :rtype: collections.Iterable
         """
-        pass
+        pass  # all: no cover
 
     @property
     def platform(self):

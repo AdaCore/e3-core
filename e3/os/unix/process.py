@@ -19,7 +19,7 @@ def wait(blocking=False):
     if not blocking:
         options |= os.WNOHANG
 
-    if sys.platform.startswith('linux'):
+    if sys.platform.startswith('linux'):  # darwin: no cover
         import ctypes
 
         # Wait only for exited processes
@@ -49,6 +49,6 @@ def wait(blocking=False):
             raise OSError("waitid error")
 
         return siginfo_t.pid
-    else:
+    else:  # linux: no cover
         pid, _, _ = os.wait3(options)
         return pid

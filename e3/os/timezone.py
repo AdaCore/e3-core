@@ -35,7 +35,7 @@ def timezone():
         # utcoffset can return None.
         result = datetime.now(gettz()).utcoffset()
         if result is None:
-            result = 0
+            result = 0  # defensive code
         else:
             result = result.total_seconds() / 3600
 

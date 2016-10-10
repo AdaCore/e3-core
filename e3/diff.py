@@ -103,7 +103,7 @@ def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
         """
         cmd = ['patch', '-p0', '-f']
         p = e3.os.process.Run(cmd, cwd=working_dir, input=fname)
-        if p.status != 0:
+        if p.status != 0:  # defensive code
             raise DiffError(
                 origin='patch',
                 message='running %s < %s in %s failed with %s' % (

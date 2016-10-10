@@ -75,9 +75,9 @@ class EventManager(object):
 
     @abc.abstractmethod
     def send_event(self, event):
-        pass
+        pass  # all: no cover
 
     @abc.abstractproperty
     def Event(self):
         """Return the Event class used by this EventManager."""
-        pass
+        pass  # all: no cover

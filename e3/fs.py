@@ -247,7 +247,7 @@ def mkdir(path, mode=0755, quiet=False):
             logger.debug('mkdir %s (mode=%s)', path, oct(mode))
         try:
             os.makedirs(path, mode)
-        except Exception as e:
+        except Exception as e:  # defensive code
             if os.path.isdir(path):
                 # Take care of cases where in parallel execution environment
                 # the directory is created after the initial test on its
