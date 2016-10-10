@@ -10,11 +10,23 @@ if __name__ == '__main__':
     script_dir = os.path.abspath(os.path.dirname(__file__))
     cmd = ['py.test' + Env().build.os.exeext]
 
-    if '--cov' in sys.argv[1:]:
-        cmd.append(
-            '--cov-config=%s/coverage_%s.rc' % (script_dir, os_name))
+    args = sys.argv[1:]
 
-    p = Run(cmd + sys.argv[1:],
+    if '--cov' in args:
+        coverage_conf = '%s/coverage_%s.rc' % (script_dir, os_name)
+        cmd.append('--cov-config=%s' % coverage_conf)
+    if '--cov' in args and '--coveralls' in args:
+        args = [arg for arg in args if arg != '--coveralls']
+        run_coveralls = True
+    else:
+        run_coveralls = False
+
+    p = Run(cmd + args,
             output=None,
             error=None)
+
+    if run_coveralls:
+        Run(['coveralls', '--rcfile=%s' % coverage_conf],
+            output=None, error=None)
+
     sys.exit(p.status)
