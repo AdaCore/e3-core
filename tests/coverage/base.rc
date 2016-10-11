@@ -1,0 +1,10 @@
+[run]
+branch = False
+# we can probably activate it once we have more coverage
+
+[report]
+fail_under = 60
+# ideally should be around 90, work in progress
+
+[html]
+title = e3 coverage report

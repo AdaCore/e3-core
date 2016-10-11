@@ -2,6 +2,7 @@
 __pycache__
 /.cache
 /.coverage
+/.coveragerc
 /.idea
 /dist/
 /build/
