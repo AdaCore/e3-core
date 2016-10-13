@@ -116,3 +116,37 @@ def test_iter_with_busy_state():
     for nid, data in it:
         if nid is None:
             it.leave('a')
+
+
+def test_inexisting():
+    d = DAG()
+    d.add_vertex('a')
+    assert 'a' in d
+    d.update_vertex('a', data='NOT B',
+                    predecessors=['b'], enable_checks=False)
+    assert 'b' not in d
+    assert d['a'] == 'NOT B'
+    with pytest.raises(DAGError):
+        d.check()
+
+
+def test_reverse_dag():
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('b', predecessors=['a'])
+    d.add_vertex('c', predecessors=['b'])
+    d.add_vertex('d', predecessors=['c'])
+
+    it = DAGIterator(d)
+    assert [k for k, _ in it] == ['a', 'b', 'c', 'd']
+
+    reverse_d = d.reverse_graph()
+    reverse_it = DAGIterator(reverse_d)
+    assert [k for k, _ in reverse_it] == ['d', 'c', 'b', 'a']
+
+
+def test_dot():
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('b', predecessors=['a'])
+    assert '"b" -> "a"' in d.as_dot()
