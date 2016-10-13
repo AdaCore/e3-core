@@ -138,8 +138,6 @@ def test_mainloop_errors(caplog):
         collect_result_too_many_errors,
         parallelism=0)
 
-    assert any(
-        ('Too many errors, aborting'
-         in c.getMessage() for c in caplog.records()))
+    assert 'Too many errors, aborting' in caplog.text
     assert 'error' in result
     assert 'skip' in result

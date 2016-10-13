@@ -27,9 +27,8 @@ def test_simple_store(caplog):
         current_dir = os.getcwd()
         path = store.download_resource_content(metadata, current_dir)
         assert path is None
-        assert any(
-            ('expecting da39a3ee5e6b4b0d3255bfef95601890afd80709 got'
-                in c.getMessage() for c in caplog.records()))
+        assert 'expecting da39a3ee5e6b4b0d3255bfef95601890afd80709 got' \
+            in caplog.text
 
         metadata.sha = '0c8ef1a401f4564abba7b85676464ac4bbb5cb05'
         path = store.download_resource_content(metadata, current_dir)

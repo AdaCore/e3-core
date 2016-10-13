@@ -38,7 +38,7 @@ def test_mkdir(caplog):
     try:
         subdir = os.path.join(base, 'subdir')
         e3.fs.mkdir(subdir)
-        for record in caplog.records():
+        for record in caplog.records:
             assert 'mkdir' in record.msg
 
     finally:
@@ -50,7 +50,7 @@ def test_mkdir_exists(caplog):
     try:
         subdir = os.path.join(base, 'subdir')
         os.makedirs(subdir)
-        for record in caplog.records():
+        for record in caplog.records:
             assert 'mkdir' not in record.msg
 
     finally:

@@ -64,7 +64,7 @@ def test_patch_ignore_all(caplog):
         'patch2.txt', current_dir,
         discarded_files=lambda x: True)
 
-    assert 'All patch2.txt content has been discarded' in caplog.text()
+    assert 'All patch2.txt content has been discarded' in caplog.text
 
 
 def test_patch_invalid():
