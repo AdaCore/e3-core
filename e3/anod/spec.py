@@ -126,7 +126,7 @@ class Anod(object):
     ExternalSourceBuilder = e3.anod.package.ExternalSourceBuilder
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
-    def __init__(self, qualifier, kind, jobs=1, env=None, data_files=None):
+    def __init__(self, qualifier, kind, jobs=1, env=None):
         """Initialize an Anod instance.
 
         :param qualifier: the qualifier used when loading the spec
@@ -138,9 +138,6 @@ class Anod(object):
         :type jobs: int
         :param env: alternate platform environment
         :type env: Env
-        :param data_files: list of data files (yaml files) associated with
-            the spec
-        :type data_files: list[str] | None
         :raise: SpecError
         """
         self.deps = OrderedDict()
@@ -148,7 +145,6 @@ class Anod(object):
 
         self.kind = kind
         self.jobs = jobs
-        self.data_files = data_files
 
         # Set when AnodDriver.activate() is called
         self.build_space = None
