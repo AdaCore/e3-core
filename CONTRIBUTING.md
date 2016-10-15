@@ -33,6 +33,10 @@ This ensures that:
  * the print statement cannot be used
  * the / operator means true division
 
+Note that this can be automated by running:
+
+`isort <your module>.py`
+
 The `e3` namespace
 ------------------
 
