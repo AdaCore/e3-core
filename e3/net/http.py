@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 
 import cgi
@@ -103,7 +104,7 @@ class HTTPSession(object):
                 path = os.path.join(dest, filename)
                 logger.info('downloading %s size=%s', path, content_length)
 
-                expected_size = content_length / self.CHUNK_SIZE
+                expected_size = content_length // self.CHUNK_SIZE
                 with open(path, 'wb') as fd:
                     for chunk in e3.log.progress_bar(
                             response.iter_content(self.CHUNK_SIZE),

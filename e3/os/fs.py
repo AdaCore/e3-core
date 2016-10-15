@@ -5,8 +5,8 @@ logging (unless in case of unexpected failure).
 """
 
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
-
 
 import itertools
 import os
@@ -191,10 +191,10 @@ def df(path, full=False):
         used = ((st.f_blocks - st.f_bfree) * st.f_frsize)
     if full:
         return _ntuple_diskusage(
-            total / (1024 * 1024),
-            used / (1024 * 1024),
-            free / (1024 * 1024))
-    return free / (1024 * 1024)
+            total // (1024 * 1024),
+            used // (1024 * 1024),
+            free // (1024 * 1024))
+    return free // (1024 * 1024)
 
 
 def __safe_unlink_func():

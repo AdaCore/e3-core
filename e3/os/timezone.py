@@ -1,5 +1,6 @@
 """Return the current timezone offset."""
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 
 from dateutil.tz import gettz
@@ -29,7 +30,7 @@ def timezone():
         win_tz_pt = pointer(win_tz)
         windll.kernel32.GetTimeZoneInformation(win_tz_pt)
         result = win_tz.Bias
-        result = - int(result) / 60
+        result = - int(result) // 60
     else:
         # Note that in case timezone cannot be computed then
         # utcoffset can return None.
@@ -37,6 +38,6 @@ def timezone():
         if result is None:
             result = 0  # defensive code
         else:
-            result = result.total_seconds() / 3600
+            result = result.total_seconds() // 3600
 
     return float(result)

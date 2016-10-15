@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 
 from e3.error import E3Error
@@ -160,13 +161,13 @@ class FileTime(Structure):
     def as_datetime(self):
         try:
             return datetime.fromtimestamp(
-                self.filetime / 10000000 - 11644473600)
+                self.filetime // 10000000 - 11644473600)
         except ValueError as err:
             raise ValueError("filetime '%s' failed with %s" % (
                              self.filetime, err))
 
     def __str__(self):
-        return str(time.ctime(self.filetime / 10000000 - 11644473600))
+        return str(time.ctime(self.filetime // 10000000 - 11644473600))
 
 
 class FileInfo(object):

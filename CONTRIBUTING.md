@@ -17,18 +17,21 @@ All entry points must instanciate `e3.main.Main` to parse their options.
 
 Exceptions raised by `e3` should derived from `e3.error.E3Error`.
 
-All import used in `e3` should be _absolute imports_. To force this, we add at
-the beginning of each `e3` module:
+All `e3` Python 2 code is converted to Python 3 using `2to3`. To minimize
+the differences between the two versions, we're adding the following
+import statements at the beginning of each module:
 
 ```python
 from __future__ import absolute_import
-```
-
-All `e3` Python 2 code is converted to Python 3 using `2to3`, to simply the writing of tests also import the Python 3 print function with:
-
-```python
+from __future__ import division
 from __future__ import print_function
 ```
+
+This ensures that:
+
+ * all imports are absolute imports
+ * the print statement cannot be used
+ * the / operator means true division
 
 The `e3` namespace
 ------------------
