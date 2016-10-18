@@ -1,9 +1,14 @@
 from __future__ import absolute_import
-import e3.event
 import contextlib
 import email
 import json
 import mock
+import os
+
+import e3.archive
+import e3.event
+import e3.fs
+import e3.os.fs
 
 
 def test_smtp_event():
@@ -16,9 +21,19 @@ def test_smtp_event():
          'smtp_servers': ['smtp.localhost']
          })
 
+    e3.fs.mkdir('pkg')
+    e3.archive.create_archive(
+        filename='pkg.tar.gz',
+        from_dir=os.path.join(os.getcwd(), 'pkg'),
+        dest=os.getcwd())
+
+    e3.os.fs.touch('unknown')
+
     with contextlib.closing(manager.Event(
             name='event test')) as e:
+        e.attach_file('pkg.tar.gz', name='pkg.tar.gz')
         e.attach_file(__file__, name='test.py')
+        e.attach_file('unknown', name='unknown')
         e.subject = 'a test subject'
 
     with mock.patch('smtplib.SMTP') as mock_smtp:
