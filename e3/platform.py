@@ -84,7 +84,7 @@ class Platform(
         if platform_name in (None, '', 'default'):
             platform_name = default_platform
             is_host = True
-        if machine == cls.system_info.hostname():
+        if machine == cls.system_info.hostname()[0]:
             is_host = True
 
         if is_host:
