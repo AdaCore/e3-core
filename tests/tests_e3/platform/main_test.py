@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import pytest
+import e3.env
 import e3.platform
 
 
@@ -20,6 +21,12 @@ def test_platform():
     assert b != c
 
     assert c.os.name == 'linux'
+
+
+def test_is_host():
+    p = e3.platform.Platform.get(
+        machine=e3.env.Env().build.machine)
+    assert p.is_host
 
 
 def test_immutable():
