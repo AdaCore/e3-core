@@ -67,22 +67,16 @@ class SMTPEventManager(EventManager):
         mail.attach(event_json)
 
         for name, (filename, file_hash) in attachments.items():
-            if isinstance(filename, str) or isinstance(filename, unicode):
-                ctype, encoding = mimetypes.guess_type(filename)
+            ctype, encoding = mimetypes.guess_type(filename)
 
-                if encoding == 'gzip' and ctype == 'application/x-tar':
-                    attachment = MIMEBase('application', 'x-tar-gz')
-                elif encoding is None and ctype is not None:
-                    attachment = MIMEBase(*ctype.split('/', 1))
-                else:
-                    attachment = MIMEBase('application', 'octet-stream')
-                with open(filename, 'rb') as data_f:
-                    attachment.set_payload(data_f.read())
-
+            if encoding == 'gzip' and ctype == 'application/x-tar':
+                attachment = MIMEBase('application', 'x-tar-gz')
+            elif encoding is None and ctype is not None:
+                attachment = MIMEBase(*ctype.split('/', 1))
             else:
-                # if filename is not a string assume it's a file descriptor
-                attachment = MIMEBase('text', 'plain')
-                attachment.set_payload(filename.read())
+                attachment = MIMEBase('application', 'octet-stream')
+            with open(filename, 'rb') as data_f:
+                attachment.set_payload(data_f.read())
 
             encoders.encode_base64(attachment)
             attachment.add_header('Content-Disposition', 'attachment',
