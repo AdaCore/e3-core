@@ -1,7 +1,7 @@
 [run]
 omit =
     */os/windows/*
-    */os/unix/constants.py
+    */os/unix/constant.py
 
 [report]
 exclude_lines =
