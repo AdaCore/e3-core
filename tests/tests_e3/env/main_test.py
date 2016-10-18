@@ -1,10 +1,13 @@
 from __future__ import absolute_import
+import os
 import sys
+
+import pytest
 
 import e3.env
 import e3.fs
 import e3.platform
-import os
+import e3.os.process
 
 
 def test_autodetect():
@@ -84,6 +87,9 @@ def test_set_target():
     e.set_target('host')
     assert e.host == e.target
 
+    e.set_target()
+    assert e.host == e.target
+
 
 def test_set_env():
     e = e3.env.BaseEnv()
@@ -91,6 +97,22 @@ def test_set_env():
     assert e.build.platform == 'x86-linux'
     assert e.host.platform == 'x86_64-linux'
     assert e.target.platform == 'x86-windows'
+
+    # keep the current target
+    e.set_env('x86-linux,rhEs5', 'x86_64-linux,debian7', 'target')
+    assert e.target.platform == 'x86-windows'
+
+    # None means host, replace the target by the previous host value
+    e.set_env('x86-linux,rhEs5', 'x86_64-linux,debian7', None)
+    assert e.target.platform == 'x86_64-linux'
+
+    # replace the target by the previous build value
+    e.set_env('x86-linux,rhEs5', 'x86_64-linux,debian7', 'build')
+    assert e.target.platform == 'x86-linux'
+
+    # replace the target by the previous build host
+    e.set_env('x86-linux,rhEs5', 'x86_64-linux,debian7', 'host')
+    assert e.target.platform == 'x86_64-linux'
 
 
 def test_cmd_triplet():
@@ -109,6 +131,17 @@ def test_get_attr():
     assert e.get_attr('host.os.name') == 'linux'
     assert e.get_attr('host.os.name2', default_value='hello') == 'hello'
     assert e.get_attr('host.cpu.bits', forced_value='gotit') == 'gotit'
+
+    e.my_attr = 3
+    assert e.get_attr('my_attr') == 3
+
+    e.my_attr = None
+    assert e.get_attr('my_attr', default_value=4) == 4
+
+    assert e.my_attr is None
+
+    with pytest.raises(AttributeError):
+        print(e.does_not_exist)
 
 
 def test_add_path():
@@ -141,7 +174,17 @@ def test_discriminants():
     assert 'native' in e.discriminants
     e.set_target('arm-elf')
     assert 'native' not in e.discriminants
+
+    e.set_build('x86-windows')
+    assert 'NT' in e.discriminants
     e.restore()
+
+
+def test_tmp():
+    e = e3.env.Env()
+    current_dir = os.getcwd()
+    os.environ['TMPDIR'] = current_dir
+    assert e.tmp_dir == current_dir
 
 
 def test_to_dict():
@@ -170,6 +213,14 @@ def test_store():
     c.restore()
     assert c.abc == 'foo'
 
+    # calling .restore() when there is nothing to restore is a no-op
+    # this test is run through env_protect (defined in conftest.py)
+    # so Env().store() has already been called, call it twice here
+    c.restore()
+    c.restore()
+
+    assert not hasattr(c, 'abc')
+
 
 def test_from_platform_name():
     e = e3.env.BaseEnv.from_platform_name('arm-linux-linux')
@@ -186,3 +237,13 @@ def test_from_platform_name():
     assert e.target.platform == 'x86_64-linux'
     assert e.build.platform == 'x86_64-linux'
     assert not e.is_cross
+
+    e = e3.env.BaseEnv.from_platform_name('what-linux-linux')
+    assert e is None
+
+
+def test_copy():
+    e = e3.env.BaseEnv()
+    new_e = e.copy(target='arm-elf')
+
+    assert new_e.target.platform == 'arm-elf'
