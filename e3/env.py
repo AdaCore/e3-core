@@ -694,15 +694,3 @@ class Env(AbstractBaseEnv):
 
         # Restore current directory
         os.chdir(self.cwd)
-
-
-def main_platform_info():
-    import e3.main
-    m = e3.main.Main(platform_args=True)
-    m.argument_parser.add_argument(
-        '--show',
-        choices={'build', 'host', 'target'},
-        default='build',
-        help='Select which platform info to show')
-    m.parse_args()
-    print(getattr(Env(), m.args.show))
