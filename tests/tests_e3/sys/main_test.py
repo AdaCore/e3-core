@@ -2,10 +2,15 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import ast
+import os
 import pytest
+import sys
 
+import e3.fs
+import e3.os.fs
 from e3.sys import RewriteImportNodeTransformer, RewriteImportRule, \
     RewriteNodeError
+import e3.sys
 
 
 def test_filtering_import():
@@ -102,3 +107,36 @@ from foo.bar2.module3 import name1
         ).visit(node3)
     # verify that from foo.bar.module import name2 is rejected
     assert "module='foo.bar." in str(err3.value)
+
+
+def test_python_func():
+    e3.sys.set_python_env('/foo')
+    if sys.platform == 'win32':
+        assert '/foo' in os.environ['PATH'].split(os.pathsep)
+        assert [e3.os.fs.unixpath(p)
+                for p in e3.sys.python_script('run', '/foo')] == [
+            '/foo/python.exe', '/foo/Scripts/run']
+        assert [e3.os.fs.unixpath(p)
+                for p in e3.sys.python_script('run')][0] == \
+            e3.os.fs.unixpath(sys.executable)
+
+        e3.fs.mkdir('Scripts')
+        e3.os.fs.touch('Scripts/run.exe')
+        assert e3.os.fs.unixpath(
+            e3.sys.python_script('run.exe', os.getcwd())[0]) == \
+            e3.os.fs.unixpath(
+                os.path.join(os.getcwd(), 'Scripts', 'run.exe'))
+        assert e3.os.fs.unixpath(
+            e3.sys.python_script('run', os.getcwd())[0]) == \
+            e3.os.fs.unixpath(
+                os.path.join(os.getcwd(), 'Scripts', 'run.exe'))
+    else:
+        assert '/foo/bin' in os.environ['PATH'].split(os.pathsep)
+        assert e3.sys.python_script('run', '/foo') == [
+            '/foo/bin/python', '/foo/bin/run']
+
+    assert e3.os.fs.unixpath(
+        os.path.dirname(e3.sys.python_script('run')[0])) == \
+        e3.os.fs.unixpath(os.path.dirname(sys.executable))
+    assert e3.os.fs.unixpath(e3.sys.interpreter()) == \
+        e3.os.fs.unixpath(sys.executable)

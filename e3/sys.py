@@ -239,7 +239,9 @@ def python_script(name, prefix=None):
 
     if sys.platform == 'win32':  # unix: no cover
         script = os.path.join(prefix, 'Scripts', name)
-        if os.path.isfile(script + '.exe'):
+        if script.endswith('exe') and os.path.isfile(script):
+            return [script]
+        elif os.path.isfile(script + '.exe'):
             return [script + '.exe']
         else:
             return [interpreter(prefix), script]
