@@ -1,9 +1,9 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
 import sys
 
-import pytest
-
 import e3.os.process
+import pytest
 from e3.binarydata import BinaryFileBuffer
 from e3.binarydata.elf import Elf, ElfMagic
 

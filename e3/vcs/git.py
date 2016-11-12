@@ -13,13 +13,12 @@ Example::
             authors.append(commit['email'])
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
-from subprocess import PIPE
-import sys
-import tempfile
+from __future__ import absolute_import, division, print_function
 
 import itertools
+import sys
+import tempfile
+from subprocess import PIPE
 
 import e3.error
 import e3.fs

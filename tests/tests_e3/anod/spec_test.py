@@ -1,13 +1,12 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
-from e3.anod.driver import AnodDriver
-from e3.anod.error import AnodError
-from e3.anod.spec import Anod, has_primitive
-from e3.anod.sandbox import SandBox
+from __future__ import absolute_import, division, print_function
 
 import os
+
 import pytest
+from e3.anod.driver import AnodDriver
+from e3.anod.error import AnodError
+from e3.anod.sandbox import SandBox
+from e3.anod.spec import Anod, has_primitive
 
 
 def test_simple_spec():

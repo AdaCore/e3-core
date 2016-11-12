@@ -1,11 +1,10 @@
 """Return the current timezone offset."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
+
+import sys
+from datetime import datetime
 
 from dateutil.tz import gettz
-from datetime import datetime
-import sys
 
 
 def timezone():

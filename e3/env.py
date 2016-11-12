@@ -3,8 +3,7 @@
 This package provide a class called Env used to store global
 information. Env is a singleton so there is in fact only one instance.
 """
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import abc
 import os

@@ -1,6 +1,7 @@
-import pytest
+from __future__ import absolute_import, division, print_function
 
 import e3.hash
+import pytest
 
 
 def test_hash():

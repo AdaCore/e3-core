@@ -1,8 +1,9 @@
-from __future__ import absolute_import
-import dateutil.parser
+from __future__ import absolute_import, division, print_function
+
 import datetime
 import sys
 
+import dateutil.parser
 import e3.log
 import e3.os.process
 

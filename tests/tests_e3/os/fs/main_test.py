@@ -1,12 +1,12 @@
-from __future__ import absolute_import
-import os
-import tempfile
-import sys
+from __future__ import absolute_import, division, print_function
 
-import pytest
+import os
+import sys
+import tempfile
 
 import e3.fs
 import e3.os.fs
+import pytest
 
 
 @pytest.mark.xfail(sys.platform == 'win32',

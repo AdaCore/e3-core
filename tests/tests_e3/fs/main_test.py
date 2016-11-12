@@ -1,11 +1,13 @@
-from __future__ import absolute_import
-import e3.hash
-import e3.fs
-import e3.diff
-import e3.os.fs
+from __future__ import absolute_import, division, print_function
+
 import os
-import pytest
 import sys
+
+import e3.diff
+import e3.fs
+import e3.hash
+import e3.os.fs
+import pytest
 
 
 def test_cp():

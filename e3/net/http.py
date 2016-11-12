@@ -1,19 +1,17 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import cgi
 import contextlib
 import os
 import socket
-import requests
-import requests.adapters
-import requests.packages.urllib3.exceptions
-from requests.packages.urllib3.util import Retry
-import requests.exceptions
 import tempfile
 
 import e3.log
+import requests
+import requests.adapters
+import requests.exceptions
+import requests.packages.urllib3.exceptions
+from requests.packages.urllib3.util import Retry
 
 logger = e3.log.getLogger('net.http')
 

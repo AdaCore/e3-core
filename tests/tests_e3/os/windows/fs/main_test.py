@@ -1,15 +1,13 @@
-from __future__ import absolute_import
-
-from e3.os.fs import touch
-from e3.fs import mkdir
-from e3.fs import rm
+from __future__ import absolute_import, division, print_function
 
 import contextlib
-from datetime import datetime, timedelta
 import os
-import pytest
 import sys
+from datetime import datetime, timedelta
 
+import pytest
+from e3.fs import mkdir, rm
+from e3.os.fs import touch
 
 if sys.platform == 'win32':
     from e3.os.windows.fs import NTFile

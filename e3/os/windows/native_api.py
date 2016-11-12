@@ -1,16 +1,15 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from e3.error import E3Error
-from ctypes import (Structure, create_unicode_buffer, pointer, cast, c_wchar_p,
-                    sizeof, POINTER)
-from ctypes.wintypes import (USHORT, LPWSTR, DWORD, LONG, BOOLEAN, INT, BOOL,
-                             LARGE_INTEGER, LPVOID, ULONG, HANDLE)
-from datetime import datetime
 import ctypes
 import sys
 import time
+from ctypes import (POINTER, Structure, c_wchar_p, cast,
+                    create_unicode_buffer, pointer, sizeof)
+from ctypes.wintypes import (BOOL, BOOLEAN, DWORD, HANDLE, INT, LARGE_INTEGER,
+                             LONG, LPVOID, LPWSTR, ULONG, USHORT)
+from datetime import datetime
+
+from e3.error import E3Error
 
 NTSTATUS = LONG
 

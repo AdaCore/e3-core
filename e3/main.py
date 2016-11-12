@@ -20,12 +20,13 @@ will also be provided::
     --host       to set the host
     --target     to set the target
 """
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
+
 import logging
 import os
-import sys
 import signal
+import sys
+
 import e3
 import e3.log
 from e3.env import Env

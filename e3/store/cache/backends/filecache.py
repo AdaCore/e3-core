@@ -1,20 +1,18 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import errno
-
-try:
-    import cPickle as pickle
-except ImportError:  # defensive code
-    import pickle
-
 import os
 import tempfile
 import time
 
 import e3.log
 from e3.fs import mkdir, rm
-from e3.store.cache.backends.base import Cache, DEFAULT_TIMEOUT
+from e3.store.cache.backends.base import DEFAULT_TIMEOUT, Cache
+
+try:
+    import cPickle as pickle
+except ImportError:  # defensive code
+    import pickle
 
 
 class FileCache(Cache):

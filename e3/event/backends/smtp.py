@@ -1,15 +1,14 @@
-from __future__ import absolute_import
-import mimetypes
-import json
+from __future__ import absolute_import, division, print_function
 
+import json
+import mimetypes
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
-from email.utils import make_msgid, formatdate
-
-from e3.event.backends.base import Event, EventManager
+from email.utils import formatdate, make_msgid
 
 import e3.net.smtp
+from e3.event.backends.base import Event, EventManager
 
 
 class SMTPEvent(Event):

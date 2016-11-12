@@ -1,14 +1,16 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
 import contextlib
 import email
 import json
-import mock
 import os
 
 import e3.archive
 import e3.event
 import e3.fs
 import e3.os.fs
+
+import mock
 
 
 def test_smtp_event():

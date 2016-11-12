@@ -1,13 +1,13 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
 import os
 import sys
 
-import pytest
-
 import e3.env
 import e3.fs
-import e3.platform
 import e3.os.process
+import e3.platform
+import pytest
 
 
 def test_autodetect():

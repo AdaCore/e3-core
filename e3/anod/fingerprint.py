@@ -5,15 +5,15 @@ and allow Anod to detect changes in these states. This is mainly used to
 decide if a given action has been done and is up-to-date.
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
+import hashlib
+import os
 from collections import OrderedDict
 
 from e3.anod.error import AnodError
 from e3.env import Env
 from e3.hash import sha1
-
-import os
-import hashlib
 
 FINGERPRINT_VERSION = '1.1'
 # This value should be bumped each time computation of the fingerprint changes.

@@ -3,9 +3,12 @@
 # show only paths corresponding to the real source files
 # From https://github.com/danilobellini/pytest-doctest-custom/
 
-from coverage.data import PathAliases, CoverageData
+from __future__ import absolute_import, division, print_function
+
 import os
 import sys
+
+from coverage.data import CoverageData, PathAliases
 
 
 def fix_paths(site_pkg_dir, cov_data_file):

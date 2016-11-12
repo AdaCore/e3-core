@@ -1,19 +1,18 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 from collections import OrderedDict
 
-from e3.anod.error import AnodError, ShellError
-from e3.anod.status import ReturnValue
-from e3.yaml import load_with_config
 import e3.anod.deps
 import e3.anod.package
-import yaml
 import e3.env
 import e3.log
 import e3.os.process
 import e3.text
+import yaml
+from e3.anod.error import AnodError, ShellError
+from e3.anod.status import ReturnValue
+from e3.yaml import load_with_config
 
 # CURRENT API version
 __version__ = '1.4'
