@@ -6,6 +6,6 @@ script: tox
 matrix:
     include:
         - python: 2.7
-          env: TOXENV=py27-cov,coveralls,checkstyle,docs
+          env: TOXENV=py27-cov-coveralls,checkstyle,docs
         - python: 3.5
           env: TOXENV=py35
