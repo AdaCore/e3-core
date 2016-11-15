@@ -70,17 +70,26 @@ def test_wait_for_processes():
     p1 = e3.os.process.Run([sys.executable, 'p1.py'], bg=True)
     p2 = e3.os.process.Run([sys.executable, 'p2.py'], bg=True)
 
-    process_list = [p1, p2]
-    e3.os.fs.touch('end1')
-    result = e3.os.process.wait_for_processes(process_list, 10)
+    process_list = [p2]
+    p3 = e3.os.process.Run(
+            [sys.executable, '-c',
+             'from e3.os.fs import touch;'
+             'from time import sleep;'
+             'sleep(0.2);'
+             'touch("end1");'
+             'sleep(0.2);'
+             'touch("end2")'], bg=True)
+    result = e3.os.process.wait_for_processes(process_list, 2)
     del process_list[result]
-    e3.os.fs.touch('end2')
-    e3.os.process.wait_for_processes(process_list, 10)
+    process_list = [p1, p2]
+    e3.os.process.wait_for_processes(process_list, 2)
 
     assert p1.status == 0
     assert p1.out.strip() == 'process1'
     assert p2.status == 0
     assert p2.out.strip() == 'process2'
+
+    p3.wait()
 
 
 def test_run_pipe():
