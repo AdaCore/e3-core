@@ -625,29 +625,50 @@ def wait_for_processes(process_list, timeout):
                 raise WaitError
 
     else:
-        import e3.os.unix.process
-        # Choose between blocking or non-blocking call to wait
-        blocking = True
-        if timeout != 0:
-            blocking = False
+        import select
+        import signal
 
-        while remain >= 0.0 or timeout == 0:
-            # Retrieve first child process that ends. Note that that child
-            # process might not be in our watch list
-            pid = e3.os.unix.process.wait(blocking)
+        # Each time a SIGCHLD signal is received write into pipe. Use
+        # then select which support timeout arguments to wait.
+        fd_r, fd_w = os.pipe()
 
-            if pid != 0:
-                # We have a result
-                result = next((index for index, p in
-                               enumerate(process_list) if p.pid == pid), None)
-                if result is not None:
-                    # At the stage we need to set the process status and close
-                    # related handles. Indeed we will not be able to use the
-                    # wait method afterwards and retrieve it.
-                    process_list[result].wait()
-                    return result
-            time.sleep(1.0)
-            remain = timeout - time.time() + start
+        def handler(signum, frame):
+            os.write(fd_w, b'a')
+
+        signal.signal(signal.SIGCHLD, handler)
+
+        try:
+            while remain >= 0.0 or timeout == 0:
+                # Do a first check in case a SIGCHLD was emited before the
+                # initialisation of the handler.
+                for index, p in enumerate(process_list):
+                    if p.poll() is not None:
+                        return index
+
+                # Wait for a sigchld signal. Note that select might
+                # be interrupted by signals thus the loop
+                select_args = [[fd_r], [], []]
+                if timeout != 0:
+                    select_args.append(remain)
+
+                while True:
+                    try:
+                        l_r, _, _ = select.select(*select_args)
+                        break
+                    except select.error:
+                        pass
+                if l_r:
+                    os.read(fd_r, 1)
+
+                remain = timeout - time.time() + start
+        finally:
+            # Be sure to remove signal handler and close pipe
+            signal.signal(signal.SIGCHLD, 0)
+            os.close(fd_r)
+            os.close(fd_w)
+
+        logger.warning('no process ended after %f seconds',
+                       time.time() - start)
         return None
 
 
