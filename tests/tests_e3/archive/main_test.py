@@ -6,8 +6,6 @@ import e3.os.fs
 import os
 import pytest
 
-e3.log.activate()
-
 
 @pytest.mark.parametrize('ext', ('.tar.gz', '.tar', '.zip'))
 def test_unpack(ext):

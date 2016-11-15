@@ -9,9 +9,6 @@ import yaml
 import e3.yaml
 import e3.log
 
-e3.log.activate()
-e3.log.e3_debug_logger = True
-
 
 @pytest.mark.parametrize('config,expected', [
     ({'param1': 'full', 'param2': 'short'},
