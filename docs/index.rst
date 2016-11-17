@@ -8,6 +8,7 @@ Contents:
 
    welcome
    plugin
+   decision-graphs
 
 
 Indices and tables
