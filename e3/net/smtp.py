@@ -55,7 +55,8 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
     def system_sendmail():
         """Run the system sendmail."""
         if system_sendmail_fallback:
-            for sendmail_bin in ('/usr/lib/sendmail', '/usr/sbin/sendmail'):
+            for sendmail_bin in ('/usr/lib/sendmail',
+                                 '/usr/sbin/sendmail'):  # all: no cover
                 if os.path.exists(sendmail_bin):
                     p = e3.os.process.Run(
                         [sendmail_bin] + to_emails,

@@ -54,6 +54,14 @@ def test_cp():
     assert os.path.exists(os.path.join(dest3, 'a1'))
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
+def test_cp_symplink():
+    e3.os.fs.touch('c')
+    os.symlink('c', 'c_sym')
+    e3.fs.cp('c_sym', 'd', preserve_symlinks=True)
+    assert os.path.islink('d')
+
+
 def test_echo():
     dest_file = 'echo_test'
     e3.fs.echo_to_file(dest_file, 'foo')
@@ -107,6 +115,15 @@ def test_tree_state():
     e3.os.fs.touch('toto')
     state4 = e3.fs.get_filetree_state(current_dir)
     assert state4 != state3
+    hidden = os.path.join(current_dir, '.h')
+    e3.fs.mkdir(hidden)
+    state5 = e3.fs.get_filetree_state(current_dir)
+    assert state5 == state4
+    e3.os.fs.touch('.toto')
+    state6 = e3.fs.get_filetree_state(current_dir)
+    assert state6 == state5
+    state6 = e3.fs.get_filetree_state('toto')
+    assert isinstance(state6, str)
 
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
