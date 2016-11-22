@@ -24,15 +24,15 @@ class AnodSpecRepository(object):
     spec_dir = None
     specs = {}
 
-    def __init__(self, spec_dir=None, spec_prolog=''):
+    def __init__(self, spec_dir=None, spec_config=None):
         """Initialize an AnodSpecRepository.
 
         :param spec_dir: directory containing the anod specs. If None then
             parameters from previous instance will be used.
         :type spec_dir: str | None
-        :param spec_prolog: python source code that should be prepended to
-            each spec code
-        :type spec_prolog: str
+        :param spec_config: dictionary containing the configuration for this
+            AnodSpecRepository
+        :type spec_config: dict
         """
         if spec_dir is None:
             assert self.spec_dir is not None, "repository not initialized"
@@ -74,7 +74,13 @@ class AnodSpecRepository(object):
             self.specs[name] = AnodModule(name, **value)
 
         # Declare spec prolog
-        self.spec_prolog = spec_prolog
+        prolog_file = os.path.join(spec_dir, 'prolog.py')
+        self.prolog_dict = {'spec_config': spec_config,
+                            '__spec_repository': self}
+        if os.path.exists(prolog_file):
+            with open(prolog_file) as f:
+                exec(compile(f.read(), prolog_file, 'exec'),
+                     self.prolog_dict)
 
     def __contains__(self, item):
         """Check by name if a spec is present in the repository.
@@ -167,15 +173,12 @@ class AnodModule(object):
 
         try:
             with open(self.path) as fd:
-                anod_module.__dict__['__spec_repository'] = repository
+                # Inject the prolog into the new module dict
+                anod_module.__dict__.update(repository.prolog_dict)
 
-                # Exec prolog
-                code = compile(repository.spec_prolog, self.path, 'exec')
-                exec code in anod_module.__dict__
-
-                # Followed by spec code
+                # Exec spec code
                 code = compile(fd.read(), self.path, 'exec')
-                exec code in anod_module.__dict__
+                exec(code, anod_module.__dict__)
         except Exception as e:
             logger.error('exception: %s', e)
             logger.error('cannot load code of %s', self.name)
