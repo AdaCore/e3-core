@@ -19,8 +19,7 @@ Note also that from the user point view there is no parallelism to handle.
 The two user defined function run_job and collect_result are called
 sequentially.
 """
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import argparse
 import os

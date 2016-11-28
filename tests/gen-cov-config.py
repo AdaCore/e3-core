@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-from e3.env import Env
+from __future__ import absolute_import, division, print_function
 
 import os
 import sys
+
+from e3.env import Env
 
 
 def main(coverage_rc):

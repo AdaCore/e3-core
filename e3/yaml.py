@@ -1,17 +1,16 @@
 """Modification of the yaml loader for E3."""
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-
-from collections import OrderedDict
-import e3.log
-from e3.text import format_with_dict
 import os
 import re
 import sys
+from collections import OrderedDict
+
+import e3.log
 import yaml
 import yaml.constructor
 import yaml.parser
+from e3.text import format_with_dict
 
 try:
     from yaml import CLoader as Loader

@@ -1,11 +1,11 @@
 """Extensions to the standard Python logging system."""
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import logging
+import re
 import sys
 import time
-import re
+
 from colorama import Fore, Style
 from tqdm import tqdm
 

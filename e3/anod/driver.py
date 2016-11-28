@@ -1,16 +1,13 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from functools import wraps
 import os
 import sys
-
-from e3.error import E3Error
-
-from e3.anod.spec import AnodError, has_primitive
+from functools import wraps
 
 import e3.log
 import e3.store
+from e3.anod.spec import AnodError, has_primitive
+from e3.error import E3Error
 
 logger = e3.log.getLogger('e3.anod.driver')
 

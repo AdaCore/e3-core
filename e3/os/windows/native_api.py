@@ -1,15 +1,15 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from e3.error import E3Error
-from ctypes import (Structure, create_unicode_buffer, pointer, cast, c_wchar_p,
-                    sizeof, POINTER)
-from ctypes.wintypes import (USHORT, LPWSTR, DWORD, LONG, BOOLEAN, INT, BOOL,
-                             LARGE_INTEGER, LPVOID, ULONG, HANDLE)
-from datetime import datetime
 import ctypes
 import sys
 import time
+from ctypes import (POINTER, Structure, c_wchar_p, cast,
+                    create_unicode_buffer, pointer, sizeof)
+from ctypes.wintypes import (BOOL, BOOLEAN, DWORD, HANDLE, INT, LARGE_INTEGER,
+                             LONG, LPVOID, LPWSTR, ULONG, USHORT)
+from datetime import datetime
+
+from e3.error import E3Error
 
 NTSTATUS = LONG
 
@@ -160,13 +160,13 @@ class FileTime(Structure):
     def as_datetime(self):
         try:
             return datetime.fromtimestamp(
-                self.filetime / 10000000 - 11644473600)
+                self.filetime // 10000000 - 11644473600)
         except ValueError as err:
             raise ValueError("filetime '%s' failed with %s" % (
                              self.filetime, err))
 
     def __str__(self):
-        return str(time.ctime(self.filetime / 10000000 - 11644473600))
+        return str(time.ctime(self.filetime // 10000000 - 11644473600))
 
 
 class FileInfo(object):

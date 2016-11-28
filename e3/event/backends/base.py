@@ -1,13 +1,11 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import abc
 import uuid
 
-from e3.error import E3Error
-
 import e3.env
 import e3.hash
+from e3.error import E3Error
 
 
 class Event(object):

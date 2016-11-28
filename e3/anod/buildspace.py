@@ -1,23 +1,22 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import os
-import sys
 import logging
 import logging.handlers
-import yaml
+import os
+import sys
 from datetime import datetime as dt
-from yaml.reader import ReaderError
-from yaml.parser import ParserError
+
 import e3.error
 import e3.log
 import e3.os.process
-from e3.hash import sha1
+import yaml
+from e3.anod.error import AnodError
 from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import ReturnValue
-from e3.anod.error import AnodError
 from e3.fs import mkdir, rm
-
+from e3.hash import sha1
+from yaml.parser import ParserError
+from yaml.reader import ReaderError
 
 logger = e3.log.getLogger('buildspace')
 

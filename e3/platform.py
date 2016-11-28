@@ -1,12 +1,10 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import collections
 
 import e3.os
 import e3.os.platform
 from e3.platform_db import get_knowledge_base
-
 
 KNOWLEDGE_BASE = get_knowledge_base()
 

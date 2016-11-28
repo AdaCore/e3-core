@@ -1,9 +1,9 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
 from random import random
 
-import pytest
-
 import e3.decorator
+import pytest
 
 
 def test_memoize():

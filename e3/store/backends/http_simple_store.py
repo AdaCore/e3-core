@@ -1,6 +1,4 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
+from __future__ import absolute_import, division, print_function
 
 import e3.hash
 import e3.log

@@ -1,13 +1,12 @@
 """Support for reading and writing tar and zip archives."""
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from contextlib import closing
 import fnmatch
 import os
 import subprocess
 import sys
 import tempfile
+from contextlib import closing
 
 import e3
 import e3.error

@@ -1,9 +1,8 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import pytest
 import e3.env
 import e3.platform
+import pytest
 
 
 def test_platform():

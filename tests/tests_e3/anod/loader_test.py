@@ -1,12 +1,10 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
-from e3.anod.loader import AnodSpecRepository
-from e3.anod.error import SandBoxError
-
+from __future__ import absolute_import, division, print_function
 
 import os
+
 import pytest
+from e3.anod.error import SandBoxError
+from e3.anod.loader import AnodSpecRepository
 
 
 class TestLoader(object):

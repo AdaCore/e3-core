@@ -1,10 +1,9 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 
 from e3.anod.driver import AnodDriver
-from e3.anod.helper import Make, Configure, text_replace
+from e3.anod.helper import Configure, Make, text_replace
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod
 

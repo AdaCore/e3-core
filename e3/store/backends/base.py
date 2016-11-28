@@ -1,12 +1,10 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from collections import namedtuple
+from __future__ import absolute_import, division, print_function
 
 import abc
+from collections import namedtuple
 
 import e3.log
 from e3.error import E3Error
-
 
 logger = e3.log.getLogger('store')
 

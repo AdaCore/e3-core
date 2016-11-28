@@ -1,18 +1,17 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
 
-from e3.collection.dag import DAG
+from e3.anod.action import (Build, BuildOrInstall, Checkout, CreateSource,
+                            CreateSourceOrDownload, Decision, DownloadBinary,
+                            DownloadSource, GetSource, Install,
+                            InstallSource, Root, Test, UploadBinaryComponent,
+                            UploadComponent, UploadSourceComponent)
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
+from e3.anod.package import UnmanagedSourceBuilder
+from e3.anod.spec import has_primitive
+from e3.collection.dag import DAG
 from e3.env import BaseEnv
 from e3.error import E3Error
-from e3.anod.spec import has_primitive
-from e3.anod.package import UnmanagedSourceBuilder
-from e3.anod.action import (Root, InstallSource, CreateSource, Checkout,
-                            DownloadSource, GetSource, Build, Test, Install,
-                            DownloadBinary, Decision, BuildOrInstall,
-                            UploadComponent, UploadBinaryComponent,
-                            UploadSourceComponent,
-                            CreateSourceOrDownload)
 
 
 class SchedulingError(E3Error):

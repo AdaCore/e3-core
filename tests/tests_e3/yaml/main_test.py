@@ -1,13 +1,15 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
+import e3.log
+import e3.yaml
+import pytest
+import yaml
+
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 
-import pytest
-import yaml
-import e3.yaml
-import e3.log
 
 
 @pytest.mark.parametrize('config,expected', [

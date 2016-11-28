@@ -4,18 +4,15 @@ All function here should be platform indepenent, should not involve globbing or
 logging (unless in case of unexpected failure).
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-
+import collections
 import itertools
 import os
 import re
 import shutil
 import stat
 import sys
-
-import collections
 
 import e3
 import e3.error
@@ -191,10 +188,10 @@ def df(path, full=False):
         used = ((st.f_blocks - st.f_bfree) * st.f_frsize)
     if full:
         return _ntuple_diskusage(
-            total / (1024 * 1024),
-            used / (1024 * 1024),
-            free / (1024 * 1024))
-    return free / (1024 * 1024)
+            total // (1024 * 1024),
+            used // (1024 * 1024),
+            free // (1024 * 1024))
+    return free // (1024 * 1024)
 
 
 def __safe_unlink_func():

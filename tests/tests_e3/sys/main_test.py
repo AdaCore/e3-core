@@ -1,16 +1,15 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import ast
 import os
-import pytest
 import sys
 
 import e3.fs
 import e3.os.fs
-from e3.sys import RewriteImportNodeTransformer, RewriteImportRule, \
-    RewriteNodeError
 import e3.sys
+import pytest
+from e3.sys import (RewriteImportNodeTransformer,
+                    RewriteImportRule, RewriteNodeError)
 
 
 def test_filtering_import():

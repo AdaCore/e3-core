@@ -1,11 +1,12 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
 import logging
 import sys
 
 import e3.collection.dag
 import e3.mainloop
-import e3.os.process
 import e3.os.fs
+import e3.os.process
 
 
 def run_job(job_data, job_info):

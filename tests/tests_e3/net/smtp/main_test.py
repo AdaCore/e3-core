@@ -1,7 +1,10 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
 import mock
-import e3.net.smtp
 import smtplib
+
+import e3.net.smtp
+
 
 def test_sendmail():
     from_addr = 'e3@example.net'

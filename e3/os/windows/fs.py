@@ -1,16 +1,16 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from e3.os.windows.native_api import (IOStatusBlock, UnicodeString,
-                                      NTException, NT, FileInfo,
-                                      ObjectAttributes, Share, Access,
-                                      Status, OpenOptions, FileAttribute)
-from ctypes import (pointer, create_unicode_buffer, create_string_buffer,
-                    c_wchar_p, sizeof)
-from ctypes.wintypes import HANDLE
+from __future__ import absolute_import, division, print_function
+
 import os
 import struct
-import e3.log
+from ctypes import (c_wchar_p, create_string_buffer,
+                    create_unicode_buffer, pointer, sizeof)
+from ctypes.wintypes import HANDLE
 
+import e3.log
+from e3.os.windows.native_api import (NT, Access, FileAttribute, FileInfo,
+                                      IOStatusBlock, NTException,
+                                      ObjectAttributes, OpenOptions, Share,
+                                      Status, UnicodeString)
 
 logger = e3.log.getLogger('os.windows.fs')
 

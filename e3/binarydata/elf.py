@@ -1,12 +1,12 @@
 """Basic ELF reader."""
 
-from __future__ import absolute_import
-from __future__ import print_function
-from e3.binarydata import UChar, UInt16, BinaryData, UInt32, \
-    CharStr, Address, Offset, UIntMax, Field, StructType, String, \
-    FieldArray, FieldNullTerminatedArray, \
-    BinaryFileBuffer
-from os.path import dirname, join, isfile
+from __future__ import absolute_import, division, print_function
+
+from os.path import dirname, isfile, join
+
+from e3.binarydata import (Address, BinaryData, BinaryFileBuffer, CharStr,
+                           Field, FieldArray, FieldNullTerminatedArray, Offset,
+                           String, StructType, UChar, UInt16, UInt32, UIntMax)
 
 E_TYPE_STR = {
     0: 'No file type',

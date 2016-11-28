@@ -1,11 +1,13 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
+import os
+import sys
+import time
+
 import e3.fs
 import e3.os.fs
 import e3.os.process
-import os
 import pytest
-import sys
-import time
 
 
 def test_run_shebang():
