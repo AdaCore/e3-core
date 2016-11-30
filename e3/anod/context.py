@@ -77,13 +77,16 @@ class AnodContext(object):
         :param name: spec name
         :type name: str
         :param env: environment to use for the spec instance
-        :type env: BaseEnv
+        :type env: BaseEnv | None
         :param qualifier: spec qualifier
         :type qualifier: str | None
         :param kind: primitive used for the loaded spec
         :type kind: str
         :return: a spec instance
         """
+        if env is None:
+            env = self.default_env
+
         # Key used for the spec instance cache
         key = (name, env.build, env.host, env.target, qualifier, kind)
 
