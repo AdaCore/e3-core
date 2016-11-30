@@ -7,6 +7,8 @@ import tempfile
 import e3.fs
 import e3.os.fs
 import pytest
+import mock
+import numbers
 
 
 @pytest.mark.xfail(sys.platform == 'win32',
@@ -55,3 +57,33 @@ def test_mkdir_exists(caplog):
 
     finally:
         e3.fs.rm(base, True)
+
+
+def test_df():
+    cwd = os.getcwd()
+    statfs = e3.os.fs.df(cwd)
+    assert isinstance(statfs, numbers.Integral)
+    statfs = e3.os.fs.df(cwd, True)
+    assert all(isinstance(elt, numbers.Integral) for elt in statfs)
+
+
+@pytest.mark.xfail(sys.platform == 'win32',
+                   reason='windows doesnt support os.link')
+def test_ln():
+    e3.os.fs.touch("toto")
+    with mock.patch("os.link") as mock_link, mock.patch("shutil.copy2") as mock_copy2:
+        e3.os.fs.ln("toto", "tata")
+        assert any([mock_link.called, mock_copy2.called])
+    e3.os.fs.touch("tata")
+    os.chmod("tata", 0000)
+    try:
+        e3.os.fs.ln("toto", "tata")
+        assert False
+    except Exception:
+        assert True
+
+
+def test_maxpath():
+    maxPath = e3.os.fs.max_path()
+    assert isinstance(maxPath, numbers.Integral)
+
