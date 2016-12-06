@@ -163,47 +163,49 @@ def unpack_archive(filename,
     try:
         if ext in ('tar', 'tar.bz2', 'tar.gz'):
             try:
-                with closing(tarfile.open(filename, mode='r')) as fd:
-                    # selected_files must be converted to tarfile members
+                # Set the right mode
+                mode = 'r:'
+                if ext.endswith('bz2'):
+                    mode += 'bz2'
+                elif ext.endswith('gz'):
+                    mode += 'gz'
+                # Extract tar files
+                with closing(tarfile.open(filename, mode=mode)) as fd:
+                    check_selected = set(selected_files)
+
+                    def is_match(name, files):
+                        """check if name match any of the expression in files.
+
+                        :param name: file name
+                        :type name: str
+                        :param files: list of patterns to test against
+                        :type files: list[str]/regex]
+                        :return: True when the name is matched
+                        :rtype: bool
+                        """
+                        for pattern in files:
+                            if fnmatch.fnmatch(name, pattern):
+                                if pattern in check_selected:
+                                    check_selected.remove(pattern)
+                                return True
+                        return False
+                    dirs = []
                     if selected_files:
-                        members = fd.getmembers()
-
-                        def is_matched(tarfile_members, pattern):
-                            """Return a list of matched tarfile members.
-
-                            :param tarfile_members: TarInfo list
-                            :type tarfile_members: list[TarInfo]
-                            :param pattern: string or regexp
-                            :type pattern: str
-
-                            :raise ArchiveError: if no member match the
-                                pattern.
-
-                            :return: a list of tarfile members
-                            :rtype: list[TarInfo]
-                            """
-                            r = [mem for mem in tarfile_members
-                                 if fnmatch.fnmatch(mem.name, pattern)]
-                            if not r:
-                                raise ArchiveError(
-                                    'unpack_archive',
-                                    'Cannot untar %s ' % pattern)
-                            return r
-
-                        selected_files = [f for l in selected_files
-                                          for f in is_matched(members, l)]
-
-                    # detect directories. This is not done by default
-                    # For each directory, select all the tree
-                    selected_dirnames = [
-                        d.name for d in selected_files if d.isdir()]
-                    for dname in selected_dirnames:
-                        selected_files += [
-                            fd.getmember(n) for n in fd.getnames()
-                            if n.startswith(dname + '/')]
-                    fd.extractall(tmp_dest,
-                                  selected_files if selected_files
-                                  else None)
+                        for tinfo in fd:
+                            if is_match(tinfo.name, selected_files) or \
+                                    tinfo.name.startswith(tuple(dirs)):
+                                # If dir then add it for recursive extracting
+                                if tinfo.isdir() and \
+                                        not tinfo.name.startswith(tuple(dirs)):
+                                    dirs.append(tinfo.name)
+                                fd.extract(tinfo, path=tmp_dest)
+                        if check_selected:
+                            raise ArchiveError(
+                                'unpack_archive',
+                                'Cannot untar %s ' % filename)
+                    else:
+                        for tinfo in fd:
+                            fd.extract(tinfo, path=tmp_dest)
 
             except tarfile.TarError as e:
                 raise ArchiveError(
@@ -329,6 +331,5 @@ def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
         else:
             raise ArchiveError(origin='create_archive',
                                message='unsupported ext %s' % ext)
-        archive = tarfile.open(filepath, tar_format)
-        archive.add(from_dir, from_dir_rename, recursive=True)
-        archive.close()
+        with closing(tarfile.open(filepath, tar_format)) as archive:
+            archive.add(from_dir, from_dir_rename, recursive=True)
