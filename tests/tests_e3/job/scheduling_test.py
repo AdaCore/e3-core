@@ -1,0 +1,130 @@
+from __future__ import absolute_import, division, print_function
+
+from e3.collection.dag import DAG
+from e3.job import Job
+from e3.job.scheduler import Scheduler
+
+
+class SleepJob(Job):
+
+    def run(self):
+        pass
+
+
+class TestScheduler(object):
+
+    def test_minimal_run(self):
+        """Test with only two independent jobs."""
+        dag = DAG()
+        dag.add_vertex('1')
+        dag.add_vertex('2')
+        s = Scheduler(Scheduler.simple_provider(SleepJob), tokens=2)
+        s.run(dag)
+        assert s.max_active_jobs == 2
+
+    def test_minimal_run2(self):
+        """Test with two interdependent jobs."""
+        dag = DAG()
+        dag.add_vertex('1')
+        dag.add_vertex('2', predecessors=['1'])
+        s = Scheduler(Scheduler.simple_provider(SleepJob), tokens=2)
+        s.run(dag)
+        assert s.max_active_jobs == 1
+
+    def test_requeue(self):
+        """Requeue test.
+
+        Same as previous example except that all tests are requeued
+        once.
+        """
+        results = {}
+
+        def collect(job):
+            if job.uid not in results:
+                results[job.uid] = True
+                return True
+            else:
+                return False
+
+        # This time test with two interdependent jobs
+        dag = DAG()
+        dag.add_vertex('1')
+        dag.add_vertex('2')
+        s = Scheduler(Scheduler.simple_provider(SleepJob),
+                      tokens=2, collect=collect)
+        s.run(dag)
+        assert s.max_active_jobs == 2
+        assert results['1']
+        assert results['2']
+
+    def test_skip(self):
+        """Simple example in which all the tests are skipped."""
+        results = {}
+
+        def get_job(uid, data, predecessors, notify_end):
+            result = SleepJob(uid, data, notify_end)
+            result.should_skip = True
+            return result
+
+        def collect(job):
+            results[job.uid] = (job.start_time, job.stop_time)
+
+        # This time test with two interdependent jobs
+        dag = DAG()
+        dag.add_vertex('1')
+        dag.add_vertex('2')
+        s = Scheduler(get_job, tokens=2, collect=collect)
+        s.run(dag)
+
+        # Check start_time end_time to be sure tests have not been run
+        for k, v in results.items():
+            assert v[0] is None
+            assert v[1] is None
+
+    def test_collect_feedback_scheme(self):
+        """Collect feedback construction.
+
+        Scheme in which if a job predecessor "fails" then job is skipped
+        In order to do that get_job and collect should have access to
+        common data. Note that that scheduler ensure that these functions
+        are called sequentially.
+        """
+        class SchedulerContext(object):
+            def __init__(self):
+                # Save in results tuples with first element being a bool
+                # indicating success or failure and the second the job itself
+                self.results = {}
+
+            def get_job(self, uid, data, predecessors, notify_end):
+                result = SleepJob(uid, data, notify_end)
+
+                # If any of the predecessor failed skip the job
+                for k in predecessors:
+                    if not self.results[k][0]:
+                        result.should_skip = True
+                return result
+
+            def collect(self, job):
+                if job.should_skip:
+                    # Skipped jobs are considered failed
+                    self.results[job.uid] = [False, job]
+                else:
+                    # Job '2' is always failing
+                    if job.uid == '2':
+                        self.results[job.uid] = [False, job]
+                    else:
+                        self.results[job.uid] = [True, job]
+
+        dag = DAG()
+        dag.add_vertex('1')
+        dag.add_vertex('2')
+        dag.add_vertex('3', predecessors=['1', '2'])
+        dag.add_vertex('4', predecessors=['3'])
+        c = SchedulerContext()
+        s = Scheduler(c.get_job, tokens=2, collect=c.collect)
+        s.run(dag)
+
+        assert not c.results['2'][1].should_skip and not c.results['2'][0], \
+            'job "2" is run and should be marked as failed'
+        assert c.results['3'][1].should_skip, 'job "3" should be skipped'
+        assert c.results['4'][1].should_skip, 'job "4" should be skipped'
