@@ -14,8 +14,7 @@ Test status
 Platform | Status
 ---------|-------
 Linux    | [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core)
-Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/wb1f46qn4t7cqsjj/branch/master?svg=true)](https://ci.appveyor.com/project/enzbang/e3-core/branch/master)
-
+Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/qxol1i9s464uvn6e/branch/master?svg=true)](https://ci.appveyor.com/project/adacore-bot/e3-core/branch/master)
 
 `e3-core` content
 =================
