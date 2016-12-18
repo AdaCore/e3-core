@@ -82,7 +82,7 @@ def chmod(mode, filename):
             wholist = ''
             actionlist = clause
 
-        actions = re.findall(r'(?:([-\+=])([ugo]|[rwx]*))',
+        actions = re.findall(r'(?:([-\+=])?([ugo]|[0-7]+|[rwx]*))',
                              actionlist)
         assert ''.join(list(itertools.chain.from_iterable(actions))) == \
                actionlist
@@ -97,6 +97,11 @@ def chmod(mode, filename):
                         action_mask >>= 6
                     elif permlist == 'g':
                         action_mask >>= 3
+                elif permlist.isdigit():
+                    raise OSFSError(
+                        origin='chmod',
+                        message='numeric mode not supported,'
+                                ' use os.chmod instead')
                 else:
                     action_mask = 0
                     for perm in permlist:
