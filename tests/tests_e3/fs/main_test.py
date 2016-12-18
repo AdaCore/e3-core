@@ -55,6 +55,9 @@ def test_cp():
     assert os.path.exists(os.path.join(dest3, 'a', 'b', 'b1'))
     assert os.path.exists(os.path.join(dest3, 'a1'))
 
+    with pytest.raises(e3.fs.FSError):
+        e3.fs.cp(a, os.path.join('does', 'not', 'exist'))
+
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
 def test_cp_symplink():
@@ -94,6 +97,50 @@ def test_find():
     result = {os.path.abspath(f) for f in result}
     assert os.path.abspath(d) in result
     assert os.path.abspath(__file__) in result
+
+
+def test_ls(caplog):
+    e3.os.fs.touch('a')
+    e3.fs.ls('a', emit_log_record=True)
+    assert 'ls a' in caplog.text
+
+
+def test_mkdir(caplog):
+    e3.fs.mkdir('subdir')
+    for record in caplog.records:
+        assert 'mkdir' in record.msg
+
+
+def test_mkdir_exists(caplog):
+    os.makedirs('subdir')
+    e3.fs.mkdir('subdir')
+    for record in caplog.records:
+        assert 'mkdir' not in record.msg
+
+
+def test_mv():
+    for fname in ('a1', 'a2', 'a3', '1', '2', '3', '11', '12', '13'):
+        e3.os.fs.touch(fname)
+
+    e3.fs.mkdir('b')
+
+    e3.fs.mv('a*', 'b')
+    for fname in ('a1', 'a2', 'a3'):
+        assert os.path.isfile(os.path.join('b', fname))
+
+    e3.fs.mv('1', 'b')
+    assert os.path.isfile(os.path.join('b', '1'))
+
+    with pytest.raises(e3.fs.FSError):
+        e3.fs.mv(('1*',' 2', '3'), 'c')
+
+    e3.fs.mkdir('c')
+    e3.fs.mv(('1*', '2', '3'), 'c')
+    for fname in ('2', '3', '11', '12', '13'):
+        assert os.path.isfile(os.path.join('c', fname))
+
+    with pytest.raises(e3.fs.FSError):
+        e3.fs.mv('d*', 'b')
 
 
 def test_tree_state():

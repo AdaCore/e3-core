@@ -82,30 +82,6 @@ def test_rm():
         e3.fs.rm(base, True)
 
 
-def test_mkdir(caplog):
-    base = tempfile.mkdtemp()
-    try:
-        subdir = os.path.join(base, 'subdir')
-        e3.fs.mkdir(subdir)
-        for record in caplog.records:
-            assert 'mkdir' in record.msg
-
-    finally:
-        e3.fs.rm(base, True)
-
-
-def test_mkdir_exists(caplog):
-    base = tempfile.mkdtemp()
-    try:
-        subdir = os.path.join(base, 'subdir')
-        os.makedirs(subdir)
-        for record in caplog.records:
-            assert 'mkdir' not in record.msg
-
-    finally:
-        e3.fs.rm(base, True)
-
-
 def test_mv():
     os.makedirs('a')
     e3.os.fs.mv('a', 'b')
