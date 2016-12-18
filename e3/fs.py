@@ -217,7 +217,7 @@ def ls(path, emit_log_record=True):
         path = (path, )
 
     if emit_log_record:
-        logger.debug('ls %s', str(path))
+        logger.debug('ls %s', ' '.join(path))
 
     return list(sorted(itertools.chain.from_iterable(
         (glob.glob(p) for p in path))))
@@ -269,7 +269,10 @@ def mv(source, target):
 
     :raise FSError: if an error occurs
     """
-    logger.debug('mv %s->%s', source, target)
+    if isinstance(source, basestring):
+        logger.debug('mv %s %s', source, target)
+    else:
+        logger.debug('mv %s %s', ' '.join(source), target)
 
     try:
         # Compute file list and number of file to copy
@@ -286,7 +289,9 @@ def mv(source, target):
             raise FSError('mv', '%s should be a directory' % target)
         else:
             for f in file_list:
-                shutil.move(f, os.path.join(target, os.path.basename(f)))
+                f_dest = os.path.join(target, os.path.basename(f))
+                e3.log.debug('mv %s %s', f, f_dest)
+                shutil.move(f, f_dest)
     except Exception as e:
         logger.error(e)
         raise FSError(origin='mv', message=str(e)), None, sys.exc_traceback
