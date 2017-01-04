@@ -51,7 +51,8 @@ class GetSource(Action):
     __slots__ = ('uid', 'data')
 
     def __init__(self, data):
-        Action.__init__(self, 'source_get.%s' % data.name, data)
+        super(GetSource, self).__init__(uid='source_get.%s' % data.name,
+                                        data=data)
 
     def __str__(self):
         return 'get source %s' % self.data.name
@@ -67,7 +68,8 @@ class DownloadSource(Action):
     __slots__ = ('uid', 'data')
 
     def __init__(self, data):
-        Action.__init__(self, 'download.%s' % data.name, data)
+        super(DownloadSource, self).__init__(uid='download.%s' % data.name,
+                                             data=data)
 
     def __str__(self):
         return 'download source %s' % self.data.name
@@ -83,7 +85,7 @@ class InstallSource(Action):
     __slots__ = ('uid', 'data')
 
     def __init__(self, uid, data):
-        Action.__init__(self, uid, data)
+        super(InstallSource, self).__init__(uid, data)
 
     def __str__(self):
         return 'install source %s' % self.data.name
@@ -106,9 +108,8 @@ class CreateSource(Action):
         :param source_name: name of source package to assemble
         :type source_name: str
         """
-        Action.__init__(self,
-                        spec.uid + '.' + source_name,
-                        data=(spec, source_name))
+        super(CreateSource, self).__init__(uid=spec.uid + '.' + source_name,
+                                           data=(spec, source_name))
 
     def __str__(self):
         return 'create source %s' % self.data[1]
@@ -124,7 +125,8 @@ class Checkout(Action):
     __slots__ = ('uid', 'data')
 
     def __init__(self, repository):
-        Action.__init__(self, 'checkout.%s' % repository, repository)
+        super(Checkout, self).__init__(uid='checkout.%s' % repository,
+                                       data=repository)
 
     def __str__(self):
         return 'checkout %s' % self.data
@@ -145,7 +147,7 @@ class AnodAction(Action):
         :type data: Anod
         """
         assert isinstance(data, Anod)
-        Action.__init__(self, data.uid, data)
+        super(AnodAction, self).__init__(uid=data.uid, data=data)
 
     def __str__(self):
         return '%s %s for %s' % (self.data.kind,
@@ -188,7 +190,7 @@ class DownloadBinary(Action):
         uid = data.uid.split('.')
         uid[-1] = 'download_bin'
         uid = '.'.join(uid)
-        Action.__init__(self, uid, data)
+        super(DownloadBinary, self).__init__(uid=uid, data=data)
 
     def __str__(self):
         return 'download binary of %s' % \
@@ -212,23 +214,32 @@ class UploadComponent(Action):
         uid = data.uid.split('.')
         uid[-1] = 'upload_bin'
         uid = '.'.join(uid)
-        Action.__init__(self, uid, data)
+        super(UploadComponent, self).__init__(uid=uid, data=data)
+
+    @property
+    def str_prefix(self):
+        return ''
 
     def __str__(self):
-        return 'upload binary of %s' % \
-            self.uid.split('.', 1)[1].rsplit('.', 1)[0]
+        return 'upload %s of %s' % (
+            self.str_prefix,
+            self.uid.split('.', 1)[1].rsplit('.', 1)[0])
 
 
 class UploadBinaryComponent(UploadComponent):
     """Upload binary component."""
 
-    pass
+    @property
+    def str_prefix(self):
+        return 'binary package'
 
 
 class UploadSourceComponent(UploadComponent):
     """Upload source only component."""
 
-    pass
+    @property
+    def str_prefix(self):
+        return 'source metadata'
 
 
 class Decision(Action):
@@ -256,7 +267,7 @@ class Decision(Action):
         :param choice: expected choice
         :type choice: int
         """
-        Action.__init__(self, root.uid + '.decision', None)
+        super(Decision, self).__init__(uid=root.uid + '.decision', data=None)
         self.initiator = root.uid
         self.choice = choice
         self.expected_choice = None
@@ -353,7 +364,9 @@ class CreateSourceOrDownload(Decision):
         """
         assert isinstance(left, CreateSource)
         assert isinstance(right, DownloadSource)
-        Decision.__init__(self, root, left, right)
+        super(CreateSourceOrDownload, self).__init__(root=root,
+                                                     left=left,
+                                                     right=right)
 
 
 class BuildOrInstall(Decision):
@@ -375,4 +388,6 @@ class BuildOrInstall(Decision):
         assert isinstance(left, Build)
         assert isinstance(right, DownloadBinary)
         assert isinstance(root, Install)
-        Decision.__init__(self, root, left, right)
+        super(BuildOrInstall, self).__init__(root=root,
+                                             left=left,
+                                             right=right)
