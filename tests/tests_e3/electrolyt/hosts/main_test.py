@@ -17,14 +17,16 @@ def test_host_db():
 
 
 def test_host_db_yaml():
-    with open('db.yaml', 'wb') as f:
-        yaml.dump(data={'computer2': {'build_platform': 'x86-windows',
-                                      'build_os_version': '2008R2',
-                                      'data_center': 'dc993'},
-                        'computer3': {'build_platform': 'x86_64-darwin',
-                                      'build_os_version': '16.3',
-                                      'data_center': 'dcmac'}},
-                  stream=f)
+    with open('db.yaml', 'w') as f:
+        f.write(
+            'computer2:\n'
+            '   build_platform: x86-windows\n'
+            '   build_os_version: 2008R2\n'
+            '   data_center: dc993\n\n'
+            'computer3:\n'
+            '   build_platform: x86_64-darwin\n'
+            '   build_os_version: 16.3\n'
+            '   data_center: dcmac\n')
 
     db = hosts.HostDB(filename='db.yaml')
     assert set(db.hostnames) == {'computer2', 'computer3'}

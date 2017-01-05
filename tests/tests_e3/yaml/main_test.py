@@ -5,11 +5,12 @@ import e3.yaml
 import pytest
 import yaml
 
+from collections import OrderedDict
+
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-
 
 
 @pytest.mark.parametrize('config,expected', [
@@ -40,3 +41,20 @@ case_param2:
                   e3.yaml.OrderedDictYAMLLoader)
     parse_it = e3.yaml.CaseParser(config).parse(d)
     assert parse_it == expected
+
+    with open('tmp', 'w') as f:
+        f.write(yaml_case_content)
+
+    parse_it2 = e3.yaml.load_with_config('tmp', config)
+    assert parse_it2 == expected
+
+
+def test_include():
+    with open('1.yaml', 'w') as f:
+        f.write('b: !include 2.yaml\n')
+
+    with open('2.yaml', 'w') as f:
+        f.write('a: 4\n')
+
+    d = e3.yaml.load_ordered('1.yaml')
+    assert d == OrderedDict([('b', OrderedDict([('a', 4)]))])
