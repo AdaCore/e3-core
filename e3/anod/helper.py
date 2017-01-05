@@ -5,13 +5,10 @@ from __future__ import absolute_import, division, print_function
 import io
 import os
 import re
-from StringIO import StringIO
 
 import e3.log
 import yaml
-from e3.anod.error import AnodError
 from e3.anod.spec import parse_command
-from e3.fs import find, rm
 from e3.os.fs import unixpath
 from e3.yaml import custom_repr
 
@@ -272,103 +269,6 @@ def text_replace(filename, pattern):
             f.write(output.getvalue())
     output.close()
     return nb_substitution
-
-
-def gplize(anod_instance, src_dir, force=False):
-    """Remove GPL specific exception.
-
-    This operate recursively on all .h .c .ad* .gp* files
-    present in the directory passed as parameter
-
-    :param anod_instance: an Anod instance
-    :type anod_instance: Anod
-    :param src_dir: the directory to process
-    :type src_dir: str
-    :param force: force transformation to gpl
-    :type force: bool
-    """
-    def remove_paragraph(filename):
-        begin = '-- .*As a .*special .*exception.* if other '\
-            'files .*instantiate .*generics from .*(this)? .*|'\
-            '-- .*As a .*special .*exception under Section 7 of GPL '\
-            'version 3, you are.*|'\
-            ' \* .*As a .*special .*exception.* if you .*link .*this'\
-            ' file .*with other .*files to.*|'\
-            ' \* .*As a .*special .*exception under Section 7 of GPL '\
-            'version 3, you are.*|'\
-            '\/\/ .*As a .*special .*exception.* if other files '\
-            '.*instantiate .*generics from this.*|'\
-            '\/\/ .*As a .*special .*exception under Section 7 of GPL '\
-            'version 3, you are.*'
-        end = '-- .*covered .*by .*the .*GNU Public License.*|'\
-            '-- .*version 3.1, as published by the Free Software '\
-            'Foundation.*--|'\
-            '\/\/ .*covered by the  GNU Public License.*|'\
-            '.*file .*might be covered by the  GNU Public License.*|'\
-            '\/\/ .*version 3.1, as published by the Free Software'\
-            ' Foundation.*\/\/|'\
-            ' \* .*version 3.1, as published by the Free Software'\
-            ' Foundation.*\*'
-
-        output = StringIO()
-        state = 2
-        i = 0
-        try:
-            with open(filename) as f:
-                for line in f:
-                    # Detect comment type
-                    if i == 1:
-                        comment = line[0:2]
-                        comment1 = comment
-                        comment2 = comment
-                        if comment == ' *':
-                            comment2 = '* '
-                    i += 1
-                    # Detect begining of exception paragraph
-                    if re.match(begin, line):
-                        state = 0
-                        output.write(
-                            comment1 + (74 * " ") + comment2 + "\n")
-                        continue
-                    # Detect end of exception paragraph
-                    if re.match(end, line):
-                        if state == 0:
-                            state = 1
-                            output.write(
-                                comment1 + (74 * " ") + comment2 + "\n")
-                            continue
-                    # Skip one line after the paragraph
-                    if state == 1:
-                        state = 3
-                    # Replace exception lines with blank comment lines
-                    if state == 0:
-                        output.write(
-                            comment1 + (74 * " ") + comment2 + "\n")
-                        continue
-                    # Write non exception lines
-                    if (state == 2) or (state == 3):
-                        output.write(line)
-                if state == 0:
-                    raise AnodError(
-                        'gplize: End of paragraph was not detected in %s' % (
-                            filename))
-                with open(filename, "w") as dest_f:
-                    dest_f.write(output.getvalue())
-        finally:
-            output.close()
-
-    if anod_instance.sandbox.config.get('release_mode', '') == 'gpl' or force:
-        anod_instance.log.debug('move files to GPL license')
-
-        rm(os.path.join(src_dir, 'COPYING.RUNTIME'))
-        gpb_files = find(src_dir, "*.gp*")
-        ada_files = find(src_dir, "*.ad*")
-        c_files = find(src_dir, "*.[hc]")
-        java_files = find(src_dir, "*.java")
-
-        for l in (gpb_files, ada_files, c_files, java_files):
-            for k in l:
-                remove_paragraph(k)
 
 
 yaml.add_representer(Make, custom_repr('cmdline'))
