@@ -18,6 +18,7 @@ from __future__ import absolute_import, division, print_function
 import itertools
 import sys
 import tempfile
+from contextlib import closing
 from subprocess import PIPE
 
 import e3.error
@@ -133,19 +134,31 @@ class GitRepository(object):
         p = self.git_cmd(['describe', '--always', commit], output=PIPE)
         return p.out.strip()
 
-    def write_diff(self, stream, commit=HEAD):
+    def write_local_diff(self, stream):
         """Write local changes in the working tree in stream.
 
-        :param commit: write the diff between the first parent of `commit` and
-            `commit`.
+        :param stream: an open file descriptor
+        :type stream: file
+        :rtype: str
+        :raise: GitError
+        """
+        cmd = ['--no-pager', 'diff']
+        self.git_cmd(cmd, output=stream, error=self.log_stream)
+
+    def write_diff(self, stream, commit):
+        """Write commit diff in stream.
+
+        :param commit: revision naming a commit object, e.g. sha1 or symbolic
+            refname
         :type commit: str
         :param stream: an open file descriptor
         :type stream: file
         :rtype: str
         :raise: GitError
         """
-        cmd = ['--no-pager', 'diff', '%s^!' % commit]
-        self.git_cmd(cmd, output=stream, error=PIPE)
+        cmd = ['--no-pager', 'diff-tree', '--cc', '--no-commit-id', '--root',
+               commit]
+        self.git_cmd(cmd, output=stream, error=self.log_stream)
 
     def fetch(self, url, refspec=None):
         """Fetch remote changes.
@@ -201,17 +214,17 @@ class GitRepository(object):
         #   %N: commit notes
         cmd = ['log',
                '--format=format:%H%n%aE%n%cI%n' +
-               '%N%n' if with_gerrit_notes else '' + '%n%B',
+               ('%N%n' if with_gerrit_notes else '') + '%n%B',
                '--log-size',
                '--max-count=%d' % max_count if max_count else None,
                '--show-notes=review' if with_gerrit_notes else None,
                rev_range]
-        self.git_cmd(cmd, output=stream)
+        self.git_cmd(cmd, output=stream, error=None)
 
     def parse_log(self, stream, max_diff_size=0):
         """Parse a log stream generated with `write_log`.
 
-        :param stream: stream to read
+        :param stream: stream of text to read
         :type stream: file
         :param max_diff_size: max size of a diff, if <= 0 diff are ignored
         :type max_diff_size: int
@@ -248,13 +261,29 @@ class GitRepository(object):
             result['message'] = body
 
             if max_diff_size > 0:
-                diff_fd = tempfile.NamedTemporaryFile()
-                self.write_diff(diff_fd, result['sha'])
-                diff_size = diff_fd.tell()
-                diff_fd.seek(0)
-                result['diff'] = diff_fd.read(max_diff_size)
-                if diff_size > max_diff_size:
-                    result['diff'] += '\n... diff too long ...\n'
+
+                tempfile_name = None
+                try:
+                    with closing(tempfile.NamedTemporaryFile(
+                            mode='wb', delete=False)) as diff_fd:
+                        tempfile_name = diff_fd.name
+                        self.write_diff(diff_fd, result['sha'])
+
+                        # compute file size
+                        diff_fd.seek(0, 2)
+                        diff_size = diff_fd.tell()
+                        e3.log.debug('diff size for %s: %d',
+                                     result['sha'], diff_size)
+
+                    with open(tempfile_name) as f:
+                        result['diff'] = f.read(max_diff_size)
+
+                    if diff_size > max_diff_size:
+                        result['diff'] += '\n... diff too long ...\n'
+                finally:
+                    if tempfile_name is not None:
+                        e3.fs.rm(tempfile_name)
+
             return result
 
         size_to_read = 0
