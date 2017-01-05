@@ -174,9 +174,9 @@ class AnodContext(object):
         """Retrieve predecessors of a given action.
 
         :param action: the parent action
-        :type action: Action
+        :type action: e3.anod.action.Action
         :return: the predecessor list
-        :rtype: list[Action]
+        :rtype: list[e3.anod.action.Action]
         """
         return [self[el] for el in self.tree.vertex_predecessors[action.uid]]
 
