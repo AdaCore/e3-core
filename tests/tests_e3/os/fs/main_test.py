@@ -1,14 +1,61 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import stat
 import sys
 import tempfile
+import time
 
 import e3.fs
 import e3.os.fs
 import pytest
 import mock
 import numbers
+
+
+def test_cd():
+    with pytest.raises(e3.os.fs.OSFSError) as err:
+        e3.os.fs.cd('doesnotexist')
+
+    assert 'doesnotexist' in str(err)
+
+
+@pytest.mark.xfail(sys.platform == 'win32',
+                   reason='not completely supported on windows')
+def test_chmod():
+    e3.os.fs.touch('a')
+
+    def check_mode(filename, mode):
+        fmode = stat.S_IMODE(os.stat(filename).st_mode)
+        assert fmode == mode, '%s != %s' % (oct(fmode), oct(mode))
+
+    with pytest.raises(e3.os.fs.OSFSError) as err:
+        e3.os.fs.chmod('666', 'a')
+    assert 'not supported' in str(err)
+
+    os.chmod('a', 0o666)
+    check_mode('a', 0o666)
+
+    e3.os.fs.chmod('u-w', 'a')
+    check_mode('a', 0o466)
+
+    e3.os.fs.chmod('a+wx', 'a')
+    check_mode('a', 0o777)
+
+    e3.os.fs.chmod('-w', 'a')
+    check_mode('a', 0o577)
+
+    e3.os.fs.chmod('o=u', 'a')
+    check_mode('a', 0o575)
+
+    e3.os.fs.chmod('u=g', 'a')
+    check_mode('a', 0o775)
+
+    e3.os.fs.chmod('u+', 'a')
+    check_mode('a', 0o775)
+
+    e3.os.fs.chmod('g=rw', 'a')
+    check_mode('a', 0o765)
 
 
 @pytest.mark.xfail(sys.platform == 'win32',
@@ -35,28 +82,20 @@ def test_rm():
         e3.fs.rm(base, True)
 
 
-def test_mkdir(caplog):
-    base = tempfile.mkdtemp()
-    try:
-        subdir = os.path.join(base, 'subdir')
-        e3.fs.mkdir(subdir)
-        for record in caplog.records:
-            assert 'mkdir' in record.msg
+def test_mv():
+    os.makedirs('a')
+    e3.os.fs.mv('a', 'b')
+    assert os.path.isdir('b')
 
-    finally:
-        e3.fs.rm(base, True)
+    os.makedirs('c')
+    e3.os.fs.mv('b', 'c')
+    assert os.path.isdir(os.path.join('c', 'b'))
 
+    e3.os.fs.touch('d')
+    os.makedirs('dest')
+    e3.os.fs.mv('d', 'dest')
 
-def test_mkdir_exists(caplog):
-    base = tempfile.mkdtemp()
-    try:
-        subdir = os.path.join(base, 'subdir')
-        os.makedirs(subdir)
-        for record in caplog.records:
-            assert 'mkdir' not in record.msg
-
-    finally:
-        e3.fs.rm(base, True)
+    assert os.path.isfile(os.path.join('dest', 'd'))
 
 
 def test_df():
@@ -67,23 +106,25 @@ def test_df():
     assert all(isinstance(elt, numbers.Integral) for elt in statfs)
 
 
-@pytest.mark.xfail(sys.platform == 'win32',
-                   reason='windows doesnt support os.link')
-def test_ln():
-    e3.os.fs.touch("toto")
-    with mock.patch("os.link") as mock_link, mock.patch("shutil.copy2") as mock_copy2:
-        e3.os.fs.ln("toto", "tata")
-        assert any([mock_link.called, mock_copy2.called])
-    e3.os.fs.touch("tata")
-    os.chmod("tata", 0000)
-    try:
-        e3.os.fs.ln("toto", "tata")
-        assert False
-    except Exception:
-        assert True
-
-
 def test_maxpath():
     maxPath = e3.os.fs.max_path()
     assert isinstance(maxPath, numbers.Integral)
 
+
+def test_touch():
+    e3.os.fs.touch('a')
+    assert os.path.exists('a')
+
+    now = time.time()
+    os.utime('a', (now - 10000, now))
+
+    e3.os.fs.touch('a')
+
+    assert os.stat('a').st_atime - now < 100
+
+
+def test_which():
+    path_to_e3 = e3.os.fs.which('e3')
+    assert os.path.isfile(path_to_e3)
+
+    assert e3.os.fs.which(path_to_e3) == path_to_e3

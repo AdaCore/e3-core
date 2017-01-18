@@ -82,7 +82,7 @@ def chmod(mode, filename):
             wholist = ''
             actionlist = clause
 
-        actions = re.findall(r'(?:([-\+=])([ugo]|[rwx]*))',
+        actions = re.findall(r'(?:([-\+=])?([ugo]|[0-7]+|[rwx]*))',
                              actionlist)
         assert ''.join(list(itertools.chain.from_iterable(actions))) == \
                actionlist
@@ -97,6 +97,11 @@ def chmod(mode, filename):
                         action_mask >>= 6
                     elif permlist == 'g':
                         action_mask >>= 3
+                elif permlist.isdigit():
+                    raise OSFSError(
+                        origin='chmod',
+                        message='numeric mode not supported,'
+                                ' use os.chmod instead')
                 else:
                     action_mask = 0
                     for perm in permlist:
@@ -234,26 +239,6 @@ def force_remove_file(path):
         os.chmod(path, 0o700)
         safe_remove(path)
         os.chmod(dir_path, orig_mode)
-
-
-def ln(source, target):
-    """Create a hard link or a copy if no hard link supported.
-
-    :param str source: a filename
-    :param str target: the target filename
-    :raise OSFSError: in case of error
-    """
-    try:
-        if hasattr(os, "link"):
-            os.link(source, target)
-        else:
-            shutil.copy2(source, target)
-    except Exception as e:
-        logger.error(e, exc_info=True)
-        raise OSFSError(
-            origin='ln',
-            message='can not link %s to %s' % (source, target)), \
-            None, sys.exc_traceback
 
 
 def max_path():

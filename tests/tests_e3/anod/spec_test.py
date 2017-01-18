@@ -53,6 +53,8 @@ def test_primitive():
         build_qualifier_format = (
             ('error', False),)
 
+        package = Anod.Package(prefix='mypackage', version=lambda: '42')
+
         @Anod.primitive()
         def build(self):
             if 'error' in self.parsed_qualifier:
@@ -82,3 +84,5 @@ def test_primitive():
     with pytest.raises(AnodError) as err:
         with_primitive2.build()
     assert 'foobar' in str(err.value)
+
+    assert with_primitive2.package.name.startswith('mypackage')
