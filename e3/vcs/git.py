@@ -4,6 +4,7 @@ Example::
 
 
     g = GitRepository(working_tree='/tmp/e3-core')
+    g.init()
     g.update('ssh://git.adacore.com/anod', refspec='master', force=True)
     with open('/tmp/e3-core-log', 'w') as fd:
         g.write_log(fd, max_count=10)
