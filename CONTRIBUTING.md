@@ -62,12 +62,12 @@ Plugin system
 -------------
 
 `e3` uses a plugin system based on
-[stevedore][https://github.com/openstack/stevedore] built on top of setuptools
+[stevedore](https://github.com/openstack/stevedore) built on top of setuptools
 entry points. `e3-core` is meant to be as small as possible and extented with
 plugins.
 
 To add a new feature based on plugins, first define a base class with
-[abc (Abstract Base Classes)][https://docs.python.org/2/library/abc.html] that
+[abc (Abstract Base Classes)](https://docs.python.org/2/library/abc.html) that
 will implement the plugin interface. Other packages can then create plugin by
 deriving the base class (the interface) and referencing the entry point in its
 ``setup.py``. `e3-core` can then use the plugin via `stevedore`. See the
