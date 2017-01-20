@@ -71,7 +71,12 @@ To add a new feature based on plugins, first define a base class with
 will implement the plugin interface. Other packages can then create plugin by
 deriving the base class (the interface) and referencing the entry point in its
 ``setup.py``. `e3-core` can then use the plugin via `stevedore`. See the
-[plugin system documentation](docs/plugin.rst).
+[plugin system documentation](https://github.com/AdaCore/e3-core/wiki/Plugins).
+
+Documentation
+-------------
+
+`e3-core` documentation is available in the [e3-core GitHub wiki](https://github.com/AdaCore/e3-core/wiki).
 
 Testing
 -------
@@ -83,14 +88,11 @@ If not already installed, install it via:
 pip install tox
 ```
 
-In order to run the public testsuite of `e3-core` and check that there
-is no error when generating the documentation, do:
+In order to run the public testsuite of `e3-core`, do:
 
 ```bash
 tox
 ```
-
-The doc is generated in ``.tox/docs/html``.
 
 To verify that the `e3-core` package is PEP8 compliant and that no error is
 reported by PyFlakes, do:
