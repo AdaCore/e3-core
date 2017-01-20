@@ -44,7 +44,9 @@ OS_INFO = {
 }
 
 PLATFORM_INFO = {
+    'aarch64-elf': {'cpu': 'aarch64', 'os': 'none', 'is_hie': True},
     'aarch64-ios': {'cpu': 'aarch64', 'os': 'ios', 'is_hie': False},
+    'aarch64-linux': {'cpu': 'aarch64', 'os': 'linux', 'is_hie': False},
     'arm-android': {'cpu': 'arm', 'os': 'android', 'is_hie': False},
     'arm-elf': {'cpu': 'arm', 'os': 'none', 'is_hie': True},
     'arm-ios': {'cpu': 'arm', 'os': 'ios', 'is_hie': False},
@@ -74,7 +76,9 @@ PLATFORM_INFO = {
     'x86_64-windows': {'cpu': 'x86_64', 'os': 'windows', 'is_hie': False}}
 
 BUILD_TARGETS = {
+    'aarch64-elf': {'name': 'aarch64-elf'},
     'aarch64-ios': {'name': 'aarch64-apple-darwin'},
+    'aarch64-linux': {'name': 'aarch64-linux-gnu'},
     'arm-android': {'name': 'arm-linux-androideabi'},
     'arm-elf': {'name': 'arm-eabi'},
     'arm-ios': {'name': 'arm-apple-darwin10'},
