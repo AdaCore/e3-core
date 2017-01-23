@@ -16,9 +16,9 @@ install_requires = [
 
 extras_require = {}
 
-for p in ('win32', 'darwin', 'linux', 'linux2'):
+for p in ('darwin', 'linux', 'linux2', 'win32'):
     platform_string = ":sys_platform=='%s'" % p
-    extras_require[platform_string] = ['psutil']
+    extras_require[platform_string] = ['netifaces', 'psutil']
     if p in ('linux', 'linux2'):
         extras_require[platform_string].append('ld')
 
