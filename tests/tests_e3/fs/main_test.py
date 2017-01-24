@@ -249,3 +249,11 @@ def test_rm_on_error():
     os.chmod('a/f', 0o500)
 
     e3.fs.rm('a', True)
+
+
+def test_splitall():
+    assert e3.fs.splitall('a/b') == ('a', 'b') 
+    assert e3.fs.splitall('/a') == ('/', 'a')
+    assert e3.fs.splitall('/a/b') == ('/', 'a', 'b') 
+    assert e3.fs.splitall('/a/b/') == ('/', 'a', 'b') 
+

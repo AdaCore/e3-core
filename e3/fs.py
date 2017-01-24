@@ -399,6 +399,37 @@ def rm(path, recursive=False, glob=True):
                 sys.exc_traceback
 
 
+def splitall(path):
+    """Split a path into a list of path components.
+
+    :param path: path to split
+    :type path: str
+    :return: a list of path components
+    :rtype: tuple[str]
+    """
+    dirnames = []
+    while 1:
+        head, tail = os.path.split(path)
+        if head == path:
+            # absolute paths
+            # os.path.split('/') -> ('/', '')
+            dirnames.append(head)
+            break
+        elif tail == path:
+            # relative paths
+            # os.path.split('..') -> ('', '..')
+            dirnames.append(tail)
+            break
+        elif tail == '':
+            # ending with a directory separator
+            # os.path.split('a/b/c/') -> ('a/b/c', '')
+            pass
+        else:
+            dirnames.append(tail)
+        path = head
+    return tuple(reversed(dirnames))
+
+
 VCS_IGNORE_LIST = ('RCS', 'SCCS', 'CVS', 'CVS.adm', 'RCSLOG',
                    '.svn', '.git', '.hg', '.bzr', '.cvsignore',
                    '.gitignore', '.gitattributes', '.gitmodules',
