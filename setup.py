@@ -7,7 +7,6 @@ import os
 install_requires = [
     'colorama',
     'enum34',
-    'netifaces',
     'pyyaml',
     'python-dateutil',
     'requests',
