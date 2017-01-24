@@ -18,5 +18,6 @@ def main(coverage_rc):
             with open(source) as s:
                 dest.write(s.read())
 
+
 if __name__ == '__main__':
     main(sys.argv[1])

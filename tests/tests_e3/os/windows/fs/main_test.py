@@ -5,9 +5,10 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-import pytest
 from e3.fs import mkdir, rm
 from e3.os.fs import touch
+
+import pytest
 
 if sys.platform == 'win32':
     from e3.os.windows.fs import NTFile
@@ -18,8 +19,8 @@ is_appveyor_test = os.environ.get('APPVEYOR') == "True"
 
 
 @pytest.mark.skipif(
-        sys.platform != 'win32' or is_appveyor_test,
-        reason="windows specific test (not working on appveyor)")
+    sys.platform != 'win32' or is_appveyor_test,
+    reason="windows specific test (not working on appveyor)")
 def test_read_attributes():
     work_dir = os.getcwd()
 

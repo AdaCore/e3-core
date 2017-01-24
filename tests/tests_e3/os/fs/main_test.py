@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import numbers
 import os
 import stat
 import sys
@@ -8,9 +9,8 @@ import time
 
 import e3.fs
 import e3.os.fs
+
 import pytest
-import mock
-import numbers
 
 
 def test_cd():

@@ -7,6 +7,7 @@ import time
 import e3.fs
 import e3.os.fs
 import e3.os.process
+
 import pytest
 
 
@@ -74,13 +75,13 @@ def test_wait_for_processes():
 
     process_list = [p2]
     p3 = e3.os.process.Run(
-            [sys.executable, '-c',
-             'from e3.os.fs import touch;'
-             'from time import sleep;'
-             'sleep(0.2);'
-             'touch("end1");'
-             'sleep(0.2);'
-             'touch("end2")'], bg=True)
+        [sys.executable, '-c',
+         'from e3.os.fs import touch;'
+         'from time import sleep;'
+         'sleep(0.2);'
+         'touch("end1");'
+         'sleep(0.2);'
+         'touch("end2")'], bg=True)
     result = e3.os.process.wait_for_processes(process_list, 2)
     del process_list[result]
     process_list = [p1, p2]

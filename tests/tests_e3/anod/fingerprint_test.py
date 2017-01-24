@@ -2,10 +2,11 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
-import pytest
 from e3.anod.error import AnodError
 from e3.anod.fingerprint import Fingerprint
 from e3.env import Env
+
+import pytest
 
 
 def test_fingerprint():

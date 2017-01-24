@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 from random import random
 
 import e3.decorator
+
 import pytest
 
 

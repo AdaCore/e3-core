@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 import e3.anod.action as action
 import e3.anod.spec
 import e3.env
@@ -5,7 +7,6 @@ import e3.env
 
 def test_initall():
     """Very simple test to check that all objects can be initialized."""
-
     root = action.Root()
     assert root.uid == 'root'
     assert str(root) == 'root node'

@@ -7,6 +7,7 @@ import e3.diff
 import e3.fs
 import e3.hash
 import e3.os.fs
+
 import pytest
 
 
@@ -132,7 +133,7 @@ def test_mv():
     assert os.path.isfile(os.path.join('b', '1'))
 
     with pytest.raises(e3.fs.FSError):
-        e3.fs.mv(('1*',' 2', '3'), 'c')
+        e3.fs.mv(('1*', ' 2', '3'), 'c')
 
     e3.fs.mkdir('c')
     e3.fs.mv(('1*', '2', '3'), 'c')
@@ -252,8 +253,7 @@ def test_rm_on_error():
 
 
 def test_splitall():
-    assert e3.fs.splitall('a/b') == ('a', 'b') 
+    assert e3.fs.splitall('a/b') == ('a', 'b')
     assert e3.fs.splitall('/a') == ('/', 'a')
-    assert e3.fs.splitall('/a/b') == ('/', 'a', 'b') 
-    assert e3.fs.splitall('/a/b/') == ('/', 'a', 'b') 
-
+    assert e3.fs.splitall('/a/b') == ('/', 'a', 'b')
+    assert e3.fs.splitall('/a/b/') == ('/', 'a', 'b')

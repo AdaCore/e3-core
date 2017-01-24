@@ -1,10 +1,13 @@
-from e3.os.fs import unixpath
-from e3.vcs.git import GitRepository, GitError
-from e3.fs import echo_to_file
+from __future__ import absolute_import, division, print_function
 
 import os
-import pytest
 import sys
+
+from e3.fs import echo_to_file
+from e3.os.fs import unixpath
+from e3.vcs.git import GitError, GitRepository
+
+import pytest
 
 
 def test_git_repo():
