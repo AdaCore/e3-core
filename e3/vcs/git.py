@@ -25,6 +25,7 @@ from subprocess import PIPE
 import e3.error
 import e3.fs
 import e3.log
+import e3.os.fs
 import e3.os.process
 
 logger = e3.log.getLogger('vcs.git')
@@ -79,7 +80,7 @@ class GitRepository(object):
             git_binary = e3.os.process.which('git', default=None)
             if git_binary is None:
                 raise GitError('cannot find git', 'git_cmd')
-            self.__class__.git = git_binary
+            self.__class__.git = e3.os.fs.unixpath(git_binary)
 
         if 'output' not in kwargs:
             kwargs['output'] = self.log_stream
