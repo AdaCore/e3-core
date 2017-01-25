@@ -17,34 +17,25 @@ class AnodSpecRepository(object):
     """Anod spec repository.
 
     The object represent a set of anod specifications along with their data
-    files. Note that currently this class acts as a singleton.
+    files.
     """
 
-    spec_dir = None
-    specs = {}
-
-    def __init__(self, spec_dir=None, spec_config=None):
+    def __init__(self, spec_dir, spec_config=None):
         """Initialize an AnodSpecRepository.
 
-        :param spec_dir: directory containing the anod specs. If None then
-            parameters from previous instance will be used.
-        :type spec_dir: str | None
+        :param spec_dir: directory containing the anod specs.
+        :type spec_dir: str
         :param spec_config: dictionary containing the configuration for this
             AnodSpecRepository
         :type spec_config: dict
         """
-        if spec_dir is None:
-            assert self.spec_dir is not None, "repository not initialized"
-            return
-
         logger.debug('initialize spec repository (%s)', spec_dir)
 
-        # ??? The use of singleton should be reviewed in order to support
-        # several spec repositories.
         if not os.path.isdir(spec_dir):
             raise SandBoxError(
                 'spec directory %s does not exist' % spec_dir)
-        self.__class__.spec_dir = spec_dir
+        self.spec_dir = spec_dir
+        self.specs = {}
 
         # Look for all spec files and data files
         spec_list = {os.path.basename(k)[:-5]: {'path': k, 'data': []}
@@ -87,7 +78,7 @@ class AnodSpecRepository(object):
         :return: True if present, False otherwise
         :rtype: bool
         """
-        return item in self.specs and self.specs[item]['module'] is not None
+        return item in self.specs and self.specs[item].module is not None
 
     def load_all(self, ignore_errors=False):
         """Load all the specs present in the repository.
@@ -110,20 +101,6 @@ class AnodSpecRepository(object):
         """
         assert name in self.specs, "spec %s not found" % name
         return self.specs[name].load(self)
-
-    def get_instance(self, name, qualifier, kind, env=None):
-        """Get a new Anod instance.
-
-        :param name: spec name
-        :type name: str
-        :param qualifier: qualifier of the instance
-        :type qualifier: str
-        :param kind: associated primitive for this instance
-        :type kind: str
-        :param env: environment associated with the instance
-        :type env: None | BaseEnv
-        """
-        return self.specs[name](qualifier=qualifier, kind=kind, env=env)
 
 
 class AnodModule(object):
