@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-import mock
 import smtplib
 
 import e3.net.smtp
+
+import mock
 
 
 def test_sendmail():
@@ -25,17 +26,18 @@ def test_sendmail():
             to_addresses,
             msg_as_string)
 
+
 def test_sendmail_onerror():
     from_addr = 'e3@example.net'
     to_addresses = ['info@example.net', 'info@example.com']
     msg_as_string = 'test mail content'
-    msg_size_exceed = "A"*1200
+    msg_size_exceed = "A" * 1200
     result = e3.net.smtp.sendmail(
         from_addr,
         to_addresses,
         msg_size_exceed,
         ['smtp.localhost'],
-        max_size=8/1024)
+        max_size=8 / 1024)
     assert result is False
 
     with mock.patch('smtplib.SMTP') as mock_smtp:

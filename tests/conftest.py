@@ -4,10 +4,11 @@ import logging
 import tempfile
 
 import e3.log
-import pytest
 from e3.env import Env
 from e3.fs import rm
 from e3.os.fs import cd
+
+import pytest
 
 # Activate full debug logs
 e3.log.activate(level=logging.DEBUG, e3_debug=True)

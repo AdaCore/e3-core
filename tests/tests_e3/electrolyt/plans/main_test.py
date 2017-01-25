@@ -1,5 +1,7 @@
-import e3.electrolyt.plans as plan
+from __future__ import absolute_import, division, print_function
+
 import e3.electrolyt.hosts as host
+import e3.electrolyt.plans as plan
 
 
 def test_simple_plan():

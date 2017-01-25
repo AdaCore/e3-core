@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-import pytest
 from e3.collection.dag import DAG, DAGError, DAGIterator
+
+import pytest
 
 
 def test_simple_dag():

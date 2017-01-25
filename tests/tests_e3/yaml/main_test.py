@@ -1,11 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
+from collections import OrderedDict
+
 import e3.log
 import e3.yaml
-import pytest
 import yaml
 
-from collections import OrderedDict
+import pytest
 
 try:
     from StringIO import StringIO

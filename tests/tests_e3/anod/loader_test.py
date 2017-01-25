@@ -2,9 +2,10 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
-import pytest
 from e3.anod.error import SandBoxError
 from e3.anod.loader import AnodSpecRepository
+
+import pytest
 
 
 class TestLoader(object):

@@ -7,9 +7,10 @@ import sys
 import e3.fs
 import e3.os.fs
 import e3.sys
-import pytest
 from e3.sys import (RewriteImportNodeTransformer,
                     RewriteImportRule, RewriteNodeError)
+
+import pytest
 
 
 def test_filtering_import():

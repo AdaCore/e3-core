@@ -3,11 +3,12 @@ from __future__ import absolute_import, division, print_function
 import datetime
 import os
 
-import pytest
 from e3.anod.buildspace import BuildSpace
 from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import ReturnValue
 from e3.os.fs import touch
+
+import pytest
 
 
 def test_reset():

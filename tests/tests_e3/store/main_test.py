@@ -2,9 +2,10 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
+from e3.store.backends.http_simple_store import HTTPSimpleStore
+
 import httpretty
 import httpretty.core
-from e3.store.backends.http_simple_store import HTTPSimpleStore
 
 
 def test_simple_store(caplog):
