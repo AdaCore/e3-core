@@ -1,0 +1,14 @@
+from e3.anod.spec import Anod
+
+
+class Spec5(Anod):
+
+    component = 'mycomponent5'
+
+    @Anod.primitive(post='install')
+    def build(self):
+        pass
+
+    @Anod.primitive()
+    def install(self):
+        pass
