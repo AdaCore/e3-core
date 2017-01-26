@@ -2,10 +2,10 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
+from e3.anod.action import Build
+from e3.anod.context import AnodContext
 from e3.anod.loader import AnodSpecRepository
 from e3.env import BaseEnv
-from e3.anod.context import AnodContext
-from e3.anod.action import Build
 
 
 class TestContext(object):

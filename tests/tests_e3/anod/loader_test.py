@@ -35,7 +35,6 @@ class TestLoader(object):
 
     def test_invalid_spec(self):
         """Ensure that loading an invalid spec result in a SandboxError."""
-
         spec_repo = AnodSpecRepository(self.spec_dir)
         with pytest.raises(SandBoxError) as err:
             spec_repo.load('invalid_spec')
@@ -60,7 +59,7 @@ class TestLoader(object):
         assert anod_instance.parent_info == 'from_parent'
 
     def test_multiple_spec_repository(self):
-        """Ensure that spec function is context dependent"""
+        """Ensure that spec function is context dependent."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         spec2_repo = AnodSpecRepository(self.spec2_dir)
         anod_class = spec_repo.load('child')
