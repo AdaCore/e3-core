@@ -1,0 +1,5 @@
+from e3.anod.spec import Anod
+
+
+class PrologTest(Anod):
+    prolog_test = PROLOG_WAS_EXECUTED

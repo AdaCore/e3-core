@@ -1,0 +1,5 @@
+from e3.anod.spec import Anod
+
+
+class Parent(Anod):
+    parent_info = 'from_parent2'

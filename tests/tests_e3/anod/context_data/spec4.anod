@@ -1,0 +1,17 @@
+from e3.anod.spec import Anod
+from e3.anod.package import Package
+
+
+class Spec4(Anod):
+
+    component = 'mycomponent'
+
+    package = Package('toto-bin')
+
+    @Anod.primitive(post='install')
+    def build(self):
+        pass
+
+    @Anod.primitive()
+    def install(self):
+        pass
