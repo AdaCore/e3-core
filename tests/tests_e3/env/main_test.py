@@ -13,7 +13,7 @@ import pytest
 
 def test_autodetect():
     sys_platform = sys.platform.replace('linux2', 'linux').replace(
-        'win32', 'windows')
+        'win32', 'windows').replace('aix7', 'aix')
     assert sys_platform in str(e3.platform.Platform.get())
 
     assert sys_platform in e3.env.Env().build.platform
