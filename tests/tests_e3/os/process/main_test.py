@@ -187,6 +187,8 @@ def test_is_running():
     assert p.status == 0
 
 
+@pytest.mark.xfail(e3.env.Env().build.os.name == 'solaris',
+                   reason='known issue: p.status == 0 on Solaris')
 def test_interrupt():
     t0 = time.time()
     p = e3.os.process.Run([sys.executable,
