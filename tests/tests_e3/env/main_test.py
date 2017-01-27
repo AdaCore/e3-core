@@ -117,11 +117,15 @@ def test_set_env():
 
 
 def test_cmd_triplet():
+    if e3.env.Env().build.platform == 'x86-linux':
+        build_platform = 'x86_64-linux,rhES5'
+    else:
+        build_platform = 'x86-linux,rhES5'
     e = e3.env.BaseEnv()
-    e.set_env('x86-linux,rhES5', 'x86_64-linux,debian7', 'x86-windows,2008')
+    e.set_env(build_platform, 'x86_64-linux,debian7', 'x86-windows,2008')
     cmd_options = e.cmd_triplet()
     assert len(cmd_options) == 3
-    assert cmd_options[0] == '--build=x86-linux,rhES5'
+    assert cmd_options[0] == '--build=%s' % build_platform
     assert cmd_options[1] == '--host=x86_64-linux,debian7'
     assert cmd_options[2].startswith('--target=x86-windows,2008')
 
