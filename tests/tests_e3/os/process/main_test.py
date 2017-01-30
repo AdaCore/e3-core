@@ -10,6 +10,11 @@ import e3.os.process
 
 import pytest
 
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
 
 def test_run_shebang():
     """Verify that the parse shebang option works."""
@@ -182,6 +187,8 @@ def test_is_running():
     assert p.status == 0
 
 
+@pytest.mark.xfail(e3.env.Env().build.os.name == 'solaris',
+                   reason='known issue: p.status == 0 on Solaris')
 def test_interrupt():
     t0 = time.time()
     p = e3.os.process.Run([sys.executable,
@@ -196,6 +203,7 @@ def test_interrupt():
     assert p.status != 0
 
 
+@pytest.mark.skipif(psutil is None, reason='require psutil')
 def test_kill_process_tree():
     p1 = e3.os.process.Run(
         [sys.executable, '-c',
