@@ -106,7 +106,7 @@ class HTTPSession(object):
                 with open(path, 'wb') as fd:
                     for chunk in e3.log.progress_bar(
                             response.iter_content(self.CHUNK_SIZE),
-                            expected_size=expected_size):
+                            total=expected_size):
                         fd.write(chunk)
                 if validate is None or validate(path):
                     return path
