@@ -8,14 +8,13 @@ binary code packaging, and automated testing).
 The `e3` framework is split across multiple Python packages named `e3-<name>`
 and sharing the same namespace: `e3`.
 
-Test status
+Code status
 ===========
 
 Platform | Status
 ---------|-------
-Linux    | [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core)
-Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/wb1f46qn4t7cqsjj/branch/master?svg=true)](https://ci.appveyor.com/project/enzbang/e3-core/branch/master)
-
+Linux    | [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core) [![Coverage Status](https://coveralls.io/repos/github/AdaCore/e3-core/badge.svg?branch=master)](https://coveralls.io/github/AdaCore/e3-core?branch=master)
+Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0pmg1q89f/branch/master?svg=true)](https://ci.appveyor.com/project/github-integration-adacore/e3-core/branch/master)
 
 `e3-core` content
 =================
