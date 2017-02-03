@@ -76,7 +76,7 @@ class HTTPSession(object):
         :return: the name of the file or None if there is an error
         :rtype: str
         """
-        logger.info('GET %s (dir=%s)', url, dest)
+        logger.debug('GET %s (dir=%s)', url, dest)
         # When using stream=True, Requests cannot release the connection back
         # to the pool unless all the data is consumed or Response.close called.
         # Force Response.close by wrapping the code with contextlib.closing
