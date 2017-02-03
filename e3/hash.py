@@ -46,3 +46,15 @@ def sha1(path):
     :raise HashError: in case of error
     """
     return __compute_hash(path, 'sha1')
+
+
+def sha256(path):
+    """Compute sha256 hexadecimal digest of a file.
+
+    :param str path: path to a file
+
+    :return: the hash of the file content
+    :rtype: str
+    :raise HashError: in case of error
+    """
+    return __compute_hash(path, 'sha256')
