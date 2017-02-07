@@ -174,3 +174,13 @@ class TestContext(object):
         assert set(result.vertex_data.keys()) == \
             set(('root',
                  'mylinux.x86-linux.spec6.build'))
+
+    def test_add_anod_action7(self):
+        # Ensure that build_deps = None is accepted
+        ac = self.create_context()
+        ac.add_anod_action('spec7', primitive='build')
+        result = ac.schedule(ac.always_download_source_resolver)
+        assert len(result) == 2, result.as_dot()
+        assert set(result.vertex_data.keys()) == \
+            set(('root',
+                 'mylinux.x86-linux.spec7.build'))

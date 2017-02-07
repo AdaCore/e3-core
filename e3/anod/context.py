@@ -321,7 +321,8 @@ class AnodContext(object):
                 self.connect(result, download_action)
 
         # Look for dependencies
-        if '%s_deps' % primitive in dir(spec):
+        if '%s_deps' % primitive in dir(spec) and \
+                getattr(spec, '%s_deps' % primitive) is not None:
             for e in getattr(spec, '%s_deps' % primitive):
                 if isinstance(e, Dependency):
                     if e.kind == 'source':
