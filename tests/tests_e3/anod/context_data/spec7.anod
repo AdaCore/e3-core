@@ -1,0 +1,10 @@
+from e3.anod.spec import Anod
+
+
+class Spec7(Anod):
+
+    build_deps = None
+
+    @Anod.primitive()
+    def build(self):
+        pass
