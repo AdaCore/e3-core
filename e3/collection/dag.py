@@ -37,11 +37,20 @@ class DAGIterator(object):
         return self
 
     def next(self):
+        """Same as next_element with with_predecessors=False.
+
+        The intermediate function is needed in Python 3.x
+
+        :rtype: (None, None) | (str, T)
+        """
+        return self.next_element()[0:2]
+
+    def next_element(self):
         """Retrieve next element in topological order.
 
-        :return: a tuple id, data. (None, None) is returned if no element is
-            available
-        :rtype: (str, object)
+        :return: a tuple id, data, predecessors. (None, None, None) is
+            returned if no element is available).
+        :rtype: (str, T, list[str]) | (None, None, None)
         """
         if not self.non_visited:
             raise StopIteration
@@ -57,7 +66,7 @@ class DAGIterator(object):
 
         if result is None:
             # No vertex is ready to be visited
-            return None, None
+            return None, None, None
 
         # Remove the vertex from the "non_visited_list" and when
         # enable_busy_state, mark the vertex as BUSY, mark it VISITED
@@ -66,7 +75,9 @@ class DAGIterator(object):
             else self.VISITED
         self.non_visited.discard(result)
 
-        return result, self.dag.vertex_data[result]
+        return (result,
+                self.dag.vertex_data[result],
+                self.dag.vertex_predecessors[result])
 
     def leave(self, vertex_id):
         """Switch element from BUSY to VISITED state.
