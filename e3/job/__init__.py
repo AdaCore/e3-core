@@ -4,7 +4,10 @@ from __future__ import print_function
 from datetime import datetime
 from e3.os.process import Run
 import abc
+import e3.log
 import threading
+
+logger = e3.log.getLogger('job')
 
 
 class Job(object):
@@ -21,6 +24,9 @@ class Job(object):
     :vartype stop_time: datetime.datetime
     :ivar should_skip: indicator for the scheduler that the job should not
         be executed
+    :vartype: bool
+    :ivar interrupted: if True it means that job has been interrupted. Can
+        be consequence of timeout or Ctrl-C pressed
     :vartype: bool
     :ivar queue_name: name of the queue in which the job has been placed
     :vartype: str
@@ -51,6 +57,7 @@ class Job(object):
         self.start_time = None
         self.stop_time = None
         self.should_skip = False
+        self.interrupted = False
         self.queue_name = 'default'
         self.tokens = 1
 
@@ -80,7 +87,7 @@ class Job(object):
 
     def interrupt(self):
         """Interrupt current job."""
-        pass
+        self.interrupted = True
 
 
 class ProcessJob(Job):
@@ -90,7 +97,13 @@ class ProcessJob(Job):
 
     def run(self):
         """Internal function."""
-        self.proc_handle = Run(self.cmdline, **self.cmd_options)
+        cmd_options = self.cmd_options
+
+        # Do non blocking spawn followed by a wait in order to have
+        # self.proc_handle set. This allows support for interrupt.
+        cmd_options['bg'] = True
+        self.proc_handle = Run(self.cmdline, **cmd_options)
+        self.proc_handle.wait()
 
     @abc.abstractproperty
     def cmdline(self):
@@ -111,6 +124,10 @@ class ProcessJob(Job):
         return {}
 
     def interrupt(self):
-        """Kill running process."""
-        if self.proc_handle:
-            self.proc_handle.interrupt()
+        """Kill running process tree."""
+        if hasattr(self, 'proc_handle') and \
+                self.proc_handle and \
+                self.proc_handle.is_running():
+            logger.debug('interrrupt job %s', self.uid)
+            self.proc_handle.kill(recursive=True)
+            self.interrupted = True

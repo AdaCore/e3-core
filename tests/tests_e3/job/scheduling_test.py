@@ -1,14 +1,23 @@
 from __future__ import absolute_import, division, print_function
 
+import sys
+
 from e3.collection.dag import DAG
-from e3.job import Job
+from e3.job import Job, ProcessJob
 from e3.job.scheduler import Scheduler
 
 
-class SleepJob(Job):
+class NopJob(Job):
 
     def run(self):
         pass
+
+
+class SleepJob(ProcessJob):
+
+    @property
+    def cmdline(self):
+        return [sys.executable, '-c', 'import time; time.sleep(6.0)']
 
 
 class TestScheduler(object):
@@ -18,7 +27,7 @@ class TestScheduler(object):
         dag = DAG()
         dag.add_vertex('1')
         dag.add_vertex('2')
-        s = Scheduler(Scheduler.simple_provider(SleepJob), tokens=2)
+        s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2)
         s.run(dag)
         assert s.max_active_jobs == 2
 
@@ -27,7 +36,7 @@ class TestScheduler(object):
         dag = DAG()
         dag.add_vertex('1')
         dag.add_vertex('2', predecessors=['1'])
-        s = Scheduler(Scheduler.simple_provider(SleepJob), tokens=2)
+        s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2)
         s.run(dag)
         assert s.max_active_jobs == 1
 
@@ -50,7 +59,7 @@ class TestScheduler(object):
         dag = DAG()
         dag.add_vertex('1')
         dag.add_vertex('2')
-        s = Scheduler(Scheduler.simple_provider(SleepJob),
+        s = Scheduler(Scheduler.simple_provider(NopJob),
                       tokens=2, collect=collect)
         s.run(dag)
         assert s.max_active_jobs == 2
@@ -62,7 +71,7 @@ class TestScheduler(object):
         results = {}
 
         def get_job(uid, data, predecessors, notify_end):
-            result = SleepJob(uid, data, notify_end)
+            result = NopJob(uid, data, notify_end)
             result.should_skip = True
             return result
 
@@ -81,6 +90,25 @@ class TestScheduler(object):
             assert v[0] is None
             assert v[1] is None
 
+    def test_timeout(self):
+        """Ensure that jobs are interrupted correctly on timeout."""
+        results = {}
+
+        def get_job(uid, data, predecessors, notify_end):
+            return SleepJob(uid, data, notify_end)
+
+        def collect(job):
+            results[job.uid] = job
+
+        dag = DAG()
+        dag.add_vertex('1')
+        dag.add_vertex('2')
+        s = Scheduler(get_job, tokens=2, collect=collect, job_timeout=2)
+        s.run(dag)
+
+        for k, v in results.items():
+            assert v.interrupted
+
     def test_collect_feedback_scheme(self):
         """Collect feedback construction.
 
@@ -96,7 +124,7 @@ class TestScheduler(object):
                 self.results = {}
 
             def get_job(self, uid, data, predecessors, notify_end):
-                result = SleepJob(uid, data, notify_end)
+                result = NopJob(uid, data, notify_end)
 
                 # If any of the predecessor failed skip the job
                 for k in predecessors:

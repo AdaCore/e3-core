@@ -496,9 +496,16 @@ class Run(object):
         else:
             return None
 
-    def kill(self):
-        """Kill the process."""
-        self.internal.kill()
+    def kill(self, recursive=True):
+        """Kill the process.
+
+        :param recursive: if True, try to kill the complete process tree
+        :type recursive: bool
+        """
+        if recursive:
+            kill_process_tree(self.internal)
+        else:
+            self.internal.kill()
 
     def interrupt(self):
         """Send SIGINT CTRL_C_EVENT to the process."""
