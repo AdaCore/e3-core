@@ -1,10 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
+import cgi
 import logging
 import os
 import threading
 import time
 
+import requests_toolbelt.multipart
 from e3.net.http import HTTPSession
 
 try:
@@ -59,6 +61,37 @@ class ServerErrorHandler(BaseHTTPRequestHandler):
         self.send_response(500)
         self.end_headers()
         self.wfile.close()
+
+    def do_POST(self):
+        self.send_response(500)
+        self.end_headers()
+
+
+class MultiPartPostHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        if 'Content-Type' not in self.headers:
+            self.send_response(200)
+            self.end_headers()
+            return
+
+        content = self.rfile.read(int(self.headers['Content-Length']))
+        decoder = requests_toolbelt.multipart.MultipartDecoder(
+            content, self.headers['Content-Type'])
+
+        logging.debug('POST received')
+        self.server.test_payloads = {}
+        for part in decoder.parts:
+            logging.debug(part.headers.keys())
+            # With python 3.x requests_toolbelt returns bytes
+            _, value = cgi.parse_header(
+                part.headers[b'Content-Disposition'].decode('utf-8'))
+            self.server.test_payloads[value['name']] = part.text
+
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b'OK')
+        logging.debug('POST finish')
 
 
 def run_server(handler, func):
@@ -150,7 +183,7 @@ class TestHTTP(object):
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
                     session.DEFAULT_TIMEOUT = (10.0, 0.2)
                     session.set_max_retries(connect=4)
-                    result = session.download_file(base_url + 'dummy',
+                    result = session.download_file('dummy',
                                                    dest='.')
                     assert result is None
                     assert server.calls == 1
@@ -159,3 +192,23 @@ class TestHTTP(object):
             run_server(RetryAbortHandler, inner_func)
 
         run_server(ServerErrorHandler, func)
+
+    def test_post_stream_data(self):
+        def outter_func(nok_server, nok_url):
+            def func(server, url):
+                with HTTPSession(base_urls=[nok_url, url]) as session:
+                    session.DEFAULT_TIMEOUT = (3.0, 3.0)
+                    with open('./data.txt', 'wb') as fd:
+                        fd.write(b'Hello!')
+                    with open('./data.txt', 'rb') as fd:
+                        session.request(
+                            'POST', 'dummy',
+                            data_streams={'data.txt': fd,
+                                          'str_metadata': 'string',
+                                          'metadata': {'key1': 'val1'}})
+                assert server.test_payloads['metadata'] == '{"key1": "val1"}'
+                assert server.test_payloads['data.txt'] == 'Hello!'
+                assert server.test_payloads['str_metadata'] == 'string'
+            run_server(MultiPartPostHandler, func)
+
+        run_server(ServerErrorHandler, outter_func)
