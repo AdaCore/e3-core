@@ -233,6 +233,39 @@ def test_sync_tree_with_symlinks():
     assert os.path.exists(os.path.join(m2, 'c'))
 
 
+def test_sync_tree_preserve_timestamps():
+    """Run sync_tree without preserving timestamps."""
+    e3.fs.mkdir('a')
+    e3.fs.mkdir('b')
+    with open('a/content', 'w') as f:
+        f.write('content')
+    with open('a/content2', 'w') as f:
+        f.write('content2')
+    with open('b/content', 'w') as f:
+        f.write('content')
+    with open('b/content2', 'w') as f:
+        f.write('content1')
+    e3.fs.sync_tree('a', 'b', preserve_timestamps=False)
+
+    with open('b/content2') as f:
+        assert f.read() == 'content2'
+
+
+@pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
+def test_sync_tree_links():
+    """Check handling of symbolink links in sync_tree."""
+    e3.fs.mkdir('a')
+    e3.fs.mkdir('b')
+    e3.fs.mkdir('c')
+    with open('a/content', 'w') as f:
+        f.write('content')
+    os.symlink(os.path.join(os.getcwd(), 'a', 'content'), 'a/link')
+    e3.fs.sync_tree('a', 'b', preserve_timestamps=False)
+
+    with open('b/link') as f:
+        assert f.read() == 'content'
+
+
 def test_rm_on_error():
     e3.fs.mkdir('a')
     e3.fs.mkdir('a/b')
@@ -250,6 +283,50 @@ def test_rm_on_error():
     os.chmod('a/f', 0o500)
 
     e3.fs.rm('a', True)
+
+
+def test_safe_copy():
+    """sync_tree should replace directory by files and fix permissions."""
+    # Check that a directory in the target dir is replaced by a file when
+    # needed.
+    e3.fs.mkdir('a')
+    with open('a/f', 'w') as f:
+        f.write('file')
+    e3.fs.mkdir('b')
+    e3.fs.mkdir('b/f')
+    e3.fs.sync_tree('a', 'b')
+    assert os.path.isfile('b/f')
+
+    # Check that target file permission are changed to allow copying new
+    # content.
+    e3.fs.mkdir('c')
+    e3.os.fs.touch('c/f')
+    os.chmod('c/f', 0o000)
+    e3.fs.sync_tree('a', 'c')
+    with open('c/f') as f:
+        assert f.read() == 'file'
+
+
+@pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
+def test_safe_copy_links():
+    """sync_tree should replace directory by symlinks when needed."""
+    e3.fs.mkdir('a')
+    e3.fs.mkdir('a/d')
+    os.symlink('f', 'a/l')
+    e3.fs.mkdir('b')
+    e3.fs.mkdir('b/l')
+    e3.fs.sync_tree('a', 'b')
+    assert os.path.islink('b/l')
+
+
+def test_safe_mkdir():
+    """sync_tree should copy dir even when no permission in target dir."""
+    e3.fs.mkdir('a')
+    e3.fs.mkdir('a/a')
+    e3.fs.mkdir('b')
+    os.chmod('b', 0o000)
+    e3.fs.sync_tree('a', 'b')
+    assert os.path.isdir('b/a')
 
 
 def test_splitall():
