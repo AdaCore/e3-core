@@ -9,3 +9,8 @@ exclude_lines =
     linux: no cover
     all: no cover
     defensive code
+    windows-only
+    darwin-only
+    bsd-only
+    aix-only
+    solaris-only

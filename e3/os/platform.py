@@ -73,7 +73,7 @@ class SystemInfo(object):
         cls.uname = Uname(*platform_uname())
 
         # Fetch linux distribution info on linux OS
-        if cls.uname.system == 'Linux':
+        if cls.uname.system == 'Linux':  # linux-only
             import ld
             cls.ld_info = {'name': ld.name(),
                            'major_version': ld.major_version(),
@@ -87,7 +87,7 @@ class SystemInfo(object):
             cls.network_ifs = {itf: {address_families[k]: v
                                      for k, v in ifaddresses(itf).iteritems()}
                                for itf in interfaces()}
-        except Exception:
+        except Exception:  # defensive code
             e3.log.debug('cannot get network info', exc_info=True)
             cls.network_ifs = None
 
@@ -98,7 +98,7 @@ class SystemInfo(object):
         try:
             import multiprocessing
             cls.core_number = multiprocessing.cpu_count()
-        except Exception:
+        except Exception:  # defensive code
             e3.log.debug('multiprocessing error', exc_info=True)
             try:
                 import psutil
@@ -111,7 +111,7 @@ class SystemInfo(object):
 
         try:
             import nis
-        except ImportError:
+        except ImportError:  # defensive code
             e3.log.debug('cannot import nis', exc_info=True)
             nis = None
 
@@ -120,7 +120,7 @@ class SystemInfo(object):
                 cls.nis_domain = nis.get_default_domain()
                 if not cls.nis_domain:
                     cls.nis_domain = UNKNOWN
-            except nis.error:
+            except nis.error:  # defensive code
                 e3.log.debug('nis error', exc_info=True)
                 pass
 
@@ -148,7 +148,7 @@ class SystemInfo(object):
 
         if result:
             result = result[0]
-        else:
+        else:  # defensive code
             result = UNKNOWN
 
         cls._platform = result
@@ -171,11 +171,11 @@ class SystemInfo(object):
         kernel_version = UNKNOWN
         system = cls.uname.system
 
-        if system == 'Darwin':
+        if system == 'Darwin':  # darwin-only
             version = cls.uname.release
-        elif system == 'FreeBSD':
+        elif system == 'FreeBSD':  # bsd-only
             version = re.sub('-.*', '', cls.uname.release)
-        elif system == 'Linux':
+        elif system == 'Linux':  # linux-only
             kernel_version = cls.uname.release
             name = cls.ld_info['name'].lower()
             if 'redhat' in name:
@@ -190,11 +190,11 @@ class SystemInfo(object):
             else:
                 version_number = cls.ld_info['version']
             version = name + version_number
-        elif system == 'AIX':
+        elif system == 'AIX':  # aix-only
             version = cls.uname.version + '.' + cls.uname.release
-        elif system == 'SunOS':
+        elif system == 'SunOS':  # solaris-only
             version = '2' + cls.uname.release[1:]
-        elif system == 'Windows':
+        elif system == 'Windows':  # windows-only
             version = cls.uname.release.replace('Server', '')
             kernel_version = cls.uname.version
             if version == 'Vista' and '64' in cls.uname.machine:
@@ -220,7 +220,7 @@ class SystemInfo(object):
         result = False
 
         if cls.uname.system == 'SunOS' and \
-                cls.uname.version == 'Generic_Virtual':
+                cls.uname.version == 'Generic_Virtual':  # solaris-only
             result = True
         else:
             if cls.network_ifs is not None:
