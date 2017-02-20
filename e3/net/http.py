@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import cgi
 import contextlib
+import json
 import os
 import socket
 import tempfile
@@ -12,6 +13,7 @@ import requests
 import requests.adapters
 import requests.exceptions
 import requests.packages.urllib3.exceptions
+import requests_toolbelt.multipart
 from e3.error import E3Error
 from e3.fs import rm
 from requests.packages.urllib3.util import Retry
@@ -94,11 +96,50 @@ class HTTPSession(object):
         See requests Session.request function.
 
         The main difference is that several servers are tried in case
-        base_urls has been set.
+        base_urls have been set.
+
+        For POST requests an additional parameter is supported: data_streams.
+        data_streams is a dict associating a string key to either another
+        string, a dict, a list or a file descriptor. String value are passed
+        without any modifications. Lists and dicts are automatically encoded
+        in JSON. Finally file objects are streamed during the POST request
+        (no complete read is done into memory to fetch file content). When
+        using data_streams parameter, data parameter will be ignored and
+        headers one modified.
         """
         error_msgs = []
+        data_streams = None
+
+        # Keep data_streams apart as it is not an argument to request
+        if 'data_streams' in kwargs:
+            data_streams = kwargs['data_streams']
+            del kwargs['data_streams']
+
         for base_url in list(self.base_urls):
             logger.debug('try with %s', base_url)
+
+            # Handle data_streams. After some tests it seems that we need to
+            # redo an instance of the multipart encoder for each attempt.
+            if data_streams is not None:
+                data = {}
+                for k, v in data_streams.iteritems():
+                    if hasattr(v, 'seek'):
+                        # This is a file. Assume that the key is the filename
+                        data[k] = (k, v)
+                        v.seek(0)
+                    elif isinstance(v, dict) or isinstance(v, list):
+                        # Automatically encode to json
+                        data[k] = json.dumps(v)
+                    else:
+                        data[k] = v
+                kwargs['data'] = \
+                    requests_toolbelt.multipart.encoder.MultipartEncoder(data)
+                header = {'Content-Type': kwargs['data'].content_type}
+                if 'headers' in kwargs:
+                    kwargs['headers'].update(header)
+                else:
+                    kwargs['headers'] = header
+
             # Compute final url
             if base_url is not None:
                 final_url = '%s/%s' % (base_url, url)

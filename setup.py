@@ -10,6 +10,7 @@ install_requires = [
     'pyyaml',
     'python-dateutil',
     'requests',
+    'requests_toolbelt',
     'tqdm',
     'stevedore']
 
