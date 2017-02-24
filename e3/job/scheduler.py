@@ -2,12 +2,12 @@ from __future__ import absolute_import, division, print_function
 
 from collections import deque
 from datetime import datetime
-from Queue import Queue
+from Queue import Empty, Queue
 
 import e3.log
 from e3.collection.dag import DAGIterator
 
-logger = e3.log.getLogger('e3.job.scheduler')
+logger = e3.log.getLogger('job.scheduler')
 
 
 class Scheduler(object):
@@ -17,7 +17,8 @@ class Scheduler(object):
                  job_provider,
                  collect=None,
                  queues=None,
-                 tokens=1):
+                 tokens=1,
+                 job_timeout=3600 * 24):
         """Initialize Scheduler.
 
         :param job_provider: function that returns instances of Job.
@@ -37,10 +38,16 @@ class Scheduler(object):
         :type queues: dict(str, int) | None
         :param tokens: number of tokens for the default queue. Relevant
             only when queues is None
-        :param tokens: int
+        :type tokens: int
+        :param job_timeout: maximum execution time for a job. The default
+            is 24h. If set to None timeout are disabled but it also make
+            the scheduller non interruptable when waiting for a job to
+            finish.
+        :type job_timeout: int | None
         """
         self.job_provider = job_provider
         self.collect = collect
+        self.job_timeout = job_timeout
         if self.collect is None:
             self.collect = lambda x: False
 
@@ -127,13 +134,20 @@ class Scheduler(object):
         """
         self.init_state(dag)
 
-        while not self.is_finished:
-            self.enqueue()
-            self.launch()
-            self.log_state()
-            self.max_active_jobs = max(self.max_active_jobs,
-                                       len(self.active_jobs))
-            self.wait()
+        try:
+            while not self.is_finished:
+                self.enqueue()
+                self.launch()
+                self.log_state()
+                self.max_active_jobs = max(self.max_active_jobs,
+                                           len(self.active_jobs))
+                self.wait()
+        except KeyboardInterrupt:
+            logger.info('Interrupting jobs...')
+            for p in self.active_jobs:
+                p.interrupt()
+                self.collect(p)
+            raise KeyboardInterrupt
         self.stop_time = datetime.now()
 
     def enqueue(self):
@@ -183,7 +197,25 @@ class Scheduler(object):
             return
 
         # Wait for message from one the active jobs
-        uid = self.message_queue.get(True, None)
+        while True:
+            try:
+                # The first job in active jobs is the oldest one
+                # compute the get timeout based on its startup information
+                deadline = datetime.now() - self.active_jobs[0].start_time
+                deadline = self.job_timeout - deadline.total_seconds()
+
+                # Ensure waiting time is a positive number
+                deadline = max(0.0, deadline)
+
+                uid = self.message_queue.get(True, deadline)
+                break
+            except Empty:
+                # If after timeout we get an empty result, it means that
+                # the oldest job has reached the timeout. Interrupt it
+                # and wait for the queue to receive the end notification
+                self.active_jobs[0].interrupt()
+
+        logger.info('job %s finished', uid)
         job_index, job = next(((index, job)
                                for index, job in enumerate(self.active_jobs)
                                if job.uid == uid))
