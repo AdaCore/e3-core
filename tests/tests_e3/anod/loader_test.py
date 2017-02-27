@@ -79,3 +79,17 @@ class TestLoader(object):
         assert 'parent' in spec_repo
         assert 'child' in spec_repo
         assert 'unknown' not in spec_repo
+
+    def test_load_config(self):
+        spec_repo = AnodSpecRepository(self.spec_dir)
+        anod_class = spec_repo.load('withconfig')
+        anod_instance = anod_class('', 'build')
+
+        # See comments in tests/tests_e3/anod/data/withconfig.anod
+
+        assert anod_instance.test1() == 9
+        with pytest.raises(KeyError) as err:
+            anod_instance.test2()
+        assert 'foo' in str(err.value)
+
+        assert list(anod_instance.test3()) == ['case_foo']

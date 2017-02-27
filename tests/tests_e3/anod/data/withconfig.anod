@@ -1,0 +1,20 @@
+from e3.anod.spec import Anod
+
+
+class Parent(Anod):
+
+    def test1(self):
+        """Load config with selectors."""
+        d1 = self.load_config_file(extended=True, selectors={'foo': 2})
+        return d1['bar']  # returns 9
+
+    def test2(self):
+        """Load config without selectors."""
+        self.load_config_file(extended=True)  # raises KeyError('foo')
+
+    def test3(self):
+        """Load config without extended mode ==> yaml.load()."""
+        d = self.load_config_file(extended=False)
+        return d.keys()  # returns 'case_foo'
+
+
