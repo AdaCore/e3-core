@@ -126,15 +126,15 @@ class Main(object):
         self.argument_parser = argument_parser
         self.__log_handlers_set = False
 
-        def sigterm_handler(signal, frame):
+        def sigterm_handler(sig, frame):
             """Automatically convert SIGTERM to SystemExit exception.
 
             This is done to give enough time to an application killed by
             rlimit to perform the needed cleanup steps
-            :param signal: signal action
+            :param sig: signal action
             :param frame: the interrupted stack frame
             """
-            del signal, frame
+            del sig, frame
             logging.critical('SIGTERM received')
             raise SystemExit('SIGTERM received')
 
