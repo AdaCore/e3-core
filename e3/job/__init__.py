@@ -118,10 +118,18 @@ class ProcessJob(Job):
     def cmd_options(self):
         """Process options.
 
+        Important note: don't use PIPE for output or error parameters this can
+        cause locking error in case the process is interrupted. The default
+        redirect output and error to the console.
+
+        The pipe behavior can easily be emulated by writing to a file and
+        modifying the run method to read the file content when the process
+        finish.
+
         :return: options for e3.os.process.Run as a dict
         :rtype: dict
         """
-        return {}
+        return {'output': None}
 
     def interrupt(self):
         """Kill running process tree."""
