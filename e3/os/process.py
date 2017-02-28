@@ -749,6 +749,8 @@ def kill_process_tree(pid, timeout=3):
 
     :param pid: pid of the toplevel process
     :type pid: int | psutil.Process
+    :param timeout: wait timeout after sending the kill signal
+    :type timeout: int
     :return: True if all processes either don't exist or have been killed,
         False if there are some processes still alive.
     :rtype: bool

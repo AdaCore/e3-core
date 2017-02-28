@@ -205,6 +205,11 @@ class GitRepository(object):
         :type stream: file
         :param max_count: max number of commit to display
         :type max_count: int
+        :param rev_range: git revision range, see ``git log -h`` for details
+        :type rev_range: str
+        :param with_gerrit_notes: if True also fetch Gerrit notes containing
+            review data such as Submitted-at, Submitted-by.
+        :type with_gerrit_notes: bool
         :raise: GitError
         """
         # Format:

@@ -251,6 +251,8 @@ class AbstractBaseEnv(object):
 
             :param value: a string representing a platform or None
             :type value: str | None
+            :param machine: machine name
+            :type machine: str | None
             :rtype: a Platform instance or None
             """
             if value is None:
