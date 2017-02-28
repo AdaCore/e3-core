@@ -34,7 +34,7 @@ class Plan(object):
             source_code = fd.read()
         self.load_chunk(source_code, filename)
 
-    def check(self, ast):
+    def check(self, code_ast):
         """Check plan coding style."""
         pass
 
