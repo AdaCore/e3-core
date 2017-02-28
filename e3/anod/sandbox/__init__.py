@@ -6,7 +6,7 @@ from pkg_resources import get_distribution
 from e3.env import Env
 from e3.fs import mkdir, rm
 
-import e3.error
+from e3.anod.error import SandBoxError
 import e3.log
 import e3.os.process
 
@@ -18,10 +18,6 @@ from e3.os.fs import chmod
 from e3.anod.buildspace import BuildSpace
 
 logger = e3.log.getLogger('sandbox')
-
-
-class SandBoxError(e3.error.E3Error):
-    pass
 
 
 class SandBox(object):
