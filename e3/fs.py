@@ -482,11 +482,11 @@ def sync_tree(source, target, ignore=None,
 
     # normalize ignore patterns
     if ignore is not None:
-        norm_ignore_list = [p.replace('\\', '/') for p in ignore]
-        abs_ignore_patterns = [p for p in norm_ignore_list
-                               if p.startswith('/')]
-        rel_ignore_patterns = [p for p in norm_ignore_list
-                               if not p.startswith('/')]
+        norm_ignore_list = [fn.replace('\\', '/') for fn in ignore]
+        abs_ignore_patterns = [fn for fn in norm_ignore_list
+                               if fn.startswith('/')]
+        rel_ignore_patterns = [fn for fn in norm_ignore_list
+                               if not fn.startswith('/')]
 
     def is_in_ignore_list(p):
         """Check if a file should be ignored.
