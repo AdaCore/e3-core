@@ -325,55 +325,55 @@ def rm(path, recursive=False, glob=True):
         else:
             file_list = set(path)
 
-    def onerror(func, path, exc_info):
+    def onerror(func, error_path, exc_info):
         """When shutil.rmtree fail, try again to delete the file.
 
         :param func: function to call on error
         :type func: () -> None
-        :param path: file or directory to remove
-        :type path: str
+        :param error_path: file or directory to remove
+        :type error_path: str
         :param exc_info: exception raised when the first delete attempt was
              made
         :type exc_info: tuple
         """
         del exc_info
-        e3.log.debug('error when running %s on %s', func, path)
+        e3.log.debug('error when running %s on %s', func, error_path)
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
-        if not os.path.exists(path):
+        if not os.path.exists(error_path):
             return
 
         if func in (os.remove, os.unlink):
-            # Cannot remove path, call chmod and redo an attempt
+            # Cannot remove error_path, call chmod and redo an attempt
 
             # This function is only called when deleting a file inside a
             # directory to remove, it is safe to change the parent directory
             # permission since the parent directory will also be removed.
-            os.chmod(os.path.dirname(path), 0o700)
+            os.chmod(os.path.dirname(error_path), 0o700)
 
             # ??? It seems that this might be needed on windows
-            os.chmod(path, 0o700)
-            e3.os.fs.safe_remove(path)
+            os.chmod(error_path, 0o700)
+            e3.os.fs.safe_remove(error_path)
 
         elif func == os.rmdir:
-            # Cannot remove path, call chmod and redo an attempt
-            os.chmod(path, 0o700)
+            # Cannot remove error_path, call chmod and redo an attempt
+            os.chmod(error_path, 0o700)
 
             # Also change the parent directory permission if it will also
             # be removed.
-            if recursive and path not in file_list:
-                # If path not in the list of directories to remove it means
-                # that we are already in a subdirectory.
-                os.chmod(os.path.dirname(path), 0o700)
-            e3.os.fs.safe_rmdir(path)
+            if recursive and error_path not in file_list:
+                # If error_path not in the list of directories to remove it
+                # means that we are already in a subdirectory.
+                os.chmod(os.path.dirname(error_path), 0o700)
+            e3.os.fs.safe_rmdir(error_path)
 
         elif func in (os.listdir, os.open):
             # Cannot read the directory content, probably a permission issue
-            os.chmod(path, 0o700)
+            os.chmod(error_path, 0o700)
 
             # And continue to delete the subdir
-            shutil.rmtree(path, onerror=onerror)
+            shutil.rmtree(error_path, onerror=onerror)
 
     for f in file_list:
         try:
