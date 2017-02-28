@@ -640,6 +640,7 @@ def wait_for_processes(process_list, timeout):
         fd_r, fd_w = os.pipe()
 
         def handler(signum, frame):
+            del signum, frame
             os.write(fd_w, b'a')
 
         signal.signal(signal.SIGCHLD, handler)

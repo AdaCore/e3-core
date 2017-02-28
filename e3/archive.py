@@ -22,14 +22,11 @@ class ArchiveError(e3.error.E3Error):
     pass
 
 
-def __check_type(filename, unpack=True,
-                 force_extension=None):
+def __check_type(filename, force_extension=None):
     """Internal function used by create_archive and unpack_archive.
 
     :param filename: the name of the archive to extract the extension
     :type filename: str
-    :param unpack: to know if we are called by unpack_archive or create_archive
-    :type unpack: bool
     :param force_extension: specify the archive extension if not in the
         filename
     :type force_extension: str | None
@@ -73,7 +70,6 @@ def unpack_archive(filename,
                    dest,
                    selected_files=None,
                    remove_root_dir=False,
-                   tar='tar',
                    unpack_cmd=None,
                    force_extension=None,
                    delete=False,
@@ -94,8 +90,6 @@ def unpack_archive(filename,
         if it is possible. If not do not raise an exception in that case and
         fallback on the other method.
     :type remove_root_dir: bool
-    :param tar: path/to/tar binary (else use 'tar')
-    :type tar: str
     :param unpack_cmd: command to run to unpack the archive, if None use
         default methods or raise ArchiveError if archive format is not
         supported. If unpack_cmd is not None, then remove_root_dir is ignored.
@@ -148,7 +142,6 @@ def unpack_archive(filename,
 
     ext = __check_type(
         filename,
-        unpack=True,
         force_extension=force_extension,)
 
     # If remove_root_dir is set then extract to a temp directory first.
@@ -268,7 +261,7 @@ def unpack_archive(filename,
             e3.fs.rm(tmp_dest, True)
 
 
-def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
+def create_archive(filename, from_dir, dest, force_extension=None,
                    from_dir_rename=None, no_root_dir=False):
     """Create an archive file (.tgz, .tar.gz, .tar or .zip).
 
@@ -284,8 +277,6 @@ def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
     :type from_dir: str
     :param dest: destination directory (should exist)
     :type dest: str
-    :param tar: path/to/tar binary (else use 'tar')
-    :type tar: str
     :param force_extension: specify the archive extension if not in the
         filename. If filename has no extension and force_extension is None
         create_archive will fail.
@@ -303,7 +294,6 @@ def create_archive(filename, from_dir, dest, tar='tar', force_extension=None,
 
     ext = __check_type(
         filename,
-        unpack=False,
         force_extension=force_extension)
 
     if from_dir_rename is None:

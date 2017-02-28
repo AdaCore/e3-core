@@ -65,8 +65,6 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
         # No system sendmail, return False
         return False
 
-    result = False
-
     for smtp_server in smtp_servers:
         try:
             s = smtplib.SMTP(smtp_server)
@@ -79,7 +77,6 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
                 if not s.sendmail(from_email, to_emails, mail_as_string):
                     # sendmail returns an empty dictionary if the message
                     # was accepted for delivery to all addresses
-                    result = True
                     break
                 continue
             except (socket.error, smtplib.SMTPException) as e:
@@ -97,9 +94,10 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
 
     else:
         logger.debug('no valid smtp server found')
-        result = system_sendmail()
+        if not system_sendmail():
+            return False
 
-    if result and message_id is not None:
+    if message_id is not None:
         logger.debug('Message-ID: %s sent successfully', message_id)
 
-    return result
+    return True

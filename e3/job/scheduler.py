@@ -89,6 +89,7 @@ class Scheduler(object):
         :type job_class: () -> Job
         """
         def provider(uid, data, predecessors, notify_end):
+            del predecessors
             return job_class(uid, data, notify_end)
         return provider
 
