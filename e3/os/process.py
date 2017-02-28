@@ -661,11 +661,11 @@ def wait_for_processes(process_list, timeout):
                 while True:
                     try:
                         l_r, _, _ = select.select(*select_args)
+                        if l_r:
+                            os.read(fd_r, 1)
                         break
                     except select.error:
                         pass
-                if l_r:
-                    os.read(fd_r, 1)
 
                 remain = timeout - time.time() + start
         finally:
