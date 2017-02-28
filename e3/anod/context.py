@@ -127,7 +127,7 @@ class AnodContext(object):
                               |-> right
 
         :param decision_class: Decision subclass to use
-        :type decision_class: T
+        :type decision_class: () -> Decision
         :param root: parent node of the decision node
         :type root: e3.anod.action.Action
         :param left: left decision (child of Decision node)

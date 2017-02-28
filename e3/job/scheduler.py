@@ -86,7 +86,7 @@ class Scheduler(object):
         """Return a simple provider based on a given Job class.
 
         :param job_class: a subclass of Job
-        :type job_class: T
+        :type job_class: () -> Job
         """
         def provider(uid, data, predecessors, notify_end):
             return job_class(uid, data, notify_end)
