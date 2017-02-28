@@ -53,6 +53,7 @@ class Job(object):
         self.data = data
         self.notify_end = notify_end
         self.slot = None
+        self.handle = None
         self.thread = None
         self.start_time = None
         self.stop_time = None
@@ -94,6 +95,10 @@ class ProcessJob(Job):
     """Specialized version of Job that spawn processes."""
 
     __metaclass__ = abc.ABCMeta
+
+    def __init__(self, uid, data, notify_end):
+        super(ProcessJob, self).__init__(uid, data, notify_end)
+        self.proc_handle = None
 
     def run(self):
         """Internal function."""

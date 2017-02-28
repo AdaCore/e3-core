@@ -51,6 +51,15 @@ class Scheduler(object):
         if self.collect is None:
             self.collect = lambda x: False
 
+        self.active_jobs = []
+        self.queued_jobs = 0
+        self.all_jobs_queued = False
+        self.message_queue = None
+        self.dag_iterator = None
+        self.start_time = None
+        self.stop_time = None
+        self.max_active_jobs = 0
+
         # Initialize named queues
         self.queues = {}
         self.tokens = {}
