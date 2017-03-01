@@ -2,15 +2,3 @@
 omit =
     */os/windows/*
     */os/unix/constant.py
-
-[report]
-exclude_lines =
-    unix: no cover
-    darwin: no cover
-    all: no cover
-    defensive code
-    linux-only
-    windows-only
-    bsd-only
-    aix-only
-    solaris-only
