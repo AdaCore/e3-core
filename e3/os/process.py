@@ -266,7 +266,11 @@ class Run(object):
                 return cmd_line
 
             with open(prog) as f:
-                header = f.read()[0:2]
+                try:
+                    header = f.read()[0:2]
+                except UnicodeDecodeError:  # py3-only
+                    # unknown header - cannot decode the first two bytes
+                    return cmd_line
                 if header != "#!":
                     # Unknown header
                     return cmd_line
