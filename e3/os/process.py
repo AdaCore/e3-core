@@ -507,7 +507,7 @@ class Run(object):
         :type recursive: bool
         """
         if recursive:
-            kill_process_tree(self.internal)
+            kill_process_tree(self.internal, wait=False)
         else:
             self.internal.kill()
 
@@ -748,11 +748,16 @@ def kill_processes_with_handle(path):
         return ''
 
 
-def kill_process_tree(pid, timeout=3):
+def kill_process_tree(pid, timeout=3, wait=True):
     """Kill a hierarchy of processes.
 
     :param pid: pid of the toplevel process
     :type pid: int | psutil.Process
+    :param timeout: timeout in seconds
+    :type timeout: int
+    :param wait: if True wait for the parent process otherwise it is
+        the responsability of the callee to wait for it
+    :type wait: bool
     :return: True if all processes either don't exist or have been killed,
         False if there are some processes still alive.
     :rtype: bool
@@ -777,13 +782,13 @@ def kill_process_tree(pid, timeout=3):
         :type proc: psutil.Process
         """
         try:
-            logger.debug('kill_process_tree %s', pid)
+            logger.debug('kill_process %s', pid)
             proc.kill()
             logging.info('%s process killed pid:%s (%s)',
                          'parent' if proc.pid == pid else 'child',
                          proc.pid,
                          proc.cmdline())
-        except psutil.Error as kill_err:
+        except (psutil.NoSuchProcess, psutil.Error) as kill_err:
             e3.log.debug(kill_err)
             pass
 
@@ -801,7 +806,8 @@ def kill_process_tree(pid, timeout=3):
 
     try:
         psutil.wait_procs(children, timeout=timeout)
-        parent_process.wait(timeout=timeout)
+        if wait:
+            parent_process.wait(timeout=timeout)
         return True
     except psutil.TimeoutExpired as err:
         e3.log.debug(err)

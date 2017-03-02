@@ -17,7 +17,7 @@ class SleepJob(ProcessJob):
 
     @property
     def cmdline(self):
-        return [sys.executable, '-c', 'import time; time.sleep(6.0)']
+        return [sys.executable, '-c', 'import time; time.sleep(12.0)']
 
 
 class TestScheduler(object):

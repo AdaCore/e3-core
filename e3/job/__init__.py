@@ -72,6 +72,8 @@ class Job(object):
                 self.run()
             finally:
                 self.stop_time = datetime.now()
+                logger.debug('job %s finished after %s' %
+                             (self.uid, self.stop_time - self.start_time))
                 self.notify_end(self.uid)
 
         self.handle = threading.Thread(target=task_function,
