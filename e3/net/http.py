@@ -37,6 +37,32 @@ class HTTPError(E3Error):
     pass
 
 
+class BaseURL(object):
+    """Represent a base url object along with its authentication.
+
+    The root class BaseURL does not use authentication
+    """
+
+    def __init__(self, url):
+        """Initialize a base url object.
+
+        :param url: the base url
+        :type url: str
+        """
+        self.url = url
+
+    def get_auth(self):
+        """Return auth requests parameter.
+
+        :return: authentication associated with the url
+        :rtype: (str, str) | requests.auth.AuthBase | None
+        """
+        return None
+
+    def __str__(self):
+        return self.url
+
+
 class HTTPSession(object):
 
     CHUNK_SIZE = 1024 * 1024
@@ -48,15 +74,17 @@ class HTTPSession(object):
         :param base_urls: list of urls used as prefix to subsequent requests.
             Preferred base url is the first one in the list. In case of error
             during a request the next urls are used.
-        :type base_urls: list[str] | None
+        :type base_urls: list[str] | list[BaseUrl] | None
         """
         if base_urls:
-            self.base_urls = deque(base_urls)
+            self.base_urls = deque([k if isinstance(k, BaseURL) else BaseURL(k)
+                                    for k in base_urls])
         else:
             self.base_urls = deque([None])
+        self.session = requests.Session()
+        self.last_base_url = None
 
     def __enter__(self):
-        self.session = requests.Session()
         self.session.__enter__()
         return self
 
@@ -86,7 +114,7 @@ class HTTPSession(object):
             base_urls = [base_url]
 
         for url in base_urls:
-            self.session.mount(url, requests.adapters.HTTPAdapter(
+            self.session.mount(str(url), requests.adapters.HTTPAdapter(
                 max_retries=Retry(
                     connect=connect, read=read, redirect=redirect)))
 
@@ -116,6 +144,10 @@ class HTTPSession(object):
             del kwargs['data_streams']
 
         for base_url in list(self.base_urls):
+            if self.last_base_url != base_url:
+                self.session.auth = base_url.get_auth()
+                self.last_base_url = base_url
+
             logger.debug('try with %s', base_url)
 
             # Handle data_streams. After some tests it seems that we need to
