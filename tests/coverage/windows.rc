@@ -1,14 +1,3 @@
 [run]
 omit =
     */os/unix/*
-
-[report]
-exclude_lines =
-    windows: no cover
-    all: no cover
-    defensive code
-    linux-only
-    darwin-only
-    bsd-only
-    aix-only
-    solaris-only

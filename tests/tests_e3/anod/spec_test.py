@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import subprocess
+import sys
 
 from e3.anod.driver import AnodDriver
-from e3.anod.error import AnodError
+from e3.anod.error import AnodError, ShellError
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, has_primitive
 
@@ -60,10 +62,17 @@ def test_primitive():
         def build(self):
             if 'error' in self.parsed_qualifier:
                 raise ValueError(self.parsed_qualifier['error'])
-            return 3
+            elif 'error2' in self.parsed_qualifier:
+                self.shell(sys.executable, '-c', 'import sys; sys.exit(2)')
+            else:
+                hello = self.shell(
+                    sys.executable, '-c', 'print("world")',
+                    output=subprocess.PIPE)
+                return hello.out.strip()
 
     with_primitive = WithPrimitive('', 'build')
     with_primitive2 = WithPrimitive('error=foobar', 'build')
+    with_primitive3 = WithPrimitive('error2', 'build')
 
     Anod.sandbox = SandBox()
     Anod.sandbox.root_dir = os.getcwd()
@@ -74,11 +83,12 @@ def test_primitive():
     # Activate the logging
     AnodDriver(anod_instance=with_primitive, store=None).activate()
     AnodDriver(anod_instance=with_primitive2, store=None).activate()
+    AnodDriver(anod_instance=with_primitive3, store=None).activate()
 
     with_primitive.build_space.create()
 
     assert has_primitive(with_primitive, 'build') is True
-    assert with_primitive.build() == 3
+    assert with_primitive.build() == 'world'
 
     with_primitive2.build_space.create()
 
@@ -87,3 +97,8 @@ def test_primitive():
     assert 'foobar' in str(err.value)
 
     assert with_primitive2.package.name.startswith('mypackage')
+
+    with_primitive3.build_space.create()
+    with pytest.raises(ShellError) as err:
+        with_primitive3.build()
+    assert 'build fails' in str(err.value)
