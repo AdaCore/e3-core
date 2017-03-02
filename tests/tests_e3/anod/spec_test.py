@@ -98,6 +98,14 @@ def test_primitive():
 
     assert with_primitive2.package.name.startswith('mypackage')
 
+    # Check __getitem__
+    # PKG_DIR returns the path to the pkg directory
+    assert with_primitive2['PKG_DIR'].endswith('pkg')
+
+    # Check access to build_space config dict directly in Anod instance
+    with_primitive2.build_space.config['config-key'] = 'config-value'
+    assert with_primitive2['config-key'] == 'config-value'
+
     with_primitive3.build_space.create()
     with pytest.raises(ShellError) as err:
         with_primitive3.build()

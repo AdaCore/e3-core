@@ -93,3 +93,10 @@ class TestLoader(object):
         assert 'foo' in str(err.value)
 
         assert list(anod_instance.test3()) == ['case_foo']
+
+    def test_getitem_without_buildspace(self):
+        """Without a build space PKG_DIR returns 'unknown'."""
+        spec_repo = AnodSpecRepository(self.spec_dir)
+        anod_class = spec_repo.load('parent')
+        anod_instance = anod_class('', 'build')
+        assert anod_instance['PKG_DIR'] == 'unknown'
