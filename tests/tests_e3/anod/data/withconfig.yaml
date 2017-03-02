@@ -1,0 +1,5 @@
+case_foo:
+    2:
+        bar: 9
+    .*:
+        bar: 6
