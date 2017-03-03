@@ -51,6 +51,15 @@ class Scheduler(object):
         if self.collect is None:
             self.collect = lambda x: False
 
+        self.active_jobs = []
+        self.queued_jobs = 0
+        self.all_jobs_queued = False
+        self.message_queue = None
+        self.dag_iterator = None
+        self.start_time = None
+        self.stop_time = None
+        self.max_active_jobs = 0
+
         # Initialize named queues
         self.queues = {}
         self.tokens = {}
@@ -77,9 +86,10 @@ class Scheduler(object):
         """Return a simple provider based on a given Job class.
 
         :param job_class: a subclass of Job
-        :type job_class: T
+        :type job_class: () -> Job
         """
         def provider(uid, data, predecessors, notify_end):
+            del predecessors
             return job_class(uid, data, notify_end)
         return provider
 
@@ -198,38 +208,39 @@ class Scheduler(object):
 
         # Wait for message from one the active jobs
         while True:
+            # The first job in active jobs is the oldest one
+            # compute the get timeout based on its startup information
+            deadline = datetime.now() - self.active_jobs[0].start_time
+            deadline = self.job_timeout - deadline.total_seconds()
+
+            # Ensure waiting time is a positive number
+            deadline = max(0.0, deadline)
+
             try:
-                # The first job in active jobs is the oldest one
-                # compute the get timeout based on its startup information
-                deadline = datetime.now() - self.active_jobs[0].start_time
-                deadline = self.job_timeout - deadline.total_seconds()
-
-                # Ensure waiting time is a positive number
-                deadline = max(0.0, deadline)
-
                 uid = self.message_queue.get(True, deadline)
-                break
+                logger.info('job %s finished', uid)
+                job_index, job = next(
+                    ((index, job)
+                     for index, job in enumerate(self.active_jobs)
+                     if job.uid == uid))
+                self.slots.append(job.slot)
+
+                # Liberate the resources taken by the job
+                self.tokens[job.queue_name] += job.tokens
+
+                if self.collect(job):
+                    # Requeue when needed
+                    self.queues[job.queue_name].append(job)
+                    self.queued_jobs += 1
+                else:
+                    # Mark the job as completed
+                    self.dag_iterator.leave(job.uid)
+
+                del self.active_jobs[job_index]
+                return
+
             except Empty:
                 # If after timeout we get an empty result, it means that
                 # the oldest job has reached the timeout. Interrupt it
                 # and wait for the queue to receive the end notification
                 self.active_jobs[0].interrupt()
-
-        logger.info('job %s finished', uid)
-        job_index, job = next(((index, job)
-                               for index, job in enumerate(self.active_jobs)
-                               if job.uid == uid))
-        self.slots.append(job.slot)
-
-        # Liberate the resources taken by the job
-        self.tokens[job.queue_name] += job.tokens
-
-        if self.collect(job):
-            # Requeue when needed
-            self.queues[job.queue_name].append(job)
-            self.queued_jobs += 1
-        else:
-            # Mark the job as completed
-            self.dag_iterator.leave(job.uid)
-
-        del self.active_jobs[job_index]

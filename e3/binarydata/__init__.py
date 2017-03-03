@@ -197,8 +197,8 @@ class BasicType(BinaryData):
         """
         return self.FORMATTER % self.value
 
-    @abc.abstractproperty
     @staticmethod
+    @abc.abstractproperty
     def FORMATTER():
         """image() returns the result of FORMATTER % value.
 

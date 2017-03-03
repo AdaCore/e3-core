@@ -644,6 +644,7 @@ def wait_for_processes(process_list, timeout):
         fd_r, fd_w = os.pipe()
 
         def handler(signum, frame):
+            del signum, frame
             os.write(fd_w, b'a')
 
         signal.signal(signal.SIGCHLD, handler)
@@ -665,11 +666,11 @@ def wait_for_processes(process_list, timeout):
                 while True:
                     try:
                         l_r, _, _ = select.select(*select_args)
+                        if l_r:
+                            os.read(fd_r, 1)
                         break
                     except select.error:
                         pass
-                if l_r:
-                    os.read(fd_r, 1)
 
                 remain = timeout - time.time() + start
         finally:
@@ -753,6 +754,8 @@ def kill_process_tree(pid, timeout=3):
 
     :param pid: pid of the toplevel process
     :type pid: int | psutil.Process
+    :param timeout: wait timeout after sending the kill signal
+    :type timeout: int
     :return: True if all processes either don't exist or have been killed,
         False if there are some processes still alive.
     :rtype: bool
