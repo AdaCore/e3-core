@@ -7,7 +7,7 @@ import sys
 from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError, ShellError
 from e3.anod.sandbox import SandBox
-from e3.anod.spec import Anod, has_primitive
+from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 
 import pytest
 
@@ -84,11 +84,13 @@ def test_primitive():
     AnodDriver(anod_instance=with_primitive, store=None).activate()
     AnodDriver(anod_instance=with_primitive2, store=None).activate()
     AnodDriver(anod_instance=with_primitive3, store=None).activate()
+    AnodDriver(anod_instance=with_primitive4, store=None)  # don't activate
 
     with_primitive.build_space.create()
 
     assert has_primitive(with_primitive, 'build') is True
     assert with_primitive.build() == 'world'
+    assert with_primitive.has_nsis is False
 
     with_primitive2.build_space.create()
 
@@ -110,3 +112,19 @@ def test_primitive():
     with pytest.raises(ShellError) as err:
         with_primitive3.build()
     assert 'build fails' in str(err.value)
+
+    with_primitive3.build_space.set_logging()
+    with pytest.raises(ShellError) as err:
+        with_primitive3.build()
+    assert 'build fails' in str(err.value)
+    with open(with_primitive3.build_space.log_file) as f:
+        assert 'import sys; sys.exit(2)' in f.read()
+    with_primitive3.build_space.end()
+
+
+def test_api_version():
+    # __version__ is supported
+    check_api_version(__version__)
+
+    with pytest.raises(AnodError):
+        check_api_version('0.0')
