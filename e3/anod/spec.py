@@ -356,7 +356,7 @@ class Anod(object):
         """
         # nsis is used only during the builds
         return self.kind == 'build' and self.env.build.os.name == 'windows' \
-            and self.package is not None and self.package.nsis_cb is not None
+            and self.package is not None and self.package.nsis is not None
 
     def shell(self, *command, **kwargs):
         """Run a subprocess using e3.os.process.Run."""
