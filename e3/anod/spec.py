@@ -381,9 +381,9 @@ class Anod(object):
                 # Try to extract the command output that lead to that error
                 with open(active_log_filename, 'rb') as fd:
                     content = fd.read()
-                index = content.rfind('e3.os.process.cmdline')
+                index = content.rfind(b'e3.os.process.cmdline')
                 content = content[index:]
-                index = content.find(']')
+                index = content.find(b']')
 
                 # Create an exception with 2 messages: the log itself and
                 # then the status. This is important not have the log as
