@@ -73,6 +73,7 @@ def test_primitive():
     with_primitive = WithPrimitive('', 'build')
     with_primitive2 = WithPrimitive('error=foobar', 'build')
     with_primitive3 = WithPrimitive('error2', 'build')
+    with_primitive4 = WithPrimitive('error3', 'build')
 
     Anod.sandbox = SandBox()
     Anod.sandbox.root_dir = os.getcwd()
@@ -120,6 +121,10 @@ def test_primitive():
     with open(with_primitive3.build_space.log_file) as f:
         assert 'import sys; sys.exit(2)' in f.read()
     with_primitive3.build_space.end()
+
+    with pytest.raises(AnodError) as err:
+        with_primitive4.build()
+    assert 'AnodDriver.activate() has not been run' in str(err)
 
 
 def test_api_version():

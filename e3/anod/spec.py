@@ -273,7 +273,7 @@ class Anod(object):
 
             def primitive_func(self, *args, **kwargs):
                 # Check whether the instance has been activated
-                if self.uid is None:
+                if self.build_space is None:
                     # Not yet activated, fail
                     raise AnodError('AnodDriver.activate() has not been run')
 

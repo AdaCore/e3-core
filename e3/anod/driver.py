@@ -17,7 +17,7 @@ def primitive_check():
         def wrapper(self, *args, **kwargs):
             if not has_primitive(self.anod_instance, func.__name__):
                 raise AnodError('no primitive %s' % func.__name__)
-            elif self.anod_instance.anod_id is None:
+            elif self.anod_instance.build_space is None:
                 raise AnodError('.activate() has not been called')
             return func(self, *args, **kwargs)
         return wrapper
@@ -49,16 +49,9 @@ class AnodDriver(object):
             primitive=self.anod_instance.kind,
             platform=self.anod_instance.env.platform)
 
-        # Compute an id that should be unique
-        self.anod_instance.anod_id = '%s.%s' % (
-            os.path.relpath(
-                self.anod_instance.build_space.root_dir,
-                sbx.root_dir).replace('/', '.').replace('\\', '.'),
-            self.anod_instance.kind)
-
         self.anod_instance.log = e3.log.getLogger(
-            'spec.' + self.anod_instance.anod_id)
-        e3.log.debug('activating spec %s', self.anod_instance.anod_id)
+            'spec.' + self.anod_instance.uid)
+        e3.log.debug('activating spec %s', self.anod_instance.uid)
 
     def call(self, action):
         """Call an Anod action.
@@ -86,7 +79,7 @@ class AnodDriver(object):
             self.anod_instance.log.critical(err)
             raise AnodError(
                 'cannot get resource metadata from store',
-                origin=self.anod_instance.anod_id), None, sys.exc_traceback
+                origin=self.anod_instance.uid), None, sys.exc_traceback
         else:
             self.store.download_resource(
                 metadata,
