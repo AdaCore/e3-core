@@ -318,8 +318,7 @@ def create_archive(filename, from_dir, dest, force_extension=None,
             tar_format = 'w'
         elif ext == 'tar.gz':
             tar_format = 'w:gz'
-        else:
-            raise ArchiveError(origin='create_archive',
-                               message='unsupported ext %s' % ext)
+        elif ext == 'tar.bz2':
+            tar_format = 'w:bz2'
         with closing(tarfile.open(filepath, tar_format)) as archive:
             archive.add(from_dir, from_dir_rename, recursive=True)
