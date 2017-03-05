@@ -7,7 +7,7 @@ import sys
 from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError, ShellError
 from e3.anod.sandbox import SandBox
-from e3.anod.spec import Anod, has_primitive
+from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 
 import pytest
 
@@ -73,6 +73,7 @@ def test_primitive():
     with_primitive = WithPrimitive('', 'build')
     with_primitive2 = WithPrimitive('error=foobar', 'build')
     with_primitive3 = WithPrimitive('error2', 'build')
+    with_primitive4 = WithPrimitive('error3', 'build')
 
     Anod.sandbox = SandBox()
     Anod.sandbox.root_dir = os.getcwd()
@@ -84,11 +85,13 @@ def test_primitive():
     AnodDriver(anod_instance=with_primitive, store=None).activate()
     AnodDriver(anod_instance=with_primitive2, store=None).activate()
     AnodDriver(anod_instance=with_primitive3, store=None).activate()
+    AnodDriver(anod_instance=with_primitive4, store=None)  # don't activate
 
     with_primitive.build_space.create()
 
     assert has_primitive(with_primitive, 'build') is True
     assert with_primitive.build() == 'world'
+    assert with_primitive.has_nsis is False
 
     with_primitive2.build_space.create()
 
@@ -98,7 +101,35 @@ def test_primitive():
 
     assert with_primitive2.package.name.startswith('mypackage')
 
+    # Check __getitem__
+    # PKG_DIR returns the path to the pkg directory
+    assert with_primitive2['PKG_DIR'].endswith('pkg')
+
+    # Check access to build_space config dict directly in Anod instance
+    with_primitive2.build_space.config['config-key'] = 'config-value'
+    assert with_primitive2['config-key'] == 'config-value'
+
     with_primitive3.build_space.create()
     with pytest.raises(ShellError) as err:
         with_primitive3.build()
     assert 'build fails' in str(err.value)
+
+    with_primitive3.build_space.set_logging()
+    with pytest.raises(ShellError) as err:
+        with_primitive3.build()
+    assert 'build fails' in str(err.value)
+    with open(with_primitive3.build_space.log_file) as f:
+        assert 'import sys; sys.exit(2)' in f.read()
+    with_primitive3.build_space.end()
+
+    with pytest.raises(AnodError) as err:
+        with_primitive4.build()
+    assert 'AnodDriver.activate() has not been run' in str(err)
+
+
+def test_api_version():
+    # __version__ is supported
+    check_api_version(__version__)
+
+    with pytest.raises(AnodError):
+        check_api_version('0.0')

@@ -273,7 +273,7 @@ class Anod(object):
 
             def primitive_func(self, *args, **kwargs):
                 # Check whether the instance has been activated
-                if self.uid is None:
+                if self.build_space is None:
                     # Not yet activated, fail
                     raise AnodError('AnodDriver.activate() has not been run')
 
@@ -356,7 +356,7 @@ class Anod(object):
         """
         # nsis is used only during the builds
         return self.kind == 'build' and self.env.build.os.name == 'windows' \
-            and self.package is not None and self.package.nsis_cb is not None
+            and self.package is not None and self.package.nsis is not None
 
     def shell(self, *command, **kwargs):
         """Run a subprocess using e3.os.process.Run."""
@@ -381,9 +381,9 @@ class Anod(object):
                 # Try to extract the command output that lead to that error
                 with open(active_log_filename, 'rb') as fd:
                     content = fd.read()
-                index = content.rfind('e3.os.process.cmdline')
+                index = content.rfind(b'e3.os.process.cmdline')
                 content = content[index:]
-                index = content.find(']')
+                index = content.find(b']')
 
                 # Create an exception with 2 messages: the log itself and
                 # then the status. This is important not have the log as

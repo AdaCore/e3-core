@@ -203,7 +203,7 @@ class BuildSpace(object):
         status_file = os.path.join(
             self.meta_dir, kind + '_last_status')
         with open(status_file, 'wb') as f:
-            if isinstance(status.name, unicode):
+            if isinstance(status.name, unicode):  # py3-only
                 f.write(status.name.encode('utf-8'))
             else:
                 f.write(status.name)
@@ -245,7 +245,7 @@ class BuildSpace(object):
 
                 try:
                     from threading import Thread, Event
-                except ImportError:
+                except ImportError:  # defensive code
                     Thread = None
                     Event = None
 
@@ -254,7 +254,7 @@ class BuildSpace(object):
                     self.tail_thread = Thread(target=follow, args=(
                         self.stop_event, self.log_file,))
                     self.tail_thread.start()
-                else:
+                else:  # defensive code
                     if not info_msg:
                         print('-v not supported on this machine')
                         print('output redirected to %s' % self.log_file)
