@@ -77,11 +77,16 @@ class FileCache(Cache):
             tmp_file.write(pickle.dumps(self.get_expiry_time(timeout),
                                         pickle.HIGHEST_PROTOCOL))
             tmp_file.write(pickle.dumps(value, pickle.HIGHEST_PROTOCOL))
+        except Exception as err:
+            tmp_file.close()
+            e3.log.debug('error when setting %s in %s:\n%s',
+                         uid, dest_file, err)
+            return False
+        else:
             tmp_file.close()
 
             os.rename(tmp_file.name, dest_file)
+            return True
 
-        except OSError as err:
-            rm(tmp_file)
-            e3.log.debug('error when setting %s in %s:\n%s',
-                         uid, dest_file, err)
+        finally:
+            rm(tmp_file.name)

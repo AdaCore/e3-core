@@ -52,6 +52,8 @@ class Cache(object):
         :param timeout: timeout to use for caching this value, otherwise the
             default cache timeout will be used.
         :type timeout: int
+        :return: True if the value is set, False in case of failure
+        :rtype: bool
         """
         pass  # all: no cover
 
