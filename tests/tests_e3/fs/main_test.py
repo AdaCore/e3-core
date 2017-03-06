@@ -175,6 +175,10 @@ def test_tree_state():
     state6 = e3.fs.get_filetree_state('toto')
     assert isinstance(state6, str)
 
+    # check that get_filetree_state accept unicode
+    state7 = e3.fs.get_filetree_state(u'toto')
+    assert isinstance(state7, str)
+
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
 def test_sync_tree_with_symlinks():
@@ -285,6 +289,15 @@ def test_rm_on_error():
     e3.fs.rm('a', True)
 
 
+def test_rm_list():
+    """Call rm with list of files to remove."""
+    e3.os.fs.touch('a')
+    e3.os.fs.touch('b')
+    e3.fs.rm(['a', 'b'], glob=False)
+    assert not os.path.exists('a')
+    assert not os.path.exists('b')
+
+
 def test_safe_copy():
     """sync_tree should replace directory by files and fix permissions."""
     # Check that a directory in the target dir is replaced by a file when
@@ -319,6 +332,16 @@ def test_safe_copy_links():
     assert os.path.islink('b/l')
 
 
+def test_sync_tree_dir_vs_file():
+    """sync_tree should replace file by directory when needed."""
+    e3.fs.mkdir('a')
+    e3.fs.mkdir('a/d')
+    e3.fs.mkdir('b')
+    e3.os.fs.touch('b/d')
+    e3.fs.sync_tree('a', 'b')
+    assert os.path.isdir('b/d')
+
+
 def test_safe_mkdir():
     """sync_tree should copy dir even when no permission in target dir."""
     e3.fs.mkdir('a')
@@ -334,3 +357,35 @@ def test_splitall():
     assert e3.fs.splitall('/a') == ('/', 'a')
     assert e3.fs.splitall('/a/b') == ('/', 'a', 'b')
     assert e3.fs.splitall('/a/b/') == ('/', 'a', 'b')
+
+
+def test_sync_tree_with_file_list():
+    """Test sync_tree with file_list."""
+    e3.fs.mkdir('a')
+    for x in range(0, 10):
+        e3.os.fs.touch('a/%d' % x)
+
+    e3.fs.mkdir('b')
+    e3.fs.sync_tree('a', 'b', file_list=['3', '7'])
+    assert os.path.exists('b/3')
+    assert os.path.exists('b/7')
+    assert not os.path.exists('b/5')
+
+
+def test_sync_tree_with_ignore():
+    """Test sync_tree with ignore."""
+    e3.fs.mkdir('a')
+    for x in range(0, 10):
+        e3.os.fs.touch('a/%d' % x)
+
+    e3.fs.mkdir('b')
+    e3.fs.sync_tree('a', 'b', ignore=['/3', '/7'])
+    assert not os.path.exists('b/3')
+    assert not os.path.exists('b/7')
+    assert os.path.exists('b/5')
+
+    e3.os.fs.touch('b/7')
+    e3.fs.sync_tree('a', 'b', ignore=['/3', '/7'])
+    assert os.path.exists('b/7')
+    e3.fs.sync_tree('a', 'b', ignore=['/3', '/7'], delete_ignore=True)
+    assert not os.path.exists('b/7')
