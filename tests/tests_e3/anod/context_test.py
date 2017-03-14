@@ -3,9 +3,12 @@ from __future__ import absolute_import, division, print_function
 import os
 
 from e3.anod.action import Build
-from e3.anod.context import AnodContext
+from e3.anod.context import AnodContext, SchedulingError
+from e3.anod.error import AnodError
 from e3.anod.loader import AnodSpecRepository
 from e3.env import BaseEnv
+
+import pytest
 
 
 class TestContext(object):
@@ -184,3 +187,25 @@ class TestContext(object):
         assert set(result.vertex_data.keys()) == \
             set(('root',
                  'mylinux.x86-linux.spec7.build'))
+
+    def test_add_anod_action8(self):
+        """Simple spec with source that does not exist."""
+        ac = self.create_context()
+        with pytest.raises(AnodError):
+            ac.add_anod_action('spec8', primitive='build')
+
+    def test_add_anod_action9(self):
+        """Test source dependency."""
+        ac = self.create_context()
+        ac.add_anod_action('spec9', primitive='build')
+        result = ac.schedule(ac.always_download_source_resolver)
+        assert 'download.spec2-src' in result.vertex_data.keys()
+
+    def test_add_anod_action10(self):
+        """Verify that requiring both build and install fails."""
+        ac = self.create_context()
+        ac.add_anod_action('spec3', primitive='install')
+        ac.add_anod_action('spec3', primitive='build')
+
+        with pytest.raises(SchedulingError):
+            ac.schedule(ac.always_download_source_resolver)

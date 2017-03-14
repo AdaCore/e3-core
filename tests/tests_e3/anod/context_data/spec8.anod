@@ -1,0 +1,12 @@
+from e3.anod.spec import Anod
+from e3.anod.package import SourceBuilder, Source
+
+
+class Spec8(Anod):
+
+    build_source_list = [Source('no-spec-src', publish=True)]
+
+    source_pkg_build = [
+        SourceBuilder(name='spec8-src',
+                      fullname=lambda x: 'spec8-src',
+                      checkout=['spec8-git'])]
