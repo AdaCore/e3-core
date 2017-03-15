@@ -1,3 +1,4 @@
 [run]
 omit =
     */os/unix/*
+    */e3/binarydata/macho.py

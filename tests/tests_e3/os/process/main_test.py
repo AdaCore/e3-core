@@ -16,15 +16,27 @@ except ImportError:
     psutil = None
 
 
-def test_run_shebang():
+def test_run_shebang(caplog):
     """Verify that the parse shebang option works."""
     prog_filename = os.path.join(os.getcwd(), 'prog')
     with open(prog_filename, 'wb') as f:
         f.write(b'#!/usr/bin/env python\n')
-        f.write(b'print("running python prog")\n')
+        f.write(b'import sys\n')
+        f.write(b'print("running %s" % sys.argv[1])\n')
     e3.os.fs.chmod('a+x', prog_filename)
-    p = e3.os.process.Run([prog_filename], parse_shebang=True)
-    assert p.out == 'running python prog\n'
+    p = e3.os.process.Run([prog_filename, 'atest'], parse_shebang=True)
+    assert p.out == 'running atest\n'
+
+    # Create a shebang spawning a file that does not exist
+    with open(prog_filename, 'wb') as f:
+        f.write(b'#!doesnot exist\n')
+        f.write(b'print("running python prog")\n')
+
+    e3.os.fs.chmod('a+x', prog_filename)
+    with pytest.raises(OSError) as err:
+        e3.os.process.Run([prog_filename], parse_shebang=True)
+    assert 'doesnot' in str(err)
+    assert 'doesnot exist' in caplog.text
 
 
 def test_rlimit():
@@ -41,6 +53,10 @@ def test_rlimit():
 def test_not_found():
     with pytest.raises(OSError) as err:
         e3.os.process.Run(['e3-bin-not-found'])
+    assert 'e3-bin-not-found not found' in str(err.value)
+
+    with pytest.raises(OSError) as err:
+        e3.os.process.Run(['e3-bin-not-found'], parse_shebang=True)
     assert 'e3-bin-not-found not found' in str(err.value)
 
     with pytest.raises(OSError) as err:
@@ -99,12 +115,20 @@ def test_wait_for_processes():
 
     p3.wait()
 
+    assert e3.os.process.wait_for_processes([], 10) is None
+
 
 def test_run_pipe():
-    p = e3.os.process.Run(
-        [[sys.executable, '-c', 'print("dummy")'],
-         [sys.executable, '-c',
-          'import sys; print(sys.stdin.read().replace("y", "ies"))']])
+    cmd_left = [sys.executable, '-c', 'print("dummy")']
+    cmd_right = [sys.executable, '-c',
+                 'import sys; print(sys.stdin.read().replace("y", "ies"))']
+    p = e3.os.process.Run([cmd_left, cmd_right])
+    assert p.status == 0
+    assert p.out.strip() == 'dummies'
+
+    with open('dummy', 'w') as f:
+        f.write('dummy')
+    p = e3.os.process.Run(cmd_right, input='dummy')
     assert p.status == 0
     assert p.out.strip() == 'dummies'
 
@@ -173,7 +197,7 @@ def test_is_running():
                            'import time; time.sleep(1)'],
                           bg=True)
     assert e3.os.process.is_running(p.pid)
-    time.sleep(2)
+    p.kill(recursive=False)
 
     # On windows we don't want to wait as otherwise pid will be reused
     # Note also that the semantic is slightly different between Unix
@@ -184,7 +208,6 @@ def test_is_running():
     assert not e3.os.process.is_running(p.pid)
 
     p.wait()
-    assert p.status == 0
 
 
 @pytest.mark.xfail(e3.env.Env().build.os.name == 'solaris',
@@ -213,13 +236,13 @@ def test_kill_process_tree():
     p1.wait()
     assert p1.status != 2
 
-    p2 = e3.os.process.Run(
-        [sys.executable, '-c',
-         'import e3.os.process; import time; import sys;'
-         ' e3.os.process.Run([sys.executable, "-c",'
-         ' "import time; time.sleep(10)"]);'
-         'time.sleep(10)'],
-        bg=True)
+    cmd = [sys.executable, '-c',
+           'import e3.os.process; import time; import sys;'
+           ' e3.os.process.Run([sys.executable, "-c",'
+           ' "import time; time.sleep(10)"]);'
+           'time.sleep(10)']
+
+    p2 = e3.os.process.Run(cmd, bg=True)
     time.sleep(1)
     p2_children = p2.children()
     assert len(p2_children) == 1
@@ -230,3 +253,48 @@ def test_kill_process_tree():
     assert not p2.is_running()
     for p in p2_children:
         assert not p.is_running()
+
+    p3 = e3.os.process.Run(cmd, bg=True)
+    time.sleep(1)
+    p3_children = p3.children()
+    assert len(p3_children) == 1
+    p3.kill()
+    p3.wait()
+    assert not p3.is_running()
+    for p in p3_children:
+        assert not p.is_running()
+
+    # killing it twice should also work
+    assert e3.os.process.kill_process_tree(p3.pid) is True
+
+
+def test_run_with_env():
+    os.environ['EXT_VAR'] = 'bar'
+    cmd = [
+        sys.executable, '-c',
+        'import os; print(os.environ.get("TEST_RUN_VAR")'
+        ' + os.environ.get("EXT_VAR", "world"))'],
+    p1 = e3.os.process.Run(
+        cmd,
+        env={'TEST_RUN_VAR': 'foo'},
+        ignore_environ=False)
+    assert p1.out.strip() == 'foobar'
+
+    p1 = e3.os.process.Run(
+        cmd,
+        env={'TEST_RUN_VAR': 'hello'},
+        ignore_environ=True)
+    assert p1.out.strip() == 'helloworld'
+
+
+def test_no_rlimit(caplog):
+    fake_rlimit = e3.os.process.get_rlimit(platform='null')
+    old_get_rlimit = e3.os.process.get_rlimit
+    e3.os.process.get_rlimit = lambda: fake_rlimit
+
+    try:
+        p1 = e3.os.process.Run([sys.executable, '-c', 'print(1)'], timeout=2)
+        assert p1.out.strip() == '1'
+        assert 'cannot find rlimit' in caplog.text
+    finally:
+        e3.os.process.get_rlimit = old_get_rlimit

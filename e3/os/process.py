@@ -39,7 +39,7 @@ PIPE = subprocess.PIPE
 try:
     import psutil
     from psutil import Popen
-except ImportError:
+except ImportError:  # defensive code
     from subprocess import Popen
     psutil = None
 
@@ -523,7 +523,7 @@ class Run(object):
 
         :rtype: bool
         """
-        if psutil is None:
+        if psutil is None:  # defensive code
             # psutil not imported, use our is_running function
             return is_running(self.pid)
         else:
@@ -534,7 +534,7 @@ class Run(object):
 
         :rtype: list[psutil.Process]
         """
-        if psutil is None:
+        if psutil is None:  # defensive code
             raise NotImplementedError('Run.children() require psutil')
         return self.internal.children()
 

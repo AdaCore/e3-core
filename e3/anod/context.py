@@ -509,7 +509,7 @@ class AnodContext(object):
                                 iuid for iuid in rev_graph.get_closure(uid)
                                 if 'root'
                                 in rev_graph.vertex_predecessors[iuid]]
-                            raise SchedulingError(e.message, uid=uid,
+                            raise SchedulingError(e.messages, uid=uid,
                                                   initiators=initiators)
                 else:
                     # An action is scheduled only if one of its successors is
