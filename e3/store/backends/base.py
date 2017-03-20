@@ -112,6 +112,7 @@ class Store(object):
         self.cache_backend.set(
             metadata.uid,
             CachedResource(uid=metadata.uid, local_path=local_path))
+        return local_path
 
     @abc.abstractmethod
     def download_resource_content(self, metadata, dest):
