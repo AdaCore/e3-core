@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import errno
 import os
+import sys
 import tempfile
 import time
 
@@ -85,6 +86,10 @@ class FileCache(Cache):
         else:
             tmp_file.close()
 
+            if sys.platform == 'win32':  # unix: no cover
+                # atomic rename does not work on windows if the dest file
+                # already exist
+                rm(dest_file)
             os.rename(tmp_file.name, dest_file)
             return True
 
