@@ -236,16 +236,23 @@ def test_kill_process_tree():
     p1.wait()
     assert p1.status != 2
 
-    cmd = [sys.executable, '-c',
-           'import e3.os.process; import time; import sys;'
-           ' e3.os.process.Run([sys.executable, "-c",'
-           ' "import time; time.sleep(10)"]);'
-           'time.sleep(10)']
+    def get_one_child():
+        cmd = [sys.executable, '-c',
+               'import e3.os.process; import time; import sys;'
+               ' e3.os.process.Run([sys.executable, "-c",'
+               ' "import time; time.sleep(10)"]);'
+               'time.sleep(10)']
 
-    p2 = e3.os.process.Run(cmd, bg=True)
-    time.sleep(1)
-    p2_children = p2.children()
-    assert len(p2_children) == 1
+        p_one_child = e3.os.process.Run(cmd, bg=True)
+        for k in range(0, 100):
+            p_one_child_children = p_one_child.children()
+            if len(p_one_child_children) == 1:
+                break
+            time.sleep(0.1)
+        assert len(p_one_child_children) == 1
+        return p_one_child, p_one_child_children
+
+    p2, p2_children = get_one_child()
     e3.os.process.kill_process_tree(p2.pid)
     p2.wait()
 
@@ -254,10 +261,7 @@ def test_kill_process_tree():
     for p in p2_children:
         assert not p.is_running()
 
-    p3 = e3.os.process.Run(cmd, bg=True)
-    time.sleep(1)
-    p3_children = p3.children()
-    assert len(p3_children) == 1
+    p3, p3_children = get_one_child()
     p3.kill()
     p3.wait()
     assert not p3.is_running()
