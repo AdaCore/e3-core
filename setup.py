@@ -6,7 +6,6 @@ import os
 
 install_requires = [
     'colorama',
-    'enum34',
     'pyyaml',
     'python-dateutil',
     'requests',
@@ -15,6 +14,8 @@ install_requires = [
     'stevedore']
 
 extras_require = {}
+
+extras_require[':python_version<"3.4"'] = ['enum34']
 
 for p in ('darwin', 'linux', 'linux2', 'win32'):
     platform_string = ":sys_platform=='%s'" % p
