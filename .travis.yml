@@ -1,11 +1,16 @@
 language: python
 install:
   - pip install tox
-sudo: false
 script: tox
 matrix:
     include:
         - python: 2.7
           env: TOXENV=py27-cov-coveralls,checkstyle
+          dist: trusty
+          sudo: false
+          os: linux
         - python: 3.5
           env: TOXENV=py35
+          dist: trusty
+          sudo: false
+          os: linux
