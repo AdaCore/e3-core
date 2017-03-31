@@ -386,7 +386,9 @@ def rm(path, recursive=False, glob=True):
             if sys.platform == 'win32':  # unix: no cover
                 f = unicode(f)
 
-            if recursive and os.path.isdir(f):
+            # Note: shutil.rmtree requires its argument to be an actual
+            # directory, not a symbolic link to a directory
+            if recursive and os.path.isdir(f) and not os.path.islink(f):
                 shutil.rmtree(f, onerror=onerror)
             else:
                 e3.os.fs.force_remove_file(f)
