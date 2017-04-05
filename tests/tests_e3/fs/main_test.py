@@ -298,6 +298,14 @@ def test_rm_list():
     assert not os.path.exists('b')
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='test using symlink')
+def test_rm_symlink_to_dir():
+    e3.fs.mkdir('a')
+    os.symlink('a', 'b')
+    e3.fs.rm('b', recursive=True)
+    assert not os.path.exists('b')
+
+
 def test_safe_copy():
     """sync_tree should replace directory by files and fix permissions."""
     # Check that a directory in the target dir is replaced by a file when
