@@ -6,6 +6,8 @@ from e3.collection.dag import DAG
 from e3.job import Job, ProcessJob
 from e3.job.scheduler import Scheduler
 
+import pytest
+
 
 class NopJob(Job):
 
@@ -93,6 +95,7 @@ class TestScheduler(object):
     def test_timeout(self):
         """Ensure that jobs are interrupted correctly on timeout."""
         results = {}
+        pytest.importorskip('psutil')
 
         def get_job(uid, data, predecessors, notify_end):
             return SleepJob(uid, data, notify_end)
