@@ -113,11 +113,6 @@ class TestHTTP(object):
         with HTTPSession():
             pass
 
-    def test_session_download(self):
-        with HTTPSession() as session:
-            result = session.download_file('http://google.com', dest='.')
-            assert result is not None
-
     def test_retry(self):
         def func(server, base_url):
             with HTTPSession() as session:
