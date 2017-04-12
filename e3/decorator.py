@@ -64,6 +64,11 @@ class memoize(object):
 
     Calling the same function twice with the same paramaters returns the same
     result.
+
+    Calling the function with the special keyword argument reset_cache=True
+    force a call to the decorated function, skipping the cache.
+
+    No keyword argument can be passed to the decorated function.
     """
 
     def __init__(self, func):
@@ -77,7 +82,12 @@ class memoize(object):
     def __call__(self, *args, **kwargs):
         """Return the cache value if exist, else call func."""
         if kwargs:
-            raise TypeError("memoize does not support keyword arguments")
+            if len(kwargs) == 1 and kwargs.get('reset_cache'):
+                # special handling of reset_cache, clean the cache
+                if args in self.cache:
+                    del self.cache[args]
+            else:
+                raise TypeError("memoize does not support keyword arguments")
         try:
             return self.cache[args]
         except KeyError:
