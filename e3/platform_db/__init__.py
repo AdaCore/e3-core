@@ -37,6 +37,16 @@ class PlatformDBPlugin(object):
         pass
 
 
+class AmberCPUSupport(PlatformDBPlugin):
+    """Plugin example adding support for Amber CPUs."""
+
+    def update_db(self):
+        """Add support for Amber CPUs."""
+        self.cpu_info.update(
+            {'amber23': {'endian': 'little', 'bits': 32},
+             'amber25': {'endian': 'little', 'bits': 32}})
+
+
 @e3.decorator.memoize
 def get_knowledge_base():
     """Load the knowledge base, including all content from plugins.
