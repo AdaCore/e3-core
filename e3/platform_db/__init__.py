@@ -34,7 +34,7 @@ class PlatformDBPlugin(object):
 
     @abc.abstractmethod
     def update_db(self):
-        pass
+        pass  # all: no cover
 
 
 class AmberCPUSupport(PlatformDBPlugin):
@@ -58,6 +58,7 @@ def get_knowledge_base():
     from e3.platform_db.knowledge_base import (
         CPU_INFO, OS_INFO, PLATFORM_INFO, BUILD_TARGETS, HOST_GUESS)
 
+    e3.log.debug('loading knownledge base')
     # Load all platform_db plugins
     ext = stevedore.ExtensionManager(
         namespace='e3.platform_db',
