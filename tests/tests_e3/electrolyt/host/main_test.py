@@ -1,10 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-import e3.electrolyt.hosts as hosts
+import e3.electrolyt.host as host
 
 
 def test_host_db():
-    db = hosts.HostDB()
+    db = host.HostDB()
     db.add_host(hostname='computer1',
                 platform='x86_64-linux',
                 version='rhes5',
@@ -28,6 +28,6 @@ def test_host_db_yaml():
             '   build_os_version: 16.3\n'
             '   data_center: dcmac\n')
 
-    db = hosts.HostDB(filename='db.yaml')
+    db = host.HostDB(filename='db.yaml')
     assert set(db.hostnames) == {'computer2', 'computer3'}
     assert db['computer3'].platform == 'x86_64-darwin'
