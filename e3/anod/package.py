@@ -227,19 +227,19 @@ class UnmanagedSourceBuilder(SourceBuilder):
 class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
     """SourceBuilder for thirdparty packages."""
 
-    def __init__(self, name, fullname=None, checkout=None,
-                 prepare_src=None, apply_patch=None,
-                 kind='thirdparty'):
+    def __init__(self, name):
         """Create a SourceBuilder for a third party package.
 
-        See SourceBuilder documentation
+        :param name: full package name (including extension)
+        :type name: str
         """
-        if apply_patch is None:
-            apply_patch = self.DEFAULT_PATCH_CMD
-        if fullname is None:
-            fullname = name
-        SourceBuilder.__init__(self, name, fullname, checkout,
-                               prepare_src, apply_patch, kind)
+        SourceBuilder.__init__(
+            self,
+            name=name,
+            fullname=lambda: name,
+            checkout=None,
+            apply_patch=self.DEFAULT_PATCH_CMD,
+            kind='thirdparty')
 
 
 class ExternalSourceBuilder(UnmanagedSourceBuilder):
