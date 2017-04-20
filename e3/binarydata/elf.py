@@ -169,7 +169,7 @@ class ElfDyn(StructType):
 
     @property
     def d_val(self):
-        """An alias to the d_ptr field."""
+        """Return d_ptr field value."""
         return self.d_ptr
 
     def is_null(self):
@@ -240,7 +240,7 @@ class Elf(object):
             return buf[offset:offset + str_len]
 
         def expanded_so_name(shared_lib_name, path_list):
-            """The expanded shared library name.
+            """Return the expanded shared library name.
 
             Implement the ELF shared library loading specs, minus the
             search of the LD_LIBRARY_PATH environment variable, which

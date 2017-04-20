@@ -241,9 +241,7 @@ class AnodContext(object):
                  qualifier=None,
                  expand_build=True,
                  source_name=None):
-        """Internal function.
-
-        The function expand an anod action into a tree
+        """Expand an anod action into a tree (internal).
 
         :param name: spec name
         :type name: str
@@ -401,7 +399,7 @@ class AnodContext(object):
 
     @classmethod
     def always_download_source_resolver(cls, action, decision):
-        """Resolver for the schedule method.
+        """Force source download when scheduling a plan.
 
         The resolver takes the following decision:
         * sources are always downloaded
@@ -409,7 +407,7 @@ class AnodContext(object):
 
         :param action: action to consider
         :type action: Action
-        :param decision: decisition to resolve
+        :param decision: decision to resolve
         :type decision: Decision
         :return: True if the action should be scheduled, False otherwise
         :rtype: False
@@ -449,7 +447,7 @@ class AnodContext(object):
 
         for uid, action in rev:
             if uid == 'root':
-                # Root node is alway in the final DAG
+                # Root node is always in the final DAG
                 dag.add_vertex(uid, action)
             elif isinstance(action, Decision):
                 # Decision node does not appears in the final DAG but we need

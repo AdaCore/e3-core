@@ -17,7 +17,7 @@ class Package(object):
         :param prefix: prefix of the package to create, the name will be
             {prefix}-{version}-{platform}-bin.{exe,tar.gz}
             The version is by default set to Anod.sandbox.build_version and
-            can be overriden by the version callback.
+            can be overridden by the version callback.
         :type prefix: str
         :param publish: if True, publish the package
         :type publish: bool
@@ -187,12 +187,12 @@ class SourceBuilder(object):
         :rtype: (str, str, str) -> None
         """
         def default_apply_patch(_, patch_file, dest):
-            """Default patch function to apply patches."""
+            """Apply a patch file using e3.diff.patch."""
             e3.log.debug('applying patch %s on %s', patch_file, dest)
             e3.diff.patch(patch_file, dest)
 
         def no_apply_patch(r, p, d):
-            """Default function when no patch function is found."""
+            """Raise an error (no apply_patch function defined)."""
             # Unused parameters
             del r, p, d
             raise e3.anod.error.AnodError(

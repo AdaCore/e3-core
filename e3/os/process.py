@@ -545,10 +545,10 @@ class File(object):
     def __init__(self, name, mode='r'):
         """Create a new File.
 
-        PARAMETERS
-          name: can be PIPE, STDOUT, a filename string, an opened fd, a python
-            file object, or a command to pipe (if starts with |)
-          mode: can be 'r' or 'w' if name starts with + the mode will be a+
+        :param name: can be PIPE, STDOUT, a filename string, an opened fd, a
+            python file object, or a command to pipe (if starts with |)
+        :param mode: can be 'r' or 'w' if name starts with + the mode will be
+            a+ :type mode: str
         """
         assert mode in 'rw', 'Mode should be r or w'
 

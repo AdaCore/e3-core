@@ -23,7 +23,9 @@ class ArchiveError(e3.error.E3Error):
 
 
 def __check_type(filename, force_extension=None):
-    """Internal function used by create_archive and unpack_archive.
+    """Return the archive extension.
+
+    Internal function used by create_archive and unpack_archive.
 
     :param filename: the name of the archive to extract the extension
     :type filename: str

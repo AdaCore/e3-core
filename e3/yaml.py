@@ -245,7 +245,7 @@ class CaseParser(object):
         return self.__parse(data, self.__state, ())
 
     def __parse(self, data, cursor, prefix):
-        """Internal parse function.
+        """Parse (internal).
 
         :param data: a python object. Note that dictionaries in that structure
             should be OrderedDict.
