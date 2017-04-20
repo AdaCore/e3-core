@@ -409,7 +409,7 @@ class AnodContext(object):
 
         :param action: action to consider
         :type action: Action
-        :param decision: decisition to resolve
+        :param decision: decision to resolve
         :type decision: Decision
         :return: True if the action should be scheduled, False otherwise
         :rtype: False
@@ -449,7 +449,7 @@ class AnodContext(object):
 
         for uid, action in rev:
             if uid == 'root':
-                # Root node is alway in the final DAG
+                # Root node is always in the final DAG
                 dag.add_vertex(uid, action)
             elif isinstance(action, Decision):
                 # Decision node does not appears in the final DAG but we need

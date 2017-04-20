@@ -17,7 +17,7 @@ class Package(object):
         :param prefix: prefix of the package to create, the name will be
             {prefix}-{version}-{platform}-bin.{exe,tar.gz}
             The version is by default set to Anod.sandbox.build_version and
-            can be overriden by the version callback.
+            can be overridden by the version callback.
         :type prefix: str
         :param publish: if True, publish the package
         :type publish: bool

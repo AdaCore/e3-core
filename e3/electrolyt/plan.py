@@ -20,7 +20,7 @@ class Plan(object):
         """
         self.mod = imp.new_module('_anod_plan_')
 
-        # Some additionnal user symbols
+        # Some additional user symbols
         for k, v in data.iteritems():
             self.mod.__dict__[k] = v
 
