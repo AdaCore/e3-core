@@ -250,7 +250,7 @@ class Anod(object):
 
     @classmethod
     def primitive(cls, pre=None, post=None, version=None):
-        """Decorator for anod primitives.
+        """Declare an anod primitive.
 
         Store (and check) the fingerprint of the module dependencies
         Store the primitive success flag

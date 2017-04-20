@@ -101,7 +101,7 @@ class ProcessJob(Job):
         self.proc_handle = None
 
     def run(self):
-        """Internal function."""
+        """Run the job."""
         cmd_options = self.cmd_options
 
         # Do non blocking spawn followed by a wait in order to have
@@ -112,7 +112,7 @@ class ProcessJob(Job):
 
     @abc.abstractproperty
     def cmdline(self):
-        """Command line of the process to be spawned.
+        """Return the command line of the process to be spawned.
 
         :return: the command line
         :rtype: list[str]

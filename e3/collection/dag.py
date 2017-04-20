@@ -37,7 +37,7 @@ class DAGIterator(object):
         return self
 
     def next(self):
-        """Same as next_element with with_predecessors=False.
+        """Retrieve next_element with with_predecessors=False.
 
         The intermediate function is needed in Python 3.x
 

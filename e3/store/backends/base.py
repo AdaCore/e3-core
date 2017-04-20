@@ -19,7 +19,7 @@ class ResourceInfo(object):
 
     @abc.abstractproperty
     def uid(self):
-        """Unique identifier.
+        """Return an unique identifier.
 
         This is meant to be used to implement a cache system.
         :rtype: str

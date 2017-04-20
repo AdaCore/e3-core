@@ -241,9 +241,7 @@ class AnodContext(object):
                  qualifier=None,
                  expand_build=True,
                  source_name=None):
-        """Internal function.
-
-        The function expand an anod action into a tree
+        """Expand an anod action into a tree (internal).
 
         :param name: spec name
         :type name: str
@@ -401,7 +399,7 @@ class AnodContext(object):
 
     @classmethod
     def always_download_source_resolver(cls, action, decision):
-        """Resolver for the schedule method.
+        """Force source download when scheduling a plan.
 
         The resolver takes the following decision:
         * sources are always downloaded
