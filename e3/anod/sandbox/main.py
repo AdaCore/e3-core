@@ -1,7 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
+import sys
+
 import e3.log
 import stevedore
+
+from e3.anod.error import SandBoxError
 from e3.main import Main
 
 
@@ -42,4 +46,7 @@ def main(get_argument_parser=False):
                  ','.join(ext.names()))
 
     # An action has been selected, run it
-    ext[m.args.action].obj.run(m.args)
+    try:
+        ext[m.args.action].obj.run(m.args)
+    except SandBoxError as err:
+        sys.exit(err)
