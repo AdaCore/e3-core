@@ -35,6 +35,7 @@ class AnodSpecRepository(object):
             raise SandBoxError(
                 'spec directory %s does not exist' % spec_dir)
         self.spec_dir = spec_dir
+        self.api_version = None
         self.specs = {}
 
         # Look for all spec files and data files
