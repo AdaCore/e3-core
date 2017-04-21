@@ -10,8 +10,9 @@ import e3.os.process
 
 def test_deploy_sandbox():
     sandbox_dir = os.getcwd()
-    e3.os.process.Run(
-        ['e3-sandbox', 'create', sandbox_dir])
+    p = e3.os.process.Run(
+        ['e3-sandbox', '-vv', 'create', sandbox_dir])
+    assert p.status == 0, p.out
     assert os.path.isdir('log')
 
     assert 'sandbox = %s' % sandbox_dir in e3.os.process.Run(
