@@ -37,6 +37,11 @@ def main(get_argument_parser=False):
         invoke_on_load=True,
         invoke_args=(subparsers, ))
 
+    if len(ext.names()) != len(ext.entry_points_names()):
+        raise SandBoxError(
+            'an error occured when loading sandbox_action entry points %s'
+            % ','.join(ext.entry_points_names()))
+
     if get_argument_parser:
         return m.argument_parser
 
