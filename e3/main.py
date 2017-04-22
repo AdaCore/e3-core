@@ -140,14 +140,20 @@ class Main(object):
 
         signal.signal(signal.SIGTERM, sigterm_handler)
 
-    def parse_args(self, args=None):
+    def parse_args(self, args=None, known_args_only=False):
         """Parse options and set console logger.
 
         :param args: the list of positional parameters. If None then
             ``sys.argv[1:]`` is used
-        :type: list[str] | None
+        :type args: list[str] | None
+        :param known_args_only: does not produce an error when extra
+            arguments are present
+        :type known_args_only: bool
         """
-        self.args = self.argument_parser.parse_args(args)
+        if known_args_only:
+            self.args, _ = self.argument_parser.parse_known_args(args)
+        else:
+            self.args = self.argument_parser.parse_args(args)
 
         if self.args.nocolor:
             e3.log.pretty_cli = False
