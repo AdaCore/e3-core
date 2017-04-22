@@ -28,6 +28,8 @@ def main(get_argument_parser=False):
     :type get_argument_parser: bool
     """
     m = Main()
+    m.parse_args(known_args_only=True)
+
     subparsers = m.argument_parser.add_subparsers(
         title="action", description="valid actions")
 
@@ -45,13 +47,13 @@ def main(get_argument_parser=False):
     if get_argument_parser:
         return m.argument_parser
 
-    m.parse_args()
+    args = m.argument_parser.parse_args()
 
     e3.log.debug('sandbox action plugins loaded: %s',
                  ','.join(ext.names()))
 
     # An action has been selected, run it
     try:
-        ext[m.args.action].obj.run(m.args)
+        ext[args.action].obj.run(args)
     except SandBoxError as err:
         sys.exit(err)
