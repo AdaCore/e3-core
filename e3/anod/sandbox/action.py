@@ -5,10 +5,14 @@ import argparse
 import os
 
 import e3.log
+from e3.anod.context import AnodContext
 from e3.anod.loader import AnodSpecRepository
 from e3.anod.sandbox import SandBox, SandBoxError
 from e3.anod.sandbox.main import main
 from e3.anod.spec import check_api_version
+from e3.electrolyt.plan import Plan, PlanContext
+from e3.electrolyt.run import ElectrolytJobFactory
+from e3.env import BaseEnv
 from e3.fs import mkdir
 from e3.vcs.git import GitRepository
 
@@ -180,7 +184,44 @@ class SandBoxExec(SandBoxCreate):
 
         # Load plan content if needed
         if args.plan:
-            if not os.path.exists(args.plan):
+            if not os.path.isfile(args.plan):
                 raise SandBoxError(
                     'plan file %s does not exist' % args.plan,
                     origin='SandBoxExec.run')
+            with open(args.plan, 'rb') as plan_fd:
+                plan_content = ['def main_entry_point():']
+                plan_content += ['    %s' % line
+                                 for line in plan_fd.read().splitlines()]
+                plan_content = "\n".join(plan_content)
+
+            env = BaseEnv()
+            cm = PlanContext(server=env)
+
+            # Declare available actions and their signature
+            def anod_action(module,
+                            build=None,
+                            host=None,
+                            target=None,
+                            qualifier=None):
+                pass
+
+            for a in ('anod_install', 'anod_build', 'anod_test'):
+                cm.register_action(a, anod_action)
+
+            # Load the plan and execute
+            plan = Plan(data={})
+            plan.load_chunk(plan_content)
+            actions = cm.execute(plan, 'main_entry_point')
+
+            ac = AnodContext(asr, default_env=env)
+            for action in actions:
+                ac.add_anod_action(action.module,
+                                   action,
+                                   action.action.replace('anod_', '', 1),
+                                   action.qualifier)
+
+            # Check if machine plan is locally schedulable
+            action_list = ac.schedule(
+                AnodContext.always_download_source_resolver)
+            e = ElectrolytJobFactory(sandbox, asr)
+            e.run(action_list)
