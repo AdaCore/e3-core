@@ -50,6 +50,7 @@ class Plan(object):
 
     def check(self, code_ast):
         """Check plan coding style."""
+        del self, code_ast
         pass
 
     def load_chunk(self, source_code, filename='<unknown>'):
@@ -83,8 +84,8 @@ class PlanContext(object):
             only internally
         :type stack: list[BaseEnv]
         :param server: a BaseEnv object that represent the host default env.
-            server parameter is taken into acount only during creation of the
-            initial context.
+            server parameter is taken into account only during creation of
+            the initial context.
         :type server: BaseEnv
         :param build: see e3.env.BaseEnv.set_env
         :type build: str | None
@@ -111,7 +112,7 @@ class PlanContext(object):
                 new = BaseEnv()
                 new.set_env(build, host, target)
 
-        # Store additionnal data
+        # Store additional data
         for k, v in kwargs.iteritems():
             setattr(new, k, v)
 
@@ -168,6 +169,8 @@ class PlanContext(object):
             electrolyt entry point
         :type verify: bool
         :raise: PlanError
+        :return: a list of plan actions
+        :rtype: list[callable]
         """
         # Give access to some useful data during plan execution
         plan.mod.__dict__['env'] = self.env
