@@ -7,6 +7,13 @@ from functools import partial
 
 from e3.electrolyt.entry_point import EntryPointKind, entry_point
 from e3.env import BaseEnv
+from e3.error import E3Error
+
+
+class PlanError(E3Error):
+    """Error when parsing or executing the plan."""
+
+    pass
 
 
 class Plan(object):
@@ -150,13 +157,17 @@ class PlanContext(object):
         """
         return self.stack[0]
 
-    def execute(self, plan, entry_point_name):
+    def execute(self, plan, entry_point_name, verify=False):
         """Execute a plan.
 
         :param plan: the plan to execute
         :type plan: Plan
         :param entry_point_name: entry point to call in the plan
         :type entry_point_name: str
+        :param verify: verify whether the entry point name is a
+            electrolyt entry point
+        :type verify: bool
+        :raise: PlanError
         """
         # Give access to some useful data during plan execution
         plan.mod.__dict__['env'] = self.env
@@ -173,7 +184,16 @@ class PlanContext(object):
 
         self.action_list = []
         self.plan = plan
-        plan.mod.__dict__[entry_point_name]()
+        ep = plan.mod.__dict__[entry_point_name]
+
+        if verify and not getattr(ep, 'is_entry_point', False):
+            # ep.is_entry_point should be set to True when a function
+            # is decorated with e3.electrolyt.entry_point.entry_point
+            raise PlanError(
+                message='%s is not an entry point' % entry_point_name,
+                origin='PlanContext.execute')
+
+        ep()
         return self.action_list
 
     def _add_action(self, name, *args, **kwargs):

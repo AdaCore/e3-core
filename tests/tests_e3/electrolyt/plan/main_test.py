@@ -4,6 +4,8 @@ import e3.electrolyt.host as host
 import e3.electrolyt.plan as plan
 from e3.electrolyt.entry_point import EntryPointKind
 
+import pytest
+
 
 def _get_new_plancontext(machine_name):
     server = host.Host(hostname=machine_name,
@@ -37,7 +39,7 @@ def test_simple_plan():
                  u'    build(b, build="x86-linux", host="x86-linux",',
                  u'          target="x86-windows")\n'])
 
-    actions = context.execute(myplan, 'myserver')
+    actions = context.execute(myplan, 'myserver', verify=False)
     assert len(actions) == 2
     assert actions[0].spec == 'a'
     assert actions[1].build.platform == 'x86-linux'
@@ -75,7 +77,7 @@ def test_entry_points():
     assert db['machine2'].kind == EntryPointKind.machine
 
     context = _get_new_plancontext('machine2')
-    actions = context.execute(myplan, 'machine2')
+    actions = context.execute(myplan, 'machine2', verify=True)
     assert len(actions) == 1
     assert actions[0].spec == 'b'
 
@@ -83,3 +85,18 @@ def test_entry_points():
 
     assert len(ep_executed) == 1
     assert ep_executed[0].name == 'machine2'
+
+
+def test_verify_entry_point():
+    """PlanContext with verify=True should reject non entry points."""
+    plan_context = ['def foo():', '    build("o")']
+
+    my_plan = _get_plan({}, plan_context)
+    context = _get_new_plancontext('foo')
+    actions = context.execute(my_plan, 'foo')
+    assert len(actions) == 1
+
+    with pytest.raises(plan.PlanError) as plan_err:
+        context.execute(my_plan, 'foo', verify=True)
+
+    assert 'foo is not an entry point' in str(plan_err)
