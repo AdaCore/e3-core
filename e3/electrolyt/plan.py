@@ -5,7 +5,15 @@ import imp
 import inspect
 from functools import partial
 
+from e3.electrolyt.entry_point import EntryPointKind, entry_point
 from e3.env import BaseEnv
+from e3.error import E3Error
+
+
+class PlanError(E3Error):
+    """Error when parsing or executing the plan."""
+
+    pass
 
 
 class Plan(object):
@@ -24,6 +32,12 @@ class Plan(object):
         for k, v in data.iteritems():
             self.mod.__dict__[k] = v
 
+        self.entry_points = {}
+
+        for ep_name, ep in EntryPointKind.__members__.iteritems():
+            self.mod.__dict__[ep_name] = partial(
+                entry_point, self.entry_points, ep)
+
     def load(self, filename):
         """Load python code from file.
 
@@ -36,6 +50,7 @@ class Plan(object):
 
     def check(self, code_ast):
         """Check plan coding style."""
+        del self, code_ast
         pass
 
     def load_chunk(self, source_code, filename='<unknown>'):
@@ -69,8 +84,8 @@ class PlanContext(object):
             only internally
         :type stack: list[BaseEnv]
         :param server: a BaseEnv object that represent the host default env.
-            server parameter is taken into acount only during creation of the
-            initial context.
+            server parameter is taken into account only during creation of
+            the initial context.
         :type server: BaseEnv
         :param build: see e3.env.BaseEnv.set_env
         :type build: str | None
@@ -97,7 +112,7 @@ class PlanContext(object):
                 new = BaseEnv()
                 new.set_env(build, host, target)
 
-        # Store additionnal data
+        # Store additional data
         for k, v in kwargs.iteritems():
             setattr(new, k, v)
 
@@ -143,13 +158,19 @@ class PlanContext(object):
         """
         return self.stack[0]
 
-    def execute(self, plan, entry_point):
+    def execute(self, plan, entry_point_name, verify=False):
         """Execute a plan.
 
         :param plan: the plan to execute
         :type plan: Plan
-        :param entry_point: entry point to call in the plan
-        :type entry_point: str
+        :param entry_point_name: entry point to call in the plan
+        :type entry_point_name: str
+        :param verify: verify whether the entry point name is a
+            electrolyt entry point
+        :type verify: bool
+        :raise: PlanError
+        :return: a list of plan actions
+        :rtype: list[callable]
         """
         # Give access to some useful data during plan execution
         plan.mod.__dict__['env'] = self.env
@@ -166,7 +187,16 @@ class PlanContext(object):
 
         self.action_list = []
         self.plan = plan
-        plan.mod.__dict__[entry_point]()
+        ep = plan.mod.__dict__[entry_point_name]
+
+        if verify and not getattr(ep, 'is_entry_point', False):
+            # ep.is_entry_point should be set to True when a function
+            # is decorated with e3.electrolyt.entry_point.entry_point
+            raise PlanError(
+                message='%s is not an entry point' % entry_point_name,
+                origin='PlanContext.execute')
+
+        ep()
         return self.action_list
 
     def _add_action(self, name, *args, **kwargs):

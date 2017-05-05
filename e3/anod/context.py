@@ -111,7 +111,7 @@ class AnodContext(object):
         :param data: node data
         :type data: e3.anod.action.Action
         :param args: list of predecessors
-        :type args: list[e3.anod.action.Action]
+        :type args: e3.anod.action.Action
         """
         preds = [k.uid for k in args]
         self.tree.update_vertex(data.uid, data,
