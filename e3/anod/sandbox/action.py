@@ -154,15 +154,12 @@ class SandBoxExec(SandBoxCreate):
         if args.spec_dir:
             sandbox_spec_dir = args.spec_dir
         else:
-            sandbox_spec_dir = os.path.join(
-                sandbox.root_dir,
-                'specs')
+            sandbox_spec_dir = sandbox.specs_dir
 
         if args.create_sandbox:
             sandbox.create_dirs()
 
         if args.create_sandbox and args.spec_git_url:
-            mkdir(sandbox_spec_dir)
             g = GitRepository(sandbox_spec_dir)
             if e3.log.default_output_stream is not None:
                 g.log_stream = e3.log.default_output_stream
