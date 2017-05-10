@@ -6,7 +6,6 @@ import argparse
 import e3.log
 from e3.anod.sandbox import SandBox, SandBoxError
 from e3.anod.sandbox.main import main
-from e3.fs import mkdir
 from e3.vcs.git import GitRepository
 
 
@@ -77,8 +76,7 @@ class SandBoxCreate(SandBoxAction):
         sandbox.create_dirs()
 
         if args.spec_git_url:
-            mkdir(sandbox.spec_dir)
-            g = GitRepository(sandbox.spec_dir)
+            g = GitRepository(sandbox.specs_dir)
             if e3.log.default_output_stream is not None:
                 g.log_stream = e3.log.default_output_stream
             g.init()
