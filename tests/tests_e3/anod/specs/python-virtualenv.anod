@@ -1,0 +1,23 @@
+import os
+
+from e3.anod.loader import spec
+from e3.anod.spec import Anod
+
+
+class PythonVirtualEnv(spec('anod')):
+    """A base python install.
+
+    This is used to get a base python install that can be used with
+    e3 profiles.
+    """
+
+    def setenv(self):
+        activate_file = os.path.join(
+            self['INSTALL_DIR'], 'bin', 'activate_this.py')
+        execfile(activate_file, dict(__file__=activate_file))
+
+    @Anod.primitive()
+    def build(self):
+        self.shell('virtualenv', self['INSTALL_DIR'])
+        self.setenv()
+        self.shell('pip', 'install', 'tox')
