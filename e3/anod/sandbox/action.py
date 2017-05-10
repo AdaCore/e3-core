@@ -6,7 +6,6 @@ import argparse
 import e3.log
 from e3.anod.sandbox import SandBox, SandBoxError
 from e3.anod.sandbox.main import main
-from e3.vcs.git import GitRepository
 
 
 class SandBoxAction(object):

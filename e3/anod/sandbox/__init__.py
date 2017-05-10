@@ -30,7 +30,7 @@ class SandBox(object):
 
         # Required directories for a sandbox
         self.dirs = ('meta', 'bin', 'tmp', os.path.join('tmp', 'cache'),
-                     'src', 'log', 'etc', 'vcs', 'patch', 'specs')
+                     'src', 'log', 'vcs', 'patch', 'specs')
 
         self.meta_dir = None
         self.tmp_dir = None
