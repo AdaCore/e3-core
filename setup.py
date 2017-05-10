@@ -58,6 +58,7 @@ setup(
     extras_require=extras_require,
     entry_points={
         'e3.anod.sandbox.sandbox_action': [
+            'exec = e3.anod.sandbox.action:SandBoxExec',
             'create = e3.anod.sandbox.action:SandBoxCreate',
             'show-config = e3.anod.sandbox.action:SandBoxShowConfiguration',
         ],

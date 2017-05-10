@@ -218,7 +218,7 @@ class Scheduler(object):
 
             try:
                 uid = self.message_queue.get(True, deadline)
-                logger.info('job %s finished', uid)
+                logger.debug('job %s finished', uid)
                 job_index, job = next(
                     ((index, job)
                      for index, job in enumerate(self.active_jobs)
