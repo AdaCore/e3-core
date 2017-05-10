@@ -37,7 +37,6 @@ class SandBox(object):
         self.tmp_cache_dir = None
         self.src_dir = None
         self.log_dir = None
-        self.etc_dir = None
         self.vcs_dir = None
         self.patch_dir = None
         self.bin_dir = None
