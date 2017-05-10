@@ -1,0 +1,14 @@
+import os
+
+import e3.anod.spec
+
+
+class Anod(e3.anod.spec.Anod):
+
+    def setenv(self):
+        """Add the install directory to PATH."""
+        prefix = self['INSTALL_DIR']
+        prefix_bin = os.path.join(prefix, 'bin')
+
+        if os.path.exists(prefix_bin):
+            self.env.add_path(prefix_bin)
