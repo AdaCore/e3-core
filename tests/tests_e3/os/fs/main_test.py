@@ -23,6 +23,7 @@ def test_cd():
 @pytest.mark.xfail(sys.platform == 'win32',
                    reason='not completely supported on windows')
 def test_chmod():
+    os.umask(0o022)
     e3.os.fs.touch('a')
 
     def check_mode(filename, mode):
