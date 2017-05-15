@@ -187,7 +187,7 @@ class SandBoxExec(SandBoxCreate):
                 raise SandBoxError(
                     'plan file %s does not exist' % args.plan,
                     origin='SandBoxExec.run')
-            with open(args.plan, 'rb') as plan_fd:
+            with open(args.plan, 'r') as plan_fd:
                 plan_content = ['def main_entry_point():']
                 plan_content += ['    %s' % line
                                  for line in plan_fd.read().splitlines()]
