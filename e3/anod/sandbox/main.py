@@ -8,6 +8,8 @@ import stevedore
 from e3.anod.error import SandBoxError
 from e3.main import Main
 
+logger = e3.log.getLogger('sandbox.main')
+
 
 def main(get_argument_parser=False):
     """Manipulate an Anod sandbox.
@@ -56,4 +58,5 @@ def main(get_argument_parser=False):
     try:
         ext[args.action].obj.run(args)
     except SandBoxError as err:
-        sys.exit(err)
+        logger.error(err)
+        sys.exit(1)

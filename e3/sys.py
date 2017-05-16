@@ -5,7 +5,11 @@ import os
 import re
 import sys
 
+import e3.log
+
 from enum import Enum
+
+logger = e3.log.getLogger('e3.sys')
 
 
 class RewriteNodeError(Exception):
@@ -179,7 +183,8 @@ def main():
     elif m.args.check:
         errors = sanity_check()
         if errors:  # defensive code
-            sys.exit('sanity checking failed!')
+            logger.error('sanity checking failed!')
+            sys.exit(1)
         else:
             print('Everything OK!')
             return
