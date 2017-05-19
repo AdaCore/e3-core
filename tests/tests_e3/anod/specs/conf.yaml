@@ -1,0 +1,6 @@
+api_version: '1.4'
+repositories:
+    e3-core-github:
+        vcs: git
+        url: https://github.com/AdaCore/e3-core.git
+        revision: master
