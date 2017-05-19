@@ -1,5 +1,19 @@
-The `e3-core` package
-=====================
+Contributing
+============
+
+Feedback and pull-requests
+--------------------------
+
+For feature requests, bug reports, vulnerability reports, and feedback, please
+provide them as GitHub issues.
+
+To submit a patch please create a pull request from your topic branch.
+You should create a separate branch for each single topic (bug fix or
+new feature). Please follow commit message guideline from
+[git-scm book](http://git-scm.com/book/ch5-2.html). Try to break several
+logical changes or bug fixes in several commits.
+
+We also ask you to sign our [Contributor Licence Agreement](https://github.com/AdaCore/contributing-howto).
 
 Code conventions
 ----------------
@@ -76,12 +90,16 @@ deriving the base class (the interface) and referencing the entry point in its
 Documentation
 -------------
 
+All public API methods must be documented.
+
 `e3-core` documentation is available in the [e3-core GitHub wiki](https://github.com/AdaCore/e3-core/wiki).
 
 Testing
 -------
 
-requires: [tox](https://pypi.python.org/pypi/tox)
+All features or bug fixes must be tested.
+
+Requires: [tox](https://pypi.python.org/pypi/tox)
 If not already installed, install it via:
 
 ```bash
