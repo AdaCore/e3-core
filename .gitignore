@@ -10,3 +10,4 @@ __pycache__
 /htmlcov
 /.tox
 /docs/_build
+docs/build
