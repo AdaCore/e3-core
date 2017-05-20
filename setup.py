@@ -11,7 +11,7 @@ install_requires = [
     'requests',
     'requests_toolbelt',
     'tqdm',
-    'stevedore']
+    'stevedore>1.20.0']
 
 extras_require = {}
 
