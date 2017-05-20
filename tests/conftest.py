@@ -43,7 +43,13 @@ def pytest_addoption(parser):
 @pytest.fixture(autouse=True)
 def require_git(request):
     marker = request.node.get_marker('git')
-    if marker and not which('git'):
+    if marker:
+        git(request)
+
+
+@pytest.fixture
+def git(request):
+    if not which('git'):
         if request.config.getoption('ci'):
             pytest.fail('git not available')
         else:
