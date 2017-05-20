@@ -14,4 +14,4 @@ install:
     mkdir C:\\tmp\\Trash
 build: off
 test_script:
-- cmd: tox -e py-cov
+- cmd: tox -e py-ci-cov

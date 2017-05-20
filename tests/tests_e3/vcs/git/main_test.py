@@ -4,13 +4,13 @@ import os
 import sys
 
 from e3.fs import echo_to_file
-from e3.os.fs import unixpath, which
+from e3.os.fs import unixpath
 from e3.vcs.git import GitError, GitRepository
 
 import pytest
 
 
-@pytest.mark.skipif(not which('git'), reason='require git')
+@pytest.mark.git
 def test_git_repo():
     working_tree = unixpath(os.path.join(os.getcwd(), 'working_tree'))
     working_tree2 = os.path.join(os.getcwd(), 'working_tree2')

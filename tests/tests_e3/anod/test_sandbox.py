@@ -1,15 +1,16 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-
 from shutil import copyfile
+
 import e3.anod.sandbox
 import e3.env
 import e3.fs
 import e3.os.process
 import e3.platform
-
 from e3.vcs.git import GitRepository
+
+import pytest
 
 
 def test_deploy_sandbox():
@@ -51,6 +52,7 @@ def test_sandbox_env():
     assert os.environ['GPR_PROJECT_PATH'] == ''
 
 
+@pytest.mark.git
 def test_SandBoxCreate_git():
     """Check if sandbox create can load the specs from a git repo."""
     root_dir = os.getcwd()
@@ -75,6 +77,7 @@ def test_SandBoxCreate_git():
         assert os.path.isfile(os.path.join(sandbox_dir, 'specs', filename))
 
 
+@pytest.mark.git
 def test_sandbox_exec_missing():
     """Test sandbox exec exception.
 
@@ -106,6 +109,7 @@ def test_sandbox_exec_missing():
     assert 'SandBoxExec.run: plan file noplan does not exist' in no_plan.out
 
 
+@pytest.mark.git
 def test_sandbox_exec_success():
     """Test if sandbox exec works with local specs and a git repo."""
     root_dir = os.getcwd()
@@ -137,6 +141,7 @@ def test_sandbox_exec_success():
     assert 'build e3 for %s' % platform in p.out
 
 
+@pytest.mark.git
 def test_anod_plan():
     """Test if sandbox exec works with local specs and a git repo."""
     root_dir = os.getcwd()
