@@ -56,6 +56,9 @@ Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0
 - *vcs*: high level interface to VCS repositories
 - *yaml*: helpers for parsing yaml data
 
+See [e3-core documentation](http://e3-core.readthedocs.io/en/latest/) for
+more details.
+
 
 Install
 =======
