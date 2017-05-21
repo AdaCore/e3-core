@@ -11,6 +11,7 @@ Welcome to e3-core's documentation!
    :caption: Contents:
 
    intro
+   quickstart
    decision_graph
    plugins
 
