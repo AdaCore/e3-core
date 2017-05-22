@@ -52,7 +52,6 @@ def subprocess_setup():
     """
     # Set sigpipe only when set_sigpipe is True
     # This should fix HC16-020 and could be activated by default
-    import signal
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 

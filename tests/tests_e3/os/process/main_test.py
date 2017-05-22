@@ -142,7 +142,6 @@ def test_command_line_image():
 
 
 def test_poll():
-    import time
     result = e3.os.process.Run(
         [sys.executable, '-c',
          'import time; time.sleep(1); print("process")'], bg=True)
