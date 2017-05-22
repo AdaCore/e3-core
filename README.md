@@ -1,6 +1,8 @@
 The `e3` Project 
 ================
 
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/979/badge)](https://bestpractices.coreinfrastructure.org/projects/979)
+
 This present project (`e3`) is a Python framework to ease the development
 of portable automated build systems (compilation, dependencies management,
 binary code packaging, and automated testing).
@@ -15,6 +17,7 @@ Platform | Status
 ---------|-------
 Linux    | [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core) [![Coverage Status](https://coveralls.io/repos/github/AdaCore/e3-core/badge.svg?branch=master)](https://coveralls.io/github/AdaCore/e3-core?branch=master)
 Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0pmg1q89f/branch/master?svg=true)](https://ci.appveyor.com/project/github-integration-adacore/e3-core/branch/master)
+
 
 `e3-core` content
 =================
