@@ -24,6 +24,9 @@ Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0
 
 `e3-core` package is organized in several packages and modules:
 
+- *anod*: build system handling dependencies management and binary code
+  packaging. This includes a driver that can parse `.anod` specification
+  files.
 - *archive*: support for reading and writing tar and zip archives
 - *binarydata*: helpers for parsing binary data such as object files,
   executables, …
@@ -31,15 +34,18 @@ Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0
   Graphs
 - *decorator*: Python decorators, e.g. a memoize decorator
 - *diff*: functions to compute a diff or apply it
+- *electrolyt*: support for parsing build plans
 - *env*: global environment handling
 - *error*: `e3` exceptions
+- *event*: interface for notifying external services
 - *fs*: high-level file system operations, using globbing, walk,...
 - *hash*: computation of sha1, md5
 - *log*: logging helpers
 - *main*: main program initialization, command line parsing,...
 - *mainloop*: generic loop for running jobs
 - *net*: network utilities
-  - *net.smtp*: helper for sending emails through smtp.
+  - *net.http*: helper for sending http requests and downloading files
+  - *net.smtp*: helper for sending emails through smtp
 - *os*: platform independent interface to Operating System functions
   - *os.fs*: low-level file system operations, no logging involved
   - *os.platform*: tools to detect the platform
@@ -47,9 +53,14 @@ Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0
   - *os.timezone*: platform independent interface to get the machine timezone
 - *platform*: generic interface for providing platform information
 - *platform_db*: knowledge base for computing platform information
+- *store*: interface to download and store resources in a store
 - *sys*: `e3` information, sanity check, ...
 - *text*: text formatting and transformation
+- *vcs*: high level interface to VCS repositories
 - *yaml*: helpers for parsing yaml data
+
+See [e3-core documentation](http://e3-core.readthedocs.io/en/latest/) for
+more details.
 
 
 Install
