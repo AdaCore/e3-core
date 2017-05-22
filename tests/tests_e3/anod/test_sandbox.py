@@ -1,15 +1,70 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-
 from shutil import copyfile
+
 import e3.anod.sandbox
 import e3.env
 import e3.fs
 import e3.os.process
 import e3.platform
-
 from e3.vcs.git import GitRepository
+
+import pytest
+
+
+PROLOG = r"""# prolog file loaded before all specs
+
+
+def main():
+    import yaml
+    import os
+
+    with open(os.path.join(
+            __spec_repository.spec_dir, 'conf.yaml')) as f:
+        conf = yaml.load(f)
+        __spec_repository.api_version = conf['api_version']
+
+
+main()
+del main
+"""
+
+
+@pytest.fixture
+def git_specs_dir(git, tmpdir):
+    """Create a git repo to check out specs from it."""
+    del git  # skip or fail when git is not installed
+
+    def create_prolog(prolog_dir):
+        """Create prolog.py file on the fly to prevent checkstyle error."""
+        if os.path.isfile(os.path.join(prolog_dir, 'prolog.py')):
+            return
+        with open(os.path.join(prolog_dir, 'prolog.py'), 'w') as f:
+            f.write(PROLOG)
+
+    # Create a e3-specs git repository for all tests in this module
+    specs_dir = str(tmpdir.mkdir('e3-specs-git-repo'))
+
+    try:
+        specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
+        for spec_file in os.listdir(specs_source_dir):
+            if os.path.isfile(os.path.join(specs_source_dir, spec_file)):
+                copyfile(os.path.join(specs_source_dir, spec_file),
+                         os.path.join(specs_dir, spec_file))
+        # Put prolog file
+        create_prolog(specs_dir)
+        if os.path.isdir(os.path.join(specs_dir, '.git')):
+            return
+        g = GitRepository(specs_dir)
+        g.init()
+        g.git_cmd(['config', 'user.email', '"test@example.com"'])
+        g.git_cmd(['config', 'user.name', '"test"'])
+        g.git_cmd(['add', '-A'])
+        g.git_cmd(['commit', '-m', "'add all'"])
+        yield specs_dir
+    finally:
+        e3.fs.rm(specs_dir, True)
 
 
 def test_deploy_sandbox():
@@ -51,17 +106,14 @@ def test_sandbox_env():
     assert os.environ['GPR_PROJECT_PATH'] == ''
 
 
-def test_SandBoxCreate_git():
+def test_sandbox_create_git(git_specs_dir):
     """Check if sandbox create can load the specs from a git repo."""
     root_dir = os.getcwd()
     sandbox_dir = os.path.join(root_dir, 'sbx')
-    specs_dir = os.path.join(root_dir, 'e3-specs')
-    # prepare git repo
-    prepare_git(specs_dir)
     with_git = e3.os.process.Run(
         ['e3-sandbox', '-v',
          'create',
-         '--spec-git-url', specs_dir,
+         '--spec-git-url', git_specs_dir,
          sandbox_dir], output=None)
     assert with_git.status == 0
     # Test structure
@@ -75,16 +127,13 @@ def test_SandBoxCreate_git():
         assert os.path.isfile(os.path.join(sandbox_dir, 'specs', filename))
 
 
-def test_sandbox_exec_missing():
+def test_sandbox_exec_missing_spec_dir(git_specs_dir):
     """Test sandbox exec exception.
 
     - Check if sandbox exec raises exception if spec-dir is missing
-    - Check if sandbox exec raises exception if plan file is missing
     """
     root_dir = os.getcwd()
     sandbox_dir = os.path.join(root_dir, 'sbx')
-    specs_dir = os.path.join(root_dir, 'e3-specs')
-    prepare_git(specs_dir)
 
     e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
 
@@ -96,9 +145,20 @@ def test_sandbox_exec_missing():
     assert no_specs.status != 0
     assert 'spec directory nospecs does not exist' in no_specs.out
 
+
+def test_sandbox_exec_missing_plan_file(git_specs_dir):
+    """Test sandbox exec exception.
+
+    - Check if sandbox exec raises exception if plan file is missing
+    """
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+
+    e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
+
     # Plan file is missing
     no_plan = e3.os.process.Run(['e3-sandbox', 'exec',
-                                 '--spec-git-url', specs_dir,
+                                 '--spec-git-url', git_specs_dir,
                                  '--plan', 'noplan',
                                  '--create-sandbox',
                                  sandbox_dir])
@@ -106,14 +166,11 @@ def test_sandbox_exec_missing():
     assert 'SandBoxExec.run: plan file noplan does not exist' in no_plan.out
 
 
-def test_sandbox_exec_success():
+def test_sandbox_exec_success(git_specs_dir):
     """Test if sandbox exec works with local specs and a git repo."""
     root_dir = os.getcwd()
     sandbox_dir = os.path.join(root_dir, 'sbx')
-    specs_dir = os.path.join(root_dir, 'e3-specs')
 
-    # Prepare a git repo
-    prepare_git(specs_dir)
     platform = e3.platform.Platform.get().platform
 
     e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
@@ -122,7 +179,7 @@ def test_sandbox_exec_success():
 
     # Test with local specs
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', specs_dir,
+                           '--spec-dir', git_specs_dir,
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
@@ -130,26 +187,22 @@ def test_sandbox_exec_success():
 
     # Test with git module
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-git-url', specs_dir,
+                           '--spec-git-url', git_specs_dir,
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            '--create-sandbox', sandbox_dir])
     assert 'build e3 for %s' % platform in p.out
 
 
-def test_anod_plan():
+def test_anod_plan(git_specs_dir):
     """Test if sandbox exec works with local specs and a git repo."""
     root_dir = os.getcwd()
     sandbox_dir = os.path.join(root_dir, 'sbx')
-    specs_dir = os.path.join(root_dir, 'e3-specs')
-
-    # Prepare a git repo
-    prepare_git(specs_dir)
 
     # create sandbox
     with_git = e3.os.process.Run(['e3-sandbox', '-v',
                                   'create',
-                                  '--spec-git-url', specs_dir,
+                                  '--spec-git-url', git_specs_dir,
                                   sandbox_dir], output=None)
     assert with_git.status == 0
 
@@ -190,54 +243,3 @@ def test_anod_plan():
                'test e3 for %s' % platform]
     for action in actions:
         assert action in p.out
-
-
-def prepare_git(specs_dir):
-    """Create a git repo to check out specs from it.
-
-    :param spec_dir: directory to create the git repo in it
-    :type spec_dir: str
-    """
-    # Create the git repo if it doesnt exist
-    if not os.path.isdir(specs_dir):
-        os.mkdir(specs_dir)
-    specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
-    for spec_file in os.listdir(specs_source_dir):
-        if os.path.isfile(os.path.join(specs_source_dir, spec_file)):
-            copyfile(os.path.join(specs_source_dir, spec_file),
-                     os.path.join(specs_dir, spec_file))
-    # Put prolog file
-    create_prolog(specs_dir)
-    if os.path.isdir(os.path.join(specs_dir, '.git')):
-        return
-    # As prolog.py has been created on the fly we will commit all files here
-    g = GitRepository(specs_dir)
-    g.init()
-    g.git_cmd(['config', 'user.email', '"test@example.com"'])
-    g.git_cmd(['config', 'user.name', '"test"'])
-    g.git_cmd(['add', '-A'])
-    g.git_cmd(['commit', '-m', "'add all'"])
-
-
-def create_prolog(prolog_dir):
-    """Create prolog.py file on the fly to prevent checkstyle error."""
-    if os.path.isfile(os.path.join(prolog_dir, 'prolog.py')):
-        return
-    prolog_content = """# prolog file loaded before all specs
-
-
-def main():
-    import yaml
-    import os
-
-    with open(os.path.join(
-            __spec_repository.spec_dir, 'conf.yaml')) as f:
-        conf = yaml.load(f)
-        __spec_repository.api_version = conf['api_version']
-
-
-main()
-del main
-"""
-    with open(os.path.join(prolog_dir, 'prolog.py'), 'w') as fd_prolog:
-        fd_prolog.write(prolog_content)
