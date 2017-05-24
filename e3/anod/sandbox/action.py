@@ -204,12 +204,12 @@ class SandBoxExec(SandBoxCreate):
 
             env = BaseEnv()
             cm = PlanContext(server=env)
+            store = None
             resolver = getattr(
                 AnodContext,
                 str(args.resolver),
                 AnodContext.always_create_source_resolver)
             logger.debug('Using resolver %s', resolver.__name__)
-
             # Declare available actions and their signature
             def anod_action(module,
                             build=None,
@@ -235,5 +235,5 @@ class SandBoxExec(SandBoxCreate):
 
             # Check if machine plan is locally schedulable
             action_list = ac.schedule(resolver)
-            e = ElectrolytJobFactory(sandbox, asr, dry_run=args.dry_run)
+            e = ElectrolytJobFactory(sandbox, asr, store, dry_run=args.dry_run)
             e.run(action_list)

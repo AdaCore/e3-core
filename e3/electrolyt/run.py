@@ -14,8 +14,8 @@ STATUS_UNKNOWN = -127
 
 class ElectrolytJob(Job):
 
-    def __init__(self, uid, data, notify_end, sandbox,
-                 force_status=STATUS_UNKNOWN,
+    def __init__(self, uid, data, notify_end, sandbox, store,
+                 force_status=STATUS.STATUS_UNKNOWN,
                  dry_run=False):
         """Initialize the context of the job.
 
@@ -36,6 +36,7 @@ class ElectrolytJob(Job):
         self.status = force_status
         self.sandbox = sandbox
         self.dry_run = dry_run
+        self.store = store
 
     def run(self):
         if self.status == STATUS_UNKNOWN:
@@ -50,11 +51,12 @@ class ElectrolytJob(Job):
 
 class ElectrolytJobFactory(object):
 
-    def __init__(self, sandbox, asr, dry_run=False):
+    def __init__(self, sandbox, asr, store, dry_run=False):
         self.job_status = {}
         self.sandbox = sandbox
         self.asr = asr
         self.dry_run = dry_run
+        self.store = store
 
     def get_job(self, uid, data, predecessors, notify_end):
         force_fail = any((k for k in predecessors
@@ -64,6 +66,7 @@ class ElectrolytJobFactory(object):
             data,
             notify_end,
             sandbox=self.sandbox,
+            store = self.store,
             force_status=STATUS_UNKNOWN if not force_fail else FORCE_FAIL,
             dry_run = self.dry_run)
 
