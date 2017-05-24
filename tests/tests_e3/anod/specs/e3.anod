@@ -18,7 +18,7 @@ class e3(spec('anod')):
 
         def prepare_src(repos, dest):
             # only one repo
-            working_dir = repos.values()[0]['working_dir']
+            working_dir = list(repos.values())[0]['working_dir']
 
             with open(os.path.join(working_dir, '.gitignore')) as f:
                 ignore_list = f.readlines()
