@@ -350,10 +350,13 @@ class AnodContext(object):
         # Look for source dependencies (i.e sources needed)
         if '%s_source_list' % primitive in dir(spec):
             for s in getattr(spec, '%s_source_list' % primitive):
+                # set source builder
+                if self.sources.has_key(s.name):
+                    s.set_builder(self.sources[s.name])
                 # add source install node
                 src_install_uid = result.uid.rsplit('.', 1)[0] + \
                     '.source_install.' + s.name
-                src_install_action = InstallSource(src_install_uid, s)
+                src_install_action = InstallSource(src_install_uid, spec, s)
                 self.add(src_install_action)
                 self.connect(result, src_install_action)
 
@@ -387,7 +390,7 @@ class AnodContext(object):
                                                   None,
                                                   source_name=s.name)
                     for repo in obj.checkout:
-                        r = Checkout(repo)
+                        r = Checkout((repo, self.repo.repos[repo]))
                         self.add(r)
                         self.connect(source_action, r)
                     self.add_decision(CreateSourceOrDownload,
