@@ -1,8 +1,13 @@
 from __future__ import absolute_import, division, print_function
 
+import os
+
 import e3.log
 from e3.job import Job
 from e3.job.scheduler import Scheduler
+from e3.anod.driver import AnodDriver
+from e3.vcs.git import GitRepository
+from e3.fs import cp, sync_tree
 from e3.anod.status import ReturnValue
 
 logger = e3.log.getLogger('electrolyt.exec')
@@ -43,6 +48,100 @@ class ElectrolytJob(Job):
                     return
                 if hasattr(self, method_name):
                     getattr(self, method_name)()
+
+    def do_build(self):
+        """Run the build primitive after setting up the sandbox."""
+        self.data.data.sandbox = self.sandbox
+        anod_driver = AnodDriver(anod_instance=self.data.data, store=self.store)
+        anod_driver.activate()
+        anod_driver.anod_instance.build_space.create(quiet=True)
+        if getattr(anod_driver.anod_instance, 'build', None) is None:
+            logger.error('primitive build not implemented in the spec %s',
+                         self.data.anod_instance)
+            self.status = STATUS.failure
+            return
+        anod_driver.anod_instance.build()
+        self.status = STATUS.success
+
+    def do_test(self):
+        """Run the test primitive."""
+        self.data.data.sandbox = self.sandbox
+        anod_driver = AnodDriver(anod_instance=self.data.data, store=self.store)
+        anod_driver.activate()
+        anod_driver.anod_instance.build_space.create(quiet=True)
+        if getattr(anod_driver.anod_instance, 'test', None) is None:
+            logger.error('primitive test not implemented in the spec %s',
+                         self.data.anod_instance)
+            self.status = STATUS.failure
+            return
+        anod_driver.anod_instance.test()
+        self.status = STATUS.success
+
+    def do_checkout(self):
+        """Get sources from vcs to sandbox vcs_dir."""
+        repo_name = self.data.data[0]
+        repo_url = self.data.data[1]['url']
+        repo_revision = self.data.data[1]['revision']
+        repo_vcs = self.data.data[1]['vcs']
+        if repo_vcs != 'git':
+            logger.error('%s vcs type not supported', repo_vcs)
+            self.status = STATUS.failure
+            return
+        repo_dir = os.path.join(self.sandbox.vcs_dir, repo_name)
+        g = GitRepository(repo_dir)
+        if e3.log.default_output_stream is not None:
+            g.log_stream = e3.log.default_output_stream
+        g.init()
+        g.update(repo_url, repo_revision, force=True)
+        self.status = STATUS.success
+
+    def do_createsource(self):
+        """Prepare src from vcs to cache using sourcebuilders."""
+        source_name = self.data.source_name
+        tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, 'cache')
+        src = self.sandbox.vcs_dir
+        for src_builder in self.data.spec.source_pkg_build:
+            if src_builder.name == source_name:
+                repo_dict = {}
+                src_dir = os.path.join(src, src_builder.checkout[0])
+                dest_dir = os.path.join(tmp_cache_dir, source_name)
+                # ??? missing repository state
+                repo_dict[source_name] = {"working_dir": src_dir}
+                src_builder.prepare_src(repo_dict, dest_dir)
+                self.status = STATUS.success
+                logger.debug('%s created in cache/tmp', source_name)
+                return
+
+    def do_getsource(self):
+        """action_item from an intermediate node.
+
+        This action should return success status so do_install
+        source can procede"""
+        self.status = STATUS.success
+
+    def do_installsource(self):
+        """Install the source from tmp/cache to build_space/src."""
+        spec = self.data.spec
+        spec.sandbox = self.sandbox
+        anod_instance = AnodDriver(anod_instance=spec, store=self.store)
+        anod_instance.activate()
+        source = self.data.source
+        src_dir = os.path.join(self.sandbox.tmp_dir,
+                               'cache',
+                               source.name)
+        dest_dir = os.path.join(spec.build_space.src_dir)
+        sync_tree(src_dir, dest_dir, ignore=source.ignore)
+        self.status = STATUS.success
+
+    def do_root(self):
+        """Epress the final result of the exec."""
+        # If nothing fails in the process the status will remain automatically
+        # UNKNOWN, as the root node, UNKNOWN status is a success
+        if self.status == STATUS.STATUS_UNKNOWN:
+            self.status = STATUS.success
+            logger.info('result: OK')
+            return
+        logger.info('result: FAIL')
 
 
 class ElectrolytJobFactory(object):
