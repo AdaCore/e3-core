@@ -335,6 +335,8 @@ class AnodContext(object):
                                                  e.kind,
                                                  e.qualifier)
 
+                    spec.deps[e.local_name] = result.data
+
                     if e.kind == 'build' and \
                             self[child_action.uid].data.kind == 'install':
                         # We have a build tree dependency that produced a
