@@ -16,6 +16,8 @@ from e3.env import BaseEnv
 from e3.fs import mkdir
 from e3.vcs.git import GitRepository
 
+logger = e3.log.getLogger('e3.anod.SandBox')
+
 
 class SandBoxAction(object):
 
@@ -146,6 +148,9 @@ class SandBoxExec(SandBoxCreate):
             help='Create the sandbox if needed')
         self.parser.add_argument(
             '--plan', metavar='FILE', help='Path to the plan')
+        self.parser.add_argument(
+            '--resolver',
+            help='Use specific resolver')
 
     def run(self, args):
         sandbox = SandBox()
@@ -195,6 +200,11 @@ class SandBoxExec(SandBoxCreate):
 
             env = BaseEnv()
             cm = PlanContext(server=env)
+            resolver = getattr(
+                AnodContext,
+                str(args.resolver),
+                AnodContext.always_create_source_resolver)
+            logger.debug('Using resolver %s', resolver.__name__)
 
             # Declare available actions and their signature
             def anod_action(module,
@@ -220,7 +230,6 @@ class SandBoxExec(SandBoxCreate):
                                    action.qualifier)
 
             # Check if machine plan is locally schedulable
-            action_list = ac.schedule(
-                AnodContext.always_download_source_resolver)
+            action_list = ac.schedule(resolver)
             e = ElectrolytJobFactory(sandbox, asr)
             e.run(action_list)
