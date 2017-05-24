@@ -24,12 +24,27 @@ def main():
             __spec_repository.spec_dir, 'conf.yaml')) as f:
         conf = yaml.load(f)
         __spec_repository.api_version = conf['api_version']
+        __spec_repository.repos = conf['repositories']
 
 
 main()
 del main
 """
 
+E3Fake = r"""api_version: '1.4'
+repositories:
+    e3-fake-github:
+        vcs: git
+        url: %s
+        revision: master
+"""
+E3FakeNoGit = r"""api_version: '1.4'
+repositories:
+    e3-fake-github:
+        vcs: svn
+        url: %s
+        revision: master
+"""
 
 @pytest.fixture
 def git_specs_dir(git, tmpdir):
@@ -50,7 +65,7 @@ def git_specs_dir(git, tmpdir):
         specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
         for spec_file in os.listdir(specs_source_dir):
             if os.path.isfile(os.path.join(specs_source_dir, spec_file)):
-                copyfile(os.path.join(specs_source_dir, spec_file),
+                e3.fs.cp(os.path.join(specs_source_dir, spec_file),
                          os.path.join(specs_dir, spec_file))
         # Put prolog file
         create_prolog(specs_dir)
@@ -65,6 +80,33 @@ def git_specs_dir(git, tmpdir):
         yield specs_dir
     finally:
         e3.fs.rm(specs_dir, True)
+
+@pytest.fixture
+def e3fake_git_dir(git, tmpdir):
+    """Create a fake e3 git repo for the test suite."""
+    del git  # skip or fail when git is not installed
+
+    # Create a e3-fake git repository
+    e3_fake_git_dir = str(tmpdir.mkdir('e3-fake-git-repo'))
+
+    try:
+        e3_fake_dir = os.path.join(os.path.dirname(__file__), 'e3-fake')
+        for source_file in os.listdir(e3_fake_dir):
+            if os.path.isfile(os.path.join(e3_fake_dir, source_file)):
+                e3.fs.cp(os.path.join(e3_fake_dir, source_file),
+                         os.path.join(e3_fake_git_dir, source_file))
+
+        if os.path.isdir(os.path.join(e3_fake_git_dir, '.git')):
+            return
+        g = GitRepository(e3_fake_git_dir)
+        g.init()
+        g.git_cmd(['config', 'user.email', '"test@example.com"'])
+        g.git_cmd(['config', 'user.name', '"test"'])
+        g.git_cmd(['add', '-A'])
+        g.git_cmd(['commit', '-m', "'add all'"])
+        yield e3_fake_git_dir
+    finally:
+        e3.fs.rm(e3_fake_git_dir, True)
 
 
 def test_deploy_sandbox():
@@ -212,15 +254,15 @@ def test_anod_plan(git_specs_dir):
     # Build action
     with open(os.path.join(root_dir, 'e3_build.plan'), 'w') as fd:
         fd.write("anod_build('e3')")
+
     command = ['e3-sandbox', '-v', 'exec',
                '--plan', os.path.join(root_dir, 'e3_build.plan'),
-               sandbox_dir]
+               '--dry-run', sandbox_dir]
     p = e3.os.process.Run(command)
     assert p.status == 0
     actions = ['build e3 for %s' % platform, ]
     for action in actions:
         assert action in p.out
-
     # Install action
     with open(os.path.join(root_dir, 'e3_build.plan'), 'w') as fd:
         fd.write("anod_install('e3')")
@@ -236,6 +278,21 @@ def test_anod_plan(git_specs_dir):
         fd.write("anod_test('e3')")
     p = e3.os.process.Run(command)
     assert p.status == 0
+    actions = ['checkout e3-core-github',
+               'build python-virtualenv for %s' % platform,
+               'get source e3-core-src',
+               'install source e3-core-src',
+               'test e3 for %s' % platform]
+    for action in actions:
+        assert action in p.out
+    # Test with download source resolver
+    command = ['e3-sandbox', '-v', 'exec',
+               '--plan', os.path.join(root_dir, 'e3_build.plan'),
+               '--dry-run',
+               '--resolver', 'always_download_source_resolver',
+               sandbox_dir]
+    p = e3.os.process.Run(command)
+    assert p.status == 0
     actions = ['download source e3-core-src',
                'build python-virtualenv for %s' % platform,
                'get source e3-core-src',
@@ -243,3 +300,41 @@ def test_anod_plan(git_specs_dir):
                'test e3 for %s' % platform]
     for action in actions:
         assert action in p.out
+
+
+def test_anodtest(git_specs_dir, e3fake_git_dir):
+    """Test the procedure of anodtest('e3fake')."""
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+    plan_file = os.path.join(root_dir, 'e3_test.plan')
+    p = e3.os.process.Run(['e3-sandbox', '-v', 'create',
+                           '--spec-git-url', git_specs_dir,
+                           sandbox_dir])
+    assert p.status == 0
+
+    with open(plan_file, 'w') as plan_fd:
+        plan_fd.write("anod_test('e3fake')")
+    # Add the git path
+    conf_dir = os.path.join(sandbox_dir, 'specs', 'conf.yaml')
+    git_repo_entry = E3Fake % e3fake_git_dir
+    with open(conf_dir, 'w') as conf_fd:
+        conf_fd.write(git_repo_entry)
+    command = ['e3-sandbox', '-v', 'exec',
+               '--spec-git-url', git_specs_dir,
+               '--plan', plan_file,
+               sandbox_dir]
+    p = e3.os.process.Run(command)
+    assert p.status == 0
+    # Test for buildspaces
+    platform = e3.platform.Platform.get().platform
+    dirs = [platform,
+            os.path.join(platform, 'e3fake'),
+            os.path.join(platform, 'python-virtualenv')]
+    for dir_test in dirs:
+        assert os.path.exists(os.path.join(sandbox_dir, dir_test))
+    # Test for vcs failure
+    git_repo_entry = E3FakeNoGit % e3fake_git_dir
+    with open(conf_dir, 'w') as conf_fd:
+        conf_fd.write(git_repo_entry)
+    p = e3.os.process.Run(command)
+    assert 'svn vcs type not supported' in p.out
