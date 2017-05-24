@@ -82,13 +82,15 @@ class InstallSource(Action):
     a GetSource Action.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'spec', 'source')
 
-    def __init__(self, uid, data):
-        super(InstallSource, self).__init__(uid, data)
+    def __init__(self, uid, spec, source):
+        super(InstallSource, self).__init__(uid, data = (spec, source))
+        self.spec = spec
+        self.source = source
 
     def __str__(self):
-        return 'install source %s' % self.data.name
+        return 'install source %s' % self.data[1].name
 
 
 class CreateSource(Action):
@@ -98,7 +100,7 @@ class CreateSource(Action):
     checkouts. CreateSource has at least one Checkout child node.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'spec', 'source_name')
 
     def __init__(self, spec, source_name):
         """Initialize CreateSource object.
@@ -110,6 +112,8 @@ class CreateSource(Action):
         """
         super(CreateSource, self).__init__(uid=spec.uid + '.' + source_name,
                                            data=(spec, source_name))
+        self.spec = spec
+        self.source_name = source_name
 
     def __str__(self):
         return 'create source %s' % self.data[1]
@@ -125,11 +129,11 @@ class Checkout(Action):
     __slots__ = ('uid', 'data')
 
     def __init__(self, repository):
-        super(Checkout, self).__init__(uid='checkout.%s' % repository,
+        super(Checkout, self).__init__(uid='checkout.%s' % repository[0],
                                        data=repository)
 
     def __str__(self):
-        return 'checkout %s' % self.data
+        return 'checkout %s' % self.data[0]
 
 
 class AnodAction(Action):
