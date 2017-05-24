@@ -15,26 +15,46 @@ STATUS_UNKNOWN = -127
 class ElectrolytJob(Job):
 
     def __init__(self, uid, data, notify_end, sandbox,
-                 force_status=STATUS_UNKNOWN):
+                 force_status=STATUS_UNKNOWN,
+                 dry_run=False):
+        """Initialize the context of the job.
+
+        :param uid: uid of the job
+        :type uid: str
+        :param data: object to be processed by the job
+        :type data: child of e3.anod.action.Action
+        :param notify_end: callback to call when job is finished
+        :type notify_end: function
+        :param sandbox: current working sandbox
+        :type sandbox: e3.anod.sandbox.SandBox
+        :param force_status: set the status of the job
+        :type force_status: e3.anod.status.ReturnValue
+        :param dry_run: if True report kind of action without execution
+        :param dry_run: bool
+        """
         Job.__init__(self, uid, data, notify_end)
         self.status = force_status
         self.sandbox = sandbox
+        self.dry_run = dry_run
 
     def run(self):
         if self.status == STATUS_UNKNOWN:
             for class_name in [
                     k.__name__ for k in self.data.__class__.__mro__]:
                 method_name = 'do_%s' % class_name.lower()
+                if self.dry_run:
+                    return
                 if hasattr(self, method_name):
                     getattr(self, method_name)()
 
 
 class ElectrolytJobFactory(object):
 
-    def __init__(self, sandbox, asr):
+    def __init__(self, sandbox, asr, dry_run=False):
         self.job_status = {}
         self.sandbox = sandbox
         self.asr = asr
+        self.dry_run = dry_run
 
     def get_job(self, uid, data, predecessors, notify_end):
         force_fail = any((k for k in predecessors
@@ -44,7 +64,8 @@ class ElectrolytJobFactory(object):
             data,
             notify_end,
             sandbox=self.sandbox,
-            force_status=STATUS_UNKNOWN if not force_fail else FORCE_FAIL)
+            force_status=STATUS_UNKNOWN if not force_fail else FORCE_FAIL,
+            dry_run = self.dry_run)
 
     def collect(self, job):
         self.job_status[job.uid] = job.status

@@ -149,6 +149,10 @@ class SandBoxExec(SandBoxCreate):
         self.parser.add_argument(
             '--plan', metavar='FILE', help='Path to the plan')
         self.parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help='Show action item without any execution')
+        self.parser.add_argument(
             '--resolver',
             help='Use specific resolver')
 
@@ -231,5 +235,5 @@ class SandBoxExec(SandBoxCreate):
 
             # Check if machine plan is locally schedulable
             action_list = ac.schedule(resolver)
-            e = ElectrolytJobFactory(sandbox, asr)
+            e = ElectrolytJobFactory(sandbox, asr, dry_run=args.dry_run)
             e.run(action_list)
