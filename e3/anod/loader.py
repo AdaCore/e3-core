@@ -37,6 +37,7 @@ class AnodSpecRepository(object):
         self.spec_dir = spec_dir
         self.api_version = None
         self.specs = {}
+        self.repos = {}
 
         # Look for all spec files and data files
         spec_list = {os.path.basename(k)[:-5]: {'path': k, 'data': []}
