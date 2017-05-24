@@ -42,21 +42,21 @@ def test_initall():
     build_spec.name = 'my_spec'
     build_spec.env = e3.env.Env()
 
-    build = action.Build(data=build_spec)
+    build = action.Build(anod_instance=build_spec)
     assert str(build).startswith('build my_spec for ')
 
     test_spec = Spec(qualifier='', kind='test')
     test_spec.name = 'my_spec'
     test_spec.env = e3.env.Env()
 
-    test = action.Test(data=test_spec)
+    test = action.Test(anod_instance=test_spec)
     assert str(test).startswith('test my_spec for ')
 
     install_spec = Spec(qualifier='', kind='build')
     install_spec.name = 'my_spec'
     install_spec.env = e3.env.Env()
 
-    install = action.Install(data=build_spec)
+    install = action.Install(anod_instance=build_spec)
     assert str(install).startswith('build my_spec for ')
 
     download_spec = Spec(qualifier='', kind='build')
