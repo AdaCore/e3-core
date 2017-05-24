@@ -18,6 +18,9 @@ class TestContext(object):
     def create_context(self):
         # Create a context for a x86-linux machine
         asr = AnodSpecRepository(self.spec_dir)
+        asr.repos['spec1-git'] = 'spec1-git'
+        asr.repos['spec8-git'] = 'spec8-git'
+        asr.repos['spec2-git'] = 'spec2-git'
         env = BaseEnv()
         env.set_build('x86-linux', 'rhes6', 'mylinux')
         ac = AnodContext(asr, default_env=env)
@@ -77,13 +80,11 @@ class TestContext(object):
 
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 5, result.as_dot()
-
         assert set(result.vertex_data.keys()) == \
             set(('root',
                  'mylinux.x86-linux.spec2.build',
                  'source_get.spec2-src',
                  'mylinux.x86-linux.spec2.source_install.spec2-src',
-                 'mylinux.x86-linux.spec2.build',
                  'download.spec2-src'))
 
     def test_add_anod_action3(self):

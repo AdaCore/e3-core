@@ -13,6 +13,9 @@ def test_initall():
 
     class MySource():
         name = 'my_source'
+    class Spec(e3.anod.spec.Anod):
+        uid = 'my_source_uid'
+        name = 'my_source_spec'
 
     get_source = action.GetSource(data=MySource())
     assert get_source.uid == 'source_get.my_source'
@@ -23,18 +26,16 @@ def test_initall():
     assert str(download_source) == "download source my_source"
 
     install_source = action.InstallSource(uid='install.my_source',
-                                          data=MySource())
+                                          spec=Spec(qualifier='',
+                                                    kind='source'),
+                                          source=MySource())
     assert str(install_source) == 'install source my_source'
-
-    class Spec(e3.anod.spec.Anod):
-        uid = 'my_source_uid'
-        name = 'my_source_spec'
 
     create_source = action.CreateSource(spec=Spec(qualifier='', kind='source'),
                                         source_name='my_source')
     assert str(create_source) == 'create source my_source'
 
-    checkout = action.Checkout(repository='e3-core')
+    checkout = action.Checkout(repository=['e3-core'])
     assert str(checkout) == 'checkout e3-core'
 
     build_spec = Spec(qualifier='', kind='build')
