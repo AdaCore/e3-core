@@ -3,20 +3,21 @@ from __future__ import absolute_import, division, print_function
 import os
 
 import e3.log
+from e3.anod.driver import AnodDriver
+from e3.anod.status import ReturnValue
+from e3.fs import sync_tree
 from e3.job import Job
 from e3.job.scheduler import Scheduler
-from e3.anod.driver import AnodDriver
 from e3.vcs.git import GitRepository
-from e3.fs import cp, sync_tree
-from e3.anod.status import ReturnValue
 
 logger = e3.log.getLogger('electrolyt.exec')
 STATUS = ReturnValue
 
+
 class ElectrolytJob(Job):
 
     def __init__(self, uid, data, notify_end, sandbox, store,
-                 force_status=STATUS.STATUS_UNKNOWN,
+                 force_status=STATUS.status_unknown,
                  dry_run=False):
         """Initialize the context of the job.
 
@@ -40,7 +41,7 @@ class ElectrolytJob(Job):
         self.store = store
 
     def run(self):
-        if self.status == STATUS.STATUS_UNKNOWN:
+        if self.status == STATUS.status_unknown:
             for class_name in [
                     k.__name__ for k in self.data.__class__.__mro__]:
                 method_name = 'do_%s' % class_name.lower()
@@ -52,7 +53,8 @@ class ElectrolytJob(Job):
     def do_build(self):
         """Run the build primitive after setting up the sandbox."""
         self.data.data.sandbox = self.sandbox
-        anod_driver = AnodDriver(anod_instance=self.data.data, store=self.store)
+        anod_driver = AnodDriver(anod_instance=self.data.data,
+                                 store=self.store)
         anod_driver.activate()
         anod_driver.anod_instance.build_space.create(quiet=True)
         if getattr(anod_driver.anod_instance, 'build', None) is None:
@@ -66,7 +68,8 @@ class ElectrolytJob(Job):
     def do_test(self):
         """Run the test primitive."""
         self.data.data.sandbox = self.sandbox
-        anod_driver = AnodDriver(anod_instance=self.data.data, store=self.store)
+        anod_driver = AnodDriver(anod_instance=self.data.data,
+                                 store=self.store)
         anod_driver.activate()
         anod_driver.anod_instance.build_space.create(quiet=True)
         if getattr(anod_driver.anod_instance, 'test', None) is None:
@@ -116,7 +119,8 @@ class ElectrolytJob(Job):
         """action_item from an intermediate node.
 
         This action should return success status so do_install
-        source can procede"""
+        source can procede.
+        """
         self.status = STATUS.success
 
     def do_installsource(self):
@@ -137,7 +141,7 @@ class ElectrolytJob(Job):
         """Epress the final result of the exec."""
         # If nothing fails in the process the status will remain automatically
         # UNKNOWN, as the root node, UNKNOWN status is a success
-        if self.status == STATUS.STATUS_UNKNOWN:
+        if self.status == STATUS.status_unknown:
             self.status = STATUS.success
             logger.info('result: OK')
             return
@@ -156,16 +160,18 @@ class ElectrolytJobFactory(object):
     def get_job(self, uid, data, predecessors, notify_end):
         force_fail = any((k for k in predecessors
                           if self.job_status[k] not in (STATUS.success,
-                                                        STATUS.FORCE_SKIP,
-                                                        STATUS.FORCE_SKIP)))
+                                                        STATUS.force_skip,
+                                                        STATUS.force_skip)))
         return ElectrolytJob(
             uid,
             data,
             notify_end,
             sandbox=self.sandbox,
-            store = self.store,
-            force_status=STATUS.STATUS_UNKNOWN if not force_fail else STATUS.failure,
-            dry_run = self.dry_run)
+            store=self.store,
+            force_status=(STATUS.status_unknown
+                          if not force_fail
+                          else STATUS.failure),
+            dry_run=self.dry_run)
 
     def collect(self, job):
         self.job_status[job.uid] = job.status

@@ -85,7 +85,7 @@ class InstallSource(Action):
     __slots__ = ('uid', 'spec', 'source')
 
     def __init__(self, uid, spec, source):
-        super(InstallSource, self).__init__(uid, data = (spec, source))
+        super(InstallSource, self).__init__(uid, data=(spec, source))
         self.spec = spec
         self.source = source
 

@@ -13,6 +13,7 @@ def test_initall():
 
     class MySource():
         name = 'my_source'
+
     class Spec(e3.anod.spec.Anod):
         uid = 'my_source_uid'
         name = 'my_source_spec'
