@@ -3,14 +3,10 @@ from __future__ import absolute_import, division, print_function
 import e3.log
 from e3.job import Job
 from e3.job.scheduler import Scheduler
+from e3.anod.status import ReturnValue
 
 logger = e3.log.getLogger('electrolyt.exec')
-
-
-FORCE_SKIP = -125
-FORCE_FAIL = -126
-STATUS_UNKNOWN = -127
-
+STATUS = ReturnValue
 
 class ElectrolytJob(Job):
 
@@ -39,7 +35,7 @@ class ElectrolytJob(Job):
         self.store = store
 
     def run(self):
-        if self.status == STATUS_UNKNOWN:
+        if self.status == STATUS.STATUS_UNKNOWN:
             for class_name in [
                     k.__name__ for k in self.data.__class__.__mro__]:
                 method_name = 'do_%s' % class_name.lower()
@@ -60,21 +56,23 @@ class ElectrolytJobFactory(object):
 
     def get_job(self, uid, data, predecessors, notify_end):
         force_fail = any((k for k in predecessors
-                          if self.job_status[k] not in (0, 125, FORCE_SKIP)))
+                          if self.job_status[k] not in (STATUS.success,
+                                                        STATUS.FORCE_SKIP,
+                                                        STATUS.FORCE_SKIP)))
         return ElectrolytJob(
             uid,
             data,
             notify_end,
             sandbox=self.sandbox,
             store = self.store,
-            force_status=STATUS_UNKNOWN if not force_fail else FORCE_FAIL,
+            force_status=STATUS.STATUS_UNKNOWN if not force_fail else STATUS.failure,
             dry_run = self.dry_run)
 
     def collect(self, job):
         self.job_status[job.uid] = job.status
         logger.info("%-48s [queue=%-10s status=%3d]" %
                     (job.data, job.queue_name,
-                     self.job_status[job.uid]))
+                     self.job_status[job.uid].value))
 
     def run(self, action_list):
         sch = Scheduler(self.get_job, self.collect)
