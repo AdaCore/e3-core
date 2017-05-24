@@ -353,7 +353,7 @@ class AnodContext(object):
         if '%s_source_list' % primitive in dir(spec):
             for s in getattr(spec, '%s_source_list' % primitive):
                 # set source builder
-                if self.sources.has_key(s.name):
+                if s.name in self.sources:
                     s.set_builder(self.sources[s.name])
                 # add source install node
                 src_install_uid = result.uid.rsplit('.', 1)[0] + \
@@ -441,7 +441,7 @@ class AnodContext(object):
 
     @classmethod
     def always_create_source_resolver(cls, action, decision):
-        """Froce source creation when scheduling a plan"""
+        """Force source creation when scheduling a plan."""
         if isinstance(action, CreateSource):
             return True
         elif isinstance(action, DownloadSource):

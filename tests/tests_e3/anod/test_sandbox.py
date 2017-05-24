@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-from shutil import copyfile
 
 import e3.anod.sandbox
 import e3.env
@@ -74,6 +73,7 @@ def git_specs_dir(git, tmpdir):
         yield specs_dir
     finally:
         e3.fs.rm(specs_dir, True)
+
 
 @pytest.fixture
 def e3fake_git_dir(git, tmpdir):
