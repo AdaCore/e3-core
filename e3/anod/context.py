@@ -434,6 +434,30 @@ class AnodContext(object):
                     (action.uid, decision.get_expected_decision())
             raise SchedulingError(msg)
 
+    @classmethod
+    def always_create_source_resolver(cls, action, decision):
+        """Froce source creation when scheduling a plan"""
+        if isinstance(action, CreateSource):
+            return True
+        elif isinstance(action, DownloadSource):
+            return False
+        else:
+            if decision.choice is None:
+                msg = 'a decision should be taken between %s and %s' % \
+                    (decision.left, decision.right)
+                if decision.expected_choice == Decision.LEFT:
+                    msg += '(first expected)'
+                elif decision.expected_choice == Decision.RIGHT:
+                    msg += '(second expected)'
+            elif decision.choice == Decision.BOTH:
+                msg = 'cannot do both %s and %s' % \
+                    (decision.left, decision.right)
+            else:
+                msg = 'cannot do %s as %s is expected after ' \
+                    'scheduling resolution' % \
+                    (action.uid, decision.get_expected_decision())
+            raise SchedulingError(msg)
+
     def schedule(self, resolver):
         """Compute a DAG of scheduled actions.
 
