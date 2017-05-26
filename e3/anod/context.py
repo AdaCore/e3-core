@@ -335,7 +335,7 @@ class AnodContext(object):
                                                  e.kind,
                                                  e.qualifier)
 
-                    spec.deps[e.local_name] = result.data
+                    spec.deps[e.local_name] = result.anod_instance
 
                     if e.kind == 'build' and \
                             self[child_action.uid].data.kind == 'install':
@@ -392,7 +392,7 @@ class AnodContext(object):
                                                   None,
                                                   source_name=s.name)
                     for repo in obj.checkout:
-                        r = Checkout((repo, self.repo.repos[repo]))
+                        r = Checkout(repo, self.repo.repos[repo])
                         self.add(r)
                         self.connect(source_action, r)
                     self.add_decision(CreateSourceOrDownload,

@@ -18,11 +18,11 @@ def test_initall():
         uid = 'my_source_uid'
         name = 'my_source_spec'
 
-    get_source = action.GetSource(data=MySource())
+    get_source = action.GetSource(builder=MySource())
     assert get_source.uid == 'source_get.my_source'
     assert str(get_source) == "get source my_source"
 
-    download_source = action.DownloadSource(data=MySource())
+    download_source = action.DownloadSource(builder=MySource())
     assert download_source.uid == 'download.my_source'
     assert str(download_source) == "download source my_source"
 
@@ -32,11 +32,12 @@ def test_initall():
                                           source=MySource())
     assert str(install_source) == 'install source my_source'
 
-    create_source = action.CreateSource(spec=Spec(qualifier='', kind='source'),
+    create_source = action.CreateSource(anod_instance=Spec(qualifier='',
+                                                           kind='source'),
                                         source_name='my_source')
     assert str(create_source) == 'create source my_source'
 
-    checkout = action.Checkout(repository=['e3-core'])
+    checkout = action.Checkout(repo_name='e3-core', repo_data={})
     assert str(checkout) == 'checkout e3-core'
 
     build_spec = Spec(qualifier='', kind='build')
