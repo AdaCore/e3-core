@@ -52,8 +52,8 @@ class ElectrolytJob(Job):
 
     def do_build(self):
         """Run the build primitive after setting up the sandbox."""
-        self.data.data.sandbox = self.sandbox
-        anod_driver = AnodDriver(anod_instance=self.data.data,
+        self.data.anod_instance.sandbox = self.sandbox
+        anod_driver = AnodDriver(anod_instance=self.data.anod_instance,
                                  store=self.store)
         anod_driver.activate()
         anod_driver.anod_instance.build_space.create(quiet=True)
@@ -67,8 +67,8 @@ class ElectrolytJob(Job):
 
     def do_test(self):
         """Run the test primitive."""
-        self.data.data.sandbox = self.sandbox
-        anod_driver = AnodDriver(anod_instance=self.data.data,
+        self.data.anod_instance.sandbox = self.sandbox
+        anod_driver = AnodDriver(anod_instance=self.data.anod_instance,
                                  store=self.store)
         anod_driver.activate()
         anod_driver.anod_instance.build_space.create(quiet=True)
@@ -82,10 +82,10 @@ class ElectrolytJob(Job):
 
     def do_checkout(self):
         """Get sources from vcs to sandbox vcs_dir."""
-        repo_name = self.data.data[0]
-        repo_url = self.data.data[1]['url']
-        repo_revision = self.data.data[1]['revision']
-        repo_vcs = self.data.data[1]['vcs']
+        repo_name = self.data.repo_name
+        repo_url = self.data.repo_data['url']
+        repo_revision = self.data.repo_data['revision']
+        repo_vcs = self.data.repo_data['vcs']
         if repo_vcs != 'git':
             logger.error('%s vcs type not supported', repo_vcs)
             self.status = STATUS.failure
@@ -103,7 +103,7 @@ class ElectrolytJob(Job):
         source_name = self.data.source_name
         tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, 'cache')
         src = self.sandbox.vcs_dir
-        for src_builder in self.data.spec.source_pkg_build:
+        for src_builder in self.data.anod_instance.source_pkg_build:
             if src_builder.name == source_name:
                 repo_dict = {}
                 src_dir = os.path.join(src, src_builder.checkout[0])
@@ -138,7 +138,7 @@ class ElectrolytJob(Job):
         self.status = STATUS.success
 
     def do_root(self):
-        """Epress the final result of the exec."""
+        """Express the final result of the exec."""
         # If nothing fails in the process the status will remain automatically
         # UNKNOWN, as the root node, UNKNOWN status is a success
         if self.status == STATUS.status_unknown:
