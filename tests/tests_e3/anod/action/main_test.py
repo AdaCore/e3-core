@@ -14,48 +14,51 @@ def test_initall():
     class MySource():
         name = 'my_source'
 
-    get_source = action.GetSource(data=MySource())
-    assert get_source.uid == 'source_get.my_source'
-    assert str(get_source) == "get source my_source"
-
-    download_source = action.DownloadSource(data=MySource())
-    assert download_source.uid == 'download.my_source'
-    assert str(download_source) == "download source my_source"
-
-    install_source = action.InstallSource(uid='install.my_source',
-                                          data=MySource())
-    assert str(install_source) == 'install source my_source'
-
     class Spec(e3.anod.spec.Anod):
         uid = 'my_source_uid'
         name = 'my_source_spec'
 
-    create_source = action.CreateSource(spec=Spec(qualifier='', kind='source'),
+    get_source = action.GetSource(builder=MySource())
+    assert get_source.uid == 'source_get.my_source'
+    assert str(get_source) == "get source my_source"
+
+    download_source = action.DownloadSource(builder=MySource())
+    assert download_source.uid == 'download.my_source'
+    assert str(download_source) == "download source my_source"
+
+    install_source = action.InstallSource(uid='install.my_source',
+                                          spec=Spec(qualifier='',
+                                                    kind='source'),
+                                          source=MySource())
+    assert str(install_source) == 'install source my_source'
+
+    create_source = action.CreateSource(anod_instance=Spec(qualifier='',
+                                                           kind='source'),
                                         source_name='my_source')
     assert str(create_source) == 'create source my_source'
 
-    checkout = action.Checkout(repository='e3-core')
+    checkout = action.Checkout(repo_name='e3-core', repo_data={})
     assert str(checkout) == 'checkout e3-core'
 
     build_spec = Spec(qualifier='', kind='build')
     build_spec.name = 'my_spec'
     build_spec.env = e3.env.Env()
 
-    build = action.Build(data=build_spec)
+    build = action.Build(anod_instance=build_spec)
     assert str(build).startswith('build my_spec for ')
 
     test_spec = Spec(qualifier='', kind='test')
     test_spec.name = 'my_spec'
     test_spec.env = e3.env.Env()
 
-    test = action.Test(data=test_spec)
+    test = action.Test(anod_instance=test_spec)
     assert str(test).startswith('test my_spec for ')
 
     install_spec = Spec(qualifier='', kind='build')
     install_spec.name = 'my_spec'
     install_spec.env = e3.env.Env()
 
-    install = action.Install(data=build_spec)
+    install = action.Install(anod_instance=build_spec)
     assert str(install).startswith('build my_spec for ')
 
     download_spec = Spec(qualifier='', kind='build')

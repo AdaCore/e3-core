@@ -8,7 +8,7 @@ install_requires = [
     'colorama',
     'pyyaml',
     'python-dateutil',
-    'requests',
+    'requests<=2.6.1',
     'requests_toolbelt',
     'tqdm',
     'stevedore>1.20.0']

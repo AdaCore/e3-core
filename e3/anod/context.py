@@ -335,6 +335,8 @@ class AnodContext(object):
                                                  e.kind,
                                                  e.qualifier)
 
+                    spec.deps[e.local_name] = result.anod_instance
+
                     if e.kind == 'build' and \
                             self[child_action.uid].data.kind == 'install':
                         # We have a build tree dependency that produced a
@@ -350,10 +352,13 @@ class AnodContext(object):
         # Look for source dependencies (i.e sources needed)
         if '%s_source_list' % primitive in dir(spec):
             for s in getattr(spec, '%s_source_list' % primitive):
+                # set source builder
+                if s.name in self.sources:
+                    s.set_builder(self.sources[s.name])
                 # add source install node
                 src_install_uid = result.uid.rsplit('.', 1)[0] + \
                     '.source_install.' + s.name
-                src_install_action = InstallSource(src_install_uid, s)
+                src_install_action = InstallSource(src_install_uid, spec, s)
                 self.add(src_install_action)
                 self.connect(result, src_install_action)
 
@@ -387,7 +392,7 @@ class AnodContext(object):
                                                   None,
                                                   source_name=s.name)
                     for repo in obj.checkout:
-                        r = Checkout(repo)
+                        r = Checkout(repo, self.repo.repos[repo])
                         self.add(r)
                         self.connect(source_action, r)
                     self.add_decision(CreateSourceOrDownload,
@@ -417,6 +422,30 @@ class AnodContext(object):
             return False
         elif isinstance(action, DownloadSource):
             return True
+        else:
+            if decision.choice is None:
+                msg = 'a decision should be taken between %s and %s' % \
+                    (decision.left, decision.right)
+                if decision.expected_choice == Decision.LEFT:
+                    msg += '(first expected)'
+                elif decision.expected_choice == Decision.RIGHT:
+                    msg += '(second expected)'
+            elif decision.choice == Decision.BOTH:
+                msg = 'cannot do both %s and %s' % \
+                    (decision.left, decision.right)
+            else:
+                msg = 'cannot do %s as %s is expected after ' \
+                    'scheduling resolution' % \
+                    (action.uid, decision.get_expected_decision())
+            raise SchedulingError(msg)
+
+    @classmethod
+    def always_create_source_resolver(cls, action, decision):
+        """Force source creation when scheduling a plan."""
+        if isinstance(action, CreateSource):
+            return True
+        elif isinstance(action, DownloadSource):
+            return False
         else:
             if decision.choice is None:
                 msg = 'a decision should be taken between %s and %s' % \
