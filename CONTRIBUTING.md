@@ -18,18 +18,30 @@ We also ask you to sign our [Contributor Licence Agreement](https://github.com/A
 Code conventions
 ----------------
 
-All code should follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
+### PEP8, PEP257 and Pyflakes
+
+All code should follow [PEP8](https://www.python.org/dev/peps/pep-0008/),
+[PEP257](https://www.python.org/dev/peps/pep-0257/).
+
+You should also document your method's parameters and their return values
+in *reStructuredText* format:
+
+```python
+"""Doc string for function
+
+:param myparam1: description for param1
+:type myparam1: param1-type
+:param myparam2: description for param1
+:type myparam2: param2-type | param2-other-accepted-type
+:return: description for returned object
+:rtype: type of returned object
+"""
+```
+
 We also expect that [PyFlakes](https://pypi.python.org/pypi/pyflakes) has been
 run before sending a patch.
 
-All logging done by `e3` must be done via a logger returned by the function
-`e3.log.getLogger`. Very verbose logging can be achieved by adding calls to
-`e3.log.debug()`. This will be activated when an application using
-`e3.main.Main` is run with: `-v -v`.
-
-All entry points must instanciate `e3.main.Main` to parse their options.
-
-Exceptions raised by `e3` should derived from `e3.error.E3Error`.
+### Python 3
 
 All `e3` Python 2 code is converted to Python 3 using `2to3`. To minimize
 the differences between the two versions, we're adding the following
@@ -50,6 +62,27 @@ This ensures that:
 Note that this can be automated by running:
 
 `isort <your module>.py`
+
+### logger
+
+All logging done by `e3` must be done via a logger returned by the function
+`e3.log.getLogger`. Very verbose logging can be achieved by adding calls to
+`e3.log.debug()`. This will be activated when an application using
+`e3.main.Main` is run with: `-v -v`.
+
+### Main
+
+All entry points must instanciate `e3.main.Main` to parse their options.
+
+### Exceptions
+
+Exceptions raised by `e3` should derived from `e3.error.E3Error`.
+
+### hasattr()
+
+Don't use hasattr() - this swallows exceptions and makes debugging much
+harder. Use getattr() instead.
+
 
 The `e3` namespace
 ------------------

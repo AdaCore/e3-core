@@ -2,6 +2,7 @@ The `e3` Project
 ================
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/979/badge)](https://bestpractices.coreinfrastructure.org/projects/979)
+[![Documentation Status](https://readthedocs.org/projects/e3-core/badge/?version=latest)](http://e3-core.readthedocs.io/en/latest/?badge=latest)
 
 This present project (`e3`) is a Python framework to ease the development
 of portable automated build systems (compilation, dependencies management,
