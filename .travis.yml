@@ -5,7 +5,7 @@ script: tox
 matrix:
     include:
         - python: 2.7
-          env: TOXENV=py27-ci-cov-coveralls,checkstyle
+          env: TOXENV=py27-ci-cov-codecov,checkstyle
           dist: trusty
           sudo: false
           os: linux
