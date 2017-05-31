@@ -104,6 +104,7 @@ def run_server(handler, func):
         func(server, base_url)
     finally:
         server.shutdown()
+        server.server_close()
 
 
 class TestHTTP(object):

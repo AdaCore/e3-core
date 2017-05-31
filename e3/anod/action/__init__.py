@@ -48,11 +48,12 @@ class GetSource(Action):
     CreateSource using a Decision node.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'builder')
 
-    def __init__(self, data):
-        super(GetSource, self).__init__(uid='source_get.%s' % data.name,
-                                        data=data)
+    def __init__(self, builder):
+        super(GetSource, self).__init__(uid='source_get.%s' % builder.name,
+                                        data=builder)
+        self.builder = builder
 
     def __str__(self):
         return 'get source %s' % self.data.name
@@ -65,14 +66,15 @@ class DownloadSource(Action):
     source. DownloadSource is always a leaf of the DAG.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'builder')
 
-    def __init__(self, data):
-        super(DownloadSource, self).__init__(uid='download.%s' % data.name,
-                                             data=data)
+    def __init__(self, builder):
+        super(DownloadSource, self).__init__(uid='download.%s' % builder.name,
+                                             data=builder)
+        self.builder = builder
 
     def __str__(self):
-        return 'download source %s' % self.data.name
+        return 'download source %s' % self.builder.name
 
 
 class InstallSource(Action):
@@ -82,13 +84,15 @@ class InstallSource(Action):
     a GetSource Action.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'spec', 'source')
 
-    def __init__(self, uid, data):
-        super(InstallSource, self).__init__(uid, data)
+    def __init__(self, uid, spec, source):
+        super(InstallSource, self).__init__(uid, data=(spec, source))
+        self.spec = spec
+        self.source = source
 
     def __str__(self):
-        return 'install source %s' % self.data.name
+        return 'install source %s' % self.data[1].name
 
 
 class CreateSource(Action):
@@ -98,9 +102,9 @@ class CreateSource(Action):
     checkouts. CreateSource has at least one Checkout child node.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'anod_instance', 'source_name')
 
-    def __init__(self, spec, source_name):
+    def __init__(self, anod_instance, source_name):
         """Initialize CreateSource object.
 
         :param spec: an Anod instance with primitive set to source
@@ -108,8 +112,11 @@ class CreateSource(Action):
         :param source_name: name of source package to assemble
         :type source_name: str
         """
-        super(CreateSource, self).__init__(uid=spec.uid + '.' + source_name,
-                                           data=(spec, source_name))
+        super(CreateSource, self).__init__(uid='%s.%s' % (anod_instance.uid,
+                                                          source_name),
+                                           data=(anod_instance, source_name))
+        self.anod_instance = anod_instance
+        self.source_name = source_name
 
     def __str__(self):
         return 'create source %s' % self.data[1]
@@ -122,14 +129,16 @@ class Checkout(Action):
     repository.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'repo_name', 'repo_data')
 
-    def __init__(self, repository):
-        super(Checkout, self).__init__(uid='checkout.%s' % repository,
-                                       data=repository)
+    def __init__(self, repo_name, repo_data):
+        super(Checkout, self).__init__(uid='checkout.%s' % repo_name,
+                                       data=(repo_name, repo_data))
+        self.repo_name = repo_name
+        self.repo_data = repo_data
 
     def __str__(self):
-        return 'checkout %s' % self.data
+        return 'checkout %s' % self.data[0]
 
 
 class AnodAction(Action):
@@ -158,19 +167,31 @@ class AnodAction(Action):
 class Build(AnodAction):
     """Anod build primitive."""
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'anod_instance')
+
+    def __init__(self, anod_instance):
+        super(Build, self).__init__(data=anod_instance)
+        self.anod_instance = anod_instance
 
 
 class Test(AnodAction):
     """Anod test primitive."""
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'anod_instance')
+
+    def __init__(self, anod_instance):
+        super(Test, self).__init__(data=anod_instance)
+        self.anod_instance = anod_instance
 
 
 class Install(AnodAction):
     """Anod install primitive."""
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'anod_instance')
+
+    def __init__(self, anod_instance):
+        super(Install, self).__init__(data=anod_instance)
+        self.anod_instance = anod_instance
 
 
 class DownloadBinary(Action):

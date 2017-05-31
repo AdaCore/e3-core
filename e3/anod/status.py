@@ -10,3 +10,6 @@ class ReturnValue(Enum):
     failure = 1
     missing = 2
     notready = 75
+    force_skip = -125
+    force_fail = -126
+    status_unknown = -127

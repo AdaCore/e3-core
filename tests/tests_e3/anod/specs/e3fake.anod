@@ -5,12 +5,8 @@ from e3.anod.spec import Anod
 from e3.fs import VCS_IGNORE_LIST, sync_tree
 
 
-class e3(spec('anod')):
-    """Python framework to ease the dev of portable automated build systems.
-
-    Build whl file for e3-* projects, install them with their needed
-    dependencies and test them.
-    Python version to build e3 on is provided through the qualifier 'version'
+class e3fake(spec('anod')):
+    """Fake spec for the test suite.
     """
 
     @property
@@ -28,16 +24,16 @@ class e3(spec('anod')):
                       delete=True)
 
         return [Anod.SourceBuilder(
-            name='e3-core-src',
-            fullname=lambda x: 'e3-core-src.tgz',
+            name='e3-fake-src',
+            fullname=lambda x: 'e3-fake-src.tgz',
             prepare_src=prepare_src,
-            checkout=['e3-core-github'])]
+            checkout=['e3-fake-github'])]
 
     test_deps = [Anod.Dependency('python-virtualenv',
                                  local_name='python',
                                  require='installation')]
 
-    test_source_list = [Anod.Source('e3-core-src', publish=True)]
+    test_source_list = [Anod.Source('e3-fake-src', publish=True)]
 
     @Anod.primitive()
     def test(self):
