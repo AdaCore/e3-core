@@ -1,10 +1,13 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import re
+import sys
 
 import e3.anod.sandbox
 import e3.env
 import e3.fs
+import e3.os.fs
 import e3.os.process
 import e3.platform
 from e3.vcs.git import GitRepository
@@ -77,7 +80,7 @@ def git_specs_dir(git, tmpdir):
         g.git_cmd(['config', 'user.name', '"test"'])
         g.git_cmd(['add', '-A'])
         g.git_cmd(['commit', '-m', "'add all'"])
-        yield specs_dir
+        yield cygdrive(specs_dir)
     finally:
         e3.fs.rm(specs_dir, True)
 
@@ -105,9 +108,23 @@ def e3fake_git_dir(git, tmpdir):
         g.git_cmd(['config', 'user.name', '"test"'])
         g.git_cmd(['add', '-A'])
         g.git_cmd(['commit', '-m', "'add all'"])
-        yield e3_fake_git_dir
+        yield cygdrive(e3_fake_git_dir)
     finally:
         e3.fs.rm(e3_fake_git_dir, True)
+
+
+def cygdrive(path):
+    print('cygdrive got %s' % path)
+    if sys.platform == 'win32':
+        path = path.replace('\\', '/')
+        m = re.match('([a-zA-Z]):(.*)', path)
+        if m is not None:
+            drive = m.group(1)
+            rest_path = m.group(2)
+            path = os.path.join('/cygdrive/', drive, rest_path)
+            print('cygdrive returning %s' % path)
+            return os.path.join('/cygdrive/', drive, rest_path)
+    return path
 
 
 def test_deploy_sandbox():
@@ -152,6 +169,7 @@ def test_sandbox_env():
 def test_sandbox_create_git(git_specs_dir):
     """Check if sandbox create can load the specs from a git repo."""
     root_dir = os.getcwd()
+    print('git_specs_dir %s' % git_specs_dir)
     sandbox_dir = os.path.join(root_dir, 'sbx')
     with_git = e3.os.process.Run(
         ['e3-sandbox', '-v',
