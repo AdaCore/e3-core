@@ -4,7 +4,6 @@ import sys
 
 import e3.log
 import stevedore
-
 from e3.anod.error import SandBoxError
 from e3.main import Main
 
