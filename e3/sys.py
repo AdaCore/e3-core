@@ -4,10 +4,9 @@ import ast
 import os
 import re
 import sys
+from enum import Enum
 
 import e3.log
-
-from enum import Enum
 
 logger = e3.log.getLogger('e3.sys')
 
