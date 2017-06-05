@@ -46,17 +46,18 @@ repositories:
 """
 
 
+def create_prolog(prolog_dir):
+    """Create prolog.py file on the fly to prevent checkstyle error."""
+    if os.path.isfile(os.path.join(prolog_dir, 'prolog.py')):
+        return
+    with open(os.path.join(prolog_dir, 'prolog.py'), 'w') as f:
+        f.write(PROLOG)
+
+
 @pytest.fixture
 def git_specs_dir(git, tmpdir):
     """Create a git repo to check out specs from it."""
     del git  # skip or fail when git is not installed
-
-    def create_prolog(prolog_dir):
-        """Create prolog.py file on the fly to prevent checkstyle error."""
-        if os.path.isfile(os.path.join(prolog_dir, 'prolog.py')):
-            return
-        with open(os.path.join(prolog_dir, 'prolog.py'), 'w') as f:
-            f.write(PROLOG)
 
     # Create a e3-specs git repository for all tests in this module
     specs_dir = str(tmpdir.mkdir('e3-specs-git-repo'))
@@ -77,7 +78,7 @@ def git_specs_dir(git, tmpdir):
         g.git_cmd(['config', 'user.name', '"test"'])
         g.git_cmd(['add', '-A'])
         g.git_cmd(['commit', '-m', "'add all'"])
-        yield specs_dir
+        yield 'file://%s' % specs_dir.replace('\\', '/')
     finally:
         e3.fs.rm(specs_dir, True)
 
@@ -220,9 +221,15 @@ def test_sandbox_exec_success(git_specs_dir):
     with open(os.path.join(sandbox_dir, 'test.plan'), 'w') as fd:
         fd.write("anod_build('e3')\n")
 
+    specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
+    local_spec_dir = os.path.join(root_dir, 'specs')
+
+    e3.fs.sync_tree(specs_source_dir, local_spec_dir)
+    create_prolog(local_spec_dir)
+
     # Test with local specs
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', git_specs_dir,
+                           '--spec-dir', os.path.join(root_dir, 'specs'),
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
