@@ -94,7 +94,7 @@ def test_wait_for_processes():
     p1 = e3.os.process.Run([sys.executable, 'p1.py'], bg=True)
     p2 = e3.os.process.Run([sys.executable, 'p2.py'], bg=True)
 
-    process_list = [p2]
+    process_list = [p1, p2]
     p3 = e3.os.process.Run(
         [sys.executable, '-c',
          'from e3.os.fs import touch;'
@@ -103,10 +103,11 @@ def test_wait_for_processes():
          'touch("end1");'
          'sleep(0.2);'
          'touch("end2")'], bg=True)
-    result = e3.os.process.wait_for_processes(process_list, 2)
-    del process_list[result]
-    process_list = [p1, p2]
-    e3.os.process.wait_for_processes(process_list, 2)
+    for i in range(2):
+        result = e3.os.process.wait_for_processes(process_list, 2)
+        if result is not None:
+            del process_list[result]
+    assert process_list == []
 
     assert p1.status == 0
     assert p1.out.strip() == 'process1'
