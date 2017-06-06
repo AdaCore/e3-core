@@ -107,7 +107,7 @@ def test_wait_for_processes():
         result = e3.os.process.wait_for_processes(process_list, 2)
         if result is not None:
             del process_list[result]
-    assert process_list == []
+    assert len(process_list) == 0
 
     assert p1.status == 0
     assert p1.out.strip() == 'process1'
