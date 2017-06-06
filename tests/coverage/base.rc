@@ -7,6 +7,7 @@ fail_under = 60
 # ideally should be around 90, work in progress
 exclude_lines =
     all: no cover
+    # os-specific
     defensive code
     # + <os>-only and <os>: no cover
     # + py2-only or py3-only
