@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import re
+import sys
 from collections import namedtuple
 from platform import uname as platform_uname
 
@@ -109,20 +110,20 @@ class SystemInfo(object):
 
         cls.nis_domain = UNKNOWN
 
-        try:
-            import nis
-        except ImportError:  # defensive code
-            e3.log.debug('cannot import nis', exc_info=True)
-            nis = None
-
-        if nis is not None:
+        if sys.platform != 'win32':  # windows: no cover
             try:
-                cls.nis_domain = nis.get_default_domain()
-                if not cls.nis_domain:
-                    cls.nis_domain = UNKNOWN
-            except nis.error:  # defensive code
-                e3.log.debug('nis error', exc_info=True)
-                pass
+                import nis
+            except ImportError:  # defensive code
+                e3.log.debug('cannot import nis', exc_info=True)
+                nis = None
+
+            if nis is not None:
+                try:
+                    cls.nis_domain = nis.get_default_domain()
+                    if not cls.nis_domain:
+                        cls.nis_domain = UNKNOWN
+                except nis.error:  # defensive code
+                    e3.log.debug('nis error', exc_info=True)
 
     @classmethod
     def platform(cls):
