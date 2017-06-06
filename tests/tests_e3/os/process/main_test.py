@@ -81,8 +81,8 @@ def test_enable_commands_handler():
     assert len(lines) == 2
 
 
-@pytest.mark.xfailif(sys.platform != 'win32',
-                     reason="unix implem not complete")
+@pytest.mark.xfail(sys.platform != 'win32',
+                   reason='unix implem not complete')
 def test_wait_for_processes():
     for v in (1, 2):
         with open('p%d.py' % v, 'w') as f:
