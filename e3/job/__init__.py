@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
+from collections import namedtuple
 from datetime import datetime
 from e3.os.process import Run
 import abc
@@ -10,8 +11,12 @@ import threading
 logger = e3.log.getLogger('job')
 
 
+JobTimingInfo = namedtuple('JobTimingInfo',
+                           ['start_time', 'stop_time', 'duration'])
+
+
 class Job(object):
-    """Class to handle a single Job.
+    """Handle a single Job.
 
     :ivar slot: number associated with the job during its execution. At a
         given time only one job have a given slot number.
@@ -36,6 +41,7 @@ class Job(object):
     """
 
     __metaclass__ = abc.ABCMeta
+    _lock = threading.Lock()
 
     def __init__(self, uid, data, notify_end):
         """Initialize worker.
@@ -55,12 +61,31 @@ class Job(object):
         self.slot = None
         self.handle = None
         self.thread = None
-        self.start_time = None
-        self.stop_time = None
+        self.__start_time = None
+        self.__stop_time = None
         self.should_skip = False
         self.interrupted = False
         self.queue_name = 'default'
         self.tokens = 1
+
+    def record_start_time(self):
+        with self._lock:
+            self.__start_time = datetime.now()
+
+    def record_stop_time(self):
+        with self._lock:
+            self.__stop_time = datetime.now()
+
+    @property
+    def timing_info(self):
+        with self._lock:
+            start = self.__start_time
+            stop = self.__stop_time
+        if start is None:
+            duration = 0
+        else:
+            duration = ((stop or datetime.now()) - start).total_seconds()
+        return JobTimingInfo(start, stop, duration)
 
     def start(self, slot):
         """Launch the job.
@@ -69,26 +94,38 @@ class Job(object):
         :type slot: int
         """
         def task_function():
+            self.record_start_time()
             try:
-                self.run()
+                with self._lock:
+                    interrupted = self.interrupted
+                if interrupted:  # defensive code
+                    logger.debug('job %s has been cancelled', self.uid)
+                else:
+                    self.run()
             finally:
-                self.stop_time = datetime.now()
+                self.record_stop_time()
                 self.notify_end(self.uid)
 
         self.handle = threading.Thread(target=task_function,
                                        name=self.uid)
-        self.start_time = datetime.now()
         self.handle.start()
         self.slot = slot
 
     @abc.abstractmethod
     def run(self):
         """Job activity."""
-        pass
+        pass  # all: no cover
 
     def interrupt(self):
-        """Interrupt current job."""
-        self.interrupted = True
+        """Interrupt current job.
+
+        :rtype: bool
+        :return: True if interrupted, False if already interrupted
+        """
+        with self._lock:
+            previous_state = self.interrupted
+            self.interrupted = True
+        return not previous_state
 
 
 class ProcessJob(Job):
@@ -107,8 +144,15 @@ class ProcessJob(Job):
         # Do non blocking spawn followed by a wait in order to have
         # self.proc_handle set. This allows support for interrupt.
         cmd_options['bg'] = True
-        self.proc_handle = Run(self.cmdline, **cmd_options)
-        self.proc_handle.wait()
+        with self._lock:
+            if self.interrupted:  # defensive code
+                logger.debug('job %s has been cancelled', self.uid)
+                return
+            proc_handle = Run(self.cmdline, **cmd_options)
+            self.proc_handle = proc_handle
+        proc_handle.wait()
+        logger.debug('job %s status %s (pid:%s)',
+                     self.uid, proc_handle.status, proc_handle.pid)
 
     @abc.abstractproperty
     def cmdline(self):
@@ -117,7 +161,7 @@ class ProcessJob(Job):
         :return: the command line
         :rtype: list[str]
         """
-        pass
+        pass  # all: no cover
 
     @property
     def cmd_options(self):
@@ -138,9 +182,11 @@ class ProcessJob(Job):
 
     def interrupt(self):
         """Kill running process tree."""
-        if hasattr(self, 'proc_handle') and \
-                self.proc_handle and \
-                self.proc_handle.is_running():
-            logger.debug('interrrupt job %s', self.uid)
-            self.proc_handle.kill(recursive=True)
-            self.interrupted = True
+        if super(ProcessJob, self).interrupt():
+            if self.proc_handle is None:  # defensive code
+                logger.debug('cancel job %s', self.uid)
+            elif self.proc_handle.is_running():
+                logger.debug('kill job %s', self.uid)
+                self.proc_handle.kill(recursive=True)
+            else:  # defensive code
+                logger.debug('cannot interrupt, job %s has finished', self.uid)
