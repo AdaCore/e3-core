@@ -328,7 +328,6 @@ def test_anodtest(git_specs_dir, e3fake_git_dir):
     with open(conf_dir, 'w') as conf_fd:
         conf_fd.write(git_repo_entry)
     command = ['e3-sandbox', '-v', 'exec',
-               '--spec-git-url', git_specs_dir,
                '--plan', plan_file,
                sandbox_dir]
     p = e3.os.process.Run(command)
