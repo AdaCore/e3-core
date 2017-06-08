@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import re
+import sys
 from collections import namedtuple
 from platform import uname as platform_uname
 
@@ -109,20 +110,20 @@ class SystemInfo(object):
 
         cls.nis_domain = UNKNOWN
 
-        try:
-            import nis
-        except ImportError:  # defensive code
-            e3.log.debug('cannot import nis', exc_info=True)
-            nis = None
-
-        if nis is not None:
+        if sys.platform != 'win32':  # windows: no cover
             try:
-                cls.nis_domain = nis.get_default_domain()
-                if not cls.nis_domain:
-                    cls.nis_domain = UNKNOWN
-            except nis.error:  # defensive code
-                e3.log.debug('nis error', exc_info=True)
-                pass
+                import nis
+            except ImportError:  # defensive code
+                e3.log.debug('cannot import nis', exc_info=True)
+                nis = None
+
+            if nis is not None:
+                try:
+                    cls.nis_domain = nis.get_default_domain()
+                    if not cls.nis_domain:  # defensive code
+                        cls.nis_domain = UNKNOWN
+                except nis.error:  # defensive code
+                    e3.log.debug('nis error', exc_info=True)
 
     @classmethod
     def platform(cls):
@@ -178,16 +179,16 @@ class SystemInfo(object):
         elif system == 'Linux':  # linux-only
             kernel_version = cls.uname.release
             name = cls.ld_info['name'].lower()
-            if 'redhat' in name:
+            if 'redhat' in name:  # os-specific
                 name = 'rhES'
                 version_number = cls.ld_info['major_version']
-            elif 'suse' in name:
+            elif 'suse' in name:  # os-specific
                 name = 'suse'
                 version_number = cls.ld_info['major_version']
-            elif 'debian' in name:
+            elif 'debian' in name:  # os-specific
                 name = 'debian'
                 version_number = cls.ld_info['major_version']
-            else:
+            else:  # os-specific
                 version_number = cls.ld_info['version']
             version = name + version_number
         elif system == 'AIX':  # aix-only
@@ -197,7 +198,7 @@ class SystemInfo(object):
         elif system == 'Windows':  # windows-only
             version = cls.uname.release.replace('Server', '')
             kernel_version = cls.uname.version
-            if version == 'Vista' and '64' in cls.uname.machine:
+            if version == 'Vista' and '64' in cls.uname.machine:  # os-specific
                 version = 'Vista64'
 
         cls._os_version = (version, kernel_version)
