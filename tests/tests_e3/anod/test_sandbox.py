@@ -330,7 +330,7 @@ def test_anodtest(git_specs_dir, e3fake_git_dir):
     command = ['e3-sandbox', '-v', 'exec',
                '--plan', plan_file,
                sandbox_dir]
-    p = e3.os.process.Run(command)
+    p = e3.os.process.Run(command, output=None)
     assert p.status == 0
     # Test for buildspaces
     platform = e3.platform.Platform.get().platform
