@@ -78,7 +78,7 @@ class TestScheduler(object):
             return result
 
         def collect(job):
-            results[job.uid] = (job.start_time, job.stop_time)
+            results[job.uid] = job.timing_info
 
         # This time test with two interdependent jobs
         dag = DAG()
@@ -89,8 +89,8 @@ class TestScheduler(object):
 
         # Check start_time end_time to be sure tests have not been run
         for k, v in results.items():
-            assert v[0] is None
-            assert v[1] is None
+            assert v.start_time is None
+            assert v.stop_time is None
 
     def test_timeout(self):
         """Ensure that jobs are interrupted correctly on timeout."""

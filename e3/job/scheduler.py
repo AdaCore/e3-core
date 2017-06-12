@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import time
 from collections import deque
 from datetime import datetime
 from Queue import Empty, Queue
@@ -210,19 +211,34 @@ class Scheduler(object):
         while True:
             # The first job in active jobs is the oldest one
             # compute the get timeout based on its startup information
-            deadline = datetime.now() - self.active_jobs[0].start_time
-            deadline = self.job_timeout - deadline.total_seconds()
+            first_job = self.active_jobs[0]
+            current_timeout = self.job_timeout - first_job.timing_info.duration
 
             # Ensure waiting time is a positive number
-            deadline = max(0.0, deadline)
+            current_timeout = max(0.1, current_timeout)
 
             try:
-                uid = self.message_queue.get(True, deadline)
-                logger.debug('job %s finished', uid)
+                uid = self.message_queue.get(
+                    block=True, timeout=current_timeout)
+
+            except Empty:
+                # If after timeout we get an empty result, it means that
+                # the oldest job has reached the timeout. Interrupt it
+                # and wait for the queue to receive the end notification
+                self.active_jobs[0].interrupt()
+                time.sleep(0.1)
+
+            else:
                 job_index, job = next(
                     ((index, job)
                      for index, job in enumerate(self.active_jobs)
                      if job.uid == uid))
+                ti = job.timing_info
+                logger.debug(
+                    'job %s %s after %s',
+                    uid,
+                    'interrupted' if job.interrupted else 'finished',
+                    ti.duration)
                 self.slots.append(job.slot)
 
                 # Liberate the resources taken by the job
@@ -238,9 +254,3 @@ class Scheduler(object):
 
                 del self.active_jobs[job_index]
                 return
-
-            except Empty:
-                # If after timeout we get an empty result, it means that
-                # the oldest job has reached the timeout. Interrupt it
-                # and wait for the queue to receive the end notification
-                self.active_jobs[0].interrupt()
