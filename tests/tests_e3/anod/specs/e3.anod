@@ -20,11 +20,8 @@ class e3(spec('anod')):
             # only one repo
             working_dir = list(repos.values())[0]['working_dir']
 
-            with open(os.path.join(working_dir, '.gitignore')) as f:
-                ignore_list = f.readlines()
-
             sync_tree(working_dir, dest,
-                      ignore=list(VCS_IGNORE_LIST) + ignore_list,
+                      ignore=list(VCS_IGNORE_LIST),
                       delete=True)
 
         return [Anod.SourceBuilder(
