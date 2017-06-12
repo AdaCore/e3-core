@@ -139,13 +139,10 @@ class ElectrolytJob(Job):
 
     def do_root(self):
         """Express the final result of the exec."""
-        # If nothing fails in the process the status will remain automatically
-        # UNKNOWN, as the root node, UNKNOWN status is a success
-        if self.status == STATUS.status_unknown:
-            self.status = STATUS.success
-            logger.info('result: OK')
-            return
-        logger.info('result: FAIL')
+        # This method won't be executed unless all the predecessor jobs are
+        # successful, so it will just report success state
+        self.status = STATUS.success
+        logger.info('result: OK')
 
 
 class ElectrolytJobFactory(object):
