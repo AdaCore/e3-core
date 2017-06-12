@@ -47,8 +47,17 @@ class ElectrolytJob(Job):
                 method_name = 'do_%s' % class_name.lower()
                 if self.dry_run:
                     return
-                if hasattr(self, method_name):
-                    getattr(self, method_name)()
+                try:
+                    anod_action = getattr(self, method_name)
+                except AttributeError:
+                    logger.error('method not implemented %s', method_name)
+                else:
+                    try:
+                        anod_action()
+                    except Exception as e:
+                        self.status == STATUS.failure
+                        logger.error('Exception occured in action %s %s',
+                                     method_name, e)
 
     def do_build(self):
         """Run the build primitive after setting up the sandbox."""
