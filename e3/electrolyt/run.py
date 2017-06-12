@@ -157,7 +157,6 @@ class ElectrolytJobFactory(object):
     def get_job(self, uid, data, predecessors, notify_end):
         force_fail = any((k for k in predecessors
                           if self.job_status[k] not in (STATUS.success,
-                                                        STATUS.force_skip,
                                                         STATUS.force_skip)))
         return ElectrolytJob(
             uid,
