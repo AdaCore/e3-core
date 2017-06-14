@@ -393,7 +393,7 @@ def rm(path, recursive=False, glob=True):
             else:
                 e3.os.fs.force_remove_file(f)
 
-        except Exception as e:
+        except Exception as e:  # defensive code
             logger.error(e)
             raise FSError(
                 origin='rm',
@@ -613,7 +613,7 @@ def sync_tree(source, target, ignore=None,
             if hasattr(os, 'lchflags') and hasattr(src.stat, 'st_flags'):
                 try:
                     os.lchflags(dst.path, src.stat.st_flags)
-                except OSError as why:
+                except OSError as why:  # defensive code
                     import errno
                     if (not hasattr(errno, 'EOPNOTSUPP') or
                             why.errno != errno.EOPNOTSUPP):
@@ -630,7 +630,7 @@ def sync_tree(source, target, ignore=None,
             if hasattr(os, 'chflags') and hasattr(src.stat, 'st_flags'):
                 try:
                     os.chflags(dst.path, src.stat.st_flags)
-                except OSError as why:
+                except OSError as why:  # defensive code
                     import errno
                     if (not hasattr(errno, 'EOPNOTSUPP') or
                             why.errno != errno.EOPNOTSUPP):
@@ -711,7 +711,7 @@ def sync_tree(source, target, ignore=None,
             yield entry
         try:
             source_names = set(os.listdir(entry.source.path))
-        except Exception:
+        except Exception:  # defensive code
             e3.log.debug('cannot get sources list', exc_info=True)
             # Don't crash in case a source directory cannot be read
             return
