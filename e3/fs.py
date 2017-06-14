@@ -799,8 +799,6 @@ def sync_tree(source, target, ignore=None,
                         safe_mkdir(wf.target)
                         updated_list.append(wf.target.path)
                     copystat_dir_list.append((wf.source, wf.target))
-                else:
-                    continue
 
     # Adjust directory permissions once all files have been copied
     for d in copystat_dir_list:
