@@ -408,7 +408,7 @@ class AnodContext(object):
 
         The resolver takes the following decision:
         * sources are always downloaded
-        * any build that produces a package should be added explicitely
+        * any build that produces a package should be added explicitly
 
         :param action: action to consider
         :type action: Action
@@ -427,9 +427,9 @@ class AnodContext(object):
                 msg = 'a decision should be taken between %s and %s' % \
                     (decision.left, decision.right)
                 if decision.expected_choice == Decision.LEFT:
-                    msg += '(first expected)'
+                    msg += ' (first expected)'
                 elif decision.expected_choice == Decision.RIGHT:
-                    msg += '(second expected)'
+                    msg += ' (second expected)'
             elif decision.choice == Decision.BOTH:
                 msg = 'cannot do both %s and %s' % \
                     (decision.left, decision.right)
