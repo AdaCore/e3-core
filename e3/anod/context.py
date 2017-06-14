@@ -269,8 +269,8 @@ class AnodContext(object):
             result = Test(spec)
         elif primitive == 'install':
             result = Install(spec)
-        else:
-            raise Exception(primitive)
+        else:  # defensive code
+            raise ValueError('add_spec error: %s is not known' % primitive)
 
         if not spec.has_package and primitive == 'install' and \
                 has_primitive(spec, 'build'):
