@@ -1,0 +1,14 @@
+from e3.anod.spec import Anod
+from e3.anod.package import SourceBuilder, Source
+
+
+class Spec12(Anod):
+
+    build_source_list = [Source('spec1-src', publish=True)]
+
+    build_deps = [Anod.Dependency('spec11', require='build_tree'),
+                  Anod.Dependency('spec1', require='source_pkg')]
+
+    @Anod.primitive
+    def build():
+        pass

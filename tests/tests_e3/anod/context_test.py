@@ -229,3 +229,11 @@ class TestContext(object):
 
         assert 'is expected after' in str(err)
 
+    def test_add_anod_action12(self):
+        """Check handling of duplicated source package."""
+        ac = self.create_context()
+        ac.add_anod_action('spec12', primitive='build')
+        result = ac.schedule(ac.always_download_source_resolver)
+        keys = set(result.vertex_data.keys())
+        assert 'download.spec1-src' in keys
+        assert 'download.unmanaged-src' in keys
