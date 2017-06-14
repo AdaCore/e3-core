@@ -210,3 +210,16 @@ class TestContext(object):
 
         with pytest.raises(SchedulingError):
             ac.schedule(ac.always_download_source_resolver)
+
+    def test_add_anod_action11(self):
+        """Check build dependencies."""
+        ac = self.create_context()
+        ac.add_anod_action('spec10', primitive='build')
+
+        # we have a dep on spec3 build_pkg, we require an explicit call to
+        # build
+        with pytest.raises(SchedulingError):
+            ac.schedule(ac.always_download_source_resolver)
+
+        ac.add_anod_action('spec3', primitive='build')
+        ac.schedule(ac.always_download_source_resolver)
