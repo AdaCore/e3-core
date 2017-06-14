@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from e3.anod.driver import AnodDriver
-from e3.anod.error import AnodError, ShellError
+from e3.anod.error import AnodError, ShellError, SpecError
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 
@@ -51,9 +51,17 @@ def test_spec_buildvars():
         def build(self):
             pass
 
-
     ms = MySpec('', kind='build')
     assert len(ms.deps) == 0
+
+
+def test_spec_wrong_dep():
+    """Check exception message when wrong dependency is set."""
+    with pytest.raises(SpecError) as err:
+        Anod.Dependency('foo', require='invalid')
+
+    assert 'require should be build_tree, installation or source_pkg not ' \
+           'invalid' in str(err)
 
 
 def test_primitive():
