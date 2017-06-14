@@ -403,6 +403,32 @@ class AnodContext(object):
         return result
 
     @classmethod
+    def decision_error(cls, action, decision):
+        """Raise SchedulingError.
+
+        :param action: action to consider
+        :type action: Action
+        :param decision: decision to resolve
+        :type decision: Decision
+        :raise SchedulingError
+        """
+        if decision.choice is None:
+            msg = 'a decision should be taken between %s%s and %s%s' % (
+                decision.left,
+                ' (expected)' if decision.expected_choice == Decision.LEFT
+                else '',
+                decision.right,
+                ' (expected)' if decision.expected_choice == Decision.RIGHT
+                else '')
+        elif decision.choice == Decision.BOTH:
+            msg = 'cannot do both %s and %s' % (decision.left, decision.right)
+        else:
+            msg = 'cannot do %s as %s is expected after ' \
+                  'scheduling resolution' % \
+                  (action.uid, decision.get_expected_decision())
+        raise SchedulingError(msg)
+
+    @classmethod
     def always_download_source_resolver(cls, action, decision):
         """Force source download when scheduling a plan.
 
@@ -423,21 +449,7 @@ class AnodContext(object):
         elif isinstance(action, DownloadSource):
             return True
         else:
-            if decision.choice is None:
-                msg = 'a decision should be taken between %s and %s' % \
-                    (decision.left, decision.right)
-                if decision.expected_choice == Decision.LEFT:
-                    msg += ' (first expected)'
-                elif decision.expected_choice == Decision.RIGHT:
-                    msg += ' (second expected)'
-            elif decision.choice == Decision.BOTH:
-                msg = 'cannot do both %s and %s' % \
-                    (decision.left, decision.right)
-            else:
-                msg = 'cannot do %s as %s is expected after ' \
-                    'scheduling resolution' % \
-                    (action.uid, decision.get_expected_decision())
-            raise SchedulingError(msg)
+            return cls.decision_error(action, decision)
 
     @classmethod
     def always_create_source_resolver(cls, action, decision):
@@ -447,21 +459,7 @@ class AnodContext(object):
         elif isinstance(action, DownloadSource):
             return False
         else:
-            if decision.choice is None:
-                msg = 'a decision should be taken between %s and %s' % \
-                    (decision.left, decision.right)
-                if decision.expected_choice == Decision.LEFT:
-                    msg += '(first expected)'
-                elif decision.expected_choice == Decision.RIGHT:
-                    msg += '(second expected)'
-            elif decision.choice == Decision.BOTH:
-                msg = 'cannot do both %s and %s' % \
-                    (decision.left, decision.right)
-            else:
-                msg = 'cannot do %s as %s is expected after ' \
-                    'scheduling resolution' % \
-                    (action.uid, decision.get_expected_decision())
-            raise SchedulingError(msg)
+            return cls.decision_error(action, decision)
 
     def schedule(self, resolver):
         """Compute a DAG of scheduled actions.
