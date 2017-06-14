@@ -38,7 +38,7 @@ class SandBoxAction(object):
 
         :rtype: str
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractproperty
     def help(self):
@@ -46,12 +46,12 @@ class SandBoxAction(object):
 
         :rtype: str
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def add_parsers(self):
         """Add new command line argument parsers."""
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def run(self, args):
@@ -59,7 +59,7 @@ class SandBoxAction(object):
 
         :param args: command line arguments gotten with argparse.
         """
-        pass
+        pass  # all: no cover
 
 
 class SandBoxCreate(SandBoxAction):
