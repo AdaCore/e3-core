@@ -392,7 +392,7 @@ class AnodContext(object):
                                                   None,
                                                   source_name=s.name)
                     for repo in obj.checkout:
-                        r = Checkout(repo, self.repo.repos[repo])
+                        r = Checkout(repo, self.repo.repos.get(repo))
                         self.add(r)
                         self.connect(source_action, r)
                     self.add_decision(CreateSourceOrDownload,
