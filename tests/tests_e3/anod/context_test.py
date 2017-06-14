@@ -218,8 +218,14 @@ class TestContext(object):
 
         # we have a dep on spec3 build_pkg, we require an explicit call to
         # build
-        with pytest.raises(SchedulingError):
+        with pytest.raises(SchedulingError) as err:
             ac.schedule(ac.always_download_source_resolver)
 
-        ac.add_anod_action('spec3', primitive='build')
-        ac.schedule(ac.always_download_source_resolver)
+        assert '.build (expected)' in str(err)
+
+        ac.add_anod_action('spec3', primitive='install')
+        with pytest.raises(SchedulingError) as err:
+            ac.schedule(ac.always_download_source_resolver)
+
+        assert 'is expected after' in str(err)
+
