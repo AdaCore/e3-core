@@ -30,8 +30,6 @@ Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0
   packaging. This includes a driver that can parse `.anod` specification
   files.
 - *archive*: support for reading and writing tar and zip archives
-- *binarydata*: helpers for parsing binary data such as object files,
-  executables, …
 - *collection*: generic collections, e.g. an implementation of Direct Acyclic
   Graphs
 - *decorator*: Python decorators, e.g. a memoize decorator

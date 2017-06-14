@@ -2,4 +2,3 @@
 omit =
     */os/windows/*
     */os/unix/constant.py
-    */e3/binarydata/macho.py
