@@ -6,7 +6,7 @@ class Spec9(Anod):
 
     build_source_list = [Source('spec2-src', publish=True)]
 
-    build_deps = [Anod.Dependency(name='spec2', kind='source')]
+    build_deps = [Anod.Dependency(name='spec2', require='source_pkg')]
 
     @Anod.primitive
     def build():
