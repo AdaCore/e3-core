@@ -41,6 +41,21 @@ def test_simple_spec():
     assert len(simple_test_with_bar.test_source_list) == 2
 
 
+def test_spec_buildvars():
+    """Build vars are used by the driver and not visible in deps."""
+    class MySpec(Anod):
+
+        build_deps = [Anod.BuildVar('key', 'value')]
+
+        @Anod.primitive()
+        def build(self):
+            pass
+
+
+    ms = MySpec('', kind='build')
+    assert len(ms.deps) == 0
+
+
 def test_primitive():
 
     class NoPrimitive(Anod):
