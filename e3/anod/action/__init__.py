@@ -225,6 +225,7 @@ class UploadComponent(Action):
     """
 
     __slots__ = ('uid', 'data')
+    str_prefix = ''
 
     def __init__(self, data):
         """Initialize a UploadComponent object.
@@ -237,10 +238,6 @@ class UploadComponent(Action):
         uid = '.'.join(uid)
         super(UploadComponent, self).__init__(uid=uid, data=data)
 
-    @property
-    def str_prefix(self):
-        return ''
-
     def __str__(self):
         return 'upload %s of %s' % (
             self.str_prefix,
@@ -250,17 +247,13 @@ class UploadComponent(Action):
 class UploadBinaryComponent(UploadComponent):
     """Upload binary component."""
 
-    @property
-    def str_prefix(self):
-        return 'binary package'
+    str_prefix = 'binary package'
 
 
 class UploadSourceComponent(UploadComponent):
     """Upload source only component."""
 
-    @property
-    def str_prefix(self):
-        return 'source metadata'
+    str_prefix = 'source metadata'
 
 
 class Decision(Action):
