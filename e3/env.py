@@ -430,7 +430,7 @@ class AbstractBaseEnv(object):
             discs.extend((
                 self.target.os.name,
                 self.target.os.name + '-' + self.target.os.version))
-        if self.target.os.name.startswith('vxworks'):
+        if self.target.os.name.startswith('vxworks'):  # all: no cover
             discs.append('vxworks')
         if not self.is_cross:
             discs.append('native')
@@ -440,7 +440,7 @@ class AbstractBaseEnv(object):
 
         if (not self.is_cross and not self.is_canadian) and \
                 self.build.is_virtual:
-            discs.append('virtual_machine')
+            discs.append('virtual_machine')  # all: no cover
 
         return discs
 
