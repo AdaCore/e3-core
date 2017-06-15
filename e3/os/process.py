@@ -731,8 +731,8 @@ def kill_processes_with_handle(path):
             logger.debug("taskkill output:\n%s", taskkill_p.out)
             msg += "taskkill output:\n%s" % taskkill_p.out
         return msg
-    else:
-        return ''
+    else:  # defensive code
+        raise NotImplementedError('currently only supported on windows')
 
 
 def kill_process_tree(pid, timeout=3):
