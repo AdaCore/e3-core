@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import subprocess
-import sys
 
 from e3.fs import echo_to_file
 from e3.os.fs import unixpath
@@ -93,15 +92,8 @@ def test_git_repo():
     repo2 = GitRepository(working_tree2)
     giturl = 'file://%s' % working_tree.replace('\\', '/')
     repo2.init(url=giturl, remote='tree1')
-    try:
-        repo2.update(url=giturl, refspec='master')
-    except GitError:
-        if sys.platform == 'win32':
-            # some git versions on windows do not support that well
-            # ignore this test for now???
-            pass
-    else:
-        repo2.rev_parse() == repo.rev_parse()
+    repo2.update(url=giturl, refspec='master')
+    repo2.rev_parse() == repo.rev_parse()
 
     repo2.fetch_gerrit_notes(url=giturl)
     p = repo2.git_cmd(['notes', '--ref=review', 'show', new_sha],
