@@ -792,6 +792,6 @@ def kill_process_tree(pid, timeout=3):
         psutil.wait_procs(children, timeout=timeout)
         parent_process.wait(timeout=timeout)
         return True
-    except psutil.TimeoutExpired as err:
+    except psutil.TimeoutExpired as err:  # defensive code
         e3.log.debug(err)
         return False
