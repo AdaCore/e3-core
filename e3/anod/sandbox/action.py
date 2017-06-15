@@ -223,7 +223,7 @@ class SandBoxExec(SandBoxCreate):
                             host=None,
                             target=None,
                             qualifier=None):
-                pass
+                pass  # all: no cover
 
             for a in ('anod_install', 'anod_build', 'anod_test'):
                 cm.register_action(a, anod_action)
