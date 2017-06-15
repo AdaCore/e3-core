@@ -78,7 +78,7 @@ class GitRepository(object):
         """
         if self.__class__.git is None:
             git_binary = e3.os.process.which('git', default=None)
-            if git_binary is None:
+            if git_binary is None:  # defensive code
                 raise GitError('cannot find git', 'git_cmd')
             self.__class__.git = e3.os.fs.unixpath(git_binary)
 

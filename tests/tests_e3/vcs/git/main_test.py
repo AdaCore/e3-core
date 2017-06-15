@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import subprocess
 import sys
 
 from e3.fs import echo_to_file
@@ -12,19 +13,46 @@ import pytest
 
 @pytest.mark.git
 def test_git_repo():
-    working_tree = unixpath(os.path.join(os.getcwd(), 'working_tree'))
+    working_tree = os.path.join(os.getcwd(), 'working_tree')
     working_tree2 = os.path.join(os.getcwd(), 'working_tree2')
     repo = GitRepository(working_tree)
     repo.init()
     os.chdir(working_tree)
-    new_file = unixpath(os.path.join(working_tree, 'new.txt'))
+    new_file = os.path.join(working_tree, 'new.txt')
     echo_to_file(new_file, 'new\n')
+
+    commit_note = unixpath(os.path.join(working_tree, 'commit_note.txt'))
+    echo_to_file(commit_note,
+                 '\n'.join(
+                     ('Code-Review+2: Nobody <nobody@example.com>',
+                      'Submitted-by: Nobody <nobody@example.com>',
+                      'Submitted-at: Thu, 08 Jun 2017 18:40:11 +0200')))
+
     repo.git_cmd(['add', 'new.txt'])
     repo.git_cmd(['config', 'user.email', 'e3-core@example.net'])
     repo.git_cmd(['config', 'user.name', 'e3 core'])
     repo.git_cmd(['commit', '-m', 'new file'])
     repo.git_cmd(['tag', '-a', '-m', 'new tag', '20.0855369232'])
+    repo.git_cmd(['notes', '--ref', 'review', 'add', 'HEAD', '-F',
+                  commit_note])
 
+    # try with gerrit notes
+    with open('log.txt', 'w') as f:
+        repo.write_log(f, with_gerrit_notes=True)
+    with open('log.txt', 'r') as f:
+        commits = list(repo.parse_log(f))
+        assert 'nobody@example.com' in commits[0]['notes']['Code-Review+2']
+
+    # try with an invalid note
+    repo.git_cmd(['notes', '--ref', 'review', 'add', 'HEAD', '-f', '-m',
+                  'invalid-note'])
+    with open('log.txt', 'w') as f:
+        repo.write_log(f, with_gerrit_notes=True)
+    with open('log.txt', 'r') as f:
+        commits = list(repo.parse_log(f))
+        assert commits[0]['notes'] is None
+
+    # try again without gerrit notes
     with open('log.txt', 'w') as f:
         repo.write_log(f)
     with open('log.txt', 'r') as f:
@@ -63,9 +91,10 @@ def test_git_repo():
         assert commits[1]['diff'] != commits[0]['diff']
 
     repo2 = GitRepository(working_tree2)
-    repo2.init(url=working_tree, remote='tree1')
+    giturl = 'file://%s' % working_tree.replace('\\', '/')
+    repo2.init(url=giturl, remote='tree1')
     try:
-        repo2.update(url=working_tree, refspec='master')
+        repo2.update(url=giturl, refspec='master')
     except GitError:
         if sys.platform == 'win32':
             # some git versions on windows do not support that well
@@ -73,3 +102,8 @@ def test_git_repo():
             pass
     else:
         repo2.rev_parse() == repo.rev_parse()
+
+    repo2.fetch_gerrit_notes(url=giturl)
+    p = repo2.git_cmd(['notes', '--ref=review', 'show', new_sha],
+                      output=subprocess.PIPE)
+    assert 'invalid-note' in p.out
