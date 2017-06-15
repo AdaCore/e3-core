@@ -64,3 +64,17 @@ def test_invalid_fingerprint():
     with pytest.raises(AnodError):
         f1 = Fingerprint()
         f1.add('invalid', {})
+
+
+def test_fingerprint_eq():
+    """Check fingerprint __eq__ function."""
+    f1 = Fingerprint()
+    f1.add('1', '1')
+    assert f1 != 1
+
+    f2 = Fingerprint()
+    f2.add('1', '1')
+    f2.add('2', '2')
+    assert f1 != f2
+
+    assert f1.compare_to(f1) is None
