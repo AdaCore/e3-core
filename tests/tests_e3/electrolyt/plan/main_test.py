@@ -2,9 +2,14 @@ from __future__ import absolute_import, division, print_function
 
 import e3.electrolyt.host as host
 import e3.electrolyt.plan as plan
+import e3.env
 from e3.electrolyt.entry_point import EntryPointKind
 
 import pytest
+
+
+def build_action(spec, build=None, host=None, target=None, board=None):
+    return 'build ' + spec
 
 
 def _get_new_plancontext(machine_name):
@@ -12,11 +17,8 @@ def _get_new_plancontext(machine_name):
                        platform='x86_64-linux',
                        version='suse11')
 
-    def build(spec, build=None, host=None, target=None):
-        return 'build ' + spec
-
     context = plan.PlanContext(server=server)
-    context.register_action('build', build)
+    context.register_action('build', build_action)
     return context
 
 
@@ -46,6 +48,63 @@ def test_simple_plan():
     assert actions[1].target.platform == 'x86-windows'
     assert actions[1].action == 'build'
     assert actions[1].spec == 'b'
+
+
+def test_plan_without_server_info():
+    context = plan.PlanContext()
+    context.register_action('build', build_action)
+    myplan = _get_plan(
+        data={'a': 'a'},
+        content=[u'def myserver():\n',
+                 u'    build(a)\n'])
+    actions = context.execute(myplan, 'myserver', verify=False)
+    assert actions[0].build.platform == e3.env.Env().build.platform
+
+
+def test_plan_scope():
+    context = _get_new_plancontext('myserver')
+
+    myplan = _get_plan(
+        data={},
+        content=[u'def myserver():\n',
+                 u'    build("foo")\n'
+                 u'    with defaults(build="x86_64-windows",\n'
+                 u'                  host="x86-windows",\n'
+                 u'                  target="x86-linux"):\n'
+                 u'        build("foo")\n'
+                 u'        with defaults(target="x86_64-linux"):\n'
+                 u'            build("foo")\n'
+                 u'        with defaults(bar="bar"):\n'
+                 u'            build(env.bar)\n'
+                 u'    build("bar")\n'])
+
+    actions = context.execute(myplan, 'myserver', verify=False)
+    assert len(actions) == 5
+    assert actions[0].spec == 'foo'
+    assert actions[0].build.platform == actions[0].target.platform
+    assert actions[1].target.platform == 'x86-linux'
+    assert actions[1].build.platform == 'x86_64-windows'
+    assert actions[1].host.platform == 'x86-windows'
+    assert actions[2].target.platform == 'x86_64-linux'
+    assert actions[3].spec == 'bar'
+    assert actions[3].target.platform == 'x86-linux'
+    assert actions[4].build.platform == actions[0].build.platform
+    assert actions[4].build.platform == actions[4].target.platform
+
+
+def test_board():
+    """Test a very basic electrolyt plan."""
+    context = _get_new_plancontext('myserver')
+
+    myplan = _get_plan(
+        data={'a': 'a', 'b': 'b'},
+        content=[u'def myserver():\n',
+                 u'    build(a, board="bobby")\n'])
+
+    actions = context.execute(myplan, 'myserver', verify=False)
+    assert len(actions) == 1
+    assert actions[0].spec == 'a'
+    assert actions[0].target.machine == 'bobby'
 
 
 def test_entry_points():
