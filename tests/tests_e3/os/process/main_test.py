@@ -268,8 +268,9 @@ def test_kill_process_tree():
     for p in p3_children:
         assert not p.is_running()
 
-    # killing it twice should also work
+    # killing it more than once should also work
     assert e3.os.process.kill_process_tree(p3.pid) is True
+    assert e3.os.process.kill_process_tree(p3.internal) is True
 
 
 def test_run_with_env():
