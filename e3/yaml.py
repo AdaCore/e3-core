@@ -14,7 +14,7 @@ from e3.text import format_with_dict
 
 try:
     from yaml import CLoader as Loader
-except ImportError:
+except ImportError:  # defensive code
     from yaml import Loader
 
 
