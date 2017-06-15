@@ -42,6 +42,10 @@ def test_fingerprint():
         f5.add('f4', f4)
     assert 'f4 should be a string' in str(err.value)
 
+    f6 = Fingerprint()
+    f6.add('unicode', u'6')
+    assert len(f6.sha1()) == 40
+
 
 def test_fingerprint_version():
     """Changing the FINGERPRINT_VERSION modify the fingerprint sha1."""
