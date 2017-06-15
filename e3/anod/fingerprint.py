@@ -162,8 +162,6 @@ class Fingerprint(object):
 
         :rtype: str
         """
-        if not self.elements:
-            return 'None'
         return '\n'.join(['%s: %s' % (k, self.elements[k])
                           for k in self.elements])
 
