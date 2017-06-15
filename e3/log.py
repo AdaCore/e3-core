@@ -19,7 +19,7 @@ default_output_stream = sys.stdout
 
 # If sys.stdout is a terminal then enable "pretty" output for user
 # This includes progress bars and colors
-if sys.stdout.isatty():
+if sys.stdout.isatty():  # all: no cover (not used in production!)
     pretty_cli = True
 else:
     pretty_cli = False
@@ -34,7 +34,7 @@ def progress_bar(it, **kwargs):
     :type kwargs: dict
     :return: a tqdm progress bar iterator
     """
-    if pretty_cli:
+    if pretty_cli:  # all: no cover
         return tqdm(it, **kwargs)
     else:
         # When pretty cli is disabled return a progress bar that do nothing.
@@ -46,7 +46,7 @@ def progress_bar(it, **kwargs):
 __null_handler_set = set()
 
 
-class TqdmHandler(logging.StreamHandler):
+class TqdmHandler(logging.StreamHandler):  # all: no cover
     """Logging handler when used when progress bars are enabled."""
 
     color_subst = ((re.compile(r'(OK|PASSED)', re.I), Fore.GREEN),
@@ -118,7 +118,7 @@ def __add_handlers(level, fmt, filename=None):
     """
     global default_output_stream
     if filename is None:
-        if pretty_cli:
+        if pretty_cli:  # all: no cover
             handler = TqdmHandler()
         else:
             handler = logging.StreamHandler()
