@@ -112,6 +112,33 @@ class TestScheduler(object):
         for k, v in results.items():
             assert v.interrupted
 
+    def test_keyboard_interrupt(self):
+        """Ensure that jobs can be interrupted."""
+        results = {}
+        pytest.importorskip('psutil')
+
+        def get_job(uid, data, predecessors, notify_end):
+            return NopJob(uid, data, notify_end)
+
+        def collect(job):
+            results[job.uid] = job
+
+        dag = DAG()
+        dag.add_vertex('1')
+        dag.add_vertex('2')
+        s = Scheduler(get_job, tokens=2, collect=collect, job_timeout=2)
+
+        # fake log_state that will raise a KeyboardInterrupt
+        def fake_log_state():
+            raise KeyboardInterrupt
+        s.log_state = fake_log_state
+
+        with pytest.raises(KeyboardInterrupt):
+            s.run(dag)
+
+        for k, v in results.items():
+            assert v.interrupted
+
     def test_collect_feedback_scheme(self):
         """Collect feedback construction.
 
