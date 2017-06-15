@@ -106,7 +106,7 @@ def e3fake_git_dir(git, tmpdir):
         g.git_cmd(['config', 'user.name', '"test"'])
         g.git_cmd(['add', '-A'])
         g.git_cmd(['commit', '-m', "'add all'"])
-        yield e3_fake_git_dir
+        yield 'file://%s' % e3_fake_git_dir.replace('\\', '/')
     finally:
         e3.fs.rm(e3_fake_git_dir, True)
 
