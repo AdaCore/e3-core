@@ -14,6 +14,10 @@ def test_make():
 
     class AnodMake(Anod):
 
+        def shell(self, *cmd, **kwargs):
+            """Mock for Anod.shell that does not spawn processes."""
+            return (cmd, kwargs)
+
         @Anod.primitive()
         def build(self):
             m1 = Make(self, makefile='/tmp/makefile')
@@ -22,6 +26,8 @@ def test_make():
             m2.set_default_target('install')
             m2.set_var('profiles', ['dev', 'prod'])
             return (m1.cmdline()['cmd'],
+                    m1()[0],
+                    m1(exec_dir='/foo', timeout=2)[1],
                     m2.cmdline()['cmd'],
                     m2.cmdline(['clean', 'install'])['cmd'],
                     m2.cmdline('all')['cmd'])
@@ -35,6 +41,8 @@ def test_make():
     am.build_space.create()
     assert am.build() == (
         ['make', '-f', '/tmp/makefile', '-j', '10', 'prefix=/foo'],
+        ('make', '-f', '/tmp/makefile', '-j', '10', 'prefix=/foo'),
+        {'cwd': '/foo', 'timeout': 2},
         ['make', '-j', '2', 'profiles=dev prod', 'install'],
         ['make', '-j', '2', 'profiles=dev prod', 'clean', 'install'],
         ['make', '-j', '2', 'profiles=dev prod', 'all'])
@@ -95,12 +103,16 @@ def test_configure_opts():
     """Check configure options."""
     class AnodConf(Anod):
 
+        def shell(self, *cmd, **kwargs):
+            """Mock for Anod.shell that does not spawn processes."""
+            return (cmd, kwargs)
+
         @Anod.primitive()
         def build(self):
             c = Configure(self)
             c.add('--with-opt')
             c.add_env('OPT', 'VAL')
-            return c.cmdline()
+            return [c.cmdline(), c()]
 
     os.environ['CONFIG_SHELL'] = 'ksh'
 
@@ -112,9 +124,14 @@ def test_configure_opts():
     AnodDriver(anod_instance=ac, store=None).activate()
     ac.build_space.create()
 
-    assert ac.build()['cmd'][:-1] == [
+    result = ac.build()
+
+    assert result[0]['cmd'][:-1] == [
         'ksh', '../src/configure', '--with-opt']
-    assert ac.build()['options']['env'] == {'OPT': 'VAL'}
+    assert result[0]['options']['env'] == {'OPT': 'VAL'}
+
+    assert result[1][0][:-1] == tuple(result[0]['cmd'][:-1])
+    assert result[1][1]['env'] == result[0]['options']['env']
 
 
 def test_text_replace():
