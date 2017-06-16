@@ -1,0 +1,5 @@
+from e3.anod.loader import spec
+
+
+class NoAction(spec('anod')):
+    pass

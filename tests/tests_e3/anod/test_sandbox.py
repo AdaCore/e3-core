@@ -237,6 +237,34 @@ def test_sandbox_exec_api_version(git_specs_dir):
     assert 'api_version should be set in prolog.py' in p.out
 
 
+def test_sandbox_action_errors(git_specs_dir):
+    """Test sandbox api version check."""
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+
+    e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
+    with open(os.path.join(sandbox_dir, 'test.plan'), 'w') as fd:
+        fd.write("anod_build('builderror')\n")
+        fd.write("anod_build('noaction')\n")
+        fd.write("anod_test('noaction')\n")
+
+    specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
+    local_spec_dir = os.path.join(root_dir, 'specs')
+
+    e3.fs.sync_tree(specs_source_dir, local_spec_dir)
+    create_prolog(local_spec_dir)
+
+    # Test with local specs
+    p = e3.os.process.Run(['e3-sandbox', 'exec',
+                           '--spec-dir', os.path.join(root_dir, 'specs'),
+                           '--plan',
+                           os.path.join(sandbox_dir, 'test.plan'),
+                           sandbox_dir])
+    assert 'Exception occurred in action' in p.out
+    assert 'build not implemented' in p.out
+    assert 'test not implemented' in p.out
+
+
 def test_sandbox_exec_missing_plan_file(git_specs_dir):
     """Test sandbox exec exception.
 
