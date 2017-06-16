@@ -530,11 +530,11 @@ class BaseEnv(AbstractBaseEnv):
 
         :param build: build architecture. If None then it is set to default
             build
-        :type build: Arch | None
+        :type build: Platform | None
         :param host: host architecture. If None then it is set to build
-        :type host: Arch | None
+        :type host: Platform | None
         :param target: target architecture. If None then it is set to target
-        :type target: Arch | None
+        :type target: Platform | None
         """
         # class variable that holds the current environment
         self._instance = {}
