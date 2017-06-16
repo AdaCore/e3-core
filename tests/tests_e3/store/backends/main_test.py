@@ -16,6 +16,8 @@ def test_cache():
 
     fc.set('a', 1)
     assert fc.get('a') == 1
+    assert fc.has_resource('a')
+    assert 'a' in fc
     fc.delete('a')
     assert fc.get('a', 0) == 0
 
