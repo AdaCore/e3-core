@@ -551,10 +551,7 @@ class BaseEnv(AbstractBaseEnv):
 
     def __getattr__(self, name):
         try:
-            if name in ('_instance', '_context'):
-                return self.__dict__[name]
-            else:
-                return self._instance[name]
+            return self._instance[name]
         except KeyError as e:
             raise AttributeError(e), None, sys.exc_traceback
 
@@ -627,12 +624,7 @@ class Env(AbstractBaseEnv):
 
     def __getattr__(self, name):
         try:
-            if name == '_instance':
-                return Env._instance
-            elif name == '_context':
-                return Env._context
-            else:
-                return self._instance[name]
+            return self._instance[name]
         except KeyError as e:
             raise AttributeError(e), None, sys.exc_traceback
 
