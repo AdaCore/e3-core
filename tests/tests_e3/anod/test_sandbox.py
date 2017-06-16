@@ -173,6 +173,19 @@ def test_sandbox_env():
     assert os.environ['GPR_PROJECT_PATH'] == ''
 
 
+def test_sandbox_rootdir():
+    sandbox = e3.anod.sandbox.SandBox()
+    with pytest.raises(e3.anod.sandbox.SandBoxError):
+        assert sandbox.root_dir
+
+    sandbox.root_dir = 'foo'
+    sandbox.root_dir = 'foo'
+    assert os.path.relpath(sandbox.tmp_dir, sandbox.root_dir) == 'tmp'
+    assert os.path.relpath(
+        sandbox.get_build_space('bar', 'build').root_dir,
+        os.path.join('foo', e3.env.Env().platform)) == 'bar'
+
+
 def test_sandbox_create_git(git_specs_dir):
     """Check if sandbox create can load the specs from a git repo."""
     root_dir = os.getcwd()
