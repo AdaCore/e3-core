@@ -382,7 +382,7 @@ class Run(object):
 
                     self.internal = runs[-1]
 
-        except Exception as e:
+        except Exception as e:  # defensive code
             self.__error(e, self.cmds)
             raise
 
@@ -659,15 +659,15 @@ def wait_for_processes(process_list, timeout):
                         pass
 
                 remain = timeout - time.time() + start
+
+            logger.warning('no process ended after %f seconds',
+                           time.time() - start)  # defensive code
+
         finally:
             # Be sure to remove signal handler and close pipe
             signal.signal(signal.SIGCHLD, 0)
             os.close(fd_r)
             os.close(fd_w)
-
-        logger.warning('no process ended after %f seconds',
-                       time.time() - start)
-        return None
 
 
 def is_running(pid):
