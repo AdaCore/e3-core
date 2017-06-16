@@ -257,11 +257,6 @@ class CaseParser(object):
         if not isinstance(data, dict):
             return self.__format_value(data)
 
-        if cursor is None:
-            cursor = self.__state
-        if prefix is None:
-            prefix = ()
-
         for key in data:
             if key.startswith(self.case_prefix):
                 pc = self.__parse_case(key, data[key])
