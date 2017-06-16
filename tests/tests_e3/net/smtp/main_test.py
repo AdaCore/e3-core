@@ -27,7 +27,7 @@ def test_sendmail():
             msg_as_string)
 
 
-def test_sendmail_onerror():
+def test_sendmail_onerror(caplog):
     from_addr = 'e3@example.net'
     to_addresses = ['info@example.net', 'info@example.com']
     msg_as_string = 'test mail content'
@@ -37,8 +37,9 @@ def test_sendmail_onerror():
         to_addresses,
         msg_size_exceed,
         ['smtp.localhost'],
-        max_size=8 / 1024)
+        max_size=1 / 1024)
     assert result is False
+    assert 'message file too big' in caplog.text
 
     with mock.patch('smtplib.SMTP') as mock_smtp:
         mock_smtp.side_effect = smtplib.SMTPException()
