@@ -55,8 +55,8 @@ class ElectrolytJob(Job):
                     try:
                         anod_action()
                     except Exception as e:
-                        self.status == STATUS.failure
-                        logger.error('Exception occured in action %s %s',
+                        self.status = STATUS.failure
+                        logger.error('Exception occurred in action %s %s',
                                      method_name, e)
 
     def do_build(self):
