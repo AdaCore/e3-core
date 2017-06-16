@@ -154,7 +154,7 @@ class SandBox(object):
                     'console_scripts', 'sandbox_scripts')
             with open(target, 'wb') as f:
                 if isinstance(script_content, unicode):
-                    f.write(script_content.encode('utf-8'))
+                    f.write(script_content.encode('utf-8'))  # py3-only
                 else:
-                    f.write(script_content)
+                    f.write(script_content)  # py2-only
             chmod('a+x', target)
