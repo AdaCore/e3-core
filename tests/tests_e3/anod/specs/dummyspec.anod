@@ -1,0 +1,14 @@
+from e3.anod.loader import spec
+from e3.anod.spec import Anod
+
+
+class dummyspec(spec('anod')):
+    """Fake spec for the test suite.
+    """
+    @Anod.primitive()
+    def build(self):
+        pass
+
+    @Anod.primitive()
+    def test(self):
+        pass
