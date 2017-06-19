@@ -1,16 +1,17 @@
 from e3.anod.loader import spec
 from e3.anod.spec import Anod
+from e3.fs import sync_tree
 
 
-class e3fake(spec('anod')):
+class dummyspec(spec('anod')):
     """Fake spec for the test suite.
     """
-
     @property
     def source_pkg_build(self):
 
         def prepare_src(repos, dest):
-            pass
+             sync_tree(list(repos.values())[0]['working_dir'],
+                       dest)
 
         return [Anod.SourceBuilder(
             name='e3-fake-src',
@@ -21,5 +22,9 @@ class e3fake(spec('anod')):
     test_source_list = [Anod.Source('e3-fake-src', publish=True)]
 
     @Anod.primitive()
+    def build(self):
+        pass
+
+    @Anod.primitive()
     def test(self):
-        self.shell('ls', cwd=self['SRC_DIR'])
+        pass
