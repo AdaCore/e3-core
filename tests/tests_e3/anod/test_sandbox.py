@@ -433,3 +433,32 @@ def test_anodtest(git_specs_dir, e3fake_git_dir):
         conf_fd.write(git_repo_entry)
     p = e3.os.process.Run(command)
     assert 'svn vcs type not supported' in p.out
+
+
+def test_failure_status(git_specs_dir, e3fake_git_dir):
+    """This test will run sandbox exec with an expected error.
+
+    The error should be propagated throught the DAG and no action
+    should be executed once we have the fail
+    """
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+    plan_file = os.path.join(root_dir, 'e3fake_test.plan')
+    p = e3.os.process.Run(['e3-sandbox', '-v', 'create',
+                           '--spec-git-url', git_specs_dir,
+                           sandbox_dir])
+    assert p.status == 0
+
+    with open(plan_file, 'w') as plan_fd:
+        plan_fd.write("anod_test('e3fake')")
+    conf_dir = os.path.join(sandbox_dir, 'specs', 'conf.yaml')
+    git_repo_entry = E3Fake % 'no_url'
+    with open(conf_dir, 'w') as conf_fd:
+        conf_fd.write(git_repo_entry)
+    command = ['e3-sandbox', '-v', 'exec',
+               '--plan', plan_file,
+               sandbox_dir]
+    p = e3.os.process.Run(command)
+    # the dag for this plan has 6 actions and thus we need to have at least
+    # 6 failure status ( status = 1 )
+    assert p.out.count('status=  1') >= 6
