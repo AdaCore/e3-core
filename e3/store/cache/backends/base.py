@@ -74,7 +74,7 @@ class Cache(object):
 
     def close(self):
         """Close the cache connection."""
-        pass
+        pass  # all: no cover
 
     def __contains__(self, uid):
         """Return True if the resource is in the cache and has not expired.

@@ -90,7 +90,7 @@ class RewriteImportRule(object):
                         raise RewriteNodeError(
                             'Rejected import found in ast: %s' % ast.dump(
                                 node))
-                    else:
+                    else:  # defensive code
                         raise ValueError('unknown action %s', self.action)
                 else:
                     new_names.append(var)

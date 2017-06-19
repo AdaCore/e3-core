@@ -80,8 +80,10 @@ class Make(object):
         :param timeout: timeout to pass to ex.Run
         :type timeout: int | None
         """
-        cmd, options = self.cmdline(
+        cmdline = self.cmdline(
             target, jobs, exec_dir, timeout=timeout)
+        cmd = cmdline['cmd']
+        options = cmdline['options']
         return self.anod_instance.shell(*cmd, **options)
 
     def cmdline(self, target=None, jobs=None, exec_dir=None, timeout=None):
@@ -234,7 +236,9 @@ class Configure(object):
             'options': cmd_options}
 
     def __call__(self):
-        cmd, options = self.cmdline()
+        cmdline = self.cmdline()
+        cmd = cmdline['cmd']
+        options = cmdline['options']
         return self.anod_instance.shell(*cmd, **options)
 
 

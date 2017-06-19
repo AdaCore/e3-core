@@ -1,0 +1,9 @@
+from e3.anod.loader import spec
+from e3.anod.spec import Anod
+
+
+class BuildError(spec('anod')):
+
+    @Anod.primitive()
+    def build(self):
+        raise ValueError('invalid')

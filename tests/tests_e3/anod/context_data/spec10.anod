@@ -1,0 +1,11 @@
+from e3.anod.spec import Anod
+from e3.anod.package import Source
+
+
+class Spec10(Anod):
+
+    build_deps = [Anod.Dependency(name='spec3', require='build_tree')]
+
+    @Anod.primitive
+    def build():
+        pass

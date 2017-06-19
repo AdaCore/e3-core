@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 import abc
-import argparse
 import os
 
 import e3.log
@@ -38,7 +37,7 @@ class SandBoxAction(object):
 
         :rtype: str
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractproperty
     def help(self):
@@ -46,12 +45,12 @@ class SandBoxAction(object):
 
         :rtype: str
         """
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def add_parsers(self):
         """Add new command line argument parsers."""
-        pass
+        pass  # all: no cover
 
     @abc.abstractmethod
     def run(self, args):
@@ -59,7 +58,7 @@ class SandBoxAction(object):
 
         :param args: command line arguments gotten with argparse.
         """
-        pass
+        pass  # all: no cover
 
 
 class SandBoxCreate(SandBoxAction):
@@ -108,13 +107,20 @@ class SandBoxShowConfiguration(SandBoxAction):
         pass
 
     def run(self, args):
+        def warn_invalid(msg):
+            print('the configuration is invalid, the argument parser got the'
+                  ' following error:')
+            print(msg)
+
         sandbox = SandBox()
         sandbox.root_dir = args.sandbox
 
-        cmd_line = sandbox.get_configuration()['cmd_line']
+        try:
+            cmd_line = sandbox.get_configuration()['cmd_line']
+        except (TypeError, KeyError) as msg:
+            warn_invalid(msg)
+            return
 
-        args_namespace = argparse.Namespace()
-        args_namespace.python = cmd_line[0]
         argument_parser = main(get_argument_parser=True)
 
         def error(message):
@@ -124,9 +130,9 @@ class SandBoxShowConfiguration(SandBoxAction):
         try:
             args = argument_parser.parse_args(cmd_line[2:])
         except SandBoxError as msg:
-            print('the configuration is invalid, the argument parser got the'
-                  'following error:')
-            print(msg)
+            warn_invalid(msg)
+            return
+
         for k, v in vars(args).iteritems():
             if k in self.keys:
                 print('%s = %s' % (k, v))
@@ -217,7 +223,7 @@ class SandBoxExec(SandBoxCreate):
                             host=None,
                             target=None,
                             qualifier=None):
-                pass
+                pass  # all: no cover
 
             for a in ('anod_install', 'anod_build', 'anod_test'):
                 cm.register_action(a, anod_action)

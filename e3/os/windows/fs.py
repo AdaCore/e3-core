@@ -167,7 +167,9 @@ class NTFile(object):
                                          pointer(result),
                                          sizeof(result),
                                          FileInfo.Internal.class_id)
-        if status < 0:
+        if status < 0:  # defensive code
+            # we should already have raised an error here when trying
+            # to open the file
             raise NTException(status=status,
                               message='cannot find file uid',
                               origin="NTFile.uid")
@@ -412,11 +414,12 @@ class NTFile(object):
                     # File is already open elsewhere for a non delete operation
                     # Try a few times to open it with relaxed share settings
                     shared_access = Share.ALL
-                elif e.status == Status.DELETE_PENDING:
-                    # file is already pending deletion so consider the deletion
+                elif e.status == Status.DELETE_PENDING:  # defensive code
+                    # file is already pending deletion (just after our call
+                    # to read_attributes) so consider the deletion
                     # is done and return
                     return
-                else:
+                else:  # defensive code
                     # We don't know what to do here so just fail
                     raise
 
@@ -480,7 +483,7 @@ class NTFile(object):
                             except NTException:
                                 pass
                     else:
-                        # Unknown error. If the file has been move away
+                        # Unknown error. If the file has been moved away
                         # consider it success. Otherwise reraise exception
                         if is_in_trash:
                             break

@@ -7,6 +7,7 @@ import e3.env
 import e3.fs
 import e3.os.process
 import e3.platform
+import yaml
 from e3.vcs.git import GitRepository
 
 import pytest
@@ -46,12 +47,12 @@ repositories:
 """
 
 
-def create_prolog(prolog_dir):
+def create_prolog(prolog_dir, content=PROLOG):
     """Create prolog.py file on the fly to prevent checkstyle error."""
     if os.path.isfile(os.path.join(prolog_dir, 'prolog.py')):
         return
     with open(os.path.join(prolog_dir, 'prolog.py'), 'w') as f:
-        f.write(PROLOG)
+        f.write(content)
 
 
 @pytest.fixture
@@ -143,11 +144,46 @@ def test_deploy_sandbox():
          'download', 'b']).out
 
 
+def test_sandbox_show_config_err():
+    """Check e3-sandbox show-config with invalid sandbox."""
+    sandbox_dir = os.getcwd()
+    sandbox_conf = os.path.join('meta', 'sandbox.yaml')
+    e3.os.process.Run(
+        ['e3-sandbox', '-v', '-v', 'create', sandbox_dir], output=None)
+    with open(sandbox_conf) as f:
+        conf = yaml.load(f.read())
+    conf['cmd_line'].append('--wrong-arg')
+    with open(sandbox_conf, 'w') as f:
+        yaml.dump(conf, stream=f)
+
+    assert 'the configuration is invalid' in e3.os.process.Run(
+        ['e3-sandbox', 'show-config', sandbox_dir]).out
+
+    with open(sandbox_conf, 'w') as f:
+        f.write('invalid')
+
+    assert 'the configuration is invalid' in e3.os.process.Run(
+        ['e3-sandbox', 'show-config', sandbox_dir]).out
+
+
 def test_sandbox_env():
     os.environ['GPR_PROJECT_PATH'] = '/foo'
     sandbox = e3.anod.sandbox.SandBox()
     sandbox.set_default_env()
     assert os.environ['GPR_PROJECT_PATH'] == ''
+
+
+def test_sandbox_rootdir():
+    sandbox = e3.anod.sandbox.SandBox()
+    with pytest.raises(e3.anod.sandbox.SandBoxError):
+        assert sandbox.root_dir
+
+    sandbox.root_dir = 'foo'
+    sandbox.root_dir = 'foo'
+    assert os.path.relpath(sandbox.tmp_dir, sandbox.root_dir) == 'tmp'
+    assert os.path.relpath(
+        sandbox.get_build_space('bar', 'build').root_dir,
+        os.path.join('foo', e3.env.Env().platform)) == 'bar'
 
 
 def test_sandbox_create_git(git_specs_dir):
@@ -188,6 +224,58 @@ def test_sandbox_exec_missing_spec_dir(git_specs_dir):
                                   'noplan', sandbox_dir])
     assert no_specs.status != 0
     assert 'spec directory nospecs does not exist' in no_specs.out
+
+
+def test_sandbox_exec_api_version(git_specs_dir):
+    """Test sandbox api version check."""
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+
+    e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
+    with open(os.path.join(sandbox_dir, 'test.plan'), 'w') as fd:
+        fd.write("anod_build('e3')\n")
+
+    specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
+    local_spec_dir = os.path.join(root_dir, 'specs')
+
+    e3.fs.sync_tree(specs_source_dir, local_spec_dir)
+    create_prolog(local_spec_dir, '')
+
+    # Test with local specs
+    p = e3.os.process.Run(['e3-sandbox', 'exec',
+                           '--spec-dir', os.path.join(root_dir, 'specs'),
+                           '--plan',
+                           os.path.join(sandbox_dir, 'test.plan'),
+                           sandbox_dir])
+    assert 'api_version should be set in prolog.py' in p.out
+
+
+def test_sandbox_action_errors(git_specs_dir):
+    """Test sandbox api version check."""
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+
+    e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
+    with open(os.path.join(sandbox_dir, 'test.plan'), 'w') as fd:
+        fd.write("anod_build('builderror')\n")
+        fd.write("anod_build('noaction')\n")
+        fd.write("anod_test('noaction')\n")
+
+    specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
+    local_spec_dir = os.path.join(root_dir, 'specs')
+
+    e3.fs.sync_tree(specs_source_dir, local_spec_dir)
+    create_prolog(local_spec_dir)
+
+    # Test with local specs
+    p = e3.os.process.Run(['e3-sandbox', 'exec',
+                           '--spec-dir', os.path.join(root_dir, 'specs'),
+                           '--plan',
+                           os.path.join(sandbox_dir, 'test.plan'),
+                           sandbox_dir])
+    assert 'Exception occurred in action' in p.out
+    assert 'build not implemented' in p.out
+    assert 'test not implemented' in p.out
 
 
 def test_sandbox_exec_missing_plan_file(git_specs_dir):

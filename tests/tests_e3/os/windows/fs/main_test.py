@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import contextlib
 import os
 import sys
+import time
 from datetime import datetime, timedelta
 
 from e3.fs import mkdir, rm
@@ -27,6 +28,8 @@ def test_read_attributes():
     test_file_path = os.path.join(work_dir, 'test_read_attr_file.txt')
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
+    assert 'test_read_attr_file.txt' in str(ntfile)
+
     ntfile.read_attributes()
     # On appveyor calling as_datetime fails because
     # ntfile.basic_info.change_time is equal to 0. Ignore this until
@@ -47,6 +50,8 @@ def test_write_attributes():
     ntfile.open(Access.READ_ATTRS)
     ntfile.basic_info.change_time = FileTime(
         datetime.now() - timedelta(seconds=3600))
+    assert str(time.localtime().tm_year) in \
+        str(ntfile.basic_info.change_time)
     try:
         with pytest.raises(NTException):
             ntfile.write_attributes()
@@ -237,6 +242,8 @@ def test_unlink():
         touch(deleted_file_path)
         ntfile2.read_attributes()
         ntfile2.basic_info.file_attributes.attr |= FileAttribute.READONLY
+
+        assert 'READONLY' in str(ntfile2.basic_info.file_attributes)
         ntfile2.write_attributes()
         ntfile2.unlink()
 
@@ -260,3 +267,9 @@ def test_unlink():
         ntfile.close()
         ntfile2.close()
         ntfile2.close()
+
+    ntfile = NTFile('nul')
+    with pytest.raises(NTException) as err:
+        ntfile.unlink()
+    ntfile.close()
+    assert 'NTFile.read_attributes:' in str(err)

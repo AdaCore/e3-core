@@ -48,7 +48,7 @@ class Main(object):
         :param platform_args: add --build, --host, --target support
         :type platform_args: bool
         """
-        # Set a signal handler for SIGTERM that will raise SystemExit
+        # On UNIX set a signal handler for SIGTERM that will raise SystemExit
         # This is to let an e3 application enough time to perform
         # cleanup steps when killed by rlimit. rlimit first send a SIGTERM
         # then a SIGKILL 5 seconds later
@@ -126,7 +126,7 @@ class Main(object):
         self.argument_parser = argument_parser
         self.__log_handlers_set = False
 
-        def sigterm_handler(sig, frame):
+        def sigterm_handler(sig, frame):  # unix-only
             """Automatically convert SIGTERM to SystemExit exception.
 
             This is done to give enough time to an application killed by
@@ -138,7 +138,8 @@ class Main(object):
             logging.critical('SIGTERM received')
             raise SystemExit('SIGTERM received')
 
-        signal.signal(signal.SIGTERM, sigterm_handler)
+        if sys.platform != 'win32':  # unix-only
+            signal.signal(signal.SIGTERM, sigterm_handler)
 
     def parse_args(self, args=None, known_args_only=False):
         """Parse options and set console logger.

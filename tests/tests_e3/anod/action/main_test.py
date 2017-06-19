@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import e3.anod.action as action
 import e3.anod.spec
+import e3.collection.dag
 import e3.env
 
 
@@ -98,3 +99,56 @@ def test_initall():
     assert boi_decision.get_decision() is None
     boi_decision.set_decision(action.Decision.LEFT)
     assert boi_decision.get_decision() == build.uid
+
+
+def test_trigger():
+    """Test Decision triggers."""
+    class Spec(e3.anod.spec.Anod):
+        uid = 'my_source_uid'
+        name = 'my_source_spec'
+
+    dag = e3.collection.dag.DAG()
+
+    root = action.Root()
+
+    build_spec = Spec(qualifier='', kind='build')
+    build_spec.name = 'my_spec'
+    build_spec.env = e3.env.Env()
+    build = action.Build(anod_instance=build_spec)
+
+    build_spec2 = Spec(qualifier='', kind='build')
+    build_spec2.name = 'my_spec2'
+    build_spec2.env = e3.env.Env()
+    build2 = action.Build(anod_instance=build_spec2)
+
+    install2 = action.Install(anod_instance=build_spec2)
+
+    dag.add_vertex(root)
+
+    # Add a trigger on 'build'
+    decision = action.Decision(root=root, left=build2, right=install2)
+    decision.add_trigger(build, action.Decision.LEFT)
+
+    decision.apply_triggers(dag)
+
+    assert decision.get_expected_decision() is None
+    # 'build' not in dag --> expected decision is None
+
+    dag.add_vertex(build.uid, build)
+    decision.apply_triggers(dag)
+    assert decision.get_expected_decision() == build2.uid
+
+    # Now change the decision, applying the trigger again should show the
+    # conflict
+    decision.expected_choice = action.Decision.RIGHT
+    decision.apply_triggers(dag)
+    assert decision.get_expected_decision() is None  # Decision.BOTH
+
+    # Set back to the expected choice and ask for another one
+    decision.expected_choice = build2.uid
+    decision.set_decision(action.Decision.RIGHT)
+    assert decision.get_decision() is None  # Decision.BOTH
+
+    # Also change the expected choice to RIGHT
+    decision.expected_choice = action.Decision.RIGHT
+    assert decision.get_expected_decision() == install2.uid

@@ -81,13 +81,13 @@ class Dependency(object):
                      'source_pkg': 'source'}[require]
         self.track = track
 
-    def env(self, parent, default_env=None):
+    def env(self, parent, default_env):
         """Retrieve env for the dependency.
 
         :param parent: Anod instance in which the dep was declared
         :type parent: Anod
         :param default_env: default env for the current context
-        :type default_env: BaseEnv | None
+        :type default_env: BaseEnv
         :return: env object that should be used by the dependency
         :rtype: BaseEnv
         """
@@ -95,7 +95,7 @@ class Dependency(object):
         # and adjust it based on dependency parameters
         dep_env = BaseEnv(parent.env.build, parent.env.host, parent.env.target)
 
-        if self.build == 'default' and default_env is not None:
+        if self.build == 'default':
             # For simulation purposes we sometimes load specs as if it was
             # load on a non local machine thus 'default' does not correspond
             # to the default build platform of the local machine.

@@ -270,6 +270,13 @@ def test_sync_tree_links():
         assert f.read() == 'content'
 
 
+def test_sync_tree_does_not_exist():
+    """Check error message when sync_tree source does not exist."""
+    with pytest.raises(e3.fs.FSError) as err:
+        e3.fs.sync_tree('doesnotexist', 'dest')
+    assert 'doesnotexist does not exist' in str(err)
+
+
 def test_rm_on_error():
     e3.fs.mkdir('a')
     e3.fs.mkdir('a/b')

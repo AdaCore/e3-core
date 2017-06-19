@@ -430,7 +430,7 @@ class AbstractBaseEnv(object):
             discs.extend((
                 self.target.os.name,
                 self.target.os.name + '-' + self.target.os.version))
-        if self.target.os.name.startswith('vxworks'):
+        if self.target.os.name.startswith('vxworks'):  # all: no cover
             discs.append('vxworks')
         if not self.is_cross:
             discs.append('native')
@@ -440,7 +440,7 @@ class AbstractBaseEnv(object):
 
         if (not self.is_cross and not self.is_canadian) and \
                 self.build.is_virtual:
-            discs.append('virtual_machine')
+            discs.append('virtual_machine')  # all: no cover
 
         return discs
 
@@ -530,11 +530,11 @@ class BaseEnv(AbstractBaseEnv):
 
         :param build: build architecture. If None then it is set to default
             build
-        :type build: Arch | None
+        :type build: Platform | None
         :param host: host architecture. If None then it is set to build
-        :type host: Arch | None
+        :type host: Platform | None
         :param target: target architecture. If None then it is set to target
-        :type target: Arch | None
+        :type target: Platform | None
         """
         # class variable that holds the current environment
         self._instance = {}
@@ -551,10 +551,7 @@ class BaseEnv(AbstractBaseEnv):
 
     def __getattr__(self, name):
         try:
-            if name in ('_instance', '_context'):
-                return self.__dict__[name]
-            else:
-                return self._instance[name]
+            return self._instance[name]
         except KeyError as e:
             raise AttributeError(e), None, sys.exc_traceback
 
@@ -627,12 +624,7 @@ class Env(AbstractBaseEnv):
 
     def __getattr__(self, name):
         try:
-            if name == '_instance':
-                return Env._instance
-            elif name == '_context':
-                return Env._context
-            else:
-                return self._instance[name]
+            return self._instance[name]
         except KeyError as e:
             raise AttributeError(e), None, sys.exc_traceback
 

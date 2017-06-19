@@ -93,6 +93,12 @@ def test_include():
         [('b', OrderedDict([('a', 4)])),
          ('c', OrderedDict([('a', 4)]))])
 
+    with pytest.raises(IOError) as err:
+        yaml.load('b: !include foo.yaml\n',
+                  e3.yaml.OrderedDictYAMLLoader)
+    assert 'No such file or directory' in str(err)
+    assert 'foo.yaml' in str(err)
+
 
 def test_duplicatekey():
     """Duplicated key should be rejected by load_ordered."""

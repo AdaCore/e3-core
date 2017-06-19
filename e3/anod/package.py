@@ -213,10 +213,6 @@ class SourceBuilder(object):
             else:
                 return self.__apply_patch
 
-    def add_repository(self, repository):
-        """Add new Repository object."""
-        self.repositories[repository.name] = repository
-
 
 class UnmanagedSourceBuilder(SourceBuilder):
     """Source builder for sources not managed by anod."""

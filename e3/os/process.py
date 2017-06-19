@@ -52,7 +52,7 @@ def subprocess_setup():
     """
     # Set sigpipe only when set_sigpipe is True
     # This should fix HC16-020 and could be activated by default
-    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # all: no cover
 
 
 def get_rlimit(platform=None):
@@ -190,7 +190,7 @@ class Run(object):
     def __init__(self, cmds, cwd=None, output=PIPE,
                  error=STDOUT, input=None, bg=False, timeout=None,
                  env=None, set_sigpipe=True, parse_shebang=False,
-                 ignore_environ=True, python_executable=sys.executable):
+                 ignore_environ=True):
         """Spawn a process.
 
         :param cmds: two possibilities:
@@ -231,8 +231,6 @@ class Run(object):
             environment variables currently defined (os.environ) augmented by
             the ones provided in env.
         :type ignore_environ: bool
-        :param python_executable: name or path to the python executable
-        :type python_executable: str
 
         :raise OSError: when trying to execute a non-existent file.
 
@@ -248,11 +246,8 @@ class Run(object):
             If the #! line cannot be parsed, just return the cmd_line
             unchanged
 
-            If the interpreter command line contains /usr/bin/env python it
-            will be replaced by the value of python_executable
-
             On windows, /usr/bin/env will be ignored to avoid a dependency on
-            cygwin
+            cygwin and /bin/bash & /bin/sh are replaced by $SHELL if defined.
             :param cmd_line: command line
             :type cmd_line: list[str]
             """
@@ -284,15 +279,7 @@ class Run(object):
                 else:
                     cmd_line = [prog]
 
-                # If the interpreter is '/usr/bin/env python', use
-                # python_executable instead to keep the same python executable
-                if interpreter_cmds[0:2] == ['/usr/bin/env', 'python']:
-                    if len(interpreter_cmds) > 2:
-                        return [python_executable] + \
-                            interpreter_cmds[2:] + cmd_line
-                    else:
-                        return [python_executable] + cmd_line
-                elif sys.platform == 'win32':  # unix: no cover
+                if sys.platform == 'win32':  # unix: no cover
                     if interpreter_cmds[0] == '/usr/bin/env':
                         return interpreter_cmds[1:] + cmd_line
                     elif interpreter_cmds[0] in ('/bin/bash', '/bin/sh') and \
@@ -395,7 +382,7 @@ class Run(object):
 
                     self.internal = runs[-1]
 
-        except Exception as e:
+        except Exception as e:  # defensive code
             self.__error(e, self.cmds)
             raise
 
@@ -672,15 +659,15 @@ def wait_for_processes(process_list, timeout):
                         pass
 
                 remain = timeout - time.time() + start
+
+            logger.warning('no process ended after %f seconds',
+                           time.time() - start)  # defensive code
+
         finally:
             # Be sure to remove signal handler and close pipe
             signal.signal(signal.SIGCHLD, 0)
             os.close(fd_r)
             os.close(fd_w)
-
-        logger.warning('no process ended after %f seconds',
-                       time.time() - start)
-        return None
 
 
 def is_running(pid):
@@ -744,8 +731,8 @@ def kill_processes_with_handle(path):
             logger.debug("taskkill output:\n%s", taskkill_p.out)
             msg += "taskkill output:\n%s" % taskkill_p.out
         return msg
-    else:
-        return ''
+    else:  # defensive code
+        raise NotImplementedError('currently only supported on windows')
 
 
 def kill_process_tree(pid, timeout=3):
@@ -805,6 +792,6 @@ def kill_process_tree(pid, timeout=3):
         psutil.wait_procs(children, timeout=timeout)
         parent_process.wait(timeout=timeout)
         return True
-    except psutil.TimeoutExpired as err:
+    except psutil.TimeoutExpired as err:  # defensive code
         e3.log.debug(err)
         return False

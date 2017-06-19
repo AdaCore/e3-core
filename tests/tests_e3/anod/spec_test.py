@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from e3.anod.driver import AnodDriver
-from e3.anod.error import AnodError, ShellError
+from e3.anod.error import AnodError, ShellError, SpecError
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 
@@ -39,6 +39,29 @@ def test_simple_spec():
 
     simple_test_with_bar = Simple('with_bar=true', kind='test')
     assert len(simple_test_with_bar.test_source_list) == 2
+
+
+def test_spec_buildvars():
+    """Build vars are used by the driver and not visible in deps."""
+    class MySpec(Anod):
+
+        build_deps = [Anod.BuildVar('key', 'value')]
+
+        @Anod.primitive()
+        def build(self):
+            pass
+
+    ms = MySpec('', kind='build')
+    assert len(ms.deps) == 0
+
+
+def test_spec_wrong_dep():
+    """Check exception message when wrong dependency is set."""
+    with pytest.raises(SpecError) as err:
+        Anod.Dependency('foo', require='invalid')
+
+    assert 'require should be build_tree, installation or source_pkg not ' \
+           'invalid' in str(err)
 
 
 def test_primitive():

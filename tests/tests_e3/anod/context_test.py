@@ -210,3 +210,30 @@ class TestContext(object):
 
         with pytest.raises(SchedulingError):
             ac.schedule(ac.always_download_source_resolver)
+
+    def test_add_anod_action11(self):
+        """Check build dependencies."""
+        ac = self.create_context()
+        ac.add_anod_action('spec10', primitive='build')
+
+        # we have a dep on spec3 build_pkg, we require an explicit call to
+        # build
+        with pytest.raises(SchedulingError) as err:
+            ac.schedule(ac.always_download_source_resolver)
+
+        assert '.build (expected)' in str(err)
+
+        ac.add_anod_action('spec3', primitive='install')
+        with pytest.raises(SchedulingError) as err:
+            ac.schedule(ac.always_download_source_resolver)
+
+        assert 'is expected after' in str(err)
+
+    def test_add_anod_action12(self):
+        """Check handling of duplicated source package."""
+        ac = self.create_context()
+        ac.add_anod_action('spec12', primitive='build')
+        result = ac.schedule(ac.always_download_source_resolver)
+        keys = set(result.vertex_data.keys())
+        assert 'download.spec1-src' in keys
+        assert 'download.unmanaged-src' in keys

@@ -14,7 +14,7 @@ from e3.text import format_with_dict
 
 try:
     from yaml import CLoader as Loader
-except ImportError:
+except ImportError:  # defensive code
     from yaml import Loader
 
 
@@ -256,11 +256,6 @@ class CaseParser(object):
         """
         if not isinstance(data, dict):
             return self.__format_value(data)
-
-        if cursor is None:
-            cursor = self.__state
-        if prefix is None:
-            prefix = ()
 
         for key in data:
             if key.startswith(self.case_prefix):

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import smtplib
+from email.utils import make_msgid
 
 import e3.net.smtp
 
@@ -27,7 +28,7 @@ def test_sendmail():
             msg_as_string)
 
 
-def test_sendmail_onerror():
+def test_sendmail_onerror(caplog):
     from_addr = 'e3@example.net'
     to_addresses = ['info@example.net', 'info@example.com']
     msg_as_string = 'test mail content'
@@ -37,8 +38,9 @@ def test_sendmail_onerror():
         to_addresses,
         msg_size_exceed,
         ['smtp.localhost'],
-        max_size=8 / 1024)
+        max_size=1 / 1024)
     assert result is False
+    assert 'message file too big' in caplog.text
 
     with mock.patch('smtplib.SMTP') as mock_smtp:
         mock_smtp.side_effect = smtplib.SMTPException()
@@ -62,9 +64,31 @@ def test_sendmail_onerror():
     with mock.patch('smtplib.SMTP') as mock_smtp:
         smtp_mock = mock_smtp.return_value
         smtp_mock.sendmail.return_value = {}
+
+        mid = make_msgid()
         result = e3.net.smtp.sendmail(
             from_addr,
             to_addresses,
             msg_as_string,
-            ['smtp.localhost'])
+            ['smtp.localhost'],
+            message_id=mid)
         assert result is True
+        assert 'Message-ID: %s sent successfully' % mid in caplog.text
+        assert 'smtp quit' in caplog.text
+
+    with mock.patch('smtplib.SMTP') as mock_smtp:
+        smtp_mock = mock_smtp.return_value
+        smtp_mock.sendmail.return_value = {}
+
+        def error_on_quit():
+            raise smtplib.SMTPException('error on quit ignored')
+        smtp_mock.quit = error_on_quit
+        mid = make_msgid()
+        result = e3.net.smtp.sendmail(
+            from_addr,
+            to_addresses,
+            msg_as_string,
+            ['smtp.localhost'],
+            message_id=mid)
+        assert result is True
+        assert 'Message-ID: %s sent successfully' % mid in caplog.text

@@ -15,6 +15,7 @@ def test_simple_dag():
         result.append(vertex_id)
     result.sort()
     assert result == ['a', 'b', 'c']
+    assert d.check() is None
 
 
 def test_add_vertex():

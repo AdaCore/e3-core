@@ -42,6 +42,10 @@ def test_fingerprint():
         f5.add('f4', f4)
     assert 'f4 should be a string' in str(err.value)
 
+    f6 = Fingerprint()
+    f6.add('unicode', u'6')
+    assert len(f6.sha1()) == 40
+
 
 def test_fingerprint_version():
     """Changing the FINGERPRINT_VERSION modify the fingerprint sha1."""
@@ -64,3 +68,17 @@ def test_invalid_fingerprint():
     with pytest.raises(AnodError):
         f1 = Fingerprint()
         f1.add('invalid', {})
+
+
+def test_fingerprint_eq():
+    """Check fingerprint __eq__ function."""
+    f1 = Fingerprint()
+    f1.add('1', '1')
+    assert f1 != 1
+
+    f2 = Fingerprint()
+    f2.add('1', '1')
+    f2.add('2', '2')
+    assert f1 != f2
+
+    assert f1.compare_to(f1) is None
