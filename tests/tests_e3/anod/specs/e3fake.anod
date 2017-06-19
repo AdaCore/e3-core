@@ -1,8 +1,5 @@
-import os
-
 from e3.anod.loader import spec
 from e3.anod.spec import Anod
-from e3.fs import VCS_IGNORE_LIST, sync_tree
 
 
 class e3fake(spec('anod')):
@@ -13,12 +10,7 @@ class e3fake(spec('anod')):
     def source_pkg_build(self):
 
         def prepare_src(repos, dest):
-            # only one repo
-            working_dir = list(repos.values())[0]['working_dir']
-
-            sync_tree(working_dir, dest,
-                      ignore=list(VCS_IGNORE_LIST),
-                      delete=True)
+            pass
 
         return [Anod.SourceBuilder(
             name='e3-fake-src',
@@ -26,13 +18,8 @@ class e3fake(spec('anod')):
             prepare_src=prepare_src,
             checkout=['e3-fake-github'])]
 
-    test_deps = [Anod.Dependency('python-virtualenv',
-                                 local_name='python',
-                                 require='installation')]
-
     test_source_list = [Anod.Source('e3-fake-src', publish=True)]
 
     @Anod.primitive()
     def test(self):
-        self.deps['python'].setenv()
-        self.shell('tox', cwd=self['SRC_DIR'])
+        self.shell('ls', cwd=self['SRC_DIR'])
