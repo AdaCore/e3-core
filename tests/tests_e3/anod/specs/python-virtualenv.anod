@@ -12,9 +12,13 @@ class PythonVirtualEnv(spec('anod')):
     """
 
     def setenv(self):
+        if self.env.build.os.name == 'windows':
+            activate_subpath = 'Scripts'
+        else:
+            activate_subpath = 'bin'
         activate_file = os.path.join(
-            self['INSTALL_DIR'], 'bin', 'activate_this.py')
-        exec(open(activate_file).read(), dict(__file__=activate_file))
+            self['INSTALL_DIR'], activate_subpath, 'activate_this.py')
+        execfile(activate_file, dict(__file__=activate_file))
 
     @Anod.primitive()
     def build(self):
