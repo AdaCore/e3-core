@@ -26,8 +26,9 @@ def test_mainprog():
     assert 'mymain' in p.out
 
 
-@pytest.mark.skipif(sys.platform == 'win32',
-                    reason='Signal handler not set on windows')
+@pytest.mark.skipif(sys.platform in ('win32', 'sunos5'),
+                    reason='Signal handler not set on windows.'
+                           ' Bug in signal handling in solaris')
 def test_sigterm():
     with open('mymain.py', 'w') as f:
         f.write('\n'.join((
