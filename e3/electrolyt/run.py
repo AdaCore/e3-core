@@ -47,9 +47,8 @@ class ElectrolytJob(Job):
                 method_name = 'do_%s' % class_name.lower()
                 if self.dry_run:
                     return
-                try:
-                    anod_action = getattr(self, method_name)
-                except AttributeError:
+                anod_action = getattr(self, method_name, None)
+                if anod_action is None:
                     logger.error('method not implemented %s', method_name)
                 else:
                     try:
