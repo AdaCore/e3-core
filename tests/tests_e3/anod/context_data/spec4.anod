@@ -15,3 +15,7 @@ class Spec4(Anod):
     @Anod.primitive()
     def install(self):
         pass
+
+    @Anod.primitive()
+    def test(self):
+        pass

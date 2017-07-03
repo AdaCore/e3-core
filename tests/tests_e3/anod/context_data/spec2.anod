@@ -10,3 +10,7 @@ class Spec2(Anod):
         SourceBuilder(name='spec2-src',
                       fullname=lambda x: 'spec2-src',
                       checkout=['spec2-git'])]
+
+    @Anod.primitive()
+    def build(self):
+        pass

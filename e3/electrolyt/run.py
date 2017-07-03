@@ -66,11 +66,6 @@ class ElectrolytJob(Job):
                                  store=self.store)
         anod_driver.activate()
         anod_driver.anod_instance.build_space.create(quiet=True)
-        if getattr(anod_driver.anod_instance, 'build', None) is None:
-            logger.error('primitive build not implemented in the spec %s',
-                         self.data.anod_instance)
-            self.status = STATUS.failure
-            return
         anod_driver.anod_instance.build()
         self.status = STATUS.success
 
@@ -81,11 +76,6 @@ class ElectrolytJob(Job):
                                  store=self.store)
         anod_driver.activate()
         anod_driver.anod_instance.build_space.create(quiet=True)
-        if getattr(anod_driver.anod_instance, 'test', None) is None:
-            logger.error('primitive test not implemented in the spec %s',
-                         self.data.anod_instance)
-            self.status = STATUS.failure
-            return
         anod_driver.anod_instance.test()
         self.status = STATUS.success
 
