@@ -1,5 +1,5 @@
 from e3.anod.spec import Anod
-from e3.anod.package import SourceBuilder, Source
+from e3.anod.package import Source
 
 
 class Spec12(Anod):
@@ -9,6 +9,6 @@ class Spec12(Anod):
     build_deps = [Anod.Dependency('spec11', require='build_tree'),
                   Anod.Dependency('spec1', require='source_pkg')]
 
-    @Anod.primitive
-    def build():
+    @Anod.primitive()
+    def build(self):
         pass

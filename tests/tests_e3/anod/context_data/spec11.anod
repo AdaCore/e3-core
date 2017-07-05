@@ -18,6 +18,6 @@ class Spec11(Anod):
             checkout=['spec1-git']),
         ExternalSourceBuilder(name='external-src')]
 
-    @Anod.primitive
-    def build():
+    @Anod.primitive()
+    def build(self):
         pass

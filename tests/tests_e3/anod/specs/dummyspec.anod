@@ -1,30 +1,36 @@
 from e3.anod.loader import spec
+from e3.anod.package import Package
 from e3.anod.spec import Anod
 from e3.fs import sync_tree
 
 
 class dummyspec(spec('anod')):
-    """Fake spec for the test suite.
-    """
+    """Fake spec for the test suite."""
     @property
     def source_pkg_build(self):
 
         def prepare_src(repos, dest):
-             sync_tree(list(repos.values())[0]['working_dir'],
-                       dest)
+            sync_tree(list(repos.values())[0]['working_dir'],
+                      dest)
 
         return [Anod.SourceBuilder(
-            name='e3-fake-src',
-            fullname=lambda x: 'e3-fake-src.tgz',
+            name='dummy-src',
+            fullname=lambda x: 'dummy-src.tgz',
             prepare_src=prepare_src,
-            checkout=['e3-fake-github'])]
+            checkout=['dummy-github'])]
 
-    test_source_list = [Anod.Source('e3-fake-src', publish=True)]
+    test_source_list = [Anod.Source('dummy-src', publish=True)]
+
+    package = Package('dummypkg')
 
     @Anod.primitive()
     def build(self):
-        pass
+        print('I am building')
+
+    @Anod.primitive()
+    def install(self):
+        print('I am installing')
 
     @Anod.primitive()
     def test(self):
-        pass
+        print('I am testing')

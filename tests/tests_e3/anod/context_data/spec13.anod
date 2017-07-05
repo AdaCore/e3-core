@@ -1,0 +1,11 @@
+from e3.anod.package import Package
+from e3.anod.spec import Anod
+
+
+class Spec13(Anod):
+
+    package = Package('pkg')
+
+    @Anod.primitive()
+    def install(self):
+        pass

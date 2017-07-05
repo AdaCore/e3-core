@@ -8,6 +8,6 @@ class Spec9(Anod):
 
     build_deps = [Anod.Dependency(name='spec2', require='source_pkg')]
 
-    @Anod.primitive
-    def build():
+    @Anod.primitive()
+    def build(self):
         pass

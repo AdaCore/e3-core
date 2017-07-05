@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
-from e3.anod.action import Build
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError
 from e3.anod.loader import AnodSpecRepository
@@ -56,21 +55,11 @@ class TestContext(object):
     def test_add_anod_action(self):
         # Load spec1 with build primitive
         ac = self.create_context()
-        node = ac.add_anod_action('spec1', primitive='build')
-        # ??? spec1 does not have a build primitive ???
-        # ??? should we consider a default build primitive exist or no ???
 
-        # spec1 is a simple spec we expect only 2 nodes root and build node
-        assert len(ac.tree) == 2, ac.tree.as_dot()
-        assert isinstance(node, Build)
-        assert set(ac.tree.vertex_data.keys()) == \
-            set(('root', 'mylinux.x86-linux.spec1.build'))
-
-        # the result should be schedulable
-        result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 2, result.as_dot()
-        assert set(result.vertex_data.keys()) == \
-            set(('root', 'mylinux.x86-linux.spec1.build'))
+        # the result should not be schedulable as there is no build
+        # primitive defined in spec1
+        with pytest.raises(SchedulingError):
+            print(ac.add_anod_action('spec1', primitive='build'))
 
     def test_add_anod_action2(self):
         # Simple spec with sources associated to the build primitive
@@ -237,3 +226,13 @@ class TestContext(object):
         keys = set(result.vertex_data.keys())
         assert 'download.spec1-src' in keys
         assert 'download.unmanaged-src' in keys
+
+    def test_add_anod_action13(self):
+        """Check handling of install without build."""
+        ac = self.create_context()
+        ac.add_anod_action('spec13', primitive='install')
+        result = ac.schedule(ac.always_download_source_resolver)
+        keys = set(result.vertex_data.keys())
+        assert len(keys) == 3, keys
+        assert 'mylinux.x86-linux.spec13.download_bin' in keys
+        assert 'mylinux.x86-linux.spec13.install' in keys

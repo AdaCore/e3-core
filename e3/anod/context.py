@@ -295,6 +295,10 @@ class AnodContext(object):
         if result in self:
             return result
 
+        if not has_primitive(spec, primitive):
+            raise SchedulingError('spec %s does not support primitive %s'
+                                  % (name, primitive))
+
         # Add the action in the DAG
         self.add(result)
 

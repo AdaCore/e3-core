@@ -59,6 +59,10 @@ def has_primitive(anod_instance, name):
 
     :rtype: bool
     """
+    if name == 'source':
+        source_pkg_build = getattr(anod_instance, 'source_pkg_build', None)
+        return source_pkg_build is not None
+
     try:
         func = getattr(anod_instance, name)
         is_primitive = getattr(func, 'is_primitive')

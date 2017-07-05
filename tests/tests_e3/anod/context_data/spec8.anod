@@ -10,3 +10,7 @@ class Spec8(Anod):
         SourceBuilder(name='spec8-src',
                       fullname=lambda x: 'spec8-src',
                       checkout=['spec8-git'])]
+
+    @Anod.primitive()
+    def build(self):
+        pass
