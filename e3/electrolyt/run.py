@@ -167,7 +167,7 @@ class ElectrolytJobFactory(object):
 
     def collect(self, job):
         self.job_status[job.uid] = job.status
-        logger.info("%-48s [queue=%-10s status=%3d]" %
+        logger.info("%-48s [queue=%-10s status=%03d]" %
                     (job.data, job.queue_name,
                      self.job_status[job.uid].value))
 
