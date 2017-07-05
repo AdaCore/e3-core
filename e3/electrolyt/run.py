@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import sys
+import traceback
 
 import e3.log
 from e3.anod.driver import AnodDriver
@@ -34,49 +36,45 @@ class ElectrolytJob(Job):
         :param dry_run: if True report kind of action without execution
         :param dry_run: bool
         """
-        Job.__init__(self, uid, data, notify_end)
+        super(ElectrolytJob, self).__init__(uid, data, notify_end)
         self.status = force_status
         self.sandbox = sandbox
         self.dry_run = dry_run
         self.store = store
 
     def run(self):
-        if self.status == STATUS.status_unknown:
-            for class_name in [
-                    k.__name__ for k in self.data.__class__.__mro__]:
-                method_name = 'do_%s' % class_name.lower()
-                if self.dry_run:
-                    return
-                anod_action = getattr(self, method_name, None)
-                if anod_action is None:
-                    logger.error('method not implemented %s', method_name)
-                else:
-                    try:
-                        anod_action()
-                    except Exception as e:
-                        self.status = STATUS.failure
-                        logger.error('Exception occurred in action %s %s',
-                                     method_name, e)
+        if self.status == STATUS.status_unknown and not self.dry_run:
+            try:
+                getattr(self, self.data.run_method)()
+            except Exception as e:
+                self.status = STATUS.failure
+                logger.error(
+                    'Exception occurred in action %s %s',
+                    self.data.run_method, e)
+                _, _, exc_traceback = sys.exc_info()
+                logger.error(traceback.format_tb(exc_traceback))
+
+    def run_anod_primitive(self, primitive=None):
+        """Run an anod primitive after setting up the sandbox."""
+        self.data.anod_instance.sandbox = self.sandbox
+        anod_driver = AnodDriver(anod_instance=self.data.anod_instance,
+                                 store=self.store)
+        anod_driver.activate()
+        anod_driver.anod_instance.build_space.create(quiet=True)
+        getattr(anod_driver.anod_instance, primitive)()
+        self.status = STATUS.success
 
     def do_build(self):
-        """Run the build primitive after setting up the sandbox."""
-        self.data.anod_instance.sandbox = self.sandbox
-        anod_driver = AnodDriver(anod_instance=self.data.anod_instance,
-                                 store=self.store)
-        anod_driver.activate()
-        anod_driver.anod_instance.build_space.create(quiet=True)
-        anod_driver.anod_instance.build()
-        self.status = STATUS.success
+        """Run anod build primitive."""
+        return self.run_anod_primitive('build')
+
+    def do_install(self):
+        """Run anod install primitive."""
+        return self.run_anod_primitive('install')
 
     def do_test(self):
-        """Run the test primitive."""
-        self.data.anod_instance.sandbox = self.sandbox
-        anod_driver = AnodDriver(anod_instance=self.data.anod_instance,
-                                 store=self.store)
-        anod_driver.activate()
-        anod_driver.anod_instance.build_space.create(quiet=True)
-        anod_driver.anod_instance.test()
-        self.status = STATUS.success
+        """Run anod test primitive."""
+        return self.run_anod_primitive('test')
 
     def do_checkout(self):
         """Get sources from vcs to sandbox vcs_dir."""

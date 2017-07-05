@@ -25,12 +25,12 @@ class dummyspec(spec('anod')):
 
     @Anod.primitive()
     def build(self):
-        pass
+        print('I am building')
 
     @Anod.primitive()
     def install(self):
-        pass
+        print('I am installing')
 
     @Anod.primitive()
     def test(self):
-        pass
+        print('I am testing')

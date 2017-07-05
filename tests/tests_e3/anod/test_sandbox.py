@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
+import e3.anod.helper
 import e3.anod.sandbox
 import e3.env
 import e3.fs
@@ -311,14 +312,33 @@ def test_sandbox_exec_success(git_specs_dir):
     e3.fs.sync_tree(specs_source_dir, local_spec_dir)
     create_prolog(local_spec_dir)
 
+    e3.anod.helper.text_replace(
+        os.path.join(local_spec_dir, 'conf.yaml'),
+        [(b'GITURL', git_specs_dir.encode('utf-8'))])
+
     # Test with local specs
     p = e3.os.process.Run(['e3-sandbox', 'exec',
                            '--spec-dir', local_spec_dir,
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
-                           '--dry-run',
                            sandbox_dir])
     assert 'build dummyspec for %s' % platform in p.out
+    assert 'result: OK' in p.out
+
+    with open(os.path.join(sandbox_dir, 'test.plan'), 'w') as fd:
+        fd.write("anod_build('dummyspec')\n")
+        fd.write("anod_test('dummyspec')\n")
+
+    p = e3.os.process.Run(['e3-sandbox', 'exec',
+                           '--spec-dir', local_spec_dir,
+                           '--plan',
+                           os.path.join(sandbox_dir, 'test.plan'),
+                           sandbox_dir])
+    assert 'build dummyspec for %s' % platform in p.out
+    assert 'test dummyspec for %s' % platform in p.out
+    assert 'I am building' in p.out, p.out
+    assert 'I am testing' in p.out, p.out
+    assert p.status == 0
 
     # Test with git module
     p = e3.os.process.Run(['e3-sandbox', 'exec',
@@ -328,6 +348,7 @@ def test_sandbox_exec_success(git_specs_dir):
                            '--dry-run',
                            '--create-sandbox', sandbox_dir])
     assert 'build dummyspec for %s' % platform in p.out
+    assert 'test dummyspec for %s' % platform in p.out
 
 
 def test_anod_plan(git_specs_dir):

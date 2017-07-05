@@ -20,6 +20,10 @@ class Action(object):
         self.uid = uid
         self.data = data
 
+    @property
+    def run_method(self):
+        return 'do_%s' % self.__class__.__name__.lower()
+
 
 class Root(Action):
     """Root action.
