@@ -226,3 +226,13 @@ class TestContext(object):
         keys = set(result.vertex_data.keys())
         assert 'download.spec1-src' in keys
         assert 'download.unmanaged-src' in keys
+
+    def test_add_anod_action13(self):
+        """Check handling of install without build."""
+        ac = self.create_context()
+        ac.add_anod_action('spec13', primitive='install')
+        result = ac.schedule(ac.always_download_source_resolver)
+        keys = set(result.vertex_data.keys())
+        assert len(keys) == 3, keys
+        assert 'mylinux.x86-linux.spec13.download_bin' in keys
+        assert 'mylinux.x86-linux.spec13.install' in keys
