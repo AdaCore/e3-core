@@ -136,3 +136,17 @@ def test_dump_traceback():
     assert os.path.exists(trace_file)
     with open(trace_file) as f:
         assert 'dumping traceback now' in f.read()
+
+
+def test_reset_tmp_dir():
+    """Check that the tmp_dir is reset when the build space is created.
+
+    REQ-EC19.
+    """
+    bs = BuildSpace(root_dir=os.getcwd(), primitive='build')
+    marker = os.path.join(bs.get_subdir(name='tmp'), 'deleteme')
+    mkdir(bs.tmp_dir)
+    touch(marker)
+    assert os.path.exists(marker)
+    bs.create()
+    assert not os.path.exists(marker)
