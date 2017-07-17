@@ -1,0 +1,48 @@
+REQ-EC1:
+    desc: Failing to write in the local filesystem causes an anod action to be requeued
+REQ-EC2:
+    desc: All sources used in the context of an anod action are tracked in the build space
+REQ-EC3:
+    desc: electrolyt tracks the origin and license of all sources
+REQ-EC4:
+    desc: two identical anod commands always use the same build space
+REQ-EC5:
+    desc: after a specification file update, an anod action using that specification file is never skipped
+REQ-EC6:
+    desc: after a configuration file update, an anod action using that specification file is never skipped
+REQ-EC7:
+    desc: For a given anod spec, an update of any of its dependencies, an anod action using that spec is never skipped.
+REQ-EC8:
+    desc: For a given anod spec, an update of any of its resources, an anod action using that spec is never skipped.
+REQ-EC9:
+    desc: For a given anod spec, running a second time an anod action which has failed does never result in a SKIP.
+REQ-EC10:
+    desc: After an anod Spec API update, an anod action is never skipped.
+REQ-EC11:
+    desc: After a build OS version update (Eg. update of build machine from RH5 to RH5.5), an anod action is never skipped.
+REQ-EC12:
+    desc: For each repository associated with a source used in a given anod spec, when the patch applicable to that repository has been added/changed/removed, any action using that anod spec is never skipped.
+REQ-EC13:
+    desc: For each repository associated with a source used in a given anod spec, when the repository has been modified, any action that rely on this repository is never skipped.
+REQ-EC14:
+    desc: After a change in a BuildVar an anod action does never result in a SKIP.
+REQ-EC15:
+    desc: An unhandled exception occurring inside an anod spec is caught by the anod driver, logged, and the status of the anod action is set to FAILED.
+REQ-EC16:
+    desc: The list of anod actions from the expansion of an electrolyt plan does not contain any duplicate.
+REQ-EC17:
+    desc: During the execution of an anod action, reading an invalid state or cache contents of the build space results in the reset of the current build space.
+REQ-EC18:
+    desc: Read-Only Primitives/Actions do not modify the sandbox
+REQ-EC19:
+    desc: Any non-Read-Only anod Action starts by deleting the tmp directory in the corresponding build space.
+REQ-EC20:
+    desc: Calling anod with a qualifier which has not been declared inside the anod spec causes anod to fail.
+    note: At the implementation level, the expectation is that all qualifiers that an anod spec are declared and documented in the spec, so anod is able to determine whether each qualifier is valid or not. This allows the detection of typos in the qualifier.
+REQ-EC21:
+    desc: Qualifier keys and values is a valid directory name on all supported platforms. They also do not contain ‘, space, nor ‘=’..
+    note: To be defined precisely.  Alphanumeric + _ and - ?
+REQ-EC22:
+    desc: Applying a patch were one hunk was already applied should fail with a clear error message.
+REQ-EC23:
+    desc: When a patch not apply, anod should report the conflict and fail.

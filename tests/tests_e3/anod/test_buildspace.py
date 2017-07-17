@@ -8,6 +8,7 @@ from e3.anod.buildspace import BuildSpace
 from e3.anod.error import AnodError
 from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import ReturnValue
+from e3.fs import mkdir
 from e3.os.fs import touch
 
 import pytest
