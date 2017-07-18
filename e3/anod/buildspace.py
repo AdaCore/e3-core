@@ -83,6 +83,8 @@ class BuildSpace(object):
         :param quiet: do not print info messages
         :type quiet: bool
         """
+        # Always clean the temp directory
+        rm(self.get_subdir(name='tmp'), recursive=True)
         for d in self.dirs:
             mkdir(self.get_subdir(name=d), quiet=quiet)
 
@@ -101,7 +103,7 @@ class BuildSpace(object):
         keep = set(keep) if keep is not None else set()
         keep.update(('results', 'log'))
         for d in (d for d in self.dirs if d not in keep):
-            rm(os.path.join(self.root_dir, d), True)
+            rm(self.get_subdir(name=d), True)
 
     def update_status(self, kind, status=ReturnValue.failure,
                       fingerprint=None):

@@ -11,3 +11,5 @@ __pycache__
 /.tox
 /docs/_build
 docs/build
+docs/source/requirement_coverage.rst
+docs/source/requirement_coverage.yaml
