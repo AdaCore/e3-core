@@ -28,6 +28,9 @@ version_file = os.path.join(os.path.dirname(__file__), 'VERSION')
 with open(version_file) as f:
     e3_version = f.read().strip()
 
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
+    long_description = f.read()
+
 # If the version contains only the two first digits, add the date in
 # YYYYMMDD format to create a version following PEP 286:
 # 'N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]'
@@ -42,6 +45,7 @@ setup(
     author='AdaCore',
     author_email='info@adacore.com',
     description='E3 core. Tools and library for building and testing software',
+    long_description=long_description,
     namespace_packages=['e3'],
     use_2to3=True,
     classifiers=[
