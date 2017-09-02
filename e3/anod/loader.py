@@ -55,7 +55,7 @@ class AnodSpecRepository(object):
             candidate_specs = [spec_file for spec_file in spec_list
                                if data.startswith(spec_file)]
             # We pick the longuest spec name
-            candidate_specs.sort(key=lambda x: len(x))
+            candidate_specs.sort(key=len)
             if candidate_specs:
                 spec_list[candidate_specs[-1]]['data'].append(data)
 

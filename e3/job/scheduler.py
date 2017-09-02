@@ -178,7 +178,7 @@ class Scheduler(object):
                     uid,
                     data,
                     predecessors=predecessors,
-                    notify_end=lambda x: self.message_queue.put(x))
+                    notify_end=self.message_queue.put)
                 if job.should_skip:
                     self.collect(job)
                     self.dag_iterator.leave(uid)
