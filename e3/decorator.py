@@ -40,7 +40,6 @@ def disabled(func):
 
     def empty_func(*args, **kargs):
         del args, kargs
-        pass
     return empty_func
 
 

@@ -51,7 +51,6 @@ class Plan(object):
     def check(self, code_ast):
         """Check plan coding style."""
         del self, code_ast
-        pass
 
     def load_chunk(self, source_code, filename='<unknown>'):
         """Load a chunk of Python code.

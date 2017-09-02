@@ -624,7 +624,6 @@ def wait_for_processes(process_list, timeout):
 
     else:
         import select
-        import signal
 
         # Each time a SIGCHLD signal is received write into pipe. Use
         # then select which support timeout arguments to wait.
@@ -747,8 +746,6 @@ def kill_process_tree(pid, timeout=3):
         False if there are some processes still alive.
     :rtype: bool
     """
-    import psutil
-
     if isinstance(pid, psutil.Process):
         parent_process = pid
     else:
@@ -775,7 +772,6 @@ def kill_process_tree(pid, timeout=3):
                          proc.cmdline())
         except psutil.Error as kill_err:
             e3.log.debug(kill_err)
-            pass
 
     try:
         children = parent_process.children(recursive=True)
