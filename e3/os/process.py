@@ -757,23 +757,27 @@ def kill_process_tree(pid, timeout=3):
 
     logger.debug('kill_process_tree %s', parent_process)
 
-    def kill_process(proc):
+    def kill_process(proc, is_parent):
         """Kill a process, catching all psutil exceptions.
 
         :param proc: process to kill
         :type proc: psutil.Process
+        :param is_parent: True if proc is the parent process
+        :type is_parent: bool
         """
+        parent_or_child = 'parent' if is_parent else 'child'
+        logger.debug('kill %s process %s', parent_or_child, pid)
+        proc_pid = proc.pid
+        proc_cmdline = proc.cmdline()
         try:
-            logger.debug('kill_process_tree %s', pid)
-            proc_pid = proc.pid
-            proc_cmdline = proc.cmdline()
             proc.kill()
-            logging.info('%s process killed pid:%s (%s)',
-                         'parent' if proc_pid == pid else 'child',
-                         proc_pid,
-                         proc_cmdline)
         except psutil.Error as kill_err:
             e3.log.debug(kill_err)
+        else:
+            logging.info('%s process killed pid:%s (%s)',
+                         parent_or_child,
+                         proc_pid,
+                         proc_cmdline)
 
     try:
         children = parent_process.children(recursive=True)
@@ -782,10 +786,10 @@ def kill_process_tree(pid, timeout=3):
         return True
 
     # Kill the parent first to not let him spawn new child processes
-    kill_process(parent_process)
+    kill_process(parent_process, True)
 
     for child_process in children:
-        kill_process(child_process)
+        kill_process(child_process, False)
 
     try:
         psutil.wait_procs(children, timeout=timeout)
