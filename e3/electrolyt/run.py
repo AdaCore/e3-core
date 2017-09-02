@@ -171,9 +171,9 @@ class ElectrolytJobFactory(object):
 
     def collect(self, job):
         self.job_status[job.uid] = job.status
-        logger.info("%-48s [queue=%-10s status=%03d]" %
-                    (job.data, job.queue_name,
-                     self.job_status[job.uid].value))
+        logger.info("%-48s [queue=%-10s status=%03d]",
+                    job.data, job.queue_name,
+                    self.job_status[job.uid].value)
 
     def run(self, action_list):
         sch = Scheduler(self.get_job, self.collect)

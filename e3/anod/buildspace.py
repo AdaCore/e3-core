@@ -267,11 +267,11 @@ class BuildSpace(object):
                         '[%(levelname)s %(asctime)s %(name)-24s] %(message)s',
                         datefmt='%H:%M:%S'))
                 logging.getLogger('').addHandler(self.main_log_handler)
-                logging.debug('Running {}'.format(
-                    e3.os.process.command_line_image(sys.argv)))
-                logging.debug('anod primitive: {name} ({pid})'.format(
-                    name=self.primitive_name,
-                    pid=os.getpid()))
+                logging.debug(
+                    'Running %s', e3.os.process.command_line_image(sys.argv))
+                logging.debug(
+                    'anod primitive: %s (%s)',
+                    self.primitive_name, os.getpid())
 
     def __del__(self):
         """Call self.end() if not already done."""

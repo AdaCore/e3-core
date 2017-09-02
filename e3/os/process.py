@@ -320,9 +320,10 @@ class Run(object):
                 self.cmds = [add_interpreter_command(c) for c in cmds]
                 self.cmds[0] = rlimit_args + list(self.cmds[0])
 
-            cmdlogger.debug('Run: cd %s; %s' % (
+            cmdlogger.debug(
+                'Run: cd %s; %s',
                 cwd if cwd is not None else os.getcwd(),
-                self.command_line_image()))
+                self.command_line_image())
 
             if isinstance(cmds[0], basestring):
                 popen_args = {
