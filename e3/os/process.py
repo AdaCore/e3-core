@@ -765,11 +765,13 @@ def kill_process_tree(pid, timeout=3):
         """
         try:
             logger.debug('kill_process_tree %s', pid)
+            proc_pid = proc.pid
+            proc_cmdline = proc.cmdline()
             proc.kill()
             logging.info('%s process killed pid:%s (%s)',
-                         'parent' if proc.pid == pid else 'child',
-                         proc.pid,
-                         proc.cmdline())
+                         'parent' if proc_pid == pid else 'child',
+                         proc_pid,
+                         proc_cmdline)
         except psutil.Error as kill_err:
             e3.log.debug(kill_err)
 
