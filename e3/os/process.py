@@ -487,14 +487,17 @@ class Run(object):
         else:
             return None
 
-    def kill(self, recursive=True):
+    def kill(self, recursive=True, timeout=3):
         """Kill the process.
 
         :param recursive: if True, try to kill the complete process tree
         :type recursive: bool
+        :param timeout: wait timeout (in seconds) after sending the kill
+            signal (when recursive=True)
+        :type timeout: int
         """
         if recursive:
-            kill_process_tree(self.internal)
+            kill_process_tree(self.internal, timeout=timeout)
         else:
             self.internal.kill()
 
@@ -757,43 +760,28 @@ def kill_process_tree(pid, timeout=3):
 
     logger.debug('kill_process_tree %s', parent_process)
 
-    def kill_process(proc, is_parent):
-        """Kill a process, catching all psutil exceptions.
-
-        :param proc: process to kill
-        :type proc: psutil.Process
-        :param is_parent: True if proc is the parent process
-        :type is_parent: bool
-        """
-        parent_or_child = 'parent' if is_parent else 'child'
-        logger.debug('kill %s process %s', parent_or_child, pid)
-        proc_pid = proc.pid
-        proc_cmdline = proc.cmdline()
-        try:
-            proc.kill()
-        except psutil.Error as kill_err:
-            e3.log.debug(kill_err)
-        else:
-            logging.info('%s process killed pid:%s (%s)',
-                         parent_or_child,
-                         proc_pid,
-                         proc_cmdline)
-
     try:
         children = parent_process.children(recursive=True)
     except psutil.NoSuchProcess as err:
         e3.log.debug(err)
         return True
 
-    # Kill the parent first to not let him spawn new child processes
-    kill_process(parent_process, True)
+    all_processes = [parent_process] + children
+    for p in all_processes:
+        logger.debug('kill process %s (%s)', p, p.cmdline())
+        p.kill()
 
-    for child_process in children:
-        kill_process(child_process, False)
+    def on_terminate(p):
+        """Log info when a process terminate."""
+        logger.info('process %s killed', p)
 
     try:
-        psutil.wait_procs(children, timeout=timeout)
-        parent_process.wait(timeout=timeout)
+        gone, alive = psutil.wait_procs(
+            all_processes, timeout=timeout, callback=on_terminate)
+        e3.log.debug('%d processes killed', len(gone))
+        for p in alive:  # defensive code
+            logger.warn('process %s survived kill()', p)
+
         return True
     except psutil.TimeoutExpired as err:  # defensive code
         e3.log.debug(err)
