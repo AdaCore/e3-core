@@ -66,7 +66,7 @@ class Fingerprint(object):
         :type value: str | unicode
         :raise: AnodError
         """
-        if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, (str, unicode)):
             self.elements[name] = value
         else:
             raise AnodError(

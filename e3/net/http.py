@@ -159,7 +159,7 @@ class HTTPSession(object):
                         # This is a file. Assume that the key is the filename
                         data[k] = (k, v)
                         v.seek(0)
-                    elif isinstance(v, dict) or isinstance(v, list):
+                    elif isinstance(v, (dict, list)):
                         # Automatically encode to json
                         data[k] = json.dumps(v)
                     else:

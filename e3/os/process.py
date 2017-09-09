@@ -541,7 +541,7 @@ class File(object):
 
         self.name = name
         self.to_close = False
-        if isinstance(name, str) or isinstance(name, unicode):
+        if isinstance(name, (str, unicode)):
             # can be a pipe or a filename
             if mode == 'r' and name.startswith('|'):
                 self.fd = subprocess.PIPE

@@ -182,7 +182,7 @@ class CaseParser(object):
         :return: the result of the expansion
         """
         try:
-            if isinstance(value, str) or isinstance(value, unicode):
+            if isinstance(value, (str, unicode)):
                 return format_with_dict(value, self.__state)
             elif isinstance(value, dict):
                 return {k: self.__format_value(v)
