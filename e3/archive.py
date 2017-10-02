@@ -116,7 +116,7 @@ def unpack_archive(filename,
 
     cygpath (win32) utilities might be needed when using remove_root_dir option
     """
-    logger.debug('unpack %s in %s' % (filename, dest))
+    logger.debug('unpack %s in %s', filename, dest)
     # First do some checks such as archive existence or destination directory
     # existence.
     if not os.path.isfile(filename):

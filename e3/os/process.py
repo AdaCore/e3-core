@@ -320,9 +320,10 @@ class Run(object):
                 self.cmds = [add_interpreter_command(c) for c in cmds]
                 self.cmds[0] = rlimit_args + list(self.cmds[0])
 
-            cmdlogger.debug('Run: cd %s; %s' % (
+            cmdlogger.debug(
+                'Run: cd %s; %s',
                 cwd if cwd is not None else os.getcwd(),
-                self.command_line_image()))
+                self.command_line_image())
 
             if isinstance(cmds[0], basestring):
                 popen_args = {
@@ -486,14 +487,17 @@ class Run(object):
         else:
             return None
 
-    def kill(self, recursive=True):
+    def kill(self, recursive=True, timeout=3):
         """Kill the process.
 
         :param recursive: if True, try to kill the complete process tree
         :type recursive: bool
+        :param timeout: wait timeout (in seconds) after sending the kill
+            signal (when recursive=True)
+        :type timeout: int
         """
         if recursive:
-            kill_process_tree(self.internal)
+            kill_process_tree(self.internal, timeout=timeout)
         else:
             self.internal.kill()
 
@@ -540,7 +544,7 @@ class File(object):
 
         self.name = name
         self.to_close = False
-        if isinstance(name, str) or isinstance(name, unicode):
+        if isinstance(name, (str, unicode)):
             # can be a pipe or a filename
             if mode == 'r' and name.startswith('|'):
                 self.fd = subprocess.PIPE
@@ -623,7 +627,6 @@ def wait_for_processes(process_list, timeout):
 
     else:
         import select
-        import signal
 
         # Each time a SIGCHLD signal is received write into pipe. Use
         # then select which support timeout arguments to wait.
@@ -746,8 +749,6 @@ def kill_process_tree(pid, timeout=3):
         False if there are some processes still alive.
     :rtype: bool
     """
-    import psutil
-
     if isinstance(pid, psutil.Process):
         parent_process = pid
     else:
@@ -759,38 +760,28 @@ def kill_process_tree(pid, timeout=3):
 
     logger.debug('kill_process_tree %s', parent_process)
 
-    def kill_process(proc):
-        """Kill a process, catching all psutil exceptions.
-
-        :param proc: process to kill
-        :type proc: psutil.Process
-        """
-        try:
-            logger.debug('kill_process_tree %s', pid)
-            proc.kill()
-            logging.info('%s process killed pid:%s (%s)',
-                         'parent' if proc.pid == pid else 'child',
-                         proc.pid,
-                         proc.cmdline())
-        except psutil.Error as kill_err:
-            e3.log.debug(kill_err)
-            pass
-
     try:
         children = parent_process.children(recursive=True)
     except psutil.NoSuchProcess as err:
         e3.log.debug(err)
         return True
 
-    # Kill the parent first to not let him spawn new child processes
-    kill_process(parent_process)
+    all_processes = [parent_process] + children
+    for p in all_processes:
+        logger.debug('kill process %s (%s)', p, p.cmdline())
+        p.kill()
 
-    for child_process in children:
-        kill_process(child_process)
+    def on_terminate(p):
+        """Log info when a process terminate."""
+        logger.info('process %s killed', p)
 
     try:
-        psutil.wait_procs(children, timeout=timeout)
-        parent_process.wait(timeout=timeout)
+        gone, alive = psutil.wait_procs(
+            all_processes, timeout=timeout, callback=on_terminate)
+        e3.log.debug('%d processes killed', len(gone))
+        for p in alive:  # defensive code
+            logger.warn('process %s survived kill()', p)
+
         return True
     except psutil.TimeoutExpired as err:  # defensive code
         e3.log.debug(err)

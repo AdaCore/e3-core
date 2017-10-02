@@ -748,7 +748,7 @@ def sync_tree(source, target, ignore=None,
 
         for el in result:
             if is_in_ignore_list(el.rel_path):
-                logger.debug('ignore %s' % el.rel_path)
+                logger.debug('ignore %s', el.rel_path)
                 if delete_ignore:
                     yield FilesInfo(el.rel_path,
                                     FileInfo(el.source.path, None),

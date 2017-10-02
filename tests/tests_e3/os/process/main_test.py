@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import sys
+import textwrap
 import time
 
 import e3.fs
@@ -228,45 +229,64 @@ def test_interrupt():
 
 @pytest.mark.skipif(psutil is None, reason='require psutil')
 def test_kill_process_tree():
+
+    is_appveyor_test = bool(os.environ.get('APPVEYOR'))
+    wait_timeout = 3
+    if is_appveyor_test:
+        wait_timeout *= 3
     p1 = e3.os.process.Run(
         [sys.executable, '-c',
          'import time; time.sleep(10); import sys; sys.exit(2)'],
         bg=True)
-    e3.os.process.kill_process_tree(p1.pid)
-    p1.wait()
+    e3.os.process.kill_process_tree(p1.pid, timeout=wait_timeout)
     assert p1.status != 2
-
-    def get_one_child():
-        cmd = [sys.executable, '-c',
-               'import e3.os.process; import time; import sys;'
-               ' e3.os.process.Run([sys.executable, "-c",'
-               ' "import time; time.sleep(10)"]);'
-               'time.sleep(10)']
-
-        p_one_child = e3.os.process.Run(cmd, bg=True)
-        for k in range(0, 100):
-            p_one_child_children = p_one_child.children()
-            if len(p_one_child_children) == 1:
-                break
-            time.sleep(0.1)
-        assert len(p_one_child_children) == 1
-        return p_one_child, p_one_child_children
-
-    p2, p2_children = get_one_child()
-    e3.os.process.kill_process_tree(p2.pid)
-    p2.wait()
-
     assert not p1.is_running()
-    assert not p2.is_running()
-    for p in p2_children:
-        assert not p.is_running()
 
-    p3, p3_children = get_one_child()
-    p3.kill()
-    p3.wait()
+    def get_one_child(idx):
+        pid_file = 'child_pid_%d' % idx
+        gen_prog_name = 'child_prog_%d' % idx
+        prog = textwrap.dedent("""\
+            import e3.os.process, os, sys, time
+            child_cmd = "import os, time;"
+            child_cmd += "f = open('%s', 'w');"
+            child_cmd += "f.write(str(os.getpid()));"
+            child_cmd += "f.close();"
+            child_cmd += "time.sleep(60);"
+            e3.os.process.Run([sys.executable, '-c', child_cmd])
+            time.sleep(60)
+            """ % pid_file)
+
+        with open(gen_prog_name, 'w') as f:
+            f.write(prog)
+
+        parent_process = e3.os.process.Run(
+            [sys.executable, gen_prog_name], bg=True)
+        for k in range(0, 100):
+            try:
+                with open(pid_file) as f:
+                    child_pid = f.read()
+                    if child_pid:
+                        break
+            except IOError:
+                pass
+            time.sleep(0.1)
+        e3.fs.rm(gen_prog_name)
+        e3.fs.rm(pid_file)
+        child_process = psutil.Process(int(child_pid))
+        assert parent_process.children()[0].pid == int(child_pid)
+        return parent_process, child_process
+
+    p2, p2_child = get_one_child(1)
+    e3.os.process.kill_process_tree(p2.pid, timeout=wait_timeout)
+
+    assert not p2.is_running()
+    assert not p2_child.is_running()
+
+    p3, p3_child = get_one_child(2)
+    p3.kill(timeout=wait_timeout)
+
     assert not p3.is_running()
-    for p in p3_children:
-        assert not p.is_running()
+    assert not p3_child.is_running()
 
     # killing it more than once should also work
     assert e3.os.process.kill_process_tree(p3.pid) is True

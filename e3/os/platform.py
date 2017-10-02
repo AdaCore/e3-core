@@ -106,7 +106,6 @@ class SystemInfo(object):
                 cls.core_number = psutil.cpu_count()
             except Exception:
                 e3.log.debug('psutil error', exc_info=True)
-                pass
 
         cls.nis_domain = UNKNOWN
 

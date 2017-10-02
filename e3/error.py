@@ -19,7 +19,7 @@ class E3Error(Exception):
         self.origin = origin
         self.messages = []
         if message is not None:
-            if isinstance(message, unicode) or isinstance(message, str):
+            if isinstance(message, (str, unicode)):
                 self.messages.append(message)
             else:
                 self.messages.extend(message)
@@ -32,7 +32,7 @@ class E3Error(Exception):
         """
         if isinstance(other, E3Error):
             self.messages.extend(other.messages)
-        elif isinstance(other, unicode) or isinstance(other, str):
+        elif isinstance(other, (str, unicode)):
             self.messages.append(other)
         else:
             self.messages.extend(other)
