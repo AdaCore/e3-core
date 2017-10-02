@@ -178,7 +178,7 @@ class SystemInfo(object):
         elif system == 'Linux':  # linux-only
             kernel_version = cls.uname.release
             name = cls.ld_info['name'].lower()
-            if 'redhat' in name:  # os-specific
+            if 'redhat' in name or 'red hat' in name:  # os-specific
                 name = 'rhES'
                 version_number = cls.ld_info['major_version']
             elif 'suse' in name:  # os-specific
