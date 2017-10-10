@@ -197,8 +197,63 @@ class SystemInfo(object):
         elif system == 'Windows':  # windows-only
             version = cls.uname.release.replace('Server', '')
             kernel_version = cls.uname.version
-            if version == 'Vista' and '64' in cls.uname.machine:  # os-specific
-                version = 'Vista64'
+            # Compute real underlying OS version. Starting with Windows 8.1
+            # (6.3), the win32 function that returns the version may return
+            # the wrong version depending on the application manifest. So
+            # python will always return Windows 8 in that case.
+            import ctypes
+
+            class WinOSVersion(ctypes.Structure):
+                _fields_ = [('dwOSVersionInfoSize', ctypes.c_ulong),
+                            ('dwMajorVersion', ctypes.c_ulong),
+                            ('dwMinorVersion', ctypes.c_ulong),
+                            ('dwBuildNumber', ctypes.c_ulong),
+                            ('dwPlatformId', ctypes.c_ulong),
+                            ('szCSDVersion', ctypes.c_wchar * 128),
+                            ('wServicePackMajor', ctypes.c_ushort),
+                            ('wServicePackMinor', ctypes.c_ushort),
+                            ('wSuiteMask', ctypes.c_ushort),
+                            ('wProductType', ctypes.c_byte),
+                            ('wReserved', ctypes.c_byte)]
+
+            def get_os_version():
+                """Return the real Windows kernel version.
+
+                On recent version, the kernel version returned by the
+                GetVersionEx Win32 function depends on the way the application
+                has been compiled. Using RtlGetVersion kernel function ensure
+                that the right version is returned.
+
+                :return: the version
+                :rtype: float | None
+                """
+                os_version = WinOSVersion()
+                os_version.dwOSVersionInfoSize = ctypes.sizeof(os_version)
+                retcode = ctypes.windll.Ntdll.RtlGetVersion(
+                    ctypes.byref(os_version))
+                if retcode != 0:
+                    return None
+
+                return float("%d.%d" % (os_version.dwMajorVersion,
+                                        os_version.dwMinorVersion))
+
+            effective_version = get_os_version()
+
+            if effective_version is None or effective_version <= 6.2:
+                if version == 'Vista' and \
+                        '64' in cls.uname.machine:  # os-specific
+                    version = 'Vista64'
+            else:
+                if effective_version == 6.3:
+                    if 'Server' in cls.uname.release:
+                        version = '2012R2'
+                    else:
+                        version = '8.1'
+                elif effective_version == 10.0:
+                    if 'Server' in cls.uname.release:
+                        version = '2016'
+                    else:
+                        version = '10'
 
         cls._os_version = (version, kernel_version)
         return version, kernel_version
