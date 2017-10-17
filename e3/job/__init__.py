@@ -37,10 +37,17 @@ class Job(object):
     :ivar tokens: number of tokens (i.e: resources) consumed during the job
         execution
     :vartype: int
+    :ivar index: global index indicating the order in which jobs have been
+        created. The index is used to implement the default ordering function
+        needed to sort Jobs. In the context of ``e3.job.scheduler.Scheduler``
+        this means that by default jobs that are created first will have a
+        higher priority.
+    :vartype: int
     """
 
     __metaclass__ = abc.ABCMeta
     _lock = threading.Lock()
+    index_counter = 0
 
     def __init__(self, uid, data, notify_end):
         """Initialize worker.
@@ -66,17 +73,40 @@ class Job(object):
         self.interrupted = False
         self.queue_name = 'default'
         self.tokens = 1
+        with self._lock:
+            self.index = Job.index_counter
+            Job.index_counter += 1
+
+    def __lt__(self, other):
+        """Compare two jobs.
+
+        This method can be reimplemented in order to provider other
+        priority systems.
+
+        :param other: another Job
+        :type other: Job
+        :return: True if self has a strictly higher priority than other
+        :rtype: bool
+        """
+        return self.index < other.index
 
     def record_start_time(self):
+        """Log the starting time of a job."""
         with self._lock:
             self.__start_time = datetime.now()
 
     def record_stop_time(self):
+        """Log the stopping time of a job."""
         with self._lock:
             self.__stop_time = datetime.now()
 
     @property
     def timing_info(self):
+        """Retrieve some job's timing information.
+
+        :return: a JobTimingInfo object
+        :rtype: JobTimingInfo
+        """
         with self._lock:
             start = self.__start_time
             stop = self.__stop_time
