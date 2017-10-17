@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+import heapq
 import time
-from collections import deque
 from datetime import datetime
 from Queue import Empty, Queue
 
@@ -73,7 +73,7 @@ class Scheduler(object):
 
         # Create the queues
         for name, max_token in queues.iteritems():
-            self.queues[name] = deque()
+            self.queues[name] = []
             self.tokens[name] = max_token
             self.n_tokens += max_token
 
@@ -183,7 +183,7 @@ class Scheduler(object):
                     self.collect(job)
                     self.dag_iterator.leave(uid)
                 else:
-                    self.queues[job.queue_name].append(job)
+                    heapq.heappush(self.queues[job.queue_name], job)
                     self.queued_jobs += 1
         except StopIteration:
             self.all_jobs_queued = True
@@ -196,7 +196,7 @@ class Scheduler(object):
         for name in self.queues:
             q = self.queues[name]
             while q and q[0].tokens <= self.tokens[name]:
-                next_job = q.popleft()
+                next_job = heapq.heappop(q)
                 next_job.start(slot=self.slots.pop())
                 self.tokens[name] -= next_job.tokens
                 self.queued_jobs -= 1
@@ -246,7 +246,7 @@ class Scheduler(object):
 
                 if self.collect(job):
                     # Requeue when needed
-                    self.queues[job.queue_name].append(job)
+                    heapq.heappush(self.queues[job.queue_name], job)
                     self.queued_jobs += 1
                 else:
                     # Mark the job as completed
