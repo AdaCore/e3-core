@@ -14,6 +14,9 @@ class NopJob(Job):
     def run(self):
         pass
 
+    def __cmp__(self, other):
+        return cmp(self.uid, other.uid)
+
 
 class SleepJob(ProcessJob):
 
@@ -32,6 +35,23 @@ class TestScheduler(object):
         s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2)
         s.run(dag)
         assert s.max_active_jobs == 2
+
+    def test_ordering(self):
+        """Test that jobs are ordered correctly."""
+
+        results = []
+
+        def collect(job):
+            results.append(job.uid)
+
+        dag = DAG()
+        dag.add_vertex('3')
+        dag.add_vertex('0')
+        dag.add_vertex('1')
+        s = Scheduler(Scheduler.simple_provider(NopJob), tokens=1,
+                      collect=collect)
+        s.run(dag)
+        assert tuple(results) == ('0', '1', '3')
 
     def test_minimal_run2(self):
         """Test with two interdependent jobs."""
