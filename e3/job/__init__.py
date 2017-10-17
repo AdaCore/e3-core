@@ -41,6 +41,7 @@ class Job(object):
 
     __metaclass__ = abc.ABCMeta
     _lock = threading.Lock()
+    index_counter = 0
 
     def __init__(self, uid, data, notify_end):
         """Initialize worker.
@@ -66,6 +67,12 @@ class Job(object):
         self.interrupted = False
         self.queue_name = 'default'
         self.tokens = 1
+        with self._lock:
+            self.index = Job.index_counter
+            Job.index_counter += 1
+
+    def __lt__(self, other):
+        return self.index < other.index
 
     def record_start_time(self):
         with self._lock:
