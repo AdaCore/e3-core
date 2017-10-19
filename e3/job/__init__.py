@@ -77,18 +77,15 @@ class Job(object):
             self.index = Job.index_counter
             Job.index_counter += 1
 
-    def __lt__(self, other):
-        """Compare two jobs.
+    @property
+    def priority(self):
+        """Return job priority.
 
-        This method can be reimplemented in order to provider other
-        priority systems.
+        This is used in ``e3.job.scheduler.Scheduler``.
 
-        :param other: another Job
-        :type other: Job
-        :return: True if self has a strictly higher priority than other
-        :rtype: bool
+        :return: int
         """
-        return self.index < other.index
+        return 0
 
     def record_start_time(self):
         """Log the starting time of a job."""

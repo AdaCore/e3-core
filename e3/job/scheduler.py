@@ -71,6 +71,8 @@ class Scheduler(object):
             # with no name.
             queues = {'default': tokens}
 
+        self.global_queue_index = 1
+
         # Create the queues
         for name, max_token in queues.iteritems():
             self.queues[name] = []
@@ -161,6 +163,19 @@ class Scheduler(object):
             raise KeyboardInterrupt
         self.stop_time = datetime.now()
 
+    def push(self, job):
+        """Push a job into a queue.
+
+        :param job: a job
+        :type job: Job
+        """
+        # We use a tuple here to ensure the stability of the queue
+        # when two jobs have similar priorities.
+        heapq.heappush(self.queues[job.queue_name],
+                       (-job.priority, self.global_queue_index, job))
+        self.global_queue_index += 1
+        self.queued_jobs += 1
+
     def enqueue(self):
         """Push into the queues job that are ready (internal)."""
         if self.all_jobs_queued:
@@ -183,8 +198,7 @@ class Scheduler(object):
                     self.collect(job)
                     self.dag_iterator.leave(uid)
                 else:
-                    heapq.heappush(self.queues[job.queue_name], job)
-                    self.queued_jobs += 1
+                    self.push(job)
         except StopIteration:
             self.all_jobs_queued = True
 
@@ -195,11 +209,11 @@ class Scheduler(object):
 
         for name in self.queues:
             q = self.queues[name]
-            while q and q[0].tokens <= self.tokens[name]:
-                next_job = heapq.heappop(q)
+            while q and q[0][2].tokens <= self.tokens[name]:
+                _, _, next_job = heapq.heappop(q)
+                self.queued_jobs -= 1
                 next_job.start(slot=self.slots.pop())
                 self.tokens[name] -= next_job.tokens
-                self.queued_jobs -= 1
                 self.active_jobs.append(next_job)
 
     def wait(self):
@@ -246,8 +260,7 @@ class Scheduler(object):
 
                 if self.collect(job):
                     # Requeue when needed
-                    heapq.heappush(self.queues[job.queue_name], job)
-                    self.queued_jobs += 1
+                    self.push(job)
                 else:
                     # Mark the job as completed
                     self.dag_iterator.leave(job.uid)
