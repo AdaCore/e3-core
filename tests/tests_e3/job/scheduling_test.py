@@ -14,8 +14,13 @@ class NopJob(Job):
     def run(self):
         pass
 
-    def __lt__(self, other):
-        return str(self.uid) < str(other.uid)
+    @property
+    def priority(self):
+        try:
+            result = -int(self.uid)
+        except Exception:
+            result = 0
+        return result
 
 
 class SleepJob(ProcessJob):
