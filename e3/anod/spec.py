@@ -249,8 +249,8 @@ class Anod(object):
             return self.build_space.config[key]
 
         # Then check if the key (in lowercase) in build_space
-        elif key.isupper() and hasattr(self.build_space, key.lower()):
-            return getattr(self.build_space, key.lower())
+        elif key.isupper():
+            return getattr(self.build_space, key.lower(), None)
 
     @classmethod
     def primitive(cls, pre=None, post=None, version=None):
