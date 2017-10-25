@@ -1,0 +1,53 @@
+import os
+from e3.anod.loader import spec
+from e3.anod.package import Package
+from e3.anod.spec import Anod
+from e3.fs import sync_tree, VCS_IGNORE_LIST
+
+
+class AutoIgnore(spec('anod')):
+    """Fake spec for the test suite."""
+    @property
+    def source_pkg_build(self):
+
+        def prepare_src(repos, dest):
+            sync_tree(list(repos.values())[0]['working_dir'],
+                      dest, ignore=VCS_IGNORE_LIST)
+
+        return [
+            Anod.SourceBuilder(
+                name='autoignore1-src',
+                fullname=lambda x: 'autoignore1-src.tgz',
+                prepare_src=prepare_src,
+                checkout=['dummy-github']),
+            Anod.SourceBuilder(
+                name='autoignore2-src',
+                fullname=lambda x: 'autoignore2-src.tgz',
+                prepare_src=prepare_src,
+                checkout=['dummy-github']),
+            Anod.SourceBuilder(
+                name='autoignore3-src',
+                fullname=lambda x: 'autoignore3-src.tgz',
+                prepare_src=prepare_src,
+                checkout=['dummy-github'])]
+
+    build_source_list = [
+        Anod.Source(
+        'autoignore1-src', dest='A/B/3/2/1', publish=True),
+        Anod.Source(
+        'autoignore2-src', dest='A//B/3/2', publish=True),
+	    Anod.Source(
+        'autoignore3-src', dest='A/B/3', publish=True),]
+
+
+    @Anod.primitive()
+    def build(self):
+        if os.path.exists(os.path.join(self['SRC_DIR'], 'A/B/3/2')):
+            print('found 2')
+        if os.path.exists(os.path.join(self['SRC_DIR'], 'A/B/3/2/1')):
+            print('found 1')
+        for subdir in ('3', '3/2', '3/2/1'):
+            if os.path.exists(os.path.join(self['SRC_DIR'], 'A/B', subdir, 'autoignore.anod')):
+                print('found .anod in {}'.format(subdir))
+
+

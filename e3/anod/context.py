@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+import os
+
 from e3.anod.action import (Build, BuildOrInstall, Checkout, CreateSource,
                             CreateSourceOrDownload, Decision, DownloadBinary,
                             DownloadSource, GetSource, Install,
@@ -359,6 +361,14 @@ class AnodContext(object):
                 # set source builder
                 if s.name in self.sources:
                     s.set_builder(self.sources[s.name])
+                # set source ignore
+                ignore_list = []
+                for s2 in getattr(spec, '{}_source_list'.format(primitive)):
+                    if s2.name != s.name:
+                        ignore_path = os.path.relpath(s2.dest, s.dest)
+                        if not ignore_path.startswith(os.pardir):
+                            ignore_list.append('/{}'.format(ignore_path))
+                s.set_ignore(ignore_list)
                 # add source install node
                 src_install_uid = result.uid.rsplit('.', 1)[0] + \
                     '.source_install.' + s.name

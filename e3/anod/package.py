@@ -71,11 +71,14 @@ class Source(object):
         :param remove_root_dir: if True (default) the root directory of the
             archive is ignored
         :type remove_root_dir: bool
-        :param ignore: list of directories/filenames to ignore when
+        :param ignore: unused during instantiation, kept for backward
+            compatibiliy.
+            List of directories/filenames to ignore when
             synchronising the `dest` content. See documentation of
             gnatpython.fileutils.sync_tree
         :type ignore: None | list[str]
         """
+        del ignore
         self.name = name
         self.publish = publish
         if dest is None:
@@ -86,12 +89,16 @@ class Source(object):
         self.dest = dest
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
-        self.ignore = ignore
+        self.ignore = None
         self.builder = None
 
     def set_builder(self, builder_function):
         """Set the SourceBuilder associated to this Source object."""
         self.builder = builder_function
+
+    def set_ignore(self, ignore):
+        """Update ignore value."""
+        self.ignore = ignore
 
 
 class SharedSource(Source):
