@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+import os
+
 import e3.anod.error
 import e3.diff
 import e3.log
@@ -76,6 +78,11 @@ class Source(object):
         """
         self.name = name
         self.publish = publish
+        if dest is None:
+            dest = ''
+        else:
+            if os.path.isabs(dest) or os.pardir in dest:
+                raise e3.anod.error.SpecError('dest should be relative path')
         self.dest = dest
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
