@@ -307,6 +307,38 @@ def test_sandbox_exec_success(git_specs_dir):
     assert 'test dummyspec for %s' % platform in p.out
 
 
+def test_sandbox_source_auto_ignore(git_specs_dir):
+    """Test if the new installation do not remove other sources."""
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+
+    e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
+    with open(os.path.join(sandbox_dir, 'test.plan'), 'w') as fd:
+        fd.write("anod_build('autoignore')\n")
+
+    specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
+    local_spec_dir = os.path.join(root_dir, 'specs')
+
+    e3.fs.sync_tree(specs_source_dir, local_spec_dir)
+    create_prolog(local_spec_dir)
+
+    e3.anod.helper.text_replace(
+        os.path.join(local_spec_dir, 'conf.yaml'),
+        [(b'GITURL', git_specs_dir.encode('utf-8'))])
+
+    # Test with local specs
+    p = e3.os.process.Run(['e3-sandbox', 'exec',
+                           '--spec-dir', local_spec_dir,
+                           '--plan',
+                           os.path.join(sandbox_dir, 'test.plan'),
+                           sandbox_dir])
+    assert 'found 2' in p.out
+    assert 'found 1' in p.out
+    for subdir in ('3', '3/2', '3/2/1'):
+        assert 'found .anod in {}'.format(subdir) in p.out
+    assert 'result: OK' in p.out
+
+
 def test_anod_plan(git_specs_dir):
     """Test if sandbox exec works with local specs and a git repo."""
     root_dir = os.getcwd()
