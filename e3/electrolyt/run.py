@@ -133,7 +133,10 @@ class ElectrolytJob(Job):
         src_dir = os.path.join(self.sandbox.tmp_dir,
                                'cache',
                                source.name)
-        dest_dir = os.path.join(spec.build_space.src_dir)
+        if source.dest is None:
+            dest_dir = spec.build_space.src_dir
+        else:
+            dest_dir = os.path.join(spec.build_space.src_dir, source.dest)
         sync_tree(src_dir, dest_dir, ignore=source.ignore)
         self.status = STATUS.success
 
