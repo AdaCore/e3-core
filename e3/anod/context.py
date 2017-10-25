@@ -364,7 +364,7 @@ class AnodContext(object):
                 # set source ignore
                 ignore_list = []
                 for s2 in getattr(spec, '{}_source_list'.format(primitive)):
-                    if s2.name != s.name:
+                    if s2.name != s.name and s2.dest:
                         ignore_path = os.path.relpath(s2.dest, s.dest)
                         if not ignore_path.startswith(os.pardir):
                             ignore_list.append('/{}'.format(ignore_path))

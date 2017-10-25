@@ -97,7 +97,11 @@ class Source(object):
         self.builder = builder_function
 
     def set_ignore(self, ignore):
-        """Update ignore value."""
+        """Update ignore value.
+
+        :param ignore: List of directories/filenames to ignore
+        :type ignore: list[str]
+        """
         self.ignore = ignore
 
 
