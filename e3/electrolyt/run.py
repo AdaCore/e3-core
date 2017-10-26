@@ -4,10 +4,11 @@ import os
 import sys
 import traceback
 
+import e3.error
 import e3.log
 from e3.anod.driver import AnodDriver
 from e3.anod.status import ReturnValue
-from e3.fs import sync_tree
+from e3.fs import mkdir, sync_tree
 from e3.job import Job
 from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
@@ -110,6 +111,7 @@ class ElectrolytJob(Job):
                 dest_dir = os.path.join(tmp_cache_dir, source_name)
                 # ??? missing repository state
                 repo_dict[source_name] = {"working_dir": src_dir}
+                mkdir(dest_dir)
                 src_builder.prepare_src(repo_dict, dest_dir)
                 self.status = STATUS.success
                 logger.debug('%s created in cache/tmp', source_name)
@@ -137,6 +139,10 @@ class ElectrolytJob(Job):
             dest_dir = spec.build_space.src_dir
         else:
             dest_dir = os.path.join(spec.build_space.src_dir, source.dest)
+        if not os.path.isdir(src_dir):  # defensive code
+            logger.critical('source directory %s does not exist', src_dir)
+            self.status = STATUS.failure
+            return
         sync_tree(src_dir, dest_dir, ignore=source.ignore)
         self.status = STATUS.success
 
