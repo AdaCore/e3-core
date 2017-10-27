@@ -1,0 +1,35 @@
+import os
+from e3.fs import cp
+from e3.anod.loader import spec
+from e3.anod.spec import Anod
+
+
+class CheckDirectory(spec('anod')):
+    """Fake spec for the test suite."""
+    @property
+    def source_pkg_build(self):
+
+        def prepare_src(repos, dest):
+            print('prepare_src')
+            try:
+                cp(os.path.join(list(repos.values())[0]['working_dir'], 'checkdirectory.anod'), dest)
+            except Exception as err:
+                print(err)
+            print('end_prepare_src')
+
+
+        return [
+            Anod.SourceBuilder(
+                name='checkdirectory-src',
+                fullname=lambda x: 'checkdirectory-src.tgz',
+                prepare_src=prepare_src,
+                checkout=['dummy-github'])]
+
+    build_source_list = [Anod.Source('checkdirectory-src', dest='thedir/thedir2', publish=True)]
+
+    @Anod.primitive()
+    def build(self):
+        print('build check directory')
+        if os.path.isfile(os.path.join(self['SRC_DIR'], 'thedir/thedir2', 'checkdirectory.anod')):
+            print('found file in destination directory')
+
