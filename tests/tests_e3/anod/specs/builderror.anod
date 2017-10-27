@@ -6,4 +6,4 @@ class BuildError(spec('anod')):
 
     @Anod.primitive()
     def build(self):
-        raise ValueError('invalid')
+        print(doesnotexist)

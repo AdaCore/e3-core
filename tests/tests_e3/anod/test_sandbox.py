@@ -228,6 +228,7 @@ def test_sandbox_action_errors(git_specs_dir):
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
+    assert "'doesnotexist' is not defined" in p.out
     assert 'builderror build fails' in p.out
 
 
