@@ -152,7 +152,7 @@ class SourceBuilder(object):
         :type kind: str
         """
         self.name = name
-        self.checkout = checkout
+        self.checkout = checkout if checkout is not None else []
         self.repositories = {}
         self.kind = kind
         self.from_spec = None
