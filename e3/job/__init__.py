@@ -155,7 +155,12 @@ class Job(object):
 
 
 class ProcessJob(Job):
-    """Specialized version of Job that spawn processes."""
+    """Specialized version of Job that spawn processes.
+
+    :ivar proc_handle: None when an object of this class is initialized.
+        An e3.os.process.Run object after the "run" method is called.
+    :vartype proc_handle: e3.os.process.Run | None
+    """
 
     __metaclass__ = abc.ABCMeta
 
