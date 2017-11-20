@@ -44,6 +44,10 @@ def test_source_builder_default_prepare_src():
         with pytest.raises(e3.anod.error.SpecError):
             assert sb_err.prepare_src
 
+    # Check ThirdParty prepare_src is None
+    tp = e3.anod.package.ThirdPartySourceBuilder(name='unmanaged-src')
+    assert tp.prepare_src is None
+
 
 def test_source_builder_custom_prepare_src():
     """Test SourceBuilder with a custom prepare_src function."""
@@ -58,16 +62,6 @@ def test_source_builder_custom_prepare_src():
 
     sb.prepare_src(None, os.getcwd())
     assert os.path.exists('my_generated_source_file')
-
-
-def test_source_builder_no_checkout():
-    """SourceBuilder.prepare_src should be None when checkout=None."""
-    sb = e3.anod.package.SourceBuilder(
-        name='c-src',
-        fullname=lambda: 'c-src.tgz',
-        checkout=None)
-
-    assert sb.prepare_src is None
 
 
 def test_apply_patch():
