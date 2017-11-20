@@ -152,7 +152,7 @@ class SourceBuilder(object):
         :type kind: str
         """
         self.name = name
-        self.checkout = checkout
+        self.checkout = checkout if checkout is not None else []
         self.repositories = {}
         self.kind = kind
         self.from_spec = None
@@ -175,11 +175,6 @@ class SourceBuilder(object):
         """
         if self.__prepare_src is not None:
             return self.__prepare_src
-        elif self.checkout is None:
-            # Checkout set to None, it means that there is no way
-            # to create a source package via Anod.
-            # This can be true for third party packages
-            return None
 
         # Else provide a default function if we have exactly 1 checkout
         if not self.checkout:
@@ -235,7 +230,10 @@ class SourceBuilder(object):
 class UnmanagedSourceBuilder(SourceBuilder):
     """Source builder for sources not managed by anod."""
 
-    pass
+    @property
+    def prepare_src(self):
+        """Do not create source package."""
+        return None
 
 
 class ThirdPartySourceBuilder(UnmanagedSourceBuilder):

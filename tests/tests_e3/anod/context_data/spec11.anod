@@ -1,6 +1,6 @@
 from e3.anod.spec import Anod
 from e3.anod.package import ExternalSourceBuilder, \
-    UnmanagedSourceBuilder, Source
+    ThirdPartySourceBuilder, Source
 
 
 class Spec11(Anod):
@@ -12,10 +12,7 @@ class Spec11(Anod):
     build_deps = [Anod.Dependency('spec1', require='source_pkg')]
 
     source_pkg_build = [
-        UnmanagedSourceBuilder(
-            name='unmanaged-src',
-            fullname=lambda x: 'unmanaged-src',
-            checkout=['spec1-git']),
+        ThirdPartySourceBuilder(name='unmanaged-src'),
         ExternalSourceBuilder(name='external-src')]
 
     @Anod.primitive()
