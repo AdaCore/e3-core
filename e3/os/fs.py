@@ -177,13 +177,13 @@ def df(path, full=False):
 
         def GetDiskFreeSpaceEx_errcheck(result, func, args):
             del func
-            if not result:
+            if not result:  # defensive code
                 raise ctypes.WinError()
             return (args[1].value, args[2].value, args[3].value)
         GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck
         _, total, free = GetDiskFreeSpaceEx(path)
         used = total - free
-    else:
+    else:  # windows: no cover
         # f_frsize = fundamental filesystem block size
         # f_bsize = preferred file system block size
         # The use of f_frsize seems to give more accurate results.
@@ -214,7 +214,7 @@ def __safe_unlink_func():
             return NTFile(x).unlink()
 
         return win_rm, win_rm
-    else:
+    else:  # windows: no cover
         return os.remove, os.rmdir
 
 
@@ -250,7 +250,7 @@ def max_path():
     if sys.platform == 'win32':  # unix: no cover
         from ctypes.wintypes import MAX_PATH
         return MAX_PATH
-    else:
+    else:  # windows: no cover
         return os.pathconf('/', 'PC_PATH_MAX')
 
 
@@ -301,7 +301,7 @@ def unixpath(path):
         if m is not None:
             result = m.group(1)
         return result
-    else:
+    else:  # windows: no cover
         return path
 
 

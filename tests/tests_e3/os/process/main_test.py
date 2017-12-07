@@ -211,6 +211,20 @@ def test_is_running():
     p.wait()
 
 
+def test_is_running_non_existant():
+    """Call is_running on non-existing process."""
+    import psutil
+    pid_list = psutil.pids()
+    pid_list.sort()
+
+    # Try to found a non existing process
+    for a in range(1, 1000):
+        running = e3.os.process.is_running(pid_list[-1] + a)
+        if not running:
+            break
+    assert not running, 'could not find non existing process'
+
+
 @pytest.mark.xfail(e3.env.Env().build.os.name == 'solaris',
                    reason='known issue: p.status == 0 on Solaris')
 def test_interrupt():
