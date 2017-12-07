@@ -39,6 +39,21 @@ def test_read_attributes():
         timedelta(seconds=10)
 
 
+@pytest.mark.skipif(
+    sys.platform != 'win32',
+    reason="windows specific test")
+def test_file_info():
+    work_dir = os.getcwd()
+
+    test_file_path = os.path.join(work_dir, 'test_read_attr_file.txt')
+    touch(test_file_path)
+    ntfile = NTFile(test_file_path)
+    assert 'test_read_attr_file.txt' in str(ntfile)
+
+    ntfile.read_attributes()
+    assert 'change_time:' in str(ntfile.basic_info)
+
+
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_write_attributes():
     work_dir = os.getcwd()
@@ -192,6 +207,16 @@ def test_iterate_on_dir():
     finally:
         ntfile.close()
 
+    test_file = os.path.join(test_dir_path, 'not-a-directory.txt')
+    touch(test_file)
+    ntfile = NTFile(test_file)
+    try:
+
+        with pytest.raises(NTException):
+            status = ntfile.iterate_on_dir(fun, default_result=False)
+    finally:
+        ntfile.close()
+
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="windows specific test")
 def test_is_dir_empty():
@@ -273,3 +298,42 @@ def test_unlink():
         ntfile.unlink()
     ntfile.close()
     assert 'NTFile.read_attributes:' in str(err)
+
+    # A directory that is not empty cannot be deleted
+    dir_to_delete = os.path.join(test_dir_path, 'dir_to_delete')
+    mkdir(dir_to_delete)
+    touch(os.path.join(dir_to_delete, 'afile.txt'))
+    ntfile = NTFile(dir_to_delete)
+    try:
+        with pytest.raises(NTException) as err:
+            ntfile.unlink()
+    finally:
+        ntfile.close()
+
+    # A directory that is already opened and not empty cannot be
+    # moved to trash
+    dir_to_delete = os.path.join(test_dir_path, 'dir_to_delete')
+    mkdir(dir_to_delete)
+    touch(os.path.join(dir_to_delete, 'afile.txt'))
+
+    ntfile = NTFile(dir_to_delete)
+    ntfile2 = NTFile(dir_to_delete)
+    try:
+        ntfile.open(Access.LIST_DIRECTORY, Share.ALL)
+        with pytest.raises(NTException) as err:
+            ntfile2.unlink()
+    finally:
+        ntfile.close()
+        ntfile2.close()
+
+    # Try to delete a file that we cannot open
+    ntfile = NTFile(deleted_file_path)
+    ntfile2 = NTFile(deleted_file_path)
+    try:
+        touch(deleted_file_path)
+        ntfile.open(Access.READ_DATA, Share.NOTHING)
+        with pytest.raises(NTException) as err:
+            ntfile2.unlink()
+    finally:
+        ntfile.close()
+        ntfile2.close()

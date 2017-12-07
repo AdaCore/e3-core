@@ -70,6 +70,7 @@ class Access(object):
 class Share(object):
     """Share Access constants."""
 
+    NOTHING = 0x00
     READ = 0x01
     WRITE = 0x02
     DELETE = 0x04
@@ -161,12 +162,16 @@ class FileTime(Structure):
         try:
             return datetime.fromtimestamp(
                 self.filetime // 10000000 - 11644473600)
-        except ValueError as err:
+        except ValueError as err:  # defensive code
+            # Add some information to ease debugging
             raise ValueError("filetime '%s' failed with %s" % (
                              self.filetime, err))
 
     def __str__(self):
-        return str(time.ctime(self.filetime // 10000000 - 11644473600))
+        try:
+            return str(time.ctime(self.filetime // 10000000 - 11644473600))
+        except ValueError:
+            return 'none'
 
 
 class FileInfo(object):

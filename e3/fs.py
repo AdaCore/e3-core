@@ -73,7 +73,7 @@ def cp(source, target, copy_attrs=True, recursive=False,
 
             if recursive and os.path.isdir(f):
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
-            elif preserve_symlinks and os.path.islink(f):
+            elif preserve_symlinks and os.path.islink(f):  # windows: no cover
                 linkto = os.readlink(f)
                 os.symlink(linkto, f_dest)
             elif copy_attrs:
@@ -605,7 +605,7 @@ def sync_tree(source, target, ignore=None,
         :param dst: the target FileInfo object
         :type dst: FileInfo
         """
-        if islink(src):
+        if islink(src):  # windows: no cover
             mode = stat.S_IMODE(src.stat.st_mode)
             if hasattr(os, 'lchmod'):
                 os.lchmod(dst.path, mode)
@@ -644,7 +644,7 @@ def sync_tree(source, target, ignore=None,
         :param dst: the target FileInfo object
         :type dst: FileInfo
         """
-        if islink(src):
+        if islink(src):  # windows: no cover
             linkto = os.readlink(src.path)
             if not islink(dst) or os.readlink(dst.path) != linkto:
                 if dst.stat is not None:
