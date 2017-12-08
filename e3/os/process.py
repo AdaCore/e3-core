@@ -334,7 +334,8 @@ class Run(object):
                     'env': env,
                     'universal_newlines': True}
 
-                if sys.platform != 'win32' and set_sigpipe:
+                if sys.platform != 'win32' and \
+                        set_sigpipe:  # windows: no cover
                     # preexec_fn is no supported on windows
                     popen_args['preexec_fn'] = subprocess_setup
 
@@ -367,7 +368,8 @@ class Run(object):
                         'env': env,
                         'universal_newlines': txt_mode}
 
-                    if sys.platform != 'win32' and set_sigpipe:
+                    if sys.platform != 'win32' and \
+                            set_sigpipe:  # windows: no cover
                         # preexec_fn is no supported on windows
                         popen_args['preexec_fn'] = subprocess_setup
 
@@ -625,7 +627,7 @@ def wait_for_processes(process_list, timeout):
             except OSError:
                 raise WaitError
 
-    else:
+    else:  # windows: no cover
         import select
 
         # Each time a SIGCHLD signal is received write into pipe. Use
@@ -687,15 +689,14 @@ def is_running(pid):
         handle = NT.OpenProcess(Access.PROCESS_QUERY_INFORMATION, False, pid)
 
         try:
-            if handle == 0:
+            if not handle:
                 return False
-
             return process_exit_code(handle) is None
 
         finally:
             NT.Close(handle)
 
-    else:
+    else:  # windows: no cover
         try:
             # We send a null signal to check the validity of pid
             os.kill(pid, 0)

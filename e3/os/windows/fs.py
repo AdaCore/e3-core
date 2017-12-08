@@ -321,7 +321,11 @@ class NTFile(object):
                                        pointer(self.io_status),
                                        b, b_size, FileInfo.Names.class_id,
                                        False, None, True)
-        if status == Status.NO_MORE_FILES:
+        if status == Status.NO_MORE_FILES:  # defensive code
+            # In theory this case should not occurs at it means that the
+            # directory does not even have the . and .. entries. In practice
+            # it can occurs (probably because of an intermediate state).
+            # In that case behave as if the directory is empty
             return result
 
         if status < 0:
@@ -442,7 +446,7 @@ class NTFile(object):
                 if self.is_dir and not self.is_dir_empty:
                     raise NTException(
                         status=1,
-                        message="directory not empty" % self.path,
+                        message="directory not empty: %s" % self.path,
                         origin="NTFile.unlink")
 
                 self.move_to_trash()
@@ -471,7 +475,7 @@ class NTFile(object):
                                 status=e.status,
                                 message="dir %s is not empty" % self.path,
                                 origin="NTFile.unlink")
-                    elif e.status == Status.CANNOT_DELETE:
+                    elif e.status == Status.CANNOT_DELETE:  # defensive code
                         # At this stage we are sure that the file is not
                         # read_only but it seems that we can get this error
                         # when the file has been mapped to memory.
@@ -482,7 +486,7 @@ class NTFile(object):
                                 try_counter = min(try_counter, 5)
                             except NTException:
                                 pass
-                    else:
+                    else:  # defensive code
                         # Unknown error. If the file has been moved away
                         # consider it success. Otherwise reraise exception
                         if is_in_trash:
