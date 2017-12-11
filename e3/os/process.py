@@ -8,10 +8,8 @@ status
 from __future__ import absolute_import, division, print_function
 
 import errno
-import itertools
 import logging
 import os
-import re
 import signal
 import subprocess
 import sys
@@ -704,39 +702,6 @@ def is_running(pid):
             # If the process is not found, errno will be set to ESRCH
             return e.errno != errno.ESRCH
         return True
-
-
-def kill_processes_with_handle(path):
-    """Kill processes with a handle on the selected directory.
-
-    Note: this works only on windows
-
-    :param path: path
-    :type path: str
-    :return: the output of launched commands (can be used for logging
-        purposes)
-    :rtype: str
-    """
-    if sys.platform == 'win32':  # unix: no cover
-        path = re.sub('^[a-zA-Z]:(.*)', r'\1', path).replace('/', '\\')
-        mod_dir = os.path.dirname(__file__)
-        handle_path = os.path.abspath(
-            os.path.join(mod_dir, 'internal', 'data', 'libexec',
-                         'x86-windows', 'handle.exe'))
-        handle_p = Run([handle_path, '/AcceptEULA', '-a', '-u', path])
-        msg = "handle_output:\n%s" % handle_p.out
-        logger.debug(msg)
-        process_list = set(re.findall(r'pid: *([0-9]+) *', handle_p.out))
-        if process_list:
-            taskkill_p = Run(['taskkill.exe', '/F'] +
-                             list(itertools.chain.from_iterable(
-                                 [['/PID', '%s' % k] for k in process_list])),
-                             error=subprocess.STDOUT)
-            logger.debug("taskkill output:\n%s", taskkill_p.out)
-            msg += "taskkill output:\n%s" % taskkill_p.out
-        return msg
-    else:  # defensive code
-        raise NotImplementedError('currently only supported on windows')
 
 
 def kill_process_tree(pid, timeout=3):
