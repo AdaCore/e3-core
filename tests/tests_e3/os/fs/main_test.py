@@ -58,6 +58,17 @@ def test_chmod():
     e3.os.fs.chmod('g=rw', 'a')
     check_mode('a', 0o765)
 
+    e3.os.fs.chmod('a=rwx', 'a')
+    check_mode('a', 0o777)
+
+    os.chmod('a', 0o666)
+
+    e3.os.fs.chmod('u=rwx,g=rwx', 'a')
+    check_mode('a', 0o776)
+
+    e3.os.fs.chmod('u=rwx,g=rwx,o=rwx', 'a')
+    check_mode('a', 0o777)
+
 
 @pytest.mark.xfail(sys.platform == 'win32',
                    reason='windows specific rm not yet added to e3-core')

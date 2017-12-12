@@ -142,8 +142,8 @@ def chmod(mode, filename):
                 else:
                     current_mode = current_mode | action_mask
 
-        os.chmod(filename, current_mode)
-        return current_mode
+    os.chmod(filename, current_mode)
+    return current_mode
 
 
 def df(path, full=False):
