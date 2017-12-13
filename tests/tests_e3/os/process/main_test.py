@@ -337,3 +337,21 @@ def test_no_rlimit(caplog):
         assert 'cannot find rlimit' in caplog.text
     finally:
         e3.os.process.get_rlimit = old_get_rlimit
+
+
+@pytest.mark.skipif(
+    sys.platform != 'win32',
+    reason="windows specific test")
+def test_shell_override():
+    """Unix shell shebang handling.
+
+    On windows we ensure that /bin/bash /bin/sh shebangs are replaced by
+    SHELL env var.
+    """
+    work_dir = os.getcwd()
+    os.environ['SHELL'] = sys.executable
+    test_file_path = os.path.join(work_dir, 'shebang_test.sh')
+    with open(test_file_path, 'w') as fd:
+        fd.write("#!/bin/bash\nimport sys; print sys.executable\n")
+    p = e3.os.process.Run([test_file_path], parse_shebang=True)
+    assert p.out.strip() == sys.executable

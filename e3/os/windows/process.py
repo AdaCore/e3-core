@@ -67,11 +67,12 @@ def wait_for_objects(object_list,
                                              timeout)
     if object_index == Wait.TIMEOUT:
         return None
-    elif object_index == Wait.FAILED:
+    elif object_index == Wait.FAILED:  # defensive code
         raise WindowsError("error while waiting for objects")
-    elif Wait.ABANDONED <= object_index < Wait.ABANDONED + size:
+    elif Wait.ABANDONED <= object_index \
+            < Wait.ABANDONED + size:  # defensive code
         return object_index - Wait.ABANDONED
     elif Wait.OBJECT <= object_index < Wait.OBJECT + size:
         return object_index
-    else:
+    else:  # defensive code
         raise WindowsError("unknown error while waiting for objects")
