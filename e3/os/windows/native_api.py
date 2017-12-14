@@ -134,7 +134,7 @@ class UnicodeString(Structure):
         strbuf = None
         length = 0
         if value is not None or max_length > 0:
-            length = len(value)
+            length = len(value) if value is not None else 0
             max_length = max(length, max_length)
             if value:
                 strbuf = create_unicode_buffer(value, max_length)
@@ -170,7 +170,7 @@ class FileTime(Structure):
     def __str__(self):
         try:
             return str(time.ctime(self.filetime // 10000000 - 11644473600))
-        except ValueError:
+        except ValueError:  # defensive code
             return 'none'
 
 
