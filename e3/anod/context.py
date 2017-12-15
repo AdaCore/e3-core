@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
+import e3.log
 from e3.anod.action import (Build, BuildOrInstall, Checkout, CreateSource,
                             CreateSourceOrDownload, Decision, DownloadBinary,
                             DownloadSource, GetSource, Install,
@@ -260,6 +261,8 @@ class AnodContext(object):
         :type source_name: str | None
         """
         # Initialize a spec instance
+        e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
+            name, qualifier, primitive))
         spec = self.load(name, qualifier=qualifier, env=env, kind=primitive)
 
         # Initialize the resulting action based on the primitive name
@@ -274,7 +277,8 @@ class AnodContext(object):
         else:  # defensive code
             raise ValueError('add_spec error: %s is not known' % primitive)
 
-        if not spec.has_package and primitive == 'install' and \
+        if primitive == 'install' and \
+                not (spec.has_package and spec.component is not None) and \
                 has_primitive(spec, 'build'):
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
@@ -286,7 +290,7 @@ class AnodContext(object):
                                  expand_build=False)
 
         if expand_build and primitive == 'build' and \
-                spec.has_package:
+                (spec.has_package and spec.component is not None):
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
