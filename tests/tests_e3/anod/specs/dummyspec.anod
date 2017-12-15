@@ -22,6 +22,7 @@ class dummyspec(spec('anod')):
     test_source_list = [Anod.Source('dummy-src', publish=True)]
 
     package = Package('dummypkg')
+    component = 'dummy'
 
     @Anod.primitive()
     def build(self):
