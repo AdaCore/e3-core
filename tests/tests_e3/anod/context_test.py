@@ -81,13 +81,14 @@ class TestContext(object):
         # declared
         ac = self.create_context()
         ac.add_anod_action('spec3', primitive='build')
-        assert len(ac.tree) == 5, ac.tree.as_dot()
+        assert len(ac.tree) == 6, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 3, result.as_dot()
+        assert len(result) == 4, result.as_dot()
         assert set(result.vertex_data.keys()) == \
             set(('root',
                  'mylinux.x86-linux.spec3.build',
-                 'mylinux.x86-linux.spec3.install'))
+                 'mylinux.x86-linux.spec3.install',
+                 'mylinux.x86-linux.spec3.upload_bin'))
 
     def test_add_anod_action4(self):
         # Simple spec with:

@@ -5,6 +5,7 @@ from e3.anod.package import Package
 class Spec3(Anod):
 
     package = Package('toto-bin')
+    component = 'toto'
 
     @Anod.primitive(post='install')
     def build(self):

@@ -146,6 +146,11 @@ class ElectrolytJob(Job):
         sync_tree(src_dir, dest_dir, ignore=source.ignore)
         self.status = STATUS.success
 
+    def do_uploadbinarycomponent(self):
+        """Upload a binary component."""
+        # not implemented
+        self.status = STATUS.success
+
     def do_root(self):
         """Express the final result of the exec."""
         # This method won't be executed unless all the predecessor jobs are
