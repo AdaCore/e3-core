@@ -65,9 +65,12 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
         # No system sendmail, return False
         return False
 
+    smtp_class = smtplib.SMTP_SSL if 'smtp_ssl' in os.environ.get(
+        'E3_ENABLE_FEATURE', '').split(',') else smtplib.SMTP
+
     for smtp_server in smtp_servers:
         try:
-            s = smtplib.SMTP(smtp_server)
+            s = smtp_class(smtp_server)
         except (socket.error, smtplib.SMTPException) as e:
             logger.debug(e)
             logger.debug('cannot connect to smtp server %s', smtp_server)
