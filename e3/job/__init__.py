@@ -144,6 +144,18 @@ class Job(object):
         """Job activity."""
         pass  # all: no cover
 
+    @property
+    def status(self):
+        """Return he job's status.
+
+        This is made a property because users of this class should not
+        be allowed to set or change it value. The job's status is ...
+        a property of the job!
+
+        :return: e3.anod.status.ReturnValue
+        """
+        return ReturnValue.success
+
     def interrupt(self):
         """Interrupt current job.
 
@@ -157,24 +169,25 @@ class Job(object):
 
 
 class EmptyJob(Job):
-    """A job which does nothing.
-
-    :ivar status: The job's status.
-    :vartype status: ReturnValue
-    """
+    """A job which does nothing."""
 
     def __init__(self, uid, data, notify_end, status=ReturnValue.force_skip):
         """Initialize the EmptyJob.
 
         :param status: The job's status.
-        :type status: ReturnValue
+        :type status: e3.anod.status.ReturnValue
         """
         super(EmptyJob, self).__init__(uid, data, notify_end)
         self.should_skip = True
-        self.status = status
+        self.__status = status
 
     def run(self):
         pass
+
+    @property
+    def status(self):
+        """See Job.status' description."""
+        return self.__status
 
 
 class ProcessJob(Job):
@@ -207,6 +220,14 @@ class ProcessJob(Job):
         proc_handle.wait()
         logger.debug('job %s status %s (pid:%s)',
                      self.uid, proc_handle.status, proc_handle.pid)
+
+    @property
+    def status(self):
+        """See Job.status' description."""
+        if self.proc_handle is None:
+            return ReturnValue.notready
+        else:
+            return ReturnValue(self.proc_handle.status)
 
     @abc.abstractproperty
     def cmdline(self):
@@ -376,8 +397,9 @@ class StatusBasedJobController(JobController):
         :param job: The job whose results we need to collect.
         :type job: ProcessJob
         """
+        self.job_status[job.uid] = ReturnValue(job.status)
+
         if job.should_skip:
-            self.job_status[job.uid] = ReturnValue(job.status)
             if job.status not in (ReturnValue.force_fail,
                                   ReturnValue.force_skip):
                 logging.info("[queue=%-10s status=%3d time=%5ds] %s",
@@ -385,10 +407,9 @@ class StatusBasedJobController(JobController):
                              0, job.data)
             return False
 
-        self.job_status[job.uid] = ReturnValue(job.proc_handle.status)
         logging.info("[queue=%-10s status=%3d time=%5ds] %s",
                      job.queue_name,
-                     job.proc_handle.status,
+                     job.status,
                      int(job.timing_info.duration),
                      job.data)
 
