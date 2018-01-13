@@ -4,7 +4,7 @@ import sys
 
 from e3.anod.status import ReturnValue
 from e3.collection.dag import DAG
-from e3.job import EmptyJob, ProcessJob, StatusBasedJobController
+from e3.job import EmptyJob, Job, ProcessJob, StatusBasedJobController
 
 
 class ControlledJob(ProcessJob):
@@ -38,6 +38,17 @@ class ControlledJob(ProcessJob):
         return result
 
 
+class NullJob(Job):
+    """A job which does nothing and always returns success.
+
+    The purpose of this class is to have a class which uses the default
+    implementation of the Job.status attribute.
+    """
+
+    def run(self):
+        pass
+
+
 class SimpleController(StatusBasedJobController):
     """A Simple controller."""
 
@@ -60,6 +71,8 @@ class SimpleController(StatusBasedJobController):
             # Create a dry-run job, which is a job that never runs
             # (EmptyJob) and returns ReturnValue.success.
             return EmptyJob(uid, data, notify_end, ReturnValue.success)
+        elif uid.endswith('nulljob'):
+            return NullJob(uid, data, notify_end)
         else:
             return ControlledJob(uid, data, notify_end)
 
@@ -196,4 +209,27 @@ class TestStatusBasedJobController(object):
         assert requeued is False
         assert c.job_status == {'1.dry-run': ReturnValue.success,
                                 '2.dry-run': ReturnValue.success}
+        assert c.requeued == {}
+
+    def test_job_status_before_run(self):
+        """Check the value of a job returned by get_job before we run it."""
+        actions = DAG()
+        actions.add_vertex('1')
+        c = SimpleController(actions)
+
+        job = c.get_job('1', None, [], print)
+        assert job.status == ReturnValue.notready
+
+    def test_null_job_no_predecessors(self):
+        """Simple case of a leaf null job."""
+        actions = DAG()
+        actions.add_vertex('1.nulljob')
+        c = SimpleController(actions)
+
+        job = c.get_job('1.nulljob', None, [], print)
+        assert isinstance(job, NullJob)
+        assert job.should_skip is False
+        job.run()
+        c.collect(job)
+        assert c.job_status == {'1.nulljob': ReturnValue.success}
         assert c.requeued == {}

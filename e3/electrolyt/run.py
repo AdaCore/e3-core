@@ -18,6 +18,18 @@ STATUS = ReturnValue
 
 
 class ElectrolytJob(Job):
+    """An electrolyt Job.
+
+    :ivar sandbox: The sandbox where to run the electrolyt job.
+    :vartype sandbox: e3.anod.sandbox.SandBox
+    :ivar force_status: Set the status of the job.
+    :vartype force_status: e3.anod.status.ReturnValue
+    :ivar dry_run: If True report kind of action without execution.
+    :vartype dry_run: bool
+    :ivar store: The store backend for accessing source and binary
+        packages.
+    :vartype store: e3.store.backends.base.Store
+    """
 
     def __init__(self, uid, data, notify_end, sandbox, store,
                  force_status=STATUS.status_unknown,
@@ -30,30 +42,37 @@ class ElectrolytJob(Job):
         :type data: child of e3.anod.action.Action
         :param notify_end: callback to call when job is finished
         :type notify_end: function
-        :param sandbox: current working sandbox
+        :param sandbox: Same as the attribute of the same name.
         :type sandbox: e3.anod.sandbox.SandBox
-        :param force_status: set the status of the job
+        :ivar store: Same as the attribute of the same name.
+        :vartype store: e3.store.backends.base.Store
+        :param force_status: Same as the attribute of the same name.
         :type force_status: e3.anod.status.ReturnValue
-        :param dry_run: if True report kind of action without execution
+        :param dry_run: Same as the attribute of the same name.
         :param dry_run: bool
         """
         super(ElectrolytJob, self).__init__(uid, data, notify_end)
-        self.status = force_status
+        self.__status = force_status
         self.sandbox = sandbox
         self.dry_run = dry_run
         self.store = store
 
     def run(self):
-        if self.status == STATUS.status_unknown and not self.dry_run:
+        if self.__status == STATUS.status_unknown and not self.dry_run:
             try:
                 getattr(self, self.data.run_method)()
             except Exception as e:
-                self.status = STATUS.failure
+                self.__status = STATUS.failure
                 logger.error(
                     'Exception occurred in action %s %s',
                     self.data.run_method, e)
                 _, _, exc_traceback = sys.exc_info()
                 logger.error(traceback.format_tb(exc_traceback))
+
+    @property
+    def status(self):
+        """See Job.status' description."""
+        return self.__status
 
     def run_anod_primitive(self, primitive=None):
         """Run an anod primitive after setting up the sandbox."""
@@ -63,7 +82,7 @@ class ElectrolytJob(Job):
         anod_driver.activate()
         anod_driver.anod_instance.build_space.create(quiet=True)
         getattr(anod_driver.anod_instance, primitive)()
-        self.status = STATUS.success
+        self.__status = STATUS.success
 
     def do_build(self):
         """Run anod build primitive."""
@@ -82,14 +101,14 @@ class ElectrolytJob(Job):
         repo_name = self.data.repo_name
         if self.data.repo_data is None:
             logger.error('%s configuration missing', repo_name)
-            self.status = STATUS.failure
+            self.__status = STATUS.failure
             return
         repo_url = self.data.repo_data['url']
         repo_revision = self.data.repo_data['revision']
         repo_vcs = self.data.repo_data['vcs']
         if repo_vcs != 'git':
             logger.error('%s vcs type not supported', repo_vcs)
-            self.status = STATUS.failure
+            self.__status = STATUS.failure
             return
         repo_dir = os.path.join(self.sandbox.vcs_dir, repo_name)
         g = GitRepository(repo_dir)
@@ -97,7 +116,7 @@ class ElectrolytJob(Job):
             g.log_stream = e3.log.default_output_stream
         g.init()
         g.update(repo_url, repo_revision, force=True)
-        self.status = STATUS.success
+        self.__status = STATUS.success
 
     def do_createsource(self):
         """Prepare src from vcs to cache using sourcebuilders."""
@@ -113,7 +132,7 @@ class ElectrolytJob(Job):
                 repo_dict[source_name] = {"working_dir": src_dir}
                 mkdir(dest_dir)
                 src_builder.prepare_src(repo_dict, dest_dir)
-                self.status = STATUS.success
+                self.__status = STATUS.success
                 logger.debug('%s created in cache/tmp', source_name)
                 return
 
@@ -123,7 +142,7 @@ class ElectrolytJob(Job):
         This action should return success status so do_install
         source can procede.
         """
-        self.status = STATUS.success
+        self.__status = STATUS.success
 
     def do_installsource(self):
         """Install the source from tmp/cache to build_space/src."""
@@ -141,21 +160,21 @@ class ElectrolytJob(Job):
             dest_dir = os.path.join(spec.build_space.src_dir, source.dest)
         if not os.path.isdir(src_dir):  # defensive code
             logger.critical('source directory %s does not exist', src_dir)
-            self.status = STATUS.failure
+            self.__status = STATUS.failure
             return
         sync_tree(src_dir, dest_dir, ignore=source.ignore)
-        self.status = STATUS.success
+        self.__status = STATUS.success
 
     def do_uploadbinarycomponent(self):
         """Upload a binary component."""
         # not implemented
-        self.status = STATUS.success
+        self.__status = STATUS.success
 
     def do_root(self):
         """Express the final result of the exec."""
         # This method won't be executed unless all the predecessor jobs are
         # successful, so it will just report success state
-        self.status = STATUS.success
+        self.__status = STATUS.success
         logger.info('result: OK')
 
 
