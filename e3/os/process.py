@@ -734,8 +734,11 @@ def kill_process_tree(pid, timeout=3):
 
     all_processes = [parent_process] + children
     for p in all_processes:
-        logger.debug('kill process %s (%s)', p, p.cmdline())
-        p.kill()
+        try:
+            logger.debug('kill process %s (%s)', p, p.cmdline())
+            p.kill()
+        except psutil.NoSuchProcess:  # defensive code
+            pass
 
     def on_terminate(p):
         """Log info when a process terminate."""
