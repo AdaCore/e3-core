@@ -4,7 +4,15 @@ import sys
 
 from e3.anod.status import ReturnValue
 from e3.collection.dag import DAG
-from e3.job import EmptyJob, Job, ProcessJob, StatusBasedJobController
+from e3.job import EmptyJob, Job, ProcessJob
+from e3.job.walk import Walk
+
+
+class DoNothingJob(Job):
+    """A Job which inherits Job's implementation of the status attribute."""
+
+    def run(self):
+        pass
 
 
 class ControlledJob(ProcessJob):
@@ -38,24 +46,12 @@ class ControlledJob(ProcessJob):
         return result
 
 
-class NullJob(Job):
-    """A job which does nothing and always returns success.
-
-    The purpose of this class is to have a class which uses the default
-    implementation of the Job.status attribute.
-    """
-
-    def run(self):
-        pass
-
-
-class SimpleController(StatusBasedJobController):
-    """A Simple controller."""
-
+class SimpleWalk(Walk):
     def __init__(self, actions):
-        super(SimpleController, self).__init__(actions)
         # The list of jobs (by UID) that have been requeued.
+        self.saved_jobs = {}
         self.requeued = {}
+        super(SimpleWalk, self).__init__(actions)
 
     def request_requeue(self, job):
         """Requeue the job is not already queued once."""
@@ -70,26 +66,33 @@ class SimpleController(StatusBasedJobController):
         if uid.endswith('dry-run'):
             # Create a dry-run job, which is a job that never runs
             # (EmptyJob) and returns ReturnValue.success.
-            return EmptyJob(uid, data, notify_end, ReturnValue.success)
-        elif uid.endswith('nulljob'):
-            return NullJob(uid, data, notify_end)
+            job = EmptyJob(uid, data, notify_end, ReturnValue.success)
+        elif uid.endswith('do-nothing'):
+            job = DoNothingJob(uid, data, notify_end)
         else:
-            return ControlledJob(uid, data, notify_end)
+            job = ControlledJob(uid, data, notify_end)
+        self.saved_jobs[job.uid] = job
+        return job
+
+    def create_failed_job(self, uid, data, predecessors, reason, notify_end):
+        job = super(SimpleWalk, self).create_failed_job(
+            uid, data, predecessors, reason, notify_end)
+        self.saved_jobs[job.uid] = job
+        return job
 
 
-class TestStatusBasedJobController(object):
-
+class TestWalk(object):
     def test_good_job_no_predecessors(self):
         """Simple case of a leaf job."""
         actions = DAG()
         actions.add_vertex('1')
-        c = SimpleController(actions)
+        c = SimpleWalk(actions)
 
-        job = c.get_job('1', None, [], print)
+        job = c.saved_jobs['1']
         assert isinstance(job, ControlledJob)
         assert job.should_skip is False
-        job.run()
-        c.collect(job)
+        assert job.status == ReturnValue.success
+
         assert c.job_status == {'1': ReturnValue.success}
         assert c.requeued == {}
 
@@ -97,14 +100,12 @@ class TestStatusBasedJobController(object):
         """Simple case of a leaf job failing."""
         actions = DAG()
         actions.add_vertex('1.bad')
-        c = SimpleController(actions)
+        c = SimpleWalk(actions)
 
-        job = c.get_job('1.bad', None, [], print)
+        job = c.saved_jobs['1.bad']
         assert isinstance(job, ControlledJob)
         assert job.should_skip is False
-        job.run()
-        requeued = c.collect(job)
-        assert not requeued
+        assert job.status == ReturnValue(1)
         assert c.job_status == {'1.bad': ReturnValue(1)}
         assert c.requeued == {}
 
@@ -113,45 +114,33 @@ class TestStatusBasedJobController(object):
         actions = DAG()
         actions.add_vertex('1.bad')
         actions.add_vertex('2', predecessors=['1.bad'])
-        c = SimpleController(actions)
+        c = SimpleWalk(actions)
 
-        job = c.get_job('1.bad', None, [], print)
+        job = c.saved_jobs['1.bad']
         assert isinstance(job, ControlledJob)
         assert job.should_skip is False
-        job.run()
-        requeued = c.collect(job)
-        assert not requeued
-        assert c.job_status == {'1.bad': ReturnValue(1)}
-        assert c.requeued == {}
+        assert job.status == ReturnValue(1)
 
-        job = c.get_job('2', None, ['1.bad'], print)
+        job = c.saved_jobs['2']
         assert isinstance(job, EmptyJob)
         assert job.should_skip is True
-        job.run()
-        requeued = c.collect(job)
-        assert not requeued
+        assert job.status == ReturnValue.failure
+
         assert c.job_status == {'1.bad': ReturnValue(1),
-                                '2': ReturnValue.force_skip}
+                                '2': ReturnValue.failure}
         assert c.requeued == {}
 
     def test_job_not_ready_then_ok(self):
         """Rerunning a job that first returned notready."""
         actions = DAG()
         actions.add_vertex('1.notready:once')
-        c = SimpleController(actions)
+        c = SimpleWalk(actions)
 
-        job = c.get_job('1.notready:once', None, [], print)
+        job = c.saved_jobs['1.notready:once']
         assert isinstance(job, ControlledJob)
         assert job.should_skip is False
-        job.run()
-        requeued = c.collect(job)
-        assert requeued is True
-        assert c.job_status == {'1.notready:once': ReturnValue.notready}
-        assert c.requeued == {'1.notready:once': 1}
+        assert job.status == ReturnValue.success
 
-        job.run()
-        requeued = c.collect(job)
-        assert requeued is False
         assert c.job_status == {'1.notready:once': ReturnValue.success}
         assert c.requeued == {'1.notready:once': 1}
 
@@ -159,29 +148,13 @@ class TestStatusBasedJobController(object):
         """Trying to run a job repeatedly returning notready."""
         actions = DAG()
         actions.add_vertex('1.notready:always')
-        c = SimpleController(actions)
+        c = SimpleWalk(actions)
 
-        job = c.get_job('1.notready:always', None, [], print)
+        job = c.saved_jobs['1.notready:always']
         assert isinstance(job, ControlledJob)
         assert job.should_skip is False
-        job.run()
-        requeued = c.collect(job)
-        assert requeued is True
-        assert c.job_status == {'1.notready:always': ReturnValue.notready}
-        assert c.requeued == {'1.notready:always': 1}
+        assert job.status == ReturnValue.notready
 
-        # Try running again. We should be getting the same outcome.
-        job.run()
-        requeued = c.collect(job)
-        assert requeued is True
-        assert c.job_status == {'1.notready:always': ReturnValue.notready}
-        assert c.requeued == {'1.notready:always': 2}
-
-        # Try running again. Still not ready, but no requeuing done
-        # anymore.
-        job.run()
-        requeued = c.collect(job)
-        assert requeued is False
         assert c.job_status == {'1.notready:always': ReturnValue.notready}
         assert c.requeued == {'1.notready:always': 3}
 
@@ -190,46 +163,39 @@ class TestStatusBasedJobController(object):
         actions = DAG()
         actions.add_vertex('1.dry-run')
         actions.add_vertex('2.dry-run', predecessors=['1.dry-run'])
-        c = SimpleController(actions)
+        c = SimpleWalk(actions)
 
-        job = c.get_job('1.dry-run', None, [], print)
+        job = c.saved_jobs['1.dry-run']
         assert isinstance(job, EmptyJob)
         assert job.should_skip is True
-        job.run()
-        requeued = c.collect(job)
-        assert requeued is False
-        assert c.job_status == {'1.dry-run': ReturnValue.success}
-        assert c.requeued == {}
+        assert job.status == ReturnValue.success
 
-        job = c.get_job('2.dry-run', None, [], print)
+        job = c.saved_jobs['2.dry-run']
         assert isinstance(job, EmptyJob)
         assert job.should_skip is True
-        job.run()
-        requeued = c.collect(job)
-        assert requeued is False
+        assert job.status == ReturnValue.success
+
         assert c.job_status == {'1.dry-run': ReturnValue.success,
                                 '2.dry-run': ReturnValue.success}
         assert c.requeued == {}
 
-    def test_job_status_before_run(self):
-        """Check the value of a job returned by get_job before we run it."""
+    def test_do_nothing_job(self):
+        """Test DAG leading us to create a DoNothingJob object."""
         actions = DAG()
-        actions.add_vertex('1')
-        c = SimpleController(actions)
+        actions.add_vertex('1.do-nothing')
+        actions.add_vertex('2', predecessors=['1.do-nothing'])
+        c = SimpleWalk(actions)
 
-        job = c.get_job('1', None, [], print)
-        assert job.status == ReturnValue.notready
-
-    def test_null_job_no_predecessors(self):
-        """Simple case of a leaf null job."""
-        actions = DAG()
-        actions.add_vertex('1.nulljob')
-        c = SimpleController(actions)
-
-        job = c.get_job('1.nulljob', None, [], print)
-        assert isinstance(job, NullJob)
+        job = c.saved_jobs['1.do-nothing']
+        assert isinstance(job, DoNothingJob)
         assert job.should_skip is False
-        job.run()
-        c.collect(job)
-        assert c.job_status == {'1.nulljob': ReturnValue.success}
+        assert job.status == ReturnValue.success
+
+        job = c.saved_jobs['2']
+        assert isinstance(job, ControlledJob)
+        assert job.should_skip is False
+        assert job.status == ReturnValue.success
+
+        assert c.job_status == {'1.do-nothing': ReturnValue.success,
+                                '2': ReturnValue.success}
         assert c.requeued == {}
