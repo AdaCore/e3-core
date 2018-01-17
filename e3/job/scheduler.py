@@ -10,6 +10,9 @@ from e3.collection.dag import DAGIterator
 
 logger = e3.log.getLogger('job.scheduler')
 
+# The default maximum duration for a job, in seconds (24 hours).
+DEFAULT_JOB_MAX_DURATION = 3600 * 24
+
 
 class Scheduler(object):
     """Handle parallel execution of interdependent jobs."""
@@ -19,7 +22,7 @@ class Scheduler(object):
                  collect=None,
                  queues=None,
                  tokens=1,
-                 job_timeout=3600 * 24):
+                 job_timeout=DEFAULT_JOB_MAX_DURATION):
         """Initialize Scheduler.
 
         :param job_provider: function that returns instances of Job.
