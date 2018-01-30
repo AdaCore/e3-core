@@ -133,6 +133,17 @@ def test_inexisting():
         d.check()
 
 
+def test_cycle():
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('b')
+    d.update_vertex('a', predecessors=['b'])
+    d.add_vertex('c', predecessors=['b'])
+    d.update_vertex('b', predecessors=['c'], enable_checks=False)
+    with pytest.raises(DAGError):
+        d.check()
+
+
 def test_reverse_dag():
     d = DAG()
     d.add_vertex('a')
