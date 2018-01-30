@@ -65,6 +65,8 @@ class DAGIterator(object):
             None)
 
         if result is None:
+            if not self.enable_busy_state:
+                raise DAGError('cycle detected')
             # No vertex is ready to be visited
             return None, None, None
 
@@ -175,13 +177,9 @@ class DAG(object):
                 raise DAGError(
                     message='invalid nodes in predecessors of %s' % node,
                     origin='DAG.check')
-
-        nodes = set(self.vertex_predecessors.keys())
-
-        while nodes:
-            node = nodes.pop()
-            closure = self.get_closure(node)
-            nodes = nodes - closure
+        # raise DAGError if cycle
+        for _ in DAGIterator(self):
+            pass
 
     def get_closure(self, vertex_id):
         """Retrieve closure of predecessors for a vertex.
