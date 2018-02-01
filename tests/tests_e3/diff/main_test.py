@@ -51,7 +51,7 @@ def test_patch():
     e3.fs.cp(file_patch2, current_dir)
     e3.diff.patch(
         'patch2.txt', current_dir,
-        discarded_files=lambda x: x.endswith(b'new.txt'))
+        discarded_files=lambda x: x.endswith('new.txt'))
 
 
 def test_patch_ignore_all(caplog):
@@ -68,6 +68,39 @@ def test_patch_ignore_all(caplog):
         discarded_files=lambda x: True)
 
     assert 'All patch2.txt content has been discarded' in caplog.text
+
+
+def test_discarded():
+    test_dir = os.path.dirname(__file__)
+    orig = os.path.join(test_dir, 'data.txt')
+    new = os.path.join(test_dir, 'data_new.txt')
+    current_dir = os.getcwd()
+
+    e3.fs.cp(orig, current_dir)
+    e3.fs.cp(os.path.join(test_dir, 'data_patch_universal.txt'), current_dir)
+    e3.diff.patch('data_patch_universal.txt',
+                  current_dir,
+                  discarded_files=['*file_to_patch*'])
+
+    with open(new, 'r') as fd:
+        expected = fd.read()
+    with open('data.txt', 'r') as fd:
+        result = fd.read()
+    assert result == expected
+
+    e3.fs.cp(orig, current_dir)
+    e3.fs.cp(os.path.join(test_dir, 'data_patch_contextual.txt'), current_dir)
+    e3.diff.patch('data_patch_universal.txt',
+                  current_dir,
+                  discarded_files=['*file_to_patch*'])
+
+    with open(new, 'r') as fd:
+        expected = fd.read()
+    with open('data.txt', 'r') as fd:
+        result = fd.read()
+    assert result == expected
+
+    e3.fs.cp(orig, current_dir)
 
 
 def test_patch_invalid():
