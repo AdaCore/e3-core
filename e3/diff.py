@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import fnmatch
+import io
 import re
 from difflib import unified_diff
 
@@ -118,62 +119,84 @@ def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
 
     files_to_patch = 0
 
-    with open(patch_file, 'rb') as f, open(filtered_patch, 'wb') as fdout:
+    with io.open(patch_file, 'r', newline='') as f, \
+            io.open(filtered_patch, 'w', newline='') as fdout:
 
-        line_buffer = ()
-        # Can contains the previous line with its matched result
+        # Two line headers that mark beginning of patches
+        header1 = ()
+        header2 = ()
+        header2_regexp = None
+        # whether the current patch line should discarded
+        discard = False
 
-        discard = False  # whether the current patch line should be discarded
+        def write_line(l):
+            """Write line in filtered patch.
+
+            :param l: the line to write
+            :type l: str
+            """
+            if not discard:
+                fdout.write(l)
 
         for line in f:
-            if line_buffer:
-                # We got a patch start. Now check the next line
-                m2 = re.search(br'^[\+-]{3} ([^ \n\t]+)', line)
-                if m2 is not None:
-                    discard = False
-                    if callable(discarded_files):
-                        for fn in (line_buffer[1].group(1), m2.group(1)):
-                            if fn != '/dev/null' and discarded_files(fn):
+            if not header1:
+                # Check if we have a potential start of a 2 lines patch header
+                m = re.search(r'^[\*-]{3} ([^ \t\n]+)', line)
+                if m is None:
+                    write_line(line)
+                else:
+                    header1 = (line, m.group(1))
+                    if line[0] == '-':
+                        header2_regexp = r'^\+{3} ([^ \n\t]+)'
+                    else:
+                        header2_regexp = r'^-{3} ([^ \n\t]+)'
+            elif not header2:
+                # Check if line next to a header first line confirm that that
+                # this is the start of a new patch
+                m = re.search(header2_regexp, line)
+                if m is None:
+                    write_line(header1[0])
+                    header1 = ()
+                    write_line(line)
+                else:
+                    header2 = (line, m.group(1))
+            else:
+                # This is the start of patch. Decide whether to discard it or
+                # not
+                discard = False
+                path_list = [fn for fn in (header1[1], header2[1])
+                             if fn != '/dev/null']
+                if callable(discarded_files):
+                    for fn in path_list:
+                        if discarded_files(fn):
+                            logger.debug(
+                                'patch %s discarding %s' % (
+                                    patch_file, fn))
+                            discard = True
+                            break
+                else:
+                    for pattern in discarded_files:
+                        for fn in path_list:
+                            if fnmatch.fnmatch(fn, pattern):
                                 logger.debug(
-                                    'patch %s discarding %s',
-                                    patch_file, fn)
+                                    'patch %s discarding %s' % (
+                                        patch_file, fn))
                                 discard = True
                                 break
-                    else:
-                        for pattern in discarded_files:
-                            if isinstance(pattern, unicode):
-                                pattern = pattern.encode('utf-8')
-                            for fn in (line_buffer[1].group(1), m2.group(1)):
-                                if fn != '/dev/null' and fnmatch.fnmatch(
-                                        fn, pattern):
-                                    logger.debug(
-                                        'patch %s discarding %s',
-                                        patch_file, fn)
-                                    discard = True
-                                    break
-                            if discard:
-                                break
-                    if not discard:
-                        files_to_patch += 1
-            else:
-                # Find lines starting with '*** filename' (contextual diff) or
-                # with '--- filename' (unified diff)
-                m = re.search(br'^[\*-]{3} ([^ \t\n]+)', line)
-                if m is not None:
-                    # Ensure this is not a hunk start of the form
-                    # '*** n,m ****' or '--- n,m ----'
-                    if not re.search(br'[\*-]{4}$', line):
-                        # We have a patch start. Get the next line that
-                        # contains other possibility for the filename
-                        line_buffer = (line, m)
-                        continue
-
-            # Empty the buffer
-            if not discard:
-                if line_buffer:
-                    fdout.write(line_buffer[0])
-                fdout.write(line)
-            line_buffer = ()
+                        if discard:
+                            break
+                if not discard:
+                    files_to_patch += 1
+                    write_line(header1[0])
+                    write_line(header2[0])
+                    write_line(line)
+                header1 = ()
+                header2 = ()
+        # Dangling lines
+        if header1:
+            write_line(header1[0])
+        if header2:  # defensive code
+            write_line(header2[0])
 
     if files_to_patch:
         apply_patch(filtered_patch)
