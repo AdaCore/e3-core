@@ -8,6 +8,7 @@ decide if a given action has been done and is up-to-date.
 from __future__ import absolute_import, division, print_function
 
 import hashlib
+import json
 import os
 
 from e3.anod.error import AnodError
@@ -182,3 +183,35 @@ class Fingerprint(object):
                 else:
                     checksum.update(chunk)
         return checksum.hexdigest()
+
+    def save_to_file(self, filename):
+        """Save the fingerprint to the given file.
+
+        :param filename: The name of the file where to save the fingerprint.
+        :type filename: str
+        """
+        with open(filename, 'w') as f:
+            json.dump(self.elements, f)
+
+    @classmethod
+    def load_from_file(cls, filename):
+        """Return the fingerprint saved in the given file.
+
+        :param filename: The name of the file where to load the fingerprint
+            from.
+        :type filename: str
+        :rtype: Fingerprint
+        """
+        fingerprint = Fingerprint()
+        with open(filename) as f:
+            try:
+                fingerprint.elements = json.load(f)
+            except ValueError as e:
+                raise AnodError(
+                    "`%s' is not a properly formatted fingerprint file (%s)"
+                    % (filename, e))
+        if not isinstance(fingerprint.elements, dict):
+            raise AnodError(
+                "`%s' is not a fingerprint file (not a dictionary)"
+                % filename)
+        return fingerprint
