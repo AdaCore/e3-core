@@ -9,7 +9,6 @@ from __future__ import absolute_import, division, print_function
 
 import hashlib
 import os
-from collections import OrderedDict
 
 from e3.anod.error import AnodError
 from e3.env import Env
@@ -30,7 +29,7 @@ class Fingerprint(object):
 
     def __init__(self):
         """Initialise a new fingerprint instance."""
-        self.elements = OrderedDict()
+        self.elements = {}
         self.add('os_version', Env().build.os.version)
         # ??? add more detailed information about the build machine so that
         # even a minor OS upgrade trigger a rebuild
@@ -163,7 +162,7 @@ class Fingerprint(object):
         :rtype: str
         """
         return '\n'.join(['%s: %s' % (k, self.elements[k])
-                          for k in self.elements])
+                          for k in sorted(self.elements.keys())])
 
     def sha1(self):
         """Get fingerprint checksum.
