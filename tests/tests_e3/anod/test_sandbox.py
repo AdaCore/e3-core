@@ -13,7 +13,6 @@ from e3.vcs.git import GitRepository
 
 import pytest
 
-
 PROLOG = r"""# prolog file loaded before all specs
 
 
