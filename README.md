@@ -38,6 +38,9 @@ Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0
 - *env*: global environment handling
 - *error*: `e3` exceptions
 - *event*: interface for notifying external services
+- *fingerprint*: support for creating a synthetic view of set of
+  conditions and determining whether those conditions have changed
+  or not.
 - *fs*: high-level file system operations, using globbing, walk,...
 - *hash*: computation of sha1, md5
 - *log*: logging helpers

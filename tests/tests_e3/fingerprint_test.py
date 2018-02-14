@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, print_function
 import json
 import os
 
-from e3.anod.fingerprint import Fingerprint
 from e3.env import Env
 from e3.error import E3Error
+from e3.fingerprint import Fingerprint
 
 import pytest
 
@@ -96,11 +96,11 @@ def test_add_order_not_important():
 
 def test_fingerprint_version():
     """Changing the FINGERPRINT_VERSION modify the fingerprint sha1."""
-    import e3.anod.fingerprint
+    import e3.fingerprint
 
     f1 = Fingerprint()
 
-    e3.anod.fingerprint.FINGERPRINT_VERSION = '0.0'
+    e3.fingerprint.FINGERPRINT_VERSION = '0.0'
     f2 = Fingerprint()
 
     assert f1 != f2

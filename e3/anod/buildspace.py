@@ -11,8 +11,8 @@ import e3.log
 import e3.os.process
 import yaml
 from e3.anod.error import AnodError
-from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import ReturnValue
+from e3.fingerprint import Fingerprint
 from e3.fs import mkdir, rm
 from e3.hash import sha1
 from yaml.parser import ParserError
@@ -113,7 +113,7 @@ class BuildSpace(object):
         :type kind: str
         :param status: the last action return code
         :type status: ReturnValue
-        :param fingerprint: the anod fingerprint
+        :param fingerprint: the fingerprint
         :type fingerprint: Fingerprint
         """
         if fingerprint is None:

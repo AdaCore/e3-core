@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 
-from e3.anod.fingerprint import Fingerprint
 from e3.anod.status import ReturnValue
 from e3.collection.dag import DAG
+from e3.fingerprint import Fingerprint
 from e3.fs import rm
 from e3.job import EmptyJob, Job, ProcessJob
 from e3.job.walk import Walk
