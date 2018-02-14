@@ -1,8 +1,20 @@
 """Fingerprints handling.
 
-Fingerprints objects are used by Anod to keep track of build, install states
-and allow Anod to detect changes in these states. This is mainly used to
-decide if a given action has been done and is up-to-date.
+Fingerprints objects provides a synthetic view of a set of elements.
+The purpose is to allow users to build fingerprints based on that
+set of elements, and then use fingerprint comparison as fast method
+for determining whether the same set of elements might have changed
+since the last time those elements were checked.
+
+One possible usage for fingerprints is determine whether something
+we built is still up to date, or should be rebuilt. For that,
+what we would do at the end of a successful build is we create
+a fingerprint using elements such as the sources we used to perform
+the build, the dependencies for our build, the version of the compiler,
+etc etc. Later on, when asking ourselves whether we need to re-build
+or not, we would compute a new fingerprint using the same elements,
+but updated to the current situation, and compare it with the one
+we previously computed. If different, we should rebuild.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -11,8 +23,8 @@ import hashlib
 import json
 import os
 
-from e3.anod.error import AnodError
 from e3.env import Env
+from e3.error import E3Error
 from e3.hash import sha1
 
 FINGERPRINT_VERSION = '1.1'
@@ -44,12 +56,12 @@ class Fingerprint(object):
         :type name: str
         :param value: associated value (should be a string)
         :type value: str | unicode
-        :raise: AnodError
+        :raise: E3Error
         """
         if isinstance(value, (str, unicode)):
             self.elements[name] = value
         else:
-            raise AnodError(
+            raise E3Error(
                 'value for %s should be a string got %s' % (name, value),
                 'fingerprint.add')
 
@@ -187,11 +199,11 @@ class Fingerprint(object):
             try:
                 fingerprint.elements = json.load(f)
             except ValueError as e:
-                raise AnodError(
+                raise E3Error(
                     "`%s' is not a properly formatted fingerprint file (%s)"
                     % (filename, e))
         if not isinstance(fingerprint.elements, dict):
-            raise AnodError(
+            raise E3Error(
                 "`%s' is not a fingerprint file (not a dictionary)"
                 % filename)
         return fingerprint
