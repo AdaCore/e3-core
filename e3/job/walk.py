@@ -13,7 +13,7 @@ class Walk(object):
 
     :ivar actions: DAG of actions to perform.
     :vartype actions: DAG
-    :ivar new_fingerprints: A dict of e3.anod.Fingerprint objects,
+    :ivar new_fingerprints: A dict of e3.fingerprint.Fingerprint objects,
         indexed by the corresponding job ID. This dictionary contains
         the fingerprints we compute each time we create a new job
         (with the job corresponding to a given entry in the DAG of
@@ -75,7 +75,7 @@ class Walk(object):
 
         :param uid: A unique Job ID.
         :type uid: str
-        :rtype: e3.anod.Fingerprint | None
+        :rtype: e3.fingerprint.Fingerprint | None
         """
         return None
 
@@ -97,7 +97,7 @@ class Walk(object):
         :param fingerprint: The fingerprint corresponding to the given
             job, or None, if the fingerprint should be deleted instead
             of saved.
-        :type fingerprint: e3.anod.Fingerprint | None
+        :type fingerprint: e3.fingerprint.Fingerprint | None
         :rtype: None
         """
         pass
@@ -118,7 +118,7 @@ class Walk(object):
 
         :param uid: A unique Job ID.
         :type uid: str
-        :rtype: e3.anod.Fingerprint | None
+        :rtype: e3.fingerprint.Fingerprint | None
         """
         return None
 
@@ -143,11 +143,11 @@ class Walk(object):
         :param previous_fingerprint: The fingerprint from the previous
             from the action's previous run.  None if the action has not
             been previously executed.
-        :type previous_fingerprint: e3.anod.Fingerprint | None
+        :type previous_fingerprint: e3.fingerprint.Fingerprint | None
         :param new_fingerprint: The fingerprint from the previous
             from the action's previous run.  None if the action has not
             been previously executed.
-        :type new_fingerprint: e3.anod.Fingerprint | None
+        :type new_fingerprint: e3.fingerprint.Fingerprint | None
         :rtype: bool
         """
         if previous_fingerprint is None or new_fingerprint is None:

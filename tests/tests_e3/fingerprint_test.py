@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, print_function
 import json
 import os
 
-from e3.anod.error import AnodError
-from e3.anod.fingerprint import Fingerprint
 from e3.env import Env
+from e3.error import E3Error
+from e3.fingerprint import Fingerprint
 
 import pytest
 
@@ -39,7 +39,7 @@ def test_fingerprint():
     assert f4 == f3
 
     f5 = Fingerprint()
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(E3Error) as err:
         f5.add('f4', f4)
     assert 'f4 should be a string' in str(err.value)
 
@@ -96,11 +96,11 @@ def test_add_order_not_important():
 
 def test_fingerprint_version():
     """Changing the FINGERPRINT_VERSION modify the fingerprint sha1."""
-    import e3.anod.fingerprint
+    import e3.fingerprint
 
     f1 = Fingerprint()
 
-    e3.anod.fingerprint.FINGERPRINT_VERSION = '0.0'
+    e3.fingerprint.FINGERPRINT_VERSION = '0.0'
     f2 = Fingerprint()
 
     assert f1 != f2
@@ -112,7 +112,7 @@ def test_fingerprint_version():
 
 def test_invalid_fingerprint():
     """A fingerprint value should be hashable."""
-    with pytest.raises(AnodError):
+    with pytest.raises(E3Error):
         f1 = Fingerprint()
         f1.add('invalid', {})
 
@@ -173,7 +173,7 @@ def test_fingerprint_save_and_load():
     with open(f_bad_filename, 'w') as f:
         f.write('yello{')
 
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(E3Error) as err:
         Fingerprint.load_from_file(f_bad_filename)
     assert 'not a properly formatted fingerprint' in str(err.value)
 
@@ -185,6 +185,6 @@ def test_fingerprint_save_and_load():
     with open(f_not_filename, 'w') as f:
         json.dump([1, 2, 3], f)
 
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(E3Error) as err:
         Fingerprint.load_from_file(f_not_filename)
     assert 'not a dictionary' in str(err.value)
