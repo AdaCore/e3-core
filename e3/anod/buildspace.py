@@ -9,14 +9,12 @@ from datetime import datetime as dt
 import e3.error
 import e3.log
 import e3.os.process
-import yaml
 from e3.anod.error import AnodError
 from e3.anod.status import ReturnValue
+from e3.error import E3Error
 from e3.fingerprint import Fingerprint
 from e3.fs import mkdir, rm
 from e3.hash import sha1
-from yaml.parser import ParserError
-from yaml.reader import ReaderError
 
 logger = e3.log.getLogger('buildspace')
 
@@ -112,7 +110,7 @@ class BuildSpace(object):
         :type kind: str
         :rtype: str
         """
-        return os.path.join(self.meta_dir, kind + '_fingerprint.yaml')
+        return os.path.join(self.meta_dir, kind + '_fingerprint.json')
 
     def update_status(self, kind, status=ReturnValue.failure,
                       fingerprint=None):
@@ -154,14 +152,13 @@ class BuildSpace(object):
 
         result = None
         if os.path.exists(fingerprint_file):
-            with open(fingerprint_file) as f:
-                try:
-                    result = yaml.load(f)
-                except (ParserError, ReaderError) as e:
-                    logger.warning(e)
-                    # Invalid fingerprint
-                    logger.warning('invalid fingerprint, discard it')
-                    result = None
+            try:
+                result = Fingerprint.load_from_file(fingerprint_file)
+            except E3Error as e:
+                logger.warning(e)
+                # Invalid fingerprint
+                logger.warning('invalid fingerprint, discarding it')
+                result = None
 
         if not isinstance(result, Fingerprint):
             # The fingerprint file did not exist or was invalid
@@ -177,9 +174,7 @@ class BuildSpace(object):
         :param fingerprint: the fingerprint object to save
         :type fingerprint: Fingerprint
         """
-        fingerprint_file = self.fingerprint_filename(kind)
-        with open(fingerprint_file, 'wb') as f:
-            yaml.dump(fingerprint, f, encoding='utf-8')
+        fingerprint.save_to_file(self.fingerprint_filename(kind))
 
     def get_last_status(self, kind):
         """Return the last status for a primitive.

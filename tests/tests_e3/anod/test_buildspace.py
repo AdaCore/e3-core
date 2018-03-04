@@ -56,7 +56,7 @@ def test_fingerprint():
 
     # Now make sure that load_fingerprint does not fail when the bumped
     # value is corrupted
-    with open(os.path.join(bs.meta_dir, 'build_fingerprint.yaml'), 'w') as f:
+    with open(bs.fingerprint_filename('build'), 'w') as f:
         f.write('[')
 
     assert bs.load_fingerprint(kind='build') == Fingerprint()
