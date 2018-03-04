@@ -105,6 +105,15 @@ class BuildSpace(object):
         for d in (d for d in self.dirs if d not in keep):
             rm(self.get_subdir(name=d), True)
 
+    def fingerprint_filename(self, kind):
+        """Return the absolute path to the fingerprint of the given primitive.
+
+        :param kind: the primitive name
+        :type kind: str
+        :rtype: str
+        """
+        return os.path.join(self.meta_dir, kind + '_fingerprint.yaml')
+
     def update_status(self, kind, status=ReturnValue.failure,
                       fingerprint=None):
         """Update meta information on disk.
@@ -139,8 +148,7 @@ class BuildSpace(object):
             exist)
         :rtype: str | Fingerprint
         """
-        fingerprint_file = os.path.join(
-            self.meta_dir, kind + '_fingerprint.yaml')
+        fingerprint_file = self.fingerprint_filename(kind)
         if sha1_only:
             return sha1(fingerprint_file)
 
@@ -169,8 +177,7 @@ class BuildSpace(object):
         :param fingerprint: the fingerprint object to save
         :type fingerprint: Fingerprint
         """
-        fingerprint_file = os.path.join(
-            self.meta_dir, kind + '_fingerprint.yaml')
+        fingerprint_file = self.fingerprint_filename(kind)
         with open(fingerprint_file, 'wb') as f:
             yaml.dump(fingerprint, f, encoding='utf-8')
 
