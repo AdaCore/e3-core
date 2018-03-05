@@ -47,10 +47,6 @@ def test_fingerprint():
     fp.add('foo', 'bar')
     bs.save_fingerprint(kind='build', fingerprint=fp)
 
-    # Check that the fingerprint stored on disk is equal to fp
-    fp_checksum = bs.load_fingerprint(kind='build', sha1_only=True)
-    assert isinstance(fp_checksum, str)
-
     loaded_fp = bs.load_fingerprint(kind='build')
     assert loaded_fp == fp
 
