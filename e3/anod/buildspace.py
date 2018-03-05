@@ -14,7 +14,6 @@ from e3.anod.status import ReturnValue
 from e3.error import E3Error
 from e3.fingerprint import Fingerprint
 from e3.fs import mkdir, rm
-from e3.hash import sha1
 
 logger = e3.log.getLogger('buildspace')
 
@@ -131,25 +130,18 @@ class BuildSpace(object):
         if kind == 'build':
             self.update_status('install', status, fingerprint)
 
-    def load_fingerprint(self, kind, sha1_only=False):
+    def load_fingerprint(self, kind):
         """Load the content of the fingerprint from disc.
 
         :param kind: the primitive name
         :type kind: str
-        :param sha1_only: if true returns only the checksum of the
-            fingerprint file
-        :type sha1_only: bool
 
-        :return: if sha1_only is True, returns a sha1 hexdigest else returns
-            a Fingerprint object (the content of the fingerprint file or an
-            empty Fingerprint when the fingerprint is invalid or does not
-            exist)
-        :rtype: str | Fingerprint
+        :return: Returns a Fingerprint object (the content of the fingerprint
+            file or an empty Fingerprint when the fingerprint is invalid
+            or does not exist).
+        :rtype: Fingerprint
         """
         fingerprint_file = self.fingerprint_filename(kind)
-        if sha1_only:
-            return sha1(fingerprint_file)
-
         result = None
         if os.path.exists(fingerprint_file):
             try:
