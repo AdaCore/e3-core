@@ -11,7 +11,6 @@ import e3.log
 import e3.os.process
 from e3.anod.error import AnodError
 from e3.anod.status import ReturnValue
-from e3.error import E3Error
 from e3.fingerprint import Fingerprint
 from e3.fs import mkdir, rm
 
@@ -146,7 +145,7 @@ class BuildSpace(object):
         if os.path.exists(fingerprint_file):
             try:
                 result = Fingerprint.load_from_file(fingerprint_file)
-            except E3Error as e:
+            except Exception as e:
                 logger.warning(e)
                 # Invalid fingerprint
                 logger.warning('invalid fingerprint, discarding it')
