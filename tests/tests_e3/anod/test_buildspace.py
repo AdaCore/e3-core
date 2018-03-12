@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import datetime
 import os
+import sys
 import time
 
 from e3.anod.buildspace import BuildSpace
@@ -77,6 +78,40 @@ def test_fingerprint():
 
     # build status should not be modified
     assert bs.get_last_status(kind='build')[0] == ReturnValue.notready
+
+
+def test_unexpected_exception_during_fingerprint_load():
+    """Check that we catch all exceptions raised during fingerprint load.
+    """
+    bs = BuildSpace(root_dir=os.getcwd(), primitive='build')
+    bs.create()
+    fingerprint_filename = bs.fingerprint_filename(kind='build')
+
+    # Scenario: The fingerprint file is actually not a file...
+
+    mkdir(fingerprint_filename)
+    fp = bs.load_fingerprint(kind='build')
+    assert fp == Fingerprint()
+    os.rmdir(fingerprint_filename)
+
+    # Scenario: The fingerprint file is not readable (lack of permissions
+    # in this case).
+    #
+    # Note that we do not have an easy way to remove read permission
+    # to a file when on Windows, so we simply avoid that test when
+    # on that platform. This test exercises the same code as in
+    # the previous scenario, so this is not a big loss.
+
+    if sys.platform != 'win32':
+        ref_fp = Fingerprint()
+        ref_fp.add('key1', 'val1')
+        bs.save_fingerprint(kind='build', fingerprint=ref_fp)
+        os.chmod(fingerprint_filename, 0)
+
+        fp = bs.load_fingerprint(kind='build')
+        assert fp == Fingerprint()
+        os.chmod(fingerprint_filename, 0o600)
+        os.remove(fingerprint_filename)
 
 
 def test_status():
