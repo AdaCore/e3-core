@@ -14,15 +14,20 @@ def get_payload(token):
     :return: decoded payload
     :rtype: dict
     """
-    # Extract the payload
-    signing_part, _ = token.rsplit('.', 1)
-    _, payload = signing_part.split('.', 1)
-
-    # Add required padding
-    rem = len(payload) % 4
-    if rem > 0:
-        payload += '=' * (4 - rem)
-    return json.loads(base64.b64decode(payload).decode('utf-8'))
+    data = {}
+    if token.count('.') == 2:
+        # Extract the payload
+        signing_part, _ = token.rsplit('.', 1)
+        _, payload = signing_part.split('.', 1)
+        # Add required padding
+        rem = len(payload) % 4
+        if rem > 0:
+            payload += '=' * (4 - rem)
+        try:
+            data = json.loads(base64.b64decode(payload).decode('utf-8'))
+        except UnicodeDecodeError:
+            pass
+    return data
 
 
 def utc_timestamp():
