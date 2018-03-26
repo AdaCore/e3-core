@@ -58,6 +58,10 @@ def test_old_token():
     assert not is_valid(old_token)
 
 
+def test_exception_pass():
+    assert not is_valid('..')
+
+
 def test_token_str():
     token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZGFjb3JlLmNvbSI'\
             'sImlhdCI6MTUxOTExOTcxMSwiZXhwIjoxNTUwNjU1NzExLCJhdWQiOiJ3d3cuYWR'\
