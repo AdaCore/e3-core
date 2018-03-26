@@ -25,7 +25,7 @@ def get_payload(token):
             payload += '=' * (4 - rem)
         try:
             data = json.loads(base64.b64decode(payload).decode('utf-8'))
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, ValueError, TypeError):
             pass
     return data
 
