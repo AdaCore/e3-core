@@ -235,6 +235,20 @@ def python_script(name, prefix=None):
     :return: a list that will be the prefix of your command line
     :rtype: list[str]
     """
+    def has_relative_python_shebang(file_script):  # unix: no cover
+        """Return True if the script contains #!python shebang.
+
+        When producing relocatable python distribution we change the shebang
+        to #!python. In that case prefix the command line with the current
+        python interpreter.
+
+        #!/path/to/python shebang should return false, as we don't need to
+        return interpreter path.
+        """
+        with open(file_script, 'rb') as f:
+            content = f.read()
+        return re.search(b'#!python', content, flags=re.MULTILINE) is not None
+
     if prefix is None:
         if sys.platform == 'win32':  # unix: no cover
             prefix = os.path.dirname(sys.executable)
@@ -242,11 +256,21 @@ def python_script(name, prefix=None):
             prefix = os.path.dirname(os.path.dirname(sys.executable))
 
     if sys.platform == 'win32':  # unix: no cover
-        script = os.path.join(prefix, 'Scripts', name)
+        script = os.path.join(prefix, name) \
+            if os.path.basename(prefix) == 'scripts' \
+            else os.path.join(prefix, 'Scripts', name)
+
+        script_exe = script + '.exe'
         if script.endswith('exe') and os.path.isfile(script):
+            if has_relative_python_shebang(script):  # all: no cover
+                # relocatable python distribution
+                return [interpreter(prefix), script]
             return [script]
-        elif os.path.isfile(script + '.exe'):
-            return [script + '.exe']
+        elif os.path.isfile(script_exe):
+            if has_relative_python_shebang(script_exe):  # all: no cover
+                # relocatable python distribution
+                return [interpreter(prefix), script_exe]
+            return [script_exe]
         else:
             return [interpreter(prefix), script]
     else:
