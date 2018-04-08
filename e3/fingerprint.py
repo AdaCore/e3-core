@@ -25,7 +25,7 @@ import os
 
 from e3.env import Env
 from e3.error import E3Error
-from e3.hash import sha1
+from e3.hash import sha256
 
 FINGERPRINT_VERSION = '1.1'
 # This value should be bumped each time computation of the fingerprint changes.
@@ -73,11 +73,11 @@ class Fingerprint(object):
 
         Adding a filename element to a fingerprint is equivalent to do add
         an element for which key is the basename of the file and value is
-        is the sha1 of the content
+        is the sha256 of the content
         """
         assert os.path.isfile(filename), \
             'filename %s does not exist' % filename
-        self.elements[os.path.basename(filename)] = sha1(filename)
+        self.elements[os.path.basename(filename)] = sha256(filename)
 
     def __eq__(self, other):
         """Implement == operator for two fingerprints.
@@ -157,17 +157,20 @@ class Fingerprint(object):
         return '\n'.join(['%s: %s' % (k, self.elements[k])
                           for k in sorted(self.elements.keys())])
 
-    def sha1(self):
-        """Get fingerprint checksum.
+    def checksum(self):
+        """Return the fingerprint's checksum.
 
         :rtype: str
 
-        The function ensure that if two fingerprints are equals then
+        At the moment, the fingerprint uses the SHA256 hashing algorithm
+        to compute the checksum.
+
+        The function ensures that if two fingerprints are equal then
         the returned checksum for each of the fingerprint is equal.
         """
         key_list = self.elements.keys()
         key_list.sort()
-        checksum = hashlib.sha1()
+        checksum = hashlib.sha256()
         for key in key_list:
             for chunk in (key, self.elements[key]):
                 if isinstance(chunk, unicode):

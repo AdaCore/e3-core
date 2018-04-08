@@ -164,7 +164,7 @@ class FingerprintWalk(SimpleWalk):
                 # or was performed but failed. So we cannot compute
                 # a fingerprint for this action either.
                 return None
-            f.add('pred:%s' % pred_uid, pred_fingerprint.sha1())
+            f.add('pred:%s' % pred_uid, pred_fingerprint.checksum())
         if os.path.exists(source_fullpath(uid)):
             f.add_file(source_fullpath(uid))
         return f
