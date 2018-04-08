@@ -114,8 +114,8 @@ def test_fingerprint_version():
 
 def test_invalid_fingerprint():
     """A fingerprint value should be hashable."""
+    f1 = Fingerprint()
     with pytest.raises(E3Error):
-        f1 = Fingerprint()
         f1.add('invalid', {})
 
 
