@@ -40,7 +40,8 @@ class AnodSpecRepository(object):
         self.repos = {}
 
         # Look for all spec files and data files
-        spec_list = {os.path.basename(k)[:-5]: {'path': k, 'data': []}
+        spec_list = {os.path.basename(os.path.splitext(k)[0]): {'path': k,
+                                                                'data': []}
                      for k in ls(os.path.join(self.spec_dir, '*.anod'),
                                  emit_log_record=False)}
         logger.debug('found %s specs', len(spec_list))
