@@ -42,10 +42,14 @@ class AnodContext(object):
     """Anod context.
 
     :ivar repo: an anod spec repository
+    :vartype repo: e3.anod.loader.AnodSpecRepository
     :ivar tree: a DAG containing the list of possible actions
     :ivar root: root node of the DAG
-    :ivar cache: cache of anod instances
-    :ivar sources: list of available sources in the current context
+    :ivar cache: cache of anod instances, indexed by the spec's name.
+    :vartype cache: dict[e3.anod.spec.Anod]
+    :ivar sources: list of available sources in the current context,
+        indexed by the source's name.
+    :vartype sources: list[e3.anod.package.SourceBuilder]
     :ivar default_env: default environment (used to override build='default')
         when simulating a list of action from another machine.
     """
@@ -54,7 +58,7 @@ class AnodContext(object):
         """Initialize a new context.
 
         :param spec_repository: an Anod repository
-        :type spec_repository: e3.anod.AnodSpecRepository
+        :type spec_repository: e3.anod.loader.AnodSpecRepository
         :param default_env: an env that should be considered as the
             default for the current context. Mainly useful to simulate
             another server context. If None then we assume that the
@@ -86,6 +90,7 @@ class AnodContext(object):
         :param kind: primitive used for the loaded spec
         :type kind: str
         :return: a spec instance
+        :rtype: e3.anod.spec.Anod
         """
         if env is None:
             env = self.default_env

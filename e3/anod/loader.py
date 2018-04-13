@@ -16,6 +16,10 @@ logger = e3.log.getLogger('anod.loader')
 class AnodSpecRepository(object):
     """Anod spec repository.
 
+    :ivar specs: A dictionary of AnodModule objects, indexed by spec name
+        (without the spec filename's extension).
+    :vartype specs: dict[e3.anod.loader.AnodModule]
+
     The object represent a set of anod specifications along with their data
     files.
     """
@@ -95,10 +99,11 @@ class AnodSpecRepository(object):
                     raise
 
     def load(self, name):
-        """Load an anod spec.
+        """Load an anod spec and return the corresponding Anod class.
 
         :param name: name of the spec to load
         :type name: str
+        :rtype: e3.anod.spec.Anod
         """
         assert name in self.specs, "spec %s not found" % name
         return self.specs[name].load(self)
@@ -133,11 +138,12 @@ class AnodModule(object):
         return self.module is not None
 
     def load(self, repository):
-        """Load an anod specification.
+        """Load an anod specification and return the corresponding Anod class.
 
         :param repository: the anod spec repository of the spec file
         :type repository: AnodSpecRepository
         :raise SandBoxError: in case of failure
+        :rtype: e3.anod.spec.Anod
         """
         if self.is_loaded:
             return self.anod_class

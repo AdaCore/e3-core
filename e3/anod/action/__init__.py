@@ -56,6 +56,11 @@ class GetSource(Action):
     __slots__ = ('uid', 'builder')
 
     def __init__(self, builder):
+        """Object initializer.
+
+        :param builder: A SourceBuilder object for the source we need to get.
+        :type builder: e3.anod.package.SourceBuilder
+        """
         super(GetSource, self).__init__(uid='source_get.%s' % builder.name,
                                         data=builder)
         self.builder = builder
@@ -74,6 +79,12 @@ class DownloadSource(Action):
     __slots__ = ('uid', 'builder')
 
     def __init__(self, builder):
+        """Object initializer.
+
+        :param builder: A SourceBuilder object for the source we need
+            to download.
+        :type builder: e3.anod.package.SourceBuilder
+        """
         super(DownloadSource, self).__init__(uid='download.%s' % builder.name,
                                              data=builder)
         self.builder = builder
@@ -92,6 +103,15 @@ class InstallSource(Action):
     __slots__ = ('uid', 'spec', 'source')
 
     def __init__(self, uid, spec, source):
+        """Object initializer.
+
+        :param uid: The job ID for this source's install.
+        :type uid: str
+        :param spec: The Anod instance of the spec providing those sources.
+        :type spec: e3.anod.spec.Anod
+        :param source: The source we want to install.
+        :type source: e3.anod.package.Source
+        """
         super(InstallSource, self).__init__(uid, data=(spec, source))
         self.spec = spec
         self.source = source
@@ -112,8 +132,9 @@ class CreateSource(Action):
     def __init__(self, anod_instance, source_name):
         """Initialize CreateSource object.
 
-        :param spec: an Anod instance with primitive set to source
-        :type spec: Anod
+        :param anod_instance: The Anod instance of the spec providing
+            the given source.
+        :type anod_instance: e3.anod.spec.Anod
         :param source_name: name of source package to assemble
         :type source_name: str
         """
@@ -137,6 +158,17 @@ class Checkout(Action):
     __slots__ = ('uid', 'repo_name', 'repo_data')
 
     def __init__(self, repo_name, repo_data):
+        """Initialize a Checkout object.
+
+        :param repo_name: The name of the repository.
+        :type repo_name: str
+        :param repo_data: A dictionary with the following keys:
+            - 'url': The repository URL;
+            - 'revision': The revision to checkout;
+            - 'vcs': The Version Control System kind (a string).
+                At present, only 'git' is supported.
+        :type repo_data: dict
+        """
         super(Checkout, self).__init__(uid='checkout.%s' % repo_name,
                                        data=(repo_name, repo_data))
         self.repo_name = repo_name
@@ -158,7 +190,7 @@ class AnodAction(Action):
         """Initialize an anod Action.
 
         :param data: an Anod spec instance
-        :type data: Anod
+        :type data: e3.anod.spec.Anod
         """
         assert isinstance(data, Anod)
         super(AnodAction, self).__init__(uid=data.uid, data=data)
@@ -175,6 +207,11 @@ class Build(AnodAction):
     __slots__ = ('uid', 'anod_instance')
 
     def __init__(self, anod_instance):
+        """Initialize a Build object.
+
+        :param anod_instance: And Anod spec instance.
+        :type anod_instance: e3.anod.spec.Anod
+        """
         super(Build, self).__init__(data=anod_instance)
         self.anod_instance = anod_instance
 
@@ -185,6 +222,11 @@ class Test(AnodAction):
     __slots__ = ('uid', 'anod_instance')
 
     def __init__(self, anod_instance):
+        """Initialize a Test object.
+
+        :param anod_instance: And Anod spec instance.
+        :type anod_instance: e3.anod.spec.Anod
+        """
         super(Test, self).__init__(data=anod_instance)
         self.anod_instance = anod_instance
 
@@ -195,6 +237,11 @@ class Install(AnodAction):
     __slots__ = ('uid', 'anod_instance')
 
     def __init__(self, anod_instance):
+        """Initialize an Install object.
+
+        :param anod_instance: And Anod spec instance.
+        :type anod_instance: e3.anod.spec.Anod
+        """
         super(Install, self).__init__(data=anod_instance)
         self.anod_instance = anod_instance
 
@@ -211,7 +258,7 @@ class DownloadBinary(Action):
         """Initialize a DownloadBinary object.
 
         :param data: Anod instance
-        :type data: Anod
+        :type data: e3.anod.spec.Anod
         """
         uid = data.uid.split('.')
         uid[-1] = 'download_bin'
@@ -233,10 +280,10 @@ class UploadComponent(Action):
     str_prefix = ''
 
     def __init__(self, data):
-        """Initialize a UploadComponent object.
+        """Initialize an UploadComponent object.
 
         :param data: Anod instance
-        :type data: Anod
+        :type data: e3.anod.spec.Anod
         """
         uid = data.uid.split('.')
         uid[-1] = 'upload_bin'
