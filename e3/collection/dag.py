@@ -22,7 +22,7 @@ class DAGIterator(object):
         :type dag: DAG
         :param enable_busy_state: used to implement topological parallel
             iteration. When False, a vertex has only 2 possible states: VISITED
-            or NOT_VISITED. When true, calling the next() funtion on the
+            or NOT_VISITED. When true, calling the next() function on the
             iteratior puts the element in 'BUSY' state. It will only be moved
             to 'Visited' once calling the 'leave()' method.
         :type enable_busy_state: bool
