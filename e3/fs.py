@@ -1,5 +1,4 @@
 """High-Level file manipulation."""
-
 from __future__ import absolute_import, division, print_function
 
 import fnmatch
@@ -552,7 +551,6 @@ def sync_tree(source, target, ignore=None,
 
         :param fi: a FileInfo namedtuple
         :type fi: FileInfo
-
         :return: True if fi is a regular file
         :rtype: bool
         """
