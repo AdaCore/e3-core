@@ -31,7 +31,7 @@ from foo.bar2.module3 import name1
             RewriteImportRule('b'),
             RewriteImportRule('a'),
             RewriteImportRule('.*3'),
-            RewriteImportRule('.*\.bar\..*', 'name2')
+            RewriteImportRule(r'.*\.bar\..*', 'name2')
         ]
     ).visit(node)
 
@@ -84,7 +84,7 @@ from foo.bar2.module3 import name1
                     action=RewriteImportRule.RuleAction.reject),
                 RewriteImportRule('b'),
                 RewriteImportRule('.*3'),
-                RewriteImportRule('.*\.bar\..*', 'name2')
+                RewriteImportRule(r'.*\.bar\..*', 'name2')
             ]
         ).visit(node2)
 
@@ -101,7 +101,7 @@ from foo.bar2.module3 import name1
                 RewriteImportRule('b'),
                 RewriteImportRule('.*3'),
                 RewriteImportRule(
-                    '.*\.bar\..*', 'name2',
+                    r'.*\.bar\..*', 'name2',
                     action=RewriteImportRule.RuleAction.reject)
             ]
         ).visit(node3)
