@@ -502,11 +502,11 @@ class Run(object):
             self.internal.kill()
 
     def interrupt(self):
-        """Send SIGINT CTRL_C_EVENT to the process."""
-        # On windows CTRL_C_EVENT is available and SIGINT is not;
-        # and the other way around on other platforms.
-        interrupt_signal = getattr(signal, 'CTRL_C_EVENT', signal.SIGINT)
-        self.internal.send_signal(interrupt_signal)
+        """Send SIGINT to the process, kill on Windows."""
+        if sys.platform == 'win32':
+            self.kill()  # Ctrl-C event is unreliable on Windows
+        else:
+            self.internal.send_signal(signal.SIGINT)
 
     def is_running(self):
         """Check whether the process is running.
