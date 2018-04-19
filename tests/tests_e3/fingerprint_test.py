@@ -30,7 +30,7 @@ def test_fingerprint():
     assert f23_diff['updated'] == set([])
     assert f23_diff['obsolete'] == {os.path.basename(__file__)}
 
-    assert f1.sha1() != f2.sha1() != f3.sha1()
+    assert f1.checksum() != f2.checksum() != f3.checksum()
 
     assert Env().build.os.version in str(f3)
 
@@ -45,7 +45,7 @@ def test_fingerprint():
 
     f6 = Fingerprint()
     f6.add('unicode', u'6')
-    assert len(f6.sha1()) == 40
+    assert len(f6.checksum()) == 64
 
 
 def test_add_order_not_important():
@@ -84,7 +84,7 @@ def test_add_order_not_important():
         assert f.compare_to(f_ref) is None
         assert f_ref.compare_to(f) is None
         assert str(f) == str(f_ref)
-        assert f.sha1() == f_ref.sha1()
+        assert f.checksum() == f_ref.checksum()
 
     check_scenario(1, 2, 3)
     check_scenario(1, 3, 2)
@@ -95,7 +95,7 @@ def test_add_order_not_important():
 
 
 def test_fingerprint_version():
-    """Changing the FINGERPRINT_VERSION modify the fingerprint sha1."""
+    """Changing the FINGERPRINT_VERSION modify the fingerprint's checksum."""
     import e3.fingerprint
 
     f1 = Fingerprint()
@@ -104,16 +104,18 @@ def test_fingerprint_version():
     f2 = Fingerprint()
 
     assert f1 != f2
+    assert f1.checksum() != f2.checksum()
 
     f3 = Fingerprint()
 
     assert f2 == f3
+    assert f2.checksum() == f3.checksum()
 
 
 def test_invalid_fingerprint():
     """A fingerprint value should be hashable."""
+    f1 = Fingerprint()
     with pytest.raises(E3Error):
-        f1 = Fingerprint()
         f1.add('invalid', {})
 
 
@@ -127,6 +129,7 @@ def test_fingerprint_eq():
     f2.add('1', '1')
     f2.add('2', '2')
     assert f1 != f2
+    assert f1.checksum() != f2.checksum()
 
     assert f1.compare_to(f1) is None
 
@@ -150,7 +153,7 @@ def test_fingerprint_save_and_load():
     f_min_restored = Fingerprint.load_from_file(f_min_filename)
     assert f_min_restored == f_min
     assert str(f_min_restored) == str(f_min)
-    assert f_min_restored.sha1() == f_min.sha1()
+    assert f_min_restored.checksum() == f_min.checksum()
 
     # Save and then load a fingerprint with more data than the minimum.
 
@@ -165,7 +168,7 @@ def test_fingerprint_save_and_load():
     f2_restored = Fingerprint.load_from_file(f2_filename)
     assert f2_restored == f2
     assert str(f2_restored) == str(f2)
-    assert f2_restored.sha1() == f2.sha1()
+    assert f2_restored.checksum() == f2.checksum()
 
     # Trying to load from a file with invalid contents (bad JSON)
 
