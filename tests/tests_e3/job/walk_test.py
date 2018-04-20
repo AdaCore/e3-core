@@ -154,7 +154,7 @@ class FingerprintWalk(SimpleWalk):
     def fingerprint_filename(cls, uid):
         return os.path.join(FINGERPRINT_DIR, uid)
 
-    def compute_new_fingerprint(self, uid):
+    def compute_new_fingerprint(self, uid, data):
         f = Fingerprint()
         for pred_uid in self.actions.vertex_predecessors[uid]:
             pred_fingerprint = self.load_previous_fingerprint(pred_uid)

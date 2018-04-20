@@ -62,7 +62,7 @@ class Walk(object):
         self.tokens = 1
         self.job_timeout = DEFAULT_JOB_MAX_DURATION
 
-    def compute_new_fingerprint(self, uid):
+    def compute_new_fingerprint(self, uid, data):
         """Compute the given action's Fingerprint.
 
         This method is expected to return a Fingerprint corresponding
@@ -75,6 +75,8 @@ class Walk(object):
 
         :param uid: A unique Job ID.
         :type uid: str
+        :param data: Data associated to the job.
+        :type data: T
         :rtype: e3.fingerprint.Fingerprint | None
         """
         return None
@@ -213,7 +215,7 @@ class Walk(object):
         :rtype: Job
         """
         prev_fingerprint = self.load_previous_fingerprint(uid)
-        self.new_fingerprints[uid] = self.compute_new_fingerprint(uid)
+        self.new_fingerprints[uid] = self.compute_new_fingerprint(uid, data)
         self.save_fingerprint(uid, None)
 
         # Check our predecessors. If any of them failed, then return
