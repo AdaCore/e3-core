@@ -165,7 +165,7 @@ class Walk(object):
         :param data: Data associated to the job to create.
         :type data: T
         :param predecessors: A list of predecessor jobs, or None.
-        :type predecessors: list[str] | None
+        :type predecessors: list[e3.job.Job] | None
         :param reason: If not None, the reason for creating a failed job.
         :type reason: str | None
         :notify_end: Same as the notify_end parameter in Job.__init__.
@@ -183,7 +183,7 @@ class Walk(object):
         :param data: Data associated to the job to create.
         :type data: T
         :param predecessors: A list of predecessor jobs, or None.
-        :type predecessors: list[str] | None
+        :type predecessors: list[e3.job.Job] | None
         :notify_end: Same as the notify_end parameter in Job.__init__.
         :type notify_end: str -> None
         :rtype: ProcessJob
