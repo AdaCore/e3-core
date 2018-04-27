@@ -20,9 +20,23 @@ SBX_DIR = os.path.join(os.getcwd(), 'sbx')
 # A place where to store fingerprints...
 FINGERPRINT_DIR = os.path.join(SBX_DIR, 'fingerprints')
 
+# A directory where download nodes will get their files from.
+STORE_DIR = os.path.join(SBX_DIR, 'store')
+
 # A place where to store anything else that we might need between
 # two runs via the Walk class.
 SBX_TMP_DIR = os.path.join(SBX_DIR, 'tmp')
+
+# By convention in this testcase, jobs whose UID start with this prefix
+# will copy a file from STORE_DIR whose name is '<UID minus prefix>.txt'
+# where <UID minus prefix> is the job's UID after stripping the dealing
+# DOWNLOAD_JOB_UID_PREFIX, and place it in SBX_DIR.
+#
+# This is to simulate jobs that download sources from the store.
+#
+# For instance, if the job name is 'download.hello-src', then the name
+# of the file in both STORE_DIR and SBX_TMP_DIR is hello-src.txt.
+DOWNLOAD_JOB_UID_PREFIX = 'download.'
 
 
 @pytest.fixture()
@@ -41,11 +55,12 @@ def setup_sbx(request):
     delete_sbx()
     os.mkdir(SBX_DIR)
     os.mkdir(FINGERPRINT_DIR)
+    os.mkdir(STORE_DIR)
     os.mkdir(SBX_TMP_DIR)
 
 
-def source_fullpath(uid):
-    """Return the fullpath of a job's sources, if present.
+def job_source_basename(uid):
+    """Return the name of a source corresponding to the give job.
 
     In our testcase environment, we will consider that, if a DAG's action
     (corresponding to the given Job ID) depends on some sources, those
@@ -55,11 +70,37 @@ def source_fullpath(uid):
     then the action depends on the "source" filename returned by this
     function; if it does not, then the action does not depend on sources.
 
+    Same thing if a job is a "download" job, but with a slightly different
+    naming scheme (see DOWNLOAD_JOB_UID_PREFIX above).
+
     :param uid: A unique Job ID.
     :type uid: str
     :rtype: str
     """
-    return os.path.join(SBX_TMP_DIR, uid + '.txt')
+    if uid.startswith(DOWNLOAD_JOB_UID_PREFIX):
+        uid = uid[len(DOWNLOAD_JOB_UID_PREFIX):]
+    return uid + '.txt'
+
+
+def source_fullpath(uid):
+    """Return the fullpath of a job's sources, if present.
+
+    :param uid: A unique Job ID.
+    :type uid: str
+    :rtype: str
+    """
+    return os.path.join(SBX_TMP_DIR, job_source_basename(uid))
+
+
+def source_store_fullpath(uid):
+    """Return the given job's fullpath to its sources in the store.
+
+    :param uid: A unique Job ID.
+    :type uid: str
+    :rtype: str
+    """
+    assert uid.startswith(DOWNLOAD_JOB_UID_PREFIX)
+    return os.path.join(STORE_DIR, job_source_basename(uid))
 
 
 class DryRunJob(EmptyJob):
@@ -104,6 +145,10 @@ class ControlledJob(ProcessJob):
         elif self.uid.endswith('notready:always'):
             result.append('import sys; sys.exit(%d)'
                           % ReturnValue.notready.value)
+        elif self.uid.startswith(DOWNLOAD_JOB_UID_PREFIX):
+            result.append("import shutil; shutil.copyfile(r'%s', r'%s')"
+                          % (source_store_fullpath(self.uid),
+                             source_fullpath(self.uid)))
         else:
             result.append('print("Hello World")')
         return result
@@ -153,6 +198,11 @@ class FingerprintWalk(SimpleWalk):
     @classmethod
     def fingerprint_filename(cls, uid):
         return os.path.join(FINGERPRINT_DIR, uid)
+
+    def can_predict_new_fingerprint(self, uid, data):
+        if 'fingerprint_after_job' in uid:
+            return False
+        return True
 
     def compute_new_fingerprint(self, uid, data):
         f = Fingerprint()
@@ -670,3 +720,97 @@ def test_dry_run(setup_sbx):
     assert r6.job_status == {'1': ReturnValue.skip,
                              '2': ReturnValue.skip}
     assert r6.requeued == {}
+
+
+def test_computing_fingerprint_after_job_done(setup_sbx):
+    """Test case where the fingerprint for one job has to be computed late."""
+    download_uid = DOWNLOAD_JOB_UID_PREFIX + 'fingerprint_after_job'
+    actions = DAG()
+    actions.add_vertex(download_uid)
+    actions.add_vertex('2', predecessors=[download_uid])
+
+    # Create the contents of the file that the download_uid job
+    # will be "downloading" from the store.
+    with open(source_store_fullpath(download_uid), 'w') as f:
+        f.write('Hello world')
+
+    # Now, execute the plan for the first time.
+    # All actions should get executed.
+
+    r1 = FingerprintWalk(actions)
+    for uid in (download_uid, '2'):
+        job = r1.saved_jobs[uid]
+        assert isinstance(job, ControlledJob)
+        assert job.should_skip is False
+        assert job.status == ReturnValue.success
+
+    assert r1.job_status == {download_uid: ReturnValue.success,
+                             '2': ReturnValue.success}
+    assert r1.requeued == {}
+
+    # Now, rerun the plan.
+    #
+    # Because we set things up so that the fingerprint of the download_uid
+    # job cannot be computed before the job is executed, we should see
+    # that job being rerun (despite the fact that, in the end, the file
+    # it downloads is the same). However, because the source it downloads
+    # hasn't changed, job '2' should be skipped.
+
+    r2 = FingerprintWalk(actions)
+
+    job = r2.saved_jobs[download_uid]
+    assert isinstance(job, ControlledJob)
+    assert job.should_skip is False
+    assert job.status == ReturnValue.success
+
+    job = r2.saved_jobs['2']
+    assert isinstance(job, EmptyJob)
+    assert job.should_skip is True
+    assert job.status == ReturnValue.skip
+
+    assert r2.job_status == {download_uid: ReturnValue.success,
+                             '2': ReturnValue.skip}
+    assert r2.requeued == {}
+
+    # Simulate the case where we re-run the plan after the source
+    # being downloaded has changed. This time, we expect job '2'
+    # to be re-executed.
+
+    with open(source_store_fullpath(download_uid), 'w') as f:
+        f.write('Hello brave new world')
+
+    r3 = FingerprintWalk(actions)
+    for uid in (download_uid, '2'):
+        job = r3.saved_jobs[uid]
+        assert isinstance(job, ControlledJob)
+        assert job.should_skip is False
+        assert job.status == ReturnValue.success
+
+    assert r3.job_status == {download_uid: ReturnValue.success,
+                             '2': ReturnValue.success}
+    assert r3.requeued == {}
+
+    # One more time, just for kicks, where we re-execute the plan
+    # where the file being downloaded hasn't changed.  Just to make
+    # things slightly different, we'll remove the source file
+    # already downloaded. It shouldn't prevent us from realizing
+    # that the sources have not change, and so '2' can be skipped.
+
+    rm(source_fullpath(download_uid))
+    assert not os.path.exists(source_fullpath(download_uid))
+
+    r4 = FingerprintWalk(actions)
+
+    job = r4.saved_jobs[download_uid]
+    assert isinstance(job, ControlledJob)
+    assert job.should_skip is False
+    assert job.status == ReturnValue.success
+
+    job = r4.saved_jobs['2']
+    assert isinstance(job, EmptyJob)
+    assert job.should_skip is True
+    assert job.status == ReturnValue.skip
+
+    assert r4.job_status == {download_uid: ReturnValue.success,
+                             '2': ReturnValue.skip}
+    assert r4.requeued == {}

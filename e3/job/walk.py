@@ -18,6 +18,11 @@ class Walk(object):
         the fingerprints we compute each time we create a new job
         (with the job corresponding to a given entry in the DAG of
         actions).
+        Note that there are situations where the user might not be able
+        to compute the fingerprint without running the job and waiting
+        for it to be complete (see method "can_predict_new_fingerprint").
+        In that situation, the fingerprint is only inserted after the job
+        completes succesfully.
     :vartype new_fingerprints: dict
     :ivar job_status: A dictionary of job status (ReturnValue), indexed by
         job unique IDs.
@@ -61,6 +66,39 @@ class Walk(object):
         self.queues = None
         self.tokens = 1
         self.job_timeout = DEFAULT_JOB_MAX_DURATION
+
+    def can_predict_new_fingerprint(self, uid, data):
+        """Return True if a job's fingerprint is computable before running it.
+
+        This function should return True for all the jobs where
+        the fingerprint can be calculated before running the job,
+        False otherwise.
+
+        Ideally, we should be able to compute the fingerprint of every
+        job before we actually run the job, as this then allows us to
+        use that fingerprint to decide whether or not the job should be
+        run or not. Unfortunately, there can be situations where this is
+        not possible; consider for instance the case where the job is
+        to fetch some data, and the fingerprint needs to include that
+        contents.
+
+        For jobs were the fingerprint cannot be predicted, what will
+        happen is that the scheduler will execute that job, and then
+        compute the fingerprint at the end, instead of computing it
+        before.
+
+        By default, this method assumes that all jobs have predictable
+        fingerprints, and so always returns True. Child classes should
+        override this method is they have jobs for which the fingerprint
+        cannot be computed ahead of running the job.
+
+        :param uid: A unique Job ID.
+        :type uid: str
+        :param data: Data associated to the job.
+        :type data: T
+        :rtype: bool
+        """
+        return True
 
     def compute_new_fingerprint(self, uid, data):
         """Compute the given action's Fingerprint.
@@ -215,8 +253,13 @@ class Walk(object):
         :rtype: Job
         """
         prev_fingerprint = self.load_previous_fingerprint(uid)
-        self.new_fingerprints[uid] = self.compute_new_fingerprint(uid, data)
         self.save_fingerprint(uid, None)
+
+        can_predict_new_fingerprint = \
+            self.can_predict_new_fingerprint(uid, data)
+        if can_predict_new_fingerprint:
+            self.new_fingerprints[uid] = \
+                self.compute_new_fingerprint(uid, data)
 
         # Check our predecessors. If any of them failed, then return
         # a failed job.
@@ -232,8 +275,9 @@ class Walk(object):
             return self.create_failed_job(uid, data, predecessors,
                                           force_fail, notify_end)
 
-        if self.should_execute_action(uid, prev_fingerprint,
-                                      self.new_fingerprints[uid]):
+        if not can_predict_new_fingerprint or \
+                self.should_execute_action(uid, prev_fingerprint,
+                                           self.new_fingerprints[uid]):
             return self.create_job(uid, data, predecessors, notify_end)
         else:
             return EmptyJob(uid, data, notify_end,
@@ -253,6 +297,9 @@ class Walk(object):
         if job.status in (ReturnValue.success,
                           ReturnValue.force_skip,
                           ReturnValue.skip):
+            if not self.can_predict_new_fingerprint(job.uid, job.data):
+                self.new_fingerprints[job.uid] = \
+                    self.compute_new_fingerprint(job.uid, job.data)
             self.save_fingerprint(job.uid, self.new_fingerprints[job.uid])
 
         self.job_status[job.uid] = ReturnValue(job.status)
