@@ -205,16 +205,13 @@ class FingerprintWalk(SimpleWalk):
         return True
 
     def compute_new_fingerprint(self, uid, data):
+        if 'no_fingerprint' in uid:
+            return None
         f = Fingerprint()
         for pred_uid in self.actions.vertex_predecessors[uid]:
             pred_fingerprint = self.load_previous_fingerprint(pred_uid)
-            if pred_fingerprint is None:
-                # We cannot execute this new action, since one of
-                # its predecessors has either not been performed,
-                # or was performed but failed. So we cannot compute
-                # a fingerprint for this action either.
-                return None
-            f.add('pred:%s' % pred_uid, pred_fingerprint.checksum())
+            if pred_fingerprint is not None:
+                f.add('pred:%s' % pred_uid, pred_fingerprint.checksum())
         if os.path.exists(source_fullpath(uid)):
             f.add_file(source_fullpath(uid))
         return f
@@ -598,6 +595,57 @@ def test_source_deps(setup_sbx):
                              '4': ReturnValue.success,
                              '5': ReturnValue.skip}
     assert r5.requeued == {}
+
+
+def test_predecessor_with_no_fingerprint(setup_sbx):
+    actions = DAG()
+    actions.add_vertex('1')
+    actions.add_vertex('2.no_fingerprint', predecessors=['1'])
+    actions.add_vertex('3', predecessors=['2.no_fingerprint'])
+    actions.add_vertex('4', predecessors=['3'])
+
+    # Execute our planned actions for the first time...
+
+    r1 = FingerprintWalk(actions)
+
+    for uid in ('1', '2.no_fingerprint', '3', '4'):
+        job = r1.saved_jobs[uid]
+        assert isinstance(job, ControlledJob)
+        assert job.should_skip is False
+        assert job.status == ReturnValue.success
+
+    assert r1.job_status == {'1': ReturnValue.success,
+                             '2.no_fingerprint': ReturnValue.success,
+                             '3': ReturnValue.success,
+                             '4': ReturnValue.success}
+    assert r1.requeued == {}
+
+    # Re-execute the plan a second time.  Because '2.no_fingerprint'
+    # has no fingerprint, both '2.no_fingerprint', but also the node
+    # that depends directly on it should be re-executed. Node '4,
+    # on the other hand, should only be re-executed if Node "3"'s
+    # fingerprint changed. The way things are set up in this testsuite
+    # is such that the fingerprint remained the same, so '4' is not
+    # expected to be re-run.
+
+    r2 = FingerprintWalk(actions)
+
+    for uid in ('1', '4'):
+        job = r2.saved_jobs[uid]
+        assert isinstance(job, EmptyJob)
+        assert job.should_skip is True
+        assert job.status == ReturnValue.skip
+    for uid in ('2.no_fingerprint', '3'):
+        job = r2.saved_jobs[uid]
+        assert isinstance(job, ControlledJob)
+        assert job.should_skip is False
+        assert job.status == ReturnValue.success
+
+    assert r2.job_status == {'1': ReturnValue.skip,
+                             '2.no_fingerprint': ReturnValue.success,
+                             '3': ReturnValue.success,
+                             '4': ReturnValue.skip}
+    assert r2.requeued == {}
 
 
 def test_dry_run(setup_sbx):

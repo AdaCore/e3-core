@@ -192,6 +192,13 @@ class Walk(object):
         """
         if previous_fingerprint is None or new_fingerprint is None:
             return True
+        for pred_uid in self.actions.vertex_predecessors[uid]:
+            if self.new_fingerprints[pred_uid] is None:
+                # One of the predecessors has no fingerprint, so
+                # this node's new_fingerprint cannot tell us whether
+                # this dependency has changed or not. We therefore
+                # need to run this action.
+                return True
         return previous_fingerprint != new_fingerprint
 
     def create_failed_job(self, uid, data, predecessors, reason, notify_end):
