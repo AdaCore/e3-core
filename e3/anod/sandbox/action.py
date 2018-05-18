@@ -188,12 +188,6 @@ class SandBoxExec(SandBoxCreate):
         sandbox.write_scripts()
 
         asr = AnodSpecRepository(sandbox_spec_dir)
-
-        # asr.prolog_dict should now contain the API Version
-        if asr.api_version is None:
-            raise SandBoxError(
-                'api_version should be set in prolog.py')
-
         check_api_version(asr.api_version)
 
         # Load plan content if needed

@@ -197,14 +197,6 @@ def test_sandbox_exec_api_version(git_specs_dir):
     e3.fs.sync_tree(specs_source_dir, local_spec_dir)
     create_prolog(local_spec_dir, '')
 
-    # Test with local specs
-    p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', os.path.join(root_dir, 'specs'),
-                           '--plan',
-                           os.path.join(sandbox_dir, 'test.plan'),
-                           sandbox_dir])
-    assert 'api_version should be set in prolog.py' in p.out
-
 
 def test_sandbox_action_errors(git_specs_dir):
     """Test sandbox action error reporting."""
