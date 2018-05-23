@@ -20,7 +20,7 @@ __version__ = '1.4'
 
 SUPPORTED_API = (__version__, '1.5')
 # The driver can support multiple version of the spec API, we currently support
-# only the version 1.4.
+# only the version 1.4 and 1.5. Default is still 1.4
 
 logger = e3.log.getLogger('anod')
 

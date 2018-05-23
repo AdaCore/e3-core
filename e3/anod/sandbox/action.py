@@ -22,14 +22,18 @@ class SandBoxAction(object):
 
     __metaclass__ = abc.ABCMeta
 
+    require_sandbox = True
+
     def __init__(self, subparsers):
         self.parser = subparsers.add_parser(
             self.name,
             help=self.help)
         self.parser.set_defaults(action=self.name)
         self.add_parsers()
-        self.parser.add_argument('sandbox',
-                                 help='path to the sandbox root directory')
+        if self.require_sandbox:
+            self.parser.add_argument(
+                'sandbox',
+                help='path to the sandbox root directory')
 
     @abc.abstractproperty
     def name(self):
