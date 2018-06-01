@@ -211,9 +211,9 @@ def test_is_running():
     p.wait()
 
 
+@pytest.mark.skipif(psutil is None, reason='require psutil')
 def test_is_running_non_existant():
     """Call is_running on non-existing process."""
-    import psutil
     pid_list = psutil.pids()
     pid_list.sort()
 
