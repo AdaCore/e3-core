@@ -23,11 +23,14 @@ import hashlib
 import json
 import os
 
+import e3.log
 from e3.env import Env
 from e3.error import E3Error
 from e3.hash import sha256
 
-FINGERPRINT_VERSION = '1.1'
+logger = e3.log.getLogger('fingerprint')
+
+FINGERPRINT_VERSION = '1.2'
 # This value should be bumped each time computation of the fingerprint changes.
 # This ensures we don't try to compare fingerprints with different meanings.
 
@@ -185,28 +188,59 @@ class Fingerprint(object):
         :param filename: The name of the file where to save the fingerprint.
         :type filename: str
         """
+        # Save the fingerprint in a format that makes it easy for us
+        # to support multiple fingerprint versions.
+        #
+        # For instance, while we have no metadata we want to save today
+        # (eg: an attribute of the object), we can easily add a new
+        # 'metadata' entry as a dictionary, with each element being
+        # one piece of metadata we want to save.
+        data = {'fingerprint_version': FINGERPRINT_VERSION,
+                'elements': self.elements}
+
         with open(filename, 'w') as f:
-            json.dump(self.elements, f)
+            json.dump(data, f)
 
     @classmethod
     def load_from_file(cls, filename):
         """Return the fingerprint saved in the given file.
+
+        Return None in the following situations:
+            - The file does not contain a fingerprint we recognize;
+            - The fingerprint has a version number we do not support.
 
         :param filename: The name of the file where to load the fingerprint
             from.
         :type filename: str
         :rtype: Fingerprint
         """
-        fingerprint = Fingerprint()
         with open(filename) as f:
             try:
-                fingerprint.elements = json.load(f)
+                data = json.load(f)
             except ValueError as e:
-                raise E3Error(
-                    "`%s' is not a properly formatted fingerprint file (%s)"
-                    % (filename, e))
-        if not isinstance(fingerprint.elements, dict):
-            raise E3Error(
-                "`%s' is not a fingerprint file (not a dictionary)"
-                % filename)
+                logger.error(
+                    "`%s' is not a properly formatted fingerprint file (%s)",
+                    filename, e)
+                return None
+
+        bad_contents = None
+        if not isinstance(data, dict):
+            bad_contents = 'not a dictionary'
+        elif 'fingerprint_version' not in data:
+            bad_contents = '"fingerprint_version" key missing'
+        elif 'elements' not in data:
+            bad_contents = '"elements" key missing'
+        if bad_contents is not None:
+            logger.error("`%s' is not a fingerprint file (%s)",
+                         filename, bad_contents)
+            return None
+
+        if data['fingerprint_version'] != FINGERPRINT_VERSION:
+            logger.info('Unsupported fingerprint version: %s',
+                        data['fingerprint_version'])
+            return None
+
+        fingerprint = Fingerprint()
+        fingerprint.elements = data['elements']
+
         return fingerprint
