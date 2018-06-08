@@ -60,10 +60,12 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
     def emit(self, record):
         msg = self.format(record)
 
-        # Handle logging on several lines
+        # Handle logging on several lines: indent all lines after the first one
+        # to be aligned with the first one.
+        msg_first_line = msg.split('\n')[0]
         msg = msg.replace(
             '\n',
-            '\n_' + ' ' * (len(msg) - len(record.message) - 1))
+            '\n_' + ' ' * (len(msg_first_line) - len(record.message) - 1))
 
         # Add color
         for reg, color in self.color_subst:
