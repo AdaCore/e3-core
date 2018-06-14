@@ -33,6 +33,16 @@ class DAGIterator(object):
                        for k in self.dag.vertex_data.keys()}
         self.enable_busy_state = enable_busy_state
 
+        # Compute list of successors and number of non visited predecessors
+        # for each node. Doing this computation in advance enable faster
+        # iteration overall (simplify conditions in next_element)
+        self.successors = {k: set() for k in self.dag.vertex_predecessors}
+        for k, v in self.dag.vertex_predecessors.iteritems():
+            for el in v:
+                self.successors[el].add(k)
+        self.pred_number = {
+            k: len(v) for k, v in self.dag.vertex_predecessors.iteritems()}
+
     def __iter__(self):
         return self
 
@@ -58,11 +68,7 @@ class DAGIterator(object):
         # Retrieve the first vertex for which all the predecessors have been
         # visited
         result = next(
-            (k for k in self.non_visited
-             if not self.dag.vertex_predecessors[k] or
-             not [p for p in self.dag.vertex_predecessors[k]
-                  if self.states[p] != self.VISITED]),
-            None)
+            (k for k in self.non_visited if self.pred_number[k] == 0), None)
 
         if result is None:
             if not self.enable_busy_state:
@@ -73,8 +79,14 @@ class DAGIterator(object):
         # Remove the vertex from the "non_visited_list" and when
         # enable_busy_state, mark the vertex as BUSY, mark it VISITED
         # otherwise.
-        self.states[result] = self.BUSY if self.enable_busy_state \
-            else self.VISITED
+        if self.enable_busy_state:
+            self.states[result] = self.BUSY
+        else:
+            self.states[result] = self.VISITED
+            # Update the number of non visited predecessors
+            for k in self.successors[result]:
+                self.pred_number[k] -= 1
+
         self.non_visited.discard(result)
 
         return (result,
@@ -89,6 +101,9 @@ class DAGIterator(object):
         """
         assert self.states[vertex_id] == self.BUSY
         self.states[vertex_id] = self.VISITED
+        # Update the number of non visited predecessors
+        for k in self.successors[vertex_id]:
+            self.pred_number[k] -= 1
 
 
 class DAG(object):
