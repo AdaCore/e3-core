@@ -52,6 +52,10 @@ class AnodContext(object):
     :vartype sources: list[e3.anod.package.SourceBuilder]
     :ivar default_env: default environment (used to override build='default')
         when simulating a list of action from another machine.
+
+    :ivar plan: maintain a link between a plan line and the generated actions
+        which is useful for setting parameters such as weather or process that
+        are conveyed by the plan and not by the specs
     """
 
     def __init__(self, spec_repository, default_env=None):
@@ -188,12 +192,29 @@ class AnodContext(object):
         """
         return [self[el] for el in self.tree.vertex_predecessors[action.uid]]
 
+    def link_to_plan(self, vertex_id, plan_line, plan_args):
+        """Tag the vertex with plan info.
+
+        :param vertex_id: ID of the vertex
+        :type vertex_id: str
+        :param plan_line: corresponding line:linenumber in the plan
+        :type plan_line: str
+        :param plan_args: action args after plan execution, taking into
+            account plan context (such as with defaults(XXX):)
+        :type plan_args: dict
+        """
+        self.tree.add_tag(vertex_id,
+                          {'plan_line': plan_line,
+                           'plan_args': plan_args})
+
     def add_anod_action(self,
                         name,
                         env=None,
                         primitive=None,
                         qualifier=None,
-                        upload=True):
+                        upload=True,
+                        plan_line=None,
+                        plan_args=None):
         """Add an Anod action to the context.
 
         :param name: spec name
@@ -206,11 +227,17 @@ class AnodContext(object):
         :type qualifier: str | None
         :param upload: if True consider uploading to the store
         :type upload: bool
+        :param plan_line: corresponding line:linenumber in the plan
+        :type plan_line: str
+        :param plan_args: action args after plan execution, taking into
+            account plan context (such as with defaults(XXX):)
+        :type plan_args: dict
         :return: the root added action
         :rtype: Action
         """
         # First create the subtree for the spec
-        result = self.add_spec(name, env, primitive, qualifier)
+        result = self.add_spec(name, env, primitive, qualifier,
+                               plan_line=plan_line, plan_args=plan_args)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
@@ -225,6 +252,7 @@ class AnodContext(object):
             if build_action is None and isinstance(result, Build):
                 build_action = result
 
+            # Create upload nodes
             if build_action is not None:
                 spec = build_action.data
                 if spec.component is not None and upload:
@@ -233,6 +261,11 @@ class AnodContext(object):
                     else:
                         upload_bin = UploadSourceComponent(spec)
                     self.add(upload_bin)
+                    # ??? is it needed?
+                    if plan_line is not None:
+                        self.link_to_plan(vertex_id=upload_bin.uid,
+                                          plan_line=plan_line,
+                                          plan_args=plan_args)
                     self.connect(self.root, upload_bin)
                     self.connect(upload_bin, build_action)
 
@@ -248,7 +281,9 @@ class AnodContext(object):
                  primitive=None,
                  qualifier=None,
                  expand_build=True,
-                 source_name=None):
+                 source_name=None,
+                 plan_line=None,
+                 plan_args=None):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -265,6 +300,11 @@ class AnodContext(object):
             primitive
         :type source_name: str | None
         """
+        def add_action(data, connect_with=None):
+            self.add(data)
+            if connect_with is not None:
+                self.connect(connect_with, data)
+
         # Initialize a spec instance
         e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
             name, qualifier, primitive))
@@ -282,6 +322,14 @@ class AnodContext(object):
         else:  # defensive code
             raise ValueError('add_spec error: %s is not known' % primitive)
 
+        # If this action is directly linked with a plan line make sure
+        # to register the link between the action and the plan even
+        # if the action has already been added via another dependency
+        if plan_line is not None:
+            self.link_to_plan(vertex_id=result.uid,
+                              plan_line=plan_line,
+                              plan_args=plan_args)
+
         if primitive == 'install' and \
                 not (spec.has_package and spec.component is not None) and \
                 has_primitive(spec, 'build'):
@@ -292,7 +340,9 @@ class AnodContext(object):
             # is an overloaded download procedure).
             return self.add_spec(name, env, 'build',
                                  qualifier,
-                                 expand_build=False)
+                                 expand_build=False,
+                                 plan_args=plan_args,
+                                 plan_line=plan_line)
 
         if expand_build and primitive == 'build' and \
                 (spec.has_package and spec.component is not None):
@@ -311,21 +361,22 @@ class AnodContext(object):
                                   % (name, primitive))
 
         # Add the action in the DAG
-        self.add(result)
+        add_action(result)
 
         if primitive == 'install':
             # Expand an install node to
             #    install --> decision --> build
             #                         \-> download binary
             download_action = DownloadBinary(spec)
-            self.add(download_action)
+            add_action(download_action)
 
             if has_primitive(spec, 'build'):
-                build_action = self.add_spec(name,
-                                             env,
-                                             'build',
-                                             qualifier,
-                                             expand_build=False)
+                build_action = self.add_spec(
+                    name=name,
+                    env=env,
+                    primitive='build',
+                    qualifier=qualifier,
+                    expand_build=False)
                 self.add_decision(BuildOrInstall,
                                   result,
                                   build_action,
@@ -345,10 +396,11 @@ class AnodContext(object):
                                   env=BaseEnv(), qualifier=None)
                         continue
 
-                    child_action = self.add_spec(e.name,
-                                                 e.env(spec, self.default_env),
-                                                 e.kind,
-                                                 e.qualifier)
+                    child_action = self.add_spec(
+                        name=e.name,
+                        env=e.env(spec, self.default_env),
+                        primitive=e.kind,
+                        qualifier=e.qualifier)
 
                     spec.deps[e.local_name] = result.anod_instance
 
@@ -382,8 +434,7 @@ class AnodContext(object):
                 src_install_uid = result.uid.rsplit('.', 1)[0] + \
                     '.source_install.' + s.name
                 src_install_action = InstallSource(src_install_uid, spec, s)
-                self.add(src_install_action)
-                self.connect(result, src_install_action)
+                add_action(src_install_action, connect_with=result)
 
                 # Then add nodes to create that source (download or creation
                 # using anod source and checkouts)
@@ -400,29 +451,27 @@ class AnodContext(object):
                     self.connect(src_install_action, src_get_action)
                     continue
 
-                self.add(src_get_action)
-                self.connect(src_install_action, src_get_action)
+                add_action(src_get_action, connect_with=src_install_action)
+
                 src_download_action = DownloadSource(obj)
-                self.add(src_download_action)
+                add_action(src_download_action)
 
                 if isinstance(obj, UnmanagedSourceBuilder):
                     # In that case only download is available
                     self.connect(src_get_action, src_download_action)
                 else:
-                    source_action = self.add_spec(spec_decl,
-                                                  BaseEnv(),
-                                                  'source',
-                                                  None,
-                                                  source_name=s.name)
+                    source_action = self.add_spec(
+                        name=spec_decl,
+                        env=BaseEnv(),
+                        primitive='source',
+                        source_name=s.name)
                     for repo in obj.checkout:
                         r = Checkout(repo, self.repo.repos.get(repo))
-                        self.add(r)
-                        self.connect(source_action, r)
+                        add_action(r, connect_with=source_action)
                     self.add_decision(CreateSourceOrDownload,
                                       src_get_action,
                                       source_action,
                                       src_download_action)
-
         return result
 
     @classmethod
@@ -494,6 +543,9 @@ class AnodContext(object):
         rev = self.tree.reverse_graph()
         uploads = []
         dag = DAG()
+
+        # Retrieve existing tags
+        dag.tags = self.tree.tags
 
         for uid, action in rev:
             if uid == 'root':

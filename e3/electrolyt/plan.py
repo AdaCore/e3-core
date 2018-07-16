@@ -208,6 +208,20 @@ class PlanContext(object):
         :param kwargs: keyword arguments of the action call
         :type kwargs: dict
         """
+        # Retrieve the plan line
+        try:
+            caller_frame = inspect.getouterframes(
+                frame=inspect.currentframe())[1]
+        except Exception:  # defensive code
+            # do not crash when inspect frames fails
+            plan_line = 'unknown filename:unknown lineno'
+        else:
+            if isinstance(caller_frame, tuple):  # py2-only
+                plan_line = '{}:{}'.format(caller_frame[1], caller_frame[2])
+            else:  # py3-only
+                plan_line = '{}:{}'.format(
+                    caller_frame.filename, caller_frame.lineno)
+
         # First create our initial object based on current scope env
         result = self.env.copy()
 
@@ -256,7 +270,9 @@ class PlanContext(object):
                               result.target.os.mode)
 
         # Set action attribute (with action name)
-        setattr(result, 'action', name)
+        result.action = name
+        result.plan_line = plan_line
+        result.plan_args = result.to_dict()
 
         # Push the action in the current list
         self.action_list.append(result)
