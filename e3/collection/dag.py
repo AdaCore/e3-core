@@ -107,10 +107,100 @@ class DAGIterator(object):
 
 
 class DAG(object):
+    """Represent a Directed Acyclic Graph.
+
+    :ivar vertex_data: a dictionary containing all vertex data
+        indexed by vertex id
+    :vartype vertex_data: dict
+    :ivar tags: a dictionary containing "tags" associated with
+        a vertex data, indexed by vertex id
+    :ivar vertex_predecessors: a dictionary containing the list
+        of predecessors for each vertex, indexed by vertex id
+    """
+
     def __init__(self):
         """Initialize a DAG."""
         self.vertex_data = {}
+        self.tags = {}
         self.vertex_predecessors = {}
+
+    def add_tag(self, vertex_id, data):
+        """Tag a vertex.
+
+        :param vertex_id: ID of the vertex to tag
+        :param data: tag content
+        """
+        self.tags[vertex_id] = data
+
+    def get_tag(self, vertex_id):
+        """Retrieve a tag associated with a vertex.
+
+        :param vertex_id: ID of the vertex
+        :return: tag content
+        """
+        return self.tags.get(vertex_id)
+
+    def get_context(self, vertex_id, max_distance=None, max_element=None):
+        r"""Get tag context.
+
+        Returns the list of predecessors tags along with their vertex id and
+        the distance between the given vertex and the tag. On each predecessors
+        branch the first tag in returned. So for the following graph::
+
+
+                A*
+               / \
+              B   C*
+             / \   \
+            D   E*  F
+
+        where each node with a * are tagged
+
+        get_context(D) will return (2, A, <tag A>)
+        get_context(E) will return (0, E, <tag E>)
+        get_context(F) will return (1, C, <tag C>)
+
+        :return: a list of tuple (distance:int, tagged vertex id, tag content)
+        :rtype: list[tuple]
+        """
+        visited = set()
+        tags = []
+        distance = 0
+        node_tag = self.get_tag(vertex_id)
+        if node_tag is not None:
+            tags.append((distance, vertex_id, node_tag))
+            return tags
+
+        closure = self.vertex_predecessors[vertex_id]
+        closure_len = len(closure)
+
+        while True:
+            distance += 1
+            if max_distance is not None and distance > max_distance:
+                return tags
+            for n in closure - visited:
+                visited.add(n)
+
+                n_tag = self.get_tag(n)
+                if n_tag is not None:
+                    tags.append((distance, n, n_tag))
+
+                    if max_element is not None and len(tags) == max_element:
+                        return tags
+                else:
+                    # Search tag in vertex predecessors
+                    if n in self.vertex_predecessors:
+                        closure |= self.vertex_predecessors[n]
+
+            if vertex_id in closure:
+                raise DAGError(message='cycle detected (involving: %s)'
+                                       % vertex_id,
+                               origin='DAG.get_closure')
+
+            if len(closure) == closure_len:
+                break
+            closure_len = len(closure)
+        return tags
 
     def add_vertex(self, vertex_id, data=None, predecessors=None):
         """Add a new vertex into the DAG.
@@ -232,6 +322,9 @@ class DAG(object):
         :rtype: DAG
         """
         result = DAG()
+
+        # Copy the tags to the reverse DAG
+        result.tags = self.tags
 
         # Note that we don't need to enable checks during this operation
         # as the reverse graph of a DAG is still a DAG (no cycles).
