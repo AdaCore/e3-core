@@ -70,7 +70,8 @@ def test_plan_scope():
                  u'    build("foo")\n'
                  u'    with defaults(build="x86_64-windows",\n'
                  u'                  host="x86-windows",\n'
-                 u'                  target="x86-linux"):\n'
+                 u'                  target="x86-linux",\n'
+                 u'                  weathers=["dev"]):\n'
                  u'        build("foo")\n'
                  u'        with defaults(target="x86_64-linux"):\n'
                  u'            build("foo")\n'
@@ -85,6 +86,7 @@ def test_plan_scope():
     assert actions[1].target.platform == 'x86-linux'
     assert actions[1].build.platform == 'x86_64-windows'
     assert actions[1].host.platform == 'x86-windows'
+    assert actions[1].weathers == ['dev']
     assert actions[2].target.platform == 'x86_64-linux'
     assert actions[3].spec == 'bar'
     assert actions[3].target.platform == 'x86-linux'

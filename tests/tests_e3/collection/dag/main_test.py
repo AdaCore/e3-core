@@ -143,6 +143,9 @@ def test_cycle():
     with pytest.raises(DAGError):
         d.check()
 
+    with pytest.raises(DAGError):
+        d.get_context('b')
+
 
 def test_reverse_dag():
     d = DAG()
@@ -164,3 +167,58 @@ def test_dot():
     d.add_vertex('a')
     d.add_vertex('b', predecessors=['a'])
     assert '"b" -> "a"' in d.as_dot()
+
+
+def test_tagged_dag():
+    r"""Test add_tag/get_tag/get_context.
+
+    With the following DAG::
+
+               A
+              / \
+             B   C*
+           /  \ /
+          D*   E
+         / \  / \
+        F   G    H*
+    """
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('b', predecessors=['a'])
+    d.add_vertex('c', predecessors=['a'])
+    d.add_vertex('d', predecessors=['b'])
+    d.add_vertex('e', predecessors=['b', 'c'])
+    d.add_vertex('f', predecessors=['d'])
+    d.add_vertex('g', predecessors=['d', 'e'])
+    d.add_vertex('h', predecessors=['e'])
+
+    d.add_tag('c', data='tagc')
+    d.add_tag('d', data='tagd')
+    d.add_tag('h', data='tagh')
+
+    assert d.get_tag('a') is None
+    assert d.get_tag('b') is None
+    assert d.get_tag('c') == 'tagc'
+    assert d.get_tag('e') is None
+    assert d.get_tag('h') == 'tagh'
+
+    assert d.get_context('d') == [(0, 'd', 'tagd')]
+    assert d.get_context('g') == [(1, 'd', 'tagd'), (2, 'c', 'tagc')]
+    assert d.get_context('f') == [(1, 'd', 'tagd')]
+    assert d.get_context('b') == []
+    assert d.get_context('a') == []
+    assert d.get_context('c') == [(0, 'c', 'tagc')]
+    assert d.get_context('e') == [(1, 'c', 'tagc')]
+    assert d.get_context('h') == [(0, 'h', 'tagh')]
+
+    di = d.reverse_graph()
+    assert di.get_context('e') == [(1, 'h', 'tagh')]
+    assert di.get_context('h') == [(0, 'h', 'tagh')]
+    assert di.get_context('a') == [
+        (1, 'c', 'tagc'), (2, 'd', 'tagd'), (3, 'h', 'tagh')]
+
+    assert di.get_context(vertex_id='a', max_distance=2) == [
+        (1, 'c', 'tagc'), (2, 'd', 'tagd')]
+
+    assert di.get_context(vertex_id='a', max_element=2) == [
+        (1, 'c', 'tagc'), (2, 'd', 'tagd')]

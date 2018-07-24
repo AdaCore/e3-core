@@ -32,7 +32,7 @@ class AnodSpecRepository(object):
         :type spec_dir: str
         :param spec_config: dictionary containing the configuration for this
             AnodSpecRepository
-        :type spec_config: dict
+        :type spec_config: dict | SandboxConfig
         """
         logger.debug('initialize spec repository (%s)', spec_dir)
 
