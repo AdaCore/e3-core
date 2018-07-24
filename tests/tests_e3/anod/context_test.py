@@ -62,6 +62,19 @@ class TestContext(object):
         with pytest.raises(SchedulingError):
             print(ac.add_anod_action('spec1', primitive='build'))
 
+    def test_add_anod_action_source(self):
+        """Test source packaging."""
+        ac = self.create_context()
+
+        ac.add_anod_action('spec1', primitive='source')
+        result = ac.schedule(ac.always_create_source_resolver)
+        assert len(result) == 4, result.as_dot()
+        assert set(result.vertex_data.keys()) == \
+            {'root',
+             'mylinux.x86-linux.spec1.source.spec1-src',
+             'mylinux.x86-linux.spec1.source.sources',
+             'checkout.spec1-git'}
+
     def test_add_anod_action2(self):
         # Simple spec with sources associated to the build primitive
         ac = self.create_context()
@@ -340,3 +353,57 @@ class TestContext(object):
                 assert sched_dag.get_tag(uid)
                 assert sched_rev.get_context(uid)[0][2]['plan_args'][
                     'weathers'] == 'my_spec3_weather'
+
+    def test_dag_2_plan_sources(self):
+        """Check that we can extract values from plan in final dag.
+
+        Use a scheduler to always create source and ask for a source
+        package creation.
+        """
+        # Create a new plan context
+        ac = self.create_context()
+        current_env = BaseEnv()
+        cm = plan.PlanContext(server=current_env)
+
+        # Declare available actions and their signature
+        def anod_action(module, build=None, default_build=False,
+                        host=None, target=None, board=None,
+                        weathers=None, product_version=None,
+                        when_missing=None,
+                        manual_action=False,
+                        qualifier=None, jobs=None,
+                        releases=None, process_suffix=None,
+                        update_vcs=False, recursive=None, query_range=None,
+                        force_repackage=False):
+            pass
+
+        cm.register_action('anod_source', anod_action)
+
+        # Create a simple plan
+        content = [u'def myserver():',
+                   u'    anod_source("spec1", weathers="foo")']
+        with open('plan.txt', 'w') as f:
+            f.write('\n'.join(content))
+        myplan = plan.Plan({})
+        myplan.load('plan.txt')
+
+        # Execute the plan and create anod actions
+        for action in cm.execute(myplan, 'myserver'):
+            primitive = action.action.replace('anod_', '', 1)
+            ac.add_anod_action(
+                name=action.module,
+                env=current_env if action.default_build else action,
+                primitive=primitive,
+                qualifier=action.qualifier,
+                plan_line=action.plan_line,
+                plan_args=action.plan_args)
+
+        for uid, action in ac.tree:
+            if uid.endswith('sources'):
+                assert ac.tree.get_tag(uid)
+            elif uid.endswith('spec1-src'):
+                assert ac.tree.get_tag(uid) is None
+                assert ac.tree.get_context(
+                    vertex_id=uid,
+                    reverse_order=True,
+                    max_distance=1)[0][2]['plan_args']['weathers'] == 'foo'
