@@ -81,6 +81,17 @@ def test_cycle_detection():
         assert data is None
     assert result == ['b', 'a']
 
+    # Force the creation of a cycle
+    d.update_vertex('b', data='newb', predecessors=['a'],
+                    enable_checks=False)
+
+    # Verify that the cycle is detected
+    with pytest.raises(DAGError):
+        d.check()
+
+    with pytest.raises(DAGError):
+        d.reverse_graph()
+
 
 def test_dag_merge():
     d = DAG()

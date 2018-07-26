@@ -116,8 +116,10 @@ class DAG(object):
         """Initialize a DAG."""
         self.vertex_data = {}
         self.tags = {}
+
         self.__vertex_predecessors = {}
         self.__vertex_successors = {}
+        self.__has_cycle = None
 
     @property
     def vertex_predecessors(self):
@@ -151,8 +153,9 @@ class DAG(object):
         Invalidate the global dictionary of vertex successors.
         """
         self.__vertex_predecessors[vertex_id] = predecessors
-        # Reset successors which are now invalid
+        # Reset successors and cycle check results which are now invalid
         self.__vertex_successors = {}
+        self.__has_cycle = None
 
     def get_successors(self, vertex_id):
         """Get set of successors for a given vertex.
@@ -226,6 +229,8 @@ class DAG(object):
         :return: a list of tuple (distance:int, tagged vertex id, tag content)
         :rtype: list[tuple]
         """
+        self.check()
+
         def get_next(vid):
             """Get successors or predecessors.
 
@@ -264,11 +269,6 @@ class DAG(object):
                 else:
                     # Search tag in vertex predecessors
                     closure |= get_next(n)
-
-            if vertex_id in closure:
-                raise DAGError(message='cycle detected (involving: %s)'
-                                       % vertex_id,
-                               origin='DAG.get_closure')
 
             if len(closure) == closure_len:
                 break
@@ -345,20 +345,38 @@ class DAG(object):
             if data is not None:
                 self.vertex_data[vertex_id] = data
 
+        if not enable_checks:
+            # DAG modified without cycle checks, discard cached result
+            self.__has_cycle = None
+
     def check(self):
         """Check for cycles and inexisting nodes.
 
         :raise: DAGError if the DAG is not valid
         """
+        # Noop if check already done
+        if self.__has_cycle is False:
+            return
+        elif self.__has_cycle:
+            raise DAGError(
+                message='this DAG contains at least one cycle',
+                origin='DAG.check')
         # First check predecessors validity
         for node, preds in self.__vertex_predecessors.iteritems():
             if len([k for k in preds if k not in self.vertex_data]) > 0:
+                self.__has_cycle = True
                 raise DAGError(
                     message='invalid nodes in predecessors of %s' % node,
                     origin='DAG.check')
         # raise DAGError if cycle
-        for _ in DAGIterator(self):
-            pass
+        try:
+            for _ in DAGIterator(self):
+                pass
+        except DAGError:
+            self.__has_cycle = True
+            raise
+        else:
+            self.__has_cycle = False
 
     def get_closure(self, vertex_id):
         """Retrieve closure of predecessors for a vertex.
@@ -368,6 +386,7 @@ class DAG(object):
         :return: a set of vertex_id
         :rtype: set(collections.Hashable)
         """
+        self.check()
         visited = set()
         closure = self.get_predecessors(vertex_id)
         closure_len = len(closure)
@@ -377,11 +396,6 @@ class DAG(object):
                 visited.add(n)
 
                 closure |= self.get_predecessors(n)
-
-            if vertex_id in closure:
-                raise DAGError(message='cycle detected (involving: %s)'
-                               % vertex_id,
-                               origin='DAG.get_closure')
 
             if len(closure) == closure_len:
                 break
@@ -409,6 +423,15 @@ class DAG(object):
                 result.update_vertex(p,
                                      predecessors=[node],
                                      enable_checks=False)
+        try:
+            result.check()
+        except DAGError:
+            # Check detected
+            self.__has_cycle = True
+            raise
+        else:
+            # No cycle in the DAG
+            self.__has_cycle = False
         return result
 
     def __iter__(self):
@@ -429,9 +452,7 @@ class DAG(object):
         result = DAG()
 
         # First add vertices and then update predecessors. The two step
-        # procedure is needed because predecessors should exist. Also
-        # using add_vertex and update_vertex ensure cycle detection is done
-        # during the creation of the merged DAG.
+        # procedure is needed because predecessors should exist.
         for nid in self.vertex_data:
             result.add_vertex(nid)
 
@@ -450,6 +471,9 @@ class DAG(object):
                 nid,
                 other.vertex_data[nid],
                 other.get_predecessors(nid))
+
+        # Make sure that no cycle are created the merged DAG.
+        result.check()
         return result
 
     def as_dot(self):
@@ -458,6 +482,7 @@ class DAG(object):
         :return: the dot source file
         :rtype: str
         """
+        self.check()
         result = ['digraph G {', 'rankdir="LR";']
         for vertex in self.vertex_data:
             result.append('"%s"' % vertex)
@@ -471,6 +496,7 @@ class DAG(object):
         return len(self.vertex_data)
 
     def __str__(self):
+        self.check()
         result = []
         for vertex, predecessors in self.__vertex_predecessors.iteritems():
             if predecessors:
