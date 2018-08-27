@@ -267,6 +267,11 @@ class Walk(object):
         if can_predict_new_fingerprint:
             self.new_fingerprints[uid] = \
                 self.compute_new_fingerprint(uid, data)
+        else:
+            # Set the new fingerprint's value to None for now.
+            # The actual fingerprint will be provided when we collect
+            # the job's results if the job is succesful.
+            self.new_fingerprints[uid] = None
 
         # Check our predecessors. If any of them failed, then return
         # a failed job.
