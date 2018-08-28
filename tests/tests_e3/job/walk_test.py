@@ -209,7 +209,7 @@ class FingerprintWalk(SimpleWalk):
             return None
         f = Fingerprint()
         for pred_uid in self.actions.vertex_predecessors[uid]:
-            pred_fingerprint = self.load_previous_fingerprint(pred_uid)
+            pred_fingerprint = self.new_fingerprints[pred_uid]
             if pred_fingerprint is not None:
                 f.add('pred:%s' % pred_uid, pred_fingerprint.checksum())
         if os.path.exists(source_fullpath(uid)):
@@ -862,3 +862,31 @@ def test_computing_fingerprint_after_job_done(setup_sbx):
     assert r4.job_status == {download_uid: ReturnValue.success,
                              '2': ReturnValue.skip}
     assert r4.requeued == {}
+
+
+def test_job_depending_on_job_with_no_predicted_fingerprint_failed(setup_sbx):
+    """Test case where job depends on failed job with late fingerprint."""
+    actions = DAG()
+    actions.add_vertex('fingerprint_after_job.bad')
+    actions.add_vertex('2', predecessors=['fingerprint_after_job.bad'])
+
+    r1 = FingerprintWalk(actions)
+    assert r1.can_predict_new_fingerprint('fingerprint_after_job.bad',
+                                          None) is False
+
+    # Check the status of the first job ('fingerprint_after_job.bad').
+    # It should be a real job that returned a failure.
+    job = r1.saved_jobs['fingerprint_after_job.bad']
+    assert isinstance(job, ControlledJob)
+    assert job.should_skip is False
+    assert job.status == ReturnValue(1)
+
+    # Check the status of the second job ('2'); because that job depends
+    # on a job that failed, it should show that the job was skipped.
+    job = r1.saved_jobs['2']
+    assert isinstance(job, EmptyJob)
+    assert job.should_skip is True
+    assert job.status == ReturnValue.failure
+
+    # Check that no job was requeued.
+    assert r1.requeued == {}
