@@ -208,7 +208,7 @@ class FingerprintWalk(SimpleWalk):
         if 'no_fingerprint' in uid:
             return None
         f = Fingerprint()
-        for pred_uid in self.actions.vertex_predecessors[uid]:
+        for pred_uid in self.actions.get_predecessors(uid):
             pred_fingerprint = self.new_fingerprints[pred_uid]
             if pred_fingerprint is not None:
                 f.add('pred:%s' % pred_uid, pred_fingerprint.checksum())

@@ -192,7 +192,7 @@ class Walk(object):
         """
         if previous_fingerprint is None or new_fingerprint is None:
             return True
-        for pred_uid in self.actions.vertex_predecessors[uid]:
+        for pred_uid in self.actions.get_predecessors(uid):
             if self.new_fingerprints[pred_uid] is None:
                 # One of the predecessors has no fingerprint, so
                 # this node's new_fingerprint cannot tell us whether

@@ -190,7 +190,7 @@ class AnodContext(object):
         :return: the predecessor list
         :rtype: list[e3.anod.action.Action]
         """
-        return [self[el] for el in self.tree.vertex_predecessors[action.uid]]
+        return [self[el] for el in self.tree.get_predecessors(action.uid)]
 
     def link_to_plan(self, vertex_id, plan_line, plan_args):
         """Tag the vertex with plan info.
@@ -558,13 +558,13 @@ class AnodContext(object):
                 action.apply_triggers(dag)
             elif isinstance(action, UploadComponent):
                 uploads.append((action,
-                                self.tree.vertex_predecessors[uid]))
+                                self.tree.get_predecessors(uid)))
             else:
                 # Compute the list of successors for the current node (i.e:
                 # predecessors in the reversed graph). Ignore UploadComponent
                 # nodes as they will be processed only once the scheduling
                 # is done.
-                preds = list([k for k in rev.vertex_predecessors[uid]
+                preds = list([k for k in rev.get_predecessors(uid)
                               if not isinstance(rev[k], UploadComponent)])
 
                 if len(preds) == 1 and isinstance(rev[preds[0]], Decision):
@@ -608,7 +608,7 @@ class AnodContext(object):
                             initiators = [
                                 iuid for iuid in rev_graph.get_closure(uid)
                                 if 'root'
-                                in rev_graph.vertex_predecessors[iuid]]
+                                in rev_graph.get_predecessors(iuid)]
                             raise SchedulingError(e.messages, uid=uid,
                                                   initiators=initiators)
                 else:
