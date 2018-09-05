@@ -368,7 +368,17 @@ class Anod(object):
             and self.package is not None and self.package.nsis is not None
 
     def shell(self, *command, **kwargs):
-        """Run a subprocess using e3.os.process.Run."""
+        """Run a subprocess using e3.os.process.Run.
+
+        Contrary to what is done in e3.os.process.Run parse_shebang
+        defaults to True and output is by default set to the anod
+        build space log stream.
+
+        Note that calling shell() raises an exception when the
+        process returns an exit code that is not 0.
+
+        :raise: ShellError
+        """
         command = parse_command(command, self.build_space)
         if 'parse_shebang' not in kwargs:
             kwargs['parse_shebang'] = True
