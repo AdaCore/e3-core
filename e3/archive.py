@@ -322,5 +322,10 @@ def create_archive(filename, from_dir, dest, force_extension=None,
             tar_format = 'w:gz'
         elif ext == 'tar.bz2':
             tar_format = 'w:bz2'
+        else:  # defensive code
+            raise ArchiveError('unsupported format {}'.format(tar_format))
         with closing(tarfile.open(filepath, tar_format)) as archive:
-            archive.add(from_dir, from_dir_rename, recursive=True)
+            archive.add(
+                name=from_dir,
+                arcname=from_dir_rename,
+                recursive=True)
