@@ -32,7 +32,7 @@ class ElectrolytJob(Job):
     """
 
     def __init__(self, uid, data, notify_end, sandbox, store,
-                 force_status=STATUS.status_unknown,
+                 force_status=STATUS.unknown,
                  dry_run=False):
         """Initialize the context of the job.
 
@@ -58,7 +58,7 @@ class ElectrolytJob(Job):
         self.store = store
 
     def run(self):
-        if self.__status == STATUS.status_unknown and not self.dry_run:
+        if self.__status == STATUS.unknown and not self.dry_run:
             try:
                 getattr(self, self.data.run_method)()
             except Exception as e:
@@ -197,16 +197,16 @@ class ElectrolytJobFactory(object):
             notify_end,
             sandbox=self.sandbox,
             store=self.store,
-            force_status=(STATUS.status_unknown
+            force_status=(STATUS.unknown
                           if not force_fail
                           else STATUS.failure),
             dry_run=self.dry_run)
 
     def collect(self, job):
         self.job_status[job.uid] = job.status
-        logger.info("%-48s [queue=%-10s status=%03d]",
+        logger.info("%-48s [queue=%-10s status=%-10s]",
                     job.data, job.queue_name,
-                    self.job_status[job.uid].value)
+                    self.job_status[job.uid].name)
 
     def run(self, action_list):
         sch = Scheduler(self.get_job, self.collect)

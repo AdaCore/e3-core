@@ -12,5 +12,5 @@ class ReturnValue(Enum):
     notready = 75
     force_skip = 122
     force_fail = 123
-    status_unknown = 124
+    unknown = 124
     skip = 125

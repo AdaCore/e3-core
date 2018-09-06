@@ -319,14 +319,14 @@ class Walk(object):
         if job.should_skip:
             if job.status not in (ReturnValue.force_fail,
                                   ReturnValue.force_skip):
-                logging.info("[queue=%-10s status=%3d time=%5ds] %s",
-                             job.queue_name, self.job_status[job.uid].value,
+                logging.info("[queue=%-10s status=%-10s time=%5ds] %s",
+                             job.queue_name, self.job_status[job.uid].name,
                              0, job.data)
             return False
 
-        logging.info("[queue=%-10s status=%3d time=%5ds] %s",
+        logging.info("[queue=%-10s status=%-10s time=%5ds] %s",
                      job.queue_name,
-                     job.status.value,
+                     job.status.name,
                      int(job.timing_info.duration),
                      job.data)
 
