@@ -29,7 +29,7 @@ class SandBox(object):
 
         # Required directories for a sandbox
         self.dirs = ('meta', 'bin', 'tmp', os.path.join('tmp', 'cache'),
-                     'src', 'log', 'vcs', 'patch', 'specs')
+                     'src', 'log', 'vcs', 'patch')
 
         self.meta_dir = None
         self.tmp_dir = None
@@ -39,7 +39,8 @@ class SandBox(object):
         self.vcs_dir = None
         self.patch_dir = None
         self.bin_dir = None
-        self.specs_dir = None
+        self.__specs_dir = None
+        self.is_alternate_specs_dir = False
         self.conf = None
 
         self.default_env = {
@@ -88,7 +89,38 @@ class SandBox(object):
         # For each directory create an attribute containing its path
         for d in self.dirs:
             setattr(self, ('%s_dir' % d).replace(os.path.sep, '_'),
-                    os.path.join(self.root_dir, d))
+                    os.path.join(new_dir, d))
+
+        # specs_dir path can be changed by a configuration in user.yaml
+        user_yaml = os.path.join(new_dir, 'user.yaml')
+        if os.path.exists(user_yaml):
+            with open(user_yaml) as f:
+                user_config = yaml.load(f)
+
+            # Accept both specs_dir and module_dir key (in that order) to
+            # get the path to the anod specification files
+            specs_dir = user_config.get(
+                'specs_dir', user_config.get('module_dir'))
+            if specs_dir is not None:
+                self.specs_dir = specs_dir
+        else:
+            self.__specs_dir = os.path.join(new_dir, 'specs')
+
+    @property
+    def specs_dir(self):
+        """Return where to find anod specification files."""
+        return self.__specs_dir
+
+    @specs_dir.setter
+    def specs_dir(self, d):
+        """Set an alternate specs dir.
+
+        :param d: directory where to find anod specification files
+        :type d: str
+        """
+        self.__specs_dir = d
+        self.is_alternate_specs_dir = True
+        logger.info('using alternate specs dir %s', d)
 
     def create_dirs(self):
         """Create all required sandbox directories."""
