@@ -73,10 +73,6 @@ class Source(object):
         :type remove_root_dir: bool
         :param ignore: unused during instantiation, kept for backward
             compatibiliy.
-            List of directories/filenames to ignore when
-            synchronising the `dest` content. See documentation of
-            gnatpython.fileutils.sync_tree
-        :type ignore: None | list[str]
         """
         del ignore
         self.name = name
@@ -89,20 +85,34 @@ class Source(object):
         self.dest = dest
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
-        self.ignore = None
         self.builder = None
+        self.other_sources = None
 
     def set_builder(self, builder_function):
         """Set the SourceBuilder associated to this Source object."""
         self.builder = builder_function
 
-    def set_ignore(self, ignore):
-        """Update ignore value.
+    def set_other_sources(self, other_sources):
+        """Get the list of other sources to compute ``ignore`` property."""
+        self.other_sources = other_sources
 
-        :param ignore: List of directories/filenames to ignore
-        :type ignore: list[str]
+    @property
+    def ignore(self):
+        """Return list of paths to ignore when installing the source.
+
+        By default, a source package is first unpacked and then install
+        in the `dest` directory by using e3.fs.sync_tree. The ignore
+        property returns a value that can be passed to e3.fs.sync_tree.
+
+        :rtype: list[str]
         """
-        self.ignore = ignore
+        ignore_list = []
+        for other_source in self.other_sources:
+            if other_source.name != self.name and other_source.dest:
+                ignore_path = os.path.relpath(other_source.dest, self.dest)
+                if not ignore_path.startswith(os.pardir):
+                    ignore_list.append('/{}'.format(ignore_path))
+        return ignore_list
 
 
 class SharedSource(Source):
