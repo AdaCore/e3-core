@@ -148,6 +148,31 @@ class CreateSource(Action):
         return 'create source %s' % self.data[1]
 
 
+class CreateSources(Action):
+    """CreateSources Action.
+
+    This action does not correspond to any real activity. It's only
+    used to group all CreateSource action corresponding to the same
+    anod spec.
+    """
+
+    __slots__ = ('uid', 'anod_instance')
+
+    def __init__(self, anod_instance):
+        """Initialize CreateSources object.
+
+        :param anod_instance: the Anod instance of the spec
+        :type anod_instance: e3.anod.spec.Anod
+        """
+        super(CreateSources, self).__init__(
+            uid='%s.sources' % anod_instance.uid,
+            data=(anod_instance))
+        self.anod_instance = anod_instance
+
+    def __str__(self):
+        return 'create sources %s' % self.data[1]
+
+
 class Checkout(Action):
     """Checkout Action.
 

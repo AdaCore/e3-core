@@ -4,8 +4,8 @@ import os
 
 import e3.log
 from e3.anod.action import (Build, BuildOrInstall, Checkout, CreateSource,
-                            CreateSourceOrDownload, Decision, DownloadBinary,
-                            DownloadSource, GetSource, Install,
+                            CreateSourceOrDownload, CreateSources, Decision,
+                            DownloadBinary, DownloadSource, GetSource, Install,
                             InstallSource, Root, Test, UploadBinaryComponent,
                             UploadComponent, UploadSourceComponent)
 from e3.anod.deps import Dependency
@@ -15,6 +15,8 @@ from e3.anod.spec import has_primitive
 from e3.collection.dag import DAG
 from e3.env import BaseEnv
 from e3.error import E3Error
+
+logger = e3.log.getLogger('anod.context')
 
 
 class SchedulingError(E3Error):
@@ -212,6 +214,7 @@ class AnodContext(object):
                         env=None,
                         primitive=None,
                         qualifier=None,
+                        source_packages=None,
                         upload=True,
                         plan_line=None,
                         plan_args=None):
@@ -225,6 +228,10 @@ class AnodContext(object):
         :type primitive: str
         :param qualifier: qualifier
         :type qualifier: str | None
+        :param source_packages: if not empty only create the specified list of
+            source packages and not all source packages defined in the anod
+            specification file
+        :type source_packages: list[str] | None
         :param upload: if True consider uploading to the store
         :type upload: bool
         :param plan_line: corresponding line:linenumber in the plan
@@ -237,6 +244,7 @@ class AnodContext(object):
         """
         # First create the subtree for the spec
         result = self.add_spec(name, env, primitive, qualifier,
+                               source_packages=source_packages,
                                plan_line=plan_line, plan_args=plan_args)
 
         # Resulting subtree should be connected to the root node
@@ -280,6 +288,7 @@ class AnodContext(object):
                  env=None,
                  primitive=None,
                  qualifier=None,
+                 source_packages=None,
                  expand_build=True,
                  source_name=None,
                  plan_line=None,
@@ -294,6 +303,10 @@ class AnodContext(object):
         :type primitive: str
         :param qualifier: qualifier
         :type qualifier: str | None
+        :param source_packages: if not empty only create the specified list of
+            source packages and not all source packages defined in the anod
+            specification file
+        :type source_packages: list[str] | None
         :param expand_build: should build primitive be expanded
         :type expand_build: bool
         :param source_name: source name associated with the source
@@ -312,7 +325,43 @@ class AnodContext(object):
 
         # Initialize the resulting action based on the primitive name
         if primitive == 'source':
-            result = CreateSource(spec, source_name)
+            if source_name is not None:
+                result = CreateSource(
+                    spec, source_name)
+                add_action(result)
+                for sb in spec.source_pkg_build:
+                    if sb.name == source_name:
+                        for checkout in sb.checkout:
+                            if checkout not in self.repo.repos:
+                                logger.warning(
+                                    'unknown repository %s', checkout)
+                            co = Checkout(
+                                checkout, self.repo.repos.get(checkout))
+                            add_action(co, result)
+
+            else:
+                # Create the root node
+                result = CreateSources(spec)
+                add_action(result)
+                if plan_line is not None:
+                    self.link_to_plan(
+                        vertex_id=result.uid,
+                        plan_line=plan_line,
+                        plan_args=plan_args)
+
+                # Then one node for each source package
+                for sb in spec.source_pkg_build:
+                    if source_packages and sb not in source_packages:
+                        # This source package is defined in the spec but
+                        # explicitly excluded in the plan
+                        continue
+                    sub_result = self.add_spec(
+                        name=name,
+                        env=env,
+                        primitive='source',
+                        source_name=sb.name)
+                    self.connect(result, sub_result)
+
         elif primitive == 'build':
             result = Build(spec)
         elif primitive == 'test':
