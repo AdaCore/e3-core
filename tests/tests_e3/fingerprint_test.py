@@ -176,9 +176,8 @@ def test_fingerprint_save_and_load():
     with open(f_bad_filename, 'w') as f:
         f.write('yello{')
 
-    with pytest.raises(E3Error) as err:
-        Fingerprint.load_from_file(f_bad_filename)
-    assert 'not a properly formatted fingerprint' in str(err.value)
+    f3 = Fingerprint.load_from_file(f_bad_filename)
+    assert f3 is None
 
     # Trying to load from a file which contains valid data, but
     # is not an dictionary, and therefore clearly not something
@@ -188,6 +187,48 @@ def test_fingerprint_save_and_load():
     with open(f_not_filename, 'w') as f:
         json.dump([1, 2, 3], f)
 
-    with pytest.raises(E3Error) as err:
-        Fingerprint.load_from_file(f_not_filename)
-    assert 'not a dictionary' in str(err.value)
+    f4 = Fingerprint.load_from_file(f_not_filename)
+    assert f4 is None
+
+    # Try to load from a file which is missing one of the mandatory
+    # elements.
+
+    for key in ('fingerprint_version', 'elements'):
+        f_key_missing_filename = fingerprint_path('no_%s_key')
+
+        # To create the bad file without assuming too much in this test
+        # how the fingerprint is saved to file, we save a valid fingerprint
+        # to file, load that file back, remove the key, and then save the
+        # truncated data again.
+
+        f2.save_to_file(f_key_missing_filename)
+        with open(f_key_missing_filename) as f:
+            data = json.load(f)
+        del(data[key])
+        with open(f_key_missing_filename, 'w') as f:
+            json.dump(data, f)
+
+        f5 = Fingerprint.load_from_file(f_key_missing_filename)
+        assert f5 is None
+
+    # Try loading a fingerprint whose version number is not recognized
+    # (typically, and old fingerprint version that we no longer support).
+    #
+    # To create the file without assuming too much in this test how
+    # fingerprint are saved to file, we start with a valid fingerprint
+    # that we saved to a file, load that file back, adjust the version
+    # number, and then replace the good fingeprint in that file by
+    # the modified one.
+
+    f_bad_version = fingerprint_path('bad_version')
+
+    f2.save_to_file(f_bad_version)
+    with open(f_bad_version) as f:
+        data = json.load(f)
+        data['fingerprint_version'] = '1.0'
+        data['elements']['fingerprint_version'] = '1.0'
+    with open(f_bad_version, 'w') as f:
+        json.dump(data, f)
+
+    f = Fingerprint.load_from_file(f_bad_version)
+    assert f is None
