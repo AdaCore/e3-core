@@ -1,7 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-import os
-
 import e3.log
 from e3.anod.action import (Build, BuildOrInstall, Checkout, CreateSource,
                             CreateSourceOrDownload, CreateSources, Decision,
@@ -467,18 +465,13 @@ class AnodContext(object):
 
         # Look for source dependencies (i.e sources needed)
         if '%s_source_list' % primitive in dir(spec):
-            for s in getattr(spec, '%s_source_list' % primitive):
+            source_list = getattr(spec, '{}_source_list'.format(primitive))
+            for s in source_list:
                 # set source builder
                 if s.name in self.sources:
                     s.set_builder(self.sources[s.name])
-                # set source ignore
-                ignore_list = []
-                for s2 in getattr(spec, '{}_source_list'.format(primitive)):
-                    if s2.name != s.name and s2.dest:
-                        ignore_path = os.path.relpath(s2.dest, s.dest)
-                        if not ignore_path.startswith(os.pardir):
-                            ignore_list.append('/{}'.format(ignore_path))
-                s.set_ignore(ignore_list)
+                # set other sources to compute source ignore
+                s.set_other_sources(source_list)
                 # add source install node
                 src_install_uid = result.uid.rsplit('.', 1)[0] + \
                     '.source_install.' + s.name
