@@ -22,11 +22,11 @@ import tempfile
 from contextlib import closing
 from subprocess import PIPE
 
-import e3.error
 import e3.fs
 import e3.log
 import e3.os.fs
 import e3.os.process
+from e3.vcs import VCSError
 
 logger = e3.log.getLogger('vcs.git')
 
@@ -39,12 +39,8 @@ FETCH_HEAD = 'FETCH_HEAD'
 # parse it, limiting the size of data read to avoid crashing our program.
 
 
-class GitError(e3.error.E3Error):
-    def __init__(self, message, origin, process=None):
-        super(GitError, self).__init__(message, origin)
-        self.origin = origin
-        self.message = message
-        self.process = process
+class GitError(VCSError):
+    pass
 
 
 class GitRepository(object):
