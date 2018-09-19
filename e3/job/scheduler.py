@@ -7,6 +7,7 @@ from Queue import Empty, Queue
 
 import e3.log
 from e3.collection.dag import DAGIterator
+from e3.job import Job
 
 logger = e3.log.getLogger('job.scheduler')
 
@@ -87,6 +88,26 @@ class Scheduler(object):
         # self.n_tokens slots
         self.slots = range(self.n_tokens)
 
+    def safe_collect(self, *args, **kwargs):
+        """Protect call to collect.
+
+        This ensures for job such as JobProcess that there are no calls to
+        Run during collect. Main goal is to avoid leak of handles from collect
+        to a process spawned by a Job. On Unixes consequences of such leak is
+        more a security concern than an operational one. On Windows, this can
+        lead easily to file locking issues and thus might cause crashes.
+        """
+        with Job.lock:
+            return self.collect(*args, **kwargs)
+
+    def safe_job_provider(self, *args, **kwargs):
+        """Protect call to job_provider.
+
+        See safe_collect commment above.
+        """
+        with Job.lock:
+            return self.job_provider(*args, **kwargs)
+
     @classmethod
     def simple_provider(cls, job_class):
         """Return a simple provider based on a given Job class.
@@ -162,7 +183,7 @@ class Scheduler(object):
             logger.info('Interrupting jobs...')
             for p in self.active_jobs:
                 p.interrupt()
-                self.collect(p)
+                self.safe_collect(p)
             raise KeyboardInterrupt
         self.stop_time = datetime.now()
 
@@ -192,13 +213,13 @@ class Scheduler(object):
                     # No more jobs ready
                     return
 
-                job = self.job_provider(
+                job = self.safe_job_provider(
                     uid,
                     data,
                     predecessors=predecessors,
                     notify_end=self.message_queue.put)
                 if job.should_skip:
-                    self.collect(job)
+                    self.safe_collect(job)
                     self.dag_iterator.leave(uid)
                 else:
                     self.push(job)
@@ -261,7 +282,7 @@ class Scheduler(object):
                 # Liberate the resources taken by the job
                 self.tokens[job.queue_name] += job.tokens
 
-                if self.collect(job):
+                if self.safe_collect(job):
                     # Requeue when needed
                     self.push(job)
                 else:
