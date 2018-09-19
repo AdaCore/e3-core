@@ -47,7 +47,7 @@ class Job(object):
     """
 
     __metaclass__ = abc.ABCMeta
-    _lock = threading.Lock()
+    lock = threading.RLock()
     index_counter = 0
 
     def __init__(self, uid, data, notify_end):
@@ -74,7 +74,7 @@ class Job(object):
         self.interrupted = False
         self.queue_name = 'default'
         self.tokens = 1
-        with self._lock:
+        with self.lock:
             self.index = Job.index_counter
             Job.index_counter += 1
 
@@ -90,12 +90,12 @@ class Job(object):
 
     def record_start_time(self):
         """Log the starting time of a job."""
-        with self._lock:
+        with self.lock:
             self.__start_time = datetime.now()
 
     def record_stop_time(self):
         """Log the stopping time of a job."""
-        with self._lock:
+        with self.lock:
             self.__stop_time = datetime.now()
 
     @property
@@ -105,7 +105,7 @@ class Job(object):
         :return: a JobTimingInfo object
         :rtype: JobTimingInfo
         """
-        with self._lock:
+        with self.lock:
             start = self.__start_time
             stop = self.__stop_time
         if start is None:
@@ -123,7 +123,7 @@ class Job(object):
         def task_function():
             self.record_start_time()
             try:
-                with self._lock:
+                with self.lock:
                     interrupted = self.interrupted
                 if interrupted:  # defensive code
                     logger.debug('job %s has been cancelled', self.uid)
@@ -161,7 +161,7 @@ class Job(object):
         :rtype: bool
         :return: True if interrupted, False if already interrupted
         """
-        with self._lock:
+        with self.lock:
             previous_state = self.interrupted
             self.interrupted = True
         return not previous_state
@@ -210,7 +210,7 @@ class ProcessJob(Job):
         # Do non blocking spawn followed by a wait in order to have
         # self.proc_handle set. This allows support for interrupt.
         cmd_options['bg'] = True
-        with self._lock:
+        with self.lock:
             if self.interrupted:  # defensive code
                 logger.debug('job %s has been cancelled', self.uid)
                 return
