@@ -140,3 +140,14 @@ def test_python_func():
         e3.os.fs.unixpath(os.path.dirname(sys.executable))
     assert e3.os.fs.unixpath(e3.sys.interpreter()) == \
         e3.os.fs.unixpath(sys.executable)
+
+    # Check support for python3
+    if sys.platform == 'win32':
+        e3.os.fs.touch('python3.exe')
+        assert e3.sys.interpreter(os.getcwd()) == \
+            os.path.join(os.getcwd(), 'python3.exe')
+    else:
+        e3.fs.mkdir('bin')
+        e3.os.fs.touch(os.path.join('bin', 'python3'))
+        assert e3.sys.interpreter(os.getcwd()) == \
+            os.path.join(os.getcwd(), 'bin', 'python3')
