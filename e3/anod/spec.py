@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 from collections import OrderedDict
+from distutils.version import StrictVersion
 
 import e3.anod.deps
 import e3.anod.package
@@ -17,9 +18,9 @@ from e3.yaml import load_with_config
 # CURRENT API version
 __version__ = '1.4'
 
-SUPPORTED_API = (__version__,)
+SUPPORTED_API = (__version__, '1.5')
 # The driver can support multiple version of the spec API, we currently support
-# only the version 1.4.
+# only the version 1.4 and 1.5. Default is still 1.4
 
 logger = e3.log.getLogger('anod')
 
@@ -197,7 +198,7 @@ class Anod(object):
         """
         return self.package is not None and self.package.name is not None
 
-    def load_config_file(self, extended=False, suffix='', selectors=None):
+    def load_config_file(self, extended=False, suffix=None, selectors=None):
         """Load a YAML config file associated with the current module.
 
         This function looks for a YAML starting with the spec basename. The
@@ -214,8 +215,12 @@ class Anod(object):
         :rtype: T
         """
         # Compute data file location and check for existence
-        filename = "%s%s" % (self.name, '-' + suffix if suffix else '')
-        assert filename in self.data_files, "invalid data file: %s" % filename
+        if StrictVersion(self.api_version) >= StrictVersion('1.5'):
+            filename = os.path.join(self.name, suffix if suffix else 'config')
+        else:
+            filename = "%s%s" % (self.name, '-' + suffix if suffix else '')
+        assert filename in self.data_files, "invalid data file: %s (%s)" % (
+            filename, ', '.join(self.data_files))
         filename = os.path.join(self.spec_dir, filename + '.yaml')
 
         if extended:
@@ -363,7 +368,17 @@ class Anod(object):
             and self.package is not None and self.package.nsis is not None
 
     def shell(self, *command, **kwargs):
-        """Run a subprocess using e3.os.process.Run."""
+        """Run a subprocess using e3.os.process.Run.
+
+        Contrary to what is done in e3.os.process.Run parse_shebang
+        defaults to True and output is by default set to the anod
+        build space log stream.
+
+        Note that calling shell() raises an exception when the
+        process returns an exit code that is not 0.
+
+        :raise: ShellError
+        """
         command = parse_command(command, self.build_space)
         if 'parse_shebang' not in kwargs:
             kwargs['parse_shebang'] = True

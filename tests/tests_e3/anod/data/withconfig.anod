@@ -17,4 +17,8 @@ class Parent(Anod):
         d = self.load_config_file(extended=False)
         return d.keys()  # returns 'case_foo'
 
+    def test_suffix(self):
+        """Load another config file."""
+        return self.load_config_file(suffix='foo')['bar']
+
 

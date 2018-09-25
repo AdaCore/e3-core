@@ -8,6 +8,7 @@ import sys
 import e3.hash
 import e3.log
 from e3.anod.error import SandBoxError
+from e3.anod.spec import __version__
 from e3.fs import ls
 
 logger = e3.log.getLogger('anod.loader')
@@ -31,7 +32,7 @@ class AnodSpecRepository(object):
         :type spec_dir: str
         :param spec_config: dictionary containing the configuration for this
             AnodSpecRepository
-        :type spec_config: dict
+        :type spec_config: dict | SandboxConfig
         """
         logger.debug('initialize spec repository (%s)', spec_dir)
 
@@ -39,7 +40,7 @@ class AnodSpecRepository(object):
             raise SandBoxError(
                 'spec directory %s does not exist' % spec_dir)
         self.spec_dir = spec_dir
-        self.api_version = None
+        self.api_version = __version__
         self.specs = {}
         self.repos = {}
 
@@ -50,10 +51,11 @@ class AnodSpecRepository(object):
                                  emit_log_record=False)}
         logger.debug('found %s specs', len(spec_list))
 
-        data_list = [os.path.basename(k)[:-5] for k in
-                     ls(os.path.join(self.spec_dir, '*.yaml'),
-                        emit_log_record=False)]
-        logger.debug('found %s yaml files', len(data_list))
+        # API == 1.4
+        yaml_files = ls(os.path.join(self.spec_dir, '*.yaml'),
+                        emit_log_record=False)
+        data_list = [os.path.basename(k)[:-5] for k in yaml_files]
+        logger.debug('found %s yaml files API 1.4 compatible', len(data_list))
 
         # Match yaml files with associated specifications
         for data in data_list:
@@ -63,6 +65,21 @@ class AnodSpecRepository(object):
             candidate_specs.sort(key=len)
             if candidate_specs:
                 spec_list[candidate_specs[-1]]['data'].append(data)
+
+        # Find yaml files that are API >= 1.5 compatible
+        new_yaml_files = ls(os.path.join(self.spec_dir, '*', '*.yaml'),
+                            emit_log_record=False)
+
+        for yml_f in new_yaml_files:
+            associated_spec = os.path.basename(os.path.dirname(yml_f))
+
+            # Keep only the yaml files associated with an .anod file
+            if associated_spec in spec_list:
+                # We're recording the relative path without the extension
+                suffix, _ = os.path.splitext(os.path.basename(yml_f))
+
+                spec_list[associated_spec]['data'].append(
+                    os.path.join(associated_spec, suffix))
 
         # Create AnodModule objects
         for name, value in spec_list.iteritems():
@@ -192,6 +209,7 @@ class AnodModule(object):
                 self.module = anod_module
                 self.anod_class.data_files = self.data
                 self.anod_class.spec_dir = os.path.dirname(self.path)
+                self.anod_class.api_version = repository.api_version
                 return self.anod_class
 
         logger.error('spec %s does not contains an Anod subclass', self.name)

@@ -1,11 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-import os
-
 import e3.log
 from e3.anod.action import (Build, BuildOrInstall, Checkout, CreateSource,
-                            CreateSourceOrDownload, Decision, DownloadBinary,
-                            DownloadSource, GetSource, Install,
+                            CreateSourceOrDownload, CreateSources, Decision,
+                            DownloadBinary, DownloadSource, GetSource, Install,
                             InstallSource, Root, Test, UploadBinaryComponent,
                             UploadComponent, UploadSourceComponent)
 from e3.anod.deps import Dependency
@@ -15,6 +13,8 @@ from e3.anod.spec import has_primitive
 from e3.collection.dag import DAG
 from e3.env import BaseEnv
 from e3.error import E3Error
+
+logger = e3.log.getLogger('anod.context')
 
 
 class SchedulingError(E3Error):
@@ -52,6 +52,10 @@ class AnodContext(object):
     :vartype sources: list[e3.anod.package.SourceBuilder]
     :ivar default_env: default environment (used to override build='default')
         when simulating a list of action from another machine.
+
+    :ivar plan: maintain a link between a plan line and the generated actions
+        which is useful for setting parameters such as weather or process that
+        are conveyed by the plan and not by the specs
     """
 
     def __init__(self, spec_repository, default_env=None):
@@ -186,14 +190,32 @@ class AnodContext(object):
         :return: the predecessor list
         :rtype: list[e3.anod.action.Action]
         """
-        return [self[el] for el in self.tree.vertex_predecessors[action.uid]]
+        return [self[el] for el in self.tree.get_predecessors(action.uid)]
+
+    def link_to_plan(self, vertex_id, plan_line, plan_args):
+        """Tag the vertex with plan info.
+
+        :param vertex_id: ID of the vertex
+        :type vertex_id: str
+        :param plan_line: corresponding line:linenumber in the plan
+        :type plan_line: str
+        :param plan_args: action args after plan execution, taking into
+            account plan context (such as with defaults(XXX):)
+        :type plan_args: dict
+        """
+        self.tree.add_tag(vertex_id,
+                          {'plan_line': plan_line,
+                           'plan_args': plan_args})
 
     def add_anod_action(self,
                         name,
                         env=None,
                         primitive=None,
                         qualifier=None,
-                        upload=True):
+                        source_packages=None,
+                        upload=True,
+                        plan_line=None,
+                        plan_args=None):
         """Add an Anod action to the context.
 
         :param name: spec name
@@ -204,13 +226,24 @@ class AnodContext(object):
         :type primitive: str
         :param qualifier: qualifier
         :type qualifier: str | None
+        :param source_packages: if not empty only create the specified list of
+            source packages and not all source packages defined in the anod
+            specification file
+        :type source_packages: list[str] | None
         :param upload: if True consider uploading to the store
         :type upload: bool
+        :param plan_line: corresponding line:linenumber in the plan
+        :type plan_line: str
+        :param plan_args: action args after plan execution, taking into
+            account plan context (such as with defaults(XXX):)
+        :type plan_args: dict
         :return: the root added action
         :rtype: Action
         """
         # First create the subtree for the spec
-        result = self.add_spec(name, env, primitive, qualifier)
+        result = self.add_spec(name, env, primitive, qualifier,
+                               source_packages=source_packages,
+                               plan_line=plan_line, plan_args=plan_args)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
@@ -225,6 +258,7 @@ class AnodContext(object):
             if build_action is None and isinstance(result, Build):
                 build_action = result
 
+            # Create upload nodes
             if build_action is not None:
                 spec = build_action.data
                 if spec.component is not None and upload:
@@ -233,6 +267,11 @@ class AnodContext(object):
                     else:
                         upload_bin = UploadSourceComponent(spec)
                     self.add(upload_bin)
+                    # ??? is it needed?
+                    if plan_line is not None:
+                        self.link_to_plan(vertex_id=upload_bin.uid,
+                                          plan_line=plan_line,
+                                          plan_args=plan_args)
                     self.connect(self.root, upload_bin)
                     self.connect(upload_bin, build_action)
 
@@ -247,8 +286,11 @@ class AnodContext(object):
                  env=None,
                  primitive=None,
                  qualifier=None,
+                 source_packages=None,
                  expand_build=True,
-                 source_name=None):
+                 source_name=None,
+                 plan_line=None,
+                 plan_args=None):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -259,12 +301,21 @@ class AnodContext(object):
         :type primitive: str
         :param qualifier: qualifier
         :type qualifier: str | None
+        :param source_packages: if not empty only create the specified list of
+            source packages and not all source packages defined in the anod
+            specification file
+        :type source_packages: list[str] | None
         :param expand_build: should build primitive be expanded
         :type expand_build: bool
         :param source_name: source name associated with the source
             primitive
         :type source_name: str | None
         """
+        def add_action(data, connect_with=None):
+            self.add(data)
+            if connect_with is not None:
+                self.connect(connect_with, data)
+
         # Initialize a spec instance
         e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
             name, qualifier, primitive))
@@ -272,7 +323,43 @@ class AnodContext(object):
 
         # Initialize the resulting action based on the primitive name
         if primitive == 'source':
-            result = CreateSource(spec, source_name)
+            if source_name is not None:
+                result = CreateSource(
+                    spec, source_name)
+                add_action(result)
+                for sb in spec.source_pkg_build:
+                    if sb.name == source_name:
+                        for checkout in sb.checkout:
+                            if checkout not in self.repo.repos:
+                                logger.warning(
+                                    'unknown repository %s', checkout)
+                            co = Checkout(
+                                checkout, self.repo.repos.get(checkout))
+                            add_action(co, result)
+
+            else:
+                # Create the root node
+                result = CreateSources(spec)
+                add_action(result)
+                if plan_line is not None:
+                    self.link_to_plan(
+                        vertex_id=result.uid,
+                        plan_line=plan_line,
+                        plan_args=plan_args)
+
+                # Then one node for each source package
+                for sb in spec.source_pkg_build:
+                    if source_packages and sb not in source_packages:
+                        # This source package is defined in the spec but
+                        # explicitly excluded in the plan
+                        continue
+                    sub_result = self.add_spec(
+                        name=name,
+                        env=env,
+                        primitive='source',
+                        source_name=sb.name)
+                    self.connect(result, sub_result)
+
         elif primitive == 'build':
             result = Build(spec)
         elif primitive == 'test':
@@ -281,6 +368,14 @@ class AnodContext(object):
             result = Install(spec)
         else:  # defensive code
             raise ValueError('add_spec error: %s is not known' % primitive)
+
+        # If this action is directly linked with a plan line make sure
+        # to register the link between the action and the plan even
+        # if the action has already been added via another dependency
+        if plan_line is not None:
+            self.link_to_plan(vertex_id=result.uid,
+                              plan_line=plan_line,
+                              plan_args=plan_args)
 
         if primitive == 'install' and \
                 not (spec.has_package and spec.component is not None) and \
@@ -292,7 +387,9 @@ class AnodContext(object):
             # is an overloaded download procedure).
             return self.add_spec(name, env, 'build',
                                  qualifier,
-                                 expand_build=False)
+                                 expand_build=False,
+                                 plan_args=plan_args,
+                                 plan_line=plan_line)
 
         if expand_build and primitive == 'build' and \
                 (spec.has_package and spec.component is not None):
@@ -311,21 +408,22 @@ class AnodContext(object):
                                   % (name, primitive))
 
         # Add the action in the DAG
-        self.add(result)
+        add_action(result)
 
         if primitive == 'install':
             # Expand an install node to
             #    install --> decision --> build
             #                         \-> download binary
             download_action = DownloadBinary(spec)
-            self.add(download_action)
+            add_action(download_action)
 
             if has_primitive(spec, 'build'):
-                build_action = self.add_spec(name,
-                                             env,
-                                             'build',
-                                             qualifier,
-                                             expand_build=False)
+                build_action = self.add_spec(
+                    name=name,
+                    env=env,
+                    primitive='build',
+                    qualifier=qualifier,
+                    expand_build=False)
                 self.add_decision(BuildOrInstall,
                                   result,
                                   build_action,
@@ -345,10 +443,11 @@ class AnodContext(object):
                                   env=BaseEnv(), qualifier=None)
                         continue
 
-                    child_action = self.add_spec(e.name,
-                                                 e.env(spec, self.default_env),
-                                                 e.kind,
-                                                 e.qualifier)
+                    child_action = self.add_spec(
+                        name=e.name,
+                        env=e.env(spec, self.default_env),
+                        primitive=e.kind,
+                        qualifier=e.qualifier)
 
                     spec.deps[e.local_name] = result.anod_instance
 
@@ -366,24 +465,18 @@ class AnodContext(object):
 
         # Look for source dependencies (i.e sources needed)
         if '%s_source_list' % primitive in dir(spec):
-            for s in getattr(spec, '%s_source_list' % primitive):
+            source_list = getattr(spec, '{}_source_list'.format(primitive))
+            for s in source_list:
                 # set source builder
                 if s.name in self.sources:
                     s.set_builder(self.sources[s.name])
-                # set source ignore
-                ignore_list = []
-                for s2 in getattr(spec, '{}_source_list'.format(primitive)):
-                    if s2.name != s.name and s2.dest:
-                        ignore_path = os.path.relpath(s2.dest, s.dest)
-                        if not ignore_path.startswith(os.pardir):
-                            ignore_list.append('/{}'.format(ignore_path))
-                s.set_ignore(ignore_list)
+                # set other sources to compute source ignore
+                s.set_other_sources(source_list)
                 # add source install node
                 src_install_uid = result.uid.rsplit('.', 1)[0] + \
                     '.source_install.' + s.name
                 src_install_action = InstallSource(src_install_uid, spec, s)
-                self.add(src_install_action)
-                self.connect(result, src_install_action)
+                add_action(src_install_action, connect_with=result)
 
                 # Then add nodes to create that source (download or creation
                 # using anod source and checkouts)
@@ -400,29 +493,27 @@ class AnodContext(object):
                     self.connect(src_install_action, src_get_action)
                     continue
 
-                self.add(src_get_action)
-                self.connect(src_install_action, src_get_action)
+                add_action(src_get_action, connect_with=src_install_action)
+
                 src_download_action = DownloadSource(obj)
-                self.add(src_download_action)
+                add_action(src_download_action)
 
                 if isinstance(obj, UnmanagedSourceBuilder):
                     # In that case only download is available
                     self.connect(src_get_action, src_download_action)
                 else:
-                    source_action = self.add_spec(spec_decl,
-                                                  BaseEnv(),
-                                                  'source',
-                                                  None,
-                                                  source_name=s.name)
+                    source_action = self.add_spec(
+                        name=spec_decl,
+                        env=BaseEnv(),
+                        primitive='source',
+                        source_name=s.name)
                     for repo in obj.checkout:
                         r = Checkout(repo, self.repo.repos.get(repo))
-                        self.add(r)
-                        self.connect(source_action, r)
+                        add_action(r, connect_with=source_action)
                     self.add_decision(CreateSourceOrDownload,
                                       src_get_action,
                                       source_action,
                                       src_download_action)
-
         return result
 
     @classmethod
@@ -495,6 +586,9 @@ class AnodContext(object):
         uploads = []
         dag = DAG()
 
+        # Retrieve existing tags
+        dag.tags = self.tree.tags
+
         for uid, action in rev:
             if uid == 'root':
                 # Root node is always in the final DAG
@@ -506,13 +600,13 @@ class AnodContext(object):
                 action.apply_triggers(dag)
             elif isinstance(action, UploadComponent):
                 uploads.append((action,
-                                self.tree.vertex_predecessors[uid]))
+                                self.tree.get_predecessors(uid)))
             else:
                 # Compute the list of successors for the current node (i.e:
                 # predecessors in the reversed graph). Ignore UploadComponent
                 # nodes as they will be processed only once the scheduling
                 # is done.
-                preds = list([k for k in rev.vertex_predecessors[uid]
+                preds = list([k for k in rev.get_predecessors(uid)
                               if not isinstance(rev[k], UploadComponent)])
 
                 if len(preds) == 1 and isinstance(rev[preds[0]], Decision):
@@ -556,7 +650,7 @@ class AnodContext(object):
                             initiators = [
                                 iuid for iuid in rev_graph.get_closure(uid)
                                 if 'root'
-                                in rev_graph.vertex_predecessors[iuid]]
+                                in rev_graph.get_predecessors(iuid)]
                             raise SchedulingError(e.messages, uid=uid,
                                                   initiators=initiators)
                 else:

@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
+import e3.electrolyt.plan as plan
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError
 from e3.anod.loader import AnodSpecRepository
@@ -60,6 +61,19 @@ class TestContext(object):
         # primitive defined in spec1
         with pytest.raises(SchedulingError):
             print(ac.add_anod_action('spec1', primitive='build'))
+
+    def test_add_anod_action_source(self):
+        """Test source packaging."""
+        ac = self.create_context()
+
+        ac.add_anod_action('spec1', primitive='source')
+        result = ac.schedule(ac.always_create_source_resolver)
+        assert len(result) == 4, result.as_dot()
+        assert set(result.vertex_data.keys()) == \
+            {'root',
+             'mylinux.x86-linux.spec1.source.spec1-src',
+             'mylinux.x86-linux.spec1.source.sources',
+             'checkout.spec1-git'}
 
     def test_add_anod_action2(self):
         # Simple spec with sources associated to the build primitive
@@ -237,3 +251,159 @@ class TestContext(object):
         assert len(keys) == 3, keys
         assert 'mylinux.x86-linux.spec13.download_bin' in keys
         assert 'mylinux.x86-linux.spec13.install' in keys
+
+    def test_dag_2_plan(self):
+        """Check that we can extract values from plan in final dag.
+
+        Some paramaters passed in the plan are lost in the final
+        scheduled dag, when plan lines are transformed into
+        anod actions. It is possible to retrieve them by looking
+        at the tags.
+        """
+        # Create a new plan context
+        ac = self.create_context()
+        current_env = BaseEnv()
+        cm = plan.PlanContext(server=current_env)
+
+        # Declare available actions and their signature
+        def anod_action(module, build=None, default_build=False,
+                        host=None, target=None, board=None,
+                        weathers=None, product_version=None,
+                        when_missing=None,
+                        manual_action=False,
+                        qualifier=None, jobs=None,
+                        releases=None, process_suffix=None,
+                        update_vcs=False, recursive=None, query_range=None,
+                        force_repackage=False):
+            pass
+
+        for a in ('anod_build', 'anod_install', 'anod_source', 'anod_test'):
+            cm.register_action(a, anod_action)
+
+        # Create a simple plan
+        content = [u'def myserver():',
+                   u'    anod_build("spec12", weathers="foo")',
+                   u'    anod_build("spec10", weathers="foo")',
+                   u'    anod_build("spec11", weathers="bar")']
+        with open('plan.txt', 'w') as f:
+            f.write('\n'.join(content))
+        myplan = plan.Plan({})
+        myplan.load('plan.txt')
+
+        # Execute the plan and create anod actions
+        for action in cm.execute(myplan, 'myserver'):
+            primitive = action.action.replace('anod_', '', 1)
+            ac.add_anod_action(
+                name=action.module,
+                env=current_env if action.default_build else action,
+                primitive=primitive,
+                qualifier=action.qualifier,
+                plan_line=action.plan_line,
+                plan_args=action.plan_args)
+
+        # Create a reverse tag to have a working get_context
+        # when looking for parameters such as weathers we want to
+        # get the plan line that has triggered the action, e.g.
+        # for spec3.build that has been triggered by spec10.build
+        # we want to propagate the weathers set in the line
+        #     anod_build("spec10", weathers="foo")
+        # in the Build action for spec3
+        reverse_dag = ac.tree.reverse_graph()
+
+        for uid, action in ac.tree:
+            if uid.endswith('spec12.build'):
+                assert ac.tree.get_tag(uid)
+                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                assert cuid == uid
+                assert ctag['plan_args']['weathers'] == 'foo'
+                assert ctag['plan_line'] == 'plan.txt:2'
+            elif uid.endswith('spec3.build'):
+                assert not ac.tree.get_tag(uid)
+                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                assert cuid != uid
+                assert cuid.endswith('spec10.build')
+                assert ctag['plan_args']['weathers'] == 'foo'
+                assert ctag['plan_line'] == 'plan.txt:3'
+            elif uid.endswith('spec11.build'):
+                assert ac.tree.get_tag(uid), ac.tree.tags
+                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                assert cuid == uid
+                assert ctag['plan_args']['weathers'] == 'bar'
+                assert ctag['plan_line'] == 'plan.txt:4'
+
+        # Also test that we are still able to extract the values
+        # after having scheduled the action graph.
+
+        # Create an explict build action to make sure that the plan can be
+        # scheduled
+        ac.add_anod_action(
+            name='spec3',
+            env=current_env,
+            primitive='build',
+            plan_line='plan.txt:5',
+            plan_args={'weathers': 'my_spec3_weather'})
+
+        sched_dag = ac.schedule(ac.always_download_source_resolver)
+        sched_rev = sched_dag.reverse_graph()
+
+        for uid, action in sched_dag:
+            if uid.endswith('spec12.build'):
+                assert sched_dag.get_tag(uid)
+            elif uid.endswith('spec3.build'):
+                assert sched_dag.get_tag(uid)
+                assert sched_rev.get_context(uid)[0][2]['plan_args'][
+                    'weathers'] == 'my_spec3_weather'
+
+    def test_dag_2_plan_sources(self):
+        """Check that we can extract values from plan in final dag.
+
+        Use a scheduler to always create source and ask for a source
+        package creation.
+        """
+        # Create a new plan context
+        ac = self.create_context()
+        current_env = BaseEnv()
+        cm = plan.PlanContext(server=current_env)
+
+        # Declare available actions and their signature
+        def anod_action(module, build=None, default_build=False,
+                        host=None, target=None, board=None,
+                        weathers=None, product_version=None,
+                        when_missing=None,
+                        manual_action=False,
+                        qualifier=None, jobs=None,
+                        releases=None, process_suffix=None,
+                        update_vcs=False, recursive=None, query_range=None,
+                        force_repackage=False):
+            pass
+
+        cm.register_action('anod_source', anod_action)
+
+        # Create a simple plan
+        content = [u'def myserver():',
+                   u'    anod_source("spec1", weathers="foo")']
+        with open('plan.txt', 'w') as f:
+            f.write('\n'.join(content))
+        myplan = plan.Plan({})
+        myplan.load('plan.txt')
+
+        # Execute the plan and create anod actions
+        for action in cm.execute(myplan, 'myserver'):
+            primitive = action.action.replace('anod_', '', 1)
+            ac.add_anod_action(
+                name=action.module,
+                env=current_env if action.default_build else action,
+                primitive=primitive,
+                qualifier=action.qualifier,
+                plan_line=action.plan_line,
+                plan_args=action.plan_args)
+
+        for uid, action in ac.tree:
+            if uid.endswith('sources'):
+                assert ac.tree.get_tag(uid)
+            elif uid.endswith('spec1-src'):
+                assert ac.tree.get_tag(uid) is None
+                assert ac.tree.get_context(
+                    vertex_id=uid,
+                    reverse_order=True,
+                    max_distance=1)[0][2]['plan_args']['weathers'] == 'foo'

@@ -95,13 +95,23 @@ class Dependency(object):
         # and adjust it based on dependency parameters
         dep_env = BaseEnv(parent.env.build, parent.env.host, parent.env.target)
 
+        # For simulation purposes we sometimes load specs as if it was
+        # loaded on a non local machine thus 'default' does not correspond
+        # to the default build platform of the local machine.
         if self.build == 'default':
-            # For simulation purposes we sometimes load specs as if it was
-            # load on a non local machine thus 'default' does not correspond
-            # to the default build platform of the local machine.
             build = default_env.build.platform
         else:
             build = self.build
 
-        dep_env.set_env(build, self.host, self.target)
+        if self.host == 'default':
+            host = default_env.build.platform
+        else:
+            host = self.host
+
+        if self.target == 'default':
+            target = default_env.build.platform
+        else:
+            target = self.target
+
+        dep_env.set_env(build, host, target)
         return dep_env

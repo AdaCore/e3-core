@@ -33,11 +33,11 @@ class AutoIgnore(spec('anod')):
 
     build_source_list = [
         Anod.Source(
-        'autoignore1-src', dest='A/B/3/2/1', publish=True),
+            'autoignore1-src', dest='A/B/3/2/1', publish=True),
         Anod.Source(
-        'autoignore2-src', dest='A//B/3/2', publish=True),
-	    Anod.Source(
-        'autoignore3-src', dest='A/B/3', publish=True),]
+            'autoignore2-src', dest='A//B/3/2', publish=True),
+        Anod.Source(
+            'autoignore3-src', dest='A/B/3', publish=True),]
 
 
     @Anod.primitive()
@@ -49,5 +49,3 @@ class AutoIgnore(spec('anod')):
         for subdir in ('3', '3/2', '3/2/1'):
             if os.path.exists(os.path.join(self['SRC_DIR'], 'A/B', subdir, 'autoignore.anod')):
                 print('found .anod in {}'.format(subdir))
-
-

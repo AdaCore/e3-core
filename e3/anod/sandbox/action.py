@@ -22,14 +22,18 @@ class SandBoxAction(object):
 
     __metaclass__ = abc.ABCMeta
 
+    require_sandbox = True
+
     def __init__(self, subparsers):
         self.parser = subparsers.add_parser(
             self.name,
             help=self.help)
         self.parser.set_defaults(action=self.name)
         self.add_parsers()
-        self.parser.add_argument('sandbox',
-                                 help='path to the sandbox root directory')
+        if self.require_sandbox:
+            self.parser.add_argument(
+                'sandbox',
+                help='path to the sandbox root directory')
 
     @abc.abstractproperty
     def name(self):
@@ -146,7 +150,7 @@ class SandBoxExec(SandBoxCreate):
     def add_parsers(self):
         super(SandBoxExec, self).add_parsers()
         self.parser.add_argument(
-            '--spec-dir',
+            '--specs-dir',
             help='Alternate spec directory to use')
         self.parser.add_argument(
             '--create-sandbox',
@@ -166,19 +170,15 @@ class SandBoxExec(SandBoxCreate):
         sandbox = SandBox()
         sandbox.root_dir = args.sandbox
 
-        if args.spec_dir:
-            sandbox_spec_dir = args.spec_dir
-        else:
-            sandbox_spec_dir = os.path.join(
-                sandbox.root_dir,
-                'specs')
+        if args.specs_dir:
+            sandbox.specs_dir = args.specs_dir
 
         if args.create_sandbox:
             sandbox.create_dirs()
 
         if args.create_sandbox and args.spec_git_url:
-            mkdir(sandbox_spec_dir)
-            g = GitRepository(sandbox_spec_dir)
+            mkdir(sandbox.specs_dir)
+            g = GitRepository(sandbox.specs_dir)
             if e3.log.default_output_stream is not None:
                 g.log_stream = e3.log.default_output_stream
             g.init()
@@ -187,13 +187,7 @@ class SandBoxExec(SandBoxCreate):
         sandbox.dump_configuration()
         sandbox.write_scripts()
 
-        asr = AnodSpecRepository(sandbox_spec_dir)
-
-        # asr.prolog_dict should now contain the API Version
-        if asr.api_version is None:
-            raise SandBoxError(
-                'api_version should be set in prolog.py')
-
+        asr = AnodSpecRepository(sandbox.specs_dir)
         check_api_version(asr.api_version)
 
         # Load plan content if needed

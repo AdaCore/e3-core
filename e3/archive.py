@@ -22,7 +22,7 @@ class ArchiveError(e3.error.E3Error):
     pass
 
 
-def __check_type(filename, force_extension=None):
+def check_type(filename, force_extension=None):
     """Return the archive extension.
 
     Internal function used by create_archive and unpack_archive.
@@ -142,7 +142,7 @@ def unpack_archive(filename,
             return unpack_cmd(filename, dest,
                               selected_files=selected_files)
 
-    ext = __check_type(
+    ext = check_type(
         filename,
         force_extension=force_extension,)
 
@@ -294,7 +294,7 @@ def create_archive(filename, from_dir, dest, force_extension=None,
     from_dir = from_dir.rstrip('/')
     filepath = os.path.abspath(os.path.join(dest, filename))
 
-    ext = __check_type(
+    ext = check_type(
         filename,
         force_extension=force_extension)
 
@@ -322,5 +322,10 @@ def create_archive(filename, from_dir, dest, force_extension=None,
             tar_format = 'w:gz'
         elif ext == 'tar.bz2':
             tar_format = 'w:bz2'
+        else:  # defensive code
+            raise ArchiveError('unsupported format {}'.format(tar_format))
         with closing(tarfile.open(filepath, tar_format)) as archive:
-            archive.add(from_dir, from_dir_rename, recursive=True)
+            archive.add(
+                name=from_dir,
+                arcname=from_dir_rename,
+                recursive=True)

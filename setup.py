@@ -65,6 +65,7 @@ setup(
             'exec = e3.anod.sandbox.action:SandBoxExec',
             'create = e3.anod.sandbox.action:SandBoxCreate',
             'show-config = e3.anod.sandbox.action:SandBoxShowConfiguration',
+            'migrate = e3.anod.sandbox.migrate:SandBoxMigrate',
         ],
         'e3.event.manager': [
             'smtp = e3.event.backends.smtp:SMTPEventManager'

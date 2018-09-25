@@ -175,7 +175,7 @@ def test_sandbox_exec_missing_spec_dir(git_specs_dir):
 
     # Specs dir is missing
     no_specs = e3.os.process.Run(['e3-sandbox', 'exec',
-                                  '--spec-dir', 'nospecs',
+                                  '--specs-dir', 'nospecs',
                                   '--plan',
                                   'noplan', sandbox_dir])
     assert no_specs.status != 0
@@ -197,14 +197,6 @@ def test_sandbox_exec_api_version(git_specs_dir):
     e3.fs.sync_tree(specs_source_dir, local_spec_dir)
     create_prolog(local_spec_dir, '')
 
-    # Test with local specs
-    p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', os.path.join(root_dir, 'specs'),
-                           '--plan',
-                           os.path.join(sandbox_dir, 'test.plan'),
-                           sandbox_dir])
-    assert 'api_version should be set in prolog.py' in p.out
-
 
 def test_sandbox_action_errors(git_specs_dir):
     """Test sandbox action error reporting."""
@@ -223,7 +215,7 @@ def test_sandbox_action_errors(git_specs_dir):
 
     # Test with local specs
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', os.path.join(root_dir, 'specs'),
+                           '--specs-dir', os.path.join(root_dir, 'specs'),
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
@@ -274,7 +266,7 @@ def test_sandbox_exec_success(git_specs_dir):
 
     # Test with local specs
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', local_spec_dir,
+                           '--specs-dir', local_spec_dir,
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
@@ -286,7 +278,7 @@ def test_sandbox_exec_success(git_specs_dir):
         fd.write("anod_test('dummyspec')\n")
 
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', local_spec_dir,
+                           '--specs-dir', local_spec_dir,
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
@@ -328,7 +320,7 @@ def test_sandbox_source_auto_ignore(git_specs_dir):
 
     # Test with local specs
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', local_spec_dir,
+                           '--specs-dir', local_spec_dir,
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
@@ -360,7 +352,7 @@ def test_sandbox_directory(git_specs_dir):
 
     # Test with local specs
     p = e3.os.process.Run(['e3-sandbox', 'exec',
-                           '--spec-dir', local_spec_dir,
+                           '--specs-dir', local_spec_dir,
                            '--plan',
                            os.path.join(sandbox_dir, 'test.plan'),
                            sandbox_dir])
@@ -453,12 +445,12 @@ def test_failure_status(git_specs_dir):
     e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
     p = e3.os.process.Run(
         ['e3-sandbox', '-v', 'exec',
-         '--spec-dir', local_spec_dir,
+         '--specs-dir', local_spec_dir,
          '--plan', os.path.join(root_dir, 'test.plan'),
          sandbox_dir])
     # the dag for this plan has 6 actions and thus we need to have
-    # 6 failure status (status=001)
-    assert p.out.count('status=001') == 6, p.out
+    # 6 failure status (status=failure)
+    assert p.out.count('status=failure') == 6, p.out
     assert 'GITURL' in p.out, p.out
 
     # Try with an unsupported VCS
@@ -467,11 +459,11 @@ def test_failure_status(git_specs_dir):
         [(b'vcs: git', b'vcs: unsupported-vcs')])
     p = e3.os.process.Run(
         ['e3-sandbox', '-v', 'exec',
-         '--spec-dir', local_spec_dir,
+         '--specs-dir', local_spec_dir,
          '--plan', os.path.join(root_dir, 'test.plan'),
          sandbox_dir])
     assert 'unsupported-vcs vcs type not supported' in p.out, p.out
-    assert p.out.count('status=001') == 6, p.out
+    assert p.out.count('status=failure') == 6, p.out
 
     # Also check with a missing repo
     e3.anod.helper.text_replace(
@@ -479,8 +471,40 @@ def test_failure_status(git_specs_dir):
         [(b'dummy-github', b'another_repo')])
     p = e3.os.process.Run(
         ['e3-sandbox', '-v', 'exec',
-         '--spec-dir', local_spec_dir,
+         '--specs-dir', local_spec_dir,
          '--plan', os.path.join(root_dir, 'test.plan'),
          sandbox_dir])
     assert 'dummy-github configuration missing' in p.out, p.out
-    assert p.out.count('status=001') == 6, p.out
+    assert p.out.count('status=failure') == 6, p.out
+
+
+def test_sandbox_user_yaml(git_specs_dir):
+    """Verify that user.yaml specs_dir is taken into account."""
+    root_dir = os.getcwd()
+    sandbox_dir = os.path.join(root_dir, 'sbx')
+
+    e3.os.process.Run(['e3-sandbox', 'create', sandbox_dir], output=None)
+    with open(os.path.join(sandbox_dir, 'test.plan'), 'w') as fd:
+        fd.write("anod_build('dummyspec')\n")
+
+    specs_source_dir = os.path.join(os.path.dirname(__file__), 'specs')
+    local_spec_dir = os.path.join(root_dir, 'myspecs')
+
+    with open(os.path.join(sandbox_dir, 'user.yaml'), 'w') as fd:
+        yaml.dump({'specs_dir': local_spec_dir}, fd)
+
+    e3.fs.sync_tree(specs_source_dir, local_spec_dir)
+    create_prolog(local_spec_dir)
+    # Test with local specs
+    p = e3.os.process.Run(['e3-sandbox', 'exec',
+                           '--plan',
+                           os.path.join(sandbox_dir, 'test.plan'),
+                           sandbox_dir])
+    assert 'build dummyspec' in p.out
+    assert 'using alternate specs dir {}'.format(local_spec_dir) in p.out
+
+    sbx = e3.anod.sandbox.SandBox()
+    sbx.root_dir = sandbox_dir
+
+    assert sbx.is_alternate_specs_dir
+    assert sbx.specs_dir == local_spec_dir

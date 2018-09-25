@@ -42,6 +42,12 @@ def test_add_vertex():
     d.add_vertex('c')
     d.update_vertex('b', predecessors=['c'])
 
+    assert d.get_predecessors('b') == frozenset(['c'])
+    assert d.vertex_predecessors == {
+        'a': frozenset(['b']),
+        'b': frozenset(['c']),
+        'c': frozenset([])}
+
     result = []
     for vertex_id, data in d:
         result.append(vertex_id)
@@ -74,6 +80,17 @@ def test_cycle_detection():
         result.append(vertex_id)
         assert data is None
     assert result == ['b', 'a']
+
+    # Force the creation of a cycle
+    d.update_vertex('b', data='newb', predecessors=['a'],
+                    enable_checks=False)
+
+    # Verify that the cycle is detected
+    with pytest.raises(DAGError):
+        d.check()
+
+    with pytest.raises(DAGError):
+        d.reverse_graph()
 
 
 def test_dag_merge():
@@ -143,6 +160,9 @@ def test_cycle():
     with pytest.raises(DAGError):
         d.check()
 
+    with pytest.raises(DAGError):
+        d.get_context('b')
+
 
 def test_reverse_dag():
     d = DAG()
@@ -164,3 +184,62 @@ def test_dot():
     d.add_vertex('a')
     d.add_vertex('b', predecessors=['a'])
     assert '"b" -> "a"' in d.as_dot()
+
+
+def test_tagged_dag():
+    r"""Test add_tag/get_tag/get_context.
+
+    With the following DAG::
+
+               A
+              / \
+             B   C*
+           /  \ /
+          D*   E
+         / \  / \
+        F   G    H*
+    """
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('b', predecessors=['a'])
+    d.add_vertex('c', predecessors=['a'])
+    d.add_vertex('d', predecessors=['b'])
+    d.add_vertex('e', predecessors=['b', 'c'])
+    d.add_vertex('f', predecessors=['d'])
+    d.add_vertex('g', predecessors=['d', 'e'])
+    d.add_vertex('h', predecessors=['e'])
+
+    d.add_tag('c', data='tagc')
+    d.add_tag('d', data='tagd')
+    d.add_tag('h', data='tagh')
+
+    assert d.get_tag('a') is None
+    assert d.get_tag('b') is None
+    assert d.get_tag('c') == 'tagc'
+    assert d.get_tag('e') is None
+    assert d.get_tag('h') == 'tagh'
+
+    assert d.get_context('d') == [(0, 'd', 'tagd')]
+    assert d.get_context('g') == [(1, 'd', 'tagd'), (2, 'c', 'tagc')]
+    assert d.get_context('f') == [(1, 'd', 'tagd')]
+    assert d.get_context('b') == []
+    assert d.get_context('a') == []
+    assert d.get_context('c') == [(0, 'c', 'tagc')]
+    assert d.get_context('e') == [(1, 'c', 'tagc')]
+    assert d.get_context('h') == [(0, 'h', 'tagh')]
+
+    assert d.get_context('e', reverse_order=True) == [(1, 'h', 'tagh')]
+    assert d.get_context('h', reverse_order=True) == [(0, 'h', 'tagh')]
+    assert d.get_context('a', reverse_order=True) == [
+        (1, 'c', 'tagc'), (2, 'd', 'tagd'), (3, 'h', 'tagh')]
+
+    assert d.get_context('a', reverse_order=True) == [
+        (1, 'c', 'tagc'), (2, 'd', 'tagd'), (3, 'h', 'tagh')]
+
+    assert d.get_context(
+        vertex_id='a', max_distance=2, reverse_order=True) == [
+            (1, 'c', 'tagc'), (2, 'd', 'tagd')]
+
+    assert d.get_context(
+        vertex_id='a', max_element=2, reverse_order=True) == [
+        (1, 'c', 'tagc'), (2, 'd', 'tagd')]

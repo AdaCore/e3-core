@@ -208,7 +208,7 @@ class FingerprintWalk(SimpleWalk):
         if 'no_fingerprint' in uid:
             return None
         f = Fingerprint()
-        for pred_uid in self.actions.vertex_predecessors[uid]:
+        for pred_uid in self.actions.get_predecessors(uid):
             pred_fingerprint = self.new_fingerprints[pred_uid]
             if pred_fingerprint is not None:
                 f.add('pred:%s' % pred_uid, pred_fingerprint.checksum())
@@ -890,3 +890,64 @@ def test_job_depending_on_job_with_no_predicted_fingerprint_failed(setup_sbx):
 
     # Check that no job was requeued.
     assert r1.requeued == {}
+
+
+def test_corrupted_fingerprint(setup_sbx):
+    """Test the case where a fingerprint somehow got corrupted."""
+    actions = DAG()
+    actions.add_vertex('1')
+    actions.add_vertex('2', predecessors=['1'])
+    actions.add_vertex('3')
+    actions.add_vertex('4', predecessors=['2', '3'])
+    actions.add_vertex('5', predecessors=['4'])
+    actions.add_vertex('6')
+
+    # Now, execute the plan a first time; everything should be run
+    # and finish succesfullly.
+
+    r1 = FingerprintWalk(actions)
+
+    for uid in ('1', '2', '3', '4', '5', '6'):
+        job = r1.saved_jobs[uid]
+        assert isinstance(job, ControlledJob)
+        assert job.should_skip is False
+        assert job.status == ReturnValue.success
+
+    assert r1.job_status == {'1': ReturnValue.success,
+                             '2': ReturnValue.success,
+                             '3': ReturnValue.success,
+                             '4': ReturnValue.success,
+                             '5': ReturnValue.success,
+                             '6': ReturnValue.success}
+    assert r1.requeued == {}
+
+    # Now, corrupt the fingerprint of node '3', and then rerun
+    # the scheduler... We expect the following:
+    #  - The scheduler does _not_ crash ;-)
+    #  - The fingerprint of node '3' gets discarded, and as a result
+    #    it should be re-run again.
+    #  - Since nothing changed in node "3"'s predecessors, the end
+    #    result for node '3' should be the same, which means
+    #    its fingerprint should be the same as before the corruption.
+    #    As a result of that, nodes '4' and '5', which directly
+    #    or indirectly depend on node '3', do not need to be rerun.
+
+    with open(r1.fingerprint_filename('3'), 'w') as f:
+        f.write('{')
+
+    r2 = FingerprintWalk(actions)
+
+    job = r2.saved_jobs['3']
+    assert isinstance(job, ControlledJob)
+    assert job.should_skip is False
+    assert job.status == ReturnValue.success
+
+    for uid in ('1', '2', '4', '5', '6'):
+        job = r2.saved_jobs[uid]
+        assert isinstance(job, EmptyJob)
+        assert job.should_skip is True
+        assert job.status == ReturnValue.skip
+
+    # Verify also that the fingerprint corruption is gone.
+    f3 = Fingerprint.load_from_file(r2.fingerprint_filename('3'))
+    assert isinstance(f3, Fingerprint)
