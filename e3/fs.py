@@ -214,6 +214,8 @@ def ls(path, emit_log_record=True):
     """
     if isinstance(path, basestring):
         path = (path, )
+    else:
+        path = list(path)
 
     if emit_log_record:
         logger.debug('ls %s', ' '.join(path))
