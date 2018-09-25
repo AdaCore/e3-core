@@ -105,6 +105,14 @@ def test_ls(caplog):
     e3.fs.ls('a', emit_log_record=True)
     assert 'ls a' in caplog.text
 
+    e3.os.fs.touch('b')
+    e3.os.fs.touch('c')
+
+    assert e3.fs.ls('*') == ['a', 'b', 'c']
+
+    # Reproduce issue #213: add test with generator
+    assert e3.fs.ls((k for k in ('a', 'c'))) == ['a', 'c']
+
 
 def test_mkdir(caplog):
     e3.fs.mkdir('subdir')
