@@ -38,3 +38,13 @@ class TestJob(object):
 
         job = EmptyProcessJob('1', None, print)
         assert job.status is ReturnValue.notready
+
+    def test_invalid_job_status(self, caplog):
+        """Verify that when the return code is invalid we return a failure."""
+        class InvalidProcessJob(ProcessJob):
+            cmdline = [sys.executable, '-c', 'import sys; sys.exit(6)']
+
+        job = InvalidProcessJob('myuid', {}, None)
+        job.run()
+        assert job.status is ReturnValue.failure
+        assert 'job myuid returned an unknown status 6' in caplog.text
