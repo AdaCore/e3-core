@@ -226,7 +226,12 @@ class ProcessJob(Job):
         if self.proc_handle is None:
             return ReturnValue.notready
         else:
-            return ReturnValue(self.proc_handle.status)
+            try:
+                return ReturnValue(self.proc_handle.status)
+            except ValueError:
+                logger.exception('job %s returned an unknown status %s',
+                                 self.uid, self.proc_handle.status)
+                return ReturnValue.failure
 
     @abc.abstractproperty
     def cmdline(self):
