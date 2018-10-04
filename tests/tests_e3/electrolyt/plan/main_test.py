@@ -12,12 +12,12 @@ def build_action(spec, build=None, host=None, target=None, board=None):
     return 'build ' + spec
 
 
-def _get_new_plancontext(machine_name):
+def _get_new_plancontext(machine_name, ignore_disabled=True):
     server = host.Host(hostname=machine_name,
                        platform='x86_64-linux',
                        version='suse11')
 
-    context = plan.PlanContext(server=server)
+    context = plan.PlanContext(server=server, ignore_disabled=ignore_disabled)
     context.register_action('build', build_action)
     return context
 
@@ -161,3 +161,32 @@ def test_verify_entry_point():
         context.execute(my_plan, 'foo', verify=True)
 
     assert 'foo is not an entry point' in str(plan_err)
+
+
+def test_plan_disable_lines():
+    """Check that lines in enabled=False blocks are disabled."""
+    context = _get_new_plancontext('myserver')
+
+    myplan = _get_plan(
+        data={},
+        content=[u'def myserver():\n',
+                 u'    build("foo")\n'
+                 u'    with defaults(enabled=False):\n'
+                 u'        build("bar1")\n'
+                 # It is not possible to "revert" the enabled=False status
+                 u'        with defaults(enabled=True):\n'
+                 u'            build("bar2")\n'
+                 u'    build("bar3")\n'])
+
+    actions = context.execute(myplan, 'myserver', verify=False)
+    assert len(actions) == 2
+    assert actions[0].spec == 'foo'
+    assert actions[1].spec == 'bar3'
+
+    context2 = _get_new_plancontext('myserver', ignore_disabled=False)
+    actions2 = context2.execute(myplan, 'myserver', verify=False)
+    assert len(actions2) == 4
+    assert actions2[0].spec == 'foo'
+    assert actions2[1].spec == 'bar1'
+    assert actions2[2].spec == 'bar2'
+    assert actions2[3].spec == 'bar3'
