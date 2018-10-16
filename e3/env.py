@@ -246,13 +246,14 @@ class AbstractBaseEnv(object):
         saved_host = self.host
         saved_target = self.target
 
-        def get_platform(value, machine=None):
+        def get_platform(value, propagate_build_info=False):
             """Platform based on string value.
 
             :param value: a string representing a platform or None
             :type value: str | None
-            :param machine: machine name
-            :type machine: str | None
+            :param propagate_build_info: whether to propagate machine name
+                and OS version if no machine name set
+            :type propagate_build_info: bool
             :rtype: a Platform instance or None
             """
             if value is None:
@@ -268,14 +269,24 @@ class AbstractBaseEnv(object):
                 return saved_host
             elif split_value[0] == 'target':
                 return saved_target
+            elif not propagate_build_info:
+                return Platform.get(*split_value)
             else:
-                # Propagate machine name if necessary
+
+                # Propagate machine name and OS version if necessary
                 if split_value[2] is None:
-                    split_value[2] = machine
+                    # No new machine name specified, reuse the current one
+                    split_value[2] = saved_build.machine
+
+                    # And if there is no OS version set also keep the
+                    # current one, setting build='x86-linux' on a 64bit
+                    # Linux machine should not change the OS version
+                    if split_value[1] is None:
+                        split_value[1] = saved_build.os.version
                 return Platform.get(*split_value)
 
         # Retrieve final values for build, host and target
-        build_opts = get_platform(build, saved_build.machine)
+        build_opts = get_platform(build, propagate_build_info=True)
         host_opts = get_platform(host)
         target_opts = get_platform(target)
 

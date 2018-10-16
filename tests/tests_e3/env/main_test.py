@@ -253,3 +253,15 @@ def test_copy():
     new_e = e.copy(target='arm-elf')
 
     assert new_e.target.platform == 'arm-elf'
+
+
+def test_build_os_propagation():
+    """Ensure that OS version is preserved when build platform is changed."""
+    winenv = e3.env.BaseEnv(build=e3.platform.Platform.get(
+        platform_name='x86-windows',
+        version='2012',
+        machine='mywindows'))
+
+    winenv.set_env(build='x86_64-windows')
+
+    assert winenv.build.os.version == '2012'
