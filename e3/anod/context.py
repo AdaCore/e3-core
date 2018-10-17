@@ -58,7 +58,8 @@ class AnodContext(object):
         are conveyed by the plan and not by the specs
     """
 
-    def __init__(self, spec_repository, default_env=None):
+    def __init__(self, spec_repository, default_env=None,
+                 reject_duplicates=False):
         """Initialize a new context.
 
         :param spec_repository: an Anod repository
@@ -68,13 +69,17 @@ class AnodContext(object):
             another server context. If None then we assume that the
             context if the local server
         :type default_env: BaseEnv | None
+        :param reject_duplicates: if True, raise SchedulingError when two
+            duplicated action are generated
+        :type reject_duplicates: bool
         """
         self.repo = spec_repository
-
         if default_env is None:
             self.default_env = BaseEnv()
         else:
             self.default_env = default_env.copy()
+        self.reject_duplicates = reject_duplicates
+
         self.tree = DAG()
         self.root = Root()
 
@@ -203,6 +208,15 @@ class AnodContext(object):
             account plan context (such as with defaults(XXX):)
         :type plan_args: dict
         """
+        if self.reject_duplicates:
+            previous_tag = self.tree.get_tag(vertex_id=vertex_id)
+            if previous_tag and previous_tag['plan_line'] != plan_line:
+                raise SchedulingError(
+                    'duplicated entry for vertex {} at'
+                    ' lines {} and {}'.format(
+                        vertex_id,
+                        previous_tag['plan_line'],
+                        plan_line))
         self.tree.add_tag(vertex_id,
                           {'plan_line': plan_line,
                            'plan_args': plan_args})
