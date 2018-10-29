@@ -247,7 +247,7 @@ class PlanContext(object):
         result = self.env.copy()
 
         # Process arguments
-        args = inspect.getcallargs(self.actions[name], *args, **kwargs)
+        call_args = inspect.getcallargs(self.actions[name], *args, **kwargs)
 
         # Push function arguments into the result object. If an arg value
         # is None then environment is not updated (handling of defaults
@@ -260,7 +260,7 @@ class PlanContext(object):
         # of the target. ??? change name ???
         board = None
 
-        for k, v in args.iteritems():
+        for k, v in call_args.iteritems():
             if k in platform:
                 platform[k] = v
             elif k == 'board':
@@ -294,6 +294,7 @@ class PlanContext(object):
         result.action = name
         result.plan_line = plan_line
         result.plan_args = result.to_dict()
+        result.plan_call_args = call_args
 
         # Push the action in the current list
         self.action_list.append(result)
