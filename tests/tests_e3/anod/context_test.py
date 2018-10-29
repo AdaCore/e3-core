@@ -473,3 +473,25 @@ class TestContext(object):
                         qualifier=action.qualifier,
                         plan_line=action.plan_line,
                         plan_args=action.plan_args)
+
+    def test_plan_call_args(self):
+        """Retrieve call args values."""
+        current_env = BaseEnv()
+        cm = plan.PlanContext(server=current_env)
+
+        # Declare available actions and their signature
+        def plan_action(platform):
+            pass
+
+        cm.register_action('plan_action', plan_action)
+        # Create a simple plan
+        content = [u'def myserver():',
+                   u'    plan_action("any")']
+        with open('plan.txt', 'w') as f:
+            f.write('\n'.join(content))
+        myplan = plan.Plan({})
+        myplan.load('plan.txt')
+
+        for action in cm.execute(myplan, 'myserver'):
+            assert action.plan_call_args == {'platform': 'any'}
+            assert action.plan_args['platform'] == BaseEnv().platform
