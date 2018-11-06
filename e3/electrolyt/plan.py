@@ -72,16 +72,24 @@ class PlanContext(object):
     def __init__(self,
                  stack=None,
                  plan=None,
+                 ignore_disabled=True,
                  server=None,
                  build=None,
                  host=None,
                  target=None,
+                 enabled=True,
                  **kwargs):
         """Initialize an execution context or a scope.
 
         :param stack: stack of BaseEnv object that keep track of scopes. Used
-            only internally
+            only internally. User instantiation of PlanContext should be done
+            with stack set to None.
         :type stack: list[BaseEnv]
+        :param plan: the plan to execute
+        :type plan: Plan
+        :param ignore_disabled: when true, discard all lines in
+            blocks "with defaults(enabled=False):"
+        :type ignore_disabled: bool
         :param server: a BaseEnv object that represent the host default env.
             server parameter is taken into account only during creation of
             the initial context.
@@ -92,14 +100,23 @@ class PlanContext(object):
         :type host: str | None
         :param target: see e3.env.BaseEnv.set_env
         :type target: str | None
+        :param enabled: whether the plan line is enabled or disabled
+        :type enabled: bool
         :param kwargs: additional data for the current scope/context
         :type kwargs: dict
         """
+        self.ignore_disabled = ignore_disabled
         if stack:
             # This is a scope creation, so copy current env
             self.stack = stack
             self.plan = plan
             new = self.stack[-1].copy(build=build, host=host, target=target)
+
+            if new.enabled and not enabled:
+                # we are in a block with enabled=False set, disable all
+                # lines in that block
+                new.enabled = enabled
+
         else:
             self.stack = []
             if server is not None:
@@ -110,6 +127,7 @@ class PlanContext(object):
                 # case retrieve defaults for the local machine.
                 new = BaseEnv()
                 new.set_env(build, host, target)
+            new.enabled = enabled
 
         # Store additional data
         for k, v in kwargs.iteritems():
@@ -175,7 +193,7 @@ class PlanContext(object):
         plan.mod.__dict__['env'] = self.env
         plan.mod.__dict__['default_env'] = self.default_env
 
-        defaults = partial(PlanContext, self.stack, plan)
+        defaults = partial(PlanContext, self.stack, plan, self.ignore_disabled)
         plan.mod.__dict__['defaults'] = defaults
 
         for a in self.actions:
@@ -208,6 +226,9 @@ class PlanContext(object):
         :param kwargs: keyword arguments of the action call
         :type kwargs: dict
         """
+        if self.ignore_disabled and not self.env.enabled:
+            return
+
         # Retrieve the plan line
         try:
             caller_frame = inspect.getouterframes(
@@ -226,7 +247,7 @@ class PlanContext(object):
         result = self.env.copy()
 
         # Process arguments
-        args = inspect.getcallargs(self.actions[name], *args, **kwargs)
+        call_args = inspect.getcallargs(self.actions[name], *args, **kwargs)
 
         # Push function arguments into the result object. If an arg value
         # is None then environment is not updated (handling of defaults
@@ -239,7 +260,7 @@ class PlanContext(object):
         # of the target. ??? change name ???
         board = None
 
-        for k, v in args.iteritems():
+        for k, v in call_args.iteritems():
             if k in platform:
                 platform[k] = v
             elif k == 'board':
@@ -273,6 +294,7 @@ class PlanContext(object):
         result.action = name
         result.plan_line = plan_line
         result.plan_args = result.to_dict()
+        result.plan_call_args = call_args
 
         # Push the action in the current list
         self.action_list.append(result)

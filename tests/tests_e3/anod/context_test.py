@@ -15,7 +15,14 @@ class TestContext(object):
 
     spec_dir = os.path.join(os.path.dirname(__file__), 'context_data')
 
-    def create_context(self):
+    def create_context(self, reject_duplicates=True):
+        """Create a spec repository and anod context.
+
+        :param reject_duplicates: whether to reject duplicates in plan
+        :type reject_duplicates: bool
+
+        :rtype: AnodContext
+        """
         # Create a context for a x86-linux machine
         asr = AnodSpecRepository(self.spec_dir)
         asr.repos['spec1-git'] = 'spec1-git'
@@ -23,7 +30,8 @@ class TestContext(object):
         asr.repos['spec2-git'] = 'spec2-git'
         env = BaseEnv()
         env.set_build('x86-linux', 'rhes6', 'mylinux')
-        ac = AnodContext(asr, default_env=env)
+        ac = AnodContext(asr, default_env=env,
+                         reject_duplicates=reject_duplicates)
         return ac
 
     def test_context_init(self):
@@ -407,3 +415,83 @@ class TestContext(object):
                     vertex_id=uid,
                     reverse_order=True,
                     max_distance=1)[0][2]['plan_args']['weathers'] == 'foo'
+
+    @pytest.mark.parametrize("reject_duplicates", [True, False])
+    def test_duplicated_lines(self, reject_duplicates):
+        """Check that duplicated lines in plan are properly rejected."""
+        ac = self.create_context(reject_duplicates=reject_duplicates)
+        current_env = BaseEnv()
+        cm = plan.PlanContext(server=current_env)
+
+        # Declare available actions and their signature
+        def anod_action(module, build=None, default_build=False,
+                        host=None, target=None, board=None,
+                        weathers=None, product_version=None,
+                        when_missing=None,
+                        manual_action=False,
+                        qualifier=None, jobs=None,
+                        releases=None, process_suffix=None,
+                        update_vcs=False, recursive=None, query_range=None,
+                        force_repackage=False):
+            pass
+
+        cm.register_action('anod_build', anod_action)
+        # Create a simple plan
+        content = [u'def myserver():',
+                   u'    anod_build("spec3", weathers="A")',
+                   u'    anod_build("spec3", weathers="B")']
+        with open('plan.txt', 'w') as f:
+            f.write('\n'.join(content))
+        myplan = plan.Plan({})
+        myplan.load('plan.txt')
+
+        if not reject_duplicates:
+            # Execute the plan and create anod actions
+            # Execute the plan and create anod actions
+            for action in cm.execute(myplan, 'myserver'):
+                primitive = action.action.replace('anod_', '', 1)
+                ac.add_anod_action(
+                    name=action.module,
+                    env=current_env if action.default_build else action,
+                    primitive=primitive,
+                    qualifier=action.qualifier,
+                    plan_line=action.plan_line,
+                    plan_args=action.plan_args)
+
+            for uid, action in ac.tree:
+                if uid.endswith('build'):
+                    assert ac.tree.get_tag(uid)['plan_args']['weathers'] == 'B'
+        else:
+
+            with pytest.raises(SchedulingError):
+                for action in cm.execute(myplan, 'myserver'):
+                    primitive = action.action.replace('anod_', '', 1)
+                    ac.add_anod_action(
+                        name=action.module,
+                        env=current_env if action.default_build else action,
+                        primitive=primitive,
+                        qualifier=action.qualifier,
+                        plan_line=action.plan_line,
+                        plan_args=action.plan_args)
+
+    def test_plan_call_args(self):
+        """Retrieve call args values."""
+        current_env = BaseEnv()
+        cm = plan.PlanContext(server=current_env)
+
+        # Declare available actions and their signature
+        def plan_action(platform):
+            pass
+
+        cm.register_action('plan_action', plan_action)
+        # Create a simple plan
+        content = [u'def myserver():',
+                   u'    plan_action("any")']
+        with open('plan.txt', 'w') as f:
+            f.write('\n'.join(content))
+        myplan = plan.Plan({})
+        myplan.load('plan.txt')
+
+        for action in cm.execute(myplan, 'myserver'):
+            assert action.plan_call_args == {'platform': 'any'}
+            assert action.plan_args['platform'] == BaseEnv().platform

@@ -210,6 +210,9 @@ def set_python_env(prefix):
 def interpreter(prefix=None):
     """Return location of the Python interpreter.
 
+    When there are both a python3 and python binary file return the path to
+    the python3 binary.
+
     :param prefix: root directory of the python distribution. if None location
         of the current interpreter is returned
     :type prefix: None | str
@@ -219,9 +222,17 @@ def interpreter(prefix=None):
     if prefix is None:
         return sys.executable
     if sys.platform == 'win32':  # unix: no cover
-        return os.path.join(prefix, 'python.exe')
-    else:
-        return os.path.join(prefix, 'bin', 'python')
+        python3 = os.path.join(prefix, 'python3.exe')
+        if os.path.exists(python3):
+            return python3
+        else:
+            return os.path.join(prefix, 'python.exe')
+    else:  # windows: no cover
+        python3 = os.path.join(prefix, 'bin', 'python3')
+        if os.path.exists(python3):
+            return python3
+        else:
+            return os.path.join(prefix, 'bin', 'python')
 
 
 def python_script(name, prefix=None):

@@ -209,16 +209,18 @@ class AnodAction(Action):
     Correspond to an Anod primitive call. Only subclasses should be used.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'anod_instance')
 
-    def __init__(self, data):
+    def __init__(self, anod_instance):
         """Initialize an anod Action.
 
-        :param data: an Anod spec instance
-        :type data: e3.anod.spec.Anod
+        :param anod_instance: an Anod spec instance
+        :type anod_instance: e3.anod.spec.Anod
         """
-        assert isinstance(data, Anod)
-        super(AnodAction, self).__init__(uid=data.uid, data=data)
+        assert isinstance(anod_instance, Anod)
+        super(AnodAction, self).__init__(uid=anod_instance.uid,
+                                         data=anod_instance)
+        self.anod_instance = anod_instance
 
     def __str__(self):
         return '%s %s for %s' % (self.data.kind,
@@ -229,46 +231,19 @@ class AnodAction(Action):
 class Build(AnodAction):
     """Anod build primitive."""
 
-    __slots__ = ('uid', 'anod_instance')
-
-    def __init__(self, anod_instance):
-        """Initialize a Build object.
-
-        :param anod_instance: And Anod spec instance.
-        :type anod_instance: e3.anod.spec.Anod
-        """
-        super(Build, self).__init__(data=anod_instance)
-        self.anod_instance = anod_instance
+    pass
 
 
 class Test(AnodAction):
     """Anod test primitive."""
 
-    __slots__ = ('uid', 'anod_instance')
-
-    def __init__(self, anod_instance):
-        """Initialize a Test object.
-
-        :param anod_instance: And Anod spec instance.
-        :type anod_instance: e3.anod.spec.Anod
-        """
-        super(Test, self).__init__(data=anod_instance)
-        self.anod_instance = anod_instance
+    pass
 
 
 class Install(AnodAction):
     """Anod install primitive."""
 
-    __slots__ = ('uid', 'anod_instance')
-
-    def __init__(self, anod_instance):
-        """Initialize an Install object.
-
-        :param anod_instance: And Anod spec instance.
-        :type anod_instance: e3.anod.spec.Anod
-        """
-        super(Install, self).__init__(data=anod_instance)
-        self.anod_instance = anod_instance
+    pass
 
 
 class DownloadBinary(Action):
