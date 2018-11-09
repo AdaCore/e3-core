@@ -48,3 +48,15 @@ class TestJob(object):
         job.run()
         assert job.status is ReturnValue.failure
         assert 'job myuid returned an unknown status 6' in caplog.text
+
+    def test_spawn_issue(self):
+        """Verify that status is set to failure when the spawn fails."""
+        class SpawnIssueProcessJob(ProcessJob):
+            @property
+            def cmdline(self):
+                # This will be called by self.run() and simulate an error
+                # when spawning the job
+                raise IOError('spawn issue')
+        job = SpawnIssueProcessJob('myuid', {}, None)
+        job.run()
+        assert job.status is ReturnValue.failure
