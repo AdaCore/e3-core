@@ -203,6 +203,10 @@ class ProcessJob(Job):
         super(ProcessJob, self).__init__(uid, data, notify_end)
         self.proc_handle = None
 
+        # Detect spawn issue to avoid returning "notready"
+        # and creating a loop
+        self.__spawn_error = False
+
     def run(self):
         """Run the job."""
         cmd_options = self.cmd_options
@@ -214,8 +218,13 @@ class ProcessJob(Job):
             if self.interrupted:  # defensive code
                 logger.debug('job %s has been cancelled', self.uid)
                 return
-            proc_handle = Run(self.cmdline, **cmd_options)
-            self.proc_handle = proc_handle
+            try:
+                proc_handle = Run(self.cmdline, **cmd_options)
+                self.proc_handle = proc_handle
+            except Exception:
+                logger.exception('error when spawing job %s', self.uid)
+                self.__spawn_error = True
+                return
         proc_handle.wait()
         logger.debug('job %s status %s (pid:%s)',
                      self.uid, proc_handle.status, proc_handle.pid)
@@ -223,7 +232,9 @@ class ProcessJob(Job):
     @property
     def status(self):
         """See Job.status' description."""
-        if self.proc_handle is None:
+        if self.__spawn_error:
+            return ReturnValue.failure
+        elif self.proc_handle is None:
             return ReturnValue.notready
         else:
             try:
