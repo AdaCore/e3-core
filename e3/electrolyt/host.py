@@ -94,11 +94,13 @@ class HostDB(object):
             content = yaml.load(fd)
 
         for hostname, hostinfo in content.iteritems():
+            result = {}
+            for key in hostinfo:
+                if key not in ('build_platform', 'build_os_version'):
+                    result[key] = hostinfo[key]
             platform = hostinfo['build_platform']
             version = hostinfo['build_os_version']
-            del hostinfo['build_platform']
-            del hostinfo['build_os_version']
-            self.add_host(hostname, platform, version, **hostinfo)
+            self.add_host(hostname, platform, version, **result)
 
     def __getitem__(self, key):
         return self.hosts[key]

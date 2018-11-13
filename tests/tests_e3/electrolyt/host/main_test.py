@@ -31,3 +31,17 @@ def test_host_db_yaml():
     db = host.HostDB(filename='db.yaml')
     assert set(db.hostnames) == {'computer2', 'computer3'}
     assert db['computer3'].platform == 'x86_64-darwin'
+
+
+def test_host_db_yaml_alias():
+    with open('db.yaml', 'w') as f:
+        f.write(
+            'computer2: &computer2_alias\n'
+            '   build_platform: x86-windows\n'
+            '   build_os_version: 2008R2\n'
+            '   data_center: dc993\n\n'
+            'computer3: *computer2_alias\n')
+
+    db = host.HostDB(filename='db.yaml')
+    assert set(db.hostnames) == {'computer2', 'computer3'}
+    assert db['computer3'].platform == 'x86-windows'
