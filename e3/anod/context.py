@@ -453,8 +453,10 @@ class AnodContext(object):
                     if e.kind == 'source':
                         # A source dependency does not create a new node but
                         # ensure that sources associated with it are available
-                        self.load(e.name, kind='source',
-                                  env=BaseEnv(), qualifier=None)
+                        child_instance = self.load(
+                            e.name, kind='source',
+                            env=BaseEnv(), qualifier=None)
+                        spec.deps[e.local_name] = child_instance
                         continue
 
                     child_action = self.add_spec(
@@ -463,7 +465,7 @@ class AnodContext(object):
                         primitive=e.kind,
                         qualifier=e.qualifier)
 
-                    spec.deps[e.local_name] = result.anod_instance
+                    spec.deps[e.local_name] = child_action.anod_instance
 
                     if e.kind == 'build' and \
                             self[child_action.uid].data.kind == 'install':
