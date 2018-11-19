@@ -56,20 +56,42 @@ def pytest_addoption(parser):
                      help='Report requirement coverage')
 
 
+def require_vcs(prog, request):
+    """Require svn or git to run the test.
+
+    When in "CI" mode, a missing svn or git generates an error. In other
+    modes the test is just skipped.
+    :param prog: either "svn" or "git"
+    """
+    if not which(prog):
+        if request.config.getoption('ci'):
+            pytest.fail('{} not available'.format(prog))
+        else:
+            pytest.skip('{} not available'.format(prog))
+
+
 @pytest.fixture(autouse=True)
+@pytest.mark.usefixtures("git")
 def require_git(request):
+    """Require git."""
     marker = request.node.get_marker('git')
     if marker:
-        git(request)
+        return require_vcs('git', request)
 
 
 @pytest.fixture
 def git(request):
-    if not which('git'):
-        if request.config.getoption('ci'):
-            pytest.fail('git not available')
-        else:
-            pytest.skip('git not available')
+    """Require git."""
+    return require_vcs('git', request)
+
+
+@pytest.fixture(autouse=True)
+@pytest.mark.usefixtures("svn")
+def require_svn(request):
+    """Require svn."""
+    marker = request.node.get_marker('svn')
+    if marker:
+        return require_vcs('svn', request)
 
 
 def pytest_configure(config):
