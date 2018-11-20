@@ -37,7 +37,7 @@ def test_make():
     Anod.sandbox.create_dirs()
 
     am = AnodMake(qualifier='', kind='build', jobs=10)
-    AnodDriver(anod_instance=am, store=None).activate()
+    AnodDriver(anod_instance=am, store=None).activate(Anod.sandbox, None)
     am.build_space.create()
     assert am.build() == (
         ['make', '-f', '/tmp/makefile', '-j', '10', 'prefix=/foo'],
@@ -62,7 +62,7 @@ def test_configure():
     Anod.sandbox.create_dirs()
 
     ac = AnodConf(qualifier='', kind='build', jobs=10)
-    AnodDriver(anod_instance=ac, store=None).activate()
+    AnodDriver(anod_instance=ac, store=None).activate(Anod.sandbox, None)
     ac.build_space.create()
 
     # Configure() can add $CONFIG_SHELL in the command line
@@ -79,7 +79,7 @@ def test_configure():
     assert canadian_env.is_canadian
 
     ac2 = AnodConf(qualifier='', kind='build', jobs=10, env=canadian_env)
-    AnodDriver(anod_instance=ac2, store=None).activate()
+    AnodDriver(anod_instance=ac2, store=None).activate(Anod.sandbox, None)
     ac2.build_space.create()
 
     ac2_cmd = ac2.build()['cmd']
@@ -93,7 +93,7 @@ def test_configure():
     cross_env.set_target('arm-elf')
 
     ac3 = AnodConf(qualifier='', kind='build', jobs=10, env=cross_env)
-    AnodDriver(anod_instance=ac3, store=None).activate()
+    AnodDriver(anod_instance=ac3, store=None).activate(Anod.sandbox, None)
     ac3.build_space.create()
 
     assert '--target=arm-eabi' in ac3.build()['cmd']
@@ -121,7 +121,7 @@ def test_configure_opts():
     Anod.sandbox.create_dirs()
 
     ac = AnodConf(qualifier='', kind='build', jobs=10)
-    AnodDriver(anod_instance=ac, store=None).activate()
+    AnodDriver(anod_instance=ac, store=None).activate(Anod.sandbox, None)
     ac.build_space.create()
 
     result = ac.build()
@@ -149,9 +149,9 @@ def test_custom_repr():
     Anod.sandbox.create_dirs()
 
     ac = Anod(qualifier='', kind='build', jobs=1)
-    AnodDriver(anod_instance=ac, store=None).activate()
+    AnodDriver(anod_instance=ac, store=None).activate(Anod.sandbox, None)
 
     m = Make(ac, exec_dir='/here', makefile='/tmp/makefile')
-    AnodDriver(anod_instance=ac, store=None).activate()
+    AnodDriver(anod_instance=ac, store=None).activate(Anod.sandbox, None)
     ac.build_space.create()
     assert "cmd: [make, -f, /tmp/makefile, -j, '1']" in yaml.dump(m)
