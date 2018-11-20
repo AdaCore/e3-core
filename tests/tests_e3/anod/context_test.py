@@ -339,6 +339,11 @@ class TestContext(object):
                 assert ctag['plan_args']['weathers'] == 'bar'
                 assert ctag['plan_line'] == 'plan.txt:4'
 
+                # Also verify that the instance deps is properly loaded
+                assert set(action.anod_instance.deps.keys()) == {'spec1'}
+                assert action.anod_instance.deps[
+                    'spec1'].__class__.__name__ == 'Spec1'
+
         # Also test that we are still able to extract the values
         # after having scheduled the action graph.
 
@@ -357,6 +362,15 @@ class TestContext(object):
         for uid, action in sched_dag:
             if uid.endswith('spec12.build'):
                 assert sched_dag.get_tag(uid)
+
+                # Also verify that the instance deps is properly loaded
+                assert set(action.anod_instance.deps.keys()) == {
+                    'spec1', 'spec11'}
+                assert action.anod_instance.deps[
+                    'spec11'].__class__.__name__ == 'Spec11'
+                assert action.anod_instance.deps[
+                    'spec1'].__class__.__name__ == 'Spec1'
+
             elif uid.endswith('spec3.build'):
                 assert sched_dag.get_tag(uid)
                 assert sched_rev.get_context(uid)[0][2]['plan_args'][

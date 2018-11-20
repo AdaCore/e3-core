@@ -24,7 +24,7 @@ def file_url(path, unix=False):
         return 'file://' + path
 
 
-@pytest.mark.git
+@pytest.mark.svn
 def test_svn_repo():
     cwd = os.getcwd()
 
