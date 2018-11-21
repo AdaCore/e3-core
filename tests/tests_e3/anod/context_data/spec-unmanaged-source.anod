@@ -1,0 +1,8 @@
+from e3.anod.spec import Anod
+from e3.anod.package import ThirdPartySourceBuilder
+
+
+class SpecUnmanagedSource(Anod):
+
+    source_pkg_build = [ThirdPartySourceBuilder(
+        name='wheel.whl')]

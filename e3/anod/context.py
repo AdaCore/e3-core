@@ -367,6 +367,9 @@ class AnodContext(object):
                         # This source package is defined in the spec but
                         # explicitly excluded in the plan
                         continue
+                    if isinstance(sb, UnmanagedSourceBuilder):
+                        # do not create source package for unmanaged source
+                        continue
                     sub_result = self.add_spec(
                         name=name,
                         env=env,
