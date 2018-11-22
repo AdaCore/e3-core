@@ -6,6 +6,7 @@ from functools import wraps
 import e3.log
 import e3.store
 from e3.anod.spec import AnodError, has_primitive
+from e3.env import BaseEnv
 from e3.error import E3Error
 
 logger = e3.log.getLogger('e3.anod.driver')
@@ -38,19 +39,24 @@ class AnodDriver(object):
         self.anod_instance = anod_instance
         self.store = store
 
-    def activate(self):
-        sbx = self.anod_instance.sandbox
-        if sbx is None:
-            raise AnodError('cannot activate a spec without a sandbox',
-                            'activate')
-
-        self.anod_instance.build_space = sbx.get_build_space(
+    def activate(self, sandbox, spec_repository):
+        self.anod_instance.build_space = sandbox.get_build_space(
             name=self.anod_instance.build_space_name,
             primitive=self.anod_instance.kind,
             platform=self.anod_instance.env.platform)
 
         self.anod_instance.log = e3.log.getLogger(
             'spec.' + self.anod_instance.uid)
+
+        for e in getattr(self.anod_instance,
+                         '%s_deps' % self.anod_instance.kind, ()):
+            if isinstance(e, self.anod_instance.Dependency):
+                dep_class = spec_repository.load(e.name)
+                dep_instance = dep_class(
+                    qualifier=e.qualifier,
+                    kind=e.kind,
+                    env=e.env(self.anod_instance, BaseEnv.from_env()))
+                self.anod_instance.deps[e.local_name] = dep_instance
         e3.log.debug('activating spec %s', self.anod_instance.uid)
 
     def call(self, action):

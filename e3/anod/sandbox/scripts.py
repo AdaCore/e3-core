@@ -67,7 +67,7 @@ def anod():
         store=store)
 
     try:
-        driver.activate()
+        driver.activate(sandbox, spec_repo)
         driver.call(action)
     except AnodError as err:
         print(err, file=sys.stderr)

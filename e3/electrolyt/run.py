@@ -31,7 +31,7 @@ class ElectrolytJob(Job):
     :vartype store: e3.store.backends.base.Store
     """
 
-    def __init__(self, uid, data, notify_end, sandbox, store,
+    def __init__(self, uid, data, notify_end, spec_repo, sandbox, store,
                  force_status=STATUS.unknown,
                  dry_run=False):
         """Initialize the context of the job.
@@ -54,6 +54,7 @@ class ElectrolytJob(Job):
         super(ElectrolytJob, self).__init__(uid, data, notify_end)
         self.__status = force_status
         self.sandbox = sandbox
+        self.spec_repo = spec_repo
         self.dry_run = dry_run
         self.store = store
 
@@ -79,7 +80,7 @@ class ElectrolytJob(Job):
         self.data.anod_instance.sandbox = self.sandbox
         anod_driver = AnodDriver(anod_instance=self.data.anod_instance,
                                  store=self.store)
-        anod_driver.activate()
+        anod_driver.activate(self.data.anod_instance.sandbox, self.spec_repo)
         anod_driver.anod_instance.build_space.create(quiet=True)
         getattr(anod_driver.anod_instance, primitive)()
         self.__status = STATUS.success
@@ -149,7 +150,7 @@ class ElectrolytJob(Job):
         spec = self.data.spec
         spec.sandbox = self.sandbox
         anod_instance = AnodDriver(anod_instance=spec, store=self.store)
-        anod_instance.activate()
+        anod_instance.activate(self.sandbox, self.spec_repo)
         source = self.data.source
         src_dir = os.path.join(self.sandbox.tmp_dir,
                                'cache',
@@ -195,6 +196,7 @@ class ElectrolytJobFactory(object):
             uid,
             data,
             notify_end,
+            spec_repo=self.asr,
             sandbox=self.sandbox,
             store=self.store,
             force_status=(STATUS.unknown
