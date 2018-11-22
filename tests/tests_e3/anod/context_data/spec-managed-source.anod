@@ -1,0 +1,9 @@
+from e3.anod.spec import Anod
+from e3.anod.package import SourceBuilder
+
+
+class SpecManagedSource(Anod):
+
+    source_pkg_build = [
+        SourceBuilder(
+            name='a-src', fullname=lambda: 'a-src.tgz', checkout=['a-git'])]
