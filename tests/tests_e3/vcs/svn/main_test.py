@@ -24,7 +24,7 @@ def file_url(path, unix=False):
         return 'file://' + path
 
 
-@pytest.mark.git
+@pytest.mark.svn
 def test_svn_repo():
     cwd = os.getcwd()
 
@@ -52,7 +52,10 @@ def test_svn_repo():
         svn_a.update()
     with pytest.raises(SVNError):
         svn_a.update(url=file_url('bad_url'))
-    svn_a.update(project_url)
+    local_change = svn_a.update(project_url)
+    assert local_change
+    local_change = svn_a.update()
+    assert not local_change
     # verify the content of the working dir A and its revision
     assert svn_a.url == project_url
     assert os.path.exists(os.path.join(
@@ -77,7 +80,8 @@ def test_svn_repo():
     touch(foo_path)
     hello_b_path = os.path.join(working_copy_b_path, hello_relative_path)
     echo_to_file(hello_b_path, 'kitty')
-    svn_b.update()
+    local_change = svn_b.update()
+    assert local_change
     assert os.path.exists(foo_path)
     with open(hello_b_path, 'r') as f:
         assert 'kitty' in f.read()

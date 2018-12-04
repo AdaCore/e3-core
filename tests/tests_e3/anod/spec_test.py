@@ -105,9 +105,12 @@ def test_primitive():
         'data')
     Anod.sandbox.create_dirs()
     # Activate the logging
-    AnodDriver(anod_instance=with_primitive, store=None).activate()
-    AnodDriver(anod_instance=with_primitive2, store=None).activate()
-    AnodDriver(anod_instance=with_primitive3, store=None).activate()
+    AnodDriver(anod_instance=with_primitive,
+               store=None).activate(Anod.sandbox, None)
+    AnodDriver(anod_instance=with_primitive2,
+               store=None).activate(Anod.sandbox, None)
+    AnodDriver(anod_instance=with_primitive3,
+               store=None).activate(Anod.sandbox, None)
     AnodDriver(anod_instance=with_primitive4, store=None)  # don't activate
 
     with_primitive.build_space.create()

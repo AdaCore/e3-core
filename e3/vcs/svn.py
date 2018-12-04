@@ -125,6 +125,8 @@ class SVNRepository(object):
         working_copy and use '--force' option for the svn update/checkout
         command
         :type force_and_clean: bool
+        :return: True if any local changes detected in the working copy
+        :rtype: bool
         :raise: SVNError
         """
         def is_clean_svn_dir(dir_path):
@@ -153,7 +155,7 @@ class SVNRepository(object):
         if is_svn_dir and (is_clean or not force_and_clean) and \
                 (not url or self.url == url):
             self.svn_cmd(['update'] + options)
-            return
+            return not is_clean
         if os.path.exists(self.working_copy):
             if not is_empty_dir(self.working_copy) and not force_and_clean:
                 raise SVNError('not empty {}'.format(
@@ -164,3 +166,4 @@ class SVNRepository(object):
 
         mkdir(self.working_copy)
         self.svn_cmd(['checkout', url, '.'] + options)
+        return not is_clean

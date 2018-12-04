@@ -260,6 +260,26 @@ class TestContext(object):
         assert 'mylinux.x86-linux.spec13.download_bin' in keys
         assert 'mylinux.x86-linux.spec13.install' in keys
 
+    def test_add_anod_action_unmanaged_source(self):
+        """Check no source creation for thirdparties."""
+        ac = self.create_context()
+        ac.add_anod_action('spec-unmanaged-source', primitive='source')
+        result = ac.schedule(ac.always_download_source_resolver)
+        keys = set(result.vertex_data.keys())
+        assert len(keys) == 2, keys
+        assert 'mylinux.x86-linux.spec-unmanaged-source.source.wheel.whl' \
+               not in keys
+
+    def test_add_anod_action_managed_source(self):
+        """Check no source creation for thirdparties."""
+        ac = self.create_context()
+        ac.add_anod_action('spec-managed-source', primitive='source')
+        result = ac.schedule(ac.always_download_source_resolver)
+        keys = set(result.vertex_data.keys())
+        assert len(keys) == 4, keys
+        assert 'checkout.a-git' in keys
+        assert 'mylinux.x86-linux.spec-managed-source.source.a-src' in keys
+
     def test_dag_2_plan(self):
         """Check that we can extract values from plan in final dag.
 
@@ -339,6 +359,11 @@ class TestContext(object):
                 assert ctag['plan_args']['weathers'] == 'bar'
                 assert ctag['plan_line'] == 'plan.txt:4'
 
+                # Also verify that the instance deps is properly loaded
+                assert set(action.anod_instance.deps.keys()) == {'spec1'}
+                assert action.anod_instance.deps[
+                    'spec1'].__class__.__name__ == 'Spec1'
+
         # Also test that we are still able to extract the values
         # after having scheduled the action graph.
 
@@ -357,6 +382,15 @@ class TestContext(object):
         for uid, action in sched_dag:
             if uid.endswith('spec12.build'):
                 assert sched_dag.get_tag(uid)
+
+                # Also verify that the instance deps is properly loaded
+                assert set(action.anod_instance.deps.keys()) == {
+                    'spec1', 'spec11'}
+                assert action.anod_instance.deps[
+                    'spec11'].__class__.__name__ == 'Spec11'
+                assert action.anod_instance.deps[
+                    'spec1'].__class__.__name__ == 'Spec1'
+
             elif uid.endswith('spec3.build'):
                 assert sched_dag.get_tag(uid)
                 assert sched_rev.get_context(uid)[0][2]['plan_args'][

@@ -24,7 +24,7 @@ def test_simple_driver():
         anod_instance.sandbox = None
         e3.anod.driver.AnodDriver(
             anod_instance=anod_instance,
-            store=None).activate()
+            store=None).activate(sandbox, None)
 
     sandbox.root_dir = os.getcwd()
     anod_instance = Simple(
@@ -39,3 +39,27 @@ def test_simple_driver():
         driver.download()
 
     assert '.activate() has not been called' in str(err)
+
+
+def test_deps_driver():
+    class Deps(e3.anod.spec.Anod):
+        build_deps = [e3.anod.spec.Anod.Dependency(name='parent')]
+
+        @e3.anod.spec.Anod.primitive()
+        def build(self):
+            return self.deps['parent'].parent_info
+
+    sandbox = e3.anod.sandbox.SandBox()
+    sandbox.root_dir = os.getcwd()
+    anod_instance = Deps(qualifier='', kind='build')
+    anod_instance.sandbox = sandbox
+
+    spec_dir = os.path.join(os.path.dirname(__file__), 'data')
+    spec_repo = e3.anod.loader.AnodSpecRepository(spec_dir)
+
+    e3.anod.driver.AnodDriver(
+        anod_instance=anod_instance,
+        store=None).activate(sandbox, spec_repo)
+
+    anod_instance.build_space.create()
+    assert anod_instance.build() == 'from_parent'
