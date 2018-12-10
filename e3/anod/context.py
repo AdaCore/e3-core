@@ -229,7 +229,8 @@ class AnodContext(object):
                         source_packages=None,
                         upload=True,
                         plan_line=None,
-                        plan_args=None):
+                        plan_args=None,
+                        force_source_deps=False):
         """Add an Anod action to the context.
 
         :param name: spec name
@@ -251,13 +252,20 @@ class AnodContext(object):
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
         :type plan_args: dict
+        :param force_source_deps: ??? whether to force loading source deps.
+            Idealy we should not need this, but since we're still in transition
+            phase we still have tools needed to both create the source package
+            and build the component in a single process. They then need to
+            parse both source_deps and build_deps.
+        :type force_source_deps: bool
         :return: the root added action
         :rtype: Action
         """
         # First create the subtree for the spec
         result = self.add_spec(name, env, primitive, qualifier,
                                source_packages=source_packages,
-                               plan_line=plan_line, plan_args=plan_args)
+                               plan_line=plan_line, plan_args=plan_args,
+                               force_source_deps=force_source_deps)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
@@ -304,7 +312,8 @@ class AnodContext(object):
                  expand_build=True,
                  source_name=None,
                  plan_line=None,
-                 plan_args=None):
+                 plan_args=None,
+                 force_source_deps=None):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -324,6 +333,8 @@ class AnodContext(object):
         :param source_name: source name associated with the source
             primitive
         :type source_name: str | None
+        :param force_source_deps: whether to force loading the source deps
+        :type force_source_deps: bool
         """
         def add_action(data, connect_with=None):
             self.add(data)
@@ -449,38 +460,46 @@ class AnodContext(object):
                 self.connect(result, download_action)
 
         # Look for dependencies
+        spec_dependencies = []
         if '%s_deps' % primitive in dir(spec) and \
                 getattr(spec, '%s_deps' % primitive) is not None:
-            for e in getattr(spec, '%s_deps' % primitive):
-                if isinstance(e, Dependency):
-                    if e.kind == 'source':
-                        # A source dependency does not create a new node but
-                        # ensure that sources associated with it are available
-                        child_instance = self.load(
-                            e.name, kind='source',
-                            env=BaseEnv(), qualifier=None)
-                        spec.deps[e.local_name] = child_instance
-                        continue
+            spec_dependencies += getattr(spec, '%s_deps' % primitive)
 
-                    child_action = self.add_spec(
-                        name=e.name,
-                        env=e.env(spec, self.default_env),
-                        primitive=e.kind,
-                        qualifier=e.qualifier)
+        if force_source_deps and primitive != 'source':
+            if 'source_deps' in dir(spec) and \
+                    getattr(spec, 'source_deps') is not None:
+                spec_dependencies += getattr(spec, 'source_deps')
 
-                    spec.deps[e.local_name] = child_action.anod_instance
+        for e in spec_dependencies:
+            if isinstance(e, Dependency):
+                if e.kind == 'source':
+                    # A source dependency does not create a new node but
+                    # ensure that sources associated with it are available
+                    child_instance = self.load(
+                        e.name, kind='source',
+                        env=BaseEnv(), qualifier=None)
+                    spec.deps[e.local_name] = child_instance
+                    continue
 
-                    if e.kind == 'build' and \
-                            self[child_action.uid].data.kind == 'install':
-                        # We have a build tree dependency that produced a
-                        # subtree starting with an install node. In that case
-                        # we expect the user to choose BUILD as decision.
-                        dec = self.predecessors(child_action)[0]
-                        if isinstance(dec, BuildOrInstall):
-                            dec.add_trigger(result, BuildOrInstall.BUILD)
+                child_action = self.add_spec(
+                    name=e.name,
+                    env=e.env(spec, self.default_env),
+                    primitive=e.kind,
+                    qualifier=e.qualifier)
 
-                    # Connect child dependency
-                    self.connect(result, child_action)
+                spec.deps[e.local_name] = child_action.anod_instance
+
+                if e.kind == 'build' and \
+                        self[child_action.uid].data.kind == 'install':
+                    # We have a build tree dependency that produced a
+                    # subtree starting with an install node. In that case
+                    # we expect the user to choose BUILD as decision.
+                    dec = self.predecessors(child_action)[0]
+                    if isinstance(dec, BuildOrInstall):
+                        dec.add_trigger(result, BuildOrInstall.BUILD)
+
+                # Connect child dependency
+                self.connect(result, child_action)
 
         # Look for source dependencies (i.e sources needed)
         if '%s_source_list' % primitive in dir(spec):
