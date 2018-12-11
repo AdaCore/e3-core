@@ -417,14 +417,16 @@ class AnodContext(object):
                                  qualifier,
                                  expand_build=False,
                                  plan_args=plan_args,
-                                 plan_line=plan_line)
+                                 plan_line=plan_line,
+                                 force_source_deps=force_source_deps)
 
         if expand_build and primitive == 'build' and \
                 (spec.has_package and spec.component is not None):
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
-            return self.add_spec(name, env, 'install', qualifier)
+            return self.add_spec(name, env, 'install', qualifier,
+                                 force_source_deps=force_source_deps)
 
         # Add this stage if the action is already in the DAG, then it has
         # already been added.
@@ -451,7 +453,8 @@ class AnodContext(object):
                     env=env,
                     primitive='build',
                     qualifier=qualifier,
-                    expand_build=False)
+                    expand_build=False,
+                    force_source_deps=force_source_deps)
                 self.add_decision(BuildOrInstall,
                                   result,
                                   build_action,
@@ -479,13 +482,23 @@ class AnodContext(object):
                         e.name, kind='source',
                         env=BaseEnv(), qualifier=None)
                     spec.deps[e.local_name] = child_instance
+
+                    if force_source_deps:
+                        # When in force_source_deps we also want to add
+                        # source_deps of all "source_pkg" dependencies.
+                        if 'source_deps' in dir(child_instance) and \
+                                getattr(child_instance,
+                                        'source_deps') is not None:
+                            spec_dependencies += child_instance.source_deps
+
                     continue
 
                 child_action = self.add_spec(
                     name=e.name,
                     env=e.env(spec, self.default_env),
                     primitive=e.kind,
-                    qualifier=e.qualifier)
+                    qualifier=e.qualifier,
+                    force_source_deps=force_source_deps)
 
                 spec.deps[e.local_name] = child_action.anod_instance
 
