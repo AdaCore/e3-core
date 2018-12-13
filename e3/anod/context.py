@@ -349,28 +349,14 @@ class AnodContext(object):
         # Initialize the resulting action based on the primitive name
         if primitive == 'source':
             if source_name is not None:
-                result = CreateSource(
-                    spec, source_name)
-                add_action(result)
-                for sb in spec.source_pkg_build:
-                    if sb.name == source_name:
-                        for checkout in sb.checkout:
-                            if checkout not in self.repo.repos:
-                                logger.warning(
-                                    'unknown repository %s', checkout)
-                            co = Checkout(
-                                checkout, self.repo.repos.get(checkout))
-                            add_action(co, result)
-
+                result = CreateSource(spec, source_name)
             else:
                 # Create the root node
                 result = CreateSources(spec)
+
+                # A consequence of calling add_action here
+                # will result in skipping dependencies parsing.
                 add_action(result)
-                if plan_line is not None:
-                    self.link_to_plan(
-                        vertex_id=result.uid,
-                        plan_line=plan_line,
-                        plan_args=plan_args)
 
                 # Then one node for each source package
                 for sb in spec.source_pkg_build:
@@ -461,6 +447,18 @@ class AnodContext(object):
                                   download_action)
             else:
                 self.connect(result, download_action)
+
+        elif primitive == 'source':
+            if source_name is not None:
+                for sb in spec.source_pkg_build:
+                    if sb.name == source_name:
+                        for checkout in sb.checkout:
+                            if checkout not in self.repo.repos:
+                                logger.warning(
+                                    'unknown repository %s', checkout)
+                            co = Checkout(
+                                checkout, self.repo.repos.get(checkout))
+                            add_action(co, result)
 
         # Look for dependencies
         spec_dependencies = []
