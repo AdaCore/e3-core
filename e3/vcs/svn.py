@@ -107,7 +107,7 @@ class SVNRepository(object):
         :rtype: str
         :raise: SVNError
         """
-        return self.get_info('Revision')
+        return self.get_info('Last Changed Rev')
 
     def update(self, url=None, revision=None, force_and_clean=False):
         """Update a working copy or checkout a new one.
