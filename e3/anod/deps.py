@@ -46,7 +46,10 @@ class Dependency(object):
         :type host: str | None
         :param target: can be either 'host' or 'build'
         :type target: str | None
-        :param build: build platform (if not the current build platform)
+        :param build: build platform (if not the current build platform), the
+            special value "default" change the build platform to the default
+            build platform. Note that on windows, the default is always
+            x86-windows.
         :type build: str | None
         :param qualifier: qualifier to set when loading the spec
         :type qualifier: str | None
