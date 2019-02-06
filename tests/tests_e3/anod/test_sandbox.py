@@ -156,7 +156,7 @@ def test_sandbox_create_git(git_specs_dir):
     # Test structure
     for test_dir in ['bin', 'log', 'meta', 'patch',
                      'specs', 'src', 'tmp', 'vcs']:
-                    assert os.path.isdir(os.path.join(sandbox_dir, test_dir))
+        assert os.path.isdir(os.path.join(sandbox_dir, test_dir))
     # Test specs files if created
     specs_files = ['anod.anod', 'dummyspec.anod', 'conf.yaml', 'prolog.py']
     for filename in specs_files:
