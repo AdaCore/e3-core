@@ -74,7 +74,7 @@ def require_vcs(prog, request):
 @pytest.mark.usefixtures("git")
 def require_git(request):
     """Require git."""
-    marker = request.node.get_marker('git')
+    marker = request.node.get_closest_marker('git')
     if marker:
         return require_vcs('git', request)
 
@@ -89,7 +89,7 @@ def git(request):
 @pytest.mark.usefixtures("svn")
 def require_svn(request):
     """Require svn."""
-    marker = request.node.get_marker('svn')
+    marker = request.node.get_closest_marker('svn')
     if marker:
         return require_vcs('svn', request)
 
