@@ -11,7 +11,7 @@ class EntryPointKind(Enum):
     ms_preset = 1
 
 
-def entry_point(db, kind, name, description=None):
+def entry_point(db, kind, name, description=None, **kwargs):
     """Entry point decorator.
 
     Declare an electrolyt entry point (e.g. a machine name, a mailserver
@@ -31,6 +31,7 @@ def entry_point(db, kind, name, description=None):
     :type name: str
     :param description: entry point description
     :type description: str | None
+    :param kwargs: additional information to store with the entry point
     :raise: AnodError
     """
     def entry_point_dec(
@@ -46,6 +47,7 @@ def entry_point(db, kind, name, description=None):
         entry_point_func.kind = lkind
         entry_point_func.description = ldescription
         entry_point_func.executed = False
+        entry_point_func.data = kwargs
         ldb[lname] = entry_point_func
         return entry_point_func
 
