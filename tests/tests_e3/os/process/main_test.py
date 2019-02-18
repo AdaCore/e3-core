@@ -233,6 +233,7 @@ def test_interrupt():
                            '-c',
                            'import time; time.sleep(30)'],
                           bg=True)
+    time.sleep(0.5)  # Make sure the process had the time to start
     p.interrupt()
     t1 = time.time()
     assert t1 - t0 < 2, 'process not interrupted after 2s?'
