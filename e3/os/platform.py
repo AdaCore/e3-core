@@ -1,6 +1,7 @@
 """Provides function to detect platform specific information."""
 from __future__ import absolute_import, division, print_function
 
+import os
 import re
 import sys
 from collections import namedtuple
@@ -315,6 +316,10 @@ class SystemInfo(object):
             domain = tmp[1]
         else:
             domain = cls.nis_domain
+
+        # Hostname can be overriden by E3_HOSTNAME env variable
+        hostname = os.environ.get('E3_HOSTNAME',
+                                  hostname)
         cls._hostname = (hostname, domain)
         return cls._hostname
 
