@@ -5,7 +5,7 @@ import imp
 import inspect
 from functools import partial
 
-from e3.electrolyt.entry_point import EntryPointKind, entry_point
+from e3.electrolyt.entry_point import Machine, entry_point
 from e3.env import BaseEnv
 from e3.error import E3Error
 
@@ -17,14 +17,21 @@ class PlanError(E3Error):
 
 
 class Plan(object):
-    """Electrolyt Plan."""
+    """Electrolyt Plan.
 
-    def __init__(self, data):
+    :ivar entry_points: list of entry points found in the plans
+    :vartype entry_points: dict
+    """
+
+    def __init__(self, data, entry_point_cls=None):
         """Initialize a new plan.
 
         :param data: a dictionary defining additional globals to push
             into plan associated module
         :type data: dict[str, T]
+        :param entry_point_cls: dict associating a list of decorator name
+            with an entry point class
+        :type entry_point_cls: dict[str, T]
         """
         self.mod = imp.new_module('_anod_plan_')
 
@@ -34,9 +41,19 @@ class Plan(object):
 
         self.entry_points = {}
 
-        for ep_name, ep in EntryPointKind.__members__.iteritems():
-            self.mod.__dict__[ep_name] = partial(
-                entry_point, self.entry_points, ep)
+        if entry_point_cls is None:
+            entry_point_cls = {}
+
+        self.mod.__dict__['machine'] = partial(entry_point,
+                                               self.entry_points,
+                                               Machine,
+                                               'machine')
+
+        for name, cls in entry_point_cls.iteritems():
+            self.mod.__dict__[name] = partial(entry_point,
+                                              self.entry_points,
+                                              cls,
+                                              name)
 
     def load(self, filename):
         """Load python code from file.
@@ -180,8 +197,9 @@ class PlanContext(object):
 
         :param plan: the plan to execute
         :type plan: Plan
-        :param entry_point_name: entry point to call in the plan
-        :type entry_point_name: str
+        :param entry_point_name: entry point to call in the plan. It can be
+            either a function name in the plan or an entry_point function
+        :type entry_point_name: str | fun
         :param verify: verify whether the entry point name is a
             electrolyt entry point
         :type verify: bool
@@ -204,16 +222,14 @@ class PlanContext(object):
 
         self.action_list = []
         self.plan = plan
-        ep = plan.mod.__dict__[entry_point_name]
 
-        if verify and not getattr(ep, 'is_entry_point', False):
-            # ep.is_entry_point should be set to True when a function
-            # is decorated with e3.electrolyt.entry_point.entry_point
-            raise PlanError(
-                message='%s is not an entry point' % entry_point_name,
-                origin='PlanContext.execute')
+        if entry_point_name in plan.entry_points:
+            plan.entry_points[entry_point_name].execute()
+        else:
+            # ??? An error should be raised as soon as entry points are
+            # used everywhere
+            plan.mod.__dict__[entry_point_name]()
 
-        ep()
         return self.action_list
 
     def _add_action(self, name, *args, **kwargs):
