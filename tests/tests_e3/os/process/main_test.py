@@ -225,8 +225,7 @@ def test_is_running_non_existant():
     assert not running, 'could not find non existing process'
 
 
-@pytest.mark.xfail(e3.env.Env().build.os.name == 'solaris',
-                   reason='known issue: p.status == 0 on Solaris')
+@pytest.mark.xfail(reason='unstable test, p.status can be 0')
 def test_interrupt():
     t0 = time.time()
     p = e3.os.process.Run([sys.executable,
