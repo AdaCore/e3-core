@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+import os
 import tempfile
 
 import e3.log
@@ -11,8 +12,22 @@ from e3.os.fs import cd, which
 
 import pytest
 
-# Activate full debug logs
-e3.log.activate(level=logging.DEBUG, e3_debug=True)
+# When the variable RESULTS_DIR is set to
+# an existing directory, the testsuite will
+# generate results file in "anod" format
+RESULTS_DIR = os.environ.get('RESULTS_DIR')
+
+
+def init_testsuite_env():
+    """Initialize testsuite environment."""
+    # Activate full debug logs
+    e3.log.activate(level=logging.DEBUG, e3_debug=True)
+
+    # Force UTC timezone
+    os.environ['TZ'] = 'UTC'
+
+
+init_testsuite_env()
 
 
 class RequirementCoverage(object):
@@ -112,3 +127,27 @@ def pytest_itemcollected(item):
 def pytest_collectreport(report):
     """Output requirement coverage report."""
     RequirementCoverage.dump()
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """Generate results file that can be used by anod."""
+    # execute all other hooks to obtain the report object
+    outcome = yield
+    rep = outcome.get_result()
+
+    if not RESULTS_DIR or not os.path.isdir(RESULTS_DIR):
+        return
+
+    # we only look at actual test calls, not setup/teardown
+    if rep.when == "call":
+        outcome = rep.outcome.upper()
+        test_name = rep.nodeid.replace('/', '.').replace('::', '--')
+        if rep.longreprtext:
+            with open(
+                os.path.join(
+                    RESULTS_DIR, '{}.diff'.format(test_name)), 'w') as f:
+                f.write(rep.longreprtext)
+
+        with open(os.path.join(RESULTS_DIR, "results"), 'a') as f:
+            f.write('{}: {}\n'.format(test_name, outcome))
