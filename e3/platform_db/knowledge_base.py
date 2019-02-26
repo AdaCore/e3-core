@@ -73,7 +73,8 @@ PLATFORM_INFO = {
     'x86-solaris': {'cpu': 'x86', 'os': 'solaris', 'is_hie': False},
     'x86_64-solaris': {'cpu': 'x86_64', 'os': 'solaris', 'is_hie': False},
     'x86-windows': {'cpu': 'x86', 'os': 'windows', 'is_hie': False},
-    'x86_64-windows': {'cpu': 'x86_64', 'os': 'windows', 'is_hie': False}}
+    'x86_64-windows': {'cpu': 'x86_64', 'os': 'windows', 'is_hie': False},
+    'x86_64-windows64': {'cpu': 'x86_64', 'os': 'windows', 'is_hie': False}}
 
 BUILD_TARGETS = {
     'aarch64-elf': {'name': 'aarch64-elf'},
@@ -103,7 +104,8 @@ BUILD_TARGETS = {
     'x86-solaris': {'name': 'i686-pc-solaris%(os_version)s'},
     'x86_64-solaris': {'name': 'x86_64-sun-solaris%(os_version)s'},
     'x86-windows': {'name': 'i686-pc-mingw32'},
-    'x86_64-windows': {'name': 'x86_64-pc-mingw32'}
+    'x86_64-windows': {'name': 'x86_64-pc-mingw32'},
+    'x86_64-windows64': {'name': 'x86_64-w64-mingw64'}
 }
 
 # The following table is used to guess a product name from the output of
