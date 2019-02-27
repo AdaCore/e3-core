@@ -133,4 +133,4 @@ def pytest_runtest_makereport(item, call):
                 f.write(rep.longreprtext)
 
         with open(os.path.join(RESULTS_DIR, "results"), 'a') as f:
-            f.write('{}: {}\n'.format(test_name, outcome))
+            f.write('{}:{}\n'.format(test_name, outcome))
