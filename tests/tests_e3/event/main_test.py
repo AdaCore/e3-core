@@ -38,7 +38,7 @@ def test_smtp_event():
         e.attach_file('unknown', name='unknown')
         e.subject = 'a test subject'
 
-    with mock.patch('smtplib.SMTP') as mock_smtp:
+    with mock.patch('smtplib.SMTP_SSL') as mock_smtp:
         manager.send_event(e)
 
     smtp_mock = mock_smtp.return_value

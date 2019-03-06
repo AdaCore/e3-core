@@ -12,7 +12,8 @@ def test_sendmail():
     from_addr = 'e3@example.net'
     to_addresses = ['info@example.net', 'info@example.com']
     msg_as_string = 'test mail content'
-    with mock.patch('smtplib.SMTP') as mock_smtp:
+
+    with mock.patch('smtplib.SMTP_SSL') as mock_smtp:
         e3.net.smtp.sendmail(
             from_addr,
             to_addresses,
@@ -42,7 +43,7 @@ def test_sendmail_onerror(caplog):
     assert result is False
     assert 'message file too big' in caplog.text
 
-    with mock.patch('smtplib.SMTP') as mock_smtp:
+    with mock.patch('smtplib.SMTP_SSL') as mock_smtp:
         mock_smtp.side_effect = smtplib.SMTPException()
         result = e3.net.smtp.sendmail(
             from_addr,
@@ -51,7 +52,7 @@ def test_sendmail_onerror(caplog):
             ['smtp.localhost'])
         assert result is False
 
-    with mock.patch('smtplib.SMTP') as mock_smtp:
+    with mock.patch('smtplib.SMTP_SSL') as mock_smtp:
         smtp_mock = mock_smtp.return_value
         smtp_mock.sendmail.side_effect = smtplib.SMTPException()
         result = e3.net.smtp.sendmail(
@@ -61,7 +62,7 @@ def test_sendmail_onerror(caplog):
             ['smtp.localhost'])
         assert result is False
 
-    with mock.patch('smtplib.SMTP') as mock_smtp:
+    with mock.patch('smtplib.SMTP_SSL') as mock_smtp:
         smtp_mock = mock_smtp.return_value
         smtp_mock.sendmail.return_value = {}
 
@@ -76,7 +77,7 @@ def test_sendmail_onerror(caplog):
         assert 'Message-ID: %s sent successfully' % mid in caplog.text
         assert 'smtp quit' in caplog.text
 
-    with mock.patch('smtplib.SMTP') as mock_smtp:
+    with mock.patch('smtplib.SMTP_SSL') as mock_smtp:
         smtp_mock = mock_smtp.return_value
         smtp_mock.sendmail.return_value = {}
 
