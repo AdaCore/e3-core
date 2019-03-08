@@ -105,7 +105,7 @@ BUILD_TARGETS = {
     'x86_64-solaris': {'name': 'x86_64-sun-solaris%(os_version)s'},
     'x86-windows': {'name': 'i686-pc-mingw32'},
     'x86_64-windows': {'name': 'x86_64-pc-mingw32'},
-    'x86_64-windows64': {'name': 'x86_64-w64-mingw64'}
+    'x86_64-windows64': {'name': 'x86_64-w64-mingw32'}
 }
 
 # The following table is used to guess a product name from the output of
