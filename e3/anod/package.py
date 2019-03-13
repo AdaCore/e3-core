@@ -21,7 +21,8 @@ class Package(object):
             The version is by default set to Anod.sandbox.build_version and
             can be overridden by the version callback.
         :type prefix: str
-        :param publish: if True, publish the package
+        :param publish: if True, publish the package (i.e. the package
+            can be distributed to a customer).
         :type publish: bool
         :param nsis: a callback returning a dictionary containing needed data
             to build an NSIS package.
