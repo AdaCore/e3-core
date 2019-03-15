@@ -92,7 +92,7 @@ def test_initall():
     a_decision.set_decision(action.Decision.BOTH, 'plan_line.txt:2')
     assert a_decision.get_decision() is None
 
-    boi_decision = action.BuildOrInstall(
+    boi_decision = action.BuildOrDownload(
         root=install,
         left=build,
         right=download)

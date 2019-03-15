@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import e3.log
-from e3.anod.action import (Build, BuildOrInstall, Checkout, CreateSource,
+from e3.anod.action import (Build, BuildOrDownload, Checkout, CreateSource,
                             CreateSourceOrDownload, CreateSources, Decision,
                             DownloadBinary, DownloadSource, GetSource, Install,
                             InstallSource, Root, Test, UploadBinaryComponent,
@@ -274,8 +274,8 @@ class AnodContext(object):
         if primitive == 'build':
             build_action = None
             for el in self.predecessors(result):
-                if isinstance(el, BuildOrInstall):
-                    el.set_decision(BuildOrInstall.BUILD, plan_line)
+                if isinstance(el, BuildOrDownload):
+                    el.set_decision(BuildOrDownload.BUILD, plan_line)
                     build_action = self[el.left]
             if build_action is None and isinstance(result, Build):
                 build_action = result
@@ -299,8 +299,8 @@ class AnodContext(object):
 
         elif primitive == 'install':
             for el in self.predecessors(result):
-                if isinstance(el, BuildOrInstall):
-                    el.set_decision(BuildOrInstall.INSTALL, plan_line)
+                if isinstance(el, BuildOrDownload):
+                    el.set_decision(BuildOrDownload.INSTALL, plan_line)
         return result
 
     def add_spec(self,
@@ -447,7 +447,7 @@ class AnodContext(object):
                     plan_args=None,
                     plan_line=plan_line,
                     force_source_deps=force_source_deps)
-                self.add_decision(BuildOrInstall,
+                self.add_decision(BuildOrDownload,
                                   result,
                                   build_action,
                                   download_action)
@@ -514,9 +514,9 @@ class AnodContext(object):
                     # subtree starting with an install node. In that case
                     # we expect the user to choose BUILD as decision.
                     dec = self.predecessors(child_action)[0]
-                    if isinstance(dec, BuildOrInstall):
+                    if isinstance(dec, BuildOrDownload):
                         dec.add_trigger(
-                            result, BuildOrInstall.BUILD,
+                            result, BuildOrDownload.BUILD,
                             plan_line if plan_line is not None
                             else 'unknown line')
 

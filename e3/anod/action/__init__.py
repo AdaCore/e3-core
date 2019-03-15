@@ -452,14 +452,14 @@ class CreateSourceOrDownload(Decision):
             else 'DownloadSource'
 
 
-class BuildOrInstall(Decision):
+class BuildOrDownload(Decision):
     """Decision between building or downloading a component."""
 
     BUILD = Decision.LEFT
     INSTALL = Decision.RIGHT
 
     def __init__(self, root, left, right):
-        """Initialize a BuildOrInstall instance.
+        """Initialize a BuildOrDownload instance.
 
         :param root: parent node
         :type root: Install
@@ -471,9 +471,9 @@ class BuildOrInstall(Decision):
         assert isinstance(left, Build)
         assert isinstance(right, DownloadBinary)
         assert isinstance(root, Install)
-        super(BuildOrInstall, self).__init__(root=root,
-                                             left=left,
-                                             right=right)
+        super(BuildOrDownload, self).__init__(root=root,
+                                              left=left,
+                                              right=right)
 
     @classmethod
     def description(cls, decision):
