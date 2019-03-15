@@ -86,10 +86,10 @@ def test_initall():
 
     assert a_decision.get_decision() is None
 
-    a_decision.set_decision(action.Decision.RIGHT)
+    a_decision.set_decision(action.Decision.RIGHT, 'plan_line.txt:1')
     assert a_decision.get_decision() == 'download.my_source'
 
-    a_decision.set_decision(action.Decision.BOTH)
+    a_decision.set_decision(action.Decision.BOTH, 'plan_line.txt:2')
     assert a_decision.get_decision() is None
 
     boi_decision = action.BuildOrInstall(
@@ -97,7 +97,7 @@ def test_initall():
         left=build,
         right=download)
     assert boi_decision.get_decision() is None
-    boi_decision.set_decision(action.Decision.LEFT)
+    boi_decision.set_decision(action.Decision.LEFT, 'plan_line.txt:3')
     assert boi_decision.get_decision() == build.uid
 
 
@@ -127,7 +127,7 @@ def test_trigger():
 
     # Add a trigger on 'build'
     decision = action.Decision(root=root, left=build2, right=install2)
-    decision.add_trigger(build, action.Decision.LEFT)
+    decision.add_trigger(build, action.Decision.LEFT, 'my_plan_line')
 
     decision.apply_triggers(dag)
 
@@ -146,7 +146,7 @@ def test_trigger():
 
     # Set back to the expected choice and ask for another one
     decision.expected_choice = build2.uid
-    decision.set_decision(action.Decision.RIGHT)
+    decision.set_decision(action.Decision.RIGHT, 'my_other_plan_line')
     assert decision.get_decision() is None  # Decision.BOTH
 
     # Also change the expected choice to RIGHT

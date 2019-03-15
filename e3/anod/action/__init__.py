@@ -340,8 +340,9 @@ class Decision(Action):
         self.left = left.uid
         self.right = right.uid
         self.triggers = []
+        self.decision_maker = None
 
-    def add_trigger(self, trigger, decision):
+    def add_trigger(self, trigger, decision, plan_line):
         """Add a trigger.
 
         A trigger will be used to set an expected choice depending on the
@@ -352,8 +353,10 @@ class Decision(Action):
         :param decision: expected decision when the trigger action is
             scheduled
         :type decision: int
+        :param plan_line: plan line associated with this action
+        :type plan_line: str
         """
-        self.triggers.append((trigger.uid, decision))
+        self.triggers.append((trigger.uid, decision, plan_line))
 
     def apply_triggers(self, dag):
         """Apply triggers.
@@ -361,7 +364,7 @@ class Decision(Action):
         :param dag: a dag of scheduled actions
         :type dag: e3.collection.dag.DAG
         """
-        for uid, decision in self.triggers:
+        for uid, decision, _ in self.triggers:
             if uid in dag:
                 if self.expected_choice is None:
                     self.expected_choice = decision
@@ -400,16 +403,25 @@ class Decision(Action):
         else:
             return None
 
-    def set_decision(self, which):
+    def set_decision(self, which, decision_maker):
         """Make a choice.
 
         :param which: Decision.LEFT or Decision.RIGHT
         :type which: int
+        :param decision_maker: record who the decision maker is
+        :type decision_maker: None | str
         """
         if self.choice is None:
             self.choice = which
         elif self.choice != which:
             self.choice = Decision.BOTH
+        self.decision_maker = decision_maker
+
+    @classmethod
+    def description(cls, decision):
+        """Return a description of the decision."""
+        raise NotImplementedError(
+            'description is not implemented in Decision root class.')
 
 
 class CreateSourceOrDownload(Decision):
@@ -434,6 +446,11 @@ class CreateSourceOrDownload(Decision):
                                                      left=left,
                                                      right=right)
 
+    @classmethod
+    def description(cls, decision):
+        return 'CreateSource' if decision == Decision.LEFT \
+            else 'DownloadSource'
+
 
 class BuildOrInstall(Decision):
     """Decision between building or downloading a component."""
@@ -457,3 +474,7 @@ class BuildOrInstall(Decision):
         super(BuildOrInstall, self).__init__(root=root,
                                              left=left,
                                              right=right)
+
+    @classmethod
+    def description(cls, decision):
+        return 'Build' if decision == Decision.LEFT else 'DownloadBinary'

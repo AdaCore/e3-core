@@ -226,7 +226,7 @@ class TestContext(object):
     def test_add_anod_action11(self):
         """Check build dependencies."""
         ac = self.create_context()
-        ac.add_anod_action('spec10', primitive='build')
+        ac.add_anod_action('spec10', primitive='build', plan_line='myplan:1')
 
         # we have a dep on spec3 build_pkg, we require an explicit call to
         # build
@@ -235,11 +235,11 @@ class TestContext(object):
 
         assert '.build (expected)' in str(err)
 
-        ac.add_anod_action('spec3', primitive='install')
+        ac.add_anod_action('spec3', primitive='install', plan_line='myplan:2')
         with pytest.raises(SchedulingError) as err:
             ac.schedule(ac.always_download_source_resolver)
 
-        assert 'is expected after' in str(err)
+        assert 'explicit DownloadBinary decision made by myplan:2' in str(err)
 
     def test_add_anod_action12(self):
         """Check handling of duplicated source package."""
@@ -315,7 +315,7 @@ class TestContext(object):
                    u'    anod_build("spec11", weathers="bar")']
         with open('plan.txt', 'w') as f:
             f.write('\n'.join(content))
-        myplan = plan.Plan({})
+        myplan = plan.Plan({}, plan_ext='.txt')
         myplan.load('plan.txt')
 
         # Execute the plan and create anod actions
@@ -474,10 +474,10 @@ class TestContext(object):
         content = [u'def myserver():',
                    u'    anod_build("spec3", weathers="A")',
                    u'    anod_build("spec3", weathers="B")']
-        with open('plan.txt', 'w') as f:
+        with open('plan.plan', 'w') as f:
             f.write('\n'.join(content))
         myplan = plan.Plan({})
-        myplan.load('plan.txt')
+        myplan.load('plan.plan')
 
         if not reject_duplicates:
             # Execute the plan and create anod actions

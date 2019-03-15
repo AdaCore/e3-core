@@ -275,7 +275,7 @@ class AnodContext(object):
             build_action = None
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrInstall):
-                    el.set_decision(BuildOrInstall.BUILD)
+                    el.set_decision(BuildOrInstall.BUILD, plan_line)
                     build_action = self[el.left]
             if build_action is None and isinstance(result, Build):
                 build_action = result
@@ -290,7 +290,7 @@ class AnodContext(object):
                         upload_bin = UploadSourceComponent(spec)
                     self.add(upload_bin)
                     # ??? is it needed?
-                    if plan_line is not None:
+                    if plan_line is not None and plan_args is not None:
                         self.link_to_plan(vertex_id=upload_bin.uid,
                                           plan_line=plan_line,
                                           plan_args=plan_args)
@@ -300,7 +300,7 @@ class AnodContext(object):
         elif primitive == 'install':
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrInstall):
-                    el.set_decision(BuildOrInstall.INSTALL)
+                    el.set_decision(BuildOrInstall.INSTALL, plan_line)
         return result
 
     def add_spec(self,
@@ -371,7 +371,9 @@ class AnodContext(object):
                         name=name,
                         env=env,
                         primitive='source',
-                        source_name=sb.name)
+                        source_name=sb.name,
+                        plan_line=plan_line,
+                        plan_args=None)
                     self.connect(result, sub_result)
 
         elif primitive == 'build':
@@ -386,7 +388,7 @@ class AnodContext(object):
         # If this action is directly linked with a plan line make sure
         # to register the link between the action and the plan even
         # if the action has already been added via another dependency
-        if plan_line is not None:
+        if plan_line is not None and plan_args is not None:
             self.link_to_plan(vertex_id=result.uid,
                               plan_line=plan_line,
                               plan_args=plan_args)
@@ -412,6 +414,8 @@ class AnodContext(object):
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
             return self.add_spec(name, env, 'install', qualifier,
+                                 plan_args=None,
+                                 plan_line=plan_line,
                                  force_source_deps=force_source_deps)
 
         # Add this stage if the action is already in the DAG, then it has
@@ -440,6 +444,8 @@ class AnodContext(object):
                     primitive='build',
                     qualifier=qualifier,
                     expand_build=False,
+                    plan_args=None,
+                    plan_line=plan_line,
                     force_source_deps=force_source_deps)
                 self.add_decision(BuildOrInstall,
                                   result,
@@ -496,6 +502,8 @@ class AnodContext(object):
                     env=e.env(spec, self.default_env),
                     primitive=e.kind,
                     qualifier=e.qualifier,
+                    plan_args=None,
+                    plan_line=plan_line,
                     force_source_deps=force_source_deps)
 
                 spec.deps[e.local_name] = child_action.anod_instance
@@ -507,7 +515,10 @@ class AnodContext(object):
                     # we expect the user to choose BUILD as decision.
                     dec = self.predecessors(child_action)[0]
                     if isinstance(dec, BuildOrInstall):
-                        dec.add_trigger(result, BuildOrInstall.BUILD)
+                        dec.add_trigger(
+                            result, BuildOrInstall.BUILD,
+                            plan_line if plan_line is not None
+                            else 'unknown line')
 
                 # Connect child dependency
                 self.connect(result, child_action)
@@ -555,6 +566,8 @@ class AnodContext(object):
                         name=spec_decl,
                         env=BaseEnv(),
                         primitive='source',
+                        plan_args=None,
+                        plan_line=plan_line,
                         source_name=s.name)
                     for repo in obj.checkout:
                         r = Checkout(repo, self.repo.repos.get(repo))
@@ -586,9 +599,23 @@ class AnodContext(object):
         elif decision.choice == Decision.BOTH:
             msg = 'cannot do both %s and %s' % (decision.left, decision.right)
         else:
-            msg = 'cannot do %s as %s is expected after ' \
-                  'scheduling resolution' % \
-                  (action.uid, decision.get_expected_decision())
+            trigger_decisions = '\n'.join(
+                '{} made by {} initiated by {}'.format(
+                    decision.left
+                    if trigger_decision == Decision.LEFT else decision.right,
+                    trigger_action,
+                    trigger_plan_line)
+                for (trigger_action,
+                     trigger_decision,
+                     trigger_plan_line)
+                in decision.triggers)
+            msg = 'explicit {} decision made by {} conflicts with the '\
+                'following decision{}:\n{}'.format(
+                    decision.description(decision.get_expected_decision()),
+                    decision.decision_maker,
+                    's' if len(decision.triggers) > 1 else '',
+                    trigger_decisions)
+
         raise SchedulingError(msg)
 
     @classmethod
