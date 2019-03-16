@@ -3,7 +3,23 @@ from e3.anod.spec import Anod
 
 class Spec10(Anod):
 
-    build_deps = [Anod.Dependency(name='spec3', require='build_tree')]
+    @property
+    def build_deps(self):
+        if 'build_tree_with_env' in self.parsed_qualifier:
+            return [
+                Anod.Dependency(name='spec3',
+                                build='x86_64-linux',
+                                host='x86-linux',
+                                target='arm-elf',
+                                qualifier='foo',
+                                require='build_tree')]
+        elif 'build_tree' in self.parsed_qualifier:
+            return [
+                Anod.Dependency(name='spec3',
+                                qualifier='foo',
+                                require='build_tree')]
+        else:
+            return [Anod.Dependency(name='spec3', require='installation')]
 
     @Anod.primitive()
     def build(self):

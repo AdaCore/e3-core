@@ -588,14 +588,19 @@ class AnodContext(object):
         :type decision: Decision
         :raise SchedulingError
         """
-        if decision.choice is None:
-            msg = 'a decision should be taken between %s%s and %s%s' % (
-                decision.left,
-                ' (expected)' if decision.expected_choice == Decision.LEFT
-                else '',
-                decision.right,
-                ' (expected)' if decision.expected_choice == Decision.RIGHT
-                else '')
+        if decision.choice is None and decision.expected_choice in (
+                Decision.LEFT, Decision.RIGHT):
+            msg = 'This plan resolver requires an explicit {}'.format(
+                decision.suggest_plan_fix(decision.expected_choice))
+        elif decision.choice is None and decision.expected_choice is None:
+            left_decision = decision.suggest_plan_fix(Decision.LEFT)
+            right_decision = decision.suggest_plan_fix(Decision.RIGHT)
+            msg = 'This plan resolver cannot decide whether what to do for' \
+                ' resolving {}.'.format(decision.initiator)
+            if left_decision is not None and right_decision is not None:
+                msg += ' Please either add {} or {} in the plan'.format(
+                    left_decision,
+                    right_decision)
         elif decision.choice == Decision.BOTH:
             msg = 'cannot do both %s and %s' % (decision.left, decision.right)
         else:

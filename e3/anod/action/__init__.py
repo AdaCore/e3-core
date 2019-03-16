@@ -1,4 +1,7 @@
 from __future__ import absolute_import, division, print_function
+
+import abc
+
 from e3.anod.spec import Anod
 
 
@@ -317,6 +320,8 @@ class Decision(Action):
     After scheduling a DAG will not contain any Decision node.
     """
 
+    __metaclass__ = abc.ABCMeta
+
     LEFT = 0
     RIGHT = 1
     BOTH = 2
@@ -338,7 +343,9 @@ class Decision(Action):
         self.choice = choice
         self.expected_choice = None
         self.left = left.uid
+        self.left_action = left
         self.right = right.uid
+        self.right_action = right
         self.triggers = []
         self.decision_maker = None
 
@@ -418,10 +425,22 @@ class Decision(Action):
         self.decision_maker = decision_maker
 
     @classmethod
+    @abc.abstractmethod
     def description(cls, decision):
         """Return a description of the decision."""
-        raise NotImplementedError(
-            'description is not implemented in Decision root class.')
+        pass  # all: no cover
+
+    def suggest_plan_fix(self, choice):
+        """Suggest a plan line that would fix the conflict.
+
+        :param choice: Decision.LEFT or Decision.RIGHT
+        :type choice: int
+
+        :return: a line to add to the plan or None if no fix
+             can be proposed
+        :rtype: str | None
+        """
+        return None
 
 
 class CreateSourceOrDownload(Decision):
@@ -478,3 +497,24 @@ class BuildOrDownload(Decision):
     @classmethod
     def description(cls, decision):
         return 'Build' if decision == Decision.LEFT else 'DownloadBinary'
+
+    def suggest_plan_fix(self, choice):
+        action = self.left_action \
+            if choice == Decision.LEFT \
+            else self.right_action
+        spec_instance = action.data
+
+        args = ['"{}"'.format(spec_instance.name)]
+        if spec_instance.qualifier:
+            args.append('qualifier="{}"'.format(spec_instance.qualifier))
+        args.append('build="{}"'.format(spec_instance.env.build.platform))
+        if spec_instance.env.host.platform != \
+                spec_instance.env.build.platform:
+            args.append('host="{}"'.format(
+                spec_instance.env.host.platform))
+        if spec_instance.env.target.platform != \
+                spec_instance.env.host.platform:
+            args.append('target="{}"'.format(
+                spec_instance.env.target.platform))
+
+        return 'anod_{}({})'.format(spec_instance.kind, ", ".join(args))

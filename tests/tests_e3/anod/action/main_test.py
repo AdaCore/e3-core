@@ -121,12 +121,19 @@ def test_trigger():
     build_spec2.env = e3.env.Env()
     build2 = action.Build(anod_instance=build_spec2)
 
-    install2 = action.Install(anod_instance=build_spec2)
+    download2 = action.DownloadBinary(build_spec2)
+
+    install_spec2 = Spec(qualifier='', kind='install')
+    install_spec2.name = 'my_spec2'
+    install_spec2.env = e3.env.Env()
+    install2 = action.Install(install_spec2)
 
     dag.add_vertex(root)
+    dag.add_vertex(install2)
 
     # Add a trigger on 'build'
-    decision = action.Decision(root=root, left=build2, right=install2)
+    decision = action.BuildOrDownload(
+        root=install2, left=build2, right=download2)
     decision.add_trigger(build, action.Decision.LEFT, 'my_plan_line')
 
     decision.apply_triggers(dag)
@@ -151,4 +158,4 @@ def test_trigger():
 
     # Also change the expected choice to RIGHT
     decision.expected_choice = action.Decision.RIGHT
-    assert decision.get_expected_decision() == install2.uid
+    assert decision.get_expected_decision() == download2.uid
