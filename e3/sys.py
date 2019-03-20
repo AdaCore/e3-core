@@ -81,7 +81,7 @@ class RewriteImportRule(object):
 
         if check_in_names is not None:
             new_names = []
-            for idx, var in enumerate(node.names):
+            for _, var in enumerate(node.names):
                 if re.match('^' + check_in_names + '$', var.name):
                     if self.action == self.RuleAction.skip:
                         # don't import this name

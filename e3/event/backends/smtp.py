@@ -65,7 +65,7 @@ class SMTPEventManager(EventManager):
                               'attachment', filename='event')
         mail.attach(event_json)
 
-        for name, (filename, file_hash) in attachments.items():
+        for name, (filename, _) in attachments.items():
             ctype, encoding = mimetypes.guess_type(filename)
 
             if encoding == 'gzip' and ctype == 'application/x-tar':
