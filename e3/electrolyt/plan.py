@@ -23,7 +23,7 @@ class Plan(object):
     :vartype entry_points: dict
     """
 
-    def __init__(self, data, entry_point_cls=None):
+    def __init__(self, data, entry_point_cls=None, plan_ext='.plan'):
         """Initialize a new plan.
 
         :param data: a dictionary defining additional globals to push
@@ -32,6 +32,10 @@ class Plan(object):
         :param entry_point_cls: dict associating a list of decorator name
             with an entry point class
         :type entry_point_cls: dict[str, T]
+        :param plan_ext: plan extension, by default ".plan". This is used to
+            detect whether a specific frame is in a plan or in our code. See
+            PlanContext._add_action
+        :type plan_ext: str
         """
         self.mod = imp.new_module('_anod_plan_')
 
@@ -43,6 +47,8 @@ class Plan(object):
 
         if entry_point_cls is None:
             entry_point_cls = {}
+
+        self.plan_ext = plan_ext
 
         self.mod.__dict__['machine'] = partial(entry_point,
                                                self.entry_points,
@@ -245,15 +251,27 @@ class PlanContext(object):
         if self.ignore_disabled and not self.env.enabled:
             return
 
+        plan_line = 'unknown filename:unknown lineno'
         # Retrieve the plan line
         try:
-            caller_frame = inspect.getouterframes(
-                frame=inspect.currentframe())[1]
+            caller_frames = inspect.getouterframes(
+                frame=inspect.currentframe())
+            caller_frame = None
+            for frame in caller_frames:
+                if isinstance(frame, tuple):  # py2-only
+                    frame_filename = frame[1]
+                else:  # py3-only
+                    frame_filename = frame.filename
+                if frame_filename.endswith(self.plan.plan_ext):
+                    caller_frame = frame
         except Exception:  # defensive code
             # do not crash when inspect frames fails
-            plan_line = 'unknown filename:unknown lineno'
+            pass
         else:
-            if isinstance(caller_frame, tuple):  # py2-only
+            if caller_frame is None:  # defensive code
+                # No information ?
+                pass
+            elif isinstance(caller_frame, tuple):  # py2-only
                 plan_line = '{}:{}'.format(caller_frame[1], caller_frame[2])
             else:  # py3-only
                 plan_line = '{}:{}'.format(

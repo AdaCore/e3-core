@@ -1,4 +1,7 @@
 from __future__ import absolute_import, division, print_function
+
+import abc
+
 from e3.anod.spec import Anod
 
 
@@ -317,6 +320,8 @@ class Decision(Action):
     After scheduling a DAG will not contain any Decision node.
     """
 
+    __metaclass__ = abc.ABCMeta
+
     LEFT = 0
     RIGHT = 1
     BOTH = 2
@@ -338,10 +343,13 @@ class Decision(Action):
         self.choice = choice
         self.expected_choice = None
         self.left = left.uid
+        self.left_action = left
         self.right = right.uid
+        self.right_action = right
         self.triggers = []
+        self.decision_maker = None
 
-    def add_trigger(self, trigger, decision):
+    def add_trigger(self, trigger, decision, plan_line):
         """Add a trigger.
 
         A trigger will be used to set an expected choice depending on the
@@ -352,8 +360,10 @@ class Decision(Action):
         :param decision: expected decision when the trigger action is
             scheduled
         :type decision: int
+        :param plan_line: plan line associated with this action
+        :type plan_line: str
         """
-        self.triggers.append((trigger.uid, decision))
+        self.triggers.append((trigger.uid, decision, plan_line))
 
     def apply_triggers(self, dag):
         """Apply triggers.
@@ -361,7 +371,7 @@ class Decision(Action):
         :param dag: a dag of scheduled actions
         :type dag: e3.collection.dag.DAG
         """
-        for uid, decision in self.triggers:
+        for uid, decision, _ in self.triggers:
             if uid in dag:
                 if self.expected_choice is None:
                     self.expected_choice = decision
@@ -400,16 +410,37 @@ class Decision(Action):
         else:
             return None
 
-    def set_decision(self, which):
+    def set_decision(self, which, decision_maker):
         """Make a choice.
 
         :param which: Decision.LEFT or Decision.RIGHT
         :type which: int
+        :param decision_maker: record who the decision maker is
+        :type decision_maker: None | str
         """
         if self.choice is None:
             self.choice = which
         elif self.choice != which:
             self.choice = Decision.BOTH
+        self.decision_maker = decision_maker
+
+    @classmethod
+    @abc.abstractmethod
+    def description(cls, decision):
+        """Return a description of the decision."""
+        pass  # all: no cover
+
+    def suggest_plan_fix(self, choice):
+        """Suggest a plan line that would fix the conflict.
+
+        :param choice: Decision.LEFT or Decision.RIGHT
+        :type choice: int
+
+        :return: a line to add to the plan or None if no fix
+             can be proposed
+        :rtype: str | None
+        """
+        return None
 
 
 class CreateSourceOrDownload(Decision):
@@ -434,15 +465,20 @@ class CreateSourceOrDownload(Decision):
                                                      left=left,
                                                      right=right)
 
+    @classmethod
+    def description(cls, decision):
+        return 'CreateSource' if decision == Decision.LEFT \
+            else 'DownloadSource'
 
-class BuildOrInstall(Decision):
+
+class BuildOrDownload(Decision):
     """Decision between building or downloading a component."""
 
     BUILD = Decision.LEFT
     INSTALL = Decision.RIGHT
 
     def __init__(self, root, left, right):
-        """Initialize a BuildOrInstall instance.
+        """Initialize a BuildOrDownload instance.
 
         :param root: parent node
         :type root: Install
@@ -454,6 +490,31 @@ class BuildOrInstall(Decision):
         assert isinstance(left, Build)
         assert isinstance(right, DownloadBinary)
         assert isinstance(root, Install)
-        super(BuildOrInstall, self).__init__(root=root,
-                                             left=left,
-                                             right=right)
+        super(BuildOrDownload, self).__init__(root=root,
+                                              left=left,
+                                              right=right)
+
+    @classmethod
+    def description(cls, decision):
+        return 'Build' if decision == Decision.LEFT else 'DownloadBinary'
+
+    def suggest_plan_fix(self, choice):
+        action = self.left_action \
+            if choice == Decision.LEFT \
+            else self.right_action
+        spec_instance = action.data
+
+        args = ['"{}"'.format(spec_instance.name)]
+        if spec_instance.qualifier:
+            args.append('qualifier="{}"'.format(spec_instance.qualifier))
+        args.append('build="{}"'.format(spec_instance.env.build.platform))
+        if spec_instance.env.host.platform != \
+                spec_instance.env.build.platform:
+            args.append('host="{}"'.format(
+                spec_instance.env.host.platform))
+        if spec_instance.env.target.platform != \
+                spec_instance.env.host.platform:
+            args.append('target="{}"'.format(
+                spec_instance.env.target.platform))
+
+        return 'anod_{}({})'.format(spec_instance.kind, ", ".join(args))

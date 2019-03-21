@@ -98,6 +98,18 @@ class TestContext(object):
                  'mylinux.x86-linux.spec2.source_install.spec2-src',
                  'download.spec2-src'))
 
+    def test_add_anod_action2_no_source_resolver(self):
+        def no_resolver(action, decision):
+            return AnodContext.decision_error(action, decision)
+        ac = self.create_context()
+        ac.add_anod_action('spec2', primitive='build')
+        assert len(ac.tree) == 8, ac.tree.as_dot()
+
+        with pytest.raises(SchedulingError) as err:
+            ac.schedule(no_resolver)
+        assert 'This plan resolver cannot decide whether what to do' \
+            ' for resolving source_get.spec2-src.' in str(err)
+
     def test_add_anod_action3(self):
         # Simple spec with both install and build primitive and a package
         # declared
@@ -223,23 +235,68 @@ class TestContext(object):
         with pytest.raises(SchedulingError):
             ac.schedule(ac.always_download_source_resolver)
 
-    def test_add_anod_action11(self):
+    def test_add_anod_action11_build_tree_dep(self):
         """Check build dependencies."""
         ac = self.create_context()
-        ac.add_anod_action('spec10', primitive='build')
+        ac.add_anod_action(
+            'spec10',
+            qualifier='build_tree',
+            primitive='build',
+            plan_line='myplan:1')
 
         # we have a dep on spec3 build_pkg, we require an explicit call to
         # build
         with pytest.raises(SchedulingError) as err:
             ac.schedule(ac.always_download_source_resolver)
 
-        assert '.build (expected)' in str(err)
+        assert 'This plan resolver requires an explicit' in str(err)
+        assert 'anod_build("spec3", qualifier="foo"' \
+            ', build="x86-linux")' in str(err)
 
-        ac.add_anod_action('spec3', primitive='install')
+        ac.add_anod_action('spec3', qualifier='foo',
+                           primitive='install', plan_line='myplan:2')
         with pytest.raises(SchedulingError) as err:
             ac.schedule(ac.always_download_source_resolver)
 
-        assert 'is expected after' in str(err)
+        assert 'explicit DownloadBinary decision made by myplan:2' in str(err)
+
+    def test_add_anod_action11_build_tree_dep_with_env(self):
+        """Check build dependencies."""
+        ac = self.create_context()
+        ac.add_anod_action(
+            'spec10',
+            qualifier='build_tree_with_env',
+            primitive='build',
+            plan_line='myplan:1')
+
+        # we have a dep on spec3 build_pkg, we require an explicit call to
+        # build
+        with pytest.raises(SchedulingError) as err:
+            ac.schedule(ac.always_download_source_resolver)
+
+        assert 'This plan resolver requires an explicit' in str(err)
+        assert 'anod_build("spec3", qualifier="foo",' \
+            ' build="x86_64-linux", host="x86-linux",' \
+            ' target="arm-elf")' in str(err)
+
+    def test_add_anod_action11_install_dep(self):
+        """Check build dependencies."""
+        ac = self.create_context()
+        ac.add_anod_action('spec10', primitive='build', plan_line='myplan:1')
+
+        # we have a dep on spec3 build_pkg, we require an explicit call to
+        # build
+        with pytest.raises(SchedulingError) as err:
+            ac.schedule(ac.always_download_source_resolver)
+
+        assert 'Please either add anod_build("spec3", build="x86-linux") '\
+            'or anod_install("spec3", build="x86-linux")' \
+            ' in the plan' in str(err)
+
+        ac.add_anod_action('spec3', primitive='install', plan_line='myplan:2')
+
+        # This call should not raise an exception
+        ac.schedule(ac.always_download_source_resolver)
 
     def test_add_anod_action12(self):
         """Check handling of duplicated source package."""
@@ -315,7 +372,7 @@ class TestContext(object):
                    u'    anod_build("spec11", weathers="bar")']
         with open('plan.txt', 'w') as f:
             f.write('\n'.join(content))
-        myplan = plan.Plan({})
+        myplan = plan.Plan({}, plan_ext='.txt')
         myplan.load('plan.txt')
 
         # Execute the plan and create anod actions
@@ -474,10 +531,10 @@ class TestContext(object):
         content = [u'def myserver():',
                    u'    anod_build("spec3", weathers="A")',
                    u'    anod_build("spec3", weathers="B")']
-        with open('plan.txt', 'w') as f:
+        with open('plan.plan', 'w') as f:
             f.write('\n'.join(content))
         myplan = plan.Plan({})
-        myplan.load('plan.txt')
+        myplan.load('plan.plan')
 
         if not reject_duplicates:
             # Execute the plan and create anod actions

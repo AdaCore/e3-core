@@ -86,18 +86,18 @@ def test_initall():
 
     assert a_decision.get_decision() is None
 
-    a_decision.set_decision(action.Decision.RIGHT)
+    a_decision.set_decision(action.Decision.RIGHT, 'plan_line.txt:1')
     assert a_decision.get_decision() == 'download.my_source'
 
-    a_decision.set_decision(action.Decision.BOTH)
+    a_decision.set_decision(action.Decision.BOTH, 'plan_line.txt:2')
     assert a_decision.get_decision() is None
 
-    boi_decision = action.BuildOrInstall(
+    boi_decision = action.BuildOrDownload(
         root=install,
         left=build,
         right=download)
     assert boi_decision.get_decision() is None
-    boi_decision.set_decision(action.Decision.LEFT)
+    boi_decision.set_decision(action.Decision.LEFT, 'plan_line.txt:3')
     assert boi_decision.get_decision() == build.uid
 
 
@@ -121,13 +121,20 @@ def test_trigger():
     build_spec2.env = e3.env.Env()
     build2 = action.Build(anod_instance=build_spec2)
 
-    install2 = action.Install(anod_instance=build_spec2)
+    download2 = action.DownloadBinary(build_spec2)
+
+    install_spec2 = Spec(qualifier='', kind='install')
+    install_spec2.name = 'my_spec2'
+    install_spec2.env = e3.env.Env()
+    install2 = action.Install(install_spec2)
 
     dag.add_vertex(root)
+    dag.add_vertex(install2)
 
     # Add a trigger on 'build'
-    decision = action.Decision(root=root, left=build2, right=install2)
-    decision.add_trigger(build, action.Decision.LEFT)
+    decision = action.BuildOrDownload(
+        root=install2, left=build2, right=download2)
+    decision.add_trigger(build, action.Decision.LEFT, 'my_plan_line')
 
     decision.apply_triggers(dag)
 
@@ -146,9 +153,9 @@ def test_trigger():
 
     # Set back to the expected choice and ask for another one
     decision.expected_choice = build2.uid
-    decision.set_decision(action.Decision.RIGHT)
+    decision.set_decision(action.Decision.RIGHT, 'my_other_plan_line')
     assert decision.get_decision() is None  # Decision.BOTH
 
     # Also change the expected choice to RIGHT
     decision.expected_choice = action.Decision.RIGHT
-    assert decision.get_expected_decision() == install2.uid
+    assert decision.get_expected_decision() == download2.uid
