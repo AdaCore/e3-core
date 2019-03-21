@@ -11,6 +11,9 @@ The script will support by default the following switches::
     --log-file FILE
                  to redirect logs to a given file (this is independent from
                  verbose option
+    --console-logs
+                 disable color, progress bars, and redirect as much as
+                 possible to stdout, starting lines with the given prefix
 
 In addition, if the add_targets_options parameter is set to True
 when instantiating an object of class Main, the following switches
@@ -90,6 +93,11 @@ class Main(object):
             default=False,
             action="store_true",
             help='disable color and progress bars')
+        log_group.add_argument(
+            '--console-logs',
+            metavar="LINE_PREFIX",
+            help='disable color, progress bars, and redirect as much as'
+            ' possible to stdout, starting lines with the given prefix')
 
         if platform_args:
             plat_group = argument_parser.add_argument_group(
@@ -161,10 +169,13 @@ class Main(object):
 
         if not self.__log_handlers_set:
             # First set level of verbosity
-            if self.args.verbose:
+            if self.args.verbose or self.args.console_logs:
                 level = logging.DEBUG
             else:
                 level = self.args.loglevel
+
+            if self.args.console_logs:
+                e3.log.console_logs = self.args.console_logs
 
             e3.log.activate(level=level, filename=self.args.log_file,
                             e3_debug=self.args.verbose > 1)

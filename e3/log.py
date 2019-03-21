@@ -24,6 +24,8 @@ if sys.stdout.isatty():  # all: no cover (not used in production!)
 else:
     pretty_cli = False
 
+console_logs = None
+
 
 def progress_bar(it, **kwargs):
     """Create a tqdm progress bar.
@@ -160,6 +162,9 @@ def activate(
     # By default do not filter anything. What is effectively logged
     # will be defined by setting/unsetting handlers
     logging.getLogger('').setLevel(logging.DEBUG)
+    if console_logs:
+        stream_format = '{}: {}'.format(
+            console_logs, stream_format)
     fmt = logging.Formatter(stream_format, datefmt)
 
     # Set logging handlers
