@@ -26,6 +26,23 @@ def test_mainprog():
     assert 'mymain' in p.out
 
 
+def test_mainprog_with_console_logs():
+    with open('mymain.py', 'w') as f:
+        f.write('\n'.join((
+            '#!/usr/bin/env python',
+            'from e3.main import Main',
+            'import os',
+            'm = Main(name="testmain")',
+            'm.parse_args()',
+            'import logging',
+            'logging.debug("this is an info line")',
+            'logging.debug("this is a debug line")')))
+    p = e3.os.process.Run(
+        [sys.executable, 'mymain.py', '--console-logs=mymain', '--nocolor'])
+    assert 'mymain: DEBUG    this is an info line\n' \
+        'mymain: DEBUG    this is a debug line' in p.out
+
+
 @pytest.mark.skipif(sys.platform in ('win32', 'sunos5'),
                     reason='Signal handler not set on windows.'
                            ' Bug in signal handling in solaris')
