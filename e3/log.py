@@ -108,13 +108,20 @@ def getLogger(name=None, prefix='e3'):
     return logger
 
 
-def __add_handlers(level, fmt, filename=None):
+def add_log_handlers(
+        level,
+        log_format,
+        datefmt=None,
+        filename=None,
+        set_default_output=True):
     """Add log handlers using GMT.
 
     :param level: set the root logger level to the specified level
     :type level: int
-    :param fmt: log formatter
-    :type fmt: logging.Formatter
+    :param log_format: format stream for the log handler
+    :type log_format: str
+    :param datefmt: date/time format for the log handler
+    :type datefmt: str
     :param filename: use of a FileHandler, using the specified filename,
         instead of a StreamHandler. Set default_output_stream to write in this
         file.
@@ -128,8 +135,10 @@ def __add_handlers(level, fmt, filename=None):
             handler = logging.StreamHandler()
     else:
         handler = logging.FileHandler(filename)
-        default_output_stream = handler.stream
+        if set_default_output:
+            default_output_stream = handler.stream
 
+    fmt = logging.Formatter(log_format, datefmt)
     fmt.converter = time.gmtime
     handler.setFormatter(fmt)
 
@@ -165,16 +174,19 @@ def activate(
     if console_logs:
         stream_format = '{}: {}'.format(
             console_logs, stream_format)
-    fmt = logging.Formatter(stream_format, datefmt)
 
     # Set logging handlers
-    __add_handlers(level=level, fmt=fmt)
+    add_log_handlers(
+        level=level,
+        log_format=stream_format,
+        datefmt=datefmt)
 
     # Log to a file if necessary
     if filename is not None:
-        __add_handlers(
+        add_log_handlers(
             level=min(level, logging.DEBUG),
-            fmt=logging.Formatter(file_format, datefmt),
+            log_format=file_format,
+            datefmt=datefmt,
             filename=filename)
 
     if e3_debug:
