@@ -186,6 +186,49 @@ def test_dot():
     assert '"b" -> "a"' in d.as_dot()
 
 
+def test_pruned_dag():
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('a1')
+    d.add_vertex('a2')
+    d.add_vertex('b', predecessors=['a', 'a1'])
+    d.add_vertex('c', predecessors=['b', 'a2'])
+    d.add_vertex('d', predecessors=['c'])
+    d.add_tag('d', 'tag')
+
+    def f(dg, node):
+        if node in ('b',  'c'):
+            return True
+        return False
+
+    d2 = d.prune(f)
+
+    for node, _ in d2:
+        preds = d2.get_predecessors(node)
+        if node == 'd':
+            assert len(preds) == 3
+            assert 'a' in preds
+            assert 'a1' in preds
+            assert 'a2' in preds
+            assert d2.get_tag('d') == 'tag'
+        elif node.startswith('a'):
+            assert len(preds) == 0
+        else:
+            assert False, 'invalid node'
+
+    # By default prune ensure we keep context unchanged.
+    # If we add a tag to 'b' (that would be suppressed) then we expect a
+    # DAGError
+    d.add_tag('b', 'b_tag')
+    with pytest.raises(DAGError):
+        d.prune(f)
+
+    # In that last test, check that no error is raised but that tag are
+    # preserved
+    d4 = d.prune(f, preserve_context=False)
+    assert d4.get_tag('d') == 'tag'
+
+
 def test_tagged_dag():
     r"""Test add_tag/get_tag/get_context.
 

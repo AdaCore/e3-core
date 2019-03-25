@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+from itertools import chain
 from e3.error import E3Error
 
 
@@ -491,6 +492,47 @@ class DAG(object):
                 result.append('"%s" -> "%s"' % (vertex, predecessor))
         result.append("}")
         return "\n".join(result)
+
+    def prune(self, fun, preserve_context=True):
+        """Create a pruned graph.
+
+        :param fun: function that return True whenever a node should be
+            pruned. The function receive as parameter the dag and the node id
+        :type fun: (DAG, str) -> bool
+        :param preserve_context: if True ensure that context is preserved
+            (i.e: that calls to get_context will return the same value for
+             both current graph and pruned graph). This means that any attempt
+            to remove a node containing a tag will result in a DAGError.
+        :type preserve_context: bool
+        :return: a new DAG
+        :rtype: DAG
+        """
+        result = DAG()
+
+        # Used to maintain the new list of predecessors
+        pruned_node_predecessors = {}
+
+        for node, data in self:
+            # The new list of predecessors is the union of predecessors of
+            # pruned predecessors and the other predecessors.
+            predecessors = set(
+                chain(*[pruned_node_predecessors[k]
+                        for k in self.get_predecessors(node)]))
+
+            if fun(self, node):
+                # Check if node can pruned
+                if node in self.tags and preserve_context:
+                    raise DAGError("suppressing %s impact context" % node)
+
+                # Node is pruned keep track of its predecessors
+                pruned_node_predecessors[node] = predecessors
+            else:
+                # Node is kept
+                result.add_vertex(node, data, predecessors)
+                pruned_node_predecessors[node] = set([node])
+                if node in self.tags:
+                    result.add_tag(node, self.tags[node])
+        return result
 
     def __len__(self):
         return len(self.vertex_data)
