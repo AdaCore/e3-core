@@ -805,3 +805,22 @@ def sync_tree(source, target, ignore=None,
         copystat(d[0], d[1])
 
     return updated_list, deleted_list
+
+
+def extension(path):
+    """Return the extension of a given filename.
+
+    Contrary to os.path.splitext which returns .gz, the function will return
+    .tar.gz if the file is FILENAME.tar.gz.
+
+    :param path: a path
+    :type path: str
+    :return: an extension
+    :rtype: str
+    """
+    root, ext = os.path.splitext(path)
+    _, ext2 = os.path.splitext(root)
+    if ext2 == ".tar":
+        return ext2 + ext
+    else:
+        return ext

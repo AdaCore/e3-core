@@ -412,3 +412,10 @@ def test_sync_tree_with_ignore():
     assert os.path.exists('b/7')
     e3.fs.sync_tree('a', 'b', ignore=['/3', '/7'], delete_ignore=True)
     assert not os.path.exists('b/7')
+
+
+def test_extension():
+    assert e3.fs.extension('/home/file1.2.txt') == '.txt'
+    assert e3.fs.extension('file2.tar.gz') == '.tar.gz'
+    assert e3.fs.extension('file2.tar') == '.tar'
+    assert e3.fs.extension('file2.tar.bz2') == '.tar.bz2'
