@@ -41,7 +41,9 @@ class SandBox(object):
         self.bin_dir = None
         self.__specs_dir = None
         self.is_alternate_specs_dir = False
-        self.conf = None
+
+        # Contains the loaded version of user.yaml if present
+        self.user_config = None
 
         self.default_env = {
             'LANG': 'C',
@@ -95,12 +97,12 @@ class SandBox(object):
         user_yaml = os.path.join(new_dir, 'user.yaml')
         if os.path.exists(user_yaml):
             with open(user_yaml) as f:
-                user_config = yaml.load(f)
+                self.user_config = yaml.safe_load(f)
 
             # Accept both specs_dir and module_dir key (in that order) to
             # get the path to the anod specification files
-            specs_dir = user_config.get(
-                'specs_dir', user_config.get('module_dir'))
+            specs_dir = self.user_config.get(
+                'specs_dir', self.user_config.get('module_dir'))
             if specs_dir is not None:
                 self.specs_dir = specs_dir
         else:
