@@ -69,7 +69,13 @@ class DAGIterator(object):
 
         if result is None:
             if not self.enable_busy_state:
-                raise DAGError('cycle detected')
+                for node in self.non_visited:
+                    minimal_cycle = self.dag.shortest_path(node, node)
+                    if minimal_cycle is not None:
+                        raise DAGError("cycle detected: %s" %
+                                       " -> ".join(minimal_cycle))
+                raise DAGError("cycle detected (unknown error)")
+
             # No vertex is ready to be visited
             return None, None, None
 
@@ -316,6 +322,9 @@ class DAG(object):
             predecessors = frozenset(predecessors)
 
         if enable_checks:
+            # Before doing changes ensure that the DAG is already valid
+            self.check()
+
             non_existing_predecessors = [k for k in predecessors
                                          if k not in self.vertex_data]
             if non_existing_predecessors:
@@ -334,13 +343,12 @@ class DAG(object):
 
             if enable_checks:
                 # Will raise DAGError if a cycle is created
-                try:
-                    self.get_closure(vertex_id)
-                except DAGError:
+                if vertex_id in self.get_closure(vertex_id):
+                    minimal_cycle = self.shortest_path(vertex_id, vertex_id)
                     self.set_predecessors(vertex_id, previous_predecessors)
                     raise DAGError(
-                        message='cannot update vertex (%s create a cycle)'
-                        % vertex_id,
+                        message='cannot update vertex (%s create a cycle: %s)'
+                        % (vertex_id, " -> ".join(minimal_cycle)),
                         origin='DAG.update_vertex')
 
             if data is not None:
@@ -349,6 +357,80 @@ class DAG(object):
         if not enable_checks:
             # DAG modified without cycle checks, discard cached result
             self.__has_cycle = None
+
+    def shortest_path(self, source, target):
+        """Compute the shortest path between two vertices of the DAG.
+
+        :param source: vertex id of the source
+        :param target: vertex id of the target. If target is equal to source
+            then the algorithm try to find the shortest cycle
+        :return: a list of vertex. If there is no path between two nodes then
+            return None
+        :rtype: list[str] | None
+        """
+        # We use the Dikjstra algorithm to compute the shortest path.
+        # Note that this is a slight variation so that the algorithm
+        # can be used to compute shortest cycle on a given node.
+
+        # The maximum distance between two vertices is len(DAG) - 1. Thus
+        # len(DAG) can be our infinite distance. As when target and source
+        # are equals we might add an additional fake node, increase it by one.
+        infinite = len(self.vertex_data) + 1
+
+        # Keep track of minimal distance between vertices and the sources
+        dist = {k: infinite for k in self.vertex_data}
+
+        # Keep track of the minimum distance
+        prev = {k: None for k in self.vertex_data}
+
+        # Set of non visited vertices
+        unvisited = {k for k in self.vertex_data}
+
+        # The only known distance at startup
+        dist[target] = 0
+
+        if source == target:
+            # If source is equal to target, default dikjstra algorithm does
+            # not work. Add a fake node and use it as target. When iterating
+            # on predecessors replace all occurences of sources to that node.
+            # If we find a path between that node and the source, it means
+            # we have our shortest cycle.
+            dist[None] = infinite
+            prev[None] = None
+            unvisited.add(None)
+            source = None
+
+        while unvisited:
+            u = min(unvisited, key=lambda x: dist[x])
+            unvisited.remove(u)
+
+            # We have found our shortest path, so break
+            if u == source:
+                break
+
+            for v in self.get_predecessors(u):
+                # Handle cycle detection case.
+                if source is None and v == target:
+                    v = None
+
+                alt = dist[u] + 1
+                if alt < dist[v]:
+                    dist[v] = alt
+                    prev[v] = u
+
+        if dist[source] == infinite:
+            # No path exist between source and target (or no cycle).
+            return None
+        else:
+            result = [source]
+            while prev[result[-1]] is not None:
+                result.append(prev[result[-1]])
+
+            # In case of cycle detection the first node is None which
+            # is in reality our source node.
+            if source is None:
+                result[0] = target
+            return result
 
     def check(self):
         """Check for cycles and inexisting nodes.
@@ -387,7 +469,6 @@ class DAG(object):
         :return: a set of vertex_id
         :rtype: set(collections.Hashable)
         """
-        self.check()
         visited = set()
         closure = self.get_predecessors(vertex_id)
         closure_len = len(closure)
@@ -483,7 +564,6 @@ class DAG(object):
         :return: the dot source file
         :rtype: str
         """
-        self.check()
         result = ['digraph G {', 'rankdir="LR";']
         for vertex in self.vertex_data:
             result.append('"%s"' % vertex)
@@ -538,7 +618,6 @@ class DAG(object):
         return len(self.vertex_data)
 
     def __str__(self):
-        self.check()
         result = []
         for vertex, predecessors in self.__vertex_predecessors.iteritems():
             if predecessors:

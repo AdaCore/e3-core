@@ -89,8 +89,35 @@ def test_cycle_detection():
     with pytest.raises(DAGError):
         d.check()
 
+    # Verify that some functions do not hang when a cycle is present
+    assert len(d.get_closure('b')) == 2
+    assert str(d)
+    assert d.as_dot()
+
     with pytest.raises(DAGError):
         d.reverse_graph()
+
+
+def test_shortest_path():
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('b')
+    d.update_vertex('a', predecessors=['b'])
+    d.update_vertex('b', predecessors=['a'], enable_checks=False)
+    assert d.shortest_path('a', 'a') == ['a', 'b', 'a']
+
+    d = DAG()
+    d.add_vertex('a')
+    d.update_vertex('a', predecessors=['a'], enable_checks=False)
+    assert d.shortest_path('a', 'a') == ['a', 'a']
+
+    d = DAG()
+    d.add_vertex('a')
+    d.add_vertex('b', predecessors=['a'])
+    d.add_vertex('c', predecessors=['b'])
+    d.add_vertex('d', predecessors=['c', 'a'])
+    assert d.shortest_path('a', 'd') == ['a', 'd']
+    assert d.shortest_path('d', 'a') is None
 
 
 def test_dag_merge():
