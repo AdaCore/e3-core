@@ -104,16 +104,16 @@ class Main(object):
                 title='Platform arguments')
             plat_group.add_argument(
                 '--build',
-                default='',  # to force autodetection
+                default=None,  # to force autodetection
                 help='Set the build platform and build os version')
             plat_group.add_argument(
                 '--host',
-                default='',  # to force autodetection
+                default=None,  # to force autodetection
                 help='Set the host platform, host os version',
                 metavar='HOST[,HOST_VERSION]')
             plat_group.add_argument(
                 '--target',
-                default='',  # to force autodetection
+                default=None,  # to force autodetection
                 help='Set the target platform, target os version, '
                      'target machine, and target mode',
                 metavar='TARGET[,TARGET_VERSION[,TARGET_MACHINE[,'
@@ -169,7 +169,7 @@ class Main(object):
 
         if not self.__log_handlers_set:
             # First set level of verbosity
-            if self.args.verbose or self.args.console_logs:
+            if self.args.verbose:
                 level = logging.DEBUG
             else:
                 level = self.args.loglevel
