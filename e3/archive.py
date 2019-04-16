@@ -22,7 +22,7 @@ class ArchiveError(e3.error.E3Error):
     pass
 
 
-def is_archive_supported(filename):
+def is_known_archive_format(filename):
     """Check if a given path is a supported archive format.
 
     :param filename: path
