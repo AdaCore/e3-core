@@ -22,6 +22,18 @@ class ArchiveError(e3.error.E3Error):
     pass
 
 
+def is_archive_supported(filename):
+    """Check if a given path is a supported archive format.
+
+    :param filename: path
+    :type filename: str
+    :return: True if the path corresponding to a supported archive format
+    :rtype: bool
+    """
+    ext = e3.fs.extension(filename)
+    return ext in ('.tar.gz', '.tgz', '.tar.bz2', '.tar', '.zip')
+
+
 def check_type(filename, force_extension=None):
     """Return the archive extension.
 
