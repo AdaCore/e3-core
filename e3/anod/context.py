@@ -402,8 +402,7 @@ class AnodContext(object):
                               plan_line=plan_line,
                               plan_args=plan_args)
 
-        if primitive == 'install' and \
-                not (spec.has_package and spec.component is not None) and \
+        if primitive == 'install' and not spec.has_package and \
                 has_primitive(spec, 'build'):
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
@@ -418,8 +417,7 @@ class AnodContext(object):
                                  force_source_deps=force_source_deps,
                                  sandbox=sandbox)
 
-        if expand_build and primitive == 'build' and \
-                (spec.has_package and spec.component is not None):
+        if expand_build and primitive == 'build' and spec.has_package:
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
