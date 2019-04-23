@@ -212,8 +212,17 @@ class Configure(object):
         cmd = []
         if 'CONFIG_SHELL' in os.environ:
             cmd.append(os.environ['CONFIG_SHELL'])
-        cmd += [unixpath(os.path.relpath(
-            os.path.join(self.src_dir, 'configure'), self.exec_dir))]
+
+        # Compute the relative path for configure
+        configure_path = unixpath(os.path.relpath(
+            os.path.join(self.src_dir, 'configure'),
+            self.exec_dir))
+
+        # In case the configure is run from its location ensure to
+        # add ./ as . is not necessary in PATH.
+        if configure_path == 'configure':
+            configure_path = './configure'
+        cmd += [configure_path]
         cmd += self.args
 
         if self.target is not None:

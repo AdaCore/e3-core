@@ -42,15 +42,40 @@ class SMTPEventManager(EventManager):
     Config = SMTPConfig
 
     def __init__(self, configuration):
+        """Initialize a SMTP event manager.
+
+        :param configuration: a dictionary with config parameters
+        :type configuration: dict
+        """
         super(SMTPEventManager, self).__init__(configuration)
         self.config = self.Config(configuration)
 
     def send_event(self, event):
-        content = json.dumps(event.to_dict())
-        return self.send_email(content, event.attachments,
-                               subject=event.subject)
+        """Send an event
 
-    def send_email(self, json_content, attachments, subject=None):
+        :param event: an event
+        :type event: SMTPEvent
+        :return: True if the event was sent successfully
+        :rtype: bool
+        """
+        result = self.create_email(event)
+        return self.send_email(result)
+
+    def create_email(self, event):
+        """Create an event as email.
+
+        :param event: an event
+        :type event: SMTPEvent
+        :return: a dictionary with the following keys: ```from``` for from
+            address, ```content``` for the email body as a string, ```to```
+            for the destination address. ```smtp_server``` for a list of smtp
+            servers to try and ```message_id``` for the email message id.
+        :rtype: dict
+        """
+        json_content = json.dumps(event.to_dict())
+        attachments = event.attachments
+        subject = event.subject
+
         mail = MIMEMultipart()
         mail['Subject'] = subject or self.config.subject
         mail['From'] = self.config.from_addr
@@ -81,9 +106,24 @@ class SMTPEventManager(EventManager):
             attachment.add_header('Content-Disposition', 'attachment',
                                   filename=name)
             mail.attach(attachment)
+        return {'from': self.config.from_addr,
+                'to': mail['To'].split(','),
+                'content': mail.as_string(),
+                'event_dict': json_content,
+                'smtp_server': self.config.smtp_servers,
+                'message_id': mail['Message-ID']}
 
+    def send_email(self, email_dict):
+        """Send the email corresponding to the event.
+
+        :param: a dict as returned by create_email.
+        :type: dict
+        :return: True if the email is successfully sent.
+        :rtype: bool
+        """
         return e3.net.smtp.sendmail(
-            mail['From'],
-            mail['To'].split(','), mail.as_string(),
-            self.config.smtp_servers,
-            message_id=mail['Message-ID'])
+            email_dict['from'],
+            email_dict['to'],
+            email_dict['content'],
+            email_dict['smtp_server'],
+            message_id=email_dict['message_id'])

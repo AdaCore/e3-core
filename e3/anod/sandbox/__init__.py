@@ -129,13 +129,11 @@ class SandBox(object):
         for d in self.dirs:
             mkdir(getattr(self, ('%s_dir' % d).replace(os.path.sep, '_')))
 
-    def get_build_space(self, name, primitive, platform=None):
+    def get_build_space(self, name, platform=None):
         """Get build space.
 
         :param name: build space name
         :type name: str
-        :param primitive: the primitive name (e.g. build, install...)
-        :type primitive: str
         :param platform: platform name (if None use the default platform)
         :type platform: str | None
 
@@ -145,8 +143,7 @@ class SandBox(object):
         if platform is None:
             platform = Env().platform
         return BuildSpace(
-            root_dir=os.path.join(self.root_dir, platform, name),
-            primitive=primitive)
+            root_dir=os.path.join(self.root_dir, platform, name))
 
     def dump_configuration(self):
         # Compute command line for call to e3-sandbox create. Ensure that the

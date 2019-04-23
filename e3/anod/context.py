@@ -87,7 +87,7 @@ class AnodContext(object):
         self.cache = {}
         self.sources = {}
 
-    def load(self, name, env, qualifier, kind):
+    def load(self, name, env, qualifier, kind, sandbox=None):
         """Load a spec instance.
 
         :param name: spec name
@@ -98,6 +98,8 @@ class AnodContext(object):
         :type qualifier: str | None
         :param kind: primitive used for the loaded spec
         :type kind: str
+        :param sandbox: is not None bind the anod instances to a sandbox
+        :type sandbox: None | Sandbox
         :return: a spec instance
         :rtype: e3.anod.spec.Anod
         """
@@ -112,6 +114,8 @@ class AnodContext(object):
             self.cache[key] = self.repo.load(name)(qualifier=qualifier,
                                                    env=env,
                                                    kind=kind)
+            if sandbox is not None:
+                self.cache[key].bind_to_sandbox(sandbox)
 
             # Update the list of available sources. ??? Should be done
             # once per spec (and not once per spec instance). Need some
@@ -230,7 +234,8 @@ class AnodContext(object):
                         upload=True,
                         plan_line=None,
                         plan_args=None,
-                        force_source_deps=False):
+                        force_source_deps=False,
+                        sandbox=None):
         """Add an Anod action to the context.
 
         :param name: spec name
@@ -265,7 +270,8 @@ class AnodContext(object):
         result = self.add_spec(name, env, primitive, qualifier,
                                source_packages=source_packages,
                                plan_line=plan_line, plan_args=plan_args,
-                               force_source_deps=force_source_deps)
+                               force_source_deps=force_source_deps,
+                               sandbox=sandbox)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
@@ -313,7 +319,8 @@ class AnodContext(object):
                  source_name=None,
                  plan_line=None,
                  plan_args=None,
-                 force_source_deps=None):
+                 force_source_deps=None,
+                 sandbox=None):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -344,7 +351,8 @@ class AnodContext(object):
         # Initialize a spec instance
         e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
             name, qualifier, primitive))
-        spec = self.load(name, qualifier=qualifier, env=env, kind=primitive)
+        spec = self.load(name, qualifier=qualifier, env=env, kind=primitive,
+                         sandbox=sandbox)
 
         # Initialize the resulting action based on the primitive name
         if primitive == 'source':
@@ -373,7 +381,8 @@ class AnodContext(object):
                         primitive='source',
                         source_name=sb.name,
                         plan_line=plan_line,
-                        plan_args=None)
+                        plan_args=None,
+                        sandbox=sandbox)
                     self.connect(result, sub_result)
 
         elif primitive == 'build':
@@ -393,8 +402,7 @@ class AnodContext(object):
                               plan_line=plan_line,
                               plan_args=plan_args)
 
-        if primitive == 'install' and \
-                not (spec.has_package and spec.component is not None) and \
+        if primitive == 'install' and not spec.has_package and \
                 has_primitive(spec, 'build'):
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
@@ -406,17 +414,18 @@ class AnodContext(object):
                                  expand_build=False,
                                  plan_args=plan_args,
                                  plan_line=plan_line,
-                                 force_source_deps=force_source_deps)
+                                 force_source_deps=force_source_deps,
+                                 sandbox=sandbox)
 
-        if expand_build and primitive == 'build' and \
-                (spec.has_package and spec.component is not None):
+        if expand_build and primitive == 'build' and spec.has_package:
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
             return self.add_spec(name, env, 'install', qualifier,
                                  plan_args=None,
                                  plan_line=plan_line,
-                                 force_source_deps=force_source_deps)
+                                 force_source_deps=force_source_deps,
+                                 sandbox=sandbox)
 
         # Add this stage if the action is already in the DAG, then it has
         # already been added.
@@ -446,7 +455,8 @@ class AnodContext(object):
                     expand_build=False,
                     plan_args=None,
                     plan_line=plan_line,
-                    force_source_deps=force_source_deps)
+                    force_source_deps=force_source_deps,
+                    sandbox=sandbox)
                 self.add_decision(BuildOrDownload,
                                   result,
                                   build_action,
@@ -484,7 +494,7 @@ class AnodContext(object):
                     # ensure that sources associated with it are available
                     child_instance = self.load(
                         e.name, kind='source',
-                        env=BaseEnv(), qualifier=None)
+                        env=BaseEnv(), qualifier=None, sandbox=sandbox)
                     spec.deps[e.local_name] = child_instance
 
                     if force_source_deps:
@@ -504,7 +514,8 @@ class AnodContext(object):
                     qualifier=e.qualifier,
                     plan_args=None,
                     plan_line=plan_line,
-                    force_source_deps=force_source_deps)
+                    force_source_deps=force_source_deps,
+                    sandbox=sandbox)
 
                 spec.deps[e.local_name] = child_action.anod_instance
 
@@ -568,7 +579,8 @@ class AnodContext(object):
                         primitive='source',
                         plan_args=None,
                         plan_line=plan_line,
-                        source_name=s.name)
+                        source_name=s.name,
+                        sandbox=sandbox)
                     for repo in obj.checkout:
                         r = Checkout(repo, self.repo.repos.get(repo))
                         add_action(r, connect_with=source_action)

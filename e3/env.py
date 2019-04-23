@@ -588,14 +588,21 @@ class BaseEnv(AbstractBaseEnv):
         return result
 
     @classmethod
-    def from_env(cls):
-        """Return a new BaseEnv object from the current Env value.
+    def from_env(cls, env=None):
+        """Return a new BaseEnv object from an env
 
+        :param env: env. If None copy the current Env
+        :type env: BaseEnv | Env
         :rtype: BaseEnv
         """
-        return BaseEnv(build=Env().build,
-                       host=Env().host,
-                       target=Env().target)
+        if env is None:
+            return BaseEnv(build=Env().build,
+                           host=Env().host,
+                           target=Env().target)
+        else:
+            return BaseEnv(build=env.build,
+                           host=env.host,
+                           target=env.target)
 
 
 class Env(AbstractBaseEnv):
