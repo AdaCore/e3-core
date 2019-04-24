@@ -329,6 +329,7 @@ class Walk(object):
                      job.status.name,
                      int(job.timing_info.duration),
                      job.data)
+        job.log()
 
         requeued = False
         if self.job_status[job.uid] == ReturnValue.notready:

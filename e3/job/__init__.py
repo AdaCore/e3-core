@@ -166,6 +166,13 @@ class Job(object):
             self.interrupted = True
         return not previous_state
 
+    def log(self):
+        """Call whenever a job is finished.
+
+        This allow the user to do some logging on job termination
+        """
+        pass
+
 
 class EmptyJob(Job):
     """A job which does nothing."""
