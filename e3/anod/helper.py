@@ -275,7 +275,10 @@ def text_replace(filename, pattern):
                                       replacement, line)
                 if count:
                     nb_substitution[pattern_index] += count
-            output.write(line)
+            if isinstance(line, unicode):
+                output.write(line.encode('utf-8'))
+            else:
+                output.write(line)
     if any((nb for nb in nb_substitution)):
         # file changed, update it
         with open(filename, 'wb') as f:

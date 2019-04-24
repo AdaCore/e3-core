@@ -368,6 +368,11 @@ class Anod(object):
         return self.name
 
     @property
+    def anod_id(self):
+        """For backward compativility purpose."""
+        return self.uid
+
+    @property
     def source_pkg_build(self):
         """Return list of SourceBuilder defined in the specification file."""
         return None
@@ -399,6 +404,11 @@ class Anod(object):
             kwargs['parse_shebang'] = True
         if 'output' not in kwargs:
             kwargs['output'] = e3.log.default_output_stream
+
+        # For backward compatibility ???
+        if 'python_executable' in kwargs:
+            del kwargs['python_executable']
+
         r = e3.os.process.Run(command, **kwargs)
         if r.status != 0:
             raise ShellError(
