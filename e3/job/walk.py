@@ -67,40 +67,7 @@ class Walk(object):
         self.tokens = 1
         self.job_timeout = DEFAULT_JOB_MAX_DURATION
 
-    def can_predict_new_fingerprint(self, uid, data):
-        """Return True if a job's fingerprint is computable before running it.
-
-        This function should return True for all the jobs where
-        the fingerprint can be calculated before running the job,
-        False otherwise.
-
-        Ideally, we should be able to compute the fingerprint of every
-        job before we actually run the job, as this then allows us to
-        use that fingerprint to decide whether or not the job should be
-        run or not. Unfortunately, there can be situations where this is
-        not possible; consider for instance the case where the job is
-        to fetch some data, and the fingerprint needs to include that
-        contents.
-
-        For jobs were the fingerprint cannot be predicted, what will
-        happen is that the scheduler will execute that job, and then
-        compute the fingerprint at the end, instead of computing it
-        before.
-
-        By default, this method assumes that all jobs have predictable
-        fingerprints, and so always returns True. Child classes should
-        override this method is they have jobs for which the fingerprint
-        cannot be computed ahead of running the job.
-
-        :param uid: A unique Job ID.
-        :type uid: str
-        :param data: Data associated to the job.
-        :type data: T
-        :rtype: bool
-        """
-        return True
-
-    def compute_new_fingerprint(self, uid, data):
+    def compute_fingerprint(self, uid, data, is_prediction=False):
         """Compute the given action's Fingerprint.
 
         This method is expected to return a Fingerprint corresponding
@@ -115,6 +82,12 @@ class Walk(object):
         :type uid: str
         :param data: Data associated to the job.
         :type data: T
+        :param is_prediction: If True this is an attempt to compute the
+            fingerprint before launching the job. In that case if the
+            function returns None then the job will always be launched.
+            When False, this is the computation done after running the
+            job (that will be the final fingerprint saved for future
+            comparison)
         :rtype: e3.fingerprint.Fingerprint | None
         """
         return None
@@ -259,19 +232,15 @@ class Walk(object):
 
         :rtype: Job
         """
+
+        # Get the latest fingerprint
         prev_fingerprint = self.load_previous_fingerprint(uid)
+
+        # And reset the fingerprint on disk
         self.save_fingerprint(uid, None)
 
-        can_predict_new_fingerprint = \
-            self.can_predict_new_fingerprint(uid, data)
-        if can_predict_new_fingerprint:
-            self.new_fingerprints[uid] = \
-                self.compute_new_fingerprint(uid, data)
-        else:
-            # Set the new fingerprint's value to None for now.
-            # The actual fingerprint will be provided when we collect
-            # the job's results if the job is succesful.
-            self.new_fingerprints[uid] = None
+        self.new_fingerprints[uid] = \
+            self.compute_fingerprint(uid, data, is_prediction=True)
 
         # Check our predecessors. If any of them failed, then return
         # a failed job.
@@ -287,9 +256,8 @@ class Walk(object):
             return self.create_failed_job(uid, data, predecessors,
                                           force_fail, notify_end)
 
-        if not can_predict_new_fingerprint or \
-                self.should_execute_action(uid, prev_fingerprint,
-                                           self.new_fingerprints[uid]):
+        if self.should_execute_action(uid, prev_fingerprint,
+                                      self.new_fingerprints[uid]):
             return self.create_job(uid, data, predecessors, notify_end)
         else:
             return EmptyJob(uid, data, notify_end,
@@ -309,9 +277,8 @@ class Walk(object):
         if job.status in (ReturnValue.success,
                           ReturnValue.force_skip,
                           ReturnValue.skip):
-            if not self.can_predict_new_fingerprint(job.uid, job.data):
-                self.new_fingerprints[job.uid] = \
-                    self.compute_new_fingerprint(job.uid, job.data)
+            self.new_fingerprints[job.uid] = \
+                self.compute_fingerprint(job.uid, job.data)
             self.save_fingerprint(job.uid, self.new_fingerprints[job.uid])
 
         self.job_status[job.uid] = ReturnValue(job.status)
@@ -329,7 +296,7 @@ class Walk(object):
                      job.status.name,
                      int(job.timing_info.duration),
                      job.data)
-        job.log()
+        job.on_finish()
 
         requeued = False
         if self.job_status[job.uid] == ReturnValue.notready:

@@ -236,6 +236,7 @@ class Scheduler(object):
             while q and q[0][2].tokens <= self.tokens[name]:
                 _, _, next_job = heapq.heappop(q)
                 self.queued_jobs -= 1
+                next_job.on_start()
                 next_job.start(slot=self.slots.pop())
                 self.tokens[name] -= next_job.tokens
                 self.active_jobs.append(next_job)

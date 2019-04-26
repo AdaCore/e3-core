@@ -166,7 +166,14 @@ class Job(object):
             self.interrupted = True
         return not previous_state
 
-    def log(self):
+    def on_start(self):
+        """Call whenever a job is started.
+
+        This allow the user to do some logging on job startup
+        """
+        pass
+
+    def on_finish(self):
         """Call whenever a job is finished.
 
         This allow the user to do some logging on job termination
