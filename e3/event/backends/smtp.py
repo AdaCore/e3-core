@@ -109,7 +109,7 @@ class SMTPEventManager(EventManager):
         return {'from': self.config.from_addr,
                 'to': mail['To'].split(','),
                 'content': mail.as_string(),
-                'event_dict': json_content,
+                'event_dict': event.to_dict(),
                 'smtp_server': self.config.smtp_servers,
                 'message_id': mail['Message-ID']}
 

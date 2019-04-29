@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import abc
+import time
 import uuid
 
 import e3.env
@@ -25,7 +26,8 @@ class Event(object):
         :type uid: str
         """
         del kwargs
-        self.uid = uid if uid is not None else uuid.uuid1()
+        self.uid = uid if uid is not None else \
+            uuid.uuid1(clock_seq=int(1000 * time.time()))
         self.env = env if env is not None else e3.env.BaseEnv()
         self.name = name
         self.attachments = {}
