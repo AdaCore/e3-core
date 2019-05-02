@@ -330,7 +330,7 @@ class Anod(object):
                     # And return the result
                     return result
                 except AnodError as e:
-                    self.log.exception("%s %s fails" % self.name, f.__name__)
+                    self.log.exception("%s %s fails", self.name, f.__name__)
                     raise
                 except Exception as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)
