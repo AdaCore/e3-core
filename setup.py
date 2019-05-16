@@ -46,6 +46,7 @@ setup(
     author_email='info@adacore.com',
     description='E3 core. Tools and library for building and testing software',
     long_description=long_description,
+    long_description_content_type="text/markdown",
     namespace_packages=['e3'],
     use_2to3=True,
     classifiers=[
