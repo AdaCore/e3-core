@@ -171,6 +171,11 @@ class ElectrolytJob(Job):
         # not implemented
         self.__status = STATUS.success
 
+    def do_uploadsource(self):
+        """Upload a binary component."""
+        # not implemented
+        self.__status = STATUS.success
+
     def do_root(self):
         """Express the final result of the exec."""
         # This method won't be executed unless all the predecessor jobs are
