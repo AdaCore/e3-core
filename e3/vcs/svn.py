@@ -107,7 +107,11 @@ class SVNRepository(object):
         :rtype: str
         :raise: SVNError
         """
-        return self.get_info('Last Changed Rev')
+        try:
+            return self.get_info('Last Changed Rev')
+        except Exception as e:
+            logger.exception("Cannot fetch last changed rev")
+            raise SVNError("Cannot fetch last changed rev", "svn_cmd")
 
     def update(self, url=None, revision=None, force_and_clean=False):
         """Update a working copy or checkout a new one.
