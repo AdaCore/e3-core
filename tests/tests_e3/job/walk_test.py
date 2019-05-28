@@ -51,7 +51,7 @@ def setup_sbx(request):
         if os.path.exists(SBX_DIR):
             rm(SBX_DIR, True)
     request.addfinalizer(delete_sbx)
-
+  
     delete_sbx()
     os.mkdir(SBX_DIR)
     os.mkdir(FINGERPRINT_DIR)
@@ -199,12 +199,9 @@ class FingerprintWalk(SimpleWalk):
     def fingerprint_filename(cls, uid):
         return os.path.join(FINGERPRINT_DIR, uid)
 
-    def can_predict_new_fingerprint(self, uid, data):
-        if 'fingerprint_after_job' in uid:
-            return False
-        return True
-
-    def compute_new_fingerprint(self, uid, data):
+    def compute_fingerprint(self, uid, data, is_prediction=False):
+        if 'fingerprint_after_job' in uid and is_prediction:
+            return None
         if 'no_fingerprint' in uid:
             return None
         f = Fingerprint()
@@ -871,8 +868,9 @@ def test_job_depending_on_job_with_no_predicted_fingerprint_failed(setup_sbx):
     actions.add_vertex('2', predecessors=['fingerprint_after_job.bad'])
 
     r1 = FingerprintWalk(actions)
-    assert r1.can_predict_new_fingerprint('fingerprint_after_job.bad',
-                                          None) is False
+    assert r1.compute_fingerprint('fingerprint_after_job.bad',
+                                  None,
+                                  is_prediction=True) is None
 
     # Check the status of the first job ('fingerprint_after_job.bad').
     # It should be a real job that returned a failure.
@@ -944,7 +942,7 @@ def test_corrupted_fingerprint(setup_sbx):
 
     for uid in ('1', '2', '4', '5', '6'):
         job = r2.saved_jobs[uid]
-        assert isinstance(job, EmptyJob)
+        assert isinstance(job, EmptyJob), "job %s should be EmptyJob" % uid
         assert job.should_skip is True
         assert job.status == ReturnValue.skip
 

@@ -131,26 +131,10 @@ def test_primitive():
     # PKG_DIR returns the path to the pkg directory
     assert with_primitive2['PKG_DIR'].endswith('pkg')
 
-    # Check access to build_space config dict directly in Anod instance
-    with_primitive2.build_space.config['config-key'] = 'config-value'
-    assert with_primitive2['config-key'] == 'config-value'
-
     with_primitive3.build_space.create()
-    with pytest.raises(ShellError) as err:
-        with_primitive3.build()
-    assert 'build fails' in str(err.value)
-
-    with_primitive3.build_space.set_logging()
-    with pytest.raises(ShellError) as err:
-        with_primitive3.build()
-    assert 'build fails' in str(err.value)
-    with open(with_primitive3.build_space.log_file) as f:
-        assert 'import sys; sys.exit(2)' in f.read()
-    with_primitive3.build_space.end()
-
     with pytest.raises(AnodError) as err:
-        with_primitive4.build()
-    assert 'AnodDriver.activate() has not been run' in str(err)
+        with_primitive3.build()
+    assert 'build fails' in str(err.value)
 
 
 def test_api_version():
