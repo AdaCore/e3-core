@@ -34,8 +34,13 @@ class BuildSpace(object):
         self.root_dir = os.path.abspath(root_dir)
         self.initialized = False
 
+    @property
+    def dirs(self):
+        return self.directory_mapping.values()
+
     def subdir(self, name):
-        assert name in self.DIRS, 'invalid subdir %s' % name
+        if name not in self.DIRS:
+            raise ValueError('invalid subdir %s' % name)
         return os.path.join(self.root_dir, self.directory_mapping[name])
 
     def __getattr__(self, name):
