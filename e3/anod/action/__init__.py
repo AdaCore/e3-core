@@ -72,7 +72,11 @@ class GetSource(Action):
         return 'get source %s' % self.data.name
 
 
-class DownloadSource(Action):
+class Download(Action):
+    """General root class for all download actions."""
+    pass
+
+class DownloadSource(Download):
     """DownloadSource Action.
 
     This action means the we need to download from the store a given
@@ -249,7 +253,7 @@ class Install(AnodAction):
     pass
 
 
-class DownloadBinary(Action):
+class DownloadBinary(Download):
     """DownloadBinary Action.
 
     Download a binary package from the store.
