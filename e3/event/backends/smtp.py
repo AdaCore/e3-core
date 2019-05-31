@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import json
 import mimetypes
+import os
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -9,6 +10,7 @@ from email.utils import formatdate, make_msgid
 
 import e3.net.smtp
 from e3.event.backends.base import Event, EventManager
+from e3.fs import mkdir
 
 
 class SMTPEvent(Event):
@@ -60,6 +62,29 @@ class SMTPEventManager(EventManager):
         """
         result = self.create_email(event)
         return self.send_email(result)
+
+    def dump_event(self, event, dest):
+        """Dump an email event into a json file.
+
+        :param event: an event as a dict
+        :type event: SMTPEvent
+        :param dest: destination directory. If the directory does not exist
+            it is created
+        :type dest: str
+        :type dest: str
+        :return: a path to the json file. the file name is unique as it is
+            based on the message id
+        :rtype: str
+        """
+        event_dict = self.create_email(event)
+        mkdir(dest)
+        event_file = os.path.join(
+            dest,
+            event_dict['message_id'].replace('<', '').replace('>', '') +
+            '.json')
+        with open(event_file, 'w') as fd:
+            json.dump(event_dict, fd, indent=2)
+        return event_file
 
     def create_email(self, event):
         """Create an event as email.
@@ -113,7 +138,25 @@ class SMTPEventManager(EventManager):
                 'smtp_server': self.config.smtp_servers,
                 'message_id': mail['Message-ID']}
 
-    def send_email(self, email_dict):
+    @classmethod
+    def send_event_from_file(cls, event_path):
+        """Load an event from a json file and send it.
+
+        :param event_path: path to a JSON file
+        :type event_path: str
+        :return: True if the email is successfully sent.
+        :rtype: bool
+        """
+        with open(event_path, 'r') as fd:
+            msg = json.load(fd)
+
+        if not isinstance(msg['smtp_server'], list):
+            msg['smtp_server'] = [msg['smtp_server']]
+
+        return cls.send_email(msg)
+
+    @classmethod
+    def send_email(cls, email_dict):
         """Send the email corresponding to the event.
 
         :param: a dict as returned by create_email.
