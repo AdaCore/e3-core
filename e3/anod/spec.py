@@ -331,10 +331,14 @@ class Anod(object):
                     return result
                 except AnodError as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)
-                    raise
+                    raise AnodError(
+                        "%s %s fails (AnodError exception in primitive)" %
+                        (self.name, f.__name__))
                 except Exception as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)
-                    raise AnodError("got exception: %s" % e)
+                    raise AnodError(
+                        "%s %s fails (got exception: %s)" %
+                        (self.name, f.__name__, e))
 
             primitive_func.is_primitive = True
             primitive_func.pre = pre

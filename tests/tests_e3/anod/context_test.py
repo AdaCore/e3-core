@@ -76,18 +76,19 @@ class TestContext(object):
 
         ac.add_anod_action('spec1', primitive='source')
         result = ac.schedule(ac.always_create_source_resolver)
-        assert len(result) == 4, result.as_dot()
+        assert len(result) == 5, result.as_dot()
         assert set(result.vertex_data.keys()) == \
             {'root',
              'mylinux.x86-linux.spec1.source.spec1-src',
              'mylinux.x86-linux.spec1.source.sources',
-             'checkout.spec1-git'}
+             'checkout.spec1-git',
+             'mylinux.x86-linux.spec1.upload_src.spec1-src'}
 
     def test_add_anod_action2(self):
         # Simple spec with sources associated to the build primitive
         ac = self.create_context()
         ac.add_anod_action('spec2', primitive='build')
-        assert len(ac.tree) == 8, ac.tree.as_dot()
+        assert len(ac.tree) == 9, ac.tree.as_dot()
 
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 5, result.as_dot()
@@ -103,7 +104,7 @@ class TestContext(object):
             return AnodContext.decision_error(action, decision)
         ac = self.create_context()
         ac.add_anod_action('spec2', primitive='build')
-        assert len(ac.tree) == 8, ac.tree.as_dot()
+        assert len(ac.tree) == 9, ac.tree.as_dot()
 
         with pytest.raises(SchedulingError) as err:
             ac.schedule(no_resolver)
@@ -333,7 +334,7 @@ class TestContext(object):
         ac.add_anod_action('spec-managed-source', primitive='source')
         result = ac.schedule(ac.always_download_source_resolver)
         keys = set(result.vertex_data.keys())
-        assert len(keys) == 4, keys
+        assert len(keys) == 5, keys
         assert 'checkout.a-git' in keys
         assert 'mylinux.x86-linux.spec-managed-source.source.a-src' in keys
 
@@ -500,7 +501,7 @@ class TestContext(object):
         for uid, action in ac.tree:
             if uid.endswith('sources'):
                 assert ac.tree.get_tag(uid)
-            elif uid.endswith('spec1-src'):
+            elif uid.endswith('.source.spec1-src'):
                 assert ac.tree.get_tag(uid) is None
                 assert ac.tree.get_context(
                     vertex_id=uid,

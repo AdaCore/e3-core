@@ -139,7 +139,7 @@ def test_sandbox_rootdir():
     sandbox.root_dir = 'foo'
     assert os.path.relpath(sandbox.tmp_dir, sandbox.root_dir) == 'tmp'
     assert os.path.relpath(
-        sandbox.get_build_space('bar', 'build').root_dir,
+        sandbox.get_build_space('bar').root_dir,
         os.path.join('foo', e3.env.Env().platform)) == 'bar'
 
 
@@ -450,7 +450,7 @@ def test_failure_status(git_specs_dir):
          sandbox_dir])
     # the dag for this plan has 6 actions and thus we need to have
     # 6 failure status (status=failure)
-    assert p.out.count('status=failure') == 6, p.out
+    assert p.out.count('status=failure') == 7, p.out
     assert 'GITURL' in p.out, p.out
 
     # Try with an unsupported VCS
@@ -463,7 +463,7 @@ def test_failure_status(git_specs_dir):
          '--plan', os.path.join(root_dir, 'test.plan'),
          sandbox_dir])
     assert 'unsupported-vcs vcs type not supported' in p.out, p.out
-    assert p.out.count('status=failure') == 6, p.out
+    assert p.out.count('status=failure') == 7, p.out
 
     # Also check with a missing repo
     e3.anod.helper.text_replace(
@@ -475,7 +475,7 @@ def test_failure_status(git_specs_dir):
          '--plan', os.path.join(root_dir, 'test.plan'),
          sandbox_dir])
     assert 'dummy-github configuration missing' in p.out, p.out
-    assert p.out.count('status=failure') == 6, p.out
+    assert p.out.count('status=failure') == 7, p.out
 
 
 def test_sandbox_user_yaml(git_specs_dir):

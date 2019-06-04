@@ -141,7 +141,6 @@ class Fingerprint(object):
 
         :raise AssertError: if other is not a Fingerprint
         """
-
         # If other is None behave as if the previous fingerprint was an empty
         # fingerprint
         if other is None:
@@ -225,12 +224,16 @@ class Fingerprint(object):
         Return None in the following situations:
             - The file does not contain a fingerprint we recognize;
             - The fingerprint has a version number we do not support.
+            - If the fingerprint file does not exist
 
         :param filename: The name of the file where to load the fingerprint
             from.
         :type filename: str
         :rtype: Fingerprint
         """
+        if not os.path.isfile(filename):
+            return None
+
         with open(filename) as f:
             try:
                 data = json.load(f)

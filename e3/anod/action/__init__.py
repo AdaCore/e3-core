@@ -72,7 +72,13 @@ class GetSource(Action):
         return 'get source %s' % self.data.name
 
 
-class DownloadSource(Action):
+class Download(Action):
+    """General root class for all download actions."""
+
+    pass
+
+
+class DownloadSource(Download):
     """DownloadSource Action.
 
     This action means the we need to download from the store a given
@@ -173,7 +179,7 @@ class CreateSources(Action):
         self.anod_instance = anod_instance
 
     def __str__(self):
-        return 'create sources %s' % self.data[1]
+        return 'create all sources for %s.anod' % self.anod_instance.name
 
 
 class Checkout(Action):
@@ -249,7 +255,7 @@ class Install(AnodAction):
     pass
 
 
-class DownloadBinary(Action):
+class DownloadBinary(Download):
     """DownloadBinary Action.
 
     Download a binary package from the store.
@@ -273,7 +279,13 @@ class DownloadBinary(Action):
             self.uid.split('.', 1)[1].rsplit('.', 1)[0]
 
 
-class UploadComponent(Action):
+class Upload(Action):
+    """General root class for all upload actions."""
+
+    pass
+
+
+class UploadComponent(Upload):
     """UploadComponent Action.
 
     Upload a component to the store.
@@ -309,6 +321,34 @@ class UploadSourceComponent(UploadComponent):
     """Upload source only component."""
 
     str_prefix = 'source metadata'
+
+
+class UploadSource(Upload):
+    """Upload a source package."""
+
+    __slots__ = ('uid', 'anod_instance', 'source_name')
+
+    def __init__(self, anod_instance, source_name):
+        """Initialize UploadSource object.
+
+        :param anod_instance: The Anod instance of the spec providing
+            the given source.
+        :type anod_instance: e3.anod.spec.Anod
+        :param source_name: name of source package to assemble
+        :type source_name: str
+        """
+        uid = anod_instance.uid.split('.')
+        uid[-1] = 'upload_src'
+        uid.append(source_name)
+        uid = '.'.join(uid)
+        super(UploadSource, self).__init__(uid=uid,
+                                           data=(anod_instance, source_name))
+        self.anod_instance = anod_instance
+        self.source_name = source_name
+
+    def __str__(self):
+        """Return string representation."""
+        return 'upload source %s' % self.source_name
 
 
 class Decision(Action):

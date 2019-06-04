@@ -60,6 +60,7 @@ class Scheduler(object):
         self.queued_jobs = 0
         self.all_jobs_queued = False
         self.message_queue = None
+        self.dag = None
         self.dag_iterator = None
         self.start_time = None
         self.stop_time = None
@@ -138,6 +139,7 @@ class Scheduler(object):
         # Message queue to get job end notifications
         self.message_queue = Queue()
 
+        self.dag = dag
         self.dag_iterator = DAGIterator(dag, enable_busy_state=True)
         self.start_time = datetime.now()
         self.stop_time = None
@@ -184,6 +186,7 @@ class Scheduler(object):
             for p in self.active_jobs:
                 p.interrupt()
                 self.safe_collect(p)
+                p.on_finish(self)
             raise KeyboardInterrupt
         self.stop_time = datetime.now()
 
@@ -220,6 +223,7 @@ class Scheduler(object):
                     notify_end=self.message_queue.put)
                 if job.should_skip:
                     self.safe_collect(job)
+                    job.on_finish(self)
                     self.dag_iterator.leave(uid)
                 else:
                     self.push(job)
@@ -236,7 +240,7 @@ class Scheduler(object):
             while q and q[0][2].tokens <= self.tokens[name]:
                 _, _, next_job = heapq.heappop(q)
                 self.queued_jobs -= 1
-                next_job.on_start()
+                next_job.on_start(self)
                 next_job.start(slot=self.slots.pop())
                 self.tokens[name] -= next_job.tokens
                 self.active_jobs.append(next_job)
@@ -282,13 +286,16 @@ class Scheduler(object):
 
                 # Liberate the resources taken by the job
                 self.tokens[job.queue_name] += job.tokens
+                collect_result = self.safe_collect(job)
+                job.on_finish(self)
 
-                if self.safe_collect(job):
+                if collect_result:
                     # Requeue when needed
                     self.push(job)
                 else:
                     # Mark the job as completed
-                    self.dag_iterator.leave(job.uid)
+                    if job.uid in self.dag:
+                        self.dag_iterator.leave(job.uid)
 
                 del self.active_jobs[job_index]
                 return

@@ -5,7 +5,7 @@ from e3.anod.action import (Build, BuildOrDownload, Checkout, CreateSource,
                             CreateSourceOrDownload, CreateSources, Decision,
                             DownloadBinary, DownloadSource, GetSource, Install,
                             InstallSource, Root, Test, UploadBinaryComponent,
-                            UploadComponent, UploadSourceComponent)
+                            Upload, UploadSource, UploadSourceComponent)
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
 from e3.anod.package import UnmanagedSourceBuilder
@@ -271,7 +271,8 @@ class AnodContext(object):
                                source_packages=source_packages,
                                plan_line=plan_line, plan_args=plan_args,
                                force_source_deps=force_source_deps,
-                               sandbox=sandbox)
+                               sandbox=sandbox,
+                               upload=upload)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
@@ -320,7 +321,8 @@ class AnodContext(object):
                  plan_line=None,
                  plan_args=None,
                  force_source_deps=None,
-                 sandbox=None):
+                 sandbox=None,
+                 upload=False):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -342,6 +344,17 @@ class AnodContext(object):
         :type source_name: str | None
         :param force_source_deps: whether to force loading the source deps
         :type force_source_deps: bool
+        :param plan_line: corresponding line:linenumber in the plan
+        :type plan_line: str
+        :param plan_args: action args after plan execution, taking into
+            account plan context (such as with defaults(XXX):)
+        :type plan_args: dict
+        :param sandbox: if not None, anod instance are automatically bind to
+            the given sandbox
+        :type sandbox: None | Sandbox
+        :param upload: if True consider uploads to the store (sources and
+            binaries)
+        :type upload: bool
         """
         def add_action(data, connect_with=None):
             self.add(data)
@@ -358,6 +371,7 @@ class AnodContext(object):
         if primitive == 'source':
             if source_name is not None:
                 result = CreateSource(spec, source_name)
+
             else:
                 # Create the root node
                 result = CreateSources(spec)
@@ -382,7 +396,8 @@ class AnodContext(object):
                         source_name=sb.name,
                         plan_line=plan_line,
                         plan_args=None,
-                        sandbox=sandbox)
+                        sandbox=sandbox,
+                        upload=upload)
                     self.connect(result, sub_result)
 
         elif primitive == 'build':
@@ -415,7 +430,8 @@ class AnodContext(object):
                                  plan_args=plan_args,
                                  plan_line=plan_line,
                                  force_source_deps=force_source_deps,
-                                 sandbox=sandbox)
+                                 sandbox=sandbox,
+                                 upload=upload)
 
         if expand_build and primitive == 'build' and spec.has_package:
             # A build primitive is required and the spec defined a binary
@@ -425,7 +441,8 @@ class AnodContext(object):
                                  plan_args=None,
                                  plan_line=plan_line,
                                  force_source_deps=force_source_deps,
-                                 sandbox=sandbox)
+                                 sandbox=sandbox,
+                                 upload=upload)
 
         # Add this stage if the action is already in the DAG, then it has
         # already been added.
@@ -456,7 +473,8 @@ class AnodContext(object):
                     plan_args=None,
                     plan_line=plan_line,
                     force_source_deps=force_source_deps,
-                    sandbox=sandbox)
+                    sandbox=sandbox,
+                    upload=upload)
                 self.add_decision(BuildOrDownload,
                                   result,
                                   build_action,
@@ -466,6 +484,13 @@ class AnodContext(object):
 
         elif primitive == 'source':
             if source_name is not None:
+                # Also add an UploadSource action
+                if upload:
+                    upload_src = UploadSource(spec, source_name)
+                    self.add(upload_src)
+                    self.connect(self.root, upload_src)
+                    self.connect(upload_src, result)
+
                 for sb in spec.source_pkg_build:
                     if sb.name == source_name:
                         for checkout in sb.checkout:
@@ -494,7 +519,7 @@ class AnodContext(object):
                     # ensure that sources associated with it are available
                     child_instance = self.load(
                         e.name, kind='source',
-                        env=BaseEnv(), qualifier=None, sandbox=sandbox)
+                        env=self.default_env, qualifier=None, sandbox=sandbox)
                     spec.deps[e.local_name] = child_instance
 
                     if force_source_deps:
@@ -515,7 +540,8 @@ class AnodContext(object):
                     plan_args=None,
                     plan_line=plan_line,
                     force_source_deps=force_source_deps,
-                    sandbox=sandbox)
+                    sandbox=sandbox,
+                    upload=upload)
 
                 spec.deps[e.local_name] = child_action.anod_instance
 
@@ -575,12 +601,13 @@ class AnodContext(object):
                 else:
                     source_action = self.add_spec(
                         name=spec_decl,
-                        env=BaseEnv(),
+                        env=self.default_env,
                         primitive='source',
                         plan_args=None,
                         plan_line=plan_line,
                         source_name=s.name,
-                        sandbox=sandbox)
+                        sandbox=sandbox,
+                        upload=upload)
                     for repo in obj.checkout:
                         r = Checkout(repo, self.repo.repos.get(repo))
                         add_action(r, connect_with=source_action)
@@ -691,16 +718,16 @@ class AnodContext(object):
                 # to apply the triggers based on the current list of scheduled
                 # actions.
                 action.apply_triggers(dag)
-            elif isinstance(action, UploadComponent):
+            elif isinstance(action, Upload):
                 uploads.append((action,
                                 self.tree.get_predecessors(uid)))
             else:
                 # Compute the list of successors for the current node (i.e:
-                # predecessors in the reversed graph). Ignore UploadComponent
+                # predecessors in the reversed graph). Ignore Upload
                 # nodes as they will be processed only once the scheduling
                 # is done.
                 preds = list([k for k in rev.get_predecessors(uid)
-                              if not isinstance(rev[k], UploadComponent)])
+                              if not isinstance(rev[k], Upload)])
 
                 if len(preds) == 1 and isinstance(rev[preds[0]], Decision):
                     decision = rev[preds[0]]
@@ -757,7 +784,7 @@ class AnodContext(object):
                                               predecessors=[uid],
                                               enable_checks=False)
 
-        # Handle UploadComponent nodes. Add the node only if all predecessors
+        # Handle Upload nodes. Add the node only if all predecessors
         # are scheduled.
         for action, predecessors in uploads:
             if len([p for p in predecessors if p not in dag]) == 0:

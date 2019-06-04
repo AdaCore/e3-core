@@ -69,3 +69,30 @@ def test_smtp_event():
     # attachment content contains this file content, including
     # the previous line
     assert b'assert attachment_content is not None' in attachment_content
+
+    # Test sending an event in two steps: save in temporary files and then
+    # reread the file and send the event.
+    event_file = manager.dump_event(event=e, dest=".")
+    assert os.path.isfile(event_file)
+
+    with mock.patch('smtplib.SMTP_SSL') as mock_smtp:
+        manager.send_event_from_file(event_file)
+
+    smtp_mock = mock_smtp.return_value
+    assert smtp_mock.sendmail.called
+    assert smtp_mock.sendmail.call_count == 1
+    msg_as_string = smtp_mock.sendmail.call_args[0][2]
+
+    event_mail = email.message_from_string(msg_as_string)
+    assert event_mail['Subject'] == 'a test subject'
+
+
+def test_smtp_servers_as_str():
+    """Test when smtp server setting is a string."""
+    manager = e3.event.load_event_manager(
+        'smtp',
+        {'subject': 'test subject',
+         'from_addr': 'e3@example.net',
+         'to_addr': 'info@example.net,info@example.com',
+         'smtp_servers': 'smtp.localhost'})
+    assert isinstance(manager.config.smtp_servers, list)
