@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from e3.anod.driver import AnodDriver
-from e3.anod.error import AnodError, ShellError, SpecError
+from e3.anod.error import AnodError, SpecError
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 

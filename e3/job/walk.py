@@ -236,7 +236,6 @@ class Walk(object):
 
         :rtype: Job
         """
-
         # Get the latest fingerprint
         prev_fingerprint = self.load_previous_fingerprint(uid)
 

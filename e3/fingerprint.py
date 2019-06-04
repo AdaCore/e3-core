@@ -141,7 +141,6 @@ class Fingerprint(object):
 
         :raise AssertError: if other is not a Fingerprint
         """
-
         # If other is None behave as if the previous fingerprint was an empty
         # fingerprint
         if other is None:

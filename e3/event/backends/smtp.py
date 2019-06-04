@@ -55,7 +55,7 @@ class SMTPEventManager(EventManager):
         self.config = self.Config(configuration)
 
     def send_event(self, event):
-        """Send an event
+        """Send an event.
 
         :param event: an event
         :type event: SMTPEvent

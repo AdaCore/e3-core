@@ -589,7 +589,7 @@ class BaseEnv(AbstractBaseEnv):
 
     @classmethod
     def from_env(cls, env=None):
-        """Return a new BaseEnv object from an env
+        """Return a new BaseEnv object from an env.
 
         :param env: env. If None copy the current Env
         :type env: BaseEnv | Env

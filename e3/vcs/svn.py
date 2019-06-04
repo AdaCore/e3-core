@@ -109,7 +109,7 @@ class SVNRepository(object):
         """
         try:
             return self.get_info('Last Changed Rev')
-        except Exception as e:
+        except Exception:
             logger.exception("Cannot fetch last changed rev")
             raise SVNError("Cannot fetch last changed rev", "svn_cmd")
 

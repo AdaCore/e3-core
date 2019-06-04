@@ -89,7 +89,6 @@ def test_smtp_event():
 
 def test_smtp_servers_as_str():
     """Test when smtp server setting is a string."""
-
     manager = e3.event.load_event_manager(
         'smtp',
         {'subject': 'test subject',

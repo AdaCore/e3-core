@@ -74,6 +74,7 @@ class GetSource(Action):
 
 class Download(Action):
     """General root class for all download actions."""
+
     pass
 
 
@@ -280,6 +281,7 @@ class DownloadBinary(Download):
 
 class Upload(Action):
     """General root class for all upload actions."""
+
     pass
 
 
@@ -345,7 +347,7 @@ class UploadSource(Upload):
         self.source_name = source_name
 
     def __str__(self):
-        """String representation."""
+        """Return string representation."""
         return 'upload source %s' % self.source_name
 
 
