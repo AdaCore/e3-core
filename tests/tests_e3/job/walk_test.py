@@ -51,7 +51,7 @@ def setup_sbx(request):
         if os.path.exists(SBX_DIR):
             rm(SBX_DIR, True)
     request.addfinalizer(delete_sbx)
-  
+
     delete_sbx()
     os.mkdir(SBX_DIR)
     os.mkdir(FINGERPRINT_DIR)

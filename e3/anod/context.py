@@ -349,8 +349,8 @@ class AnodContext(object):
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
         :type plan_args: dict
-        :param sandbox: if not None, anod instance are automatically bind to the
-            given sandbox
+        :param sandbox: if not None, anod instance are automatically bind to
+            the given sandbox
         :type sandbox: None | Sandbox
         :param upload: if True consider uploads to the store (sources and
             binaries)

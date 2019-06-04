@@ -307,7 +307,7 @@ class Walk(object):
                                   ReturnValue.force_skip):
                 logging.info("[%-10s %-9s %4ds] %s",
                              job.queue_name, self.job_status[job.uid].name,
-                             0,job.data)
+                             0, job.data)
             return False
 
         logging.info("[%-10s %-9s %4ds] %s",

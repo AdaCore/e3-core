@@ -76,6 +76,7 @@ class Download(Action):
     """General root class for all download actions."""
     pass
 
+
 class DownloadSource(Download):
     """DownloadSource Action.
 
