@@ -36,6 +36,8 @@ class SMTPConfig(object):
 
         # If no smtp server try using sendmail
         self.smtp_servers = configuration.get('smtp_servers', [])
+        if not isinstance(self.smtp_servers, list):
+            self.smtp_servers = [self.smtp_servers]
 
 
 class SMTPEventManager(EventManager):
@@ -149,9 +151,6 @@ class SMTPEventManager(EventManager):
         """
         with open(event_path, 'r') as fd:
             msg = json.load(fd)
-
-        if not isinstance(msg['smtp_server'], list):
-            msg['smtp_server'] = [msg['smtp_server']]
 
         return cls.send_email(msg)
 
