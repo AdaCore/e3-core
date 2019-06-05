@@ -36,7 +36,7 @@ class SMTPConfig(object):
 
         # If no smtp server try using sendmail
         self.smtp_servers = configuration.get('smtp_servers', [])
-        if not isinstance(self.smtp_servers, list):
+        if isinstance(self.smtp_servers, str):
             self.smtp_servers = [self.smtp_servers]
 
 
