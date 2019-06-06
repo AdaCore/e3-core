@@ -117,6 +117,8 @@ class SMTPEventManager(EventManager):
                               'attachment', filename='event')
         mail.attach(event_json)
 
+        result = {'attachments': {}}
+
         for name, (filename, _) in attachments.items():
             ctype, encoding = mimetypes.guess_type(filename)
 
@@ -129,16 +131,22 @@ class SMTPEventManager(EventManager):
             with open(filename, 'rb') as data_f:
                 attachment.set_payload(data_f.read())
 
+            result['attachments'][name] = {'path': filename,
+                                           'encoding': encoding,
+                                           'ctype': ctype}
+
             encoders.encode_base64(attachment)
             attachment.add_header('Content-Disposition', 'attachment',
                                   filename=name)
             mail.attach(attachment)
-        return {'from': self.config.from_addr,
-                'to': mail['To'].split(','),
-                'content': mail.as_string(),
-                'event_dict': event.to_dict(),
-                'smtp_server': self.config.smtp_servers,
-                'message_id': mail['Message-ID']}
+        result.update(
+            {'from': self.config.from_addr,
+             'to': mail['To'].split(','),
+             'content': mail.as_string(),
+             'event_dict': event.to_dict(),
+             'smtp_server': self.config.smtp_servers,
+             'message_id': mail['Message-ID']})
+        return result
 
     @classmethod
     def send_event_from_file(cls, event_path):
