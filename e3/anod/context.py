@@ -360,7 +360,7 @@ class AnodContext(object):
 
                 # Then one node for each source package
                 for sb in spec.source_pkg_build:
-                    if source_packages and sb not in source_packages:
+                    if source_packages and sb.name not in source_packages:
                         # This source package is defined in the spec but
                         # explicitly excluded in the plan
                         continue
