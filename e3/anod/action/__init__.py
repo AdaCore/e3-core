@@ -380,12 +380,8 @@ class Decision(Action):
     :vartype initiator: str
     :ivar left_action: The first possible choice for our decision.
     :vartype left_action: Action.
-    :ivar left: The same as self.left_action.uid.
-    :vartype left: str
     :ivar right_action: The second possible choice for our decision.
     :vartype right_action: Action.
-    :ivar right: The same as self.right_action.uid.
-    :vartype left: str
     :ivar choice: If not None, the choice made by the plan itself.
         It can be Decision.LEFT, meaning that the plan contains
         an entry to perform the self.left_action; If set to
@@ -434,12 +430,20 @@ class Decision(Action):
         self.initiator = root.uid
         self.choice = choice
         self.expected_choice = None
-        self.left = left.uid
         self.left_action = left
-        self.right = right.uid
         self.right_action = right
         self.triggers = []
         self.decision_maker = None
+
+    @property
+    def left(self):
+        """return self.left_action.uid (this is a convenience property)."""
+        return self.left_action.uid
+
+    @property
+    def right(self):
+        """return self.right_action.uid (this is a convenience property)."""
+        return self.right_action.uid
 
     def add_trigger(self, trigger, decision, plan_line):
         """Add a trigger to self.triggers.
