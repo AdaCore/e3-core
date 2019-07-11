@@ -42,13 +42,24 @@ def test_run_shebang(caplog):
 
 def test_rlimit():
     """rlimit kill the child process after a timeout."""
-    p = e3.os.process.Run(
-        [sys.executable, '-c',
-         "print('hello'); import sys; sys.stdout.flush(); "
-         "import time; time.sleep(10); print('world')"],
-        timeout=1)
-    assert 'hello' in p.out
-    assert 'world' not in p.out
+    def run_test():
+        p = e3.os.process.Run(
+            [sys.executable, '-c',
+             "print('hello'); import sys; sys.stdout.flush(); "
+             "import time; time.sleep(10); print('world')"],
+            timeout=1)
+        assert 'hello' in p.out
+        assert 'world' not in p.out
+
+    run_test()
+    if sys.platform == 'win32':
+        # On Windows make sure that rlimit works when
+        # setting the build environment to 64bit windows
+        e = e3.env.Env()
+        e.store()
+        e.set_build('x86_64-windows')
+        run_test()
+        e.restore()
 
 
 def test_not_found():
