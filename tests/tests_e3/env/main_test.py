@@ -243,6 +243,10 @@ def test_from_platform_name():
     assert e.target.platform == 'x86_64-linux'
     assert e.build.platform == 'x86_64-linux'
     assert not e.is_cross
+    e = e3.env.BaseEnv.from_platform_name('avr-elf-solaris')
+    assert e.target.platform == 'avr-elf'
+    assert e.build.platform == 'sparc-solaris'
+    assert e.is_cross
 
     e = e3.env.BaseEnv.from_platform_name('what-linux-linux')
     assert e is None
