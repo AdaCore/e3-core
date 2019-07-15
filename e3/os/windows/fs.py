@@ -176,6 +176,7 @@ class NTFile(object):
 
         return result.index_number
 
+    @WithOpenFile(Access.READ_ATTRS)
     def read_attributes(self):
         """Retrieve file basic information.
 
@@ -183,14 +184,20 @@ class NTFile(object):
 
         :raise: NTException
         """
-        status = NT.QueryAttributesFile(pointer(self.attr),
-                                        pointer(self.basic_info))
-        logger.debug('read_attributes status: %d', status)
-        if status < 0:
+        result = FileInfo.Basic()
+        status = NT.QueryInformationFile(self.handle,
+                                         pointer(self.io_status),
+                                         pointer(result),
+                                         sizeof(result),
+                                         FileInfo.Basic.class_id)
+        if status < 0:  # defensive code
+            # we should already have raised an error here when trying
+            # to open the file
             raise NTException(status=status,
-                              message="cannot query attributes %s" % self.path,
+                              message='cannot read attributes',
                               origin="NTFile.read_attributes")
-        return self.basic_info
+
+        return result
 
     @WithOpenFile(Access.WRITE_ATTRS)
     def write_attributes(self):
