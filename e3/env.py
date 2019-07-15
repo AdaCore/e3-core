@@ -507,6 +507,8 @@ class AbstractBaseEnv(object):
             target_name, host = platform.rsplit('-', 1)
             if host == 'darwin':
                 host_cpu = 'x86_64'
+            elif host == 'solaris':
+                host_cpu = 'sparc'
             elif host.endswith('64'):
                 host = host[:-2]
                 host_cpu = 'x86_64'
