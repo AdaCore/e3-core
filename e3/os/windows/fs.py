@@ -176,23 +176,45 @@ class NTFile(object):
 
         return result.index_number
 
-    def read_attributes(self):
-        """Retrieve file basic information.
+    def read_attributes_internal(self):
+        """Retrieve file basic attributes (internal function).
 
-        It updates the basic_info attributes
-
-        :raise: NTException
+        The function is used internally to check file basic attributes
+        (kind of entry and windows attributes such as readonly). Retrieved
+        attributes are stored in basic_info Python attribute. It requires
+        less rights than the read_attributes method.
         """
         status = NT.QueryAttributesFile(pointer(self.attr),
                                         pointer(self.basic_info))
-        logger.debug('read_attributes status: %d', status)
         if status < 0:
             raise NTException(status=status,
                               message="cannot query attributes %s" % self.path,
-                              origin="NTFile.read_attributes")
-        return self.basic_info
+                              origin="NTFile.read_attributes_internal")
 
-    @WithOpenFile(Access.WRITE_ATTRS)
+    @WithOpenFile(Access.READ_ATTRS)
+    def read_attributes(self):
+        """Retrieve file basic information.
+
+        It updates the basic_info attribute including timestamp information
+
+        :raise: NTException
+        """
+        result = FileInfo.Basic()
+        status = NT.QueryInformationFile(self.handle,
+                                         pointer(self.io_status),
+                                         pointer(result),
+                                         sizeof(result),
+                                         FileInfo.Basic.class_id)
+        if status < 0:  # defensive code
+            # we should already have raised an error here when trying
+            # to open the file
+            raise NTException(status=status,
+                              message='cannot read attributes',
+                              origin="NTFile.read_attributes")
+        self.basic_info = result
+        return result
+
+    @WithOpenFile(Access.WRITE_ATTRS | Access.READ_ATTRS)
     def write_attributes(self):
         """Update file attributes.
 
@@ -369,7 +391,7 @@ class NTFile(object):
         def check_file(filename, parent):
             f = NTFile(filename, parent)
             try:
-                f.read_attributes()
+                f.read_attributes_internal()
             except NTException:
                 return True, False
             return False, True
@@ -386,7 +408,7 @@ class NTFile(object):
 
         # First we need to check that file is not mark readonly
         try:
-            self.read_attributes()
+            self.read_attributes_internal()
         except NTException as e:
             if e.status == Status.OBJECT_NAME_NOT_FOUND:
                 return
