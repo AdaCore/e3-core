@@ -82,7 +82,7 @@ class AnodContext(object):
 
         self.tree = DAG()
         self.root = Root()
-
+        self.dependencies = {}
         self.add(self.root)
         self.cache = {}
         self.sources = {}
@@ -116,6 +116,9 @@ class AnodContext(object):
                                                    kind=kind)
             if sandbox is not None:
                 self.cache[key].bind_to_sandbox(sandbox)
+
+            # Update tracking of dependencies
+            self.dependencies[self.cache[key].uid] = {}
 
             # Update the list of available sources. ??? Should be done
             # once per spec (and not once per spec instance). Need some
@@ -521,6 +524,8 @@ class AnodContext(object):
                         e.name, kind='source',
                         env=self.default_env, qualifier=None, sandbox=sandbox)
                     spec.deps[e.local_name] = child_instance
+                    self.dependencies[spec.uid][e.local_name] = \
+                        (e, spec.deps[e.local_name])
 
                     if force_source_deps:
                         # When in force_source_deps we also want to add
@@ -544,6 +549,8 @@ class AnodContext(object):
                     upload=upload)
 
                 spec.deps[e.local_name] = child_action.anod_instance
+                self.dependencies[spec.uid][e.local_name] = \
+                    (e, spec.deps[e.local_name])
 
                 if e.kind == 'build' and \
                         self[child_action.uid].data.kind == 'install':

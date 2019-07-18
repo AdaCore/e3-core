@@ -144,7 +144,7 @@ class Anod(object):
         :raise: SpecError
         """
         self.deps = OrderedDict()
-        """:type: OrderedDict[e3.anod.deps.Dependency]"""
+        """:type: OrderedDict[str, e3.anod.Anod]"""
 
         self.kind = kind
         self.jobs = jobs
