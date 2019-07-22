@@ -1,0 +1,11 @@
+from e3.anod.spec import Anod
+
+class SpecTools(Anod):
+
+    @Anod.primitive()
+    def install(self):
+        pass
+
+    @Anod.primitive()
+    def download(self):
+        pass
