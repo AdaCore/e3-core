@@ -225,20 +225,23 @@ class SystemInfo(object):
                 has been compiled. Using RtlGetVersion kernel function ensure
                 that the right version is returned.
 
-                :return: the version
-                :rtype: float | None
+                :return: the version as a table
+                    (major.minor, build number, is_server)
+                :rtype: (float, int, bool) | None
                 """
                 os_version = WinOSVersion()
                 os_version.dwOSVersionInfoSize = ctypes.sizeof(os_version)
                 retcode = ctypes.windll.Ntdll.RtlGetVersion(
                     ctypes.byref(os_version))
                 if retcode != 0:
-                    return None
+                    return (None, None, None)
 
-                return float("%d.%d" % (os_version.dwMajorVersion,
-                                        os_version.dwMinorVersion))
+                return (float("%s.%s" % (os_version.dwMajorVersion,
+                                         os_version.dwMinorVersion)),
+                        os_version.dwBuildNumber,
+                        os_version.wProductType != 1)
 
-            effective_version = get_os_version()
+            effective_version, build_number, is_server = get_os_version()
 
             if effective_version is None or effective_version <= 6.2:
                 if version == 'Vista' and \
@@ -246,13 +249,16 @@ class SystemInfo(object):
                     version = 'Vista64'
             else:
                 if effective_version == 6.3:
-                    if 'Server' in cls.uname.release:
+                    if is_server:
                         version = '2012R2'
                     else:
                         version = '8.1'
                 elif effective_version == 10.0:
-                    if 'Server' in cls.uname.release:
-                        version = '2016'
+                    if is_server:
+                        if build_number < 17763:
+                            version = '2016'
+                        else:
+                            version = '2019'
                     else:
                         version = '10'
 
