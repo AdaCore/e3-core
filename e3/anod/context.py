@@ -716,10 +716,13 @@ class AnodContext(object):
         # Retrieve existing tags
         dag.tags = self.tree.tags
 
+        # Note that schedule perform a pruning on the DAG, thus no cycle can
+        # be introduced. That's why checks are disabled when creating the
+        # result graph.
         for uid, action in rev:
             if uid == 'root':
                 # Root node is always in the final DAG
-                dag.add_vertex(uid, action)
+                dag.update_vertex(uid, action, enable_checks=False)
             elif isinstance(action, Decision):
                 # Decision node does not appears in the final DAG but we need
                 # to apply the triggers based on the current list of scheduled
@@ -750,7 +753,7 @@ class AnodContext(object):
                     choice = decision.get_decision()
 
                     if choice == uid:
-                        dag.add_vertex(uid, action)
+                        dag.update_vertex(uid, action, enable_checks=False)
                         dag.update_vertex(decision.initiator,
                                           predecessors=[uid],
                                           enable_checks=False)
@@ -758,7 +761,8 @@ class AnodContext(object):
                         # delegate to resolver
                         try:
                             if resolver(action, decision):
-                                dag.add_vertex(uid, action)
+                                dag.update_vertex(uid, action,
+                                                  enable_checks=False)
                                 dag.update_vertex(decision.initiator,
                                                   predecessors=[uid],
                                                   enable_checks=False)
@@ -766,7 +770,7 @@ class AnodContext(object):
                             # In order to help the analysis of a scheduling
                             # error compute the explicit initiators of that
                             # action
-                            dag.add_vertex(uid, action)
+                            dag.update_vertex(uid, action, enable_checks=False)
                             dag.update_vertex(decision.initiator,
                                               predecessors=[action.uid],
                                               enable_checks=False)
@@ -785,7 +789,7 @@ class AnodContext(object):
                     # scheduled.
                     successors = [k for k in preds if k in dag]
                     if successors:
-                        dag.add_vertex(uid, action)
+                        dag.update_vertex(uid, action, enable_checks=False)
                         for a in successors:
                             dag.update_vertex(a,
                                               predecessors=[uid],
@@ -800,5 +804,6 @@ class AnodContext(object):
                                   predecessors=predecessors,
                                   enable_checks=False)
                 # connect upload to the root node
-                dag.update_vertex('root', predecessors=[action.uid])
+                dag.update_vertex('root', predecessors=[action.uid],
+                                  enable_checks=False)
         return dag

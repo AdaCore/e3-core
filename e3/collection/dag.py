@@ -607,8 +607,10 @@ class DAG(object):
                 # Node is pruned keep track of its predecessors
                 pruned_node_predecessors[node] = predecessors
             else:
-                # Node is kept
-                result.add_vertex(node, data, predecessors)
+                # Node is kept. Note that no check is needed as pruning
+                # operation cannot introduce a cycle.
+                result.update_vertex(node, data, predecessors,
+                                     enable_checks=False)
                 pruned_node_predecessors[node] = set([node])
                 if node in self.tags:
                     result.add_tag(node, self.tags[node])
