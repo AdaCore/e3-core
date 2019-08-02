@@ -474,8 +474,8 @@ def test_failure_status(git_specs_dir):
          '--specs-dir', local_spec_dir,
          '--plan', os.path.join(root_dir, 'test.plan'),
          sandbox_dir])
-    assert 'dummy-github configuration missing' in p.out, p.out
-    assert p.out.count('status=failure') == 7, p.out
+    assert 'add_spec: unknown repository dummy-github' in p.out, p.out
+    assert p.status == 1
 
 
 def test_sandbox_user_yaml(git_specs_dir):

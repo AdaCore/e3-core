@@ -28,6 +28,7 @@ class TestContext(object):
         asr.repos['spec1-git'] = 'spec1-git'
         asr.repos['spec8-git'] = 'spec8-git'
         asr.repos['spec2-git'] = 'spec2-git'
+        asr.repos['a-git'] = 'a-git'
         env = BaseEnv()
         env.set_build('x86-linux', 'rhes6', 'mylinux')
         ac = AnodContext(asr, default_env=env,
