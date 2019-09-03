@@ -598,3 +598,13 @@ class TestContext(object):
         for action in cm.execute(myplan, 'myserver'):
             assert action.plan_call_args == {'platform': 'any'}
             assert action.plan_args['platform'] == BaseEnv().platform
+
+    def test_add_anod_action_duplicate_dep(self):
+        """Verify that duplicate dep with same local_name are rejected."""
+        ac = self.create_context()
+
+        with pytest.raises(AnodError) as err:
+            ac.add_anod_action('duplicate_dep', primitive='build')
+
+        assert "The spec duplicate_dep has two dependencies with the same " \
+            "local_name attribute (spec3)" in str(err)
