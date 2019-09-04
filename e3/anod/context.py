@@ -364,6 +364,24 @@ class AnodContext(object):
             if connect_with is not None:
                 self.connect(connect_with, data)
 
+        def add_dep(spec_instance, dep, dep_instance):
+            """Add a new dependency in an Anod instance dependencies dict.
+
+            :param spec_instance: an Anod instance
+            :type spec_instance: Anod
+            :param dep: the dependency we want to add
+            :type dep: Dependency
+            :param dep_instance: the Anod instance loaded for that dependency
+            :type dep_instance: Anod
+            """
+            if dep.local_name in spec_instance.deps:
+                raise AnodError(
+                    origin='expand_spec',
+                    message='The spec {} has two dependencies with the same '
+                    'local_name attribute ({})'.format(
+                        spec_instance.name, dep.local_name))
+            spec_instance.deps[dep.local_name] = dep_instance
+
         # Initialize a spec instance
         e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
             name, qualifier, primitive))
@@ -531,7 +549,9 @@ class AnodContext(object):
                     child_instance = self.load(
                         e.name, kind='source',
                         env=self.default_env, qualifier=None, sandbox=sandbox)
-                    spec.deps[e.local_name] = child_instance
+                    add_dep(spec_instance=spec,
+                            dep=e,
+                            dep_instance=child_instance)
                     self.dependencies[spec.uid][e.local_name] = \
                         (e, spec.deps[e.local_name])
 
@@ -556,7 +576,9 @@ class AnodContext(object):
                     sandbox=sandbox,
                     upload=upload)
 
-                spec.deps[e.local_name] = child_action.anod_instance
+                add_dep(spec_instance=spec,
+                        dep=e,
+                        dep_instance=child_action.anod_instance)
                 self.dependencies[spec.uid][e.local_name] = \
                     (e, spec.deps[e.local_name])
 
