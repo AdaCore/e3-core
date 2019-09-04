@@ -100,6 +100,16 @@ class TestContext(object):
                  'mylinux.x86-linux.spec2.source_install.spec2-src',
                  'download.spec2-src'))
 
+    def test_add_anod_action2_force_install(self):
+        """Check that forcing an install with no package is rejected."""
+        ac = self.create_context()
+        try:
+            ac.add_anod_action('spec2', primitive='install',
+                               plan_args={}, plan_line="install_plan.txt:2")
+        except SchedulingError as err:
+            assert 'error in plan at install_plan.txt:2: install should ' \
+                'be replaced by build' in str(err)
+
     def test_add_anod_action2_no_source_resolver(self):
         def no_resolver(action, decision):
             return AnodContext.decision_error(action, decision)

@@ -422,6 +422,12 @@ class AnodContext(object):
 
         if primitive == 'install' and not spec.has_package and \
                 has_primitive(spec, 'build'):
+            if plan_line is not None and plan_args is not None:
+                # We have an explicit call to install() in the plan but the
+                # spec has no binary package to download.
+                raise SchedulingError(
+                    "error in plan at {}: "
+                    "install should be replaced by build".format(plan_line))
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
             # dependency. In case there is no build primitive and no
