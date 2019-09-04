@@ -100,10 +100,6 @@ class ElectrolytJob(Job):
     def do_checkout(self):
         """Get sources from vcs to sandbox vcs_dir."""
         repo_name = self.data.repo_name
-        if self.data.repo_data is None:
-            logger.error('%s configuration missing', repo_name)
-            self.__status = STATUS.failure
-            return
         repo_url = self.data.repo_data['url']
         repo_revision = self.data.repo_data['revision']
         repo_vcs = self.data.repo_data['vcs']

@@ -498,8 +498,10 @@ class AnodContext(object):
                     if sb.name == source_name:
                         for checkout in sb.checkout:
                             if checkout not in self.repo.repos:
-                                logger.warning(
-                                    'unknown repository %s', checkout)
+                                raise SchedulingError(
+                                    origin="add_spec",
+                                    message="unknown repository {}".format(
+                                        checkout))
                             co = Checkout(
                                 checkout, self.repo.repos.get(checkout))
                             add_action(co, result)
