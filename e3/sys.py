@@ -267,22 +267,36 @@ def python_script(name, prefix=None):
             prefix = os.path.dirname(os.path.dirname(sys.executable))
 
     if sys.platform == 'win32':  # unix: no cover
+        # On Windows a script present in a distribution might be installed
+        # using different mechanisms:
+        #
+        # 1- the python file itself in the Scripts subdirectory
+        # 2- a .exe with the same basename as the original python script which
+        #    which call a python script called <basename>-script.py
+        # 3- a .exe without a side python script
         script = os.path.join(prefix, name) \
             if os.path.basename(prefix) == 'scripts' \
             else os.path.join(prefix, 'Scripts', name)
 
-        script_exe = script + '.exe'
-        if script.endswith('exe') and os.path.isfile(script):
-            if has_relative_python_shebang(script):  # all: no cover
-                # relocatable python distribution
-                return [interpreter(prefix), script]
-            return [script]
+        if script.endswith('.exe'):
+            script_exe = script
+            script_py = script[:-4] + '-script.py'
+        else:
+            script_exe = script + '.exe'
+            script_py = script + '-script.py'
+
+        if os.path.isfile(script_py):
+            # If we have a side <basename>-script.py always use it, instead of
+            # the .exe
+            return [interpreter(prefix), script_py]
         elif os.path.isfile(script_exe):
+            # A .exe without side python script
             if has_relative_python_shebang(script_exe):  # all: no cover
                 # relocatable python distribution
                 return [interpreter(prefix), script_exe]
             return [script_exe]
         else:
+            # Case in which the script is probably a Python file
             return [interpreter(prefix), script]
     else:
         return [interpreter(prefix), os.path.join(prefix, 'bin', name)]
