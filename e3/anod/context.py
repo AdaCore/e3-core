@@ -87,7 +87,7 @@ class AnodContext(object):
         self.cache = {}
         self.sources = {}
 
-    def load(self, name, env, qualifier, kind, sandbox=None):
+    def load(self, name, env, qualifier, kind, sandbox=None, source_name=None):
         """Load a spec instance.
 
         :param name: spec name
@@ -100,6 +100,9 @@ class AnodContext(object):
         :type kind: str
         :param sandbox: is not None bind the anod instances to a sandbox
         :type sandbox: None | Sandbox
+        :param source_name: when the primitive is "source" we create a specific
+            instance for each source package we have to create.
+        :type source_name: str | None
         :return: a spec instance
         :rtype: e3.anod.spec.Anod
         """
@@ -107,7 +110,8 @@ class AnodContext(object):
             env = self.default_env
 
         # Key used for the spec instance cache
-        key = (name, env.build, env.host, env.target, qualifier, kind)
+        key = (name, env.build, env.host, env.target, qualifier, kind,
+               source_name)
 
         if key not in self.cache:
             # Spec is not in cache so create a new instance
@@ -387,7 +391,7 @@ class AnodContext(object):
         e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
             name, qualifier, primitive))
         spec = self.load(name, qualifier=qualifier, env=env, kind=primitive,
-                         sandbox=sandbox)
+                         sandbox=sandbox, source_name=source_name)
 
         # Initialize the resulting action based on the primitive name
         if primitive == 'source':
