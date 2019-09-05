@@ -378,7 +378,8 @@ class AnodContext(object):
             :param dep_instance: the Anod instance loaded for that dependency
             :type dep_instance: Anod
             """
-            if dep.local_name in spec_instance.deps:
+            if dep.local_name in spec_instance.deps and \
+                    (spec_instance.deps[dep.local_name] != dep_instance):
                 raise AnodError(
                     origin='expand_spec',
                     message='The spec {} has two dependencies with the same '
