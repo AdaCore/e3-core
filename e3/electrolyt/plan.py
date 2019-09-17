@@ -251,31 +251,40 @@ class PlanContext(object):
         if self.ignore_disabled and not self.env.enabled:
             return
 
+        # ??? sometimes to understand the context it would be better to have
+        # several lines of plan, e.g. when an action is created by calling
+        # a function defined in a plan. Include all these lines separated
+        # by ';'. A better fix would be to change plan_line to plan_lines
+        # containing a tuple of plan_line.
         plan_line = 'unknown filename:unknown lineno'
         # Retrieve the plan line
         try:
             caller_frames = inspect.getouterframes(
                 frame=inspect.currentframe())
-            caller_frame = None
+            caller_frames_in_plan = []
             for frame in caller_frames:
                 if isinstance(frame, tuple):  # py2-only
                     frame_filename = frame[1]
                 else:  # py3-only
                     frame_filename = frame.filename
                 if frame_filename.endswith(self.plan.plan_ext):
-                    caller_frame = frame
+                    caller_frames_in_plan.append(frame)
         except Exception:  # defensive code
             # do not crash when inspect frames fails
             pass
         else:
-            if caller_frame is None:  # defensive code
+            if not caller_frames_in_plan:
                 # No information ?
                 pass
-            elif isinstance(caller_frame, tuple):  # py2-only
-                plan_line = '{}:{}'.format(caller_frame[1], caller_frame[2])
+            elif isinstance(caller_frames_in_plan[0], tuple):  # py2-only
+                plan_line = ';'.join((
+                    '{}:{}'.format(caller_frame[1], caller_frame[2])
+                    for caller_frame in caller_frames_in_plan))
             else:  # py3-only
-                plan_line = '{}:{}'.format(
-                    caller_frame.filename, caller_frame.lineno)
+                plan_line = ';'.join((
+                    '{}:{}'.format(
+                        caller_frame.filename, caller_frame.lineno)
+                    for caller_frame in caller_frames_in_plan))
 
         # First create our initial object based on current scope env
         result = self.env.copy()
