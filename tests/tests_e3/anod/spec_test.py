@@ -117,7 +117,6 @@ def test_primitive():
 
     assert has_primitive(with_primitive, 'build') is True
     assert with_primitive.build() == 'world'
-    assert with_primitive.has_nsis is False
 
     with_primitive2.build_space.create()
 

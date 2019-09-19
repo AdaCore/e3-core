@@ -5,15 +5,14 @@ import os
 import e3.anod.error
 import e3.diff
 import e3.log
-from e3.env import Env
-from e3.fs import VCS_IGNORE_LIST, sync_tree
+from e3.archive import create_archive
+from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 
 
 class Package(object):
     """Describe and generate a binary package."""
 
-    def __init__(self, prefix, publish=False, nsis=None, version=None,
-                 pkg_ext='.tar.gz', no_root_dir=False, **kwargs):
+    def __init__(self, prefix, publish=False, version=None):
         """Create a binary package.
 
         :param prefix: prefix of the package to create, the name will be
@@ -24,29 +23,66 @@ class Package(object):
         :param publish: if True, publish the package (i.e. the package
             can be distributed to a customer).
         :type publish: bool
-        :param nsis: a callback returning a dictionary containing needed data
-            to build an NSIS package.
-        :type nsis: () -> dict[str][str]  | None
         :param version: a callback returning the package version, if None the
             version is set to Anod.sandbox.build_version
         :type version: () -> str | None
-        :param pkg_ext: set the extension of the binary package (ignored when
-            nsis is used). The default is .tar.gz.
-        :type pkg_ext: str
-        :param no_root_dir: Create package without the root directory (zip
-            only)
-        :type no_root_dir: bool
         """
-        # Ignore all unsupported parameters
-        del kwargs
         self.prefix = prefix
-        self.name = prefix + '-{version}-{platform}-bin'
-        self.platform = Env().platform
+        self.name = prefix + '-{version}-{date}-{platform}-bin'
         self.publish = publish
-        self.pkg_ext = pkg_ext
-        self.no_root_dir = no_root_dir
-        self.nsis = nsis
         self.version = version
+
+    def pkg_name(self, anod_instance):
+        """Return the final package filename.
+
+        :param anod_instance: the Anod instance that creates the package
+        :type anod_instance: Anod
+        :return: the name without extension of the package filename
+        :rtype: str
+        """
+        if self.version is not None:
+            version = self.version()
+        else:
+            version = anod_instance.sandbox.build_version
+
+        return self.name.format(
+            version=version,
+            date=anod_instance.sandbox.build_date,
+            platform=anod_instance.env.platform)
+
+    def pkg_path(self, anod_instance):
+        """Return the full path in which a package will be generated.
+
+        :param anod_instance: the Anod instance that creates the package
+        :type anod_instance: Anod
+        :return: the full path to the generated archive
+        :rtype: str
+        """
+        return os.path.join(anod_instance.build_space.binary_dir,
+                            self.pkg_name(anod_instance) + '.zip')
+
+    def generate_package(self, anod_instance):
+        """Generate a package as a ZIP archive.
+
+        :param anod_instance: the Anod instance that creates the package
+        :type anod_instance: Anod
+        :return: the full path to the generated archive
+        :rtype: str
+        """
+        pkg_name = self.pkg_name(anod_instance)
+        pkg_path = self.pkg_path(anod_instance)
+
+        # Reset binary dir
+        rm(anod_instance.build_space.binary_dir, True)
+        mkdir(anod_instance.build_space.binary_dir)
+
+        # Create the zip archive
+        create_archive(
+            filename=os.path.basename(pkg_path),
+            from_dir=anod_instance.build_space.pkg_dir,
+            dest=os.path.dirname(pkg_path),
+            from_dir_rename=pkg_name)
+        return pkg_path
 
 
 class Source(object):
