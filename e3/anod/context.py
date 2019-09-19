@@ -241,7 +241,6 @@ class AnodContext(object):
                         upload=True,
                         plan_line=None,
                         plan_args=None,
-                        force_source_deps=False,
                         sandbox=None):
         """Add an Anod action to the context.
 
@@ -264,12 +263,6 @@ class AnodContext(object):
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
         :type plan_args: dict
-        :param force_source_deps: ??? whether to force loading source deps.
-            Idealy we should not need this, but since we're still in transition
-            phase we still have tools needed to both create the source package
-            and build the component in a single process. They then need to
-            parse both source_deps and build_deps.
-        :type force_source_deps: bool
         :return: the root added action
         :rtype: Action
         """
@@ -277,7 +270,6 @@ class AnodContext(object):
         result = self.add_spec(name, env, primitive, qualifier,
                                source_packages=source_packages,
                                plan_line=plan_line, plan_args=plan_args,
-                               force_source_deps=force_source_deps,
                                sandbox=sandbox,
                                upload=upload)
 
@@ -327,7 +319,6 @@ class AnodContext(object):
                  source_name=None,
                  plan_line=None,
                  plan_args=None,
-                 force_source_deps=None,
                  sandbox=None,
                  upload=False):
         """Expand an anod action into a tree (internal).
@@ -349,8 +340,6 @@ class AnodContext(object):
         :param source_name: source name associated with the source
             primitive
         :type source_name: str | None
-        :param force_source_deps: whether to force loading the source deps
-        :type force_source_deps: bool
         :param plan_line: corresponding line:linenumber in the plan
         :type plan_line: str
         :param plan_args: action args after plan execution, taking into
@@ -378,8 +367,7 @@ class AnodContext(object):
             :param dep_instance: the Anod instance loaded for that dependency
             :type dep_instance: Anod
             """
-            if dep.local_name in spec_instance.deps and \
-                    (spec_instance.deps[dep.local_name] != dep_instance):
+            if dep.local_name in spec_instance.deps:
                 raise AnodError(
                     origin='expand_spec',
                     message='The spec {} has two dependencies with the same '
@@ -388,7 +376,7 @@ class AnodContext(object):
             spec_instance.deps[dep.local_name] = dep_instance
 
         # Initialize a spec instance
-        e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
+        e3.log.debug('add spec: name:{}, qualifier:{}, primitive:{}'.format(
             name, qualifier, primitive))
         spec = self.load(name, qualifier=qualifier, env=env, kind=primitive,
                          sandbox=sandbox, source_name=source_name)
@@ -461,7 +449,6 @@ class AnodContext(object):
                                  expand_build=False,
                                  plan_args=plan_args,
                                  plan_line=plan_line,
-                                 force_source_deps=force_source_deps,
                                  sandbox=sandbox,
                                  upload=upload)
 
@@ -472,7 +459,6 @@ class AnodContext(object):
             return self.add_spec(name, env, 'install', qualifier,
                                  plan_args=None,
                                  plan_line=plan_line,
-                                 force_source_deps=force_source_deps,
                                  sandbox=sandbox,
                                  upload=upload)
 
@@ -504,7 +490,6 @@ class AnodContext(object):
                     expand_build=False,
                     plan_args=None,
                     plan_line=plan_line,
-                    force_source_deps=force_source_deps,
                     sandbox=sandbox,
                     upload=upload)
                 self.add_decision(BuildOrDownload,
@@ -541,11 +526,6 @@ class AnodContext(object):
                 getattr(spec, '%s_deps' % primitive) is not None:
             spec_dependencies += getattr(spec, '%s_deps' % primitive)
 
-        if force_source_deps and primitive != 'source':
-            if 'source_deps' in dir(spec) and \
-                    getattr(spec, 'source_deps') is not None:
-                spec_dependencies += getattr(spec, 'source_deps')
-
         for e in spec_dependencies:
             if isinstance(e, Dependency):
                 if e.kind == 'source':
@@ -560,14 +540,6 @@ class AnodContext(object):
                     self.dependencies[spec.uid][e.local_name] = \
                         (e, spec.deps[e.local_name])
 
-                    if force_source_deps:
-                        # When in force_source_deps we also want to add
-                        # source_deps of all "source_pkg" dependencies.
-                        if 'source_deps' in dir(child_instance) and \
-                                getattr(child_instance,
-                                        'source_deps') is not None:
-                            spec_dependencies += child_instance.source_deps
-
                     continue
 
                 child_action = self.add_spec(
@@ -577,7 +549,6 @@ class AnodContext(object):
                     qualifier=e.qualifier,
                     plan_args=None,
                     plan_line=plan_line,
-                    force_source_deps=force_source_deps,
                     sandbox=sandbox,
                     upload=upload)
 
