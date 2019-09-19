@@ -61,7 +61,7 @@ class Package(object):
         return os.path.join(anod_instance.build_space.binary_dir,
                             self.pkg_name(anod_instance) + '.zip')
 
-    def generate_package(self, anod_instance):
+    def create_package(self, anod_instance):
         """Generate a package as a ZIP archive.
 
         :param anod_instance: the Anod instance that creates the package
