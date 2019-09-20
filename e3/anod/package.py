@@ -17,7 +17,7 @@ class Package(object):
 
         :param prefix: prefix of the package to create, the name will be
             {prefix}-{version}-{platform}-bin.{exe,tar.gz}
-            The version is by default set to Anod.sandbox.build_version and
+            The version is by default set to 'unknown' and
             can be overridden by the version callback.
         :type prefix: str
         :param publish: if True, publish the package (i.e. the package
@@ -28,7 +28,7 @@ class Package(object):
         :type version: () -> str | None
         """
         self.prefix = prefix
-        self.name = prefix + '-{version}-{date}-{platform}-bin'
+        self.name = prefix + '-{version}-{platform}-bin'
         self.publish = publish
         self.version = version
 
@@ -43,11 +43,10 @@ class Package(object):
         if self.version is not None:
             version = self.version()
         else:
-            version = anod_instance.sandbox.build_version
+            version = 'unknown'
 
         return self.name.format(
             version=version,
-            date=anod_instance.sandbox.build_date,
             platform=anod_instance.env.platform)
 
     def pkg_path(self, anod_instance):
