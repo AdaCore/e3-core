@@ -87,6 +87,37 @@ def cp(source, target, copy_attrs=True, recursive=False,
                 None, sys.exc_traceback
 
 
+def directory_content(path, include_root_dir=False, unixpath=False):
+    """Return the complete directory content (recusrsively).
+
+    :param path: path for the which the content should be returned
+    :type path: str
+    :param include_root_dir: if True include the root directory in the paths
+        returned by the function. Otherwise return relative paths
+    :type include_root_dir: bool
+    :param unixpath: if True return unix compatible paths (calling unixpath on
+        all elements returned
+    :type unixpath: bool
+    :return: a list of of path. Note that directories will end with a path
+        separator
+    :rtype: list[str]
+    """
+    result = []
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            result.append(os.path.join(root, f))
+        for d in dirs:
+            result.append(os.path.join(root, d) + os.sep)
+    if not include_root_dir:
+        result = [os.path.relpath(e, path) + os.sep
+                  if e.endswith(os.sep) else os.path.relpath(e, path)
+                  for e in result]
+    if unixpath:
+        result = [e3.os.fs.unixpath(e) for e in result]
+    result.sort()
+    return result
+
+
 def echo_to_file(filename, content, append=False):
     """Output content into a file.
 
