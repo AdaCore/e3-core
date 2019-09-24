@@ -17,6 +17,7 @@ Example::
 from __future__ import absolute_import, division, print_function
 
 import itertools
+import os
 import sys
 import tempfile
 from contextlib import closing
@@ -62,6 +63,29 @@ class GitRepository(object):
         :type working_tree: str
         """
         self.working_tree = working_tree
+
+    @classmethod
+    def create(cls, repo_path, initial_content_path=None):
+        """Create a local Git repository.
+
+        :param repo_path: a local directory that contains the repository
+        :type repo_path: str
+        :param initial_content_path: directory containing the initial content
+            of the repository. If set to None an empty repository is created.
+        :type initial_content_path: str
+        :return: the URL of the newly created repository
+        :rtype: str
+        """
+        repo_path = os.path.abspath(repo_path)
+        repo = GitRepository(repo_path)
+        repo.init()
+        if initial_content_path is not None:
+            e3.fs.sync_tree(initial_content_path, repo_path, ignore=['.git'])
+            repo.git_cmd(['add', '-A'])
+            repo.git_cmd(['config', 'user.email', 'e3-core@example.net'])
+            repo.git_cmd(['config', 'user.name', 'e3 core'])
+            repo.git_cmd(['commit', '-m', 'initial content'])
+        return repo_path
 
     def git_cmd(self, cmd, **kwargs):
         """Run a git command.
