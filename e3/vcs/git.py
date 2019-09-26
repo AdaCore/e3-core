@@ -248,6 +248,24 @@ class GitRepository(object):
                rev_range]
         self.git_cmd(cmd, output=stream, error=None)
 
+    def file_checksums(self, ref='HEAD'):
+        """Fetch the checksum of each file in the tree.
+
+        :param ref: a git reference
+        :type ref: str
+        :return: a dict associating a path to a checksum
+        :rtype: dict[str, str]
+        """
+        cmd = ['ls-tree', '-r', ref]
+        p = self.git_cmd(cmd, output=PIPE, error=None)
+        result = {}
+        for line in p.out.splitlines():
+            if ' blob ' not in line:
+                continue
+            perm, _, checksum, filename = line.split(None, 3)
+            result[filename] = checksum
+        return result
+
     def parse_log(self, stream, max_diff_size=0):
         """Parse a log stream generated with `write_log`.
 

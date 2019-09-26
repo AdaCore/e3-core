@@ -5,6 +5,7 @@ import os
 
 from e3.anod.checkout import CheckoutManager
 from e3.anod.status import ReturnValue
+from e3.fingerprint import Fingerprint
 from e3.vcs.svn import SVNRepository
 from e3.vcs.git import GitRepository
 
@@ -14,6 +15,23 @@ class TestCheckout(object):
     repo_data2 = os.path.join(os.path.dirname(__file__), 'vcs_data2')
 
     def test_svn_checkout(self):
+
+        def update_and_check_fingerprint(manager, vcs, url, revision=None):
+            assert manager.update_fingerprint(Fingerprint(),
+                                              is_prediction=True) is None, \
+                'Predicted fingerprint for a checkout should always be None'
+            prev_fingerprint = manager.update_fingerprint(Fingerprint())
+            result = m.update(vcs=vcs, url=url, revision=revision)
+            new_fingerprint = manager.update_fingerprint(Fingerprint())
+            if result != ReturnValue.failure:
+                if result == ReturnValue.success:
+                    assert new_fingerprint != prev_fingerprint, \
+                        'Change expected'
+                else:
+                    assert new_fingerprint == prev_fingerprint, \
+                        'No change expected'
+            return result
+
         os.environ['GIT_AUTHOR_EMAIL'] = 'e3-core@example.net'
         os.environ['GIT_AUTHOR_NAME'] = 'e3 core'
         os.environ['GIT_COMMITTER_NAME'] = 'e3-core@example.net'
@@ -32,11 +50,12 @@ class TestCheckout(object):
         m = CheckoutManager(name='myrepo', working_dir='.')
 
         logging.info('update of non existing url')
-        result = m.update(vcs='svn', url=url + 'wrong_url')
+        result = update_and_check_fingerprint(
+            m, vcs='svn', url=url + 'wrong_url')
         assert result == ReturnValue.failure
 
         logging.info('update of existing url')
-        result = m.update(vcs='svn', url=url)
+        result = update_and_check_fingerprint(m, vcs='svn', url=url)
         assert result == ReturnValue.success
 
         logging.info('update of existing url with no changes')
@@ -51,7 +70,7 @@ class TestCheckout(object):
         r.svn_cmd(['commit', 'file3.txt', '-m', 'checkin'])
 
         logging.info('Check that we see the update')
-        result = m.update(vcs='svn', url=url)
+        result = update_and_check_fingerprint(m, vcs='svn', url=url)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join('svn_checkout', 'file3.txt'))
 
@@ -60,29 +79,32 @@ class TestCheckout(object):
             fd.write('new file modified!')
 
         logging.info('And then do an update and check that cleanup was done')
-        result = m.update(vcs='svn', url=url)
+        result = update_and_check_fingerprint(m, vcs='svn', url=url)
         assert result == ReturnValue.unchanged
         with open(os.path.join('myrepo', 'file3.txt'), 'r') as fd:
             assert fd.read().strip() == 'new file!'
 
         logging.info('Check that we can switch from one svn url to another')
-        result = m.update(vcs='svn', url=url2)
+        result = update_and_check_fingerprint(m, vcs='svn', url=url2)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join('myrepo', 'file1.txt', 'data2.txt'))
 
         logging.info('Check that we can switch from one svn url to a git repo')
-        result = m.update(vcs='git', url=url3, revision='master')
+        result = update_and_check_fingerprint(
+            m, vcs='git', url=url3, revision='master')
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join('myrepo', 'file1.txt'))
 
         logging.info(
             'Check that we can switch from one git url to another one')
-        result = m.update(vcs='git', url=url4, revision='master')
+        result = update_and_check_fingerprint(
+            m, vcs='git', url=url4, revision='master')
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join('myrepo', 'file1.txt', 'data2.txt'))
 
         logging.info('Check that in case of no changes unchanged is returned')
-        result = m.update(vcs='git', url=url4, revision='master')
+        result = update_and_check_fingerprint(
+            m, vcs='git', url=url4, revision='master')
         assert result == ReturnValue.unchanged
 
         logging.info('Check that changes are detected in git reposotories')
@@ -91,24 +113,27 @@ class TestCheckout(object):
         r = GitRepository(os.path.abspath('git2'))
         r.git_cmd(['add', 'file3.txt'])
         r.git_cmd(['commit', '-m', 'new file'])
-        result = m.update(vcs='git', url=url4, revision='master')
+        result = update_and_check_fingerprint(
+            m, vcs='git', url=url4, revision='master')
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join('myrepo', 'file3.txt'))
 
         logging.info('Check that local modifications are discarded')
         with open(os.path.join('myrepo', 'file3.txt'), 'w') as fd:
             fd.write('new file modified!')
-        result = m.update(vcs='git', url=url4, revision='master')
+        result = update_and_check_fingerprint(
+            m, vcs='git', url=url4, revision='master')
         assert result == ReturnValue.unchanged
         with open(os.path.join('myrepo', 'file3.txt'), 'r') as fd:
             assert fd.read().strip() == 'new file!'
 
-        result = m.update(vcs='future-vcs', url='dummy')
+        result = update_and_check_fingerprint(m, vcs='future-vcs', url='dummy')
         assert result == ReturnValue.failure
 
-        result = m.update(vcs='git', url=url4 + 'non-existing',
-                          revision='master')
+        result = update_and_check_fingerprint(
+            m, vcs='git', url=url4 + 'non-existing',
+            revision='master')
         assert result == ReturnValue.failure
 
-        result = m.update(vcs='git', url=url4)
+        result = update_and_check_fingerprint(m, vcs='git', url=url4)
         assert result == ReturnValue.failure

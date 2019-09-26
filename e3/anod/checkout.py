@@ -7,6 +7,7 @@ from subprocess import PIPE
 
 import e3.log
 from e3.anod.status import ReturnValue
+from e3.fs import rm
 from e3.vcs.git import GitRepository, GitError
 from e3.vcs.svn import SVNRepository, SVNError
 
@@ -30,6 +31,43 @@ class CheckoutManager(object):
         self.working_dir = os.path.abspath(
             os.path.join(working_dir, self.name))
         self.metadata_file = self.working_dir + '_checkout.json'
+        self.checksum_file = self.working_dir + '_checkout.checksums'
+
+    def update_fingerprint(self, fingerprint, is_prediction=False):
+        """Given a fingerprint amend it with metadata of the current checkout.
+
+        :param fingerprint: initial fingerprint
+        :type fingerprint: Fingerprint
+        :param is_prediction: if True this is an attempt to compute the
+            fingerprint before doing an update. For a checkout the returned
+            value in that case is always the None.
+            See e3.job.walk.compute_fingerprint for more information.
+        :type is_prediction: bool
+        :return: a fingerprint
+        :rtype: None | Fingerprint
+        """
+        if is_prediction:
+            return None
+
+        try:
+            if os.path.isfile(self.checksum_file):
+                with open(self.checksum_file) as fd:
+                    checksums = json.load(fd)
+                for path, checksum in checksums.items():
+                    fingerprint.add(
+                        "file.%s" % path,
+                        checksum)
+            else:
+                with open(self.metadata_file) as fd:
+                    vcs_info = json.load(fd)
+                fingerprint.add(
+                    self.name, (vcs_info['url'],
+                                vcs_info['new_commit']))
+            return fingerprint
+        except Exception:
+            logger.exception(
+                'Got exception while trying to compute fingerprints')
+            return None
 
     def update(self, vcs, url, revision=None):
         """Update content of the working directory.
@@ -41,6 +79,11 @@ class CheckoutManager(object):
         :param revision: revision
         :type revision: str | None
         """
+        # Reset metadata and checksum list
+        if os.path.isfile(self.metadata_file):
+            rm(self.metadata_file)
+        if os.path.isfile(self.checksum_file):
+            rm(self.checksum_file)
         if vcs == 'git':
             update = self.update_git
         elif vcs == 'svn':
@@ -110,6 +153,10 @@ class CheckoutManager(object):
                 logger.error('Repository %s is locally modified, saving '
                              'diff in stash\n%s', self.name, p.out)
                 g.git_cmd(['stash', 'save', '-u'])
+
+            # Create a file with all the file checksums
+            with open(self.checksum_file, 'w') as fd:
+                json.dump(g.file_checksums(), fd)
 
             if old_commit == new_commit:
                 result = ReturnValue.unchanged
