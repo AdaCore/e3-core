@@ -58,11 +58,21 @@ class Fingerprint(object):
 
         :param name: name of the new element
         :type name: str
-        :param value: associated value (should be a string)
-        :type value: str | unicode
+        :param value: associated value (should be a string or a tuple of
+            string or None)
+        :type value: str | unicode | tuple | None
         :raise: E3Error
         """
-        if isinstance(value, (str, unicode)):
+        if value is None:
+            self.elements[name] = None
+        elif isinstance(value, (str, unicode)):
+            self.elements[name] = value
+        elif isinstance(value, tuple):
+            for el in value:
+                if not isinstance(el, (str, unicode)) and el is not None:
+                    raise E3Error('value for tuple elements in %s should be '
+                                  'a string but got %s' % (name, value),
+                                  'fingerprint.add')
             self.elements[name] = value
         else:
             raise E3Error(
@@ -192,8 +202,16 @@ class Fingerprint(object):
         checksum = hashlib.sha256()
         for key in key_list:
             for chunk in (key, self.elements[key]):
-                if isinstance(chunk, unicode):
+                if chunk is None:
+                    checksum.update('')
+                elif isinstance(chunk, unicode):
                     checksum.update(chunk.encode('utf-8'))
+                elif isinstance(chunk, tuple):
+                    for el in chunk:
+                        if isinstance(el, unicode):
+                            checksum.update(el.encode('utf-8'))
+                        else:
+                            checksum.update(el)
                 else:
                     checksum.update(chunk)
         return checksum.hexdigest()
