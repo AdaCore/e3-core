@@ -47,7 +47,7 @@ class SVNRepository(object):
         self.working_copy = working_copy
 
     @classmethod
-    def local_url(self, repo_path):
+    def local_url(cls, repo_path):
         """Return the url of a svn repository hosted locally.
 
         :param repo_path: path to the repo
@@ -68,11 +68,16 @@ class SVNRepository(object):
     def create(cls, repo_path, initial_content_path=None):
         """Create a local subversion repository.
 
-        :param repo_path: a local directory that contains the repository
+        This creates a local repository (not a working copy) that can be
+        referenced by using file:// protocol. The purpose of the this function
+        is mainly to test svn-related functions without relying on a remote
+        repository.
+
+        :param repo_path: a local directory where to create the repository
         :type repo_path: str
         :param initial_content_path: directory containing the initial content
             of the repository. If set to None an empty repository is created.
-        :type initial_content_path: str
+        :type initial_content_path: str | None
         :return: the URL of the newly created repository
         :rtype: str
         """
@@ -139,6 +144,8 @@ class SVNRepository(object):
         m = re.search(r'^{item}: *(.*)\n'.format(item=item), info, flags=re.M)
         if m is None:
             logger.debug('svn info result:\n%s', info)
+            raise SVNError('Cannot fetch item %s from svn_info' % item,
+                           origin='get_info')
         return m.group(1).strip()
 
     @property
