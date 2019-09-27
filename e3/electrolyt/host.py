@@ -87,7 +87,7 @@ class HostDB(object):
 
         Additional keys for a host entry will be considered as additional data
 
-        :param filename: path the the yaml file
+        :param filename: path the yaml file
         :type filename: str
         """
         with open(filename, 'rb') as fd:
