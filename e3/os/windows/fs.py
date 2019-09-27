@@ -263,7 +263,7 @@ class NTFile(object):
         """Return path in which the file can move safely for deletion.
 
         On NTFS filesystem we are sure that the path is unique and thus
-        that no existing file can exist at that that location.
+        that no existing file can exist at that location.
 
         :return: a path
         :rtype: unicode

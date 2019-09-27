@@ -393,7 +393,7 @@ class Decision(Action):
     :ivar expected_choice: If not None, the choice implicitly made
         by the way the specs involved in the decision are written.
         In practice, this attribute records the constraints we have
-        in terms of the the choices in the plan which are valid.
+        in terms of the choices in the plan which are valid.
     :ivar triggers: A list of actions that, if present in a DAG
         being created while scheduling the plan (from which this
         Decision originates), causes a specific choice to be expected

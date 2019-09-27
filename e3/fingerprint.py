@@ -40,7 +40,7 @@ class Fingerprint(object):
     """Fingerprint class.
 
     :ivar elements: a dictionary containing the checksum/id for each element
-        part of of the fingerprint. The key a string identifying the
+        part of the fingerprint. The key a string identifying the
         element.
     """
 
