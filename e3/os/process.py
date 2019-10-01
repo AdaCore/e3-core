@@ -283,6 +283,14 @@ class Run(object):
 
                 if sys.platform == 'win32':  # unix: no cover
                     if interpreter_cmds[0] == '/usr/bin/env':
+                        # On windows be sure that PATH is taken into account by
+                        # using which. In some cases involving python
+                        # interpreter, the python interpreter used to run this
+                        # module has been used rather than the first one on the
+                        # path.
+                        interpreter_cmds[1] = which(
+                            interpreter_cmds[1],
+                            default=interpreter_cmds[1])
                         return interpreter_cmds[1:] + cmd_line
                     elif interpreter_cmds[0] in ('/bin/bash', '/bin/sh') and \
                             'SHELL' in os.environ:
