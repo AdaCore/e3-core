@@ -68,16 +68,16 @@ class GitRepository(object):
     def create(cls, repo_path, initial_content_path=None):
         """Create a local Git repository.
 
-        :param repo_path: a local directory that contains the repository
+        :param repo_path: a local directory where to create the repository
         :type repo_path: str
         :param initial_content_path: directory containing the initial content
             of the repository. If set to None an empty repository is created.
-        :type initial_content_path: str
+        :type initial_content_path: str | None
         :return: the URL of the newly created repository
         :rtype: str
         """
         repo_path = os.path.abspath(repo_path)
-        repo = GitRepository(repo_path)
+        repo = cls(repo_path)
         repo.init()
         if initial_content_path is not None:
             e3.fs.sync_tree(initial_content_path, repo_path, ignore=['.git'])
