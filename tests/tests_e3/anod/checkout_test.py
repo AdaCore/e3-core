@@ -7,6 +7,7 @@ from e3.anod.checkout import CheckoutManager
 from e3.anod.status import ReturnValue
 from e3.vcs.svn import SVNRepository
 from e3.vcs.git import GitRepository
+from e3.os.fs import touch
 
 
 class TestCheckout(object):
@@ -112,3 +113,22 @@ class TestCheckout(object):
 
         result = m.update(vcs='git', url=url4)
         assert result == ReturnValue.failure
+
+        # Add a .gitignore and use an external
+
+        touch('git2/file4.txt')
+        touch('git2/ignore_file.txt')
+        with open('git2/.gitignore', 'w') as fd:
+            fd.write('/ignore_file.txt')
+
+        result = m.update(vcs='external',
+                          url=os.path.abspath('git2'))
+        assert os.path.isfile(
+            os.path.join(m.working_dir, 'file4.txt'))
+        assert not os.path.isfile(
+            os.path.join(m.working_dir, 'ignore_file.txt'))
+        assert result == ReturnValue.success
+
+        result = m.update(vcs='external',
+                          url=os.path.abspath('git2'))
+        assert result == ReturnValue.unchanged

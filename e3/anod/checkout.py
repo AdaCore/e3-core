@@ -7,6 +7,7 @@ from subprocess import PIPE
 
 import e3.log
 from e3.anod.status import ReturnValue
+from e3.fs import get_filetree_state, sync_tree, VCS_IGNORE_LIST
 from e3.vcs.git import GitRepository, GitError
 from e3.vcs.svn import SVNRepository, SVNError
 
@@ -45,6 +46,8 @@ class CheckoutManager(object):
             update = self.update_git
         elif vcs == 'svn':
             update = self.update_svn
+        elif vcs == 'external':
+            update = self.update_external
         else:
             logger.error('Invalid repository type: %s' % vcs)
             return ReturnValue.failure
@@ -59,6 +62,47 @@ class CheckoutManager(object):
                  'new_commit': new_commit,
                  'revision': revision}, fd)
         return result
+
+    def update_external(self, url, revision):
+        """Update working dir using a local directory.
+
+        :param url: path to the repository
+        :type url: str
+        :param revision: ignored
+        :type revision: None
+        """
+        # Expand env variables and ~
+        url = os.path.expandvars(os.path.expanduser(url))
+
+        old_commit = get_filetree_state(self.working_dir)
+        ignore_list = []
+
+        if os.path.isdir(os.path.join(url, '.git')):
+            # It seems that this is a git repository. Get the list of files to
+            # ignore
+            try:
+                g = GitRepository(working_tree=url)
+                ignore_list = g.git_cmd(
+                    ['ls-files', '-o', '--ignored', '--exclude-standard',
+                     '--directory'],
+                    output=PIPE).out
+                ignore_list = ['/%s' % l.strip().rstrip('/')
+                               for l in ignore_list.splitlines()]
+                logger.debug('Ignore in external: %s', ignore_list)
+            except Exception:
+                # don't crash on exception
+                pass
+
+        sync_tree(url, self.working_dir,
+                  preserve_timestamps=False,
+                  delete_ignore=True,
+                  ignore=list(VCS_IGNORE_LIST) + ignore_list)
+
+        new_commit = get_filetree_state(self.working_dir)
+        if new_commit == old_commit:
+            return ReturnValue.unchanged, old_commit, new_commit
+        else:
+            return ReturnValue.success, old_commit, new_commit
 
     def update_git(self, url, revision):
         """Update working dir using a Git repository.
