@@ -18,6 +18,28 @@ import e3.os.fs
 logger = e3.log.getLogger('archive')
 
 
+class E3ZipFile(zipfile.ZipFile):
+    """Override default ZipFile with attributes preservation."""
+
+    def _extract_member(self, member, path, pwd):
+        result = super(E3ZipFile, self)._extract_member(member, path, pwd)
+
+        if sys.platform != 'win32':
+            # Try to preserve attributes on non Windows platforms as
+            # executable attribute is relevant on those platforms. As we rely
+            # on an internal ignore any errors at this stage.
+            try:
+                # preserve bits 0-8 only: rwxrwxrwx
+                # this come from a proposed patch on python.org
+                # see: https://bugs.python.org/issue15795
+                attr = member.external_attr >> 16 & 0x1FF
+                if attr != 0:
+                    os.chmod(result, attr)
+            except AttributeError:
+                pass
+        return result
+
+
 class ArchiveError(e3.error.E3Error):
     pass
 
@@ -222,7 +244,7 @@ def unpack_archive(filename,
 
         else:
             try:
-                with closing(zipfile.ZipFile(filename, mode='r')) as fd:
+                with closing(E3ZipFile(filename, mode='r')) as fd:
                     fd.extractall(tmp_dest,
                                   selected_files if selected_files
                                   else None)
