@@ -74,7 +74,10 @@ class CheckoutManager(object):
         # Expand env variables and ~
         url = os.path.expandvars(os.path.expanduser(url))
 
-        old_commit = get_filetree_state(self.working_dir)
+        if os.path.isdir(self.working_dir):
+            old_commit = get_filetree_state(self.working_dir)
+        else:
+            old_commit = ''
         ignore_list = []
 
         if os.path.isdir(os.path.join(url, '.git')):
