@@ -219,7 +219,14 @@ def unpack_archive(filename,
                                 return True
                         return False
                     dirs = []
+
+                    # IMPORTANT: don't use the method extract. Always use the
+                    # extractall function. Indeed extractall will set file
+                    # permissions only once all selected members are unpacked.
+                    # Using extract can lead to permission denied for example
+                    # if a read-only directory is created.
                     if selected_files:
+                        member_list = []
                         for tinfo in fd:
                             if is_match(tinfo.name, selected_files) or \
                                     tinfo.name.startswith(tuple(dirs)):
@@ -227,14 +234,16 @@ def unpack_archive(filename,
                                 if tinfo.isdir() and \
                                         not tinfo.name.startswith(tuple(dirs)):
                                     dirs.append(tinfo.name)
-                                fd.extract(tinfo, path=tmp_dest)
+                                member_list.append(tinfo)
+
                         if check_selected:
                             raise ArchiveError(
                                 'unpack_archive',
                                 'Cannot untar %s ' % filename)
+
+                        fd.extractall(path=tmp_dest, members=member_list)
                     else:
-                        for tinfo in fd:
-                            fd.extract(tinfo, path=tmp_dest)
+                        fd.extractall(path=tmp_dest)
 
             except tarfile.TarError as e:
                 raise ArchiveError(

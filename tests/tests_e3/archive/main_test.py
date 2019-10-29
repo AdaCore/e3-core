@@ -260,3 +260,18 @@ def test_empty():
     e3.archive.unpack_archive(os.path.join('dest', 'pkg.zip'),
                               'result', remove_root_dir=True)
     assert os.listdir('result') == []
+
+
+def test_archive_with_readonly_dir():
+    """Test unpack of archive with read-only directory."""
+    e3.fs.mkdir('from')
+    e3.fs.mkdir('dest')
+    e3.fs.mkdir('result')
+    e3.fs.mkdir('from/readonly_dir')
+    e3.os.fs.touch('from/readonly_dir/file.txt')
+    e3.os.fs.chmod('u=rx,go=rx', 'from/readonly_dir')
+    e3.archive.create_archive('pkg.tar.gz', os.path.abspath('from'), 'dest')
+    e3.os.fs.chmod('urwx', 'from/readonly_dir')
+    e3.archive.unpack_archive(os.path.join('dest', 'pkg.tar.gz'),
+                              'result', remove_root_dir=True)
+    assert os.path.isfile(os.path.join('result', 'readonly_dir', 'file.txt'))
