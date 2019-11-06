@@ -8,6 +8,7 @@ import e3.error
 import e3.log
 from e3.anod.driver import AnodDriver
 from e3.anod.status import ReturnValue
+from e3.anod.queries import get_source_builder
 from e3.fs import mkdir, sync_tree
 from e3.job import Job
 from e3.job.scheduler import Scheduler
@@ -120,18 +121,19 @@ class ElectrolytJob(Job):
         source_name = self.data.source_name
         tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, 'cache')
         src = self.sandbox.vcs_dir
-        for src_builder in self.data.anod_instance.source_pkg_build:
-            if src_builder.name == source_name:
-                repo_dict = {}
-                src_dir = os.path.join(src, src_builder.checkout[0])
-                dest_dir = os.path.join(tmp_cache_dir, source_name)
-                # ??? missing repository state
-                repo_dict[source_name] = {"working_dir": src_dir}
-                mkdir(dest_dir)
-                src_builder.prepare_src(repo_dict, dest_dir)
-                self.__status = STATUS.success
-                logger.debug('%s created in cache/tmp', source_name)
-                return
+        src_builder = get_source_builder(self.data.anod_instance,
+                                         source_name, local_sources_only=True)
+        if src_builder is not None:
+            repo_dict = {}
+            src_dir = os.path.join(src, src_builder.checkout[0])
+            dest_dir = os.path.join(tmp_cache_dir, source_name)
+            # ??? missing repository state
+            repo_dict[source_name] = {"working_dir": src_dir}
+            mkdir(dest_dir)
+            src_builder.prepare_src(repo_dict, dest_dir)
+            self.__status = STATUS.success
+            logger.debug('%s created in cache/tmp', source_name)
+        return
 
     def do_getsource(self):
         """action_item from an intermediate node.

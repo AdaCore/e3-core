@@ -24,6 +24,36 @@ def get_build_node(anod_instance, context, default=None):
         return default
 
 
+def get_source_builder(anod_instance, source_name, local_sources_only=False):
+    """Given a source name return the associated builder.
+
+    :param anod_instance: an Anod instance
+    :type anod_instance: e3.anod.spec.Anod
+    :param source_name: a source name
+    :type source_name: str
+    :param local_sources_only: if True consider only builders declared in the
+        spec itself. if False also consider source builders in source
+        dependencies (i.e: require='source_pkg')
+    :type local_sources_only: bool
+    :return: a source builder or None if no builder can be found.
+    :rtype: e3.anod.package.SourceBuilder | None
+    """
+    # First look locally
+    builder = next((b for b in anod_instance.source_pkg_build
+                    if b.name == source_name), None)
+
+    if builder is None and not local_sources_only:
+        # If needed look into the deps
+        for dep in anod_instance.deps.values():
+            if dep.kind != 'source':
+                continue
+            builder = get_source_builder(dep, source_name,
+                                         local_sources_only=True)
+            if builder is not None:
+                break
+    return builder
+
+
 class SourceClosure(object):
     """Helper object to resolve source closure for a given spec instance."""
 
