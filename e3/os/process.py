@@ -31,11 +31,6 @@ cmdlogger = e3.log.getLogger(CMD_LOGGER_NAME)
 STDOUT = subprocess.STDOUT
 PIPE = subprocess.PIPE
 
-# If feature is enabled by default we create processes on Windows
-# with the flag CREATE_NEW_PROCESS_GROUP
-WIN_NEW_PG = 'win-force-new-process-group' in \
-    os.getenv('E3_ENABLE_FEATURE', '').split(',')
-
 # Use psutil.Popen when available to get psutil.Process properties and
 # methods available in Run.internal
 try:
@@ -349,7 +344,7 @@ class Run(object):
                     # preexec_fn is no supported on windows
                     popen_args['preexec_fn'] = subprocess_setup
 
-                if WIN_NEW_PG and sys.platform == 'win32':
+                if sys.platform == 'win32':
                     popen_args['creationflags'] = \
                         subprocess.CREATE_NEW_PROCESS_GROUP
 
@@ -387,7 +382,7 @@ class Run(object):
                         # preexec_fn is no supported on windows
                         popen_args['preexec_fn'] = subprocess_setup
 
-                    if WIN_NEW_PG and sys.platform == 'win32':
+                    if sys.platform == 'win32':
                         popen_args['creationflags'] = \
                             subprocess.CREATE_NEW_PROCESS_GROUP
 
