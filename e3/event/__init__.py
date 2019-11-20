@@ -9,9 +9,13 @@ import uuid
 
 import e3.env
 import e3.hash
+import e3.log
 from e3.date import timestamp_as_string
 from e3.error import E3Error
 from e3.fs import mkdir
+
+
+logger = e3.log.getLogger('event')
 
 
 class Event(object):
@@ -301,6 +305,7 @@ class EventManager(object):
         :param name: the handler name
         :type name: str
         """
+        logger.info('Add handler %s (%s %s)', name, args, kwargs)
         self.handlers[name] = self.get_handler(name)(*args, **kwargs)
 
     def load_handlers_from_env(self, var_name='E3_EVENT_HANDLERS'):
@@ -324,6 +329,7 @@ class EventManager(object):
                                  for el in handler_cfg_str.split('|')])
         for handler_name, handler_config in handler_cfg_dict.items():
             handler = self.get_handler(handler_name)
+            logger.info('Add handler %s (%s)', handler_name, handler_config)
             self.handlers[handler_name] = handler(
                 **handler.decode_config(handler_config))
 

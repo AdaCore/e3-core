@@ -13,28 +13,35 @@ from e3.sys import python_script
 class S3Handler(EventHandler):
     """Event handler that relies on AWS S3."""
 
-    def __init__(self, event_s3_url, log_s3_url, sse='AES256'):
+    def __init__(self, event_s3_url, log_s3_url, sse='AES256', profile=None):
         self.event_s3_url = event_s3_url
         self.log_s3_url = log_s3_url
+        self.aws_profile = profile
         self.sse = sse
 
     @classmethod
     def decode_config(self, config_str):
-        event_s3_url, log_s3_url, sse = config_str.split(',', 2)
+        event_s3_url, log_s3_url, sse, aws_profile = config_str.split(',', 3)
         return {'event_s3_url': event_s3_url,
                 'log_s3_url': log_s3_url,
-                'sse': sse}
+                'sse': sse,
+                'profile': aws_profile if aws_profile else None}
 
     def encode_config(self):
-        return "%s,%s,%s" % (self.event_s3_url,
-                             self.log_s3_url,
-                             self.sse)
+        return "%s,%s,%s" % (
+            self.event_s3_url,
+            self.log_s3_url,
+            self.sse,
+            self.aws_profile if self.aws_profile is not None else '')
 
     def send_event(self, event):
         def s3_cp(from_path, s3_url):
-            s3 = Run(python_script('aws') +
-                     ['s3', 'cp', '--sse=%s' % self.sse, from_path, s3_url],
-                     output=None)
+            cmd = ['s3', 'cp', '--sse=%s' % self.sse]
+            if self.aws_profile:
+                cmd.append('--profile=%s' % self.aws_profile)
+            cmd += [from_path, s3_url]
+
+            s3 = Run(python_script('aws') + cmd, output=None)
             return s3.status == 0
 
         # Push attachments to s3 and keep track of their url.
@@ -63,7 +70,7 @@ class S3Handler(EventHandler):
                 tempfile_name = fd.name
                 json.dump(s3_event, fd)
 
-            success = self.s3_cp(
+            success = s3_cp(
                 tempfile_name,
                 "%s/%s" % (self.event_s3_url, event.uid + '.s3'))
             if not success:
