@@ -6,6 +6,7 @@ import e3.error
 import e3.log
 import e3.os.process
 from e3.fs import mkdir, rm
+from e3.os.fs import touch
 
 logger = e3.log.getLogger('buildspace')
 
@@ -67,6 +68,9 @@ class BuildSpace(object):
 
         for d in self.DIRS:
             mkdir(self.subdir(name=d), quiet=quiet)
+
+        # Add a marker that identify a build space
+        touch(os.path.join(self.root_dir, '.buildspace'))
 
         self.initialized = True
 
