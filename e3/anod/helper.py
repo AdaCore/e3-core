@@ -271,6 +271,10 @@ def text_replace(filename, pattern):
     with open(filename, 'rb') as f:
         for line in f:
             for pattern_index, (regexp, replacement) in enumerate(pattern):
+                if isinstance(replacement, unicode):
+                    replacement = replacement.encode('utf-8')
+                if isinstance(regexp, unicode):
+                    regexp = regexp.encode('utf-8')
                 line, count = re.subn(regexp,
                                       replacement, line)
                 if count:
