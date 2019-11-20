@@ -179,7 +179,7 @@ def test_sandbox_exec_missing_spec_dir(git_specs_dir):
                                   '--plan',
                                   'noplan', sandbox_dir])
     assert no_specs.status != 0
-    assert 'spec directory nospecs does not exist' in no_specs.out
+    assert 'nospecs does not exist' in no_specs.out
 
 
 def test_sandbox_exec_api_version(git_specs_dir):
