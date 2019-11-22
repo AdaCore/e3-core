@@ -39,8 +39,11 @@ def get_source_builder(anod_instance, source_name, local_sources_only=False):
     :rtype: e3.anod.package.SourceBuilder | None
     """
     # First look locally
-    builder = next((b for b in anod_instance.source_pkg_build
-                    if b.name == source_name), None)
+    builder = None
+
+    if anod_instance.source_pkg_build is not None:
+        builder = next((b for b in anod_instance.source_pkg_build
+                        if b.name == source_name), None)
 
     if builder is None and not local_sources_only:
         # If needed look into the deps
