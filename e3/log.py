@@ -173,7 +173,7 @@ def activate(
     logging.getLogger('').setLevel(logging.DEBUG)
     if console_logs:
         stream_format = '{}: {}'.format(
-            console_logs, stream_format)
+            console_logs, file_format)
 
     # Set logging handlers
     add_log_handlers(
