@@ -3,11 +3,13 @@ from __future__ import absolute_import, division, print_function
 import hashlib
 import json
 import os
+import tempfile
+from contextlib import closing
 from subprocess import PIPE
 
 import e3.log
 from e3.anod.status import ReturnValue
-from e3.fs import get_filetree_state, sync_tree, VCS_IGNORE_LIST
+from e3.fs import get_filetree_state, rm, sync_tree, VCS_IGNORE_LIST
 from e3.vcs.git import GitRepository, GitError
 from e3.vcs.svn import SVNRepository, SVNError
 
@@ -15,7 +17,20 @@ logger = e3.log.getLogger('e3.anod.checkout')
 
 
 class CheckoutManager(object):
-    """Helper class to manage checkouts done by Anod tools."""
+    """Helper class to manage checkouts done by Anod tools.
+
+    When a checkout manager is used in working_dir directory for a repository
+    called name. The following structure will be found on disk after an update
+
+        working_dir/name/               The repository checkout
+                   /name_checkout.json  A json containing some metadata: name,
+                                        url, old_commit, new_commit, revision
+                   /name_changelog.json A json containing the list of commit
+                                        between two call to update. If this is
+                                        the inital checkout or there are no
+                                        changes then the file will not be
+                                        created
+    """
 
     def __init__(self, name, working_dir):
         """Initialize CheckoutManager instance.
@@ -31,6 +46,7 @@ class CheckoutManager(object):
         self.working_dir = os.path.abspath(
             os.path.join(working_dir, self.name))
         self.metadata_file = self.working_dir + '_checkout.json'
+        self.changelog_file = self.working_dir + '_changelog.json'
 
     def update(self, vcs, url, revision=None):
         """Update content of the working directory.
@@ -42,6 +58,10 @@ class CheckoutManager(object):
         :param revision: revision
         :type revision: str | None
         """
+        # Reset changelog file
+        if os.path.isfile(self.changelog_file):
+            rm(self.changelog_file)
+
         if vcs == 'git':
             update = self.update_git
         elif vcs == 'svn':
@@ -136,7 +156,9 @@ class CheckoutManager(object):
         # Do the remote addition manually as in that context we can ignore
         # safely any error returned by this command.
         try:
-            g.git_cmd(['remote', 'add', remote_name, url])
+            remote_list = g.git_cmd(['remote'], output=PIPE).out.splitlines()
+            if remote_name not in remote_list:
+                g.git_cmd(['remote', 'add', remote_name, url])
         except Exception:
             # Ignore exception as it probably means that remote already exist
             # In case of real error the failure will be detected later.
@@ -161,6 +183,23 @@ class CheckoutManager(object):
             if old_commit == new_commit:
                 result = ReturnValue.unchanged
             else:
+                # Fetch the change log and dump it into the changelog file
+                with closing(tempfile.NamedTemporaryFile(mode='w',
+                                                         delete=False)) as fd:
+                    g.write_log(
+                        fd, rev_range='%s..%s' % (old_commit, new_commit))
+                    tmp_filename = fd.name
+                try:
+                    with open(tmp_filename) as fd:
+                        commits = [
+                            commit for commit
+                            in g.parse_log(fd, max_diff_size=1024)]
+                finally:
+                    rm(tmp_filename)
+
+                with open(self.changelog_file, 'w') as fd:
+                    json.dump(commits, fd)
+
                 # We have removed local changes or updated the git repository
                 result = ReturnValue.success
         except GitError:
