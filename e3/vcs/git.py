@@ -126,7 +126,8 @@ class GitRepository(object):
         :raise: GitError
         """
         e3.fs.mkdir(self.working_tree)
-        self.git_cmd(['init'])
+        self.git_cmd(['init', '-q'])
+
         if url is not None:
             self.git_cmd(['remote', 'add', remote, url])
 
