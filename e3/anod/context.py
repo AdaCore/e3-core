@@ -438,10 +438,7 @@ class AnodContext(object):
                 # spec has no binary package to download.
                 raise SchedulingError(
                     "error in plan at {}: "
-                    "Cannot install `{}' because this spec does not produce "
-                    "a package; check you are using the appropriate "
-                    "qualifiers or replace it by a build?"
-                    .format(plan_line, name))
+                    "install should be replaced by build".format(plan_line))
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
             # dependency. In case there is no build primitive and no
