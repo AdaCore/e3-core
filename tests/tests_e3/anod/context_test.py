@@ -107,8 +107,9 @@ class TestContext(object):
             ac.add_anod_action('spec2', primitive='install',
                                plan_args={}, plan_line="install_plan.txt:2")
         except SchedulingError as err:
-            assert 'error in plan at install_plan.txt:2: install should ' \
-                'be replaced by build' in str(err)
+            assert "error in plan at install_plan.txt:2: " \
+                "Cannot install `spec2' because this spec does not " \
+                "produce a package" in str(err)
 
     def test_add_anod_action2_no_source_resolver(self):
         def no_resolver(action, decision):
