@@ -4,7 +4,7 @@ import base64
 import hashlib
 import json
 
-from e3.net.token import get_payload, is_valid
+from e3.net.token import get_payload, is_valid, utc_timestamp
 
 FUTURE_TIMESTAMP = 9999999999999
 
@@ -45,6 +45,11 @@ def test_valid_token():
         {u'typ': u'Bearer', u'exp': FUTURE_TIMESTAMP})
     assert is_valid(valid_token)
 
+    near_future = utc_timestamp() + 7 * 60
+    near_future_token = create_token(
+        {u'typ': u'Bearer', u'exp': near_future})
+    assert is_valid(near_future_token)
+
 
 def test_wrong_token_type():
     badtype_token = create_token(
@@ -56,6 +61,12 @@ def test_old_token():
     old_token = create_token(
         {u'typ': u'Bearer', u'exp': 1419064452})
     assert not is_valid(old_token)
+
+    # Verify that a token valid for less than 5 min will be considered invalid
+    expire_soon_date = utc_timestamp() + 4 * 60
+    expire_soon_token = create_token(
+        {u'typ': u'Bearer', u'exp': expire_soon_date})
+    assert not is_valid(expire_soon_token)
 
 
 def test_exception_pass():

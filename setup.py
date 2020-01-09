@@ -68,8 +68,11 @@ setup(
             'show-config = e3.anod.sandbox.action:SandBoxShowConfiguration',
             'migrate = e3.anod.sandbox.migrate:SandBoxMigrate',
         ],
-        'e3.event.manager': [
-            'smtp = e3.event.backends.smtp:SMTPEventManager'
+        'e3.event.handler': [
+            'smtp = e3.event.handler.smtp:SMTPHandler',
+            'logging = e3.event.handler.logging:LoggingHandler',
+            'file = e3.event.handler.file:FileHandler',
+            's3 = e3.event.handler.s3:S3Handler'
         ],
         'e3.store': [
             'http-simple-store = e3.store.backends.'

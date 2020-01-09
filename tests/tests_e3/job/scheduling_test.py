@@ -168,7 +168,7 @@ class TestScheduler(object):
 
         Scheme in which if a job predecessor "fails" then job is skipped
         In order to do that get_job and collect should have access to
-        common data. Note that that scheduler ensure that these functions
+        common data. Note that scheduler ensure that these functions
         are called sequentially.
         """
         class SchedulerContext(object):

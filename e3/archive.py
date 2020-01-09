@@ -18,8 +18,42 @@ import e3.os.fs
 logger = e3.log.getLogger('archive')
 
 
+class E3ZipFile(zipfile.ZipFile):
+    """Override default ZipFile with attributes preservation."""
+
+    def _extract_member(self, member, path, pwd):
+        result = super(E3ZipFile, self)._extract_member(member, path, pwd)
+
+        if sys.platform != 'win32':
+            # Try to preserve attributes on non Windows platforms as
+            # executable attribute is relevant on those platforms. As we rely
+            # on an internal ignore any errors at this stage.
+            try:
+                # preserve bits 0-8 only: rwxrwxrwx
+                # this come from a proposed patch on python.org
+                # see: https://bugs.python.org/issue15795
+                attr = member.external_attr >> 16 & 0x1FF
+                if attr != 0:
+                    os.chmod(result, attr)
+            except AttributeError:
+                pass
+        return result
+
+
 class ArchiveError(e3.error.E3Error):
     pass
+
+
+def is_known_archive_format(filename):
+    """Check if a given path is a supported archive format.
+
+    :param filename: path
+    :type filename: str
+    :return: True if the path corresponding to a supported archive format
+    :rtype: bool
+    """
+    ext = e3.fs.extension(filename)
+    return ext in ('.tar.gz', '.tgz', '.tar.bz2', '.tar', '.zip')
 
 
 def check_type(filename, force_extension=None):
@@ -185,7 +219,14 @@ def unpack_archive(filename,
                                 return True
                         return False
                     dirs = []
+
+                    # IMPORTANT: don't use the method extract. Always use the
+                    # extractall function. Indeed extractall will set file
+                    # permissions only once all selected members are unpacked.
+                    # Using extract can lead to permission denied for example
+                    # if a read-only directory is created.
                     if selected_files:
+                        member_list = []
                         for tinfo in fd:
                             if is_match(tinfo.name, selected_files) or \
                                     tinfo.name.startswith(tuple(dirs)):
@@ -193,14 +234,16 @@ def unpack_archive(filename,
                                 if tinfo.isdir() and \
                                         not tinfo.name.startswith(tuple(dirs)):
                                     dirs.append(tinfo.name)
-                                fd.extract(tinfo, path=tmp_dest)
+                                member_list.append(tinfo)
+
                         if check_selected:
                             raise ArchiveError(
                                 'unpack_archive',
                                 'Cannot untar %s ' % filename)
+
+                        fd.extractall(path=tmp_dest, members=member_list)
                     else:
-                        for tinfo in fd:
-                            fd.extract(tinfo, path=tmp_dest)
+                        fd.extractall(path=tmp_dest)
 
             except tarfile.TarError as e:
                 raise ArchiveError(
@@ -210,7 +253,7 @@ def unpack_archive(filename,
 
         else:
             try:
-                with closing(zipfile.ZipFile(filename, mode='r')) as fd:
+                with closing(E3ZipFile(filename, mode='r')) as fd:
                     fd.extractall(tmp_dest,
                                   selected_files if selected_files
                                   else None)

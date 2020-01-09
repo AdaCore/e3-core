@@ -28,6 +28,7 @@ class TestContext(object):
         asr.repos['spec1-git'] = 'spec1-git'
         asr.repos['spec8-git'] = 'spec8-git'
         asr.repos['spec2-git'] = 'spec2-git'
+        asr.repos['a-git'] = 'a-git'
         env = BaseEnv()
         env.set_build('x86-linux', 'rhes6', 'mylinux')
         ac = AnodContext(asr, default_env=env,
@@ -76,18 +77,19 @@ class TestContext(object):
 
         ac.add_anod_action('spec1', primitive='source')
         result = ac.schedule(ac.always_create_source_resolver)
-        assert len(result) == 4, result.as_dot()
+        assert len(result) == 5, result.as_dot()
         assert set(result.vertex_data.keys()) == \
             {'root',
              'mylinux.x86-linux.spec1.source.spec1-src',
              'mylinux.x86-linux.spec1.source.sources',
-             'checkout.spec1-git'}
+             'checkout.spec1-git',
+             'mylinux.x86-linux.spec1.upload_src.spec1-src'}
 
     def test_add_anod_action2(self):
         # Simple spec with sources associated to the build primitive
         ac = self.create_context()
         ac.add_anod_action('spec2', primitive='build')
-        assert len(ac.tree) == 8, ac.tree.as_dot()
+        assert len(ac.tree) == 9, ac.tree.as_dot()
 
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 5, result.as_dot()
@@ -98,12 +100,22 @@ class TestContext(object):
                  'mylinux.x86-linux.spec2.source_install.spec2-src',
                  'download.spec2-src'))
 
+    def test_add_anod_action2_force_install(self):
+        """Check that forcing an install with no package is rejected."""
+        ac = self.create_context()
+        try:
+            ac.add_anod_action('spec2', primitive='install',
+                               plan_args={}, plan_line="install_plan.txt:2")
+        except SchedulingError as err:
+            assert 'error in plan at install_plan.txt:2: install should ' \
+                'be replaced by build' in str(err)
+
     def test_add_anod_action2_no_source_resolver(self):
         def no_resolver(action, decision):
             return AnodContext.decision_error(action, decision)
         ac = self.create_context()
         ac.add_anod_action('spec2', primitive='build')
-        assert len(ac.tree) == 8, ac.tree.as_dot()
+        assert len(ac.tree) == 9, ac.tree.as_dot()
 
         with pytest.raises(SchedulingError) as err:
             ac.schedule(no_resolver)
@@ -333,7 +345,7 @@ class TestContext(object):
         ac.add_anod_action('spec-managed-source', primitive='source')
         result = ac.schedule(ac.always_download_source_resolver)
         keys = set(result.vertex_data.keys())
-        assert len(keys) == 4, keys
+        assert len(keys) == 5, keys
         assert 'checkout.a-git' in keys
         assert 'mylinux.x86-linux.spec-managed-source.source.a-src' in keys
 
@@ -500,7 +512,7 @@ class TestContext(object):
         for uid, action in ac.tree:
             if uid.endswith('sources'):
                 assert ac.tree.get_tag(uid)
-            elif uid.endswith('spec1-src'):
+            elif uid.endswith('.source.spec1-src'):
                 assert ac.tree.get_tag(uid) is None
                 assert ac.tree.get_context(
                     vertex_id=uid,
@@ -586,3 +598,13 @@ class TestContext(object):
         for action in cm.execute(myplan, 'myserver'):
             assert action.plan_call_args == {'platform': 'any'}
             assert action.plan_args['platform'] == BaseEnv().platform
+
+    def test_add_anod_action_duplicate_dep(self):
+        """Verify that duplicate dep with same local_name are rejected."""
+        ac = self.create_context()
+
+        with pytest.raises(AnodError) as err:
+            ac.add_anod_action('duplicate_dep', primitive='build')
+
+        assert "The spec duplicate_dep has two dependencies with the same " \
+            "local_name attribute (spec3)" in str(err)

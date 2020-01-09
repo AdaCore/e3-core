@@ -17,6 +17,7 @@ Example::
 from __future__ import absolute_import, division, print_function
 
 import itertools
+import os
 import sys
 import tempfile
 from contextlib import closing
@@ -63,6 +64,29 @@ class GitRepository(object):
         """
         self.working_tree = working_tree
 
+    @classmethod
+    def create(cls, repo_path, initial_content_path=None):
+        """Create a local Git repository.
+
+        :param repo_path: a local directory where to create the repository
+        :type repo_path: str
+        :param initial_content_path: directory containing the initial content
+            of the repository. If set to None an empty repository is created.
+        :type initial_content_path: str | None
+        :return: the URL of the newly created repository
+        :rtype: str
+        """
+        repo_path = os.path.abspath(repo_path)
+        repo = cls(repo_path)
+        repo.init()
+        if initial_content_path is not None:
+            e3.fs.sync_tree(initial_content_path, repo_path, ignore=['.git'])
+            repo.git_cmd(['add', '-A'])
+            repo.git_cmd(['config', 'user.email', 'e3-core@example.net'])
+            repo.git_cmd(['config', 'user.name', 'e3 core'])
+            repo.git_cmd(['commit', '-m', 'initial content'])
+        return repo_path
+
     def git_cmd(self, cmd, **kwargs):
         """Run a git command.
 
@@ -102,7 +126,8 @@ class GitRepository(object):
         :raise: GitError
         """
         e3.fs.mkdir(self.working_tree)
-        self.git_cmd(['init'])
+        self.git_cmd(['init', '-q'])
+
         if url is not None:
             self.git_cmd(['remote', 'add', remote, url])
 
@@ -211,12 +236,12 @@ class GitRepository(object):
         # Format:
         #   %H: commit hash
         #   %aE: author email respecting .mailmap
-        #   %cI: committer date, strict ISO 8601 format
+        #   %ci: committer date, ISO 8601-like format (don't use %cI)
         #   %n: new line
         #   %B: raw body (unwrapped subject and body)
         #   %N: commit notes
         cmd = ['log',
-               '--format=format:%H%n%aE%n%cI%n' +
+               '--format=format:%H%n%aE%n%ci%n' +
                ('%N%n' if with_gerrit_notes else '') + '%n%B',
                '--log-size',
                '--max-count=%d' % max_count if max_count else None,
@@ -249,7 +274,7 @@ class GitRepository(object):
             # are attached to the commit
             result = dict(itertools.izip_longest(
                 ('sha', 'email', 'date', 'notes'),
-                headers.split(None, 3)))
+                headers.replace('\r', '').split('\n', 3)))
 
             # replace notes "key: value" lines by a dictionary
             if result['notes']:

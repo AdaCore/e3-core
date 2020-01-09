@@ -42,7 +42,6 @@ class AnodDriver(object):
     def activate(self, sandbox, spec_repository):
         self.anod_instance.build_space = sandbox.get_build_space(
             name=self.anod_instance.build_space_name,
-            primitive=self.anod_instance.kind,
             platform=self.anod_instance.env.platform)
 
         self.anod_instance.log = e3.log.getLogger(

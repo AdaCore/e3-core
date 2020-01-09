@@ -212,8 +212,17 @@ class Configure(object):
         cmd = []
         if 'CONFIG_SHELL' in os.environ:
             cmd.append(os.environ['CONFIG_SHELL'])
-        cmd += [unixpath(os.path.relpath(
-            os.path.join(self.src_dir, 'configure'), self.exec_dir))]
+
+        # Compute the relative path for configure
+        configure_path = unixpath(os.path.relpath(
+            os.path.join(self.src_dir, 'configure'),
+            self.exec_dir))
+
+        # In case the configure is run from its location ensure to
+        # add ./ as . is not necessary in PATH.
+        if configure_path == 'configure':
+            configure_path = './configure'
+        cmd += [configure_path]
         cmd += self.args
 
         if self.target is not None:
@@ -262,11 +271,18 @@ def text_replace(filename, pattern):
     with open(filename, 'rb') as f:
         for line in f:
             for pattern_index, (regexp, replacement) in enumerate(pattern):
+                if isinstance(replacement, unicode):
+                    replacement = replacement.encode('utf-8')
+                if isinstance(regexp, unicode):
+                    regexp = regexp.encode('utf-8')
                 line, count = re.subn(regexp,
                                       replacement, line)
                 if count:
                     nb_substitution[pattern_index] += count
-            output.write(line)
+            if isinstance(line, unicode):
+                output.write(line.encode('utf-8'))
+            else:
+                output.write(line)
     if any((nb for nb in nb_substitution)):
         # file changed, update it
         with open(filename, 'wb') as f:

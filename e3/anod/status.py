@@ -14,3 +14,4 @@ class ReturnValue(Enum):
     force_fail = 123
     unknown = 124
     skip = 125
+    unchanged = 126

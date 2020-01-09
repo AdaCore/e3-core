@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import abc
 import logging
-
+from itertools import chain
 from e3.anod.status import ReturnValue
 from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
@@ -42,6 +42,8 @@ class Walk(object):
         self.new_fingerprints = {}
         self.job_status = {}
         self.set_scheduling_params()
+        self.failure_source = {}
+
         self.scheduler = Scheduler(
             job_provider=self.get_job, collect=self.collect,
             queues=self.queues, tokens=self.tokens,
@@ -67,40 +69,7 @@ class Walk(object):
         self.tokens = 1
         self.job_timeout = DEFAULT_JOB_MAX_DURATION
 
-    def can_predict_new_fingerprint(self, uid, data):
-        """Return True if a job's fingerprint is computable before running it.
-
-        This function should return True for all the jobs where
-        the fingerprint can be calculated before running the job,
-        False otherwise.
-
-        Ideally, we should be able to compute the fingerprint of every
-        job before we actually run the job, as this then allows us to
-        use that fingerprint to decide whether or not the job should be
-        run or not. Unfortunately, there can be situations where this is
-        not possible; consider for instance the case where the job is
-        to fetch some data, and the fingerprint needs to include that
-        contents.
-
-        For jobs were the fingerprint cannot be predicted, what will
-        happen is that the scheduler will execute that job, and then
-        compute the fingerprint at the end, instead of computing it
-        before.
-
-        By default, this method assumes that all jobs have predictable
-        fingerprints, and so always returns True. Child classes should
-        override this method is they have jobs for which the fingerprint
-        cannot be computed ahead of running the job.
-
-        :param uid: A unique Job ID.
-        :type uid: str
-        :param data: Data associated to the job.
-        :type data: T
-        :rtype: bool
-        """
-        return True
-
-    def compute_new_fingerprint(self, uid, data):
+    def compute_fingerprint(self, uid, data, is_prediction=False):
         """Compute the given action's Fingerprint.
 
         This method is expected to return a Fingerprint corresponding
@@ -115,6 +84,12 @@ class Walk(object):
         :type uid: str
         :param data: Data associated to the job.
         :type data: T
+        :param is_prediction: If True this is an attempt to compute the
+            fingerprint before launching the job. In that case if the
+            function returns None then the job will always be launched.
+            When False, this is the computation done after running the
+            job (that will be the final fingerprint saved for future
+            comparison)
         :rtype: e3.fingerprint.Fingerprint | None
         """
         return None
@@ -201,7 +176,8 @@ class Walk(object):
                 return True
         return previous_fingerprint != new_fingerprint
 
-    def create_failed_job(self, uid, data, predecessors, reason, notify_end):
+    def create_skipped_job(self, uid, data, predecessors, reason, notify_end,
+                           status=ReturnValue.failure):
         """Return a failed job.
 
         This method always returns an EmptyJob. Deriving classes may
@@ -219,7 +195,8 @@ class Walk(object):
         :type notify_end: str -> None
         :rtype: Job
         """
-        return EmptyJob(uid, data, notify_end, status=ReturnValue.failure)
+        return EmptyJob(uid, data, notify_end,
+                        status=status)
 
     @abc.abstractmethod
     def create_job(self, uid, data, predecessors, notify_end):
@@ -254,24 +231,19 @@ class Walk(object):
 
         Same as self.create_job except that this function first checks
         whether any of the predecessors might have failed, in which case
-        the failed job (creating using the create_failed_job method)
+        the failed job (creating using the create_skipped_job method)
         is returned.
 
         :rtype: Job
         """
+        # Get the latest fingerprint
         prev_fingerprint = self.load_previous_fingerprint(uid)
+
+        # And reset the fingerprint on disk
         self.save_fingerprint(uid, None)
 
-        can_predict_new_fingerprint = \
-            self.can_predict_new_fingerprint(uid, data)
-        if can_predict_new_fingerprint:
-            self.new_fingerprints[uid] = \
-                self.compute_new_fingerprint(uid, data)
-        else:
-            # Set the new fingerprint's value to None for now.
-            # The actual fingerprint will be provided when we collect
-            # the job's results if the job is succesful.
-            self.new_fingerprints[uid] = None
+        self.new_fingerprints[uid] = \
+            self.compute_fingerprint(uid, data, is_prediction=True)
 
         # Check our predecessors. If any of them failed, then return
         # a failed job.
@@ -279,21 +251,34 @@ class Walk(object):
                                if self.job_status[k] not in
                                (ReturnValue.success,
                                 ReturnValue.skip,
-                                ReturnValue.force_skip)]
+                                ReturnValue.force_skip,
+                                ReturnValue.unchanged)]
         if failed_predecessors:
             force_fail = "Event failed because of prerequisite failure:\n"
             force_fail += "\n".join(["  " + str(self.actions[k])
                                      for k in failed_predecessors])
-            return self.create_failed_job(uid, data, predecessors,
-                                          force_fail, notify_end)
 
-        if not can_predict_new_fingerprint or \
-                self.should_execute_action(uid, prev_fingerprint,
-                                           self.new_fingerprints[uid]):
+            # Compute the set of job that originate that failure
+            self.failure_source[uid] = set(
+                chain.from_iterable(
+                    [self.failure_source.get(k, [k])
+                     for k in failed_predecessors]))
+            force_fail += "\n\nOrigin(s) of failure:\n"
+            force_fail += "\n".join(["  " + str(self.actions[k])
+                                     for k in self.failure_source[uid]])
+
+            return self.create_skipped_job(uid, data, predecessors,
+                                           force_fail, notify_end,
+                                           status=ReturnValue.failure)
+
+        if self.should_execute_action(uid, prev_fingerprint,
+                                      self.new_fingerprints[uid]):
             return self.create_job(uid, data, predecessors, notify_end)
         else:
-            return EmptyJob(uid, data, notify_end,
-                            status=ReturnValue.skip)
+            return self.create_skipped_job(
+                uid, data, predecessors,
+                "skipped", notify_end,
+                status=ReturnValue.skip)
 
     def collect(self, job):
         """Collect all the results from the given job.
@@ -308,10 +293,10 @@ class Walk(object):
         # to skipping it).
         if job.status in (ReturnValue.success,
                           ReturnValue.force_skip,
-                          ReturnValue.skip):
-            if not self.can_predict_new_fingerprint(job.uid, job.data):
-                self.new_fingerprints[job.uid] = \
-                    self.compute_new_fingerprint(job.uid, job.data)
+                          ReturnValue.skip,
+                          ReturnValue.unchanged):
+            self.new_fingerprints[job.uid] = \
+                self.compute_fingerprint(job.uid, job.data)
             self.save_fingerprint(job.uid, self.new_fingerprints[job.uid])
 
         self.job_status[job.uid] = ReturnValue(job.status)
@@ -319,12 +304,12 @@ class Walk(object):
         if job.should_skip:
             if job.status not in (ReturnValue.force_fail,
                                   ReturnValue.force_skip):
-                logging.info("[queue=%-10s status=%-10s time=%5ds] %s",
+                logging.info("[%-10s %-9s %4ds] %s",
                              job.queue_name, self.job_status[job.uid].name,
                              0, job.data)
             return False
 
-        logging.info("[queue=%-10s status=%-10s time=%5ds] %s",
+        logging.info("[%-10s %-9s %4ds] %s",
                      job.queue_name,
                      job.status.name,
                      int(job.timing_info.duration),

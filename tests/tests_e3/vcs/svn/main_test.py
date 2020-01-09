@@ -38,9 +38,9 @@ def test_svn_repo():
 
     # --- create a SVN repository from that project
     repos_path = os.path.join(cwd, 'repos')
-    project_url = file_url(repos_path + '/Test_project')
-    p = Run(['svnadmin', 'create', repos_path])
-    assert p.status == 0, p.out
+    project_url = SVNRepository.create(
+        repo_path=repos_path)
+    project_url = project_url + '/Test_Project'
     p = Run(['svn', 'import', project_path, project_url, '-m',
              'initial import'])
     assert p.status == 0, p.out

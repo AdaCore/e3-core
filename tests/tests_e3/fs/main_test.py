@@ -419,3 +419,18 @@ def test_extension():
     assert e3.fs.extension('file2.tar.gz') == '.tar.gz'
     assert e3.fs.extension('file2.tar') == '.tar'
     assert e3.fs.extension('file2.tar.bz2') == '.tar.bz2'
+
+
+def test_directory_content():
+    """Test e3.fs.directory_content."""
+    e3.fs.mkdir('test1')
+    e3.fs.mkdir('test1/test2')
+    e3.os.fs.touch(os.path.join('test1', 'test1.txt'))
+    e3.os.fs.touch(os.path.join('test1', 'test2.txt'))
+    assert e3.fs.directory_content('test1') == \
+        ['test1.txt', 'test2.txt', 'test2' + os.sep]
+    assert e3.fs.directory_content('test1', unixpath=True) == \
+        ['test1.txt', 'test2.txt', 'test2/']
+    assert e3.fs.directory_content('test1', include_root_dir=True,
+                                   unixpath=True) == \
+        ['test1/test1.txt', 'test1/test2.txt', 'test1/test2/']

@@ -297,7 +297,7 @@ def test_unlink():
     with pytest.raises(NTException) as err:
         ntfile.unlink()
     ntfile.close()
-    assert 'NTFile.read_attributes:' in str(err)
+    assert 'NTFile.read_attributes_internal:' in str(err)
 
     # A directory that is not empty cannot be deleted
     dir_to_delete = os.path.join(test_dir_path, 'dir_to_delete')

@@ -72,7 +72,13 @@ class GetSource(Action):
         return 'get source %s' % self.data.name
 
 
-class DownloadSource(Action):
+class Download(Action):
+    """General root class for all download actions."""
+
+    pass
+
+
+class DownloadSource(Download):
     """DownloadSource Action.
 
     This action means the we need to download from the store a given
@@ -173,7 +179,7 @@ class CreateSources(Action):
         self.anod_instance = anod_instance
 
     def __str__(self):
-        return 'create sources %s' % self.data[1]
+        return 'create all sources for %s.anod' % self.anod_instance.name
 
 
 class Checkout(Action):
@@ -249,7 +255,7 @@ class Install(AnodAction):
     pass
 
 
-class DownloadBinary(Action):
+class DownloadBinary(Download):
     """DownloadBinary Action.
 
     Download a binary package from the store.
@@ -273,7 +279,13 @@ class DownloadBinary(Action):
             self.uid.split('.', 1)[1].rsplit('.', 1)[0]
 
 
-class UploadComponent(Action):
+class Upload(Action):
+    """General root class for all upload actions."""
+
+    pass
+
+
+class UploadComponent(Upload):
     """UploadComponent Action.
 
     Upload a component to the store.
@@ -311,13 +323,89 @@ class UploadSourceComponent(UploadComponent):
     str_prefix = 'source metadata'
 
 
+class UploadSource(Upload):
+    """Upload a source package."""
+
+    __slots__ = ('uid', 'anod_instance', 'source_name')
+
+    def __init__(self, anod_instance, source_name):
+        """Initialize UploadSource object.
+
+        :param anod_instance: The Anod instance of the spec providing
+            the given source.
+        :type anod_instance: e3.anod.spec.Anod
+        :param source_name: name of source package to assemble
+        :type source_name: str
+        """
+        uid = anod_instance.uid.split('.')
+        uid[-1] = 'upload_src'
+        uid.append(source_name)
+        uid = '.'.join(uid)
+        super(UploadSource, self).__init__(uid=uid,
+                                           data=(anod_instance, source_name))
+        self.anod_instance = anod_instance
+        self.source_name = source_name
+
+    def __str__(self):
+        """Return string representation."""
+        return 'upload source %s' % self.source_name
+
+
 class Decision(Action):
     """Decision Action.
 
-    Decision nodes are used when computing the DAG of possible actions.
-    A Decision node has two children corresponding to the decision to be
-    made during computation of the effective list of actions to perform.
-    After scheduling a DAG will not contain any Decision node.
+    Decision nodes correspond to Action nodes where the end result
+    can be obtained using multiple methods. For instance, sources
+    can be obtained either by downloading them from the store, but
+    also by getting them from repositories.  Each child of Decision nodes
+    represents one way to obtain the desired end result (a "choice").
+
+    The current implementation only supports 2 choices, called
+    "left" and "right".
+
+    The DAG we first create when reading the plan includes these Decision
+    nodes. Then, as part of scheduling the plan, we create a new DAG where
+    all Decision nodes are removed, and only one child of each Decision
+    is chosen by the scheduler, then taking the place of its Decision
+    node in the DAG. Therefore, once scheduling of the DAG is complete,
+    there should no longer be any Decision node left.
+
+    It important to know that this class does not actually decide
+    which choice to make. It just records some information about
+    the plan, and the associated specs. It then uses that information
+    to determine if a choice has actually been made, be it implicitly
+    or explicitly.
+
+    :ivar initiator: The UID of the parent node of the decision.
+    :vartype initiator: str
+    :ivar left_action: The first possible choice for our decision.
+    :vartype left_action: Action.
+    :ivar right_action: The second possible choice for our decision.
+    :vartype right_action: Action.
+    :ivar choice: If not None, the choice made by the plan itself.
+        It can be Decision.LEFT, meaning that the plan contains
+        an entry to perform the self.left_action; If set to
+        Decision.RIGHT, it means the plan contains an entry to
+        perform the self.right_action; and if set to BOTH, it means
+        the plan contains entries to perform both self.left_action
+        and self.right_action (which may or may not be an issue).
+    :vartype choice: Decision.LEFT | Decision.RIGHT | Decision.BOTH
+    :ivar expected_choice: If not None, the choice implicitly made
+        by the way the specs involved in the decision are written.
+        In practice, this attribute records the constraints we have
+        in terms of the choices in the plan which are valid.
+    :ivar triggers: A list of actions that, if present in a DAG
+        being created while scheduling the plan (from which this
+        Decision originates), causes a specific choice to be expected
+        for this decision.  Each element of this list consists of a tuple
+        with the uid of the Action triggering the choice, the expected
+        choice, and a plan_line (if the action comes from the plan,
+        otherwise None).
+    :vartype triggers: list[(str, LEFT | RIGHT, str | None)]
+    :ivar decision_maker: If not None, the plan_line where an entry
+        in the plan is performing an action corresponding to one of
+        our choices.
+    :ivar: str
     """
 
     __metaclass__ = abc.ABCMeta
@@ -331,34 +419,45 @@ class Decision(Action):
 
         :param root: parent node
         :type root: Action
-        :param left: first choice
+        :param left: Same as the left_action attribute.
         :type left: Action
-        :param right: second choice
+        :param right: Same as the right_action attribute.
         :type right: Action
-        :param choice: expected choice
-        :type choice: int
+        :param choice: Same as the attribute.
+        :type choice: int | None
         """
         super(Decision, self).__init__(uid=root.uid + '.decision', data=None)
         self.initiator = root.uid
         self.choice = choice
         self.expected_choice = None
-        self.left = left.uid
         self.left_action = left
-        self.right = right.uid
         self.right_action = right
         self.triggers = []
         self.decision_maker = None
 
+    @property
+    def left(self):
+        """return self.left_action.uid (this is a convenience property)."""
+        return self.left_action.uid
+
+    @property
+    def right(self):
+        """return self.right_action.uid (this is a convenience property)."""
+        return self.right_action.uid
+
     def add_trigger(self, trigger, decision, plan_line):
-        """Add a trigger.
+        """Add a trigger to self.triggers.
 
-        A trigger will be used to set an expected choice depending on the
-        presence of a given action in the DAG of scheduled actions
+        See the description of the "triggers" attribute for more
+        information as to what these triggers are used for.
 
-        :param trigger: action that will cause the trigger to be enabled
+        :param trigger: The action which, when scheduled, causes
+            the given decision (which is actually more aptly
+            described as a choice) to be recorded as the expected
+            choice for our Decision.
         :type trigger: Action
-        :param decision: expected decision when the trigger action is
-            scheduled
+        :param decision: The expected choice when the trigger Action is
+            scheduled.
         :type decision: int
         :param plan_line: plan line associated with this action
         :type plan_line: str
@@ -366,7 +465,7 @@ class Decision(Action):
         self.triggers.append((trigger.uid, decision, plan_line))
 
     def apply_triggers(self, dag):
-        """Apply triggers.
+        """Apply triggers to the given dag.
 
         :param dag: a dag of scheduled actions
         :type dag: e3.collection.dag.DAG
@@ -379,10 +478,21 @@ class Decision(Action):
                     self.expected_choice = Decision.BOTH
 
     def get_decision(self):
-        """Return uid of taken choice.
+        """Return uid of the choice made by the plan, or None.
 
-        :return: None if decision cannot be made or node uid in the
-            DAG of the path to follow
+        This function returns the choice made by the plan, if any.
+        This means that if the plan doesn't include an action
+        that implements any of the choices, we return None.
+        Similarly, if the plan has actions implementing more than
+        one of the choices, the plan hasn't made any decision
+        because the decision is ambiguous.
+
+        And finally, if the plan made a choice, but that choice
+        contradicts this decision's expected_choice, then the decision
+        is incorrect, and we also return None in that case.
+
+        :return: None if the decision cannot be made; otherwise,
+            return uid of the choice that was made.
         :rtype: None | str
         """
         if self.choice is None or self.choice == Decision.BOTH:
@@ -411,11 +521,18 @@ class Decision(Action):
             return None
 
     def set_decision(self, which, decision_maker):
-        """Make a choice.
+        """Record a choice made by an action in a plan.
+
+        This method should be caused when an entry in our plan
+        performs an action corresponding to one of the choices
+        for our decision. This method records which of the choices
+        that action performs.
 
         :param which: Decision.LEFT or Decision.RIGHT
         :type which: int
-        :param decision_maker: record who the decision maker is
+        :param decision_maker: Record who the decision maker is.
+            This is typically the plan line of the action performing
+            the choice being recorded.
         :type decision_maker: None | str
         """
         if self.choice is None:
@@ -427,7 +544,14 @@ class Decision(Action):
     @classmethod
     @abc.abstractmethod
     def description(cls, decision):
-        """Return a description of the decision."""
+        """Return a description of the decision (actually a choice).
+
+        :param decision: The decision (actually a choice).
+        :type decision: int
+        :return: A description of the given parameter (named "decision",
+            but actually a choice).
+        :rtype: str
+        """
         pass  # all: no cover
 
     def suggest_plan_fix(self, choice):

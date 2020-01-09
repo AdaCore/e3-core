@@ -87,6 +87,37 @@ def cp(source, target, copy_attrs=True, recursive=False,
                 None, sys.exc_traceback
 
 
+def directory_content(path, include_root_dir=False, unixpath=False):
+    """Return the complete directory content (recusrsively).
+
+    :param path: path for the which the content should be returned
+    :type path: str
+    :param include_root_dir: if True include the root directory in the paths
+        returned by the function. Otherwise return relative paths
+    :type include_root_dir: bool
+    :param unixpath: if True return unix compatible paths (calling unixpath on
+        all elements returned
+    :type unixpath: bool
+    :return: a list of of path. Note that directories will end with a path
+        separator
+    :rtype: list[str]
+    """
+    result = []
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            result.append(os.path.join(root, f))
+        for d in dirs:
+            result.append(os.path.join(root, d) + os.sep)
+    if not include_root_dir:
+        result = [os.path.relpath(e, path) + os.sep
+                  if e.endswith(os.sep) else os.path.relpath(e, path)
+                  for e in result]
+    if unixpath:
+        result = [e3.os.fs.unixpath(e) for e in result]
+    result.sort()
+    return result
+
+
 def echo_to_file(filename, content, append=False):
     """Output content into a file.
 
@@ -270,6 +301,67 @@ def mv(source, target):
 
     :raise FSError: if an error occurs
     """
+    def move_file(src, dst):
+        """Reimplementation of shutil.move.
+
+        The implementation follows shutil.move from the standard library.
+        The only difference is that we use e3.fs.rm function instead of
+        rmtree. This ensure moving a directory with read-only files will
+        work.
+        """
+        def same_file(src, dst):
+            if hasattr(os.path, 'samefile'):
+                try:
+                    return os.path.samefile(src, dst)
+                except OSError:
+                    return False
+            return (os.path.normcase(os.path.abspath(src)) ==
+                    os.path.normcase(os.path.abspath(dst)))
+
+        def basename(path):
+            sep = os.path.sep + (os.path.altsep or '')
+            return os.path.basename(path.rstrip(sep))
+
+        def destinsrc(src, dst):
+            src = os.path.abspath(src)
+            dst = os.path.abspath(dst)
+            if not src.endswith(os.path.sep):
+                src += os.path.sep
+            if not dst.endswith(os.path.sep):
+                dst += os.path.sep
+            return dst.startswith(src)
+
+        real_dst = dst
+        if os.path.isdir(dst):
+            if same_file(src, dst):
+                # We might be on a case insensitive filesystem,
+                # perform the rename anyway.
+                os.rename(src, dst)
+                return
+
+            real_dst = os.path.join(dst, basename(src))
+            if os.path.exists(real_dst):
+                raise FSError(
+                    "Destination path '%s' already exists" % real_dst)
+        try:
+            os.rename(src, real_dst)
+        except OSError:
+            if os.path.islink(src):
+                linkto = os.readlink(src)
+                os.symlink(linkto, real_dst)
+                os.unlink(src)
+            elif os.path.isdir(src):
+                if destinsrc(src, dst):
+                    raise FSError(
+                        "Cannot move a directory '%s' into itself"
+                        " '%s'." % (src, dst))
+                shutil.copytree(src, real_dst, symlinks=True)
+                rm(src, recursive=True)
+            else:
+                shutil.copy2(src, real_dst)
+                rm(src)
+        return real_dst
+
     if isinstance(source, basestring):
         logger.debug('mv %s %s', source, target)
     else:
@@ -284,7 +376,12 @@ def mv(source, target):
             raise FSError(origin='mv',
                           message='cannot find files matching "%s"' % source)
         elif nb_files == 1:
-            e3.os.fs.mv(file_list[0], target)
+            source = file_list[0]
+            if os.path.isdir(source) and os.path.isdir(target):
+                move_file(source,
+                          os.path.join(target, os.path.basename(source)))
+            else:
+                move_file(source, target)
         elif not os.path.isdir(target):
             # More than one file to move but the target is not a directory
             raise FSError('mv', '%s should be a directory' % target)
@@ -292,7 +389,7 @@ def mv(source, target):
             for f in file_list:
                 f_dest = os.path.join(target, os.path.basename(f))
                 e3.log.debug('mv %s %s', f, f_dest)
-                shutil.move(f, f_dest)
+                move_file(f, f_dest)
     except Exception as e:
         logger.error(e)
         raise FSError(origin='mv', message=str(e)), None, sys.exc_traceback

@@ -46,6 +46,59 @@ class SVNRepository(object):
         """
         self.working_copy = working_copy
 
+    @classmethod
+    def local_url(cls, repo_path):
+        """Return the url of a svn repository hosted locally.
+
+        :param repo_path: path to the repo
+        :type repo_path: str
+        :return: the url that can be used as repository url
+        :rtype: str
+        """
+        repo_path = os.path.abspath(repo_path)
+        if sys.platform == 'win32':  # unix: no cover
+            if len(repo_path) > 1 and repo_path[1] == ':':
+                # svn info returns the URL with an uppercase letter drive
+                repo_path = repo_path[0].upper() + repo_path[1:]
+            return 'file:///' + repo_path.replace('\\', '/')
+        else:  # windows: no cover
+            return 'file://' + repo_path
+
+    @classmethod
+    def create(cls, repo_path, initial_content_path=None):
+        """Create a local subversion repository.
+
+        This creates a local repository (not a working copy) that can be
+        referenced by using file:// protocol. The purpose of the this function
+        is mainly to test svn-related functions without relying on a remote
+        repository.
+
+        :param repo_path: a local directory where to create the repository
+        :type repo_path: str
+        :param initial_content_path: directory containing the initial content
+            of the repository. If set to None an empty repository is created.
+        :type initial_content_path: str | None
+        :return: the URL of the newly created repository
+        :rtype: str
+        """
+        repo_path = os.path.abspath(repo_path)
+        p = e3.os.process.Run(['svnadmin', 'create', repo_path],
+                              output=cls.log_stream)
+        if p.status != 0:
+            raise SVNError("cannot create svn repository in %s" % repo_path,
+                           origin="create")
+        if initial_content_path is not None:
+            p = e3.os.process.Run(
+                ['svn', 'import',
+                 initial_content_path, cls.local_url(repo_path),
+                 '-m', 'Initial import from %s' % initial_content_path],
+                output=cls.log_stream)
+            if p.status != 0:
+                raise SVNError("cannot perform initial import of %s into %s" %
+                               (initial_content_path, repo_path),
+                               origin="create")
+        return cls.local_url(repo_path)
+
     def svn_cmd(self, cmd, **kwargs):
         """Run a svn command.
 
@@ -89,6 +142,10 @@ class SVNRepository(object):
         """
         info = self.svn_cmd(['info'], output=PIPE).out
         m = re.search(r'^{item}: *(.*)\n'.format(item=item), info, flags=re.M)
+        if m is None:
+            logger.debug('svn info result:\n%s', info)
+            raise SVNError('Cannot fetch item %s from svn_info' % item,
+                           origin='get_info')
         return m.group(1).strip()
 
     @property
@@ -107,7 +164,11 @@ class SVNRepository(object):
         :rtype: str
         :raise: SVNError
         """
-        return self.get_info('Last Changed Rev')
+        try:
+            return self.get_info('Last Changed Rev')
+        except Exception:
+            logger.exception("Cannot fetch last changed rev")
+            raise SVNError("Cannot fetch last changed rev", "svn_cmd")
 
     def update(self, url=None, revision=None, force_and_clean=False):
         """Update a working copy or checkout a new one.

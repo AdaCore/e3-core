@@ -166,6 +166,20 @@ class Job(object):
             self.interrupted = True
         return not previous_state
 
+    def on_start(self, scheduler):
+        """Call whenever a job is started.
+
+        This allow the user to do some logging on job startup
+        """
+        pass
+
+    def on_finish(self, scheduler):
+        """Call whenever a job is finished.
+
+        This allow the user to do some logging on job termination
+        """
+        pass
+
 
 class EmptyJob(Job):
     """A job which does nothing."""
@@ -219,7 +233,10 @@ class ProcessJob(Job):
                 logger.debug('job %s has been cancelled', self.uid)
                 return
             try:
-                proc_handle = Run(self.cmdline, **cmd_options)
+                cmdline = self.cmdline
+                assert cmdline is not None, "cmdline cannot be None"
+
+                proc_handle = Run(cmdline, **cmd_options)
                 self.proc_handle = proc_handle
             except Exception:
                 logger.exception('error when spawing job %s', self.uid)

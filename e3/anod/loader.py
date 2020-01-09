@@ -4,6 +4,7 @@ import imp
 import inspect
 import os
 import sys
+import yaml
 
 import e3.hash
 import e3.log
@@ -84,6 +85,12 @@ class AnodSpecRepository(object):
         # Create AnodModule objects
         for name, value in spec_list.iteritems():
             self.specs[name] = AnodModule(name, **value)
+
+        # Load config/repositories.yaml
+        repo_file = os.path.join(self.spec_dir, 'config', 'repositories.yaml')
+        if os.path.isfile(repo_file):
+            with open(repo_file) as fd:
+                self.repos = yaml.safe_load(fd)
 
         # Declare spec prolog
         prolog_file = os.path.join(spec_dir, 'prolog.py')

@@ -1,0 +1,24 @@
+from e3.anod.spec import Anod
+
+class Spec2(Anod):
+    component = 'spec2'
+
+    package = Anod.Package(prefix='spec2', version=lambda: '42')
+
+    @property
+    def build_source_list(self):
+        return [Anod.Source(name='spec2-src', publish=True, dest='a'),
+                Anod.Source(name='spec2-internal-src', publish=False, dest='b')]
+
+    @property
+    def source_pkg_build(self):
+        return [Anod.ThirdPartySourceBuilder(name='spec2-src'),
+                Anod.ThirdPartySourceBuilder(name='spec2-internal-src')]
+
+    @Anod.primitive()
+    def build(self):
+        pass
+
+    @Anod.primitive()
+    def install(self):
+        pass

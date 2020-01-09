@@ -12,7 +12,6 @@ import e3.os.process
 import e3.text
 import yaml
 from e3.anod.error import AnodError, ShellError
-from e3.anod.status import ReturnValue
 from e3.yaml import load_with_config
 
 # CURRENT API version
@@ -145,28 +144,22 @@ class Anod(object):
         :raise: SpecError
         """
         self.deps = OrderedDict()
-        """:type: OrderedDict[e3.anod.deps.Dependency]"""
+        """:type: OrderedDict[str, e3.anod.Anod]"""
 
         self.kind = kind
         self.jobs = jobs
 
-        # Set when AnodDriver.activate() is called
+        # Set when self.bind_to_sandbox is called
         self.build_space = None
-        self.log = None
+
+        # Default spec logger
+        self.log = e3.log.getLogger('anod.spec')
 
         # Set spec environment
-        if env is None:
-            self.env = e3.env.BaseEnv(build=e3.env.Env().build,
-                                      host=e3.env.Env().host,
-                                      target=e3.env.Env().target)
-        else:
-            self.env = e3.env.BaseEnv(build=env.build,
-                                      host=env.host,
-                                      target=env.target)
+        self.env = e3.env.BaseEnv.from_env(env)
 
-        self.fingerprint = None
-
-        # Parse qualifier
+        # Create the parsed qualifier (dict version). In the future
+        # self.parsed_qualifier should be replaced by self.qualifier
         self.parsed_qualifier = OrderedDict()
         if qualifier:
             qual_dict = [(key, value) for key, _, value in
@@ -175,7 +168,6 @@ class Anod(object):
         else:
             qual_dict = []
 
-        # ??? In the future qualifier keys should be ordered
         for k in qual_dict:
             self.parsed_qualifier[k[0]] = k[1]
         self.qualifier = qualifier
@@ -190,13 +182,42 @@ class Anod(object):
                              self.build_space_name,
                              self.kind))
 
+        # Hold the config dictionary-like object
+        self._config = None
+
+        # Hold the result of the pre function
+        self._pre = None
+
     @property
     def has_package(self):
         """Return true if the spec defines a binary package.
 
         :rtype: bool
         """
-        return self.package is not None and self.package.name is not None
+        return (self.package is not None and
+                self.package.name is not None and
+                self.component is not None)
+
+    def bind_to_sandbox(self, sandbox):
+        """Bind spec instance to a physical Anod sandbox.
+
+        Binding an Anod instance to a sandbox will set the
+        build_space attribute.
+
+        :param sandbox: a sandbox
+        :type sandbox: Sandbox
+        """
+        self.build_space = sandbox.get_build_space(
+            name=self.build_space_name,
+            platform=self.env.platform)
+
+    def bind_to_config(self, config):
+        """Bind an Anod instance to a config.
+
+        :param config: a dictionary-like object
+        :type config: dict
+        """
+        self._config = config
 
     def load_config_file(self, extended=False, suffix=None, selectors=None):
         """Load a YAML config file associated with the current module.
@@ -249,11 +270,16 @@ class Anod(object):
         """
         if self.build_space is None:
             return 'unknown'
-        # first look in the build_space config dictionary
-        if key in self.build_space.config:
-            return self.build_space.config[key]
 
-        # Then check if the key (in lowercase) in build_space
+        # First look for pre result
+        if self._pre is not None and key in self._pre:
+            return self._pre[key]
+
+        # Then look in the config dictionary
+        if self._config is not None and key in self._config:
+            return self._config[key]
+
+        # Then check if the key (in lowercase) is in the build_space
         elif key.isupper():
             return getattr(self.build_space, key.lower(), None)
 
@@ -261,8 +287,6 @@ class Anod(object):
     def primitive(cls, pre=None, post=None, version=None):
         """Declare an anod primitive.
 
-        Store (and check) the fingerprint of the module dependencies
-        Store the primitive success flag
         Catch all exceptions and raise AnodError with the traceback
 
         :param pre: None or a special function to call before running the
@@ -281,50 +305,40 @@ class Anod(object):
         def primitive_dec(f, pre=pre, post=post, version=version):
 
             def primitive_func(self, *args, **kwargs):
-                # Check whether the instance has been activated
-                if self.build_space is None:
-                    # Not yet activated, fail
-                    raise AnodError('AnodDriver.activate() has not been run')
-
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
-                success = False  # Set to True if no exception
                 result = False
-
-                # First reset last build status and actual fingerprint. This
-                # ensure that even a crash will keep the module in a mode that
-                # force its rebuild.
-                self.build_space.update_status(self.kind)
 
                 # Ensure temporary directory is set to a directory local to
                 # the current sandbox. This avoid mainly to loose track of
                 # temporary files that are then accumulating on the
                 # filesystems.
-                for tmp_var in ('TMP', 'TEMP', 'TMPDIR'):
-                    os.environ[tmp_var] = self.build_space.tmp_dir
+                if self.build_space is not None and \
+                        self.build_space.initialized:
+                    for tmp_var in ('TMP', 'TEMP', 'TMPDIR'):
+                        os.environ[tmp_var] = self.build_space.tmp_dir
 
                 try:
+                    # If there is a pre function call it
+                    if pre is not None:
+                        self._pre = getattr(self, pre)()
+
+                    # Run the primitive
                     result = f(self, *args, **kwargs)
-                except AnodError as e:
-                    self.log.error(e)
-                    e += '{name} {action} fails'.format(name=self.name,
-                                                        action=f.__name__)
-                    raise
-                except Exception:
-                    self.log.error("%s %s fails", self.name, f.__name__)
-                    self.build_space.dump_traceback(self.name, f.__name__)
-                else:
                     self.log.debug("%s %s ends", self.name, f.__name__)
-                    success = True
-                finally:
-                    if success:
-                        # Don't update status or fingerprint if the primitive
-                        # is an installation outside the build space.
-                        self.build_space.update_status(
-                            kind=self.kind,
-                            status=ReturnValue.success,
-                            fingerprint=self.fingerprint)
-                return result
+
+                    # And return the result
+                    return result
+                except AnodError as e:
+                    self.log.exception("%s %s fails", self.name, f.__name__)
+                    raise AnodError(
+                        "%s %s fails (AnodError exception in primitive)" %
+                        (self.name, f.__name__))
+                except Exception as e:
+                    self.log.exception("%s %s fails", self.name, f.__name__)
+                    raise AnodError(
+                        "%s %s fails (got exception: %s)" %
+                        (self.name, f.__name__, e))
 
             primitive_func.is_primitive = True
             primitive_func.pre = pre
@@ -353,19 +367,19 @@ class Anod(object):
         return None
 
     @property
+    def module_name(self):
+        """For backward compatibility purpose."""
+        return self.name
+
+    @property
+    def anod_id(self):
+        """For backward compativility purpose."""
+        return self.uid
+
+    @property
     def source_pkg_build(self):
         """Return list of SourceBuilder defined in the specification file."""
         return None
-
-    @property
-    def has_nsis(self):
-        """Whether a dependency on NSIS is required.
-
-        :rtype: bool
-        """
-        # nsis is used only during the builds
-        return self.kind == 'build' and self.env.build.os.name == 'windows' \
-            and self.package is not None and self.package.nsis is not None
 
     def shell(self, *command, **kwargs):
         """Run a subprocess using e3.os.process.Run.
@@ -383,38 +397,17 @@ class Anod(object):
         if 'parse_shebang' not in kwargs:
             kwargs['parse_shebang'] = True
         if 'output' not in kwargs:
-            kwargs['output'] = self.build_space.log_stream
+            kwargs['output'] = e3.log.default_output_stream
+
+        # For backward compatibility ???
+        if 'python_executable' in kwargs:
+            del kwargs['python_executable']
+
         r = e3.os.process.Run(command, **kwargs)
         if r.status != 0:
-
-            active_log_filename = self.build_space.log_file
-            if active_log_filename is None:
-                # ??? active_log_filename can be None, e.g. when building the
-                # source package.
-                raise ShellError(
-                    message="%s failed (exit status: %d)" % (
-                        " ".join(command), r.status),
-                    origin='anod.shell',
-                    process=r)
-            else:
-                # Try to extract the command output that lead to that error
-                with open(active_log_filename, 'rb') as fd:
-                    content = fd.read()
-                index = content.rfind(b'e3.os.process.cmdline')
-                content = content[index:]
-                index = content.find(b']')
-
-                # Create an exception with 2 messages: the log itself and
-                # then the status. This is important not have the log as
-                # last message as we might log it again otherwise (calls to
-                # error with the exception instance).
-
-                # ??? log analysis call should probably be inserted here.
-                exc = ShellError(
-                    message=content[index + 2:],
-                    origin='anod.shell',
-                    process=r)
-                exc += "%s failed (exit status: %d)" % (
-                    " ".join(command), r.status)
-                raise exc
+            raise ShellError(
+                message="%s failed (exit status: %d)" % (
+                    " ".join(command), r.status),
+                origin='anod.shell',
+                process=r)
         return r

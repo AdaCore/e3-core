@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import re
 import sys
 
 import e3.env
@@ -38,9 +39,11 @@ def test_mainprog_with_console_logs():
             'logging.debug("this is an info line")',
             'logging.debug("this is a debug line")')))
     p = e3.os.process.Run(
-        [sys.executable, 'mymain.py', '--console-logs=mymain', '--nocolor'])
-    assert 'mymain: DEBUG    this is an info line\n' \
-        'mymain: DEBUG    this is a debug line' in p.out
+        [sys.executable, 'mymain.py', '-v', '--console-logs=mymain',
+         '--nocolor'])
+
+    assert re.search(r'^mymain:.*:.*: DEBUG    this is an info line\r?\n'
+                     'mymain:.*:.* DEBUG    this is a debug line', p.out)
 
 
 @pytest.mark.skipif(sys.platform in ('win32', 'sunos5'),

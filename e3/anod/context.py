@@ -5,7 +5,7 @@ from e3.anod.action import (Build, BuildOrDownload, Checkout, CreateSource,
                             CreateSourceOrDownload, CreateSources, Decision,
                             DownloadBinary, DownloadSource, GetSource, Install,
                             InstallSource, Root, Test, UploadBinaryComponent,
-                            UploadComponent, UploadSourceComponent)
+                            Upload, UploadSource, UploadSourceComponent)
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
 from e3.anod.package import UnmanagedSourceBuilder
@@ -82,12 +82,12 @@ class AnodContext(object):
 
         self.tree = DAG()
         self.root = Root()
-
+        self.dependencies = {}
         self.add(self.root)
         self.cache = {}
         self.sources = {}
 
-    def load(self, name, env, qualifier, kind):
+    def load(self, name, env, qualifier, kind, sandbox=None, source_name=None):
         """Load a spec instance.
 
         :param name: spec name
@@ -98,6 +98,11 @@ class AnodContext(object):
         :type qualifier: str | None
         :param kind: primitive used for the loaded spec
         :type kind: str
+        :param sandbox: is not None bind the anod instances to a sandbox
+        :type sandbox: None | Sandbox
+        :param source_name: when the primitive is "source" we create a specific
+            instance for each source package we have to create.
+        :type source_name: str | None
         :return: a spec instance
         :rtype: e3.anod.spec.Anod
         """
@@ -105,13 +110,19 @@ class AnodContext(object):
             env = self.default_env
 
         # Key used for the spec instance cache
-        key = (name, env.build, env.host, env.target, qualifier, kind)
+        key = (name, env.build, env.host, env.target, qualifier, kind,
+               source_name)
 
         if key not in self.cache:
             # Spec is not in cache so create a new instance
             self.cache[key] = self.repo.load(name)(qualifier=qualifier,
                                                    env=env,
                                                    kind=kind)
+            if sandbox is not None:
+                self.cache[key].bind_to_sandbox(sandbox)
+
+            # Update tracking of dependencies
+            self.dependencies[self.cache[key].uid] = {}
 
             # Update the list of available sources. ??? Should be done
             # once per spec (and not once per spec instance). Need some
@@ -230,7 +241,7 @@ class AnodContext(object):
                         upload=True,
                         plan_line=None,
                         plan_args=None,
-                        force_source_deps=False):
+                        sandbox=None):
         """Add an Anod action to the context.
 
         :param name: spec name
@@ -252,12 +263,6 @@ class AnodContext(object):
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
         :type plan_args: dict
-        :param force_source_deps: ??? whether to force loading source deps.
-            Idealy we should not need this, but since we're still in transition
-            phase we still have tools needed to both create the source package
-            and build the component in a single process. They then need to
-            parse both source_deps and build_deps.
-        :type force_source_deps: bool
         :return: the root added action
         :rtype: Action
         """
@@ -265,7 +270,8 @@ class AnodContext(object):
         result = self.add_spec(name, env, primitive, qualifier,
                                source_packages=source_packages,
                                plan_line=plan_line, plan_args=plan_args,
-                               force_source_deps=force_source_deps)
+                               sandbox=sandbox,
+                               upload=upload)
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
@@ -313,7 +319,8 @@ class AnodContext(object):
                  source_name=None,
                  plan_line=None,
                  plan_args=None,
-                 force_source_deps=None):
+                 sandbox=None,
+                 upload=False):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -333,23 +340,52 @@ class AnodContext(object):
         :param source_name: source name associated with the source
             primitive
         :type source_name: str | None
-        :param force_source_deps: whether to force loading the source deps
-        :type force_source_deps: bool
+        :param plan_line: corresponding line:linenumber in the plan
+        :type plan_line: str
+        :param plan_args: action args after plan execution, taking into
+            account plan context (such as with defaults(XXX):)
+        :type plan_args: dict
+        :param sandbox: if not None, anod instance are automatically bind to
+            the given sandbox
+        :type sandbox: None | Sandbox
+        :param upload: if True consider uploads to the store (sources and
+            binaries)
+        :type upload: bool
         """
         def add_action(data, connect_with=None):
             self.add(data)
             if connect_with is not None:
                 self.connect(connect_with, data)
 
+        def add_dep(spec_instance, dep, dep_instance):
+            """Add a new dependency in an Anod instance dependencies dict.
+
+            :param spec_instance: an Anod instance
+            :type spec_instance: Anod
+            :param dep: the dependency we want to add
+            :type dep: Dependency
+            :param dep_instance: the Anod instance loaded for that dependency
+            :type dep_instance: Anod
+            """
+            if dep.local_name in spec_instance.deps:
+                raise AnodError(
+                    origin='expand_spec',
+                    message='The spec {} has two dependencies with the same '
+                    'local_name attribute ({})'.format(
+                        spec_instance.name, dep.local_name))
+            spec_instance.deps[dep.local_name] = dep_instance
+
         # Initialize a spec instance
-        e3.log.debug('name:{}, qualifier:{}, primitive:{}'.format(
+        e3.log.debug('add spec: name:{}, qualifier:{}, primitive:{}'.format(
             name, qualifier, primitive))
-        spec = self.load(name, qualifier=qualifier, env=env, kind=primitive)
+        spec = self.load(name, qualifier=qualifier, env=env, kind=primitive,
+                         sandbox=sandbox, source_name=source_name)
 
         # Initialize the resulting action based on the primitive name
         if primitive == 'source':
             if source_name is not None:
                 result = CreateSource(spec, source_name)
+
             else:
                 # Create the root node
                 result = CreateSources(spec)
@@ -373,7 +409,9 @@ class AnodContext(object):
                         primitive='source',
                         source_name=sb.name,
                         plan_line=plan_line,
-                        plan_args=None)
+                        plan_args=None,
+                        sandbox=sandbox,
+                        upload=upload)
                     self.connect(result, sub_result)
 
         elif primitive == 'build':
@@ -393,9 +431,14 @@ class AnodContext(object):
                               plan_line=plan_line,
                               plan_args=plan_args)
 
-        if primitive == 'install' and \
-                not (spec.has_package and spec.component is not None) and \
+        if primitive == 'install' and not spec.has_package and \
                 has_primitive(spec, 'build'):
+            if plan_line is not None and plan_args is not None:
+                # We have an explicit call to install() in the plan but the
+                # spec has no binary package to download.
+                raise SchedulingError(
+                    "error in plan at {}: "
+                    "install should be replaced by build".format(plan_line))
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
             # dependency. In case there is no build primitive and no
@@ -406,17 +449,18 @@ class AnodContext(object):
                                  expand_build=False,
                                  plan_args=plan_args,
                                  plan_line=plan_line,
-                                 force_source_deps=force_source_deps)
+                                 sandbox=sandbox,
+                                 upload=upload)
 
-        if expand_build and primitive == 'build' and \
-                (spec.has_package and spec.component is not None):
+        if expand_build and primitive == 'build' and spec.has_package:
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
             return self.add_spec(name, env, 'install', qualifier,
                                  plan_args=None,
                                  plan_line=plan_line,
-                                 force_source_deps=force_source_deps)
+                                 sandbox=sandbox,
+                                 upload=upload)
 
         # Add this stage if the action is already in the DAG, then it has
         # already been added.
@@ -446,7 +490,8 @@ class AnodContext(object):
                     expand_build=False,
                     plan_args=None,
                     plan_line=plan_line,
-                    force_source_deps=force_source_deps)
+                    sandbox=sandbox,
+                    upload=upload)
                 self.add_decision(BuildOrDownload,
                                   result,
                                   build_action,
@@ -456,12 +501,21 @@ class AnodContext(object):
 
         elif primitive == 'source':
             if source_name is not None:
+                # Also add an UploadSource action
+                if upload:
+                    upload_src = UploadSource(spec, source_name)
+                    self.add(upload_src)
+                    self.connect(self.root, upload_src)
+                    self.connect(upload_src, result)
+
                 for sb in spec.source_pkg_build:
                     if sb.name == source_name:
                         for checkout in sb.checkout:
                             if checkout not in self.repo.repos:
-                                logger.warning(
-                                    'unknown repository %s', checkout)
+                                raise SchedulingError(
+                                    origin="add_spec",
+                                    message="unknown repository {}".format(
+                                        checkout))
                             co = Checkout(
                                 checkout, self.repo.repos.get(checkout))
                             add_action(co, result)
@@ -472,11 +526,6 @@ class AnodContext(object):
                 getattr(spec, '%s_deps' % primitive) is not None:
             spec_dependencies += getattr(spec, '%s_deps' % primitive)
 
-        if force_source_deps and primitive != 'source':
-            if 'source_deps' in dir(spec) and \
-                    getattr(spec, 'source_deps') is not None:
-                spec_dependencies += getattr(spec, 'source_deps')
-
         for e in spec_dependencies:
             if isinstance(e, Dependency):
                 if e.kind == 'source':
@@ -484,16 +533,12 @@ class AnodContext(object):
                     # ensure that sources associated with it are available
                     child_instance = self.load(
                         e.name, kind='source',
-                        env=BaseEnv(), qualifier=None)
-                    spec.deps[e.local_name] = child_instance
-
-                    if force_source_deps:
-                        # When in force_source_deps we also want to add
-                        # source_deps of all "source_pkg" dependencies.
-                        if 'source_deps' in dir(child_instance) and \
-                                getattr(child_instance,
-                                        'source_deps') is not None:
-                            spec_dependencies += child_instance.source_deps
+                        env=self.default_env, qualifier=None, sandbox=sandbox)
+                    add_dep(spec_instance=spec,
+                            dep=e,
+                            dep_instance=child_instance)
+                    self.dependencies[spec.uid][e.local_name] = \
+                        (e, spec.deps[e.local_name])
 
                     continue
 
@@ -504,9 +549,14 @@ class AnodContext(object):
                     qualifier=e.qualifier,
                     plan_args=None,
                     plan_line=plan_line,
-                    force_source_deps=force_source_deps)
+                    sandbox=sandbox,
+                    upload=upload)
 
-                spec.deps[e.local_name] = child_action.anod_instance
+                add_dep(spec_instance=spec,
+                        dep=e,
+                        dep_instance=child_action.anod_instance)
+                self.dependencies[spec.uid][e.local_name] = \
+                    (e, spec.deps[e.local_name])
 
                 if e.kind == 'build' and \
                         self[child_action.uid].data.kind == 'install':
@@ -564,11 +614,13 @@ class AnodContext(object):
                 else:
                     source_action = self.add_spec(
                         name=spec_decl,
-                        env=BaseEnv(),
+                        env=self.default_env,
                         primitive='source',
                         plan_args=None,
                         plan_line=plan_line,
-                        source_name=s.name)
+                        source_name=s.name,
+                        sandbox=sandbox,
+                        upload=upload)
                     for repo in obj.checkout:
                         r = Checkout(repo, self.repo.repos.get(repo))
                         add_action(r, connect_with=source_action)
@@ -670,25 +722,28 @@ class AnodContext(object):
         # Retrieve existing tags
         dag.tags = self.tree.tags
 
+        # Note that schedule perform a pruning on the DAG, thus no cycle can
+        # be introduced. That's why checks are disabled when creating the
+        # result graph.
         for uid, action in rev:
             if uid == 'root':
                 # Root node is always in the final DAG
-                dag.add_vertex(uid, action)
+                dag.update_vertex(uid, action, enable_checks=False)
             elif isinstance(action, Decision):
                 # Decision node does not appears in the final DAG but we need
                 # to apply the triggers based on the current list of scheduled
                 # actions.
                 action.apply_triggers(dag)
-            elif isinstance(action, UploadComponent):
+            elif isinstance(action, Upload):
                 uploads.append((action,
                                 self.tree.get_predecessors(uid)))
             else:
                 # Compute the list of successors for the current node (i.e:
-                # predecessors in the reversed graph). Ignore UploadComponent
+                # predecessors in the reversed graph). Ignore Upload
                 # nodes as they will be processed only once the scheduling
                 # is done.
                 preds = list([k for k in rev.get_predecessors(uid)
-                              if not isinstance(rev[k], UploadComponent)])
+                              if not isinstance(rev[k], Upload)])
 
                 if len(preds) == 1 and isinstance(rev[preds[0]], Decision):
                     decision = rev[preds[0]]
@@ -704,7 +759,7 @@ class AnodContext(object):
                     choice = decision.get_decision()
 
                     if choice == uid:
-                        dag.add_vertex(uid, action)
+                        dag.update_vertex(uid, action, enable_checks=False)
                         dag.update_vertex(decision.initiator,
                                           predecessors=[uid],
                                           enable_checks=False)
@@ -712,7 +767,8 @@ class AnodContext(object):
                         # delegate to resolver
                         try:
                             if resolver(action, decision):
-                                dag.add_vertex(uid, action)
+                                dag.update_vertex(uid, action,
+                                                  enable_checks=False)
                                 dag.update_vertex(decision.initiator,
                                                   predecessors=[uid],
                                                   enable_checks=False)
@@ -720,7 +776,7 @@ class AnodContext(object):
                             # In order to help the analysis of a scheduling
                             # error compute the explicit initiators of that
                             # action
-                            dag.add_vertex(uid, action)
+                            dag.update_vertex(uid, action, enable_checks=False)
                             dag.update_vertex(decision.initiator,
                                               predecessors=[action.uid],
                                               enable_checks=False)
@@ -739,13 +795,13 @@ class AnodContext(object):
                     # scheduled.
                     successors = [k for k in preds if k in dag]
                     if successors:
-                        dag.add_vertex(uid, action)
+                        dag.update_vertex(uid, action, enable_checks=False)
                         for a in successors:
                             dag.update_vertex(a,
                                               predecessors=[uid],
                                               enable_checks=False)
 
-        # Handle UploadComponent nodes. Add the node only if all predecessors
+        # Handle Upload nodes. Add the node only if all predecessors
         # are scheduled.
         for action, predecessors in uploads:
             if len([p for p in predecessors if p not in dag]) == 0:
@@ -754,5 +810,6 @@ class AnodContext(object):
                                   predecessors=predecessors,
                                   enable_checks=False)
                 # connect upload to the root node
-                dag.update_vertex('root', predecessors=[action.uid])
+                dag.update_vertex('root', predecessors=[action.uid],
+                                  enable_checks=False)
         return dag

@@ -49,5 +49,10 @@ def is_valid(token):
     :rtype: bool
     """
     payload = get_payload(token)
+
+    # Given that we will use the token if valid, keep some margin and
+    # do not consider a token valid if it will be valid less than 5 min
+    deadline = utc_timestamp() + 5 * 60
+
     return payload.get('typ') == 'Bearer' and \
-        payload.get('exp', 0) > utc_timestamp()
+        payload.get('exp', 0) > deadline

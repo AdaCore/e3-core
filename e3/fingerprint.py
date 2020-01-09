@@ -26,6 +26,7 @@ import os
 import e3.log
 from e3.env import Env
 from e3.error import E3Error
+from e3.fs import get_filetree_state
 from e3.hash import sha256
 
 logger = e3.log.getLogger('fingerprint')
@@ -39,7 +40,7 @@ class Fingerprint(object):
     """Fingerprint class.
 
     :ivar elements: a dictionary containing the checksum/id for each element
-        part of of the fingerprint. The key a string identifying the
+        part of the fingerprint. The key a string identifying the
         element.
     """
 
@@ -67,6 +68,16 @@ class Fingerprint(object):
             raise E3Error(
                 'value for %s should be a string got %s' % (name, value),
                 'fingerprint.add')
+
+    def add_dir(self, path):
+        """Add a file tree to the fingerprint.
+
+        :param path: a path to a directory
+        :type path: str
+        """
+        assert os.path.isdir(path), \
+            'directory %s does not exist' % path
+        self.elements[os.path.basename(path)] = get_filetree_state(path)
 
     def add_file(self, filename):
         """Add a file element to the fingerprint.
@@ -119,7 +130,7 @@ class Fingerprint(object):
     def compare_to(self, other):
         """Compare two fingerprints and return the differences.
 
-        :type other: Fingerprint
+        :type other: Fingerprint | None
 
         :return: a dictionary that list the differences or None if the two
           Fingerprint are equals. The returned dictionary contains three
@@ -130,6 +141,11 @@ class Fingerprint(object):
 
         :raise AssertError: if other is not a Fingerprint
         """
+        # If other is None behave as if the previous fingerprint was an empty
+        # fingerprint
+        if other is None:
+            other = Fingerprint()
+
         assert isinstance(other, Fingerprint), \
             'can compare only with Fingerprint objects'
 
@@ -199,7 +215,7 @@ class Fingerprint(object):
                 'elements': self.elements}
 
         with open(filename, 'w') as f:
-            json.dump(data, f)
+            json.dump(data, f, indent=2)
 
     @classmethod
     def load_from_file(cls, filename):
@@ -208,12 +224,16 @@ class Fingerprint(object):
         Return None in the following situations:
             - The file does not contain a fingerprint we recognize;
             - The fingerprint has a version number we do not support.
+            - If the fingerprint file does not exist
 
         :param filename: The name of the file where to load the fingerprint
             from.
         :type filename: str
         :rtype: Fingerprint
         """
+        if not os.path.isfile(filename):
+            return None
+
         with open(filename) as f:
             try:
                 data = json.load(f)

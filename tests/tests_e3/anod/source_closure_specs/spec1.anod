@@ -1,0 +1,8 @@
+from e3.anod.spec import Anod
+
+class Spec1(Anod):
+    component = 'spec1'
+
+    @Anod.primitive()
+    def build(self):
+        pass

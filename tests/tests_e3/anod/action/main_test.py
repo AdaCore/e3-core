@@ -33,6 +33,10 @@ def test_initall():
                                           source=MySource())
     assert str(install_source) == 'install source my_source'
 
+    create_sources = action.CreateSources(anod_instance=Spec(qualifier='',
+                                                             kind='source'))
+    assert str(create_sources) == 'create all sources for my_source_spec.anod'
+
     create_source = action.CreateSource(anod_instance=Spec(qualifier='',
                                                            kind='source'),
                                         source_name='my_source')

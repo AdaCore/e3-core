@@ -1,0 +1,12 @@
+from e3.anod.spec import Anod
+
+class DuplicateDep(Anod):
+
+    build_deps = [
+        Anod.Dependency("spec3"),
+        Anod.Dependency("spec4", local_name="spec3")]
+
+
+    @Anod.primitive()
+    def build(self):
+        pass
