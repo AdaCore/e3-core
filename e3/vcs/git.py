@@ -236,12 +236,12 @@ class GitRepository(object):
         # Format:
         #   %H: commit hash
         #   %aE: author email respecting .mailmap
-        #   %cI: committer date, strict ISO 8601 format
+        #   %ci: committer date, ISO 8601-like format (don't use %cI)
         #   %n: new line
         #   %B: raw body (unwrapped subject and body)
         #   %N: commit notes
         cmd = ['log',
-               '--format=format:%H%n%aE%n%cI%n' +
+               '--format=format:%H%n%aE%n%ci%n' +
                ('%N%n' if with_gerrit_notes else '') + '%n%B',
                '--log-size',
                '--max-count=%d' % max_count if max_count else None,
@@ -274,7 +274,7 @@ class GitRepository(object):
             # are attached to the commit
             result = dict(itertools.izip_longest(
                 ('sha', 'email', 'date', 'notes'),
-                headers.split(None, 3)))
+                headers.replace('\r', '').split('\n', 3)))
 
             # replace notes "key: value" lines by a dictionary
             if result['notes']:
