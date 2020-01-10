@@ -317,19 +317,6 @@ def load_with_config(filename, config):
     return result
 
 
-def custom_repr(cmd):
-    """Call the `cmd` method of the object when calling yaml.dump().
-
-    :param cmd: the name of an object method that returns a dictionary
-    :type cmd: str
-
-    :return: callable
-    """
-    def make_repr(dumper, data):
-        return dumper.represent_dict(getattr(data, cmd)())
-    return make_repr
-
-
 def load_with_regexp_table(filename, selectors, data):
     """Load a yaml file using regexp tables.
 

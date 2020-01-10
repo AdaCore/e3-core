@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
-import yaml
 from e3.anod.driver import AnodDriver
 from e3.anod.helper import Configure, Make, text_replace
 from e3.anod.sandbox import SandBox
@@ -140,18 +139,3 @@ def test_text_replace():
     text_replace('myfile', [(b'who', b'replaced')])
     with open('myfile') as f:
         assert f.read() == 'what replaced when'
-
-
-def test_custom_repr():
-    """Test yaml custom repr for Make."""
-    Anod.sandbox = SandBox()
-    Anod.sandbox.root_dir = os.getcwd()
-    Anod.sandbox.create_dirs()
-
-    ac = Anod(qualifier='', kind='build', jobs=1)
-    AnodDriver(anod_instance=ac, store=None).activate(Anod.sandbox, None)
-
-    m = Make(ac, exec_dir='/here', makefile='/tmp/makefile')
-    AnodDriver(anod_instance=ac, store=None).activate(Anod.sandbox, None)
-    ac.build_space.create()
-    assert "cmd: [make, -f, /tmp/makefile, -j, '1']" in yaml.dump(m)
