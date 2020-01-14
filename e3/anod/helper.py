@@ -7,10 +7,8 @@ import os
 import re
 
 import e3.log
-import yaml
 from e3.anod.spec import parse_command
 from e3.os.fs import unixpath
-from e3.yaml import custom_repr
 
 log = e3.log.getLogger('anod.helpers')
 
@@ -289,7 +287,3 @@ def text_replace(filename, pattern):
             f.write(output.getvalue())
     output.close()
     return nb_substitution
-
-
-yaml.add_representer(Make, custom_repr('cmdline'))
-yaml.add_representer(Configure, custom_repr('cmdline'))
