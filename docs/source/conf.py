@@ -60,9 +60,9 @@ author = u'AdaCore'
 # built documents.
 #
 # The short X.Y version.
-version = u'20.08'
+version = u'21.0'
 # The full version, including alpha/beta/rc tags.
-release = u'20.08'
+release = u'21.0'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -121,6 +121,3 @@ texinfo_documents = [
      author, 'e3-core', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
