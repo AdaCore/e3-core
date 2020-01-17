@@ -18,6 +18,17 @@ from e3.fs import mkdir
 logger = e3.log.getLogger('event')
 
 
+def unique_id():
+    """Return a random globally unique id.
+
+    :return: an id
+    :rtype: str
+    """
+    # Using clock_seq ensures that the uid of the event has at least
+    # microsecond precision.
+    return str(uuid.uuid1(clock_seq=int(1000 * time.time())))
+
+
 class Event(object):
     """Event class for notifying external services.
 
@@ -52,8 +63,7 @@ class Event(object):
         object.__setattr__(self, '_closed', False)
         object.__setattr__(self, '_formatters', {})
 
-        self.uid = uid if uid is not None else \
-            str(uuid.uuid1(clock_seq=int(1000 * time.time())))
+        self.uid = uid if uid is not None else unique_id()
         self.name = name
         self.begin_time = time.time()
         self.end_time = None
@@ -174,7 +184,8 @@ class Event(object):
                   'attachments': self._attachments,
                   'closed': self._closed}
         mkdir(event_dir)
-        json_filename = os.path.join(event_dir, self.uid + '.json')
+        json_filename = os.path.join(
+            event_dir, "%s-%s.json" % (self.uid, unique_id()))
         with open(json_filename, 'w') as fd:
             json.dump(result, fd)
         return json_filename
