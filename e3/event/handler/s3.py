@@ -2,9 +2,10 @@ from __future__ import absolute_import
 import mimetypes
 import tempfile
 import json
+
 from contextlib import closing
 
-from e3.event import EventHandler
+from e3.event import EventHandler, unique_id
 from e3.fs import rm
 from e3.os.process import Run
 from e3.sys import python_script
@@ -70,9 +71,14 @@ class S3Handler(EventHandler):
                 tempfile_name = fd.name
                 json.dump(s3_event, fd)
 
+            # Note that an event can be sent several times with a different
+            # status. As a consequence the target url in s3 should be different
+            # for call to send.
             success = s3_cp(
                 tempfile_name,
-                "%s/%s" % (self.event_s3_url, event.uid + '.s3'))
+                "%s/%s-%s.s3" %
+                (self.event_s3_url, event.uid, unique_id()))
+
             if not success:
                 return False
             else:
