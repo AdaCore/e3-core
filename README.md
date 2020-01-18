@@ -69,9 +69,15 @@ more details.
 Install
 =======
 
-requires: Python 2.7.x (experimental support of Python >=3.4)
+requires: Python 2.7.x or Python >=3.5
 
-To install `e3`, run:
+e3-core releases are available on PyPI and can be installed by running:
+
+```bash
+pip install e3-core
+```
+
+To install from the source package, run:
 
 ```bash
 python setup.py install
