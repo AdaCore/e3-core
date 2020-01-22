@@ -25,7 +25,7 @@ class Make(object):
         :param makefile: the Makefile to use
         :type makefile: str | None
         :param exec_dir: path to the directory from where the make should be
-            called
+            called. If None use the anod instance buildspace build dir.
         :type exec_dir: str | None
         :param jobs: number of jobs to run in parallel
         :type jobs: int | None
@@ -141,10 +141,12 @@ class Configure(object):
 
         :param anod_instance: an Anod instance
         :type anod_instance: Anod
-        :param src_dir: path to the directory containing the project sources
+        :param src_dir: path to the directory containing the project sources.
+            If None then use the anod_instance buildspace source dir.
         :type src_dir: str | None
         :param exec_dir: path to the directory from where the configure should
-            be called
+            be called. If None then use the anod_instance buildspace build
+            dir.
         :type exec_dir: str | None
         :param auto_target: if True, automatically pass --target, --host and
             --build
