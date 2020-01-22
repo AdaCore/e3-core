@@ -66,7 +66,7 @@ class S3Handler(EventHandler):
 
         try:
             tempfile_name = None
-            with closing(tempfile.NamedTemporaryFile(mode='wb',
+            with closing(tempfile.NamedTemporaryFile(mode='w',
                                                      delete=False)) as fd:
                 tempfile_name = fd.name
                 json.dump(s3_event, fd)
