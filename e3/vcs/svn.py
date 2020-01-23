@@ -47,6 +47,22 @@ class SVNRepository(object):
         self.working_copy = working_copy
 
     @classmethod
+    def is_unix_svn(cls):
+        """Check if svn is handling unix paths or windows paths.
+
+        :return: True if unix paths should be used
+        :rtype: bool
+        """
+        if sys.platform != 'win32':
+            return True
+        else:
+            svn_version = e3.os.process.Run(['svn', '--version']).out
+            if 'cygwin' in svn_version:
+                return True
+            else:
+                return False
+
+    @classmethod
     def local_url(cls, repo_path):
         """Return the url of a svn repository hosted locally.
 
@@ -56,13 +72,13 @@ class SVNRepository(object):
         :rtype: str
         """
         repo_path = os.path.abspath(repo_path)
-        if sys.platform == 'win32':  # unix: no cover
+        if not cls.is_unix_svn():
             if len(repo_path) > 1 and repo_path[1] == ':':
                 # svn info returns the URL with an uppercase letter drive
                 repo_path = repo_path[0].upper() + repo_path[1:]
             return 'file:///' + repo_path.replace('\\', '/')
         else:  # windows: no cover
-            return 'file://' + repo_path
+            return 'file://' + e3.os.fs.unixpath(repo_path)
 
     @classmethod
     def create(cls, repo_path, initial_content_path=None):
@@ -84,6 +100,10 @@ class SVNRepository(object):
         repo_path = os.path.abspath(repo_path)
         p = e3.os.process.Run(['svnadmin', 'create', repo_path],
                               output=cls.log_stream)
+
+        if cls.is_unix_svn():
+            initial_content_path = e3.os.fs.unixpath(initial_content_path)
+
         if p.status != 0:
             raise SVNError("cannot create svn repository in %s" % repo_path,
                            origin="create")
