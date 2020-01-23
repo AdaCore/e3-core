@@ -363,6 +363,6 @@ def test_shell_override():
     os.environ['SHELL'] = sys.executable
     test_file_path = os.path.join(work_dir, 'shebang_test.sh')
     with open(test_file_path, 'w') as fd:
-        fd.write("#!/bin/bash\nimport sys; print sys.executable\n")
+        fd.write("#!/bin/bash\nimport sys; print(sys.executable)\n")
     p = e3.os.process.Run([test_file_path], parse_shebang=True)
     assert p.out.strip() == sys.executable
