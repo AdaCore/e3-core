@@ -26,7 +26,7 @@ class RequirementCoverage(object):
     def dump(cls):
         if cls.output_filename:
             with open(cls.output_filename, 'w') as f:
-                yaml.dump(cls.results, f)
+                yaml.safe_dump(cls.results, f)
 
 
 @pytest.fixture(autouse=True)

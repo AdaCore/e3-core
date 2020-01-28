@@ -20,10 +20,10 @@ def merge_docs(requirement, coverage):
     :rtype: dict
     """
     with open(requirement) as f:
-        reqs = yaml.load(f)
+        reqs = yaml.safe_load(f)
 
     with open(coverage) as f:
-        reqs_cov = yaml.load(f)
+        reqs_cov = yaml.safe_load(f)
 
     for k in reqs:
         tests = lookup(k, reqs_cov)

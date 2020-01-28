@@ -153,13 +153,13 @@ class SandBox(object):
         cmd_line = [sys.executable, os.path.abspath(__file__)]
         cmd_line += sys.argv[1:]
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
-        with open(sandbox_conf, 'wb') as f:
-            yaml.dump({'cmd_line': cmd_line}, f, encoding='utf-8')
+        with open(sandbox_conf, 'w') as f:
+            yaml.safe_dump({'cmd_line': cmd_line}, f)
 
     def get_configuration(self):
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
-        with open(sandbox_conf, 'rb') as f:
-            return yaml.load(f)
+        with open(sandbox_conf, 'r') as f:
+            return yaml.safe_load(f)
 
     def write_scripts(self):
         from setuptools.command.easy_install import get_script_args
