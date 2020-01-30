@@ -232,9 +232,12 @@ class AnodAction(Action):
         self.anod_instance = anod_instance
 
     def __str__(self):
-        return '%s %s for %s' % (self.data.kind,
-                                 self.data.name,
-                                 self.data.env.platform)
+        result = '%s %s for %s' % (self.data.kind,
+                                   self.data.name,
+                                   self.data.env.platform)
+        if self.data.qualifier:
+            result += ' (qualifier=%s)' % self.data.qualifier
+        return result
 
 
 class Build(AnodAction):
