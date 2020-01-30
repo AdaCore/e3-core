@@ -12,6 +12,7 @@ import sys
 
 import e3.log
 import e3.os.platform
+from collections import namedtuple
 from e3.platform import Platform
 
 logger = e3.log.getLogger('env')
@@ -22,6 +23,9 @@ logger = e3.log.getLogger('env')
 # configurations.
 CANADIAN_EXCEPTIONS = (('x86-windows', 'x86_64-windows'),
                        ('sparc-solaris', 'sparc64-solaris'))
+
+
+EnvInfo = namedtuple('EnvInfo', ['build', 'host', 'target'])
 
 
 class AbstractBaseEnv(object):
@@ -303,29 +307,51 @@ class AbstractBaseEnv(object):
         if target_opts is not None:
             self.target = target_opts
 
+    def str_triplet(self):
+        """Return a triplet of strings suitable to call set_env.
+
+        :return: a namedtuple suitable for a call to set_env
+        :rtype: EnvInfo
+        """
+        result = []
+        if not self.build.is_default:
+            result.append(','.join([self.build.platform,
+                                    self.build.os.version]))
+        else:
+            result.append(None)
+
+        if self.host != self.build:
+            result.append(','.join([self.host.platform,
+                                    self.host.os.version]))
+        else:
+            result.append(None)
+
+        if self.target != self.host:
+            result.append(','.join([self.target.platform,
+                                    self.target.os.version,
+                                    self.target.machine,
+                                    self.target.os.mode]))
+        else:
+            result.append(None)
+        return EnvInfo(*result)
+
     def cmd_triplet(self):
         """Return command line parameters corresponding to current env.
 
         :return: a list of command line parameters
         :rtype: list(str)
         """
+        build_str, host_str, target_str = self.str_triplet()
         result = []
-        if not self.build.is_default:
-            result.append('--build=%s' %
-                          ','.join([self.build.platform,
-                                    self.build.os.version]))
+        if build_str is not None:
+            result.append('--build=%s' % build_str)
 
-        if self.host != self.build:
-            result.append('--host=%s' %
-                          ','.join([self.host.platform,
-                                    self.host.os.version]))
+        if host_str is not None:
+            result.append('--host=%s' % host_str)
 
-        if self.target != self.host:
-            result.append('--target=%s' %
-                          ','.join([self.target.platform,
-                                    self.target.os.version,
-                                    self.target.machine,
-                                    self.target.os.mode]))
+        if target_str is not None:
+            result.append('--target=%s' % target_str)
+
         return result
 
     def get_attr(self, name, default_value=None, forced_value=None):
