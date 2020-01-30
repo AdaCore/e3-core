@@ -22,7 +22,7 @@ def main():
 
     with open(os.path.join(
             __spec_repository.spec_dir, 'conf.yaml')) as f:
-        conf = yaml.load(f)
+        conf = yaml.safe_load(f)
         __spec_repository.api_version = conf['api_version']
         __spec_repository.repos = conf['repositories']
 
@@ -108,10 +108,10 @@ def test_sandbox_show_config_err():
     e3.os.process.Run(
         ['e3-sandbox', '-v', '-v', 'create', sandbox_dir], output=None)
     with open(sandbox_conf) as f:
-        conf = yaml.load(f.read())
+        conf = yaml.safe_load(f.read())
     conf['cmd_line'].append('--wrong-arg')
     with open(sandbox_conf, 'w') as f:
-        yaml.dump(conf, stream=f)
+        yaml.safe_dump(conf, stream=f)
 
     assert 'the configuration is invalid' in e3.os.process.Run(
         ['e3-sandbox', 'show-config', sandbox_dir]).out

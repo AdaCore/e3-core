@@ -254,7 +254,7 @@ class Anod(object):
             return load_with_config(filename, selectors)
         else:
             with open(filename) as f:
-                return yaml.load(f.read())
+                return yaml.safe_load(f.read())
 
     def __getitem__(self, key):
         """Access build_space attributes and pre callback values directly.

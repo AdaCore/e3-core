@@ -134,7 +134,7 @@ def sanity_check():
     print('YAMLCheck:', end=' ')
     try:
         import yaml
-        yaml.dump({'Yaml': 'works'})
+        yaml.safe_dump({'Yaml': 'works'})
         print('PASSED')
     except Exception:  # defensive code
         print('FAILED')

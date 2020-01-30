@@ -90,8 +90,8 @@ class HostDB(object):
         :param filename: path the yaml file
         :type filename: str
         """
-        with open(filename, 'rb') as fd:
-            content = yaml.load(fd)
+        with open(filename, 'r') as fd:
+            content = yaml.safe_load(fd)
 
         for hostname, hostinfo in content.iteritems():
             result = {}
