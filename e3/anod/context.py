@@ -223,11 +223,12 @@ class AnodContext(object):
             previous_tag = self.tree.get_tag(vertex_id=vertex_id)
             if previous_tag and previous_tag['plan_line'] != plan_line:
                 raise SchedulingError(
-                    'duplicated entry for vertex {} at'
-                    ' lines {} and {}'.format(
-                        vertex_id,
+                    'entries {} and {} conflict because they result in '
+                    'the same build space (id: {}). Check your '
+                    'build_space_name property or your qualifiers'.format(
                         previous_tag['plan_line'],
-                        plan_line))
+                        plan_line,
+                        vertex_id))
         self.tree.add_tag(vertex_id,
                           {'plan_line': plan_line,
                            'plan_args': plan_args})
