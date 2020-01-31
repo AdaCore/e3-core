@@ -261,7 +261,7 @@ class TestContext(object):
         with pytest.raises(SchedulingError) as err:
             ac.schedule(ac.always_download_source_resolver)
 
-        assert 'This plan resolver requires an explicit' in str(err)
+        assert 'has a build_tree dependency on spec3' in str(err)
         assert 'anod_build("spec3", qualifier="foo"' \
             ', build="x86-linux")' in str(err)
 
@@ -286,7 +286,7 @@ class TestContext(object):
         with pytest.raises(SchedulingError) as err:
             ac.schedule(ac.always_download_source_resolver)
 
-        assert 'This plan resolver requires an explicit' in str(err)
+        assert 'has a build_tree dependency on spec3' in str(err)
         assert 'anod_build("spec3", qualifier="foo",' \
             ' build="x86_64-linux", host="x86-linux",' \
             ' target="arm-elf")' in str(err)
