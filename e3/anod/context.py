@@ -642,8 +642,18 @@ class AnodContext(object):
         """
         if decision.choice is None and decision.expected_choice in (
                 Decision.LEFT, Decision.RIGHT):
-            msg = 'This plan resolver requires an explicit {}'.format(
-                decision.suggest_plan_fix(decision.expected_choice))
+
+            if decision.expected_choice == BuildOrDownload.BUILD:
+                msg = 'A spec in the plan has a build_tree dependency' \
+                    ' on {spec}. Either explicitly add the line {plan_line}' \
+                    ' or change the dependency to set' \
+                    ' require="installation" if possible'.format(
+                        spec=action.data.name,
+                        plan_line=decision.suggest_plan_fix(
+                            decision.expected_choice))
+            else:
+                msg = 'This plan resolver requires an explicit {}'.format(
+                    decision.suggest_plan_fix(decision.expected_choice))
         elif decision.choice is None and decision.expected_choice is None:
             left_decision = decision.suggest_plan_fix(Decision.LEFT)
             right_decision = decision.suggest_plan_fix(Decision.RIGHT)
