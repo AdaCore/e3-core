@@ -318,10 +318,10 @@ class TestWalk(object):
         job = c.saved_jobs['2']
         assert isinstance(job, EmptyJob)
         assert job.should_skip is True
-        assert job.status == ReturnValue.failure
+        assert job.status == ReturnValue.force_fail
 
         assert c.job_status == {'1.bad': ReturnValue(1),
-                                '2': ReturnValue.failure}
+                                '2': ReturnValue.force_fail}
         assert c.requeued == {}
 
         # In the situation where we are using fingerprints,
@@ -339,10 +339,10 @@ class TestWalk(object):
             job = r2.saved_jobs['2']
             assert isinstance(job, EmptyJob)
             assert job.should_skip is True
-            assert job.status == ReturnValue.failure
+            assert job.status == ReturnValue.force_fail
 
             assert r2.job_status == {'1.bad': ReturnValue(1),
-                                     '2': ReturnValue.failure}
+                                     '2': ReturnValue.force_fail}
             assert r2.requeued == {}
 
     def test_job_not_ready_then_ok(self, walk_class, setup_sbx):
@@ -884,7 +884,7 @@ def test_job_depending_on_job_with_no_predicted_fingerprint_failed(setup_sbx):
     job = r1.saved_jobs['2']
     assert isinstance(job, EmptyJob)
     assert job.should_skip is True
-    assert job.status == ReturnValue.failure
+    assert job.status == ReturnValue.force_fail
 
     # Check that no job was requeued.
     assert r1.requeued == {}
