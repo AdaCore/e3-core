@@ -269,7 +269,7 @@ class Walk(object):
 
             return self.create_skipped_job(uid, data, predecessors,
                                            force_fail, notify_end,
-                                           status=ReturnValue.failure)
+                                           status=ReturnValue.force_fail)
 
         if self.should_execute_action(uid, prev_fingerprint,
                                       self.new_fingerprints[uid]):
