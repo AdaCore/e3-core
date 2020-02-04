@@ -294,7 +294,7 @@ class UploadComponent(Upload):
     Upload a component to the store.
     """
 
-    __slots__ = ('uid', 'data')
+    __slots__ = ('uid', 'data', 'anod_instance')
     str_prefix = ''
 
     def __init__(self, data):
@@ -307,6 +307,7 @@ class UploadComponent(Upload):
         uid[-1] = 'upload_bin'
         uid = '.'.join(uid)
         super(UploadComponent, self).__init__(uid=uid, data=data)
+        self.anod_instance = data
 
     def __str__(self):
         return 'upload %s of %s' % (
