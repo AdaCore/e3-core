@@ -133,10 +133,10 @@ class Job(object):
                 self.record_stop_time()
                 self.notify_end(self.uid)
 
+        self.slot = slot
         self.handle = threading.Thread(target=task_function,
                                        name=self.uid)
         self.handle.start()
-        self.slot = slot
 
     @abc.abstractmethod
     def run(self):
