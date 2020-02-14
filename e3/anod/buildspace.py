@@ -35,6 +35,27 @@ class BuildSpace(object):
         self.root_dir = os.path.abspath(root_dir)
         self.initialized = False
 
+    def exists(self):
+        """Return True if the build space exists on disk.
+
+        This function just checks the contents of self.root_dir,
+        and verifies that it appears to be a build space.
+        It does so, irrespective of whether self.initialize
+        is True or not.
+
+        :return: True if self.root_dir is a buildspace, False otherwise.
+        :rtype: bool
+        """
+        # Start by verifying that the file used as build space markers
+        # exists.
+        if not os.path.isfile(os.path.join(self.root_dir, '.buildspace')):
+            return False
+        # Next, verify that all the necessary directories exist as well.
+        for d in self.DIRS:
+            if not os.path.isdir(self.subdir(name=d)):
+                return False
+        return True
+
     @property
     def dirs(self):
         return self.directory_mapping.values()

@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 
 from e3.anod.buildspace import BuildSpace
-from e3.fs import mkdir
+from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 import pytest
@@ -46,3 +46,34 @@ def test_reset_tmp_dir():
     assert os.path.exists(marker)
     bs.create()
     assert not os.path.exists(marker)
+
+
+def test_build_space_exists():
+    """Test the BuildSpace.exists method."""
+    bs_name = os.path.abspath('foo')
+    bs = BuildSpace(bs_name)
+
+    # First, verify the behavior when the buildspace directory
+    # doesn't even exist.
+    assert not os.path.exists(bs_name), bs_name
+    assert bs.exists() is False
+
+    # Next, create the directory, but without anything in it.
+    # In particular, the marker file isn't present, so
+    # is_buildspace should still return False for that directory.
+    mkdir(bs_name)
+    assert bs.exists() is False
+
+    # Create the buildspace, and then verify that is_buildspace
+    # then returns True.
+    bs.create()
+    assert bs.exists() is True
+
+    # Verify that we also return False if one of the subdirectories
+    # is missing. To do that, first verify that the subdirectory
+    # we picked does exist, then delete it, before observing
+    # whether BuildSpace.exists now return False or not.
+    one_subdir = bs.subdir(bs.DIRS[0])
+    assert os.path.isdir(one_subdir)
+    rm(one_subdir, recursive=True)
+    assert bs.exists() is False
