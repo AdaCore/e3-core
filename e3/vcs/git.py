@@ -27,6 +27,7 @@ import e3.fs
 import e3.log
 import e3.os.fs
 import e3.os.process
+from e3.text import bytes_as_str
 from e3.vcs import VCSError
 
 logger = e3.log.getLogger('vcs.git')
@@ -308,8 +309,12 @@ class GitRepository(object):
                         e3.log.debug('diff size for %s: %d',
                                      result['sha'], diff_size)
 
-                    with open(tempfile_name) as f:
-                        result['diff'] = f.read(max_diff_size)
+                    with open(tempfile_name, 'rb') as f:
+                        content = f.read(max_diff_size)
+
+                        # Diff content is not always in utf-8 format thus use
+                        # a safe function to decode it.
+                        result['diff'] = bytes_as_str(content)
 
                     if diff_size > max_diff_size:
                         result['diff'] += '\n... diff too long ...\n'
