@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import sys
 
 import e3.archive
 import e3.fs
@@ -260,6 +261,19 @@ def test_empty():
     e3.archive.unpack_archive(os.path.join('dest', 'pkg.zip'),
                               'result', remove_root_dir=True)
     assert os.listdir('result') == []
+
+
+@pytest.mark.skipif(sys.platform == 'win32',
+                    reason='test executable attribute')
+def test_zip_attributes():
+    zip_file = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'test.zip')
+    e3.fs.mkdir("result")
+    e3.archive.unpack_archive(zip_file,
+                              "result",
+                              remove_root_dir=True)
+    assert os.access("result/test.sh", os.X_OK)
 
 
 def test_archive_with_readonly_dir():
