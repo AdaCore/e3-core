@@ -302,12 +302,26 @@ class Run(object):
         self.err = ''
         self.cmds = []
 
-        if env is not None and not ignore_environ:
-            # ignore_environ is False, so get a copy of the current
-            # environment and update it with the env dictionnary.
-            tmp = os.environ.copy()
-            tmp.update(env)
-            env = tmp
+        if env is not None:
+            if ignore_environ:
+                if sys.platform == 'win32':
+                    # On Windows not all environment variables can be
+                    # discarded. At least SYSTEMDRIVE, SYSTEMROOT should be
+                    # set. In order to be portable propagate their value in
+                    # case the user does not pass them in env when
+                    # ignore_environ is set to True.
+                    tmp = {}
+                    for var in ('SYSTEMDRIVE', 'SYSTEMROOT'):
+                        if var not in env and var in os.environ:
+                            tmp[var] = os.environ[var]
+                    tmp.update(env)
+                    env = tmp
+            else:
+                # ignore_environ is False, so get a copy of the current
+                # environment and update it with the env dictionnary.
+                tmp = os.environ.copy()
+                tmp.update(env)
+                env = tmp
 
         rlimit_args = []
         if timeout is not None:
