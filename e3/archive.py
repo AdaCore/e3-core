@@ -32,6 +32,8 @@ class E3ZipFile(zipfile.ZipFile):
                 # preserve bits 0-8 only: rwxrwxrwx
                 # this come from a proposed patch on python.org
                 # see: https://bugs.python.org/issue15795
+                if not isinstance(member, zipfile.ZipInfo):
+                    member = self.getinfo(member)
                 attr = member.external_attr >> 16 & 0x1FF
                 if attr != 0:
                     os.chmod(result, attr)
