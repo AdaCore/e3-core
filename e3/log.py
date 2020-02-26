@@ -51,10 +51,12 @@ __null_handler_set = set()
 class TqdmHandler(logging.StreamHandler):  # all: no cover
     """Logging handler when used when progress bars are enabled."""
 
-    color_subst = ((re.compile(r'(OK|PASSED)', re.I), Fore.GREEN),
-                   (re.compile(r'(INFO)', re.I), Fore.BLUE),
-                   (re.compile(r'(ERROR|FAILED)', re.I), Fore.RED),
-                   (re.compile(r'(CRITICAL)', re.I), Fore.RED + Style.BRIGHT))
+    # Color the log status at the beginning of most log lines
+    color_subst = ((re.compile(r'^(DEBUG)'), Fore.CYAN),
+                   (re.compile(r'^(INFO)'), Style.DIM),
+                   (re.compile(r'^(WARNING)'), Fore.YELLOW),
+                   (re.compile(r'^(ERROR)'), Fore.RED),
+                   (re.compile(r'^(CRITICAL)'), Fore.RED + Style.BRIGHT))
 
     def __init__(self):
         logging.StreamHandler.__init__(self)
