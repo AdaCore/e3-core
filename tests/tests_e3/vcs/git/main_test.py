@@ -3,11 +3,49 @@ from __future__ import absolute_import, division, print_function
 import os
 import subprocess
 
-from e3.fs import echo_to_file
+from e3.fs import echo_to_file, rm
 from e3.os.fs import unixpath
 from e3.vcs.git import GitError, GitRepository
 
 import pytest
+import tempfile
+from contextlib import closing
+
+
+@pytest.mark.git
+def test_git_non_utf8():
+    """Test with non utf-8 encoding in changelog."""
+    working_tree = os.path.join(os.getcwd(), 'working_tree')
+    repo = GitRepository(working_tree)
+    repo.init()
+    os.chdir(working_tree)
+    new_file = os.path.join(working_tree, 'new.txt')
+    commit_msg = os.path.join(working_tree, 'commit.txt')
+
+    with open(commit_msg, 'wb') as fd:
+        fd.write(b'\x03\xff')
+
+    with open(new_file, 'wb') as fd:
+        fd.write(b'\x03\xff')
+
+    repo.git_cmd(['add', 'new.txt'])
+    repo.git_cmd(['config', 'user.email', 'e3-core@example.net'])
+    repo.git_cmd(['config', 'user.name', 'e3 core'])
+    repo.git_cmd(['commit', '-F', commit_msg])
+
+    with closing(tempfile.NamedTemporaryFile(mode='w',
+                                             delete=False)) as fd:
+        repo.write_log(fd)
+        tmp_filename = fd.name
+    try:
+        with open(tmp_filename) as fd:
+            commits = [
+                commit for commit
+                in repo.parse_log(fd, max_diff_size=1024)]
+    finally:
+        rm(tmp_filename)
+
+    assert '\\x03\\xff' in commits[0]['diff']
 
 
 @pytest.mark.git
