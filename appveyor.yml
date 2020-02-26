@@ -1,7 +1,7 @@
 version: 1.0.{build}
 environment:
-  PYTHON: C:\\Python27
-  PYTHON64: C:\\Python27-x64
+  PYTHON: C:\\Python37
+  PYTHON64: C:\\Python37-x64
 install:
 - cmd: >-
     SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
