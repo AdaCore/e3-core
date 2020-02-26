@@ -32,7 +32,7 @@ class CheckoutManager(object):
                                         created
     """
 
-    def __init__(self, name, working_dir):
+    def __init__(self, name, working_dir, compute_changelog=True):
         """Initialize CheckoutManager instance.
 
         :param name: a symbolic name for that checkout
@@ -41,8 +41,12 @@ class CheckoutManager(object):
             performed. Note that the checkout will be done in the
             ```name``` subdirectory.
         :type working_dir: str
+        :param compute_changelog: if True compute a changelog of changes
+            done since last update
+        :type compute_changelog: bool
         """
         self.name = name
+        self.compute_changelog = compute_changelog
         self.working_dir = os.path.abspath(
             os.path.join(working_dir, self.name))
         self.metadata_file = self.working_dir + '_checkout.json'
@@ -182,7 +186,7 @@ class CheckoutManager(object):
 
             if old_commit == new_commit:
                 result = ReturnValue.unchanged
-            else:
+            elif self.compute_changelog:
                 # Fetch the change log and dump it into the changelog file
                 with closing(tempfile.NamedTemporaryFile(mode='w',
                                                          delete=False)) as fd:
@@ -199,9 +203,11 @@ class CheckoutManager(object):
 
                 with open(self.changelog_file, 'w') as fd:
                     json.dump(commits, fd)
-
                 # We have removed local changes or updated the git repository
                 result = ReturnValue.success
+            else:
+                result = ReturnValue.success
+
         except GitError:
             logger.exception("Error during git update %s" % self.name)
             result = ReturnValue.failure
