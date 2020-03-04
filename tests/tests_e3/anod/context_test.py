@@ -513,7 +513,7 @@ class TestContext(object):
             if uid.endswith('sources'):
                 assert ac.tree.get_tag(uid)
             elif uid.endswith('.source.spec1-src'):
-                assert ac.tree.get_tag(uid) is None
+                assert ac.tree.get_tag(uid)
                 assert ac.tree.get_context(
                     vertex_id=uid,
                     reverse_order=True,
