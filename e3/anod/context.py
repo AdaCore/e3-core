@@ -410,7 +410,7 @@ class AnodContext(object):
                         primitive='source',
                         source_name=sb.name,
                         plan_line=plan_line,
-                        plan_args=None,
+                        plan_args=plan_args,
                         sandbox=sandbox,
                         upload=upload)
                     self.connect(result, sub_result)
@@ -506,6 +506,12 @@ class AnodContext(object):
                 if upload:
                     upload_src = UploadSource(spec, source_name)
                     self.add(upload_src)
+                    # Link the upload to the current context
+                    if plan_line is not None and plan_args is not None:
+                        self.link_to_plan(vertex_id=upload_src.uid,
+                                          plan_line=plan_line,
+                                          plan_args=plan_args)
+
                     self.connect(self.root, upload_src)
                     self.connect(upload_src, result)
 
