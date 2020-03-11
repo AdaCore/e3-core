@@ -69,7 +69,7 @@ more details.
 Install
 =======
 
-requires: Python 2.7.x or Python >=3.5
+requires: Python >=3.7
 
 e3-core releases are available on PyPI and can be installed by running:
 
