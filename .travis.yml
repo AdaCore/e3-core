@@ -6,6 +6,6 @@ matrix:
     include:
         - python: 3.8
           env: TOXENV=py38-ci-cov-codecov,checkstyle,security
-          dist: trusty
+          dist: bionic
           sudo: false
           os: linux
