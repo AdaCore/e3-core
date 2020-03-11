@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 import smtplib
 import socket
@@ -7,14 +5,15 @@ import socket
 import e3.log
 import e3.os.process
 
-logger = e3.log.getLogger('net.smtp')
+logger = e3.log.getLogger("net.smtp")
 
 
 system_sendmail_fallback = False
 
 
-def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
-             max_size=20, message_id=None):
+def sendmail(
+    from_email, to_emails, mail_as_string, smtp_servers, max_size=20, message_id=None
+):
     """Send an email with stmplib.
 
     Fallback to /usr/lib/sendmail or /usr/sbin/sendmail if
@@ -47,33 +46,39 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
     mail_size = float(len(mail_as_string)) / (1024 * 1024)
     if mail_size >= max_size:
         # Message too big
-        logger.error("!!! message file too big (>= %d Mo): %f Mo",
-                     max_size, mail_size)
+        logger.error("!!! message file too big (>= %d Mo): %f Mo", max_size, mail_size)
         return False
 
     def system_sendmail():
         """Run the system sendmail."""
         if system_sendmail_fallback:
-            for sendmail_bin in ('/usr/lib/sendmail',
-                                 '/usr/sbin/sendmail'):  # all: no cover
+            for sendmail_bin in (
+                "/usr/lib/sendmail",
+                "/usr/sbin/sendmail",
+            ):  # all: no cover
                 if os.path.exists(sendmail_bin):
                     p = e3.os.process.Run(
                         [sendmail_bin] + to_emails,
-                        input="|" + mail_as_string, output=None)
+                        input="|" + mail_as_string,
+                        output=None,
+                    )
                     return p.status == 0
 
         # No system sendmail, return False
         return False
 
-    smtp_class = smtplib.SMTP_SSL if 'smtp_ssl' in os.environ.get(
-        'E3_ENABLE_FEATURE', '').split(',') else smtplib.SMTP
+    smtp_class = (
+        smtplib.SMTP_SSL
+        if "smtp_ssl" in os.environ.get("E3_ENABLE_FEATURE", "").split(",")
+        else smtplib.SMTP
+    )
 
     for smtp_server in smtp_servers:
         try:
             s = smtp_class(smtp_server)
         except (socket.error, smtplib.SMTPException) as e:
             logger.debug(e)
-            logger.debug('cannot connect to smtp server %s', smtp_server)
+            logger.debug("cannot connect to smtp server %s", smtp_server)
             continue
         else:
             try:
@@ -96,11 +101,11 @@ def sendmail(from_email, to_emails, mail_as_string, smtp_servers,
                     pass
 
     else:
-        logger.debug('no valid smtp server found')
+        logger.debug("no valid smtp server found")
         if not system_sendmail():
             return False
 
     if message_id is not None:
-        logger.debug('Message-ID: %s sent successfully', message_id)
+        logger.debug("Message-ID: %s sent successfully", message_id)
 
     return True

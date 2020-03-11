@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 import tempfile
 import yaml
@@ -13,7 +11,7 @@ import pytest
 # When the variable RESULTS_DIR is set to
 # an existing directory, the testsuite will
 # generate results file in "anod" format
-RESULTS_DIR = os.environ.get('RESULTS_DIR')
+RESULTS_DIR = os.environ.get("RESULTS_DIR")
 
 
 class RequirementCoverage(object):
@@ -25,7 +23,7 @@ class RequirementCoverage(object):
     @classmethod
     def dump(cls):
         if cls.output_filename:
-            with open(cls.output_filename, 'w') as f:
+            with open(cls.output_filename, "w") as f:
                 yaml.safe_dump(cls.results, f)
 
 
@@ -53,7 +51,8 @@ def env_protect(request):
 def pytest_configure(config):
     try:
         RequirementCoverage.output_filename = config.getoption(
-            'requirement_coverage_report')
+            "requirement_coverage_report"
+        )
     except ValueError:
         # Option not defined.
         pass
@@ -67,34 +66,34 @@ def require_vcs(prog, request):
     :param prog: either "svn" or "git"
     """
     if not which(prog):
-        if request.config.getoption('ci'):
-            pytest.fail('{} not available'.format(prog))
+        if request.config.getoption("ci"):
+            pytest.fail("{} not available".format(prog))
         else:
-            pytest.skip('{} not available'.format(prog))
+            pytest.skip("{} not available".format(prog))
 
 
 @pytest.fixture(autouse=True)
 @pytest.mark.usefixtures("git")
 def require_git(request):
     """Require git."""
-    marker = request.node.get_closest_marker('git')
+    marker = request.node.get_closest_marker("git")
     if marker:
-        return require_vcs('git', request)
+        return require_vcs("git", request)
 
 
 @pytest.fixture
 def git(request):
     """Require git."""
-    return require_vcs('git', request)
+    return require_vcs("git", request)
 
 
 @pytest.fixture(autouse=True)
 @pytest.mark.usefixtures("svn")
 def require_svn(request):
     """Require svn."""
-    marker = request.node.get_closest_marker('svn')
+    marker = request.node.get_closest_marker("svn")
     if marker:
-        return require_vcs('svn', request)
+        return require_vcs("svn", request)
 
 
 def pytest_itemcollected(item):
@@ -102,8 +101,8 @@ def pytest_itemcollected(item):
     doc = item.obj.__doc__
     if RequirementCoverage.output_filename and doc:
         for line in item.obj.__doc__.splitlines():
-            line = line.strip().strip('.')
-            if line.startswith('REQ-'):
+            line = line.strip().strip(".")
+            if line.startswith("REQ-"):
                 RequirementCoverage.results[item.obj.__name__] = line
 
 
@@ -125,12 +124,10 @@ def pytest_runtest_makereport(item, call):
     # we only look at actual test calls, not setup/teardown
     if rep.when == "call":
         outcome = rep.outcome.upper()
-        test_name = rep.nodeid.replace('/', '.').replace('::', '--')
+        test_name = rep.nodeid.replace("/", ".").replace("::", "--")
         if rep.longreprtext:
-            with open(
-                os.path.join(
-                    RESULTS_DIR, '{}.diff'.format(test_name)), 'w') as f:
+            with open(os.path.join(RESULTS_DIR, "{}.diff".format(test_name)), "w") as f:
                 f.write(rep.longreprtext)
 
-        with open(os.path.join(RESULTS_DIR, "results"), 'a') as f:
-            f.write('{}:{}\n'.format(test_name, outcome))
+        with open(os.path.join(RESULTS_DIR, "results"), "a") as f:
+            f.write("{}:{}\n".format(test_name, outcome))

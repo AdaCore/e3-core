@@ -1,21 +1,17 @@
-from __future__ import absolute_import, division, print_function
-
 import abc
 from collections import namedtuple
 
 import e3.log
 from e3.error import E3Error
 
-logger = e3.log.getLogger('store')
+logger = e3.log.getLogger("store")
 
 
-class ResourceInfo(object):
+class ResourceInfo(object, metaclass=abc.ABCMeta):
     """Object representing resource metadata.
 
     This is subclassed by all store drivers.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractproperty
     def uid(self):
@@ -38,8 +34,7 @@ class ResourceInfo(object):
         pass  # all: no cover
 
 
-class CachedResource(namedtuple(
-        'CachedResource', ['uid', 'local_path'])):
+class CachedResource(namedtuple("CachedResource", ["uid", "local_path"])):
     """Cached information about an already downloaded resource."""
 
     __slots__ = ()
@@ -49,10 +44,7 @@ class StoreError(E3Error):
     pass
 
 
-class Store(object):
-
-    __metaclass__ = abc.ABCMeta
-
+class Store(object, metaclass=abc.ABCMeta):
     def __init__(self, store_configuration, cache_backend):
         """Initialize a Store object.
 
@@ -92,11 +84,10 @@ class Store(object):
             try:
                 local_path = cached_data.local_path
             except (TypeError, AttributeError):
-                logger.warning('invalid cache entry for %s', metadata.uid)
+                logger.warning("invalid cache entry for %s", metadata.uid)
             else:
                 if not metadata.verify(local_path):
-                    logger.warning('corrupted cache entry for %s',
-                                   metadata.uid)
+                    logger.warning("corrupted cache entry for %s", metadata.uid)
                     # Discard invalid cache entry
                     self.cache_backend.delete(metadata.uid)
                 else:
@@ -110,8 +101,8 @@ class Store(object):
 
         # store the resource in the cache
         self.cache_backend.set(
-            metadata.uid,
-            CachedResource(uid=metadata.uid, local_path=local_path))
+            metadata.uid, CachedResource(uid=metadata.uid, local_path=local_path)
+        )
         return local_path
 
     @abc.abstractmethod

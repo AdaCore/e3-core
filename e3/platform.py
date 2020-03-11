@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import collections
 
 import e3.os
@@ -12,9 +10,20 @@ KNOWLEDGE_BASE = get_knowledge_base()
 # noinspection PyUnresolvedReferences
 class Platform(
     collections.namedtuple(
-        'Platform',
-        ['cpu', 'os', 'is_hie', 'platform', 'triplet',
-         'machine', 'domain', 'is_host', 'is_default'])):
+        "Platform",
+        [
+            "cpu",
+            "os",
+            "is_hie",
+            "platform",
+            "triplet",
+            "machine",
+            "domain",
+            "is_host",
+            "is_default",
+        ],
+    )
+):
     """Class that allow user to retrieve os/cpu specific information.
 
     Attributes are:
@@ -37,8 +46,14 @@ class Platform(
     __slots__ = ()
 
     @classmethod
-    def get(cls, platform_name=None, version=None,
-            machine=None, mode=None, compute_default=False):
+    def get(
+        cls,
+        platform_name=None,
+        version=None,
+        machine=None,
+        mode=None,
+        compute_default=False,
+    ):
         """Return a Platform object.
 
         :param platform_name: if None or empty then automatically detect
@@ -60,7 +75,7 @@ class Platform(
         if not version:
             version = e3.os.platform.UNKNOWN
         if machine is None or machine == e3.os.platform.UNKNOWN:
-            machine = ''
+            machine = ""
         if not mode:
             mode = e3.os.platform.UNKNOWN
 
@@ -79,7 +94,7 @@ class Platform(
 
         # Check if the object correspond to the current machine and thus allow
         # us to compute some additional info automatically
-        if platform_name in (None, '', 'default'):
+        if platform_name in (None, "", "default"):
             platform_name = default_platform
             is_host = True
         if machine == cls.system_info.hostname()[0]:
@@ -92,18 +107,26 @@ class Platform(
 
         # Fill other attributes
         pi = KNOWLEDGE_BASE.platform_info[platform_name]
-        cpu = e3.os.platform.CPU.get(
-            pi['cpu'], pi.get('endian', None), is_host)
-        os = e3.os.platform.OS.get(
-            pi['os'], is_host, version=version, mode=mode)
-        is_hie = pi['is_hie']
+        cpu = e3.os.platform.CPU.get(pi["cpu"], pi.get("endian", None), is_host)
+        os = e3.os.platform.OS.get(pi["os"], is_host, version=version, mode=mode)
+        is_hie = pi["is_hie"]
 
         # Find triplet
-        triplet = KNOWLEDGE_BASE.build_targets[platform_name]['name'] % {
-            'os_version': os.version}
+        triplet = KNOWLEDGE_BASE.build_targets[platform_name]["name"] % {
+            "os_version": os.version
+        }
 
-        return cls(cpu, os, is_hie, platform_name, triplet,
-                   machine, domain, is_host, is_default)
+        return cls(
+            cpu,
+            os,
+            is_hie,
+            platform_name,
+            triplet,
+            machine,
+            domain,
+            is_host,
+            is_default,
+        )
 
     @property
     def is_virtual(self):
@@ -123,34 +146,36 @@ class Platform(
         :rtype: dict
         """
         str_dict = self._asdict()
-        str_dict['is_virtual'] = self.is_virtual
+        str_dict["is_virtual"] = self.is_virtual
 
-        for key, var in self.os.as_dict().iteritems():
+        for key, var in self.os.as_dict().items():
             str_dict["os_" + key] = var
-        for key, var in self.cpu.as_dict().iteritems():
+        for key, var in self.cpu.as_dict().items():
             str_dict["cpu_" + key] = var
-        del str_dict['os']
-        del str_dict['cpu']
+        del str_dict["os"]
+        del str_dict["cpu"]
         return str_dict
 
     def __str__(self):
         """Return a representation string of the object."""
-        result = "platform: %(platform)s\n" \
-                 "machine:  %(machine)s\n" \
-                 "is_hie:   %(is_hie)s\n" \
-                 "is_host:  %(is_host)s\n" \
-                 "is_virtual: %(is_virtual)s\n" \
-                 "triplet:  %(triplet)s\n" \
-                 "domain:   %(domain)s\n" \
-                 "OS\n" \
-                 "   name:          %(os_name)s\n" \
-                 "   version:       %(os_version)s\n" \
-                 "   exeext:        %(os_exeext)s\n" \
-                 "   dllext:        %(os_dllext)s\n" \
-                 "   is_bareboard:  %(os_is_bareboard)s\n" \
-                 "CPU\n" \
-                 "   name:   %(cpu_name)s\n" \
-                 "   bits:   %(cpu_bits)s\n" \
-                 "   endian: %(cpu_endian)s\n" \
-                 "   cores:  %(cpu_cores)s" % self.to_dict()
+        result = (
+            "platform: %(platform)s\n"
+            "machine:  %(machine)s\n"
+            "is_hie:   %(is_hie)s\n"
+            "is_host:  %(is_host)s\n"
+            "is_virtual: %(is_virtual)s\n"
+            "triplet:  %(triplet)s\n"
+            "domain:   %(domain)s\n"
+            "OS\n"
+            "   name:          %(os_name)s\n"
+            "   version:       %(os_version)s\n"
+            "   exeext:        %(os_exeext)s\n"
+            "   dllext:        %(os_dllext)s\n"
+            "   is_bareboard:  %(os_is_bareboard)s\n"
+            "CPU\n"
+            "   name:   %(cpu_name)s\n"
+            "   bits:   %(cpu_bits)s\n"
+            "   endian: %(cpu_endian)s\n"
+            "   cores:  %(cpu_cores)s" % self.to_dict()
+        )
         return result

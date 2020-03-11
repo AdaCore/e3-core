@@ -1,6 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
-
 class EntryPoint(object):
     """Plan Entry point.
 
@@ -31,7 +28,7 @@ class EntryPoint(object):
         self.kind = kind
         self.description = description
         self.executed = False
-        assert self.name not in db, 'duplicate entry point %s' % self.name
+        assert self.name not in db, "duplicate entry point %s" % self.name
         db[self.name] = self
 
     def execute(self):
@@ -49,10 +46,9 @@ class Machine(EntryPoint):
     execution.
     """
 
-    def __init__(self, db, fun, kind, platform, version,
-                 site=None,
-                 name=None,
-                 description=None):
+    def __init__(
+        self, db, fun, kind, platform, version, site=None, name=None, description=None
+    ):
         """Initialize a Machine entry point.
 
         :param db: see EntryPoint
@@ -92,8 +88,8 @@ def entry_point(db, cls, kind, *args, **kwargs):
     :param args: additional information to store with the entry point
     :param kwargs: additional information to store with the entry point
     """
-    def entry_point_dec(f, ldb=db, lcls=cls, lkind=kind,
-                        largs=args, lkwargs=kwargs):
+
+    def entry_point_dec(f, ldb=db, lcls=cls, lkind=kind, largs=args, lkwargs=kwargs):
         lcls(ldb, f, lkind, *largs, **lkwargs)
         return f
 

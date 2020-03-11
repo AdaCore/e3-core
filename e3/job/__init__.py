@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from collections import namedtuple
 from datetime import datetime
 from e3.anod.status import ReturnValue
@@ -8,14 +6,13 @@ import abc
 import e3.log
 import threading
 
-logger = e3.log.getLogger('job')
+logger = e3.log.getLogger("job")
 
 
-JobTimingInfo = namedtuple('JobTimingInfo',
-                           ['start_time', 'stop_time', 'duration'])
+JobTimingInfo = namedtuple("JobTimingInfo", ["start_time", "stop_time", "duration"])
 
 
-class Job(object):
+class Job(object, metaclass=abc.ABCMeta):
     """Handle a single Job.
 
     :ivar slot: number associated with the job during its execution. At a
@@ -46,7 +43,6 @@ class Job(object):
     :vartype: int
     """
 
-    __metaclass__ = abc.ABCMeta
     lock = threading.RLock()
     index_counter = 0
 
@@ -72,7 +68,7 @@ class Job(object):
         self.__stop_time = None
         self.should_skip = False
         self.interrupted = False
-        self.queue_name = 'default'
+        self.queue_name = "default"
         self.tokens = 1
         with self.lock:
             self.index = Job.index_counter
@@ -120,13 +116,14 @@ class Job(object):
         :param slot: slot number
         :type slot: int
         """
+
         def task_function():
             self.record_start_time()
             try:
                 with self.lock:
                     interrupted = self.interrupted
                 if interrupted:  # defensive code
-                    logger.debug('job %s has been cancelled', self.uid)
+                    logger.debug("job %s has been cancelled", self.uid)
                 else:
                     self.run()
             finally:
@@ -134,8 +131,7 @@ class Job(object):
                 self.notify_end(self.uid)
 
         self.slot = slot
-        self.handle = threading.Thread(target=task_function,
-                                       name=self.uid)
+        self.handle = threading.Thread(target=task_function, name=self.uid)
         self.handle.start()
 
     @abc.abstractmethod
@@ -203,15 +199,13 @@ class EmptyJob(Job):
         return self.__status
 
 
-class ProcessJob(Job):
+class ProcessJob(Job, metaclass=abc.ABCMeta):
     """Specialized version of Job that spawn processes.
 
     :ivar proc_handle: None when an object of this class is initialized.
         An e3.os.process.Run object after the "run" method is called.
     :vartype proc_handle: e3.os.process.Run | None
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, uid, data, notify_end):
         super(ProcessJob, self).__init__(uid, data, notify_end)
@@ -227,10 +221,10 @@ class ProcessJob(Job):
 
         # Do non blocking spawn followed by a wait in order to have
         # self.proc_handle set. This allows support for interrupt.
-        cmd_options['bg'] = True
+        cmd_options["bg"] = True
         with self.lock:
             if self.interrupted:  # defensive code
-                logger.debug('job %s has been cancelled', self.uid)
+                logger.debug("job %s has been cancelled", self.uid)
                 return
             try:
                 cmdline = self.cmdline
@@ -239,12 +233,13 @@ class ProcessJob(Job):
                 proc_handle = Run(cmdline, **cmd_options)
                 self.proc_handle = proc_handle
             except Exception:
-                logger.exception('error when spawing job %s', self.uid)
+                logger.exception("error when spawing job %s", self.uid)
                 self.__spawn_error = True
                 return
         proc_handle.wait()
-        logger.debug('job %s status %s (pid:%s)',
-                     self.uid, proc_handle.status, proc_handle.pid)
+        logger.debug(
+            "job %s status %s (pid:%s)", self.uid, proc_handle.status, proc_handle.pid
+        )
 
     @property
     def status(self):
@@ -257,8 +252,11 @@ class ProcessJob(Job):
             try:
                 return ReturnValue(self.proc_handle.status)
             except ValueError:
-                logger.exception('job %s returned an unknown status %s',
-                                 self.uid, self.proc_handle.status)
+                logger.exception(
+                    "job %s returned an unknown status %s",
+                    self.uid,
+                    self.proc_handle.status,
+                )
                 return ReturnValue.failure
 
     @abc.abstractproperty
@@ -285,15 +283,15 @@ class ProcessJob(Job):
         :return: options for e3.os.process.Run as a dict
         :rtype: dict
         """
-        return {'output': None}
+        return {"output": None}
 
     def interrupt(self):
         """Kill running process tree."""
         if super(ProcessJob, self).interrupt():
             if self.proc_handle is None:  # defensive code
-                logger.debug('cancel job %s', self.uid)
+                logger.debug("cancel job %s", self.uid)
             elif self.proc_handle.is_running():
-                logger.debug('kill job %s', self.uid)
+                logger.debug("kill job %s", self.uid)
                 self.proc_handle.kill(recursive=True)
             else:  # defensive code
-                logger.debug('cannot interrupt, job %s has finished', self.uid)
+                logger.debug("cannot interrupt, job %s has finished", self.uid)

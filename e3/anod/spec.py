@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 from collections import OrderedDict
 from distutils.version import StrictVersion
@@ -15,23 +13,23 @@ from e3.anod.error import AnodError, ShellError
 from e3.yaml import load_with_config
 
 # CURRENT API version
-__version__ = '1.4'
+__version__ = "1.4"
 
-SUPPORTED_API = (__version__, '1.5')
+SUPPORTED_API = (__version__, "1.5")
 # The driver can support multiple version of the spec API, we currently support
 # only the version 1.4 and 1.5. Default is still 1.4
 
-logger = e3.log.getLogger('anod')
+logger = e3.log.getLogger("anod")
 
 
 def check_api_version(version):
     """Make sure there are no API mismatch."""
     if version.strip() not in SUPPORTED_API:
         raise AnodError(
-            origin='check_api_version',
-            message='API version mismatch. Anod specs are at %s but the '
-            'driver is only supporting %s' % (
-                version.strip(), ','.join(SUPPORTED_API)))
+            origin="check_api_version",
+            message="API version mismatch. Anod specs are at %s but the "
+            "driver is only supporting %s" % (version.strip(), ",".join(SUPPORTED_API)),
+        )
 
 
 def parse_command(command, build_space):
@@ -44,8 +42,8 @@ def parse_command(command, build_space):
     """
     cmd_dict = {}
     cmd_dict.update(
-        dict((k.upper(), v)
-             for (k, v) in build_space.__dict__.items()))
+        dict((k.upper(), v) for (k, v) in list(build_space.__dict__.items()))
+    )
     return [e3.text.format_with_dict(c, cmd_dict) for c in command]
 
 
@@ -59,13 +57,13 @@ def has_primitive(anod_instance, name):
 
     :rtype: bool
     """
-    if name == 'source':
-        source_pkg_build = getattr(anod_instance, 'source_pkg_build', None)
+    if name == "source":
+        source_pkg_build = getattr(anod_instance, "source_pkg_build", None)
         return source_pkg_build is not None
 
     try:
         func = getattr(anod_instance, name)
-        is_primitive = getattr(func, 'is_primitive')
+        is_primitive = getattr(func, "is_primitive")
     except AttributeError:
         return False
     return bool(is_primitive)
@@ -115,9 +113,9 @@ class Anod(object):
     """
 
     # set when loading the spec
-    spec_checksum = ''
+    spec_checksum = ""
     sandbox = None
-    name = ''
+    name = ""
 
     # API
     Dependency = e3.anod.deps.Dependency
@@ -153,7 +151,7 @@ class Anod(object):
         self.build_space = None
 
         # Default spec logger
-        self.log = e3.log.getLogger('anod.spec')
+        self.log = e3.log.getLogger("anod.spec")
 
         # Set spec environment
         self.env = e3.env.BaseEnv.from_env(env)
@@ -162,9 +160,12 @@ class Anod(object):
         # self.parsed_qualifier should be replaced by self.qualifier
         self.parsed_qualifier = OrderedDict()
         if qualifier:
-            qual_dict = [(key, value) for key, _, value in
-                         (item.partition('=')
-                         for item in qualifier.split(','))]
+            qual_dict = [
+                (key, value)
+                for key, _, value in (
+                    item.partition("=") for item in qualifier.split(",")
+                )
+            ]
         else:
             qual_dict = []
 
@@ -173,14 +174,18 @@ class Anod(object):
         self.qualifier = qualifier
 
         # Default build space name is the spec name
-        if 'build_space_name' not in dir(self):
+        if "build_space_name" not in dir(self):
             self.build_space_name = self.name
 
         # UID of the spec instance
-        self.uid = ".".join((self.env.build.machine,
-                             self.env.platform,
-                             self.build_space_name,
-                             self.kind))
+        self.uid = ".".join(
+            (
+                self.env.build.machine,
+                self.env.platform,
+                self.build_space_name,
+                self.kind,
+            )
+        )
 
         # Hold the config dictionary-like object
         self._config = None
@@ -194,9 +199,11 @@ class Anod(object):
 
         :rtype: bool
         """
-        return (self.package is not None and
-                self.package.name is not None and
-                self.component is not None)
+        return (
+            self.package is not None
+            and self.package.name is not None
+            and self.component is not None
+        )
 
     def bind_to_sandbox(self, sandbox):
         """Bind spec instance to a physical Anod sandbox.
@@ -208,8 +215,8 @@ class Anod(object):
         :type sandbox: Sandbox
         """
         self.build_space = sandbox.get_build_space(
-            name=self.build_space_name,
-            platform=self.env.platform)
+            name=self.build_space_name, platform=self.env.platform
+        )
 
     def bind_to_config(self, config):
         """Bind an Anod instance to a config.
@@ -236,13 +243,15 @@ class Anod(object):
         :rtype: T
         """
         # Compute data file location and check for existence
-        if StrictVersion(self.api_version) >= StrictVersion('1.5'):
-            filename = os.path.join(self.name, suffix if suffix else 'config')
+        if StrictVersion(self.api_version) >= StrictVersion("1.5"):
+            filename = os.path.join(self.name, suffix if suffix else "config")
         else:
-            filename = "%s%s" % (self.name, '-' + suffix if suffix else '')
+            filename = "%s%s" % (self.name, "-" + suffix if suffix else "")
         assert filename in self.data_files, "invalid data file: %s (%s)" % (
-            filename, ', '.join(self.data_files))
-        filename = os.path.join(self.spec_dir, filename + '.yaml')
+            filename,
+            ", ".join(self.data_files),
+        )
+        filename = os.path.join(self.spec_dir, filename + ".yaml")
 
         if extended:
             # Ensure selectors is a dict
@@ -269,7 +278,7 @@ class Anod(object):
         :rtype: T
         """
         if self.build_space is None:
-            return 'unknown'
+            return "unknown"
 
         # First look for pre result
         if self._pre is not None and key in self._pre:
@@ -302,8 +311,8 @@ class Anod(object):
         :type version: None | () -> str
         :raise: AnodError
         """
-        def primitive_dec(f, pre=pre, post=post, version=version):
 
+        def primitive_dec(f, pre=pre, post=post, version=version):
             def primitive_func(self, *args, **kwargs):
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
@@ -313,9 +322,8 @@ class Anod(object):
                 # the current sandbox. This avoid mainly to loose track of
                 # temporary files that are then accumulating on the
                 # filesystems.
-                if self.build_space is not None and \
-                        self.build_space.initialized:
-                    for tmp_var in ('TMP', 'TEMP', 'TMPDIR'):
+                if self.build_space is not None and self.build_space.initialized:
+                    for tmp_var in ("TMP", "TEMP", "TMPDIR"):
                         os.environ[tmp_var] = self.build_space.tmp_dir
 
                 try:
@@ -332,13 +340,14 @@ class Anod(object):
                 except AnodError as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)
                     raise AnodError(
-                        "%s %s fails (AnodError exception in primitive)" %
-                        (self.name, f.__name__))
+                        "%s %s fails (AnodError exception in primitive)"
+                        % (self.name, f.__name__)
+                    )
                 except Exception as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)
                     raise AnodError(
-                        "%s %s fails (got exception: %s)" %
-                        (self.name, f.__name__, e))
+                        "%s %s fails (got exception: %s)" % (self.name, f.__name__, e)
+                    )
 
             primitive_func.is_primitive = True
             primitive_func.pre = pre
@@ -394,20 +403,20 @@ class Anod(object):
         :raise: ShellError
         """
         command = parse_command(command, self.build_space)
-        if 'parse_shebang' not in kwargs:
-            kwargs['parse_shebang'] = True
-        if 'output' not in kwargs:
-            kwargs['output'] = e3.log.default_output_stream
+        if "parse_shebang" not in kwargs:
+            kwargs["parse_shebang"] = True
+        if "output" not in kwargs:
+            kwargs["output"] = e3.log.default_output_stream
 
         # For backward compatibility ???
-        if 'python_executable' in kwargs:
-            del kwargs['python_executable']
+        if "python_executable" in kwargs:
+            del kwargs["python_executable"]
 
         r = e3.os.process.Run(command, **kwargs)
         if r.status != 0:
             raise ShellError(
-                message="%s failed (exit status: %d)" % (
-                    " ".join(command), r.status),
-                origin='anod.shell',
-                process=r)
+                message="%s failed (exit status: %d)" % (" ".join(command), r.status),
+                origin="anod.shell",
+                process=r,
+            )
         return r

@@ -1,6 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
-
 def process_exit_code(handle):
     """Retrieve process exit code.
 
@@ -16,11 +13,13 @@ def process_exit_code(handle):
     from ctypes import pointer, sizeof
 
     process_info = ProcessInfo.Basic()
-    status = NT.QueryInformationProcess(handle,
-                                        ProcessInfo.Basic.class_id,
-                                        pointer(process_info),
-                                        sizeof(process_info),
-                                        None)
+    status = NT.QueryInformationProcess(
+        handle,
+        ProcessInfo.Basic.class_id,
+        pointer(process_info),
+        sizeof(process_info),
+        None,
+    )
     exit_code = process_info.exit_status
 
     if status < 0:
@@ -31,9 +30,7 @@ def process_exit_code(handle):
         return exit_code
 
 
-def wait_for_objects(object_list,
-                     timeout=0,
-                     wait_for_all=False):
+def wait_for_objects(object_list, timeout=0, wait_for_all=False):
     """Wait until list of object are in signaled state.
 
     :param object_list: a list of handles
@@ -61,16 +58,12 @@ def wait_for_objects(object_list,
     handle_array = HANDLE * size
     handles = handle_array(*object_list)
 
-    object_index = NT.WaitForMultipleObjects(size,
-                                             handles,
-                                             wait_for_all,
-                                             timeout)
+    object_index = NT.WaitForMultipleObjects(size, handles, wait_for_all, timeout)
     if object_index == Wait.TIMEOUT:
         return None
     elif object_index == Wait.FAILED:  # defensive code
         raise WindowsError("error while waiting for objects")
-    elif Wait.ABANDONED <= object_index \
-            < Wait.ABANDONED + size:  # defensive code
+    elif Wait.ABANDONED <= object_index < Wait.ABANDONED + size:  # defensive code
         return object_index - Wait.ABANDONED
     elif Wait.OBJECT <= object_index < Wait.OBJECT + size:
         return object_index

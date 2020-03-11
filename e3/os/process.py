@@ -5,7 +5,7 @@ processes in blocking or non blocking mode, redirection of its stdout,
 stderr and stdin. It also provides some helpers to check the process
 status
 """
-from __future__ import absolute_import, division, print_function
+
 
 import errno
 import logging
@@ -19,11 +19,11 @@ import e3.env
 import e3.log
 from e3.os.fs import which
 
-logger = e3.log.getLogger('os.process')
+logger = e3.log.getLogger("os.process")
 
 # Special logger used for command line logging.
 # This allow user to filter easily the command lines log from the rest
-CMD_LOGGER_NAME = 'os.process.cmdline'
+CMD_LOGGER_NAME = "os.process.cmdline"
 
 cmdlogger = e3.log.getLogger(CMD_LOGGER_NAME)
 
@@ -38,6 +38,7 @@ try:
     from psutil import Popen
 except ImportError:  # defensive code
     from subprocess import Popen
+
     psutil = None
 
 
@@ -57,9 +58,8 @@ def get_rlimit(platform=None):
         platform = e3.env.Env().build.platform
 
     from pkg_resources import resource_filename
-    return resource_filename(
-        __name__, os.path.join(
-            'data', 'rlimit-%s' % platform))
+
+    return resource_filename(__name__, os.path.join("data", "rlimit-%s" % platform))
 
 
 def quote_arg(arg):
@@ -74,20 +74,39 @@ def quote_arg(arg):
     # The empty argument is a bit of a special case, as it does not
     # contain any character that might need quoting, and yet still
     # needs to be quoted.
-    if arg == '':
+    if arg == "":
         return "''"
 
-    need_quoting = ('|', '&', ';', '<', '>', '(', ')', '$',
-                    '`', '\\', '"', "'", ' ', '\t', '\n',
-                    # The POSIX spec says that the following
-                    # characters might need some extra quoting
-                    # depending on the circumstances.  We just
-                    # always quote them, to be safe (and to avoid
-                    # things like file globbing which are sometimes
-                    # performed by the shell). We do leave '%' and
-                    # '=' alone, as I don't see how they could
-                    # cause problems.
-                    '*', '?', '[', '#', '~')
+    need_quoting = (
+        "|",
+        "&",
+        ";",
+        "<",
+        ">",
+        "(",
+        ")",
+        "$",
+        "`",
+        "\\",
+        '"',
+        "'",
+        " ",
+        "\t",
+        "\n",
+        # The POSIX spec says that the following
+        # characters might need some extra quoting
+        # depending on the circumstances.  We just
+        # always quote them, to be safe (and to avoid
+        # things like file globbing which are sometimes
+        # performed by the shell). We do leave '%' and
+        # '=' alone, as I don't see how they could
+        # cause problems.
+        "*",
+        "?",
+        "[",
+        "#",
+        "~",
+    )
     for char in need_quoting:
         if char in arg:
             # The way we do this is by simply enclosing the argument
@@ -98,7 +117,7 @@ def quote_arg(arg):
             arg = arg.replace("'", r"'\''")
             # Also, it seems to be nicer to print new-line characters
             # as '\n' rather than as a new-line...
-            arg = arg.replace('\n', r"'\n'")
+            arg = arg.replace("\n", r"'\n'")
             return "'%s'" % arg
     # No quoting needed.  Return the argument as is.
     return arg
@@ -122,16 +141,15 @@ def command_line_image(cmds):
     The result is expected to be a string that can be sent verbatim
     to a shell for execution.
     """
-    if isinstance(cmds[0], basestring):
+    if isinstance(cmds[0], str):
         # Turn the simple command into a special case of
         # the multiple-commands case.  This will allow us
         # to treat both cases the same way.
-        cmds = (cmds, )
-    return ' | '.join((' '.join((quote_arg(arg) for arg in cmd))
-                       for cmd in cmds))
+        cmds = (cmds,)
+    return " | ".join((" ".join((quote_arg(arg) for arg in cmd)) for cmd in cmds))
 
 
-def enable_commands_handler(filename, mode='a'):
+def enable_commands_handler(filename, mode="a"):
     """Add a handler that log all commands launched with Run in a file.
 
     :param filename: path to log the commands
@@ -141,6 +159,7 @@ def enable_commands_handler(filename, mode='a'):
     :return: the added handler
     :type: logging.Handler
     """
+
     class CmdFilter(logging.Filter):
         """Keep only e3.os.process.cmdline records."""
 
@@ -184,10 +203,20 @@ class Run(object):
     :ivar pid: PID. Set to -1 if the command failed to run.
     """
 
-    def __init__(self, cmds, cwd=None, output=PIPE,
-                 error=STDOUT, input=None, bg=False, timeout=None,
-                 env=None, set_sigpipe=True, parse_shebang=False,
-                 ignore_environ=True):
+    def __init__(
+        self,
+        cmds,
+        cwd=None,
+        output=PIPE,
+        error=STDOUT,
+        input=None,
+        bg=False,
+        timeout=None,
+        env=None,
+        set_sigpipe=True,
+        parse_shebang=False,
+        ignore_environ=True,
+    ):
         """Spawn a process.
 
         :param cmds: two possibilities:
@@ -237,6 +266,7 @@ class Run(object):
         If you prepend the input with '|', then the content of input string
         will be used for process stdin.
         """
+
         def add_interpreter_command(cmd_line):
             """Add the interpreter defined in the #! line to cmd_line.
 
@@ -268,50 +298,53 @@ class Run(object):
                 # Header found, get the interpreter command in the first line
                 f.seek(0)
                 line = f.readline()
-                interpreter_cmds = [l.strip() for l in
-                                    line[line.find('!') + 1:].split()]
+                interpreter_cmds = [
+                    l.strip() for l in line[line.find("!") + 1 :].split()
+                ]
                 # Pass the program path to the interpreter
                 if len(cmd_line) > 1:
                     cmd_line = [prog] + list(cmd_line[1:])
                 else:
                     cmd_line = [prog]
 
-                if sys.platform == 'win32':  # unix: no cover
-                    if interpreter_cmds[0] == '/usr/bin/env':
+                if sys.platform == "win32":  # unix: no cover
+                    if interpreter_cmds[0] == "/usr/bin/env":
                         # On windows be sure that PATH is taken into account by
                         # using which. In some cases involving python
                         # interpreter, the python interpreter used to run this
                         # module has been used rather than the first one on the
                         # path.
                         interpreter_cmds[1] = which(
-                            interpreter_cmds[1],
-                            default=interpreter_cmds[1])
+                            interpreter_cmds[1], default=interpreter_cmds[1]
+                        )
                         return interpreter_cmds[1:] + cmd_line
-                    elif interpreter_cmds[0] in ('/bin/bash', '/bin/sh') and \
-                            'SHELL' in os.environ:
-                        return [os.environ['SHELL']] + cmd_line
+                    elif (
+                        interpreter_cmds[0] in ("/bin/bash", "/bin/sh")
+                        and "SHELL" in os.environ
+                    ):
+                        return [os.environ["SHELL"]] + cmd_line
                 return interpreter_cmds + cmd_line
 
         # First resolve output, error and input
-        self.input_file = File(input, 'r')
-        self.output_file = File(output, 'w')
-        self.error_file = File(error, 'w')
+        self.input_file = File(input, "r")
+        self.output_file = File(output, "w")
+        self.error_file = File(error, "w")
 
         self.status = None
-        self.out = ''
-        self.err = ''
+        self.out = ""
+        self.err = ""
         self.cmds = []
 
         if env is not None:
             if ignore_environ:
-                if sys.platform == 'win32':
+                if sys.platform == "win32":
                     # On Windows not all environment variables can be
                     # discarded. At least SYSTEMDRIVE, SYSTEMROOT should be
                     # set. In order to be portable propagate their value in
                     # case the user does not pass them in env when
                     # ignore_environ is set to True.
                     tmp = {}
-                    for var in ('SYSTEMDRIVE', 'SYSTEMROOT'):
+                    for var in ("SYSTEMDRIVE", "SYSTEMROOT"):
                         if var not in env and var in os.environ:
                             tmp[var] = os.environ[var]
                     tmp.update(env)
@@ -327,40 +360,40 @@ class Run(object):
         if timeout is not None:
             rlimit = get_rlimit()
             if os.path.exists(rlimit):
-                rlimit_args = [rlimit, '%d' % timeout]
+                rlimit_args = [rlimit, "%d" % timeout]
             else:
-                logger.warning('cannot find rlimit at %s', rlimit)
+                logger.warning("cannot find rlimit at %s", rlimit)
                 rlimit_args = []
 
         try:
-            if isinstance(cmds[0], basestring):
+            if isinstance(cmds[0], str):
                 self.cmds = rlimit_args + list(add_interpreter_command(cmds))
             else:
                 self.cmds = [add_interpreter_command(c) for c in cmds]
                 self.cmds[0] = rlimit_args + list(self.cmds[0])
 
             cmdlogger.debug(
-                'Run: cd %s; %s',
+                "Run: cd %s; %s",
                 cwd if cwd is not None else os.getcwd(),
-                self.command_line_image())
+                self.command_line_image(),
+            )
 
-            if isinstance(cmds[0], basestring):
+            if isinstance(cmds[0], str):
                 popen_args = {
-                    'stdin': self.input_file.fd,
-                    'stdout': self.output_file.fd,
-                    'stderr': self.error_file.fd,
-                    'cwd': cwd,
-                    'env': env,
-                    'universal_newlines': True}
+                    "stdin": self.input_file.fd,
+                    "stdout": self.output_file.fd,
+                    "stderr": self.error_file.fd,
+                    "cwd": cwd,
+                    "env": env,
+                    "universal_newlines": True,
+                }
 
-                if sys.platform != 'win32' and \
-                        set_sigpipe:  # windows: no cover
+                if sys.platform != "win32" and set_sigpipe:  # windows: no cover
                     # preexec_fn is no supported on windows
-                    popen_args['preexec_fn'] = subprocess_setup
+                    popen_args["preexec_fn"] = subprocess_setup
 
-                if sys.platform == 'win32':
-                    popen_args['creationflags'] = \
-                        subprocess.CREATE_NEW_PROCESS_GROUP
+                if sys.platform == "win32":
+                    popen_args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
                 self.internal = Popen(self.cmds, **popen_args)
 
@@ -384,26 +417,27 @@ class Run(object):
                         txt_mode = False
 
                     popen_args = {
-                        'stdin': stdin,
-                        'stdout': stdout,
-                        'stderr': self.error_file.fd,
-                        'cwd': cwd,
-                        'env': env,
-                        'universal_newlines': txt_mode}
+                        "stdin": stdin,
+                        "stdout": stdout,
+                        "stderr": self.error_file.fd,
+                        "cwd": cwd,
+                        "env": env,
+                        "universal_newlines": txt_mode,
+                    }
 
-                    if sys.platform != 'win32' and \
-                            set_sigpipe:  # windows: no cover
+                    if sys.platform != "win32" and set_sigpipe:  # windows: no cover
                         # preexec_fn is no supported on windows
-                        popen_args['preexec_fn'] = subprocess_setup
+                        popen_args["preexec_fn"] = subprocess_setup
 
-                    if sys.platform == 'win32':
-                        popen_args['creationflags'] = \
-                            subprocess.CREATE_NEW_PROCESS_GROUP
+                    if sys.platform == "win32":
+                        popen_args[
+                            "creationflags"
+                        ] = subprocess.CREATE_NEW_PROCESS_GROUP
 
                     try:
                         runs.append(Popen(cmd, **popen_args))
                     except OSError:
-                        logger.error('error when spawning %s', cmd)
+                        logger.error("error when spawning %s", cmd)
                         # We have an error (e.g. file not found), try to kill
                         # all processes already started.
                         for p in runs:
@@ -449,13 +483,14 @@ class Run(object):
             :type path: str
             """
             logger.error("%s not found", path)
-            e3.log.debug('PATH=%s', os.environ['PATH'])
-            raise OSError(errno.ENOENT,
-                          'No such file or directory, %s not found' % path)
+            e3.log.debug("PATH=%s", os.environ["PATH"])
+            raise OSError(
+                errno.ENOENT, "No such file or directory, %s not found" % path
+            )
 
         # Try to send an helpful message if one of the executable has not
         # been found.
-        if isinstance(cmds[0], basestring):
+        if isinstance(cmds[0], str):
             if which(cmds[0], default=None) is None:
                 not_found(cmds[0])
         else:
@@ -476,9 +511,11 @@ class Run(object):
         # If there is no pipe in the loop then just do a wait. Otherwise
         # in order to avoid blocked processes due to full pipes, use
         # communicate.
-        if self.output_file.fd != subprocess.PIPE and \
-                self.error_file.fd != subprocess.PIPE and \
-                self.input_file.fd != subprocess.PIPE:
+        if (
+            self.output_file.fd != subprocess.PIPE
+            and self.error_file.fd != subprocess.PIPE
+            and self.input_file.fd != subprocess.PIPE
+        ):
             self.status = self.internal.wait()
         else:
             tmp_input = None
@@ -532,7 +569,7 @@ class Run(object):
 
     def interrupt(self):
         """Send SIGINT to the process, kill on Windows."""
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             self.kill()  # Ctrl-C event is unreliable on Windows
         else:
             self.internal.send_signal(signal.SIGINT)
@@ -554,14 +591,14 @@ class Run(object):
         :rtype: list[psutil.Process]
         """
         if psutil is None:  # defensive code
-            raise NotImplementedError('Run.children() require psutil')
+            raise NotImplementedError("Run.children() require psutil")
         return self.internal.children()
 
 
 class File(object):
     """Can be a PIPE, a file object."""
 
-    def __init__(self, name, mode='r'):
+    def __init__(self, name, mode="r"):
         """Create a new File.
 
         :param name: can be PIPE, STDOUT, a filename string, an opened fd, a
@@ -569,26 +606,26 @@ class File(object):
         :param mode: can be 'r' or 'w' if name starts with + the mode will be
             a+ :type mode: str
         """
-        assert mode in 'rw', 'Mode should be r or w'
+        assert mode in "rw", "Mode should be r or w"
 
         self.name = name
         self.to_close = False
-        if isinstance(name, (str, unicode)):
+        if isinstance(name, str):
             # can be a pipe or a filename
-            if mode == 'r' and name.startswith('|'):
+            if mode == "r" and name.startswith("|"):
                 self.fd = subprocess.PIPE
             else:
-                if mode == 'w':
-                    if name.startswith('+'):
-                        open_mode = 'a+'
+                if mode == "w":
+                    if name.startswith("+"):
+                        open_mode = "a+"
                         name = name[1:]
                     else:
-                        open_mode = 'w+'
+                        open_mode = "w+"
                 else:
-                    open_mode = 'r'
+                    open_mode = "r"
 
                 self.fd = open(name, open_mode)
-                if open_mode == 'a+':
+                if open_mode == "a+":
                     self.fd.seek(0, 2)
                 self.to_close = True
 
@@ -629,7 +666,7 @@ def wait_for_processes(process_list, timeout):
     start = time.time()
     remain = timeout
 
-    if sys.platform == 'win32':  # unix: no cover
+    if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.process import process_exit_code, wait_for_objects
 
         handles = [int(p.internal._handle) for p in process_list]
@@ -663,7 +700,7 @@ def wait_for_processes(process_list, timeout):
 
         def handler(signum, frame):
             del signum, frame
-            os.write(fd_w, b'a')
+            os.write(fd_w, b"a")
 
         signal.signal(signal.SIGCHLD, handler)
 
@@ -692,8 +729,9 @@ def wait_for_processes(process_list, timeout):
 
                 remain = timeout - time.time() + start
 
-            logger.warning('no process ended after %f seconds',
-                           time.time() - start)  # defensive code
+            logger.warning(
+                "no process ended after %f seconds", time.time() - start
+            )  # defensive code
 
         finally:
             # Be sure to remove signal handler and close pipe
@@ -710,9 +748,10 @@ def is_running(pid):
 
     :rtype: bool
     """
-    if sys.platform == 'win32':  # unix: no cover
+    if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.native_api import Access, NT
         from e3.os.windows.process import process_exit_code
+
         handle = NT.OpenProcess(Access.PROCESS_QUERY_INFORMATION, False, pid)
 
         try:
@@ -753,7 +792,7 @@ def kill_process_tree(pid, timeout=3):
             e3.log.debug(err)
             return True
 
-    logger.debug('kill_process_tree %s', parent_process)
+    logger.debug("kill_process_tree %s", parent_process)
 
     try:
         children = parent_process.children(recursive=True)
@@ -764,21 +803,22 @@ def kill_process_tree(pid, timeout=3):
     all_processes = [parent_process] + children
     for p in all_processes:
         try:
-            logger.debug('kill process %s (%s)', p, p.cmdline())
+            logger.debug("kill process %s (%s)", p, p.cmdline())
             p.kill()
         except psutil.NoSuchProcess:  # defensive code
             pass
 
     def on_terminate(p):
         """Log info when a process terminate."""
-        logger.info('process %s killed', p)
+        logger.info("process %s killed", p)
 
     try:
         gone, alive = psutil.wait_procs(
-            all_processes, timeout=timeout, callback=on_terminate)
-        e3.log.debug('%d processes killed', len(gone))
+            all_processes, timeout=timeout, callback=on_terminate
+        )
+        e3.log.debug("%d processes killed", len(gone))
         for p in alive:  # defensive code
-            logger.warn('process %s survived kill()', p)
+            logger.warn("process %s survived kill()", p)
 
         return True
     except psutil.TimeoutExpired as err:  # defensive code

@@ -32,72 +32,71 @@ import sphinx_rtd_theme
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['autoapi.extension']
+extensions = ["autoapi.extension"]
 
-autoapi_type = 'python'
-autoapi_dirs = ['../../e3']
+autoapi_type = "python"
+autoapi_dirs = ["../../e3"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
-autoapi_template_dir = 'source/autoapi_templates'
+templates_path = ["_templates"]
+autoapi_template_dir = "source/autoapi_templates"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'e3-core'
-copyright = u'2017, AdaCore'
-author = u'AdaCore'
+project = u"e3-core"
+copyright = u"2017, AdaCore"
+author = u"AdaCore"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = u'21.0'
+version = u"21.0"
 # The full version, including alpha/beta/rc tags.
-release = u'21.0'
+release = u"21.0"
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'e3-coredoc'
+htmlhelp_basename = "e3-coredoc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = { }
+latex_elements = {}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'e3-core.tex', u'e3-core Documentation',
-     u'AdaCore', 'manual'),
+    (master_doc, "e3-core.tex", u"e3-core Documentation", u"AdaCore", "manual")
 ]
 
 
@@ -105,10 +104,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'e3-core', u'e3-core Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "e3-core", u"e3-core Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -117,7 +113,13 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'e3-core', u'e3-core Documentation',
-     author, 'e3-core', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "e3-core",
+        u"e3-core Documentation",
+        author,
+        "e3-core",
+        "One line description of project.",
+        "Miscellaneous",
+    )
 ]

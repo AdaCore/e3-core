@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import collections
 
 import e3.anod.error
@@ -20,18 +18,26 @@ class BuildVar(object):
         assert isinstance(value, collections.Hashable)
         self.name = name
         self.value = value
-        self.kind = 'var'
+        self.kind = "var"
 
     def __str__(self):
-        return '%s=%s' % (self.name, self.value)
+        return "%s=%s" % (self.name, self.value)
 
 
 class Dependency(object):
-
-    def __init__(self, name, product_version=None,
-                 host=None, target=None, build=None, qualifier=None,
-                 local_name=None, require='build_tree',
-                 track=False, **kwargs):
+    def __init__(
+        self,
+        name,
+        product_version=None,
+        host=None,
+        target=None,
+        build=None,
+        qualifier=None,
+        local_name=None,
+        require="build_tree",
+        track=False,
+        **kwargs
+    ):
         """Initialize a Dependency object.
 
         :param name: basename of the Anod spec file (without .anod extension)
@@ -75,13 +81,16 @@ class Dependency(object):
         self.qualifier = qualifier
         self.local_name = local_name if local_name is not None else name
         self.kind = None
-        if require not in ('build_tree', 'installation', 'source_pkg'):
+        if require not in ("build_tree", "installation", "source_pkg"):
             raise e3.anod.error.SpecError(
-                'require should be build_tree, installation or source_pkg'
-                ' not %s.' % require)
-        self.kind = {'build_tree': 'build',
-                     'installation': 'install',
-                     'source_pkg': 'source'}[require]
+                "require should be build_tree, installation or source_pkg"
+                " not %s." % require
+            )
+        self.kind = {
+            "build_tree": "build",
+            "installation": "install",
+            "source_pkg": "source",
+        }[require]
         self.track = track
 
     def env(self, parent, default_env):
@@ -101,17 +110,17 @@ class Dependency(object):
         # For simulation purposes we sometimes load specs as if it was
         # loaded on a non local machine thus 'default' does not correspond
         # to the default build platform of the local machine.
-        if self.build == 'default':
+        if self.build == "default":
             build = default_env.build.platform
         else:
             build = self.build
 
-        if self.host == 'default':
+        if self.host == "default":
             host = default_env.build.platform
         else:
             host = self.host
 
-        if self.target == 'default':
+        if self.target == "default":
             target = default_env.build.platform
         else:
             target = self.target

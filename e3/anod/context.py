@@ -1,11 +1,24 @@
-from __future__ import absolute_import, division, print_function
-
 import e3.log
-from e3.anod.action import (Build, BuildOrDownload, Checkout, CreateSource,
-                            CreateSourceOrDownload, CreateSources, Decision,
-                            DownloadBinary, DownloadSource, GetSource, Install,
-                            InstallSource, Root, Test, UploadBinaryComponent,
-                            Upload, UploadSource, UploadSourceComponent)
+from e3.anod.action import (
+    Build,
+    BuildOrDownload,
+    Checkout,
+    CreateSource,
+    CreateSourceOrDownload,
+    CreateSources,
+    Decision,
+    DownloadBinary,
+    DownloadSource,
+    GetSource,
+    Install,
+    InstallSource,
+    Root,
+    Test,
+    UploadBinaryComponent,
+    Upload,
+    UploadSource,
+    UploadSourceComponent,
+)
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
 from e3.anod.package import UnmanagedSourceBuilder
@@ -14,7 +27,7 @@ from e3.collection.dag import DAG
 from e3.env import BaseEnv
 from e3.error import E3Error
 
-logger = e3.log.getLogger('anod.context')
+logger = e3.log.getLogger("anod.context")
 
 
 class SchedulingError(E3Error):
@@ -58,8 +71,7 @@ class AnodContext(object):
         are conveyed by the plan and not by the specs
     """
 
-    def __init__(self, spec_repository, default_env=None,
-                 reject_duplicates=False):
+    def __init__(self, spec_repository, default_env=None, reject_duplicates=False):
         """Initialize a new context.
 
         :param spec_repository: an Anod repository
@@ -110,14 +122,13 @@ class AnodContext(object):
             env = self.default_env
 
         # Key used for the spec instance cache
-        key = (name, env.build, env.host, env.target, qualifier, kind,
-               source_name)
+        key = (name, env.build, env.host, env.target, qualifier, kind, source_name)
 
         if key not in self.cache:
             # Spec is not in cache so create a new instance
-            self.cache[key] = self.repo.load(name)(qualifier=qualifier,
-                                                   env=env,
-                                                   kind=kind)
+            self.cache[key] = self.repo.load(name)(
+                qualifier=qualifier, env=env, kind=kind
+            )
             if sandbox is not None:
                 self.cache[key].bind_to_sandbox(sandbox)
 
@@ -142,9 +153,7 @@ class AnodContext(object):
         :type args: e3.anod.action.Action
         """
         preds = [k.uid for k in args]
-        self.tree.update_vertex(data.uid, data,
-                                predecessors=preds,
-                                enable_checks=False)
+        self.tree.update_vertex(data.uid, data, predecessors=preds, enable_checks=False)
 
     def add_decision(self, decision_class, root, left, right):
         """Add a decision node.
@@ -176,9 +185,7 @@ class AnodContext(object):
         :type args: list[e3.anod.action.Action]
         """
         preds = [k.uid for k in args]
-        self.tree.update_vertex(action.uid,
-                                predecessors=preds,
-                                enable_checks=False)
+        self.tree.update_vertex(action.uid, predecessors=preds, enable_checks=False)
 
     def __contains__(self, data):
         """Check if a given action is already in the internal DAG.
@@ -221,28 +228,28 @@ class AnodContext(object):
         """
         if self.reject_duplicates:
             previous_tag = self.tree.get_tag(vertex_id=vertex_id)
-            if previous_tag and previous_tag['plan_line'] != plan_line:
+            if previous_tag and previous_tag["plan_line"] != plan_line:
                 raise SchedulingError(
-                    'entries {} and {} conflict because they result in '
-                    'the same build space (id: {}). Check your '
-                    'build_space_name property or your qualifiers'.format(
-                        previous_tag['plan_line'],
-                        plan_line,
-                        vertex_id))
-        self.tree.add_tag(vertex_id,
-                          {'plan_line': plan_line,
-                           'plan_args': plan_args})
+                    "entries {} and {} conflict because they result in "
+                    "the same build space (id: {}). Check your "
+                    "build_space_name property or your qualifiers".format(
+                        previous_tag["plan_line"], plan_line, vertex_id
+                    )
+                )
+        self.tree.add_tag(vertex_id, {"plan_line": plan_line, "plan_args": plan_args})
 
-    def add_anod_action(self,
-                        name,
-                        env=None,
-                        primitive=None,
-                        qualifier=None,
-                        source_packages=None,
-                        upload=True,
-                        plan_line=None,
-                        plan_args=None,
-                        sandbox=None):
+    def add_anod_action(
+        self,
+        name,
+        env=None,
+        primitive=None,
+        qualifier=None,
+        source_packages=None,
+        upload=True,
+        plan_line=None,
+        plan_args=None,
+        sandbox=None,
+    ):
         """Add an Anod action to the context.
 
         :param name: spec name
@@ -268,17 +275,23 @@ class AnodContext(object):
         :rtype: Action
         """
         # First create the subtree for the spec
-        result = self.add_spec(name, env, primitive, qualifier,
-                               source_packages=source_packages,
-                               plan_line=plan_line, plan_args=plan_args,
-                               sandbox=sandbox,
-                               upload=upload)
+        result = self.add_spec(
+            name,
+            env,
+            primitive,
+            qualifier,
+            source_packages=source_packages,
+            plan_line=plan_line,
+            plan_args=plan_args,
+            sandbox=sandbox,
+            upload=upload,
+        )
 
         # Resulting subtree should be connected to the root node
         self.connect(self.root, result)
 
         # Ensure decision is set in case of explicit build or install
-        if primitive == 'build':
+        if primitive == "build":
             build_action = None
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrDownload):
@@ -298,30 +311,34 @@ class AnodContext(object):
                     self.add(upload_bin)
                     # ??? is it needed?
                     if plan_line is not None and plan_args is not None:
-                        self.link_to_plan(vertex_id=upload_bin.uid,
-                                          plan_line=plan_line,
-                                          plan_args=plan_args)
+                        self.link_to_plan(
+                            vertex_id=upload_bin.uid,
+                            plan_line=plan_line,
+                            plan_args=plan_args,
+                        )
                     self.connect(self.root, upload_bin)
                     self.connect(upload_bin, build_action)
 
-        elif primitive == 'install':
+        elif primitive == "install":
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrDownload):
                     el.set_decision(BuildOrDownload.INSTALL, plan_line)
         return result
 
-    def add_spec(self,
-                 name,
-                 env=None,
-                 primitive=None,
-                 qualifier=None,
-                 source_packages=None,
-                 expand_build=True,
-                 source_name=None,
-                 plan_line=None,
-                 plan_args=None,
-                 sandbox=None,
-                 upload=False):
+    def add_spec(
+        self,
+        name,
+        env=None,
+        primitive=None,
+        qualifier=None,
+        source_packages=None,
+        expand_build=True,
+        source_name=None,
+        plan_line=None,
+        plan_args=None,
+        sandbox=None,
+        upload=False,
+    ):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -353,6 +370,7 @@ class AnodContext(object):
             binaries)
         :type upload: bool
         """
+
         def add_action(data, connect_with=None):
             self.add(data)
             if connect_with is not None:
@@ -370,20 +388,31 @@ class AnodContext(object):
             """
             if dep.local_name in spec_instance.deps:
                 raise AnodError(
-                    origin='expand_spec',
-                    message='The spec {} has two dependencies with the same '
-                    'local_name attribute ({})'.format(
-                        spec_instance.name, dep.local_name))
+                    origin="expand_spec",
+                    message="The spec {} has two dependencies with the same "
+                    "local_name attribute ({})".format(
+                        spec_instance.name, dep.local_name
+                    ),
+                )
             spec_instance.deps[dep.local_name] = dep_instance
 
         # Initialize a spec instance
-        e3.log.debug('add spec: name:{}, qualifier:{}, primitive:{}'.format(
-            name, qualifier, primitive))
-        spec = self.load(name, qualifier=qualifier, env=env, kind=primitive,
-                         sandbox=sandbox, source_name=source_name)
+        e3.log.debug(
+            "add spec: name:{}, qualifier:{}, primitive:{}".format(
+                name, qualifier, primitive
+            )
+        )
+        spec = self.load(
+            name,
+            qualifier=qualifier,
+            env=env,
+            kind=primitive,
+            sandbox=sandbox,
+            source_name=source_name,
+        )
 
         # Initialize the resulting action based on the primitive name
-        if primitive == 'source':
+        if primitive == "source":
             if source_name is not None:
                 result = CreateSource(spec, source_name)
 
@@ -407,61 +436,75 @@ class AnodContext(object):
                     sub_result = self.add_spec(
                         name=name,
                         env=env,
-                        primitive='source',
+                        primitive="source",
                         source_name=sb.name,
                         plan_line=plan_line,
                         plan_args=plan_args,
                         sandbox=sandbox,
-                        upload=upload)
+                        upload=upload,
+                    )
                     self.connect(result, sub_result)
 
-        elif primitive == 'build':
+        elif primitive == "build":
             result = Build(spec)
-        elif primitive == 'test':
+        elif primitive == "test":
             result = Test(spec)
-        elif primitive == 'install':
+        elif primitive == "install":
             result = Install(spec)
         else:  # defensive code
-            raise ValueError('add_spec error: %s is not known' % primitive)
+            raise ValueError("add_spec error: %s is not known" % primitive)
 
         # If this action is directly linked with a plan line make sure
         # to register the link between the action and the plan even
         # if the action has already been added via another dependency
         if plan_line is not None and plan_args is not None:
-            self.link_to_plan(vertex_id=result.uid,
-                              plan_line=plan_line,
-                              plan_args=plan_args)
+            self.link_to_plan(
+                vertex_id=result.uid, plan_line=plan_line, plan_args=plan_args
+            )
 
-        if primitive == 'install' and not spec.has_package and \
-                has_primitive(spec, 'build'):
+        if (
+            primitive == "install"
+            and not spec.has_package
+            and has_primitive(spec, "build")
+        ):
             if plan_line is not None and plan_args is not None:
                 # We have an explicit call to install() in the plan but the
                 # spec has no binary package to download.
                 raise SchedulingError(
                     "error in plan at {}: "
-                    "install should be replaced by build".format(plan_line))
+                    "install should be replaced by build".format(plan_line)
+                )
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
             # dependency. In case there is no build primitive and no
             # package keep the install primitive (usually this means there
             # is an overloaded download procedure).
-            return self.add_spec(name, env, 'build',
-                                 qualifier,
-                                 expand_build=False,
-                                 plan_args=plan_args,
-                                 plan_line=plan_line,
-                                 sandbox=sandbox,
-                                 upload=upload)
+            return self.add_spec(
+                name,
+                env,
+                "build",
+                qualifier,
+                expand_build=False,
+                plan_args=plan_args,
+                plan_line=plan_line,
+                sandbox=sandbox,
+                upload=upload,
+            )
 
-        if expand_build and primitive == 'build' and spec.has_package:
+        if expand_build and primitive == "build" and spec.has_package:
             # A build primitive is required and the spec defined a binary
             # package. In that case the implicit post action of the build
             # will be a call to the install primitive
-            return self.add_spec(name, env, 'install', qualifier,
-                                 plan_args=None,
-                                 plan_line=plan_line,
-                                 sandbox=sandbox,
-                                 upload=upload)
+            return self.add_spec(
+                name,
+                env,
+                "install",
+                qualifier,
+                plan_args=None,
+                plan_line=plan_line,
+                sandbox=sandbox,
+                upload=upload,
+            )
 
         # Add this stage if the action is already in the DAG, then it has
         # already been added.
@@ -469,38 +512,39 @@ class AnodContext(object):
             return result
 
         if not has_primitive(spec, primitive):
-            raise SchedulingError('spec %s does not support primitive %s'
-                                  % (name, primitive))
+            raise SchedulingError(
+                "spec %s does not support primitive %s" % (name, primitive)
+            )
 
         # Add the action in the DAG
         add_action(result)
 
-        if primitive == 'install':
+        if primitive == "install":
             # Expand an install node to
             #    install --> decision --> build
             #                         \-> download binary
             download_action = DownloadBinary(spec)
             add_action(download_action)
 
-            if has_primitive(spec, 'build'):
+            if has_primitive(spec, "build"):
                 build_action = self.add_spec(
                     name=name,
                     env=env,
-                    primitive='build',
+                    primitive="build",
                     qualifier=qualifier,
                     expand_build=False,
                     plan_args=None,
                     plan_line=plan_line,
                     sandbox=sandbox,
-                    upload=upload)
-                self.add_decision(BuildOrDownload,
-                                  result,
-                                  build_action,
-                                  download_action)
+                    upload=upload,
+                )
+                self.add_decision(
+                    BuildOrDownload, result, build_action, download_action
+                )
             else:
                 self.connect(result, download_action)
 
-        elif primitive == 'source':
+        elif primitive == "source":
             if source_name is not None:
                 # Also add an UploadSource action
                 if upload:
@@ -508,9 +552,11 @@ class AnodContext(object):
                     self.add(upload_src)
                     # Link the upload to the current context
                     if plan_line is not None and plan_args is not None:
-                        self.link_to_plan(vertex_id=upload_src.uid,
-                                          plan_line=plan_line,
-                                          plan_args=plan_args)
+                        self.link_to_plan(
+                            vertex_id=upload_src.uid,
+                            plan_line=plan_line,
+                            plan_args=plan_args,
+                        )
 
                     self.connect(self.root, upload_src)
                     self.connect(upload_src, result)
@@ -521,31 +567,36 @@ class AnodContext(object):
                             if checkout not in self.repo.repos:
                                 raise SchedulingError(
                                     origin="add_spec",
-                                    message="unknown repository {}".format(
-                                        checkout))
-                            co = Checkout(
-                                checkout, self.repo.repos.get(checkout))
+                                    message="unknown repository {}".format(checkout),
+                                )
+                            co = Checkout(checkout, self.repo.repos.get(checkout))
                             add_action(co, result)
 
         # Look for dependencies
         spec_dependencies = []
-        if '%s_deps' % primitive in dir(spec) and \
-                getattr(spec, '%s_deps' % primitive) is not None:
-            spec_dependencies += getattr(spec, '%s_deps' % primitive)
+        if (
+            "%s_deps" % primitive in dir(spec)
+            and getattr(spec, "%s_deps" % primitive) is not None
+        ):
+            spec_dependencies += getattr(spec, "%s_deps" % primitive)
 
         for e in spec_dependencies:
             if isinstance(e, Dependency):
-                if e.kind == 'source':
+                if e.kind == "source":
                     # A source dependency does not create a new node but
                     # ensure that sources associated with it are available
                     child_instance = self.load(
-                        e.name, kind='source',
-                        env=self.default_env, qualifier=None, sandbox=sandbox)
-                    add_dep(spec_instance=spec,
-                            dep=e,
-                            dep_instance=child_instance)
-                    self.dependencies[spec.uid][e.local_name] = \
-                        (e, spec.deps[e.local_name])
+                        e.name,
+                        kind="source",
+                        env=self.default_env,
+                        qualifier=None,
+                        sandbox=sandbox,
+                    )
+                    add_dep(spec_instance=spec, dep=e, dep_instance=child_instance)
+                    self.dependencies[spec.uid][e.local_name] = (
+                        e,
+                        spec.deps[e.local_name],
+                    )
 
                     continue
 
@@ -557,32 +608,32 @@ class AnodContext(object):
                     plan_args=None,
                     plan_line=plan_line,
                     sandbox=sandbox,
-                    upload=upload)
+                    upload=upload,
+                )
 
-                add_dep(spec_instance=spec,
-                        dep=e,
-                        dep_instance=child_action.anod_instance)
-                self.dependencies[spec.uid][e.local_name] = \
-                    (e, spec.deps[e.local_name])
+                add_dep(
+                    spec_instance=spec, dep=e, dep_instance=child_action.anod_instance
+                )
+                self.dependencies[spec.uid][e.local_name] = (e, spec.deps[e.local_name])
 
-                if e.kind == 'build' and \
-                        self[child_action.uid].data.kind == 'install':
+                if e.kind == "build" and self[child_action.uid].data.kind == "install":
                     # We have a build tree dependency that produced a
                     # subtree starting with an install node. In that case
                     # we expect the user to choose BUILD as decision.
                     dec = self.predecessors(child_action)[0]
                     if isinstance(dec, BuildOrDownload):
                         dec.add_trigger(
-                            result, BuildOrDownload.BUILD,
-                            plan_line if plan_line is not None
-                            else 'unknown line')
+                            result,
+                            BuildOrDownload.BUILD,
+                            plan_line if plan_line is not None else "unknown line",
+                        )
 
                 # Connect child dependency
                 self.connect(result, child_action)
 
         # Look for source dependencies (i.e sources needed)
-        if '%s_source_list' % primitive in dir(spec):
-            source_list = getattr(spec, '{}_source_list'.format(primitive))
+        if "%s_source_list" % primitive in dir(spec):
+            source_list = getattr(spec, "{}_source_list".format(primitive))
             for s in source_list:
                 # set source builder
                 if s.name in self.sources:
@@ -590,8 +641,9 @@ class AnodContext(object):
                 # set other sources to compute source ignore
                 s.set_other_sources(source_list)
                 # add source install node
-                src_install_uid = result.uid.rsplit('.', 1)[0] + \
-                    '.source_install.' + s.name
+                src_install_uid = (
+                    result.uid.rsplit(".", 1)[0] + ".source_install." + s.name
+                )
                 src_install_action = InstallSource(src_install_uid, spec, s)
                 add_action(src_install_action, connect_with=result)
 
@@ -601,9 +653,10 @@ class AnodContext(object):
                     spec_decl, obj = self.sources[s.name]
                 else:
                     raise AnodError(
-                        origin='expand_spec',
-                        message='source %s does not exist '
-                        '(referenced by %s)' % (s.name, result.uid))
+                        origin="expand_spec",
+                        message="source %s does not exist "
+                        "(referenced by %s)" % (s.name, result.uid),
+                    )
 
                 src_get_action = GetSource(obj)
                 if src_get_action in self:
@@ -622,19 +675,22 @@ class AnodContext(object):
                     source_action = self.add_spec(
                         name=spec_decl,
                         env=self.default_env,
-                        primitive='source',
+                        primitive="source",
                         plan_args=None,
                         plan_line=plan_line,
                         source_name=s.name,
                         sandbox=sandbox,
-                        upload=upload)
+                        upload=upload,
+                    )
                     for repo in obj.checkout:
                         r = Checkout(repo, self.repo.repos.get(repo))
                         add_action(r, connect_with=source_action)
-                    self.add_decision(CreateSourceOrDownload,
-                                      src_get_action,
-                                      source_action,
-                                      src_download_action)
+                    self.add_decision(
+                        CreateSourceOrDownload,
+                        src_get_action,
+                        source_action,
+                        src_download_action,
+                    )
         return result
 
     @classmethod
@@ -648,47 +704,61 @@ class AnodContext(object):
         :raise SchedulingError
         """
         if decision.choice is None and decision.expected_choice in (
-                Decision.LEFT, Decision.RIGHT):
+            Decision.LEFT,
+            Decision.RIGHT,
+        ):
 
             if decision.expected_choice == BuildOrDownload.BUILD:
-                msg = 'A spec in the plan has a build_tree dependency' \
-                    ' on {spec}. Either explicitly add the line {plan_line}' \
-                    ' or change the dependency to set' \
+                msg = (
+                    "A spec in the plan has a build_tree dependency"
+                    " on {spec}. Either explicitly add the line {plan_line}"
+                    " or change the dependency to set"
                     ' require="installation" if possible'.format(
                         spec=action.data.name,
-                        plan_line=decision.suggest_plan_fix(
-                            decision.expected_choice))
+                        plan_line=decision.suggest_plan_fix(decision.expected_choice),
+                    )
+                )
             else:
-                msg = 'This plan resolver requires an explicit {}'.format(
-                    decision.suggest_plan_fix(decision.expected_choice))
+                msg = "This plan resolver requires an explicit {}".format(
+                    decision.suggest_plan_fix(decision.expected_choice)
+                )
         elif decision.choice is None and decision.expected_choice is None:
             left_decision = decision.suggest_plan_fix(Decision.LEFT)
             right_decision = decision.suggest_plan_fix(Decision.RIGHT)
-            msg = 'This plan resolver cannot decide whether what to do for' \
-                ' resolving {}.'.format(decision.initiator)
+            msg = (
+                "This plan resolver cannot decide whether what to do for"
+                " resolving {}.".format(decision.initiator)
+            )
             if left_decision is not None and right_decision is not None:
-                msg += ' Please either add {} or {} in the plan'.format(
-                    left_decision,
-                    right_decision)
+                msg += " Please either add {} or {} in the plan".format(
+                    left_decision, right_decision
+                )
         elif decision.choice == Decision.BOTH:
-            msg = 'cannot do both %s and %s' % (decision.left, decision.right)
+            msg = "cannot do both %s and %s" % (decision.left, decision.right)
         else:
-            trigger_decisions = '\n'.join(
-                '{} made by {} initiated by {}'.format(
+            trigger_decisions = "\n".join(
+                "{} made by {} initiated by {}".format(
                     decision.left
-                    if trigger_decision == Decision.LEFT else decision.right,
+                    if trigger_decision == Decision.LEFT
+                    else decision.right,
                     trigger_action,
-                    trigger_plan_line)
-                for (trigger_action,
-                     trigger_decision,
-                     trigger_plan_line)
-                in decision.triggers)
-            msg = 'explicit {} decision made by {} conflicts with the '\
-                'following decision{}:\n{}'.format(
+                    trigger_plan_line,
+                )
+                for (
+                    trigger_action,
+                    trigger_decision,
+                    trigger_plan_line,
+                ) in decision.triggers
+            )
+            msg = (
+                "explicit {} decision made by {} conflicts with the "
+                "following decision{}:\n{}".format(
                     decision.description(decision.get_expected_decision()),
                     decision.decision_maker,
-                    's' if len(decision.triggers) > 1 else '',
-                    trigger_decisions)
+                    "s" if len(decision.triggers) > 1 else "",
+                    trigger_decisions,
+                )
+            )
 
         raise SchedulingError(msg)
 
@@ -743,7 +813,7 @@ class AnodContext(object):
         # be introduced. That's why checks are disabled when creating the
         # result graph.
         for uid, action in rev:
-            if uid == 'root':
+            if uid == "root":
                 # Root node is always in the final DAG
                 dag.update_vertex(uid, action, enable_checks=False)
             elif isinstance(action, Decision):
@@ -752,15 +822,19 @@ class AnodContext(object):
                 # actions.
                 action.apply_triggers(dag)
             elif isinstance(action, Upload):
-                uploads.append((action,
-                                self.tree.get_predecessors(uid)))
+                uploads.append((action, self.tree.get_predecessors(uid)))
             else:
                 # Compute the list of successors for the current node (i.e:
                 # predecessors in the reversed graph). Ignore Upload
                 # nodes as they will be processed only once the scheduling
                 # is done.
-                preds = list([k for k in rev.get_predecessors(uid)
-                              if not isinstance(rev[k], Upload)])
+                preds = list(
+                    [
+                        k
+                        for k in rev.get_predecessors(uid)
+                        if not isinstance(rev[k], Upload)
+                    ]
+                )
 
                 if len(preds) == 1 and isinstance(rev[preds[0]], Decision):
                     decision = rev[preds[0]]
@@ -777,36 +851,41 @@ class AnodContext(object):
 
                     if choice == uid:
                         dag.update_vertex(uid, action, enable_checks=False)
-                        dag.update_vertex(decision.initiator,
-                                          predecessors=[uid],
-                                          enable_checks=False)
+                        dag.update_vertex(
+                            decision.initiator, predecessors=[uid], enable_checks=False
+                        )
                     elif choice is None:
                         # delegate to resolver
                         try:
                             if resolver(action, decision):
-                                dag.update_vertex(uid, action,
-                                                  enable_checks=False)
-                                dag.update_vertex(decision.initiator,
-                                                  predecessors=[uid],
-                                                  enable_checks=False)
+                                dag.update_vertex(uid, action, enable_checks=False)
+                                dag.update_vertex(
+                                    decision.initiator,
+                                    predecessors=[uid],
+                                    enable_checks=False,
+                                )
                         except SchedulingError as e:
                             # In order to help the analysis of a scheduling
                             # error compute the explicit initiators of that
                             # action
                             dag.update_vertex(uid, action, enable_checks=False)
-                            dag.update_vertex(decision.initiator,
-                                              predecessors=[action.uid],
-                                              enable_checks=False)
+                            dag.update_vertex(
+                                decision.initiator,
+                                predecessors=[action.uid],
+                                enable_checks=False,
+                            )
                             rev_graph = dag.reverse_graph()
                             # Initiators are explicit actions (connected to
                             # 'root') that are in the closure of the failing
                             # node.
                             initiators = [
-                                iuid for iuid in rev_graph.get_closure(uid)
-                                if 'root'
-                                in rev_graph.get_predecessors(iuid)]
-                            raise SchedulingError(e.messages, uid=uid,
-                                                  initiators=initiators)
+                                iuid
+                                for iuid in rev_graph.get_closure(uid)
+                                if "root" in rev_graph.get_predecessors(iuid)
+                            ]
+                            raise SchedulingError(
+                                e.messages, uid=uid, initiators=initiators
+                            )
                 else:
                     # An action is scheduled only if one of its successors is
                     # scheduled.
@@ -814,19 +893,19 @@ class AnodContext(object):
                     if successors:
                         dag.update_vertex(uid, action, enable_checks=False)
                         for a in successors:
-                            dag.update_vertex(a,
-                                              predecessors=[uid],
-                                              enable_checks=False)
+                            dag.update_vertex(
+                                a, predecessors=[uid], enable_checks=False
+                            )
 
         # Handle Upload nodes. Add the node only if all predecessors
         # are scheduled.
         for action, predecessors in uploads:
             if len([p for p in predecessors if p not in dag]) == 0:
-                dag.update_vertex(action.uid,
-                                  action,
-                                  predecessors=predecessors,
-                                  enable_checks=False)
+                dag.update_vertex(
+                    action.uid, action, predecessors=predecessors, enable_checks=False
+                )
                 # connect upload to the root node
-                dag.update_vertex('root', predecessors=[action.uid],
-                                  enable_checks=False)
+                dag.update_vertex(
+                    "root", predecessors=[action.uid], enable_checks=False
+                )
         return dag

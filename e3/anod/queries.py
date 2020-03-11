@@ -15,11 +15,11 @@ def get_build_node(anod_instance, context, default=None):
         exist then return default
     :rtype: Anod
     """
-    if anod_instance.kind != 'install':
+    if anod_instance.kind != "install":
         return default
 
-    elif anod_instance.uid[:-8] + '.build' in context.tree:
-        return context[anod_instance.uid[:-8] + '.build'].anod_instance
+    elif anod_instance.uid[:-8] + ".build" in context.tree:
+        return context[anod_instance.uid[:-8] + ".build"].anod_instance
     else:
         return default
 
@@ -42,16 +42,16 @@ def get_source_builder(anod_instance, source_name, local_sources_only=False):
     builder = None
 
     if anod_instance.source_pkg_build is not None:
-        builder = next((b for b in anod_instance.source_pkg_build
-                        if b.name == source_name), None)
+        builder = next(
+            (b for b in anod_instance.source_pkg_build if b.name == source_name), None
+        )
 
     if builder is None and not local_sources_only:
         # If needed look into the deps
-        for dep in anod_instance.deps.values():
-            if dep.kind != 'source':
+        for dep in list(anod_instance.deps.values()):
+            if dep.kind != "source":
                 continue
-            builder = get_source_builder(dep, source_name,
-                                         local_sources_only=True)
+            builder = get_source_builder(dep, source_name, local_sources_only=True)
             if builder is not None:
                 break
     return builder
@@ -60,13 +60,12 @@ def get_source_builder(anod_instance, source_name, local_sources_only=False):
 class SourceClosure(object):
     """Helper object to resolve source closure for a given spec instance."""
 
-    SourceKey = collections.namedtuple(
-        'SourceKey', ['anod_uid', 'src_name', 'publish'])
+    SourceKey = collections.namedtuple("SourceKey", ["anod_uid", "src_name", "publish"])
     PackageKey = collections.namedtuple(
-        'PackageKey', ['anod_uid', 'track', 'has_closure'])
+        "PackageKey", ["anod_uid", "track", "has_closure"]
+    )
 
-    def __init__(self, anod_instance, context, expand_packages=False,
-                 data_key=None):
+    def __init__(self, anod_instance, context, expand_packages=False, data_key=None):
         """Initialize a SourceClosure.
 
         :param anod_instance: an Anod instance
@@ -100,33 +99,33 @@ class SourceClosure(object):
         :type publish: bool
         """
         # If this is an installation add the corresponding package
-        if spec.kind == 'install':
+        if spec.kind == "install":
             has_closure = get_build_node(spec, self.context) is not None
-            self.package_list[
-                self.PackageKey(spec.uid, publish, has_closure)] = None
+            self.package_list[self.PackageKey(spec.uid, publish, has_closure)] = None
             return
 
         # Otherwise consider the sources and recursively iterate on the
         # dependencies.
-        for source in getattr(spec, '%s_source_list' % spec.kind, []):
+        for source in getattr(spec, "%s_source_list" % spec.kind, []):
             publish_source = publish and source.publish
             self.source_list[
-                self.SourceKey(spec.uid, source.name, publish_source)] = None
+                self.SourceKey(spec.uid, source.name, publish_source)
+            ] = None
 
         # Follow dependencies
-        for dep, dep_spec in self.context.dependencies[spec.uid].values():
+        for dep, dep_spec in list(self.context.dependencies[spec.uid].values()):
 
             # Only consider build and install dependency (discard source deps)
-            if dep.kind in ('build', 'install'):
-                if dep_spec.kind == 'install':
+            if dep.kind in ("build", "install"):
+                if dep_spec.kind == "install":
                     # An install dep should be expanded whenever
                     # expand_packages is defined or when there is no component
                     # information generated (i.e: when dep_spec.component is
                     # None)
                     if self.expand_packages or dep_spec.component is None:
-                        dep_spec = get_build_node(dep_spec,
-                                                  context=self.context,
-                                                  default=dep_spec)
+                        dep_spec = get_build_node(
+                            dep_spec, context=self.context, default=dep_spec
+                        )
                 self.compute_closure(dep_spec, publish and dep.track)
 
     def resolve_package(self, spec_uid, data):
@@ -171,23 +170,24 @@ class SourceClosure(object):
         :rtype: list[(T, bool)]
         """
         result = {}
-        for key, src in self.source_list.items():
-            assert src is not None, 'missing resolution'
+        for key, src in list(self.source_list.items()):
+            assert src is not None, "missing resolution"
             result_key = self.data_key(src)
             result[result_key] = [
                 src,
-                result.get(result_key, (None, False))[1] or key.publish]
+                result.get(result_key, (None, False))[1] or key.publish,
+            ]
 
-        for key, pkg in self.package_list.items():
+        for key, pkg in list(self.package_list.items()):
             if not key.has_closure and not key.track:
                 continue
-            assert pkg is not None, 'missing resolution'
+            assert pkg is not None, "missing resolution"
 
             for src, publish in pkg:
                 result_key = self.data_key(src)
 
                 result[result_key] = [
                     src,
-                    result.get(result_key, (None, False))[1] or
-                    (publish and key.track)]
-        return result.values()
+                    result.get(result_key, (None, False))[1] or (publish and key.track),
+                ]
+        return list(result.values())

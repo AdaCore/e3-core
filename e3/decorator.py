@@ -2,7 +2,7 @@
 
 to enable/disable a function, to memoize a function results...
 """
-from __future__ import absolute_import, division, print_function
+
 
 from functools import partial
 
@@ -40,6 +40,7 @@ def disabled(func):
 
     def empty_func(*args, **kargs):
         del args, kargs
+
     return empty_func
 
 
@@ -81,7 +82,7 @@ class memoize(object):
     def __call__(self, *args, **kwargs):
         """Return the cache value if exist, else call func."""
         if kwargs:
-            if len(kwargs) == 1 and kwargs.get('reset_cache'):
+            if len(kwargs) == 1 and kwargs.get("reset_cache"):
                 # special handling of reset_cache, clean the cache
                 if args in self.cache:
                     del self.cache[args]

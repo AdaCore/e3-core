@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import ast
 import imp
 import inspect
@@ -23,7 +21,7 @@ class Plan(object):
     :vartype entry_points: dict
     """
 
-    def __init__(self, data, entry_point_cls=None, plan_ext='.plan'):
+    def __init__(self, data, entry_point_cls=None, plan_ext=".plan"):
         """Initialize a new plan.
 
         :param data: a dictionary defining additional globals to push
@@ -37,10 +35,10 @@ class Plan(object):
             PlanContext._add_action
         :type plan_ext: str
         """
-        self.mod = imp.new_module('_anod_plan_')
+        self.mod = imp.new_module("_anod_plan_")
 
         # Some additional user symbols
-        for k, v in data.iteritems():
+        for k, v in data.items():
             self.mod.__dict__[k] = v
 
         self.entry_points = {}
@@ -50,16 +48,12 @@ class Plan(object):
 
         self.plan_ext = plan_ext
 
-        self.mod.__dict__['machine'] = partial(entry_point,
-                                               self.entry_points,
-                                               Machine,
-                                               'machine')
+        self.mod.__dict__["machine"] = partial(
+            entry_point, self.entry_points, Machine, "machine"
+        )
 
-        for name, cls in entry_point_cls.iteritems():
-            self.mod.__dict__[name] = partial(entry_point,
-                                              self.entry_points,
-                                              cls,
-                                              name)
+        for name, cls in entry_point_cls.items():
+            self.mod.__dict__[name] = partial(entry_point, self.entry_points, cls, name)
 
     def load(self, filename):
         """Load python code from file.
@@ -67,7 +61,7 @@ class Plan(object):
         :param filename: path to the python code
         :type filename: str
         """
-        with open(filename, 'rb') as fd:
+        with open(filename, "rb") as fd:
             source_code = fd.read()
         self.load_chunk(source_code, filename)
 
@@ -75,7 +69,7 @@ class Plan(object):
         """Check plan coding style."""
         del self, code_ast
 
-    def load_chunk(self, source_code, filename='<unknown>'):
+    def load_chunk(self, source_code, filename="<unknown>"):
         """Load a chunk of Python code.
 
         :param source_code: python source code
@@ -85,23 +79,25 @@ class Plan(object):
         """
         code_ast = ast.parse(source_code, filename)
         self.check(code_ast)
-        code = compile(code_ast, filename, 'exec')
-        exec code in self.mod.__dict__
+        code = compile(code_ast, filename, "exec")
+        exec(code, self.mod.__dict__)
 
 
 class PlanContext(object):
     """Context in which a Plan is executed."""
 
-    def __init__(self,
-                 stack=None,
-                 plan=None,
-                 ignore_disabled=True,
-                 server=None,
-                 build=None,
-                 host=None,
-                 target=None,
-                 enabled=True,
-                 **kwargs):
+    def __init__(
+        self,
+        stack=None,
+        plan=None,
+        ignore_disabled=True,
+        server=None,
+        build=None,
+        host=None,
+        target=None,
+        enabled=True,
+        **kwargs
+    ):
         """Initialize an execution context or a scope.
 
         :param stack: stack of BaseEnv object that keep track of scopes. Used
@@ -153,7 +149,7 @@ class PlanContext(object):
             new.enabled = enabled
 
         # Store additional data
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             setattr(new, k, v)
 
         # And push on the stack
@@ -214,11 +210,11 @@ class PlanContext(object):
         :rtype: list[callable]
         """
         # Give access to some useful data during plan execution
-        plan.mod.__dict__['env'] = self.env
-        plan.mod.__dict__['default_env'] = self.default_env
+        plan.mod.__dict__["env"] = self.env
+        plan.mod.__dict__["default_env"] = self.default_env
 
         defaults = partial(PlanContext, self.stack, plan, self.ignore_disabled)
-        plan.mod.__dict__['defaults'] = defaults
+        plan.mod.__dict__["defaults"] = defaults
 
         for a in self.actions:
             # On each action _add_action will be called with first parameter
@@ -256,11 +252,10 @@ class PlanContext(object):
         # a function defined in a plan. Include all these lines separated
         # by ';'. A better fix would be to change plan_line to plan_lines
         # containing a tuple of plan_line.
-        plan_line = 'unknown filename:unknown lineno'
+        plan_line = "unknown filename:unknown lineno"
         # Retrieve the plan line
         try:
-            caller_frames = inspect.getouterframes(
-                frame=inspect.currentframe())
+            caller_frames = inspect.getouterframes(frame=inspect.currentframe())
             caller_frames_in_plan = []
             for frame in caller_frames:
                 if isinstance(frame, tuple):  # py2-only
@@ -277,14 +272,19 @@ class PlanContext(object):
                 # No information ?
                 pass
             elif isinstance(caller_frames_in_plan[0], tuple):  # py2-only
-                plan_line = ';'.join((
-                    '{}:{}'.format(caller_frame[1], caller_frame[2])
-                    for caller_frame in caller_frames_in_plan))
+                plan_line = ";".join(
+                    (
+                        "{}:{}".format(caller_frame[1], caller_frame[2])
+                        for caller_frame in caller_frames_in_plan
+                    )
+                )
             else:  # py3-only
-                plan_line = ';'.join((
-                    '{}:{}'.format(
-                        caller_frame.filename, caller_frame.lineno)
-                    for caller_frame in caller_frames_in_plan))
+                plan_line = ";".join(
+                    (
+                        "{}:{}".format(caller_frame.filename, caller_frame.lineno)
+                        for caller_frame in caller_frames_in_plan
+                    )
+                )
 
         # First create our initial object based on current scope env
         result = self.env.copy()
@@ -297,41 +297,43 @@ class PlanContext(object):
         # coming from environment). For the build, host and target arguments
         # a special processing is done to make the corresponding set_env
         # call on the result BaseEnv object
-        platform = {'build': None, 'host': None, 'target': None}
+        platform = {"build": None, "host": None, "target": None}
 
         # Likewise board argument is used to change only the machine name
         # of the target. ??? change name ???
         board = None
 
-        for k, v in call_args.iteritems():
+        for k, v in call_args.items():
             if k in platform:
                 platform[k] = v
-            elif k == 'board':
+            elif k == "board":
                 board = v
             elif v is not None or not hasattr(result, k):
                 setattr(result, k, v)
 
         # Handle propagation of environment from the context
-        if platform['host'] is None and result.is_canadian:
-            platform['host'] = 'host'
-        if platform['target'] is None and result.is_cross:
-            platform['target'] = 'target'
-        if platform['target'] == result.host.platform:
+        if platform["host"] is None and result.is_canadian:
+            platform["host"] = "host"
+        if platform["target"] is None and result.is_cross:
+            platform["target"] = "target"
+        if platform["target"] == result.host.platform:
             # ??? This special case is temporary ???
             # the goal is avoid cross from a -> a which are
             # not current supported.
             # Plans should be updated to use target='host'
             # instead of target=env.host.platform
-            platform['target'] = 'host'
+            platform["target"] = "host"
 
         result.set_env(**platform)
 
         # If necessary adjust target machine name
         if board is not None:
-            result.set_target(result.target.platform,
-                              result.target.os.version,
-                              board,
-                              result.target.os.mode)
+            result.set_target(
+                result.target.platform,
+                result.target.os.version,
+                board,
+                result.target.os.mode,
+            )
 
         # Set action attribute (with action name)
         result.action = name
@@ -343,10 +345,10 @@ class PlanContext(object):
         self.action_list.append(result)
 
     def __enter__(self):
-        self.plan.mod.__dict__['env'] = self.env
+        self.plan.mod.__dict__["env"] = self.env
         return None
 
     def __exit__(self, _type, _value, _tb):
         del _type, _value, _tb
         self.stack.pop()
-        self.plan.mod.__dict__['env'] = self.env
+        self.plan.mod.__dict__["env"] = self.env

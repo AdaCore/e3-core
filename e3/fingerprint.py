@@ -17,7 +17,6 @@ but updated to the current situation, and compare it with the one
 we previously computed. If different, we should rebuild.
 """
 
-from __future__ import absolute_import, division, print_function
 
 import hashlib
 import json
@@ -29,9 +28,9 @@ from e3.error import E3Error
 from e3.fs import get_filetree_state
 from e3.hash import sha256
 
-logger = e3.log.getLogger('fingerprint')
+logger = e3.log.getLogger("fingerprint")
 
-FINGERPRINT_VERSION = '1.2'
+FINGERPRINT_VERSION = "1.2"
 # This value should be bumped each time computation of the fingerprint changes.
 # This ensures we don't try to compare fingerprints with different meanings.
 
@@ -47,11 +46,11 @@ class Fingerprint(object):
     def __init__(self):
         """Initialise a new fingerprint instance."""
         self.elements = {}
-        self.add('os_version', Env().build.os.version)
+        self.add("os_version", Env().build.os.version)
         # ??? add more detailed information about the build machine so that
         # even a minor OS upgrade trigger a rebuild
 
-        self.add('fingerprint_version', FINGERPRINT_VERSION)
+        self.add("fingerprint_version", FINGERPRINT_VERSION)
 
     def add(self, name, value):
         """Add a fingerprint element.
@@ -62,12 +61,13 @@ class Fingerprint(object):
         :type value: str | unicode
         :raise: E3Error
         """
-        if isinstance(value, (str, unicode)):
+        if isinstance(value, str):
             self.elements[name] = value
         else:
             raise E3Error(
-                'value for %s should be a string got %s' % (name, value),
-                'fingerprint.add')
+                "value for %s should be a string got %s" % (name, value),
+                "fingerprint.add",
+            )
 
     def add_dir(self, path):
         """Add a file tree to the fingerprint.
@@ -75,8 +75,7 @@ class Fingerprint(object):
         :param path: a path to a directory
         :type path: str
         """
-        assert os.path.isdir(path), \
-            'directory %s does not exist' % path
+        assert os.path.isdir(path), "directory %s does not exist" % path
         self.elements[os.path.basename(path)] = get_filetree_state(path)
 
     def add_file(self, filename):
@@ -89,8 +88,7 @@ class Fingerprint(object):
         an element for which key is the basename of the file and value is
         is the sha256 of the content
         """
-        assert os.path.isfile(filename), \
-            'filename %s does not exist' % filename
+        assert os.path.isfile(filename), "filename %s does not exist" % filename
         self.elements[os.path.basename(filename)] = sha256(filename)
 
     def __eq__(self, other):
@@ -146,8 +144,9 @@ class Fingerprint(object):
         if other is None:
             other = Fingerprint()
 
-        assert isinstance(other, Fingerprint), \
-            'can compare only with Fingerprint objects'
+        assert isinstance(
+            other, Fingerprint
+        ), "can compare only with Fingerprint objects"
 
         self_key_set = set(self.elements.keys())
         other_key_set = set(other.elements.keys())
@@ -164,17 +163,16 @@ class Fingerprint(object):
         if len(updated) == 0 and len(new) == 0 and len(obsolete) == 0:
             return None
         else:
-            return {'updated': updated,
-                    'new': new,
-                    'obsolete': obsolete}
+            return {"updated": updated, "new": new, "obsolete": obsolete}
 
     def __str__(self):
         """Return a string representation of the fingerprint.
 
         :rtype: str
         """
-        return '\n'.join(['%s: %s' % (k, self.elements[k])
-                          for k in sorted(self.elements.keys())])
+        return "\n".join(
+            ["%s: %s" % (k, self.elements[k]) for k in sorted(self.elements.keys())]
+        )
 
     def checksum(self):
         """Return the fingerprint's checksum.
@@ -187,13 +185,13 @@ class Fingerprint(object):
         The function ensures that if two fingerprints are equal then
         the returned checksum for each of the fingerprint is equal.
         """
-        key_list = self.elements.keys()
+        key_list = list(self.elements.keys())
         key_list.sort()
         checksum = hashlib.sha256()
         for key in key_list:
             for chunk in (key, self.elements[key]):
-                if isinstance(chunk, unicode):
-                    checksum.update(chunk.encode('utf-8'))
+                if isinstance(chunk, str):
+                    checksum.update(chunk.encode("utf-8"))
                 else:
                     checksum.update(chunk)
         return checksum.hexdigest()
@@ -211,10 +209,9 @@ class Fingerprint(object):
         # (eg: an attribute of the object), we can easily add a new
         # 'metadata' entry as a dictionary, with each element being
         # one piece of metadata we want to save.
-        data = {'fingerprint_version': FINGERPRINT_VERSION,
-                'elements': self.elements}
+        data = {"fingerprint_version": FINGERPRINT_VERSION, "elements": self.elements}
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
     @classmethod
@@ -240,27 +237,29 @@ class Fingerprint(object):
             except ValueError as e:
                 logger.error(
                     "`%s' is not a properly formatted fingerprint file (%s)",
-                    filename, e)
+                    filename,
+                    e,
+                )
                 return None
 
         bad_contents = None
         if not isinstance(data, dict):
-            bad_contents = 'not a dictionary'
-        elif 'fingerprint_version' not in data:
+            bad_contents = "not a dictionary"
+        elif "fingerprint_version" not in data:
             bad_contents = '"fingerprint_version" key missing'
-        elif 'elements' not in data:
+        elif "elements" not in data:
             bad_contents = '"elements" key missing'
         if bad_contents is not None:
-            logger.error("`%s' is not a fingerprint file (%s)",
-                         filename, bad_contents)
+            logger.error("`%s' is not a fingerprint file (%s)", filename, bad_contents)
             return None
 
-        if data['fingerprint_version'] != FINGERPRINT_VERSION:
-            logger.info('Unsupported fingerprint version: %s',
-                        data['fingerprint_version'])
+        if data["fingerprint_version"] != FINGERPRINT_VERSION:
+            logger.info(
+                "Unsupported fingerprint version: %s", data["fingerprint_version"]
+            )
             return None
 
         fingerprint = Fingerprint()
-        fingerprint.elements = data['elements']
+        fingerprint.elements = data["elements"]
 
         return fingerprint

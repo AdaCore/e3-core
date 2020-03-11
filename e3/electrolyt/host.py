@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import yaml
 from e3.env import BaseEnv
 
@@ -10,11 +8,7 @@ class Host(BaseEnv):
     See e3.env.BaseEnv
     """
 
-    def __init__(self,
-                 hostname,
-                 platform,
-                 version,
-                 **kwargs):
+    def __init__(self, hostname, platform, version, **kwargs):
         """Initialize an host entry.
 
         :param hostname: host name
@@ -28,9 +22,7 @@ class Host(BaseEnv):
         :type kwargs: dict
         """
         BaseEnv.__init__(self)
-        self.set_build(name=str(platform),
-                       version=str(version),
-                       machine=str(hostname))
+        self.set_build(name=str(platform), version=str(version), machine=str(hostname))
         self._instance.update(kwargs)
 
 
@@ -60,7 +52,7 @@ class HostDB(object):
         :return: a list of hostnames
         :rtype: list[str]
         """
-        return self.hosts.keys()
+        return list(self.hosts.keys())
 
     def add_host(self, hostname, platform, version, **data):
         """Add/Update a host entry.
@@ -90,16 +82,16 @@ class HostDB(object):
         :param filename: path the yaml file
         :type filename: str
         """
-        with open(filename, 'r') as fd:
+        with open(filename, "r") as fd:
             content = yaml.safe_load(fd)
 
-        for hostname, hostinfo in content.iteritems():
+        for hostname, hostinfo in content.items():
             result = {}
             for key in hostinfo:
-                if key not in ('build_platform', 'build_os_version'):
+                if key not in ("build_platform", "build_os_version"):
                     result[key] = hostinfo[key]
-            platform = hostinfo['build_platform']
-            version = hostinfo['build_os_version']
+            platform = hostinfo["build_platform"]
+            version = hostinfo["build_os_version"]
             self.add_host(hostname, platform, version, **result)
 
     def __getitem__(self, key):

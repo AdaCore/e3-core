@@ -1,4 +1,3 @@
-from __future__ import absolute_import, division, print_function
 import abc
 import json
 import os
@@ -15,7 +14,7 @@ from e3.error import E3Error
 from e3.fs import mkdir
 
 
-logger = e3.log.getLogger('event')
+logger = e3.log.getLogger("event")
 
 
 def unique_id():
@@ -58,21 +57,21 @@ class Event(object):
         # Internal attributes. All other attributes are store in _data. By
         # using this construct we ensure the used cannot modify directly these
         # internal.
-        object.__setattr__(self, '_attachments', {})
-        object.__setattr__(self, '_data', {})
-        object.__setattr__(self, '_closed', False)
-        object.__setattr__(self, '_formatters', {})
+        object.__setattr__(self, "_attachments", {})
+        object.__setattr__(self, "_data", {})
+        object.__setattr__(self, "_closed", False)
+        object.__setattr__(self, "_formatters", {})
 
         self.uid = uid if uid is not None else unique_id()
         self.name = name
         self.begin_time = time.time()
         self.end_time = None
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             self._data[key] = value
 
-        self.set_formatter('begin_time', self.format_date)
-        self.set_formatter('end_time', self.format_date)
+        self.set_formatter("begin_time", self.format_date)
+        self.set_formatter("end_time", self.format_date)
 
     def __enter__(self):
         return self
@@ -95,7 +94,7 @@ class Event(object):
         """Store all attributes in the self._data dict."""
         # Once the event is closed disallow attributes modifications
         if self._closed:
-            raise EventError('event %s (%s) closed' % (self.name, self.uid))
+            raise EventError("event %s (%s) closed" % (self.name, self.uid))
         self._data[name] = value
 
     def __getattr__(self, name):
@@ -103,7 +102,7 @@ class Event(object):
         try:
             return self._data[name]
         except KeyError as e:
-            raise AttributeError(e), None, sys.exc_traceback
+            raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
     def get_attachments(self):
         """Return the list of attachments.
@@ -113,7 +112,7 @@ class Event(object):
         """
         return self._attachments
 
-    def attach_file(self, path, name='log'):
+    def attach_file(self, path, name="log"):
         """Attach log file to the event.
 
         When the event will be submitted, the log file will be attached.
@@ -125,7 +124,7 @@ class Event(object):
         :type name: str
         """
         if self._closed:
-            raise EventError('event $s (%s) closed' % (self.name, self.uid))
+            raise EventError("event $s (%s) closed" % (self.name, self.uid))
         self._attachments[name] = (path, e3.hash.sha1(path))
 
     def close(self):
@@ -136,7 +135,7 @@ class Event(object):
         """
         if not self._closed:
             self.end_time = time.time()
-            object.__setattr__(self, '_closed', True)
+            object.__setattr__(self, "_closed", True)
 
     def format_date(self, key, value):
         """Format timestamp fields.
@@ -164,7 +163,7 @@ class Event(object):
         :rtype: dict
         """
         result = {}
-        for key, value in self._data.items():
+        for key, value in list(self._data.items()):
             if key in self._formatters:
                 d = self._formatters[key](key, value)
                 result.update(d)
@@ -180,13 +179,14 @@ class Event(object):
         :return: json file location
         :rtype: str
         """
-        result = {'data': self.as_dict(),
-                  'attachments': self._attachments,
-                  'closed': self._closed}
+        result = {
+            "data": self.as_dict(),
+            "attachments": self._attachments,
+            "closed": self._closed,
+        }
         mkdir(event_dir)
-        json_filename = os.path.join(
-            event_dir, "%s-%s.json" % (self.uid, unique_id()))
-        with open(json_filename, 'w') as fd:
+        json_filename = os.path.join(event_dir, "%s-%s.json" % (self.uid, unique_id()))
+        with open(json_filename, "w") as fd:
             json.dump(result, fd)
         return json_filename
 
@@ -202,22 +202,20 @@ class Event(object):
         with open(json_filename) as fd:
             event_dict = json.load(fd)
 
-        result = Event(name='unknown')
-        object.__setattr__(result, '_attachments', event_dict['attachments'])
-        object.__setattr__(result, '_data', event_dict['data'])
-        object.__setattr__(result, '_closed', event_dict['closed'])
+        result = Event(name="unknown")
+        object.__setattr__(result, "_attachments", event_dict["attachments"])
+        object.__setattr__(result, "_data", event_dict["data"])
+        object.__setattr__(result, "_closed", event_dict["closed"])
         return result
 
 
-class EventHandler(object):
+class EventHandler(object, metaclass=abc.ABCMeta):
     """Interface to implement in order to be able to send events.
 
     One method needs to be implemented by a new EventManager:
 
     - send_event: method sending an event to an external service
     """
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def send_event(self, event):
@@ -253,7 +251,7 @@ class EventHandler(object):
             The string should not contain the '|' character.
         :rtype: str
         """
-        return ''
+        return ""
 
 
 class EventError(E3Error):
@@ -277,7 +275,7 @@ class EventManager(object):
         """
         status = True
 
-        for handler in self.handlers.values():
+        for handler in list(self.handlers.values()):
             handler_status = handler.send_event(event)
             if not handler_status:
                 status = False
@@ -306,7 +304,7 @@ class EventManager(object):
         :return: an handler class
         :rtype: obj
         """
-        return stevedore.DriverManager('e3.event.handler', name).driver
+        return stevedore.DriverManager("e3.event.handler", name).driver
 
     def add_handler(self, name, *args, **kwargs):
         """Add an handler instance to the manager.
@@ -316,10 +314,10 @@ class EventManager(object):
         :param name: the handler name
         :type name: str
         """
-        logger.info('Add handler %s (%s %s)', name, args, kwargs)
+        logger.info("Add handler %s (%s %s)", name, args, kwargs)
         self.handlers[name] = self.get_handler(name)(*args, **kwargs)
 
-    def load_handlers_from_env(self, var_name='E3_EVENT_HANDLERS'):
+    def load_handlers_from_env(self, var_name="E3_EVENT_HANDLERS"):
         """Add handlers by decoding an env variable.
 
         The variable value should have the following format:
@@ -335,16 +333,21 @@ class EventManager(object):
         :param var_name: the name of the variable
         :type var_name: str
         """
-        handler_cfg_str = os.environ.get(var_name, '')
-        handler_cfg_dict = dict([el.split('=', 1) if '=' in el else (el, '')
-                                 for el in handler_cfg_str.split('|')])
-        for handler_name, handler_config in handler_cfg_dict.items():
+        handler_cfg_str = os.environ.get(var_name, "")
+        handler_cfg_dict = dict(
+            [
+                el.split("=", 1) if "=" in el else (el, "")
+                for el in handler_cfg_str.split("|")
+            ]
+        )
+        for handler_name, handler_config in list(handler_cfg_dict.items()):
             handler = self.get_handler(handler_name)
-            logger.info('Add handler %s (%s)', handler_name, handler_config)
+            logger.info("Add handler %s (%s)", handler_name, handler_config)
             self.handlers[handler_name] = handler(
-                **handler.decode_config(handler_config))
+                **handler.decode_config(handler_config)
+            )
 
-    def handler_config_as_env(self, var_name='E3_EVENT_HANDLERS'):
+    def handler_config_as_env(self, var_name="E3_EVENT_HANDLERS"):
         """Add handlers by decoding an env variable.
 
         :param var_name: the name of the variable containing the handler
@@ -352,9 +355,9 @@ class EventManager(object):
         :type var_name: str
         """
         result = []
-        for handler_name, handler in self.handlers.items():
+        for handler_name, handler in list(self.handlers.items()):
             config_str = handler.encode_config()
-            assert '|' not in config_str
+            assert "|" not in config_str
             result.append("%s=%s" % (handler_name, config_str))
         os.environ[var_name] = "|".join(result)
 
@@ -390,7 +393,7 @@ def add_handler(name, *args, **kwargs):
     return default_manager.add_handler(name, *args, **kwargs)
 
 
-def load_handlers_from_env(var_name='E3_EVENT_HANDLERS'):
+def load_handlers_from_env(var_name="E3_EVENT_HANDLERS"):
     """Load handlers to default manager using env var.
 
     See EventManager.load_handlers_from_env
@@ -401,7 +404,7 @@ def load_handlers_from_env(var_name='E3_EVENT_HANDLERS'):
     return default_manager.load_handlers_from_env(var_name=var_name)
 
 
-def handler_config_as_env(var_name='E3_EVENT_HANDLERS'):
+def handler_config_as_env(var_name="E3_EVENT_HANDLERS"):
     """Export default manager handler configurations into env.
 
     See EventManager.handler_config_as_env

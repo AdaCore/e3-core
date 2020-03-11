@@ -3,7 +3,7 @@
 This package provide a class called Env used to store global
 information. Env is a singleton so there is in fact only one instance.
 """
-from __future__ import absolute_import, division, print_function
+
 
 import abc
 import os
@@ -15,20 +15,22 @@ import e3.os.platform
 from collections import namedtuple
 from e3.platform import Platform
 
-logger = e3.log.getLogger('env')
+logger = e3.log.getLogger("env")
 
 
 # This global variable contains a list of tuples
 # (build platform, host platform) that should not be considered as canadian
 # configurations.
-CANADIAN_EXCEPTIONS = (('x86-windows', 'x86_64-windows'),
-                       ('sparc-solaris', 'sparc64-solaris'))
+CANADIAN_EXCEPTIONS = (
+    ("x86-windows", "x86_64-windows"),
+    ("sparc-solaris", "sparc64-solaris"),
+)
 
 
-EnvInfo = namedtuple('EnvInfo', ['build', 'host', 'target'])
+EnvInfo = namedtuple("EnvInfo", ["build", "host", "target"])
 
 
-class AbstractBaseEnv(object):
+class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
     """Environment Handling.
 
     Abstract class to factorize code between BaseEnv and Env.
@@ -41,8 +43,6 @@ class AbstractBaseEnv(object):
     :ivar main_options: The command-line switches, after parsing by
     the e3.Main class (see the documentation of that class).
     """
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, build=None, host=None, target=None):
@@ -86,9 +86,9 @@ class AbstractBaseEnv(object):
             # compatibility we don't append 64 to darwin host (which is
             # always 64bits).
             suffix = self.host.os.name
-            if self.host.cpu.bits == 64 and self.host.os.name != 'darwin':
-                suffix += '64'
-            return self.target.platform + '-' + suffix
+            if self.host.cpu.bits == 64 and self.host.os.name != "darwin":
+                suffix += "64"
+            return self.target.platform + "-" + suffix
         else:
             # In native concept the platform is equivalent to target.platform
             return self.target.platform
@@ -100,8 +100,7 @@ class AbstractBaseEnv(object):
         :rtype: bool
         """
         if self.build != self.host:
-            if (self.build.platform,
-                    self.host.platform) in CANADIAN_EXCEPTIONS:
+            if (self.build.platform, self.host.platform) in CANADIAN_EXCEPTIONS:
                 return False
             return True
         else:
@@ -118,11 +117,7 @@ class AbstractBaseEnv(object):
         else:
             return False
 
-    def set_build(self,
-                  name=None,
-                  version=None,
-                  machine=None,
-                  mode=None):
+    def set_build(self, name=None, version=None, machine=None, mode=None):
         """Set build platform.
 
         :param name: a string that identify the system to be considered
@@ -145,21 +140,14 @@ class AbstractBaseEnv(object):
         build one. Thus you should call set_build before calling either
         set_host or set_target.
         """
-        e3.log.debug(
-            'set_build (build_name=%s, build_version=%s)',
-            name, version)
-        self.build = Platform.get(platform_name=name,
-                                  version=version,
-                                  machine=machine,
-                                  mode=mode)
+        e3.log.debug("set_build (build_name=%s, build_version=%s)", name, version)
+        self.build = Platform.get(
+            platform_name=name, version=version, machine=machine, mode=mode
+        )
         self.host = self.build
         self.target = self.build
 
-    def set_host(self,
-                 name=None,
-                 version=None,
-                 machine=None,
-                 mode=None):
+    def set_host(self, name=None, version=None, machine=None, mode=None):
         """Set host platform.
 
         :param name: a string that identify the system to be considered
@@ -183,24 +171,19 @@ class AbstractBaseEnv(object):
         equal to the build platform, host_version will be ignored.
         """
         if name is None:
-            name = 'build'
+            name = "build"
 
-        if name == 'target':
+        if name == "target":
             self.host = self.target
-        elif name == 'build':
+        elif name == "build":
             self.host = self.build
         else:
-            self.host = Platform.get(platform_name=name,
-                                     version=version,
-                                     machine=machine,
-                                     mode=mode)
+            self.host = Platform.get(
+                platform_name=name, version=version, machine=machine, mode=mode
+            )
         self.target = self.host
 
-    def set_target(self,
-                   name=None,
-                   version=None,
-                   machine=None,
-                   mode=None):
+    def set_target(self, name=None, version=None, machine=None, mode=None):
         """Set target platform.
 
         :param name: a string that identify the system to be considered
@@ -224,17 +207,16 @@ class AbstractBaseEnv(object):
         host platform.
         """
         if name is None:
-            name = 'host'
+            name = "host"
 
-        if name == 'host':
+        if name == "host":
             self.target = self.host
-        elif name == 'build':
+        elif name == "build":
             self.target = self.build
         else:
-            self.target = Platform.get(platform_name=name,
-                                       version=version,
-                                       machine=machine,
-                                       mode=mode)
+            self.target = Platform.get(
+                platform_name=name, version=version, machine=machine, mode=mode
+            )
 
     def set_env(self, build=None, host=None, target=None):
         """Set build/host/target.
@@ -264,14 +246,15 @@ class AbstractBaseEnv(object):
                 return None
 
             # We expect 4 fields for build and host and target
-            split_value = ([k if k else None for k in value.split(',')] +
-                           [None] * 4)[0:4]
+            split_value = ([k if k else None for k in value.split(",")] + [None] * 4)[
+                0:4
+            ]
 
-            if split_value[0] == 'build':
+            if split_value[0] == "build":
                 return saved_build
-            elif split_value[0] == 'host':
+            elif split_value[0] == "host":
                 return saved_host
-            elif split_value[0] == 'target':
+            elif split_value[0] == "target":
                 return saved_target
             elif not propagate_build_info:
                 return Platform.get(*split_value)
@@ -315,22 +298,26 @@ class AbstractBaseEnv(object):
         """
         result = []
         if not self.build.is_default:
-            result.append(','.join([self.build.platform,
-                                    self.build.os.version]))
+            result.append(",".join([self.build.platform, self.build.os.version]))
         else:
             result.append(None)
 
         if self.host != self.build:
-            result.append(','.join([self.host.platform,
-                                    self.host.os.version]))
+            result.append(",".join([self.host.platform, self.host.os.version]))
         else:
             result.append(None)
 
         if self.target != self.host:
-            result.append(','.join([self.target.platform,
-                                    self.target.os.version,
-                                    self.target.machine,
-                                    self.target.os.mode]))
+            result.append(
+                ",".join(
+                    [
+                        self.target.platform,
+                        self.target.os.version,
+                        self.target.machine,
+                        self.target.os.mode,
+                    ]
+                )
+            )
         else:
             result.append(None)
         return EnvInfo(*result)
@@ -344,13 +331,13 @@ class AbstractBaseEnv(object):
         build_str, host_str, target_str = self.str_triplet()
         result = []
         if build_str is not None:
-            result.append('--build=%s' % build_str)
+            result.append("--build=%s" % build_str)
 
         if host_str is not None:
-            result.append('--host=%s' % host_str)
+            result.append("--host=%s" % host_str)
 
         if target_str is not None:
-            result.append('--target=%s' % target_str)
+            result.append("--target=%s" % target_str)
 
         return result
 
@@ -373,7 +360,7 @@ class AbstractBaseEnv(object):
         if forced_value is not None:
             return forced_value
 
-        attributes = name.split('.')
+        attributes = name.split(".")
         result = self
         for a in attributes:
             if not hasattr(result, a):
@@ -395,7 +382,7 @@ class AbstractBaseEnv(object):
         :param append: if True append, otherwise prepend. Default is prepend
         :type append: bool
         """
-        cls.add_search_path('PATH', path, append)
+        cls.add_search_path("PATH", path, append)
 
     @classmethod
     def add_search_path(cls, env_var, path, append=False):
@@ -410,31 +397,30 @@ class AbstractBaseEnv(object):
         :type append: bool
         """
         if env_var not in os.environ:
-            logger.debug('export {env_var}={path}'.format(
-                env_var=env_var,
-                path=path))
+            logger.debug("export {env_var}={path}".format(env_var=env_var, path=path))
             os.environ[env_var] = path
         else:
             if append:
                 new_path = os.path.pathsep + path
-                logger.debug('export {env_var}=${env_var}{new_path}'.format(
-                    env_var=env_var,
-                    new_path=new_path))
+                logger.debug(
+                    "export {env_var}=${env_var}{new_path}".format(
+                        env_var=env_var, new_path=new_path
+                    )
+                )
                 os.environ[env_var] += new_path
             else:
                 new_path = path + os.path.pathsep + os.environ[env_var]
-                logger.debug('export {env_var}={new_path}'.format(
-                    env_var=env_var,
-                    new_path=new_path))
+                logger.debug(
+                    "export {env_var}={new_path}".format(
+                        env_var=env_var, new_path=new_path
+                    )
+                )
                 os.environ[env_var] = new_path
 
     @property
     def dll_path_var(self):
-        env_var_name = {'windows': 'PATH',
-                        'darwin': 'DYLD_FALLBACK_LIBRARY_PATH'}
-        return env_var_name.get(
-            self.host.os.name.lower(),
-            'LD_LIBRARY_PATH')
+        env_var_name = {"windows": "PATH", "darwin": "DYLD_FALLBACK_LIBRARY_PATH"}
+        return env_var_name.get(self.host.os.name.lower(), "LD_LIBRARY_PATH")
 
     def add_dll_path(self, path, append=False):
         """Add a path to the dynamic libraries search paths.
@@ -456,28 +442,33 @@ class AbstractBaseEnv(object):
             coherent set of base discriminants.
         :rtype: list[str]
         """
-        discs = [self.target.platform, self.target.triplet,
-                 self.target.cpu.endian + '-endian',
-                 self.target.cpu.name,
-                 self.host.os.name + '-host']
+        discs = [
+            self.target.platform,
+            self.target.triplet,
+            self.target.cpu.endian + "-endian",
+            self.target.cpu.name,
+            self.host.os.name + "-host",
+        ]
 
         if self.target.os.is_bareboard:
-            discs.append('bareboard')
+            discs.append("bareboard")
         else:
-            discs.extend((
-                self.target.os.name,
-                self.target.os.name + '-' + self.target.os.version))
-        if self.target.os.name.startswith('vxworks'):  # all: no cover
-            discs.append('vxworks')
+            discs.extend(
+                (
+                    self.target.os.name,
+                    self.target.os.name + "-" + self.target.os.version,
+                )
+            )
+        if self.target.os.name.startswith("vxworks"):  # all: no cover
+            discs.append("vxworks")
         if not self.is_cross:
-            discs.append('native')
+            discs.append("native")
         discs.append("%dbits" % self.target.cpu.bits)
-        if self.target.os.name.lower() == 'windows':
-            discs.append('NT')
+        if self.target.os.name.lower() == "windows":
+            discs.append("NT")
 
-        if (not self.is_cross and not self.is_canadian) and \
-                self.build.is_virtual:
-            discs.append('virtual_machine')  # all: no cover
+        if (not self.is_cross and not self.is_canadian) and self.build.is_virtual:
+            discs.append("virtual_machine")  # all: no cover
 
         return discs
 
@@ -492,8 +483,7 @@ class AbstractBaseEnv(object):
         and in case none of these variables are defined fallback on
         on ``/tmp``.
         """
-        return os.environ.get(
-            'TMPDIR', os.environ.get('TMP', '/tmp'))
+        return os.environ.get("TMPDIR", os.environ.get("TMP", "/tmp"))
 
     def to_dict(self):
         """Get current env as a dictionary.
@@ -504,13 +494,12 @@ class AbstractBaseEnv(object):
         :rtype: dict
         """
         result = {k: v for k, v in self._items()}
-        result['is_canadian'] = self.is_canadian
-        result['is_cross'] = self.is_cross
-        result['platform'] = self.platform
+        result["is_canadian"] = self.is_canadian
+        result["is_cross"] = self.is_cross
+        result["platform"] = self.platform
 
-        for c in ('host', 'target', 'build'):
-            result.update({'%s_%s' % (c, k): v
-                           for k, v in result[c].to_dict().iteritems()})
+        for c in ("host", "target", "build"):
+            result.update({"%s_%s" % (c, k): v for k, v in result[c].to_dict().items()})
             del result[c]
         return result
 
@@ -530,18 +519,18 @@ class AbstractBaseEnv(object):
         except KeyError:
             # Check whether is this a cross, in that case the platform name is:
             # <target-platform>-<host os name>[64]
-            target_name, host = platform.rsplit('-', 1)
-            if host == 'darwin':
-                host_cpu = 'x86_64'
-            elif host == 'solaris':
-                host_cpu = 'sparc'
-            elif host.endswith('64'):
+            target_name, host = platform.rsplit("-", 1)
+            if host == "darwin":
+                host_cpu = "x86_64"
+            elif host == "solaris":
+                host_cpu = "sparc"
+            elif host.endswith("64"):
                 host = host[:-2]
-                host_cpu = 'x86_64'
+                host_cpu = "x86_64"
             else:
-                host_cpu = 'x86'
+                host_cpu = "x86"
             try:
-                e.set_build('%s-%s' % (host_cpu, host))
+                e.set_build("%s-%s" % (host_cpu, host))
                 e.set_target(target_name)
                 found = True
             except KeyError:
@@ -583,7 +572,7 @@ class BaseEnv(AbstractBaseEnv):
         super(BaseEnv, self).__init__(build, host, target)
 
     def __setattr__(self, name, value):
-        if name in ('_instance', '_context'):
+        if name in ("_instance", "_context"):
             object.__setattr__(self, name, value)
         else:
             self._instance[name] = value
@@ -592,10 +581,10 @@ class BaseEnv(AbstractBaseEnv):
         try:
             return self._instance[name]
         except KeyError as e:
-            raise AttributeError(e), None, sys.exc_traceback
+            raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
     def _items(self):
-        return self._instance.iteritems()
+        return iter(self._instance.items())
 
     def copy(self, build=None, host=None, target=None):
         """Copy an env.
@@ -624,13 +613,9 @@ class BaseEnv(AbstractBaseEnv):
         :rtype: BaseEnv
         """
         if env is None:
-            return BaseEnv(build=Env().build,
-                           host=Env().host,
-                           target=Env().target)
+            return BaseEnv(build=Env().build, host=Env().host, target=Env().target)
         else:
-            return BaseEnv(build=env.build,
-                           host=env.host,
-                           target=env.target)
+            return BaseEnv(build=env.build, host=env.host, target=env.target)
 
 
 class Env(AbstractBaseEnv):
@@ -658,12 +643,12 @@ class Env(AbstractBaseEnv):
 
     @property
     def _initialized(self):
-        return 'build' in Env._instance
+        return "build" in Env._instance
 
     def __setattr__(self, name, value):
-        if name == '_instance':
+        if name == "_instance":
             Env._instance = value
-        elif name == '_context':
+        elif name == "_context":
             Env._context = value
         else:
             self._instance[name] = value
@@ -672,10 +657,10 @@ class Env(AbstractBaseEnv):
         try:
             return self._instance[name]
         except KeyError as e:
-            raise AttributeError(e), None, sys.exc_traceback
+            raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
     def _items(self):
-        return self._instance.iteritems()
+        return iter(self._instance.items())
 
     def store(self, filename=None):
         """Save environment into memory or file.
@@ -694,7 +679,7 @@ class Env(AbstractBaseEnv):
         if filename is None:
             self._context.append(pickle.dumps(self._instance))
         else:
-            with open(filename, 'wb+') as fd:
+            with open(filename, "wb+") as fd:
                 pickle.dump(self._instance, fd)
 
     def restore(self, filename=None):
@@ -715,7 +700,7 @@ class Env(AbstractBaseEnv):
             self._instance = pickle.loads(self._context[-1])
             self._context = self._context[:-1]
         elif filename is not None:
-            with open(filename, 'rb') as fd:
+            with open(filename, "rb") as fd:
                 self._instance = pickle.load(fd)
         else:
             return
@@ -724,7 +709,7 @@ class Env(AbstractBaseEnv):
         # Do not use os.environ = self.environ.copy()
         # or it will break the os.environ object and child process
         # will get the old environment.
-        for k in os.environ.keys():
+        for k in list(os.environ.keys()):
             if os.environ[k] != self.environ.get(k, None):
                 del os.environ[k]
         for k in self.environ:

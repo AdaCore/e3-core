@@ -1,5 +1,5 @@
 """Extensions to the standard Python logging system."""
-from __future__ import absolute_import, division, print_function
+
 
 import logging
 import re
@@ -10,8 +10,8 @@ from colorama import Fore, Style
 from tqdm import tqdm
 
 # Define default format for StreamHandler and FileHandler
-DEFAULT_STREAM_FMT = '%(levelname)-8s %(message)s'
-DEFAULT_FILE_FMT = '%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s'
+DEFAULT_STREAM_FMT = "%(levelname)-8s %(message)s"
+DEFAULT_FILE_FMT = "%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s"
 
 # Default output stream (sys.stdout by default, or a file descriptor if
 # activate() is called with a filename.
@@ -52,11 +52,13 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
     """Logging handler when used when progress bars are enabled."""
 
     # Color the log status at the beginning of most log lines
-    color_subst = ((re.compile(r'^(DEBUG)'), Fore.CYAN),
-                   (re.compile(r'^(INFO)'), Style.DIM),
-                   (re.compile(r'^(WARNING)'), Fore.YELLOW),
-                   (re.compile(r'^(ERROR)'), Fore.RED),
-                   (re.compile(r'^(CRITICAL)'), Fore.RED + Style.BRIGHT))
+    color_subst = (
+        (re.compile(r"^(DEBUG)"), Fore.CYAN),
+        (re.compile(r"^(INFO)"), Style.DIM),
+        (re.compile(r"^(WARNING)"), Fore.YELLOW),
+        (re.compile(r"^(ERROR)"), Fore.RED),
+        (re.compile(r"^(CRITICAL)"), Fore.RED + Style.BRIGHT),
+    )
 
     def __init__(self):
         logging.StreamHandler.__init__(self)
@@ -66,21 +68,19 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
 
         # Handle logging on several lines: indent all lines after the first one
         # to be aligned with the first one.
-        msg_first_line = msg.split('\n')[0]
+        msg_first_line = msg.split("\n")[0]
         msg = msg.replace(
-            '\n',
-            '\n_' + ' ' * (len(msg_first_line) - len(record.message) - 1))
+            "\n", "\n_" + " " * (len(msg_first_line) - len(record.message) - 1)
+        )
 
         # Add color
         for reg, color in self.color_subst:
-            msg = re.sub(reg,
-                         color + r'\1' + Fore.RESET + Style.RESET_ALL,
-                         msg)
+            msg = re.sub(reg, color + r"\1" + Fore.RESET + Style.RESET_ALL, msg)
 
         tqdm.write(msg)
 
 
-def getLogger(name=None, prefix='e3'):
+def getLogger(name=None, prefix="e3"):
     """Get a logger with a default handler doing nothing.
 
     Calling this function instead of logging.getLogger will avoid warnings
@@ -94,13 +94,14 @@ def getLogger(name=None, prefix='e3'):
     :type prefix:  str
     :rtype: logging.Logger
     """
+
     class NullHandler(logging.Handler):
         """Handler doing nothing."""
 
         def emit(self, _):
             pass
 
-    logger = logging.getLogger('%s.%s' % (prefix, name))
+    logger = logging.getLogger("%s.%s" % (prefix, name))
 
     if prefix not in __null_handler_set:
         # Make sure that the root logger has at least an handler attached to
@@ -111,11 +112,8 @@ def getLogger(name=None, prefix='e3'):
 
 
 def add_log_handlers(
-        level,
-        log_format,
-        datefmt=None,
-        filename=None,
-        set_default_output=True):
+    level, log_format, datefmt=None, filename=None, set_default_output=True
+):
     """Add log handlers using GMT.
 
     :param level: set the root logger level to the specified level
@@ -145,16 +143,17 @@ def add_log_handlers(
     handler.setFormatter(fmt)
 
     handler.setLevel(level)
-    logging.getLogger('').addHandler(handler)
+    logging.getLogger("").addHandler(handler)
 
 
 def activate(
-        stream_format=DEFAULT_STREAM_FMT,
-        file_format=DEFAULT_FILE_FMT,
-        datefmt=None,
-        level=logging.INFO,
-        filename=None,
-        e3_debug=False):
+    stream_format=DEFAULT_STREAM_FMT,
+    file_format=DEFAULT_FILE_FMT,
+    datefmt=None,
+    level=logging.INFO,
+    filename=None,
+    e3_debug=False,
+):
     """Activate default E3 logging.
 
     :param level: set the root logger level to the specified level
@@ -172,16 +171,12 @@ def activate(
     """
     # By default do not filter anything. What is effectively logged
     # will be defined by setting/unsetting handlers
-    logging.getLogger('').setLevel(logging.DEBUG)
+    logging.getLogger("").setLevel(logging.DEBUG)
     if console_logs:
-        stream_format = '{}: {}'.format(
-            console_logs, file_format)
+        stream_format = "{}: {}".format(console_logs, file_format)
 
     # Set logging handlers
-    add_log_handlers(
-        level=level,
-        log_format=stream_format,
-        datefmt=datefmt)
+    add_log_handlers(level=level, log_format=stream_format, datefmt=datefmt)
 
     # Log to a file if necessary
     if filename is not None:
@@ -189,16 +184,17 @@ def activate(
             level=min(level, logging.DEBUG),
             log_format=file_format,
             datefmt=datefmt,
-            filename=filename)
+            filename=filename,
+        )
 
     if e3_debug:
-        getLogger('debug').setLevel(logging.DEBUG)
+        getLogger("debug").setLevel(logging.DEBUG)
 
 
 # Provide a logger than will provides full debug information when a program
 # using e3.main.Main is called with -v -v
 
-e3_debug_logger = getLogger('debug')
+e3_debug_logger = getLogger("debug")
 e3_debug_logger.setLevel(logging.CRITICAL + 1)
 
 debug = e3_debug_logger.debug

@@ -1,15 +1,13 @@
-from __future__ import absolute_import, division, print_function
-
 import heapq
 import time
 from datetime import datetime
-from Queue import Empty, Queue
+from queue import Empty, Queue
 
 import e3.log
 from e3.collection.dag import DAGIterator
 from e3.job import Job
 
-logger = e3.log.getLogger('job.scheduler')
+logger = e3.log.getLogger("job.scheduler")
 
 # The default maximum duration for a job, in seconds (24 hours).
 DEFAULT_JOB_MAX_DURATION = 3600 * 24
@@ -18,12 +16,14 @@ DEFAULT_JOB_MAX_DURATION = 3600 * 24
 class Scheduler(object):
     """Handle parallel execution of interdependent jobs."""
 
-    def __init__(self,
-                 job_provider,
-                 collect=None,
-                 queues=None,
-                 tokens=1,
-                 job_timeout=DEFAULT_JOB_MAX_DURATION):
+    def __init__(
+        self,
+        job_provider,
+        collect=None,
+        queues=None,
+        tokens=1,
+        job_timeout=DEFAULT_JOB_MAX_DURATION,
+    ):
         """Initialize Scheduler.
 
         :param job_provider: function that returns instances of Job.
@@ -74,12 +74,12 @@ class Scheduler(object):
         if queues is None:
             # If no queues are specificied create a default one
             # with no name.
-            queues = {'default': tokens}
+            queues = {"default": tokens}
 
         self.global_queue_index = 1
 
         # Create the queues
-        for name, max_token in queues.iteritems():
+        for name, max_token in queues.items():
             self.queues[name] = []
             self.tokens[name] = max_token
             self.n_tokens += max_token
@@ -87,7 +87,7 @@ class Scheduler(object):
         # Create a slot reserve. The goal is to give a given job a number
         # which is unique among the active jobs. We need a maximum of
         # self.n_tokens slots
-        self.slots = range(self.n_tokens)
+        self.slots = list(range(self.n_tokens))
 
     def safe_collect(self, *args, **kwargs):
         """Protect call to collect.
@@ -116,9 +116,11 @@ class Scheduler(object):
         :param job_class: a subclass of Job
         :type job_class: () -> Job
         """
+
         def provider(uid, data, predecessors, notify_end):
             del predecessors
             return job_class(uid, data, notify_end)
+
         return provider
 
     def init_state(self, dag):
@@ -154,16 +156,16 @@ class Scheduler(object):
         """
         # The run is considered finished once there is no more job
         # in the DAG, the queues and that no job is running.
-        return self.all_jobs_queued and \
-            self.queued_jobs == 0 and \
-            not self.active_jobs
+        return self.all_jobs_queued and self.queued_jobs == 0 and not self.active_jobs
 
     def log_state(self):
         """Log the current state of the scheduler (internal)."""
-        logger.debug('non-ready?: %s, in queue: %s, running: %s',
-                     not self.all_jobs_queued,
-                     self.queued_jobs,
-                     len(self.active_jobs))
+        logger.debug(
+            "non-ready?: %s, in queue: %s, running: %s",
+            not self.all_jobs_queued,
+            self.queued_jobs,
+            len(self.active_jobs),
+        )
 
     def run(self, dag):
         """Launch the scheduler.
@@ -178,11 +180,10 @@ class Scheduler(object):
                 self.enqueue()
                 self.launch()
                 self.log_state()
-                self.max_active_jobs = max(self.max_active_jobs,
-                                           len(self.active_jobs))
+                self.max_active_jobs = max(self.max_active_jobs, len(self.active_jobs))
                 self.wait()
         except KeyboardInterrupt:
-            logger.info('Interrupting jobs...')
+            logger.info("Interrupting jobs...")
             for p in self.active_jobs:
                 p.interrupt()
                 self.safe_collect(p)
@@ -198,8 +199,9 @@ class Scheduler(object):
         """
         # We use a tuple here to ensure the stability of the queue
         # when two jobs have similar priorities.
-        heapq.heappush(self.queues[job.queue_name],
-                       (-job.priority, self.global_queue_index, job))
+        heapq.heappush(
+            self.queues[job.queue_name], (-job.priority, self.global_queue_index, job)
+        )
         self.global_queue_index += 1
         self.queued_jobs += 1
 
@@ -210,8 +212,7 @@ class Scheduler(object):
 
         try:
             while True:
-                uid, data, predecessors = \
-                    self.dag_iterator.next_element()
+                uid, data, predecessors = self.dag_iterator.next_element()
                 if uid is None:
                     # No more jobs ready
                     return
@@ -220,7 +221,8 @@ class Scheduler(object):
                     uid,
                     data,
                     predecessors=predecessors,
-                    notify_end=self.message_queue.put)
+                    notify_end=self.message_queue.put,
+                )
                 if job.should_skip:
                     self.safe_collect(job)
                     job.on_finish(self)
@@ -261,8 +263,7 @@ class Scheduler(object):
             current_timeout = max(0.1, current_timeout)
 
             try:
-                uid = self.message_queue.get(
-                    block=True, timeout=current_timeout)
+                uid = self.message_queue.get(block=True, timeout=current_timeout)
 
             except Empty:
                 # If after timeout we get an empty result, it means that
@@ -273,15 +274,19 @@ class Scheduler(object):
 
             else:
                 job_index, job = next(
-                    ((index, job)
-                     for index, job in enumerate(self.active_jobs)
-                     if job.uid == uid))
+                    (
+                        (index, job)
+                        for index, job in enumerate(self.active_jobs)
+                        if job.uid == uid
+                    )
+                )
                 ti = job.timing_info
                 logger.debug(
-                    'job %s %s after %s',
+                    "job %s %s after %s",
                     uid,
-                    'interrupted' if job.interrupted else 'finished',
-                    ti.duration)
+                    "interrupted" if job.interrupted else "finished",
+                    ti.duration,
+                )
                 self.slots.append(job.slot)
 
                 # Liberate the resources taken by the job

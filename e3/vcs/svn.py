@@ -6,7 +6,6 @@ Example::
                force_and_clean=True)
 """
 
-from __future__ import absolute_import, division, print_function
 
 import os.path
 import re
@@ -19,7 +18,7 @@ import e3.os.process
 from e3.fs import mkdir, rm
 from e3.vcs import VCSError
 
-logger = e3.log.getLogger('vcs.svn')
+logger = e3.log.getLogger("vcs.svn")
 
 
 class SVNError(VCSError):
@@ -53,11 +52,11 @@ class SVNRepository(object):
         :return: True if unix paths should be used
         :rtype: bool
         """
-        if sys.platform != 'win32':
+        if sys.platform != "win32":
             return True
         else:
-            svn_version = e3.os.process.Run(['svn', '--version']).out
-            if 'cygwin' in svn_version:
+            svn_version = e3.os.process.Run(["svn", "--version"]).out
+            if "cygwin" in svn_version:
                 return True
             else:
                 return False
@@ -73,12 +72,12 @@ class SVNRepository(object):
         """
         repo_path = os.path.abspath(repo_path)
         if not cls.is_unix_svn():
-            if len(repo_path) > 1 and repo_path[1] == ':':
+            if len(repo_path) > 1 and repo_path[1] == ":":
                 # svn info returns the URL with an uppercase letter drive
                 repo_path = repo_path[0].upper() + repo_path[1:]
-            return 'file:///' + repo_path.replace('\\', '/')
+            return "file:///" + repo_path.replace("\\", "/")
         else:  # windows: no cover
-            return 'file://' + e3.os.fs.unixpath(repo_path)
+            return "file://" + e3.os.fs.unixpath(repo_path)
 
     @classmethod
     def create(cls, repo_path, initial_content_path=None):
@@ -98,25 +97,33 @@ class SVNRepository(object):
         :rtype: str
         """
         repo_path = os.path.abspath(repo_path)
-        p = e3.os.process.Run(['svnadmin', 'create', repo_path],
-                              output=cls.log_stream)
+        p = e3.os.process.Run(["svnadmin", "create", repo_path], output=cls.log_stream)
 
         if cls.is_unix_svn():
             initial_content_path = e3.os.fs.unixpath(initial_content_path)
 
         if p.status != 0:
-            raise SVNError("cannot create svn repository in %s" % repo_path,
-                           origin="create")
+            raise SVNError(
+                "cannot create svn repository in %s" % repo_path, origin="create"
+            )
         if initial_content_path is not None:
             p = e3.os.process.Run(
-                ['svn', 'import',
-                 initial_content_path, cls.local_url(repo_path),
-                 '-m', 'Initial import from %s' % initial_content_path],
-                output=cls.log_stream)
+                [
+                    "svn",
+                    "import",
+                    initial_content_path,
+                    cls.local_url(repo_path),
+                    "-m",
+                    "Initial import from %s" % initial_content_path,
+                ],
+                output=cls.log_stream,
+            )
             if p.status != 0:
-                raise SVNError("cannot perform initial import of %s into %s" %
-                               (initial_content_path, repo_path),
-                               origin="create")
+                raise SVNError(
+                    "cannot perform initial import of %s into %s"
+                    % (initial_content_path, repo_path),
+                    origin="create",
+                )
         return cls.local_url(repo_path)
 
     def svn_cmd(self, cmd, **kwargs):
@@ -134,23 +141,26 @@ class SVNRepository(object):
         :raise: SVNError
         """
         if self.__class__.svn_bin is None:
-            svn_binary = e3.os.process.which('svn', default=None)
+            svn_binary = e3.os.process.which("svn", default=None)
             if svn_binary is None:  # defensive code
-                raise SVNError('cannot find svn', 'svn_cmd')
+                raise SVNError("cannot find svn", "svn_cmd")
             self.__class__.svn_bin = e3.os.fs.unixpath(svn_binary)
 
-        if 'output' not in kwargs:
-            kwargs['output'] = self.log_stream
+        if "output" not in kwargs:
+            kwargs["output"] = self.log_stream
 
         p_cmd = [arg for arg in cmd if arg is not None]
         p_cmd.insert(0, self.__class__.svn_bin)
-        p_cmd.append('--non-interactive')
+        p_cmd.append("--non-interactive")
 
         p = e3.os.process.Run(p_cmd, cwd=self.working_copy, **kwargs)
         if p.status != 0:
-            raise SVNError('%s failed (exit status: %d)' %
-                           (e3.os.process.command_line_image(p_cmd), p.status),
-                           origin='svn_cmd', process=p)
+            raise SVNError(
+                "%s failed (exit status: %d)"
+                % (e3.os.process.command_line_image(p_cmd), p.status),
+                origin="svn_cmd",
+                process=p,
+            )
         return p
 
     def get_info(self, item):
@@ -160,12 +170,13 @@ class SVNRepository(object):
         :rtype: str
         :raise: SVNError
         """
-        info = self.svn_cmd(['info'], output=PIPE).out
-        m = re.search(r'^{item}: *(.*)\n'.format(item=item), info, flags=re.M)
+        info = self.svn_cmd(["info"], output=PIPE).out
+        m = re.search(r"^{item}: *(.*)\n".format(item=item), info, flags=re.M)
         if m is None:
-            logger.debug('svn info result:\n%s', info)
-            raise SVNError('Cannot fetch item %s from svn_info' % item,
-                           origin='get_info')
+            logger.debug("svn info result:\n%s", info)
+            raise SVNError(
+                "Cannot fetch item %s from svn_info" % item, origin="get_info"
+            )
         return m.group(1).strip()
 
     @property
@@ -175,7 +186,7 @@ class SVNRepository(object):
         :rtype: str
         :raise: SVNError
         """
-        return self.get_info('URL')
+        return self.get_info("URL")
 
     @property
     def current_revision(self):
@@ -185,7 +196,7 @@ class SVNRepository(object):
         :raise: SVNError
         """
         try:
-            return self.get_info('Last Changed Rev')
+            return self.get_info("Last Changed Rev")
         except Exception:
             logger.exception("Cannot fetch last changed rev")
             raise SVNError("Cannot fetch last changed rev", "svn_cmd")
@@ -210,41 +221,46 @@ class SVNRepository(object):
         :rtype: bool
         :raise: SVNError
         """
+
         def is_clean_svn_dir(dir_path):
             """Return a tuple (True if dir is SVN directory, True if clean)."""
-            if os.path.exists(os.path.join(dir_path, '.svn')):
+            if os.path.exists(os.path.join(dir_path, ".svn")):
                 try:
-                    status = self.svn_cmd(['status'], output=PIPE).out.strip()
+                    status = self.svn_cmd(["status"], output=PIPE).out.strip()
                 except SVNError:  # defensive code
                     return False, False
-                if 'warning: W' in status:
+                if "warning: W" in status:
                     return False, False
-                return True, status == ''
+                return True, status == ""
             return False, False
 
         def is_empty_dir(dir_path):
             """Return True if the path is a directory and is empty."""
             return os.path.isdir(dir_path) and not os.listdir(dir_path)
 
-        options = ['--ignore-externals']
+        options = ["--ignore-externals"]
         if revision:
-            options += ['-r', revision]
+            options += ["-r", revision]
         if force_and_clean:
-            options += ['--force']
+            options += ["--force"]
 
         is_svn_dir, is_clean = is_clean_svn_dir(self.working_copy)
-        if is_svn_dir and (is_clean or not force_and_clean) and \
-                (not url or self.url == url):
-            self.svn_cmd(['update'] + options)
+        if (
+            is_svn_dir
+            and (is_clean or not force_and_clean)
+            and (not url or self.url == url)
+        ):
+            self.svn_cmd(["update"] + options)
             return not is_clean
         if os.path.exists(self.working_copy):
             if not is_empty_dir(self.working_copy) and not force_and_clean:
-                raise SVNError('not empty {}'.format(
-                    self.working_copy, url), origin='update')
+                raise SVNError(
+                    "not empty {}".format(self.working_copy, url), origin="update"
+                )
             if is_svn_dir and not url:
                 url = self.url
             rm(self.working_copy, recursive=True)
 
         mkdir(self.working_copy)
-        self.svn_cmd(['checkout', url, '.'] + options)
+        self.svn_cmd(["checkout", url, "."] + options)
         return not is_clean

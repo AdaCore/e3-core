@@ -23,7 +23,7 @@ will also be provided::
     --host       to set the host
     --target     to set the target
 """
-from __future__ import absolute_import, division, print_function
+
 
 import logging
 import os
@@ -41,8 +41,7 @@ class Main(object):
     :ivar args: list of positional parameters after processing options
     """
 
-    def __init__(self, name=None,
-                 platform_args=False):
+    def __init__(self, name=None, platform_args=False):
         """Initialize Main object.
 
         :param name: name of the program (if not specified the filename without
@@ -56,7 +55,7 @@ class Main(object):
         # cleanup steps when killed by rlimit. rlimit first send a SIGTERM
         # then a SIGKILL 5 seconds later
 
-        main = sys.modules['__main__']
+        main = sys.modules["__main__"]
 
         if name is not None:
             self.name = name
@@ -64,60 +63,68 @@ class Main(object):
             self.name = os.path.splitext(os.path.basename(main.__file__))[0]
 
         from argparse import ArgumentParser
+
         argument_parser = ArgumentParser()
 
-        log_group = argument_parser.add_argument_group(
-            title='Logging arguments')
+        log_group = argument_parser.add_argument_group(title="Logging arguments")
         log_group.add_argument(
-            '-v', '--verbose',
-            action='count',
+            "-v",
+            "--verbose",
+            action="count",
             default=0,
-            help='make the log outputted on the console more verbose (this '
-                 'sets the log level to DEBUG)')
+            help="make the log outputted on the console more verbose (this "
+            "sets the log level to DEBUG)",
+        )
         log_group.add_argument(
-            '--log-file',
-            metavar='FILE',
+            "--log-file",
+            metavar="FILE",
             default=None,
-            help='store all the logs into the specified file')
+            help="store all the logs into the specified file",
+        )
         log_group.add_argument(
-            '--loglevel',
+            "--loglevel",
             default=logging.INFO,
-            help='set the console log level',
+            help="set the console log level",
             choices={
-                'DEBUG': logging.DEBUG,
-                'INFO': logging.INFO,
-                'ERROR': logging.ERROR,
-                'CRITICAL': logging.CRITICAL})
+                "DEBUG": logging.DEBUG,
+                "INFO": logging.INFO,
+                "ERROR": logging.ERROR,
+                "CRITICAL": logging.CRITICAL,
+            },
+        )
         log_group.add_argument(
-            '--nocolor',
+            "--nocolor",
             default=False,
             action="store_true",
-            help='disable color and progress bars')
+            help="disable color and progress bars",
+        )
         log_group.add_argument(
-            '--console-logs',
+            "--console-logs",
             metavar="LINE_PREFIX",
-            help='disable color, progress bars, and redirect as much as'
-            ' possible to stdout, starting lines with the given prefix')
+            help="disable color, progress bars, and redirect as much as"
+            " possible to stdout, starting lines with the given prefix",
+        )
 
         if platform_args:
-            plat_group = argument_parser.add_argument_group(
-                title='Platform arguments')
+            plat_group = argument_parser.add_argument_group(title="Platform arguments")
             plat_group.add_argument(
-                '--build',
+                "--build",
                 default=None,  # to force autodetection
-                help='Set the build platform and build os version')
+                help="Set the build platform and build os version",
+            )
             plat_group.add_argument(
-                '--host',
+                "--host",
                 default=None,  # to force autodetection
-                help='Set the host platform, host os version',
-                metavar='HOST[,HOST_VERSION]')
+                help="Set the host platform, host os version",
+                metavar="HOST[,HOST_VERSION]",
+            )
             plat_group.add_argument(
-                '--target',
+                "--target",
                 default=None,  # to force autodetection
-                help='Set the target platform, target os version, '
-                     'target machine, and target mode',
-                metavar='TARGET[,TARGET_VERSION[,TARGET_MACHINE[,'
-                        'TARGET_MODE]]]')
+                help="Set the target platform, target os version, "
+                "target machine, and target mode",
+                metavar="TARGET[,TARGET_VERSION[,TARGET_MACHINE[," "TARGET_MODE]]]",
+            )
             # We add a default to a fake option as a way to encode
             # the fact that this parser supports the standard
             # --build/host/target options. That way, after the parser
@@ -143,10 +150,10 @@ class Main(object):
             :param frame: the interrupted stack frame
             """
             del sig, frame
-            logging.critical('SIGTERM received')
-            raise SystemExit('SIGTERM received')
+            logging.critical("SIGTERM received")
+            raise SystemExit("SIGTERM received")
 
-        if sys.platform != 'win32':  # unix-only
+        if sys.platform != "win32":  # unix-only
             signal.signal(signal.SIGTERM, sigterm_handler)
 
     def parse_args(self, args=None, known_args_only=False):
@@ -177,17 +184,16 @@ class Main(object):
             if self.args.console_logs:
                 e3.log.console_logs = self.args.console_logs
 
-            e3.log.activate(level=level, filename=self.args.log_file,
-                            e3_debug=self.args.verbose > 1)
+            e3.log.activate(
+                level=level, filename=self.args.log_file, e3_debug=self.args.verbose > 1
+            )
             self.__log_handlers_set = True
 
         # Export options to env
         e = Env()
         e.main_options = self.args
 
-        if hasattr(self.args, 'e3_main_platform_args_supported'):
-            e3.log.debug('parsing --build/--host/--target')
+        if hasattr(self.args, "e3_main_platform_args_supported"):
+            e3.log.debug("parsing --build/--host/--target")
             # Handle --build, --host, and --target arguments
-            e.set_env(self.args.build,
-                      self.args.host,
-                      self.args.target)
+            e.set_env(self.args.build, self.args.host, self.args.target)

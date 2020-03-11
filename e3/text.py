@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import re
 
 
@@ -17,8 +15,8 @@ def format_with_dict(pattern, values):
 
     :rtype: str
     """
-    key_regexp = r"|".join([r'\(%s\)' % k for k in values])
-    result = re.sub(r'%%(?!%s)' % key_regexp, r'%%', pattern)
+    key_regexp = r"|".join([r"\(%s\)" % k for k in values])
+    result = re.sub(r"%%(?!%s)" % key_regexp, r"%%", pattern)
     return result % values
 
 
@@ -35,7 +33,7 @@ def bytes_as_str(content):
     :rtype: str
     """
     try:
-        result = content.decode('utf-8')
+        result = content.decode("utf-8")
     except UnicodeDecodeError:
         # The default representation for bytes in python returns
         # b'content' and escape various characters. To make the
@@ -43,11 +41,13 @@ def bytes_as_str(content):
         # and unescape LF character.
         if isinstance(content, str):
             # Python 2.x case
-            result = "".join([
-                c if 32 <= ord(c) <= 126 or ord(c) == 10
-                else '\\x%02x' % ord(c)
-                for c in content])
+            result = "".join(
+                [
+                    c if 32 <= ord(c) <= 126 or ord(c) == 10 else "\\x%02x" % ord(c)
+                    for c in content
+                ]
+            )
         else:
             # Python 3.x case
-            result = str(content)[2:-1].replace('\\n', '\n')
+            result = str(content)[2:-1].replace("\\n", "\n")
     return result

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import imp
 import inspect
 import os
@@ -12,7 +10,7 @@ from e3.anod.error import SandBoxError
 from e3.anod.spec import __version__
 from e3.fs import ls
 
-logger = e3.log.getLogger('anod.loader')
+logger = e3.log.getLogger("anod.loader")
 
 
 class AnodSpecRepository(object):
@@ -35,41 +33,41 @@ class AnodSpecRepository(object):
             AnodSpecRepository
         :type spec_config: dict | SandboxConfig
         """
-        logger.debug('initialize spec repository (%s)', spec_dir)
+        logger.debug("initialize spec repository (%s)", spec_dir)
 
         if not os.path.isdir(spec_dir):
-            raise SandBoxError(
-                'spec directory %s does not exist' % spec_dir)
+            raise SandBoxError("spec directory %s does not exist" % spec_dir)
         self.spec_dir = spec_dir
         self.api_version = __version__
         self.specs = {}
         self.repos = {}
 
         # Look for all spec files and data files
-        spec_list = {os.path.basename(os.path.splitext(k)[0]): {'path': k,
-                                                                'data': []}
-                     for k in ls(os.path.join(self.spec_dir, '*.anod'),
-                                 emit_log_record=False)}
-        logger.debug('found %s specs', len(spec_list))
+        spec_list = {
+            os.path.basename(os.path.splitext(k)[0]): {"path": k, "data": []}
+            for k in ls(os.path.join(self.spec_dir, "*.anod"), emit_log_record=False)
+        }
+        logger.debug("found %s specs", len(spec_list))
 
         # API == 1.4
-        yaml_files = ls(os.path.join(self.spec_dir, '*.yaml'),
-                        emit_log_record=False)
+        yaml_files = ls(os.path.join(self.spec_dir, "*.yaml"), emit_log_record=False)
         data_list = [os.path.basename(k)[:-5] for k in yaml_files]
-        logger.debug('found %s yaml files API 1.4 compatible', len(data_list))
+        logger.debug("found %s yaml files API 1.4 compatible", len(data_list))
 
         # Match yaml files with associated specifications
         for data in data_list:
-            candidate_specs = [spec_file for spec_file in spec_list
-                               if data.startswith(spec_file)]
+            candidate_specs = [
+                spec_file for spec_file in spec_list if data.startswith(spec_file)
+            ]
             # We pick the longuest spec name
             candidate_specs.sort(key=len)
             if candidate_specs:
-                spec_list[candidate_specs[-1]]['data'].append(data)
+                spec_list[candidate_specs[-1]]["data"].append(data)
 
         # Find yaml files that are API >= 1.5 compatible
-        new_yaml_files = ls(os.path.join(self.spec_dir, '*', '*.yaml'),
-                            emit_log_record=False)
+        new_yaml_files = ls(
+            os.path.join(self.spec_dir, "*", "*.yaml"), emit_log_record=False
+        )
 
         for yml_f in new_yaml_files:
             associated_spec = os.path.basename(os.path.dirname(yml_f))
@@ -79,27 +77,26 @@ class AnodSpecRepository(object):
                 # We're recording the relative path without the extension
                 suffix, _ = os.path.splitext(os.path.basename(yml_f))
 
-                spec_list[associated_spec]['data'].append(
-                    os.path.join(associated_spec, suffix))
+                spec_list[associated_spec]["data"].append(
+                    os.path.join(associated_spec, suffix)
+                )
 
         # Create AnodModule objects
-        for name, value in spec_list.iteritems():
+        for name, value in spec_list.items():
             self.specs[name] = AnodModule(name, **value)
 
         # Load config/repositories.yaml
-        repo_file = os.path.join(self.spec_dir, 'config', 'repositories.yaml')
+        repo_file = os.path.join(self.spec_dir, "config", "repositories.yaml")
         if os.path.isfile(repo_file):
             with open(repo_file) as fd:
                 self.repos = yaml.safe_load(fd)
 
         # Declare spec prolog
-        prolog_file = os.path.join(spec_dir, 'prolog.py')
-        self.prolog_dict = {'spec_config': spec_config,
-                            '__spec_repository': self}
+        prolog_file = os.path.join(spec_dir, "prolog.py")
+        self.prolog_dict = {"spec_config": spec_config, "__spec_repository": self}
         if os.path.exists(prolog_file):
             with open(prolog_file) as f:
-                exec(compile(f.read(), prolog_file, 'exec'),
-                     self.prolog_dict)
+                exec(compile(f.read(), prolog_file, "exec"), self.prolog_dict)
 
     def __contains__(self, item):
         """Check by name if a spec is present in the repository.
@@ -134,7 +131,6 @@ class AnodSpecRepository(object):
 
 
 class AnodModule(object):
-
     def __init__(self, name, path, data):
         """Initialize an AnodModule instance.
 
@@ -172,10 +168,10 @@ class AnodModule(object):
         if self.is_loaded:
             return self.anod_class
 
-        logger.debug('loading anod spec: %s', self.name)
+        logger.debug("loading anod spec: %s", self.name)
 
         # Create a new module
-        mod_name = 'anod_' + self.name
+        mod_name = "anod_" + self.name
         anod_module = imp.new_module(mod_name)
 
         try:
@@ -184,15 +180,14 @@ class AnodModule(object):
                 anod_module.__dict__.update(repository.prolog_dict)
 
                 # Exec spec code
-                code = compile(fd.read(), self.path, 'exec')
+                code = compile(fd.read(), self.path, "exec")
                 exec(code, anod_module.__dict__)
         except Exception as e:
-            logger.error('exception: %s', e)
-            logger.error('cannot load code of %s', self.name)
+            logger.error("exception: %s", e)
+            logger.error("cannot load code of %s", self.name)
             raise SandBoxError(
-                origin='load',
-                message='invalid spec code for %s' % self.name), \
-                None, sys.exc_traceback
+                origin="load", message="invalid spec code for %s" % self.name
+            ).with_traceback(sys.exc_info()[2])
 
         # At this stage we have loaded completely the module. Now we need to
         # look for a subclass of Anod. Use python inspection features to
@@ -201,8 +196,11 @@ class AnodModule(object):
         for members in inspect.getmembers(anod_module):
             _, value = members
             # Return the first subclass of Anod defined in this module
-            if inspect.isclass(value) and value.__module__ == mod_name \
-                    and 'Anod' in [k.__name__ for k in value.__mro__]:
+            if (
+                inspect.isclass(value)
+                and value.__module__ == mod_name
+                and "Anod" in [k.__name__ for k in value.__mro__]
+            ):
                 # This class is a child of Anod so register it.
                 # Note that even if we won't use directly the
                 # module we need to keep a reference on it in order
@@ -219,9 +217,8 @@ class AnodModule(object):
                 self.anod_class.api_version = repository.api_version
                 return self.anod_class
 
-        logger.error('spec %s does not contains an Anod subclass', self.name)
-        raise SandBoxError('cannot find Anod subclass in %s' % self.path,
-                           'load')
+        logger.error("spec %s does not contains an Anod subclass", self.name)
+        raise SandBoxError("cannot find Anod subclass in %s" % self.path, "load")
 
 
 def spec(name):
@@ -237,8 +234,8 @@ def spec(name):
     """
     spec_repository = None
     for k in inspect.stack()[1:]:
-        if '__spec_repository' in k[0].f_globals:
-            spec_repository = k[0].f_globals['__spec_repository']
+        if "__spec_repository" in k[0].f_globals:
+            spec_repository = k[0].f_globals["__spec_repository"]
             break
 
     return spec_repository.load(name)

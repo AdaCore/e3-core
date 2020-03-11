@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 import sys
 import traceback
@@ -14,7 +12,7 @@ from e3.job import Job
 from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
 
-logger = e3.log.getLogger('electrolyt.exec')
+logger = e3.log.getLogger("electrolyt.exec")
 STATUS = ReturnValue
 
 
@@ -32,9 +30,17 @@ class ElectrolytJob(Job):
     :vartype store: e3.store.backends.base.Store
     """
 
-    def __init__(self, uid, data, notify_end, spec_repo, sandbox, store,
-                 force_status=STATUS.unknown,
-                 dry_run=False):
+    def __init__(
+        self,
+        uid,
+        data,
+        notify_end,
+        spec_repo,
+        sandbox,
+        store,
+        force_status=STATUS.unknown,
+        dry_run=False,
+    ):
         """Initialize the context of the job.
 
         :param uid: uid of the job
@@ -66,8 +72,8 @@ class ElectrolytJob(Job):
             except Exception as e:
                 self.__status = STATUS.failure
                 logger.error(
-                    'Exception occurred in action %s %s',
-                    self.data.run_method, e)
+                    "Exception occurred in action %s %s", self.data.run_method, e
+                )
                 _, _, exc_traceback = sys.exc_info()
                 logger.error(traceback.format_tb(exc_traceback))
 
@@ -79,8 +85,9 @@ class ElectrolytJob(Job):
     def run_anod_primitive(self, primitive=None):
         """Run an anod primitive after setting up the sandbox."""
         self.data.anod_instance.sandbox = self.sandbox
-        anod_driver = AnodDriver(anod_instance=self.data.anod_instance,
-                                 store=self.store)
+        anod_driver = AnodDriver(
+            anod_instance=self.data.anod_instance, store=self.store
+        )
         anod_driver.activate(self.data.anod_instance.sandbox, self.spec_repo)
         anod_driver.anod_instance.build_space.create(quiet=True)
         getattr(anod_driver.anod_instance, primitive)()
@@ -88,24 +95,24 @@ class ElectrolytJob(Job):
 
     def do_build(self):
         """Run anod build primitive."""
-        return self.run_anod_primitive('build')
+        return self.run_anod_primitive("build")
 
     def do_install(self):
         """Run anod install primitive."""
-        return self.run_anod_primitive('install')
+        return self.run_anod_primitive("install")
 
     def do_test(self):
         """Run anod test primitive."""
-        return self.run_anod_primitive('test')
+        return self.run_anod_primitive("test")
 
     def do_checkout(self):
         """Get sources from vcs to sandbox vcs_dir."""
         repo_name = self.data.repo_name
-        repo_url = self.data.repo_data['url']
-        repo_revision = self.data.repo_data['revision']
-        repo_vcs = self.data.repo_data['vcs']
-        if repo_vcs != 'git':
-            logger.error('%s vcs type not supported', repo_vcs)
+        repo_url = self.data.repo_data["url"]
+        repo_revision = self.data.repo_data["revision"]
+        repo_vcs = self.data.repo_data["vcs"]
+        if repo_vcs != "git":
+            logger.error("%s vcs type not supported", repo_vcs)
             self.__status = STATUS.failure
             return
         repo_dir = os.path.join(self.sandbox.vcs_dir, repo_name)
@@ -119,10 +126,11 @@ class ElectrolytJob(Job):
     def do_createsource(self):
         """Prepare src from vcs to cache using sourcebuilders."""
         source_name = self.data.source_name
-        tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, 'cache')
+        tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, "cache")
         src = self.sandbox.vcs_dir
-        src_builder = get_source_builder(self.data.anod_instance,
-                                         source_name, local_sources_only=True)
+        src_builder = get_source_builder(
+            self.data.anod_instance, source_name, local_sources_only=True
+        )
         if src_builder is not None:
             repo_dict = {}
             src_dir = os.path.join(src, src_builder.checkout[0])
@@ -132,7 +140,7 @@ class ElectrolytJob(Job):
             mkdir(dest_dir)
             src_builder.prepare_src(repo_dict, dest_dir)
             self.__status = STATUS.success
-            logger.debug('%s created in cache/tmp', source_name)
+            logger.debug("%s created in cache/tmp", source_name)
         return
 
     def do_getsource(self):
@@ -150,15 +158,13 @@ class ElectrolytJob(Job):
         anod_instance = AnodDriver(anod_instance=spec, store=self.store)
         anod_instance.activate(self.sandbox, self.spec_repo)
         source = self.data.source
-        src_dir = os.path.join(self.sandbox.tmp_dir,
-                               'cache',
-                               source.name)
+        src_dir = os.path.join(self.sandbox.tmp_dir, "cache", source.name)
         if not source.dest:
             dest_dir = spec.build_space.src_dir
         else:
             dest_dir = os.path.join(spec.build_space.src_dir, source.dest)
         if not os.path.isdir(src_dir):  # defensive code
-            logger.critical('source directory %s does not exist', src_dir)
+            logger.critical("source directory %s does not exist", src_dir)
             self.__status = STATUS.failure
             return
         sync_tree(src_dir, dest_dir, ignore=source.ignore)
@@ -179,11 +185,10 @@ class ElectrolytJob(Job):
         # This method won't be executed unless all the predecessor jobs are
         # successful, so it will just report success state
         self.__status = STATUS.success
-        logger.info('result: OK')
+        logger.info("result: OK")
 
 
 class ElectrolytJobFactory(object):
-
     def __init__(self, sandbox, asr, store, dry_run=False):
         self.job_status = {}
         self.sandbox = sandbox
@@ -192,9 +197,13 @@ class ElectrolytJobFactory(object):
         self.store = store
 
     def get_job(self, uid, data, predecessors, notify_end):
-        force_fail = any((k for k in predecessors
-                          if self.job_status[k] not in (STATUS.success,
-                                                        STATUS.force_skip)))
+        force_fail = any(
+            (
+                k
+                for k in predecessors
+                if self.job_status[k] not in (STATUS.success, STATUS.force_skip)
+            )
+        )
         return ElectrolytJob(
             uid,
             data,
@@ -202,16 +211,18 @@ class ElectrolytJobFactory(object):
             spec_repo=self.asr,
             sandbox=self.sandbox,
             store=self.store,
-            force_status=(STATUS.unknown
-                          if not force_fail
-                          else STATUS.failure),
-            dry_run=self.dry_run)
+            force_status=(STATUS.unknown if not force_fail else STATUS.failure),
+            dry_run=self.dry_run,
+        )
 
     def collect(self, job):
         self.job_status[job.uid] = job.status
-        logger.info("%-48s [queue=%-10s status=%-10s]",
-                    job.data, job.queue_name,
-                    self.job_status[job.uid].name)
+        logger.info(
+            "%-48s [queue=%-10s status=%-10s]",
+            job.data,
+            job.queue_name,
+            self.job_status[job.uid].name,
+        )
 
     def run(self, action_list):
         sch = Scheduler(self.get_job, self.collect)

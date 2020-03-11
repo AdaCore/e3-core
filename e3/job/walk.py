@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import abc
 import logging
 from itertools import chain
@@ -45,9 +43,12 @@ class Walk(object):
         self.failure_source = {}
 
         self.scheduler = Scheduler(
-            job_provider=self.get_job, collect=self.collect,
-            queues=self.queues, tokens=self.tokens,
-            job_timeout=self.job_timeout)
+            job_provider=self.get_job,
+            collect=self.collect,
+            queues=self.queues,
+            tokens=self.tokens,
+            job_timeout=self.job_timeout,
+        )
 
         self.scheduler.run(self.actions)
 
@@ -137,8 +138,7 @@ class Walk(object):
         """
         return None
 
-    def should_execute_action(self, uid,
-                              previous_fingerprint, new_fingerprint):
+    def should_execute_action(self, uid, previous_fingerprint, new_fingerprint):
         """Return True if the given action should be performed.
 
         The purpose of this function is to provide a way to determine,
@@ -176,8 +176,9 @@ class Walk(object):
                 return True
         return previous_fingerprint != new_fingerprint
 
-    def create_skipped_job(self, uid, data, predecessors, reason, notify_end,
-                           status=ReturnValue.failure):
+    def create_skipped_job(
+        self, uid, data, predecessors, reason, notify_end, status=ReturnValue.failure
+    ):
         """Return a failed job.
 
         This method always returns an EmptyJob. Deriving classes may
@@ -195,8 +196,7 @@ class Walk(object):
         :type notify_end: str -> None
         :rtype: Job
         """
-        return EmptyJob(uid, data, notify_end,
-                        status=status)
+        return EmptyJob(uid, data, notify_end, status=status)
 
     @abc.abstractmethod
     def create_job(self, uid, data, predecessors, notify_end):
@@ -242,43 +242,57 @@ class Walk(object):
         # And reset the fingerprint on disk
         self.save_fingerprint(uid, None)
 
-        self.new_fingerprints[uid] = \
-            self.compute_fingerprint(uid, data, is_prediction=True)
+        self.new_fingerprints[uid] = self.compute_fingerprint(
+            uid, data, is_prediction=True
+        )
 
         # Check our predecessors. If any of them failed, then return
         # a failed job.
-        failed_predecessors = [k for k in predecessors
-                               if self.job_status[k] not in
-                               (ReturnValue.success,
-                                ReturnValue.skip,
-                                ReturnValue.force_skip,
-                                ReturnValue.unchanged)]
+        failed_predecessors = [
+            k
+            for k in predecessors
+            if self.job_status[k]
+            not in (
+                ReturnValue.success,
+                ReturnValue.skip,
+                ReturnValue.force_skip,
+                ReturnValue.unchanged,
+            )
+        ]
         if failed_predecessors:
             force_fail = "Event failed because of prerequisite failure:\n"
-            force_fail += "\n".join(["  " + str(self.actions[k])
-                                     for k in failed_predecessors])
+            force_fail += "\n".join(
+                ["  " + str(self.actions[k]) for k in failed_predecessors]
+            )
 
             # Compute the set of job that originate that failure
             self.failure_source[uid] = set(
                 chain.from_iterable(
-                    [self.failure_source.get(k, [k])
-                     for k in failed_predecessors]))
+                    [self.failure_source.get(k, [k]) for k in failed_predecessors]
+                )
+            )
             force_fail += "\n\nOrigin(s) of failure:\n"
-            force_fail += "\n".join(["  " + str(self.actions[k])
-                                     for k in self.failure_source[uid]])
+            force_fail += "\n".join(
+                ["  " + str(self.actions[k]) for k in self.failure_source[uid]]
+            )
 
-            return self.create_skipped_job(uid, data, predecessors,
-                                           force_fail, notify_end,
-                                           status=ReturnValue.force_fail)
+            return self.create_skipped_job(
+                uid,
+                data,
+                predecessors,
+                force_fail,
+                notify_end,
+                status=ReturnValue.force_fail,
+            )
 
-        if self.should_execute_action(uid, prev_fingerprint,
-                                      self.new_fingerprints[uid]):
+        if self.should_execute_action(
+            uid, prev_fingerprint, self.new_fingerprints[uid]
+        ):
             return self.create_job(uid, data, predecessors, notify_end)
         else:
             return self.create_skipped_job(
-                uid, data, predecessors,
-                "skipped", notify_end,
-                status=ReturnValue.skip)
+                uid, data, predecessors, "skipped", notify_end, status=ReturnValue.skip
+            )
 
     def collect(self, job):
         """Collect all the results from the given job.
@@ -291,29 +305,35 @@ class Walk(object):
         # fingerprint when we created the job, not saving the fingerprint
         # ensures that we try that action again next time (as opposed
         # to skipping it).
-        if job.status in (ReturnValue.success,
-                          ReturnValue.force_skip,
-                          ReturnValue.skip,
-                          ReturnValue.unchanged):
-            self.new_fingerprints[job.uid] = \
-                self.compute_fingerprint(job.uid, job.data)
+        if job.status in (
+            ReturnValue.success,
+            ReturnValue.force_skip,
+            ReturnValue.skip,
+            ReturnValue.unchanged,
+        ):
+            self.new_fingerprints[job.uid] = self.compute_fingerprint(job.uid, job.data)
             self.save_fingerprint(job.uid, self.new_fingerprints[job.uid])
 
         self.job_status[job.uid] = ReturnValue(job.status)
 
         if job.should_skip:
-            if job.status not in (ReturnValue.force_fail,
-                                  ReturnValue.force_skip):
-                logging.info("[%-10s %-9s %4ds] %s",
-                             job.queue_name, self.job_status[job.uid].name,
-                             0, job.data)
+            if job.status not in (ReturnValue.force_fail, ReturnValue.force_skip):
+                logging.info(
+                    "[%-10s %-9s %4ds] %s",
+                    job.queue_name,
+                    self.job_status[job.uid].name,
+                    0,
+                    job.data,
+                )
             return False
 
-        logging.info("[%-10s %-9s %4ds] %s",
-                     job.queue_name,
-                     job.status.name,
-                     int(job.timing_info.duration),
-                     job.data)
+        logging.info(
+            "[%-10s %-9s %4ds] %s",
+            job.queue_name,
+            job.status.name,
+            int(job.timing_info.duration),
+            job.data,
+        )
 
         requeued = False
         if self.job_status[job.uid] == ReturnValue.notready:

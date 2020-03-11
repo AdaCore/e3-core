@@ -1,6 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
-
 class E3Error(Exception):
     """Exception raised by functions defined in E3."""
 
@@ -19,7 +16,7 @@ class E3Error(Exception):
         self.origin = origin
         self.messages = []
         if message is not None:
-            if isinstance(message, (str, unicode)):
+            if isinstance(message, str):
                 self.messages.append(message)
             else:
                 self.messages.extend(message)
@@ -32,7 +29,7 @@ class E3Error(Exception):
         """
         if isinstance(other, E3Error):
             self.messages.extend(other.messages)
-        elif isinstance(other, (str, unicode)):
+        elif isinstance(other, str):
             self.messages.append(other)
         else:
             self.messages.extend(other)
@@ -44,6 +41,6 @@ class E3Error(Exception):
         else:
             error_msg = self.__class__.__name__
         if self.origin:
-            return '%s: %s\n' % (self.origin, error_msg)
+            return "%s: %s\n" % (self.origin, error_msg)
         else:
             return error_msg

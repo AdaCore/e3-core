@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import base64
 import calendar
 import json
@@ -15,16 +13,16 @@ def get_payload(token):
     :rtype: dict
     """
     data = {}
-    if token.count('.') == 2:
+    if token.count(".") == 2:
         # Extract the payload
-        signing_part, _ = token.rsplit('.', 1)
-        _, payload = signing_part.split('.', 1)
+        signing_part, _ = token.rsplit(".", 1)
+        _, payload = signing_part.split(".", 1)
         # Add required padding
         rem = len(payload) % 4
         if rem > 0:
-            payload += '=' * (4 - rem)
+            payload += "=" * (4 - rem)
         try:
-            data = json.loads(base64.b64decode(payload).decode('utf-8'))
+            data = json.loads(base64.b64decode(payload).decode("utf-8"))
         except (UnicodeDecodeError, ValueError, TypeError):
             pass
     return data
@@ -54,5 +52,4 @@ def is_valid(token):
     # do not consider a token valid if it will be valid less than 5 min
     deadline = utc_timestamp() + 5 * 60
 
-    return payload.get('typ') == 'Bearer' and \
-        payload.get('exp', 0) > deadline
+    return payload.get("typ") == "Bearer" and payload.get("exp", 0) > deadline

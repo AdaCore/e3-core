@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 
 import e3.error
@@ -8,22 +6,24 @@ import e3.os.process
 from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
-logger = e3.log.getLogger('buildspace')
+logger = e3.log.getLogger("buildspace")
 
 
 class BuildSpace(object):
     """Build space located inside a sandbox."""
 
-    DIRS = ('binary',
-            'build',
-            'install',
-            'log',
-            'pkg',
-            'results',
-            'src',
-            'test',
-            'tmp',
-            'src')
+    DIRS = (
+        "binary",
+        "build",
+        "install",
+        "log",
+        "pkg",
+        "results",
+        "src",
+        "test",
+        "tmp",
+        "src",
+    )
 
     def __init__(self, root_dir):
         """Initialise a build space.
@@ -48,7 +48,7 @@ class BuildSpace(object):
         """
         # Start by verifying that the file used as build space markers
         # exists.
-        if not os.path.isfile(os.path.join(self.root_dir, '.buildspace')):
+        if not os.path.isfile(os.path.join(self.root_dir, ".buildspace")):
             return False
         # Next, verify that all the necessary directories exist as well.
         for d in self.DIRS:
@@ -58,22 +58,22 @@ class BuildSpace(object):
 
     @property
     def dirs(self):
-        return self.directory_mapping.values()
+        return list(self.directory_mapping.values())
 
     def subdir(self, name):
         if name not in self.DIRS:
-            raise ValueError('invalid subdir %s' % name)
+            raise ValueError("invalid subdir %s" % name)
         return os.path.join(self.root_dir, self.directory_mapping[name])
 
     def __getattr__(self, name):
-        if name.endswith('_dir') and name[:-4] in self.DIRS:
+        if name.endswith("_dir") and name[:-4] in self.DIRS:
             return self.subdir(name[:-4])
-        raise AttributeError('unknown build space attribute: %s' % name)
+        raise AttributeError("unknown build space attribute: %s" % name)
 
     def __getitem__(self, key):
-        if key.isupper() and key.endswith('_DIR'):
+        if key.isupper() and key.endswith("_DIR"):
             return getattr(self, key.lower(), None)
-        raise KeyError('invalid build space key: %s' % key)
+        raise KeyError("invalid build space key: %s" % key)
 
     def create(self, quiet=False):
         """Create a build space.
@@ -91,7 +91,7 @@ class BuildSpace(object):
             mkdir(self.subdir(name=d), quiet=quiet)
 
         # Add a marker that identify a build space
-        touch(os.path.join(self.root_dir, '.buildspace'))
+        touch(os.path.join(self.root_dir, ".buildspace"))
 
         self.initialized = True
 
@@ -109,7 +109,7 @@ class BuildSpace(object):
         :type keep: list[str] | None
         """
         keep = set(keep) if keep is not None else set()
-        keep.update(('results', 'log'))
+        keep.update(("results", "log"))
 
         dirs_to_reset = set(self.DIRS) - keep
 

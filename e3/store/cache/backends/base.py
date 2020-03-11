@@ -1,15 +1,10 @@
-from __future__ import absolute_import, division, print_function
-
 import abc
 import time
 
 DEFAULT_TIMEOUT = 3600 * 24
 
 
-class Cache(object):
-
-    __metaclass__ = abc.ABCMeta
-
+class Cache(object, metaclass=abc.ABCMeta):
     def __init__(self, cache_configuration):
         self.cache_configuration = cache_configuration
 

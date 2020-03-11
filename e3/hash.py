@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import hashlib
 import os
 
@@ -12,9 +10,9 @@ class HashError(e3.error.E3Error):
 
 def __compute_hash(path, kind):
     if not os.path.isfile(path):
-        raise HashError(kind, 'cannot find %s' % path)
+        raise HashError(kind, "cannot find %s" % path)
 
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         result = getattr(hashlib, kind)()
         while True:
             data = f.read(1024 * 1024)
@@ -33,7 +31,7 @@ def md5(path):
     :rtype: str
     :raise HashError: in case of error
     """
-    return __compute_hash(path, 'md5')
+    return __compute_hash(path, "md5")
 
 
 def sha1(path):
@@ -45,7 +43,7 @@ def sha1(path):
     :rtype: str
     :raise HashError: in case of error
     """
-    return __compute_hash(path, 'sha1')
+    return __compute_hash(path, "sha1")
 
 
 def sha256(path):
@@ -57,4 +55,4 @@ def sha256(path):
     :rtype: str
     :raise HashError: in case of error
     """
-    return __compute_hash(path, 'sha256')
+    return __compute_hash(path, "sha256")

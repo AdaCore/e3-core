@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import cgi
 import contextlib
 import json
@@ -18,7 +16,7 @@ from e3.error import E3Error
 from e3.fs import rm
 from requests.packages.urllib3.util import Retry
 
-logger = e3.log.getLogger('net.http')
+logger = e3.log.getLogger("net.http")
 
 
 def get_filename(content_disposition):
@@ -30,7 +28,7 @@ def get_filename(content_disposition):
     :rtype: str
     """
     _, value = cgi.parse_header(content_disposition)
-    return value.get('filename')
+    return value.get("filename")
 
 
 class HTTPError(E3Error):
@@ -77,8 +75,9 @@ class HTTPSession(object):
         :type base_urls: list[str] | list[BaseUrl] | None
         """
         if base_urls:
-            self.base_urls = deque([k if isinstance(k, BaseURL) else BaseURL(k)
-                                    for k in base_urls])
+            self.base_urls = deque(
+                [k if isinstance(k, BaseURL) else BaseURL(k) for k in base_urls]
+            )
         else:
             self.base_urls = deque([None])
         self.session = requests.Session()
@@ -91,11 +90,7 @@ class HTTPSession(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.session.__exit__(exc_type, exc_val, exc_tb)
 
-    def set_max_retries(self,
-                        base_url=None,
-                        connect=None,
-                        read=None,
-                        redirect=None):
+    def set_max_retries(self, base_url=None, connect=None, read=None, redirect=None):
         """Retry configuration.
 
         :param base_url: base url for the HTTPAdapter
@@ -114,9 +109,12 @@ class HTTPSession(object):
             base_urls = [base_url]
 
         for url in base_urls:
-            self.session.mount(str(url), requests.adapters.HTTPAdapter(
-                max_retries=Retry(
-                    connect=connect, read=read, redirect=redirect)))
+            self.session.mount(
+                str(url),
+                requests.adapters.HTTPAdapter(
+                    max_retries=Retry(connect=connect, read=read, redirect=redirect)
+                ),
+            )
 
     def request(self, method, url, **kwargs):
         """Send a request.
@@ -139,23 +137,23 @@ class HTTPSession(object):
         data_streams = None
 
         # Keep data_streams apart as it is not an argument to request
-        if 'data_streams' in kwargs:
-            data_streams = kwargs['data_streams']
-            del kwargs['data_streams']
+        if "data_streams" in kwargs:
+            data_streams = kwargs["data_streams"]
+            del kwargs["data_streams"]
 
         for base_url in list(self.base_urls):
             if self.last_base_url != base_url:
                 self.session.auth = base_url.get_auth()
                 self.last_base_url = base_url
 
-            logger.debug('try with %s', base_url)
+            logger.debug("try with %s", base_url)
 
             # Handle data_streams. After some tests it seems that we need to
             # redo an instance of the multipart encoder for each attempt.
             if data_streams is not None:
                 data = {}
-                for k, v in data_streams.iteritems():
-                    if hasattr(v, 'seek'):
+                for k, v in data_streams.items():
+                    if hasattr(v, "seek"):
                         # This is a file. Assume that the key is the filename
                         data[k] = (k, v)
                         v.seek(0)
@@ -164,41 +162,46 @@ class HTTPSession(object):
                         data[k] = json.dumps(v)
                     else:
                         data[k] = v
-                kwargs['data'] = \
-                    requests_toolbelt.multipart.encoder.MultipartEncoder(data)
-                header = {'Content-Type': kwargs['data'].content_type}
-                if 'headers' in kwargs:
-                    kwargs['headers'].update(header)
+                kwargs["data"] = requests_toolbelt.multipart.encoder.MultipartEncoder(
+                    data
+                )
+                header = {"Content-Type": kwargs["data"].content_type}
+                if "headers" in kwargs:
+                    kwargs["headers"].update(header)
                 else:
-                    kwargs['headers'] = header
+                    kwargs["headers"] = header
 
             # Compute final url
             if base_url is not None:
-                final_url = '%s/%s' % (base_url, url)
-                message_prefix = '%s: ' % base_url
+                final_url = "%s/%s" % (base_url, url)
+                message_prefix = "%s: " % base_url
             else:
                 final_url = url
-                message_prefix = ''
+                message_prefix = ""
 
-            if 'timeout' not in kwargs:
-                kwargs['timeout'] = self.DEFAULT_TIMEOUT
+            if "timeout" not in kwargs:
+                kwargs["timeout"] = self.DEFAULT_TIMEOUT
 
             try:
-                logger.debug('%s %s', method, final_url)
+                logger.debug("%s %s", method, final_url)
                 response = self.session.request(method, final_url, **kwargs)
                 if response.status_code != 200:
-                    error_msgs.append('%s%s' % (message_prefix, response.text))
+                    error_msgs.append("%s%s" % (message_prefix, response.text))
                     response.raise_for_status()
                 return response
-            except (socket.timeout, requests.exceptions.RequestException,
-                    requests.packages.urllib3.exceptions.HTTPError) as e:
+            except (
+                socket.timeout,
+                requests.exceptions.RequestException,
+                requests.packages.urllib3.exceptions.HTTPError,
+            ) as e:
                 # got an error with that base url so put it last in our list
-                error_msgs.append('%s%s' % (message_prefix, e))
+                error_msgs.append("%s%s" % (message_prefix, e))
                 problematic_url = self.base_urls.popleft()
                 self.base_urls.append(problematic_url)
 
-        raise HTTPError('got request error (%d):\n%s' %
-                        (len(error_msgs), '\n'.join(error_msgs)))
+        raise HTTPError(
+            "got request error (%d):\n%s" % (len(error_msgs), "\n".join(error_msgs))
+        )
 
     def download_file(self, url, dest, filename=None, validate=None):
         """Download a file.
@@ -224,33 +227,29 @@ class HTTPSession(object):
         path = None
         try:
             with contextlib.closing(
-                    self.request(method='GET',
-                                 url=url,
-                                 stream=True)) as response:
-                content_length = int(response.headers.get(
-                    'content-length', 0))
+                self.request(method="GET", url=url, stream=True)
+            ) as response:
+                content_length = int(response.headers.get("content-length", 0))
                 e3.log.debug(response.headers)
                 if filename is None:
-                    if 'content-disposition' in response.headers:
-                        filename = get_filename(
-                            response.headers['content-disposition'])
+                    if "content-disposition" in response.headers:
+                        filename = get_filename(response.headers["content-disposition"])
                     if filename is None:
                         # Generate a temporary name
                         tmpf = tempfile.NamedTemporaryFile(
-                            delete=False,
-                            dir=dest,
-                            prefix='download.')
+                            delete=False, dir=dest, prefix="download."
+                        )
                         tmpf.close()
                         filename = tmpf.name
 
                 path = os.path.join(dest, filename)
-                logger.info('downloading %s size=%s', path, content_length)
+                logger.info("downloading %s size=%s", path, content_length)
 
                 expected_size = content_length // self.CHUNK_SIZE
-                with open(path, 'wb') as fd:
+                with open(path, "wb") as fd:
                     for chunk in e3.log.progress_bar(
-                            response.iter_content(self.CHUNK_SIZE),
-                            total=expected_size):
+                        response.iter_content(self.CHUNK_SIZE), total=expected_size
+                    ):
                         fd.write(chunk)
                 if validate is None or validate(path):
                     return path
@@ -258,7 +257,7 @@ class HTTPSession(object):
                     rm(path)
         except (requests.exceptions.RequestException, HTTPError) as e:
             # An error (timeout?) occurred while downloading the file
-            logger.warning('download failed')
+            logger.warning("download failed")
             logger.debug(e)
             if path is not None:
                 rm(path)

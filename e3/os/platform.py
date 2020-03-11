@@ -1,5 +1,5 @@
 """Provides function to detect platform specific information."""
-from __future__ import absolute_import, division, print_function
+
 
 import os
 import re
@@ -12,14 +12,11 @@ from e3.platform_db import get_knowledge_base
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
-UNKNOWN = 'unknown'
+UNKNOWN = "unknown"
 
-Uname = namedtuple("Uname", ["system",
-                             "node",
-                             "release",
-                             "version",
-                             "machine",
-                             "processor"])
+Uname = namedtuple(
+    "Uname", ["system", "node", "release", "version", "machine", "processor"]
+)
 
 
 class SystemInfo(object):
@@ -75,22 +72,27 @@ class SystemInfo(object):
         cls.uname = Uname(*platform_uname())
 
         # Fetch linux distribution info on linux OS
-        if cls.uname.system == 'Linux':  # linux-only
+        if cls.uname.system == "Linux":  # linux-only
             import ld
-            cls.ld_info = {'name': ld.name(),
-                           'major_version': ld.major_version(),
-                           'version': ld.version()}
+
+            cls.ld_info = {
+                "name": ld.name(),
+                "major_version": ld.major_version(),
+                "version": ld.version(),
+            }
 
         # Fetch network interfaces
         try:
             from netifaces import interfaces, ifaddresses, address_families
+
             # use string for address families instead of integers which are
             # system dependents
-            cls.network_ifs = {itf: {address_families[k]: v
-                                     for k, v in ifaddresses(itf).iteritems()}
-                               for itf in interfaces()}
+            cls.network_ifs = {
+                itf: {address_families[k]: v for k, v in ifaddresses(itf).items()}
+                for itf in interfaces()
+            }
         except Exception:  # defensive code
-            e3.log.debug('cannot get network info', exc_info=True)
+            e3.log.debug("cannot get network info", exc_info=True)
             cls.network_ifs = None
 
         # Fetch core numbers. Note that the methods does not work
@@ -99,22 +101,24 @@ class SystemInfo(object):
         cls.core_number = 1
         try:
             import multiprocessing
+
             cls.core_number = multiprocessing.cpu_count()
         except Exception:  # defensive code
-            e3.log.debug('multiprocessing error', exc_info=True)
+            e3.log.debug("multiprocessing error", exc_info=True)
             try:
                 import psutil
+
                 cls.core_number = psutil.cpu_count()
             except Exception:
-                e3.log.debug('psutil error', exc_info=True)
+                e3.log.debug("psutil error", exc_info=True)
 
         cls.nis_domain = UNKNOWN
 
-        if sys.platform != 'win32':  # windows: no cover
+        if sys.platform != "win32":  # windows: no cover
             try:
                 import nis
             except ImportError:  # defensive code
-                e3.log.debug('cannot import nis', exc_info=True)
+                e3.log.debug("cannot import nis", exc_info=True)
                 nis = None
 
             if nis is not None:
@@ -123,7 +127,7 @@ class SystemInfo(object):
                     if not cls.nis_domain:  # defensive code
                         cls.nis_domain = UNKNOWN
                 except nis.error:  # defensive code
-                    e3.log.debug('nis error', exc_info=True)
+                    e3.log.debug("nis error", exc_info=True)
 
     @classmethod
     def platform(cls):
@@ -141,11 +145,16 @@ class SystemInfo(object):
         if cls.uname is None:
             cls.fetch_system_data()
 
-        result = [p for p, v in KNOWLEDGE_BASE.host_guess.iteritems()
-                  if cls.uname.system == v['os'] and
-                  (v['cpu'] is None or
-                   re.match(v['cpu'], cls.uname.machine) or
-                   re.match(v['cpu'], cls.uname.processor))]
+        result = [
+            p
+            for p, v in KNOWLEDGE_BASE.host_guess.items()
+            if cls.uname.system == v["os"]
+            and (
+                v["cpu"] is None
+                or re.match(v["cpu"], cls.uname.machine)
+                or re.match(v["cpu"], cls.uname.processor)
+            )
+        ]
 
         if result:
             result = result[0]
@@ -172,31 +181,31 @@ class SystemInfo(object):
         kernel_version = UNKNOWN
         system = cls.uname.system
 
-        if system == 'Darwin':  # darwin-only
+        if system == "Darwin":  # darwin-only
             version = cls.uname.release
-        elif system == 'FreeBSD':  # bsd-only
-            version = re.sub('-.*', '', cls.uname.release)
-        elif system == 'Linux':  # linux-only
+        elif system == "FreeBSD":  # bsd-only
+            version = re.sub("-.*", "", cls.uname.release)
+        elif system == "Linux":  # linux-only
             kernel_version = cls.uname.release
-            name = cls.ld_info['name'].lower()
-            if 'redhat' in name or 'red hat' in name:  # os-specific
-                name = 'rhES'
-                version_number = cls.ld_info['major_version']
-            elif 'suse' in name or 'sles' in name:  # os-specific
-                name = 'suse'
-                version_number = cls.ld_info['major_version']
-            elif 'debian' in name:  # os-specific
-                name = 'debian'
-                version_number = cls.ld_info['major_version']
+            name = cls.ld_info["name"].lower()
+            if "redhat" in name or "red hat" in name:  # os-specific
+                name = "rhES"
+                version_number = cls.ld_info["major_version"]
+            elif "suse" in name or "sles" in name:  # os-specific
+                name = "suse"
+                version_number = cls.ld_info["major_version"]
+            elif "debian" in name:  # os-specific
+                name = "debian"
+                version_number = cls.ld_info["major_version"]
             else:  # os-specific
-                version_number = cls.ld_info['version']
+                version_number = cls.ld_info["version"]
             version = name + version_number
-        elif system == 'AIX':  # aix-only
-            version = cls.uname.version + '.' + cls.uname.release
-        elif system == 'SunOS':  # solaris-only
-            version = '2' + cls.uname.release[1:]
-        elif system == 'Windows':  # windows-only
-            version = cls.uname.release.replace('Server', '')
+        elif system == "AIX":  # aix-only
+            version = cls.uname.version + "." + cls.uname.release
+        elif system == "SunOS":  # solaris-only
+            version = "2" + cls.uname.release[1:]
+        elif system == "Windows":  # windows-only
+            version = cls.uname.release.replace("Server", "")
             kernel_version = cls.uname.version
             # Compute real underlying OS version. Starting with Windows 8.1
             # (6.3), the win32 function that returns the version may return
@@ -205,17 +214,19 @@ class SystemInfo(object):
             import ctypes
 
             class WinOSVersion(ctypes.Structure):
-                _fields_ = [('dwOSVersionInfoSize', ctypes.c_ulong),
-                            ('dwMajorVersion', ctypes.c_ulong),
-                            ('dwMinorVersion', ctypes.c_ulong),
-                            ('dwBuildNumber', ctypes.c_ulong),
-                            ('dwPlatformId', ctypes.c_ulong),
-                            ('szCSDVersion', ctypes.c_wchar * 128),
-                            ('wServicePackMajor', ctypes.c_ushort),
-                            ('wServicePackMinor', ctypes.c_ushort),
-                            ('wSuiteMask', ctypes.c_ushort),
-                            ('wProductType', ctypes.c_byte),
-                            ('wReserved', ctypes.c_byte)]
+                _fields_ = [
+                    ("dwOSVersionInfoSize", ctypes.c_ulong),
+                    ("dwMajorVersion", ctypes.c_ulong),
+                    ("dwMinorVersion", ctypes.c_ulong),
+                    ("dwBuildNumber", ctypes.c_ulong),
+                    ("dwPlatformId", ctypes.c_ulong),
+                    ("szCSDVersion", ctypes.c_wchar * 128),
+                    ("wServicePackMajor", ctypes.c_ushort),
+                    ("wServicePackMinor", ctypes.c_ushort),
+                    ("wSuiteMask", ctypes.c_ushort),
+                    ("wProductType", ctypes.c_byte),
+                    ("wReserved", ctypes.c_byte),
+                ]
 
             def get_os_version():
                 """Return the real Windows kernel version.
@@ -231,36 +242,37 @@ class SystemInfo(object):
                 """
                 os_version = WinOSVersion()
                 os_version.dwOSVersionInfoSize = ctypes.sizeof(os_version)
-                retcode = ctypes.windll.Ntdll.RtlGetVersion(
-                    ctypes.byref(os_version))
+                retcode = ctypes.windll.Ntdll.RtlGetVersion(ctypes.byref(os_version))
                 if retcode != 0:
                     return (None, None, None)
 
-                return (float("%s.%s" % (os_version.dwMajorVersion,
-                                         os_version.dwMinorVersion)),
-                        os_version.dwBuildNumber,
-                        os_version.wProductType != 1)
+                return (
+                    float(
+                        "%s.%s" % (os_version.dwMajorVersion, os_version.dwMinorVersion)
+                    ),
+                    os_version.dwBuildNumber,
+                    os_version.wProductType != 1,
+                )
 
             effective_version, build_number, is_server = get_os_version()
 
             if effective_version is None or effective_version <= 6.2:
-                if version == 'Vista' and \
-                        '64' in cls.uname.machine:  # os-specific
-                    version = 'Vista64'
+                if version == "Vista" and "64" in cls.uname.machine:  # os-specific
+                    version = "Vista64"
             else:
                 if effective_version == 6.3:
                     if is_server:
-                        version = '2012R2'
+                        version = "2012R2"
                     else:
-                        version = '8.1'
+                        version = "8.1"
                 elif effective_version == 10.0:
                     if is_server:
                         if build_number < 17763:
-                            version = '2016'
+                            version = "2016"
                         else:
-                            version = '2019'
+                            version = "2019"
                     else:
-                        version = '10'
+                        version = "10"
 
         cls._os_version = (version, kernel_version)
         return version, kernel_version
@@ -281,18 +293,20 @@ class SystemInfo(object):
 
         result = False
 
-        if cls.uname.system == 'SunOS' and \
-                cls.uname.version == 'Generic_Virtual':  # solaris-only
+        if (
+            cls.uname.system == "SunOS" and cls.uname.version == "Generic_Virtual"
+        ):  # solaris-only
             result = True
         else:
             if cls.network_ifs is not None:
-                for interface in cls.network_ifs.values():
-                    for family in ('AF_LINK', 'AF_PACKET'):
+                for interface in list(cls.network_ifs.values()):
+                    for family in ("AF_LINK", "AF_PACKET"):
                         if family in interface:
                             for el in interface[family]:
-                                addr = el['addr'].lower()
-                                if addr.startswith('00:0c:29') or \
-                                        addr.startswith('00:50:56'):
+                                addr = el["addr"].lower()
+                                if addr.startswith("00:0c:29") or addr.startswith(
+                                    "00:50:56"
+                                ):
                                     result = True
                                     break
                         if result:
@@ -316,7 +330,7 @@ class SystemInfo(object):
             cls.fetch_system_data()
 
         # This is host so we can find the machine name using uname fields
-        tmp = cls.uname.node.lower().split('.', 1)
+        tmp = cls.uname.node.lower().split(".", 1)
         hostname = tmp[0]
         if len(tmp) > 1:
             domain = tmp[1]
@@ -324,13 +338,12 @@ class SystemInfo(object):
             domain = cls.nis_domain
 
         # Hostname can be overriden by E3_HOSTNAME env variable
-        hostname = os.environ.get('E3_HOSTNAME',
-                                  hostname)
+        hostname = os.environ.get("E3_HOSTNAME", hostname)
         cls._hostname = (hostname, domain)
         return cls._hostname
 
 
-class CPU(namedtuple('CPU', ['name', 'bits', 'endian', 'cores'])):
+class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
     """Object representing a CPU.
 
     CPU attributes are:
@@ -358,19 +371,31 @@ class CPU(namedtuple('CPU', ['name', 'bits', 'endian', 'cores'])):
         :type compute_cores: bool
         """
         assert name in KNOWLEDGE_BASE.cpu_info, "invalid cpu name"
-        bits = KNOWLEDGE_BASE.cpu_info[name]['bits']
+        bits = KNOWLEDGE_BASE.cpu_info[name]["bits"]
         cores = 1
 
         if endian is None:
-            endian = KNOWLEDGE_BASE.cpu_info[name]['endian']
+            endian = KNOWLEDGE_BASE.cpu_info[name]["endian"]
         if compute_cores:
             cores = SystemInfo.core_number
 
         return CPU(name, bits, endian, cores)
 
 
-class OS(namedtuple('OS', ['name', 'version', 'kernel_version', 'exeext',
-                           'dllext', 'is_bareboard', 'mode'])):
+class OS(
+    namedtuple(
+        "OS",
+        [
+            "name",
+            "version",
+            "kernel_version",
+            "exeext",
+            "dllext",
+            "is_bareboard",
+            "mode",
+        ],
+    )
+):
     """Object representing an OS.
 
     Attributes are:
@@ -401,13 +426,13 @@ class OS(namedtuple('OS', ['name', 'version', 'kernel_version', 'exeext',
         :param mode: os mode
         :type mode: str | None
         """
-        is_bareboard = KNOWLEDGE_BASE.os_info[name]['is_bareboard']
-        if name.startswith('vxworks') and mode == 'rtp':
-            exeext = '.vxe'
+        is_bareboard = KNOWLEDGE_BASE.os_info[name]["is_bareboard"]
+        if name.startswith("vxworks") and mode == "rtp":
+            exeext = ".vxe"
         else:
-            exeext = KNOWLEDGE_BASE.os_info[name]['exeext']
+            exeext = KNOWLEDGE_BASE.os_info[name]["exeext"]
 
-        dllext = KNOWLEDGE_BASE.os_info[name]['dllext']
+        dllext = KNOWLEDGE_BASE.os_info[name]["dllext"]
 
         # If version is not given by the user guess it or set it to the
         # default (cross case)
@@ -415,9 +440,8 @@ class OS(namedtuple('OS', ['name', 'version', 'kernel_version', 'exeext',
             if is_host:
                 version, kernel_version = SystemInfo.os_version()
             else:
-                version = KNOWLEDGE_BASE.os_info[name]['version']
+                version = KNOWLEDGE_BASE.os_info[name]["version"]
                 kernel_version = UNKNOWN
         else:
             kernel_version = UNKNOWN
-        return OS(name, version, kernel_version, exeext,
-                  dllext, is_bareboard, mode)
+        return OS(name, version, kernel_version, exeext, dllext, is_bareboard, mode)

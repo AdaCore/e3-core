@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 from functools import wraps
 
@@ -9,7 +7,7 @@ from e3.anod.spec import AnodError, has_primitive
 from e3.env import BaseEnv
 from e3.error import E3Error
 
-logger = e3.log.getLogger('e3.anod.driver')
+logger = e3.log.getLogger("e3.anod.driver")
 
 
 def primitive_check():
@@ -17,16 +15,17 @@ def primitive_check():
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not has_primitive(self.anod_instance, func.__name__):
-                raise AnodError('no primitive %s' % func.__name__)
+                raise AnodError("no primitive %s" % func.__name__)
             elif self.anod_instance.build_space is None:
-                raise AnodError('.activate() has not been called')
+                raise AnodError(".activate() has not been called")
             return func(self, *args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 class AnodDriver(object):
-
     def __init__(self, anod_instance, store):
         """Initialize the Anod driver for a given Anod instance.
 
@@ -42,21 +41,21 @@ class AnodDriver(object):
     def activate(self, sandbox, spec_repository):
         self.anod_instance.build_space = sandbox.get_build_space(
             name=self.anod_instance.build_space_name,
-            platform=self.anod_instance.env.platform)
+            platform=self.anod_instance.env.platform,
+        )
 
-        self.anod_instance.log = e3.log.getLogger(
-            'spec.' + self.anod_instance.uid)
+        self.anod_instance.log = e3.log.getLogger("spec." + self.anod_instance.uid)
 
-        for e in getattr(self.anod_instance,
-                         '%s_deps' % self.anod_instance.kind, ()):
+        for e in getattr(self.anod_instance, "%s_deps" % self.anod_instance.kind, ()):
             if isinstance(e, self.anod_instance.Dependency):
                 dep_class = spec_repository.load(e.name)
                 dep_instance = dep_class(
                     qualifier=e.qualifier,
                     kind=e.kind,
-                    env=e.env(self.anod_instance, BaseEnv.from_env()))
+                    env=e.env(self.anod_instance, BaseEnv.from_env()),
+                )
                 self.anod_instance.deps[e.local_name] = dep_instance
-        e3.log.debug('activating spec %s', self.anod_instance.uid)
+        e3.log.debug("activating spec %s", self.anod_instance.uid)
 
     def call(self, action):
         """Call an Anod action.
@@ -68,7 +67,7 @@ class AnodDriver(object):
 
     @staticmethod
     def unknown_action():
-        logger.critical('unknown action')
+        logger.critical("unknown action")
         return False
 
     @primitive_check()
@@ -83,9 +82,9 @@ class AnodDriver(object):
         except E3Error as err:
             self.anod_instance.log.critical(err)
             raise AnodError(
-                'cannot get resource metadata from store',
-                origin=self.anod_instance.uid), None, sys.exc_traceback
+                "cannot get resource metadata from store", origin=self.anod_instance.uid
+            ).with_traceback(sys.exc_info()[2])
         else:
             self.store.download_resource(
-                metadata,
-                self.anod_instance.build_space.binary_dir)
+                metadata, self.anod_instance.build_space.binary_dir
+            )

@@ -1,5 +1,5 @@
 """High-Level file manipulation."""
-from __future__ import absolute_import, division, print_function
+
 
 import fnmatch
 import glob
@@ -16,15 +16,14 @@ import e3.error
 import e3.log
 import e3.os.fs
 
-logger = e3.log.getLogger('fs')
+logger = e3.log.getLogger("fs")
 
 
 class FSError(e3.error.E3Error):
     pass
 
 
-def cp(source, target, copy_attrs=True, recursive=False,
-       preserve_symlinks=False):
+def cp(source, target, copy_attrs=True, recursive=False, preserve_symlinks=False):
     """Copy files.
 
     :param str source: a glob pattern
@@ -38,15 +37,15 @@ def cp(source, target, copy_attrs=True, recursive=False,
         destination folder
     :raise FSError: if an error occurs
     """
-    switches = ''
+    switches = ""
     if copy_attrs:
-        switches += ' -p'
+        switches += " -p"
     if recursive:
-        switches += ' -r'
-    logger.debug('cp %s %s->%s', switches, source, target)
+        switches += " -r"
+    logger.debug("cp %s %s->%s", switches, source, target)
 
     if recursive and not copy_attrs:
-        logger.warning('recursive copy always preserves file attributes')
+        logger.warning("recursive copy always preserves file attributes")
 
     # Compute file list and number of file to copy
     file_list = ls(source, emit_log_record=False)
@@ -54,14 +53,12 @@ def cp(source, target, copy_attrs=True, recursive=False,
 
     if file_number == 0:
         # If there is no source files raise an error
-        raise FSError(origin='cp',
-                      message='can\'t find files matching "%s"' % source)
+        raise FSError(origin="cp", message='can\'t find files matching "%s"' % source)
     elif file_number > 1:
         # If we have more than one file to copy then check that target is a
         # directory
         if not os.path.isdir(target):
-            raise FSError(origin='cp',
-                          message='target should be a directory')
+            raise FSError(origin="cp", message="target should be a directory")
 
     for f in file_list:
         try:
@@ -82,9 +79,8 @@ def cp(source, target, copy_attrs=True, recursive=False,
         except Exception as e:
             logger.error(e, exc_info=True)
             raise FSError(
-                origin='cp',
-                message='error occurred while copying %s' % f), \
-                None, sys.exc_traceback
+                origin="cp", message="error occurred while copying %s" % f
+            ).with_traceback(sys.exc_info()[2])
 
 
 def directory_content(path, include_root_dir=False, unixpath=False):
@@ -109,9 +105,12 @@ def directory_content(path, include_root_dir=False, unixpath=False):
         for d in dirs:
             result.append(os.path.join(root, d) + os.sep)
     if not include_root_dir:
-        result = [os.path.relpath(e, path) + os.sep
-                  if e.endswith(os.sep) else os.path.relpath(e, path)
-                  for e in result]
+        result = [
+            os.path.relpath(e, path) + os.sep
+            if e.endswith(os.sep)
+            else os.path.relpath(e, path)
+            for e in result
+        ]
     if unixpath:
         result = [e3.os.fs.unixpath(e) for e in result]
     result.sort()
@@ -132,19 +131,20 @@ def echo_to_file(filename, content, append=False):
     :param append: if True append to the file, otherwise overwrite.
     :type append: bool
     """
-    with open(filename, 'a+' if append else 'w+') as fd:
+    with open(filename, "a+" if append else "w+") as fd:
         if append:
             fd.seek(0, 2)
 
         if isinstance(content, list):
             for l in content:
-                fd.write(l + '\n')
+                fd.write(l + "\n")
         else:
             fd.write(content)
 
 
-def find(root, pattern=None, include_dirs=False,
-         include_files=True, follow_symlinks=False):
+def find(
+    root, pattern=None, include_dirs=False, include_files=True, follow_symlinks=False
+):
     """Find files or directory recursively.
 
     :param root: directory from which the research start
@@ -164,15 +164,15 @@ def find(root, pattern=None, include_dirs=False,
     """
     result = []
     for root, dirs, files in os.walk(root, followlinks=follow_symlinks):
-        root = root.replace('\\', '/')
+        root = root.replace("\\", "/")
         if include_files:
             for f in files:
                 if pattern is None or fnmatch.fnmatch(f, pattern):
-                    result.append(root + '/' + f)
+                    result.append(root + "/" + f)
         if include_dirs:
             for d in dirs:
                 if pattern is None or fnmatch.fnmatch(d, pattern):
-                    result.append(root + '/' + d)
+                    result.append(root + "/" + d)
     return result
 
 
@@ -193,14 +193,16 @@ def get_filetree_state(path, ignore_hidden=True):
     hash representing the state of the file tree without having to read the
     content of all files.
     """
+
     def compute_state(file_path):
         f_stat = os.lstat(file_path)
 
-        state = ':'.join([file_path, str(f_stat.st_mode),
-                          str(f_stat.st_size), str(f_stat.st_mtime)])
-        if isinstance(file_path, unicode):
+        state = ":".join(
+            [file_path, str(f_stat.st_mode), str(f_stat.st_size), str(f_stat.st_mtime)]
+        )
+        if isinstance(file_path, str):
             # Make sure to encode unicode objects before hashing
-            return state.encode('utf-8')
+            return state.encode("utf-8")
         else:
             return state
 
@@ -211,14 +213,14 @@ def get_filetree_state(path, ignore_hidden=True):
             if ignore_hidden:
                 ignore_dirs = []
                 for index, name in enumerate(dirs):
-                    if name.startswith('.'):
+                    if name.startswith("."):
                         ignore_dirs.append(index)
                 ignore_dirs.reverse()
                 for index in ignore_dirs:
                     del dirs[index]
 
             for path in files:
-                if ignore_hidden and path.startswith('.'):
+                if ignore_hidden and path.startswith("."):
                     continue
 
                 full_path = os.path.join(root, path)
@@ -243,19 +245,18 @@ def ls(path, emit_log_record=True):
     This function do not raise an error if no file matching the glob pattern
     is encountered. The only consequence is that an empty list is returned.
     """
-    if isinstance(path, basestring):
-        path = (path, )
+    if isinstance(path, str):
+        path = (path,)
     else:
         path = list(path)
 
     if emit_log_record:
-        logger.debug('ls %s', ' '.join(path))
+        logger.debug("ls %s", " ".join(path))
 
-    return list(sorted(itertools.chain.from_iterable(
-        (glob.glob(p) for p in path))))
+    return list(sorted(itertools.chain.from_iterable((glob.glob(p) for p in path))))
 
 
-def mkdir(path, mode=0755, quiet=False):
+def mkdir(path, mode=0o755, quiet=False):
     """Create a directory.
 
     :param path: path to create. If intermediate directories do not exist
@@ -275,7 +276,7 @@ def mkdir(path, mode=0755, quiet=False):
         return
     else:
         if not quiet:
-            logger.debug('mkdir %s (mode=%s)', path, oct(mode))
+            logger.debug("mkdir %s (mode=%s)", path, oct(mode))
         try:
             os.makedirs(path, mode)
         except Exception as e:  # defensive code
@@ -285,9 +286,9 @@ def mkdir(path, mode=0755, quiet=False):
                 # existence and the call to makedirs
                 return
             logger.error(e)
-            raise FSError(origin='mkdir',
-                          message='can\'t create %s' % path), \
-                None, sys.exc_traceback
+            raise FSError(
+                origin="mkdir", message="can't create %s" % path
+            ).with_traceback(sys.exc_info()[2])
 
 
 def mv(source, target):
@@ -301,6 +302,7 @@ def mv(source, target):
 
     :raise FSError: if an error occurs
     """
+
     def move_file(src, dst):
         """Reimplementation of shutil.move.
 
@@ -309,17 +311,19 @@ def mv(source, target):
         rmtree. This ensure moving a directory with read-only files will
         work.
         """
+
         def same_file(src, dst):
-            if hasattr(os.path, 'samefile'):
+            if hasattr(os.path, "samefile"):
                 try:
                     return os.path.samefile(src, dst)
                 except OSError:
                     return False
-            return (os.path.normcase(os.path.abspath(src)) ==
-                    os.path.normcase(os.path.abspath(dst)))
+            return os.path.normcase(os.path.abspath(src)) == os.path.normcase(
+                os.path.abspath(dst)
+            )
 
         def basename(path):
-            sep = os.path.sep + (os.path.altsep or '')
+            sep = os.path.sep + (os.path.altsep or "")
             return os.path.basename(path.rstrip(sep))
 
         def destinsrc(src, dst):
@@ -341,8 +345,7 @@ def mv(source, target):
 
             real_dst = os.path.join(dst, basename(src))
             if os.path.exists(real_dst):
-                raise FSError(
-                    "Destination path '%s' already exists" % real_dst)
+                raise FSError("Destination path '%s' already exists" % real_dst)
         try:
             os.rename(src, real_dst)
         except OSError:
@@ -353,8 +356,8 @@ def mv(source, target):
             elif os.path.isdir(src):
                 if destinsrc(src, dst):
                     raise FSError(
-                        "Cannot move a directory '%s' into itself"
-                        " '%s'." % (src, dst))
+                        "Cannot move a directory '%s' into itself" " '%s'." % (src, dst)
+                    )
                 shutil.copytree(src, real_dst, symlinks=True)
                 rm(src, recursive=True)
             else:
@@ -362,10 +365,10 @@ def mv(source, target):
                 rm(src)
         return real_dst
 
-    if isinstance(source, basestring):
-        logger.debug('mv %s %s', source, target)
+    if isinstance(source, str):
+        logger.debug("mv %s %s", source, target)
     else:
-        logger.debug('mv %s %s', ' '.join(source), target)
+        logger.debug("mv %s %s", " ".join(source), target)
 
     try:
         # Compute file list and number of file to copy
@@ -373,26 +376,26 @@ def mv(source, target):
         nb_files = len(file_list)
 
         if nb_files == 0:
-            raise FSError(origin='mv',
-                          message='cannot find files matching "%s"' % source)
+            raise FSError(
+                origin="mv", message='cannot find files matching "%s"' % source
+            )
         elif nb_files == 1:
             source = file_list[0]
             if os.path.isdir(source) and os.path.isdir(target):
-                move_file(source,
-                          os.path.join(target, os.path.basename(source)))
+                move_file(source, os.path.join(target, os.path.basename(source)))
             else:
                 move_file(source, target)
         elif not os.path.isdir(target):
             # More than one file to move but the target is not a directory
-            raise FSError('mv', '%s should be a directory' % target)
+            raise FSError("mv", "%s should be a directory" % target)
         else:
             for f in file_list:
                 f_dest = os.path.join(target, os.path.basename(f))
-                e3.log.debug('mv %s %s', f, f_dest)
+                e3.log.debug("mv %s %s", f, f_dest)
                 move_file(f, f_dest)
     except Exception as e:
         logger.error(e)
-        raise FSError(origin='mv', message=str(e)), None, sys.exc_traceback
+        raise FSError(origin="mv", message=str(e)).with_traceback(sys.exc_info()[2])
 
 
 def rm(path, recursive=False, glob=True):
@@ -409,16 +412,16 @@ def rm(path, recursive=False, glob=True):
     delete.
     """
     if recursive:
-        logger.debug('rm -r %s', str(path))
+        logger.debug("rm -r %s", str(path))
     else:
-        logger.debug('rm %s', str(path))
+        logger.debug("rm %s", str(path))
 
     # We transform the list into a set in order to remove duplicate files in
     # the list
     if glob:
         file_list = set(ls(path, emit_log_record=False))
     else:
-        if isinstance(path, basestring):
+        if isinstance(path, str):
             file_list = {path}
         else:
             file_list = set(path)
@@ -435,7 +438,7 @@ def rm(path, recursive=False, glob=True):
         :type exc_info: tuple
         """
         del exc_info
-        e3.log.debug('error when running %s on %s', func, error_path)
+        e3.log.debug("error when running %s on %s", func, error_path)
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
@@ -481,8 +484,8 @@ def rm(path, recursive=False, glob=True):
             # able to remove these files. On Unix don't do that as
             # we got some strange unicode "ascii codec" errors
             # (need some further investigation at some point)
-            if sys.platform == 'win32':  # unix: no cover
-                f = unicode(f)
+            if sys.platform == "win32":  # unix: no cover
+                f = str(f)
 
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
@@ -494,9 +497,8 @@ def rm(path, recursive=False, glob=True):
         except Exception as e:  # defensive code
             logger.error(e)
             raise FSError(
-                origin='rm',
-                message='error occurred while removing %s' % f), None, \
-                sys.exc_traceback
+                origin="rm", message="error occurred while removing %s" % f
+            ).with_traceback(sys.exc_info()[2])
 
 
 def splitall(path):
@@ -520,7 +522,7 @@ def splitall(path):
             # os.path.split('..') -> ('', '..')
             dirnames.append(tail)
             break
-        elif tail == '':
+        elif tail == "":
             # ending with a directory separator
             # os.path.split('a/b/c/') -> ('a/b/c', '')
             pass
@@ -530,17 +532,35 @@ def splitall(path):
     return tuple(reversed(dirnames))
 
 
-VCS_IGNORE_LIST = ('RCS', 'SCCS', 'CVS', 'CVS.adm', 'RCSLOG',
-                   '.svn', '.git', '.hg', '.bzr', '.cvsignore',
-                   '.gitignore', '.gitattributes', '.gitmodules',
-                   '.gitreview', '.mailmap', '.idea')
+VCS_IGNORE_LIST = (
+    "RCS",
+    "SCCS",
+    "CVS",
+    "CVS.adm",
+    "RCSLOG",
+    ".svn",
+    ".git",
+    ".hg",
+    ".bzr",
+    ".cvsignore",
+    ".gitignore",
+    ".gitattributes",
+    ".gitmodules",
+    ".gitreview",
+    ".mailmap",
+    ".idea",
+)
 
 
-def sync_tree(source, target, ignore=None,
-              file_list=None,
-              delete=True,
-              preserve_timestamps=True,
-              delete_ignore=False):
+def sync_tree(
+    source,
+    target,
+    ignore=None,
+    file_list=None,
+    delete=True,
+    preserve_timestamps=True,
+    delete_ignore=False,
+):
     """Synchronize the files and directories between two directories.
 
     :param source: the directory from where the files and directories
@@ -571,22 +591,19 @@ def sync_tree(source, target, ignore=None,
     :type delete_ignore: bool
     """
     # Some structure used when walking the trees to be synched
-    FilesInfo = namedtuple('FilesInfo', ['rel_path', 'source', 'target'])
-    FileInfo = namedtuple('FileInfo', ['path', 'stat'])
+    FilesInfo = namedtuple("FilesInfo", ["rel_path", "source", "target"])
+    FileInfo = namedtuple("FileInfo", ["path", "stat"])
 
     # normalize the list of file to synchronize
     norm_file_list = None
     if file_list is not None:
-        norm_file_list = [wf.replace('\\', '/').rstrip('/')
-                          for wf in file_list]
+        norm_file_list = [wf.replace("\\", "/").rstrip("/") for wf in file_list]
 
     # normalize ignore patterns
     if ignore is not None:
-        norm_ignore_list = [fn.replace('\\', '/') for fn in ignore]
-        abs_ignore_patterns = [fn for fn in norm_ignore_list
-                               if fn.startswith('/')]
-        rel_ignore_patterns = [fn for fn in norm_ignore_list
-                               if not fn.startswith('/')]
+        norm_ignore_list = [fn.replace("\\", "/") for fn in ignore]
+        abs_ignore_patterns = [fn for fn in norm_ignore_list if fn.startswith("/")]
+        rel_ignore_patterns = [fn for fn in norm_ignore_list if not fn.startswith("/")]
 
     def is_in_ignore_list(p):
         """Check if a file should be ignored.
@@ -600,13 +617,19 @@ def sync_tree(source, target, ignore=None,
         if ignore is None:
             return False
 
-        return any(
-            (f for f in abs_ignore_patterns if
-             p == f or p.startswith(f + '/'))) or \
-            any((f for f in rel_ignore_patterns if
-                 p[1:] == f or p.endswith('/' + f))) or \
-            any((f for f in norm_ignore_list if
-                 '/' not in f and fnmatch.fnmatch(os.path.basename(p), f)))
+        return (
+            any((f for f in abs_ignore_patterns if p == f or p.startswith(f + "/")))
+            or any(
+                (f for f in rel_ignore_patterns if p[1:] == f or p.endswith("/" + f))
+            )
+            or any(
+                (
+                    f
+                    for f in norm_ignore_list
+                    if "/" not in f and fnmatch.fnmatch(os.path.basename(p), f)
+                )
+            )
+        )
 
     def is_in_file_list(p):
         """Check if a file should be included.
@@ -617,11 +640,15 @@ def sync_tree(source, target, ignore=None,
         :return: True if in the list of file to include
         :rtype: bool
         """
-        return file_list is None or \
-            any([f for f in norm_file_list if
-                 f == p[1:] or
-                 p.startswith('/' + f + '/') or
-                 f.startswith(p[1:] + '/')])
+        return file_list is None or any(
+            [
+                f
+                for f in norm_file_list
+                if f == p[1:]
+                or p.startswith("/" + f + "/")
+                or f.startswith(p[1:] + "/")
+            ]
+        )
 
     def isdir(fi):
         """Check if a file is a directory.
@@ -662,7 +689,7 @@ def sync_tree(source, target, ignore=None,
         :type dst: FileInfo
         """
         bufsize = 8 * 1024
-        with open(src.path, 'rb') as fp1, open(dst.path, 'rb') as fp2:
+        with open(src.path, "rb") as fp1, open(dst.path, "rb") as fp2:
             while True:
                 b1 = fp1.read(bufsize)
                 b2 = fp2.read(bufsize)
@@ -686,13 +713,16 @@ def sync_tree(source, target, ignore=None,
         # when not preserving timestamps we cannot rely on the timestamps to
         # check if a file is up-to-date. In that case do a full content
         # comparison as last check.
-        return dst.stat is None or \
-            stat.S_IFMT(src.stat.st_mode) != stat.S_IFMT(dst.stat.st_mode) \
-            or (preserve_timestamps and
-                abs(src.stat.st_mtime - dst.stat.st_mtime) > 0.001) or \
-            src.stat.st_size != dst.stat.st_size or \
-            (not preserve_timestamps and
-             isfile(src) and not cmp_files(src, dst))
+        return (
+            dst.stat is None
+            or stat.S_IFMT(src.stat.st_mode) != stat.S_IFMT(dst.stat.st_mode)
+            or (
+                preserve_timestamps
+                and abs(src.stat.st_mtime - dst.stat.st_mtime) > 0.001
+            )
+            or src.stat.st_size != dst.stat.st_size
+            or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))
+        )
 
     def copystat(src, dst):
         """Update attribute of dst file with src attributes.
@@ -704,33 +734,39 @@ def sync_tree(source, target, ignore=None,
         """
         if islink(src):  # windows: no cover
             mode = stat.S_IMODE(src.stat.st_mode)
-            if hasattr(os, 'lchmod'):
+            if hasattr(os, "lchmod"):
                 os.lchmod(dst.path, mode)
 
-            if hasattr(os, 'lchflags') and hasattr(src.stat, 'st_flags'):
+            if hasattr(os, "lchflags") and hasattr(src.stat, "st_flags"):
                 try:
                     os.lchflags(dst.path, src.stat.st_flags)
                 except OSError as why:  # defensive code
                     import errno
-                    if (not hasattr(errno, 'EOPNOTSUPP') or
-                            why.errno != errno.EOPNOTSUPP):
+
+                    if (
+                        not hasattr(errno, "EOPNOTSUPP")
+                        or why.errno != errno.EOPNOTSUPP
+                    ):
                         raise
         else:
             mode = stat.S_IMODE(src.stat.st_mode)
-            if hasattr(os, 'utime'):
+            if hasattr(os, "utime"):
                 if preserve_timestamps:
                     os.utime(dst.path, (src.stat.st_atime, src.stat.st_mtime))
                 else:
                     os.utime(dst.path, None)
-            if hasattr(os, 'chmod'):
+            if hasattr(os, "chmod"):
                 os.chmod(dst.path, mode)
-            if hasattr(os, 'chflags') and hasattr(src.stat, 'st_flags'):
+            if hasattr(os, "chflags") and hasattr(src.stat, "st_flags"):
                 try:
                     os.chflags(dst.path, src.stat.st_flags)
                 except OSError as why:  # defensive code
                     import errno
-                    if (not hasattr(errno, 'EOPNOTSUPP') or
-                            why.errno != errno.EOPNOTSUPP):
+
+                    if (
+                        not hasattr(errno, "EOPNOTSUPP")
+                        or why.errno != errno.EOPNOTSUPP
+                    ):
                         raise
 
     def safe_copy(src, dst):
@@ -759,13 +795,13 @@ def sync_tree(source, target, ignore=None,
                 rm(dst.path, recursive=False, glob=False)
 
             try:
-                with open(src.path, 'rb') as fsrc:
-                    with open(dst.path, 'wb') as fdst:
+                with open(src.path, "rb") as fsrc:
+                    with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
             except IOError:
                 rm(dst.path, glob=False)
-                with open(src.path, 'rb') as fsrc:
-                    with open(dst.path, 'wb') as fdst:
+                with open(src.path, "rb") as fsrc:
+                    with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
             copystat(src, dst)
 
@@ -781,7 +817,7 @@ def sync_tree(source, target, ignore=None,
             # in case of error to change parent directory
             # permissions. The permissions will be then
             # set correctly at the end of rsync.
-            e3.os.fs.chmod('a+wx', os.path.dirname(dst.path))
+            e3.os.fs.chmod("a+wx", os.path.dirname(dst.path))
             os.makedirs(dst.path)
 
     def walk(root_dir, target_root_dir, entry=None):
@@ -802,14 +838,16 @@ def sync_tree(source, target, ignore=None,
             if os.path.exists(target_root_dir):
                 target_stat = os.lstat(target_root_dir)
 
-            entry = FilesInfo('',
-                              FileInfo(root_dir, os.lstat(root_dir)),
-                              FileInfo(target_root_dir, target_stat))
+            entry = FilesInfo(
+                "",
+                FileInfo(root_dir, os.lstat(root_dir)),
+                FileInfo(target_root_dir, target_stat),
+            )
             yield entry
         try:
             source_names = set(os.listdir(entry.source.path))
         except Exception:  # defensive code
-            e3.log.debug('cannot get sources list', exc_info=True)
+            e3.log.debug("cannot get sources list", exc_info=True)
             # Don't crash in case a source directory cannot be read
             return
 
@@ -818,7 +856,7 @@ def sync_tree(source, target, ignore=None,
             try:
                 target_names = set(os.listdir(entry.target.path))
             except Exception:
-                e3.log.debug('cannot get targets list', exc_info=True)
+                e3.log.debug("cannot get targets list", exc_info=True)
                 target_names = set()
 
         all_names = source_names | target_names
@@ -845,31 +883,33 @@ def sync_tree(source, target, ignore=None,
 
         for el in result:
             if is_in_ignore_list(el.rel_path):
-                logger.debug('ignore %s', el.rel_path)
+                logger.debug("ignore %s", el.rel_path)
                 if delete_ignore:
-                    yield FilesInfo(el.rel_path,
-                                    FileInfo(el.source.path, None),
-                                    el.target)
+                    yield FilesInfo(
+                        el.rel_path, FileInfo(el.source.path, None), el.target
+                    )
             elif is_in_file_list(el.rel_path):
                 yield el
                 if isdir(el.source):
                     for x in walk(root_dir, target_root_dir, el):
                         yield x
             else:
-                yield FilesInfo(el.rel_path,
-                                FileInfo(el.source.path, None),
-                                el.target)
+                yield FilesInfo(el.rel_path, FileInfo(el.source.path, None), el.target)
 
     source_top = os.path.normpath(source).rstrip(os.path.sep)
     target_top = os.path.normpath(target).rstrip(os.path.sep)
     copystat_dir_list = []
 
-    logger.debug('sync_tree %s -> %s [delete=%s, preserve_stmp=%s]',
-                 source, target, delete, preserve_timestamps)
+    logger.debug(
+        "sync_tree %s -> %s [delete=%s, preserve_stmp=%s]",
+        source,
+        target,
+        delete,
+        preserve_timestamps,
+    )
 
     if not os.path.exists(source):
-        raise FSError(origin='sync_tree',
-                      message='%s does not exist' % source)
+        raise FSError(origin="sync_tree", message="%s does not exist" % source)
 
     # Keep track of deleted and updated files
     deleted_list = []

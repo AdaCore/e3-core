@@ -1,6 +1,5 @@
 """Helpers classes and functions for ANOD."""
 
-from __future__ import absolute_import, division, print_function
 
 import io
 import os
@@ -10,14 +9,13 @@ import e3.log
 from e3.anod.spec import parse_command
 from e3.os.fs import unixpath
 
-log = e3.log.getLogger('anod.helpers')
+log = e3.log.getLogger("anod.helpers")
 
 
 class Make(object):
     """Wrapper around GNU Make."""
 
-    def __init__(self, anod_instance,
-                 makefile=None, exec_dir=None, jobs=None):
+    def __init__(self, anod_instance, makefile=None, exec_dir=None, jobs=None):
         """Initialize a Make object.
 
         :param anod_instance: an Anod instance
@@ -51,7 +49,7 @@ class Make(object):
             value separated by a space character
         :type value: str | list[str]
         """
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             self.var_list[name] = value
         else:
             # Assume we get a list
@@ -78,10 +76,9 @@ class Make(object):
         :param timeout: timeout to pass to ex.Run
         :type timeout: int | None
         """
-        cmdline = self.cmdline(
-            target, jobs, exec_dir, timeout=timeout)
-        cmd = cmdline['cmd']
-        options = cmdline['options']
+        cmdline = self.cmdline(target, jobs, exec_dir, timeout=timeout)
+        cmd = cmdline["cmd"]
+        options = cmdline["options"]
         return self.anod_instance.shell(*cmd, **options)
 
     def cmdline(self, target=None, jobs=None, exec_dir=None, timeout=None):
@@ -101,13 +98,12 @@ class Make(object):
            - options: options to pass to gnatpython.ex.Run
         :rtype: dict
         """
-        cmd_arg_list = ['make']
+        cmd_arg_list = ["make"]
 
         if self.makefile is not None:
-            cmd_arg_list += ['-f', unixpath(self.makefile)]
+            cmd_arg_list += ["-f", unixpath(self.makefile)]
 
-        cmd_arg_list += [
-            '-j', '%s' % str(jobs) if jobs is not None else str(self.jobs)]
+        cmd_arg_list += ["-j", "%s" % str(jobs) if jobs is not None else str(self.jobs)]
 
         for key in self.var_list:
             cmd_arg_list.append("%s=%s" % (key, self.var_list[key]))
@@ -121,22 +117,20 @@ class Make(object):
             else:
                 cmd_arg_list.append(target)
 
-        options = {
-            'cwd': exec_dir or self.exec_dir,
-            'timeout': timeout}
+        options = {"cwd": exec_dir or self.exec_dir, "timeout": timeout}
 
         return {
-            'cmd': parse_command(
-                command=cmd_arg_list,
-                build_space=self.anod_instance.build_space),
-            'options': options}
+            "cmd": parse_command(
+                command=cmd_arg_list, build_space=self.anod_instance.build_space
+            ),
+            "options": options,
+        }
 
 
 class Configure(object):
     """Wrapper around ./configure."""
 
-    def __init__(self, anod_instance, src_dir=None, exec_dir=None,
-                 auto_target=True):
+    def __init__(self, anod_instance, src_dir=None, exec_dir=None, auto_target=True):
         """Initialize a Configure object.
 
         :param anod_instance: an Anod instance
@@ -210,44 +204,43 @@ class Configure(object):
         called with this shell.
         """
         cmd = []
-        if 'CONFIG_SHELL' in os.environ:
-            cmd.append(os.environ['CONFIG_SHELL'])
+        if "CONFIG_SHELL" in os.environ:
+            cmd.append(os.environ["CONFIG_SHELL"])
 
         # Compute the relative path for configure
-        configure_path = unixpath(os.path.relpath(
-            os.path.join(self.src_dir, 'configure'),
-            self.exec_dir))
+        configure_path = unixpath(
+            os.path.relpath(os.path.join(self.src_dir, "configure"), self.exec_dir)
+        )
 
         # In case the configure is run from its location ensure to
         # add ./ as . is not necessary in PATH.
-        if configure_path == 'configure':
-            configure_path = './configure'
+        if configure_path == "configure":
+            configure_path = "./configure"
         cmd += [configure_path]
         cmd += self.args
 
         if self.target is not None:
-            cmd.append('--target=' + self.target)
+            cmd.append("--target=" + self.target)
 
         if self.host is not None:
-            cmd.append('--host=' + self.host)
+            cmd.append("--host=" + self.host)
 
         if self.build is not None:
-            cmd.append('--build=' + self.build)
+            cmd.append("--build=" + self.build)
 
-        cmd_options = {'cwd': self.exec_dir,
-                       'ignore_environ': False,
-                       'env': self.env}
+        cmd_options = {"cwd": self.exec_dir, "ignore_environ": False, "env": self.env}
 
         return {
-            'cmd': parse_command(
-                command=cmd,
-                build_space=self.anod_instance.build_space),
-            'options': cmd_options}
+            "cmd": parse_command(
+                command=cmd, build_space=self.anod_instance.build_space
+            ),
+            "options": cmd_options,
+        }
 
     def __call__(self):
         cmdline = self.cmdline()
-        cmd = cmdline['cmd']
-        options = cmdline['options']
+        cmd = cmdline["cmd"]
+        options = cmdline["options"]
         return self.anod_instance.shell(*cmd, **options)
 
 
@@ -268,24 +261,23 @@ def text_replace(filename, pattern):
     """
     output = io.BytesIO()
     nb_substitution = [0 for _ in pattern]
-    with open(filename, 'rb') as f:
+    with open(filename, "rb") as f:
         for line in f:
             for pattern_index, (regexp, replacement) in enumerate(pattern):
-                if isinstance(replacement, unicode):
-                    replacement = replacement.encode('utf-8')
-                if isinstance(regexp, unicode):
-                    regexp = regexp.encode('utf-8')
-                line, count = re.subn(regexp,
-                                      replacement, line)
+                if isinstance(replacement, str):
+                    replacement = replacement.encode("utf-8")
+                if isinstance(regexp, str):
+                    regexp = regexp.encode("utf-8")
+                line, count = re.subn(regexp, replacement, line)
                 if count:
                     nb_substitution[pattern_index] += count
-            if isinstance(line, unicode):
-                output.write(line.encode('utf-8'))
+            if isinstance(line, str):
+                output.write(line.encode("utf-8"))
             else:
                 output.write(line)
     if any((nb for nb in nb_substitution)):
         # file changed, update it
-        with open(filename, 'wb') as f:
+        with open(filename, "wb") as f:
             f.write(output.getvalue())
     output.close()
     return nb_substitution

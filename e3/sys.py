@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import ast
 import os
 import re
@@ -8,7 +6,7 @@ from enum import Enum
 
 import e3.log
 
-logger = e3.log.getLogger('e3.sys')
+logger = e3.log.getLogger("e3.sys")
 
 
 class RewriteNodeError(Exception):
@@ -31,7 +29,7 @@ class RewriteImportRule(object):
         reject = 0
         skip = 1
 
-    def __init__(self, module, name='.*', action=None):
+    def __init__(self, module, name=".*", action=None):
         """Initialize the object.
 
         :param module: regexp suitable for re.match() to match against the
@@ -64,7 +62,7 @@ class RewriteImportRule(object):
             # node: ImportFrom(module, names)
             # first check whether the module match our rule
 
-            if re.match('^' + self.module + '$', node.module):
+            if re.match("^" + self.module + "$", node.module):
 
                 # then we need to check whether our 'name' is in the
                 # 'from' list (node.names)
@@ -82,16 +80,16 @@ class RewriteImportRule(object):
         if check_in_names is not None:
             new_names = []
             for _, var in enumerate(node.names):
-                if re.match('^' + check_in_names + '$', var.name):
+                if re.match("^" + check_in_names + "$", var.name):
                     if self.action == self.RuleAction.skip:
                         # don't import this name
                         pass
                     elif self.action == self.RuleAction.reject:
                         raise RewriteNodeError(
-                            'Rejected import found in ast: %s' % ast.dump(
-                                node))
+                            "Rejected import found in ast: %s" % ast.dump(node)
+                        )
                     else:  # defensive code
-                        raise ValueError('unknown action %s', self.action)
+                        raise ValueError("unknown action %s", self.action)
                 else:
                     new_names.append(var)
             node.names = new_names
@@ -125,32 +123,35 @@ class RewriteImportNodeTransformer(ast.NodeTransformer):
 
 def version():
     import pkg_resources
-    return pkg_resources.get_distribution('e3-core').version
+
+    return pkg_resources.get_distribution("e3-core").version
 
 
 def sanity_check():
     """Sanity check the E3 install."""
     errors = 0
-    print('YAMLCheck:', end=' ')
+    print("YAMLCheck:", end=" ")
     try:
         import yaml
-        yaml.safe_dump({'Yaml': 'works'})
-        print('PASSED')
+
+        yaml.safe_dump({"Yaml": "works"})
+        print("PASSED")
     except Exception:  # defensive code
-        print('FAILED')
+        print("FAILED")
         errors += 1
 
-    print('HashlibCheck:', end=' ')
+    print("HashlibCheck:", end=" ")
     try:
         from e3.hash import sha1, md5
+
         sha1(__file__)
         md5(__file__)
-        print('PASSED')
+        print("PASSED")
     except Exception:  # defensive code
-        print('FAILED')
+        print("FAILED")
         errors += 1
 
-    print('Version:', end=' ')
+    print("Version:", end=" ")
     try:
         print(version())
     except Exception:  # defensive code
@@ -161,19 +162,19 @@ def sanity_check():
 def main():
     from e3.env import Env
     import e3.main
+
     m = e3.main.Main(platform_args=True)
     m.argument_parser.add_argument(
-        '--platform-info',
-        choices={'build', 'host', 'target'},
-        help='Show build/host/target platform info')
+        "--platform-info",
+        choices={"build", "host", "target"},
+        help="Show build/host/target platform info",
+    )
     m.argument_parser.add_argument(
-        '--version',
-        help='Show E3 version',
-        action='store_true')
+        "--version", help="Show E3 version", action="store_true"
+    )
     m.argument_parser.add_argument(
-        '--check',
-        help='Run e3 sanity checking',
-        action='store_true')
+        "--check", help="Run e3 sanity checking", action="store_true"
+    )
     m.parse_args()
 
     if m.args.version:
@@ -182,10 +183,10 @@ def main():
     elif m.args.check:
         errors = sanity_check()
         if errors:  # defensive code
-            logger.error('sanity checking failed!')
+            logger.error("sanity checking failed!")
             sys.exit(1)
         else:
-            print('Everything OK!')
+            print("Everything OK!")
             return
     elif m.args.platform_info:
         print(getattr(Env(), m.args.platform_info))
@@ -198,13 +199,14 @@ def set_python_env(prefix):
     :type prefix: str
     """
     import e3.env
+
     env = e3.env.Env()
-    if sys.platform == 'win32':  # unix: no cover
+    if sys.platform == "win32":  # unix: no cover
         env.add_path(prefix)
-        env.add_path(os.path.join(prefix, 'Scripts'))
+        env.add_path(os.path.join(prefix, "Scripts"))
     else:
-        env.add_path(os.path.join(prefix, 'bin'))
-        env.add_dll_path(os.path.join(prefix, 'lib'))
+        env.add_path(os.path.join(prefix, "bin"))
+        env.add_dll_path(os.path.join(prefix, "lib"))
 
 
 def interpreter(prefix=None):
@@ -221,18 +223,18 @@ def interpreter(prefix=None):
     """
     if prefix is None:
         return sys.executable
-    if sys.platform == 'win32':  # unix: no cover
-        python3 = os.path.join(prefix, 'python3.exe')
+    if sys.platform == "win32":  # unix: no cover
+        python3 = os.path.join(prefix, "python3.exe")
         if os.path.exists(python3):
             return python3
         else:
-            return os.path.join(prefix, 'python.exe')
+            return os.path.join(prefix, "python.exe")
     else:  # windows: no cover
-        python3 = os.path.join(prefix, 'bin', 'python3')
+        python3 = os.path.join(prefix, "bin", "python3")
         if os.path.exists(python3):
             return python3
         else:
-            return os.path.join(prefix, 'bin', 'python')
+            return os.path.join(prefix, "bin", "python")
 
 
 def python_script(name, prefix=None):
@@ -246,6 +248,7 @@ def python_script(name, prefix=None):
     :return: a list that will be the prefix of your command line
     :rtype: list[str]
     """
+
     def has_relative_python_shebang(file_script):  # unix: no cover
         """Return True if the script contains #!python shebang.
 
@@ -256,17 +259,17 @@ def python_script(name, prefix=None):
         #!/path/to/python shebang should return false, as we don't need to
         return interpreter path.
         """
-        with open(file_script, 'rb') as f:
+        with open(file_script, "rb") as f:
             content = f.read()
-        return re.search(b'#!python', content, flags=re.MULTILINE) is not None
+        return re.search(b"#!python", content, flags=re.MULTILINE) is not None
 
     if prefix is None:
-        if sys.platform == 'win32':  # unix: no cover
+        if sys.platform == "win32":  # unix: no cover
             prefix = os.path.dirname(sys.executable)
         else:
             prefix = os.path.dirname(os.path.dirname(sys.executable))
 
-    if sys.platform == 'win32':  # unix: no cover
+    if sys.platform == "win32":  # unix: no cover
         # On Windows a script present in a distribution might be installed
         # using different mechanisms:
         #
@@ -274,16 +277,18 @@ def python_script(name, prefix=None):
         # 2- a .exe with the same basename as the original python script which
         #    which call a python script called <basename>-script.py
         # 3- a .exe without a side python script
-        script = os.path.join(prefix, name) \
-            if os.path.basename(prefix) == 'scripts' \
-            else os.path.join(prefix, 'Scripts', name)
+        script = (
+            os.path.join(prefix, name)
+            if os.path.basename(prefix) == "scripts"
+            else os.path.join(prefix, "Scripts", name)
+        )
 
-        if script.endswith('.exe'):
+        if script.endswith(".exe"):
             script_exe = script
-            script_py = script[:-4] + '-script.py'
+            script_py = script[:-4] + "-script.py"
         else:
-            script_exe = script + '.exe'
-            script_py = script + '-script.py'
+            script_exe = script + ".exe"
+            script_py = script + "-script.py"
 
         if os.path.isfile(script_py):
             # If we have a side <basename>-script.py always use it, instead of
@@ -299,4 +304,4 @@ def python_script(name, prefix=None):
             # Case in which the script is probably a Python file
             return [interpreter(prefix), script]
     else:
-        return [interpreter(prefix), os.path.join(prefix, 'bin', name)]
+        return [interpreter(prefix), os.path.join(prefix, "bin", name)]

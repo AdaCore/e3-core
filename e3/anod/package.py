@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 
 import e3.anod.error
@@ -28,7 +26,7 @@ class Package(object):
         :type version: () -> str | None
         """
         self.prefix = prefix
-        self.name = prefix + '-{version}-{platform}-bin'
+        self.name = prefix + "-{version}-{platform}-bin"
         self.publish = publish
         self.version = version
 
@@ -43,11 +41,9 @@ class Package(object):
         if self.version is not None:
             version = self.version()
         else:
-            version = 'unknown'
+            version = "unknown"
 
-        return self.name.format(
-            version=version,
-            platform=anod_instance.env.platform)
+        return self.name.format(version=version, platform=anod_instance.env.platform)
 
     def pkg_path(self, anod_instance):
         """Return the full path in which a package will be generated.
@@ -57,8 +53,9 @@ class Package(object):
         :return: the full path to the generated archive
         :rtype: str
         """
-        return os.path.join(anod_instance.build_space.binary_dir,
-                            self.pkg_name(anod_instance) + '.zip')
+        return os.path.join(
+            anod_instance.build_space.binary_dir, self.pkg_name(anod_instance) + ".zip"
+        )
 
     def create_package(self, anod_instance):
         """Generate a package as a ZIP archive.
@@ -80,15 +77,23 @@ class Package(object):
             filename=os.path.basename(pkg_path),
             from_dir=anod_instance.build_space.pkg_dir,
             dest=os.path.dirname(pkg_path),
-            from_dir_rename=pkg_name)
+            from_dir_rename=pkg_name,
+        )
         return pkg_path
 
 
 class Source(object):
     """Source package."""
 
-    def __init__(self, name, publish, dest=None, unpack_cmd=None,
-                 remove_root_dir=True, ignore=None):
+    def __init__(
+        self,
+        name,
+        publish,
+        dest=None,
+        unpack_cmd=None,
+        remove_root_dir=True,
+        ignore=None,
+    ):
         """Create a new source object.
 
         Register a source package and describe where it should be installed.
@@ -114,10 +119,10 @@ class Source(object):
         self.name = name
         self.publish = publish
         if dest is None:
-            dest = ''
+            dest = ""
         else:
             if os.path.isabs(dest) or os.pardir in dest:
-                raise e3.anod.error.SpecError('dest should be relative path')
+                raise e3.anod.error.SpecError("dest should be relative path")
         self.dest = dest
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
@@ -147,7 +152,7 @@ class Source(object):
             if other_source.name != self.name and other_source.dest:
                 ignore_path = os.path.relpath(other_source.dest, self.dest)
                 if not ignore_path.startswith(os.pardir):
-                    ignore_list.append('/{}'.format(ignore_path))
+                    ignore_list.append("/{}".format(ignore_path))
         return ignore_list
 
 
@@ -166,9 +171,15 @@ class SourceBuilder(object):
 
     DEFAULT_PATCH_CMD = 1
 
-    def __init__(self, name, fullname, checkout,
-                 prepare_src=None, apply_patch=None,
-                 kind='source'):
+    def __init__(
+        self,
+        name,
+        fullname,
+        checkout,
+        prepare_src=None,
+        apply_patch=None,
+        kind="source",
+    ):
         """Define a builder for the source package.
 
         :param name: short name of the package (as used by build_source_list
@@ -225,18 +236,19 @@ class SourceBuilder(object):
         # Else provide a default function if we have exactly 1 checkout
         if not self.checkout:
             raise e3.anod.error.SpecError(
-                'no checkout associated to the builder %s' % self.name,
-                'prepare_src')
+                "no checkout associated to the builder %s" % self.name, "prepare_src"
+            )
         elif len(self.checkout) > 1:
             raise e3.anod.error.SpecError(
-                'more than 1 checkout and no prepare_src function'
-                ' given for %s' % self.name)
+                "more than 1 checkout and no prepare_src function"
+                " given for %s" % self.name
+            )
 
         # Set default function (a basic sync_tree call) that ignore
         # .svn, .git, .cvs, .cvsignore and .gitignore files
         return lambda repos, dest: sync_tree(
-            repos.values()[0]['working_dir'], dest,
-            ignore=VCS_IGNORE_LIST)
+            list(repos.values())[0]["working_dir"], dest, ignore=VCS_IGNORE_LIST
+        )
 
     @property
     def apply_patch(self):
@@ -245,9 +257,10 @@ class SourceBuilder(object):
         :return: the callback
         :rtype: (str, str, str) -> None
         """
+
         def default_apply_patch(_, patch_file, dest):
             """Apply a patch file using e3.diff.patch."""
-            e3.log.debug('applying patch %s on %s', patch_file, dest)
+            e3.log.debug("applying patch %s on %s", patch_file, dest)
             e3.diff.patch(patch_file, dest)
 
         def no_apply_patch(r, p, d):
@@ -255,13 +268,15 @@ class SourceBuilder(object):
             # Unused parameters
             del r, p, d
             raise e3.anod.error.AnodError(
-                'no apply_patch function defined in SourceBuilder %s'
-                % self.name,
-                'apply_path')
+                "no apply_patch function defined in SourceBuilder %s" % self.name,
+                "apply_path",
+            )
 
         if self.__apply_patch == self.DEFAULT_PATCH_CMD or (
-                self.prepare_src is not None and
-                self.__apply_patch is None and len(self.checkout) == 1):
+            self.prepare_src is not None
+            and self.__apply_patch is None
+            and len(self.checkout) == 1
+        ):
             # Either the default patch function is forced or
             # a package can be created with Anod, no patch function is
             # provided and there is only a single repository to patch
@@ -296,7 +311,8 @@ class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
             fullname=lambda: name,
             checkout=None,
             apply_patch=self.DEFAULT_PATCH_CMD,
-            kind='thirdparty')
+            kind="thirdparty",
+        )
 
 
 class ExternalSourceBuilder(UnmanagedSourceBuilder):
@@ -320,13 +336,13 @@ class ExternalSourceBuilder(UnmanagedSourceBuilder):
         :type query_name: str
         """
         super(ExternalSourceBuilder, self).__init__(
-            name=name,
-            fullname=lambda: name,
-            checkout=None,
-            kind='source')
+            name=name, fullname=lambda: name, checkout=None, kind="source"
+        )
         if query_name is None:
             query_name = name
-        self.source_query = {'name': query_name,
-                             'bid': bid,
-                             'setup': setup,
-                             'date': date}
+        self.source_query = {
+            "name": query_name,
+            "bid": bid,
+            "setup": setup,
+            "date": date,
+        }

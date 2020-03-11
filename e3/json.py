@@ -1,5 +1,5 @@
 """Utility functions related to json."""
-from __future__ import absolute_import, division, print_function
+
 
 import json
 import os
@@ -19,7 +19,7 @@ def dump_to_json_file(path, obj):
     :param obj: a Python object that can serialized to JSON
     :type obj: object
     """
-    with open(path, 'w') as fd:
+    with open(path, "w") as fd:
         json.dump(obj, fd, indent=2)
 
 
@@ -38,7 +38,7 @@ def load_from_json_file(path, default=None, ignore_non_existing=True):
     :rtype: object
     """
     if os.path.isfile(path):
-        with open(path, 'r') as fd:
+        with open(path, "r") as fd:
             content = json.load(fd)
         return content
     else:

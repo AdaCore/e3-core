@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from e3.anod.error import AnodError
 from e3.main import Main
 
@@ -7,9 +5,8 @@ from e3.main import Main
 def anod_cmdline(subparsers, action_name, action_help):
     parser = subparsers.add_parser(action_name, help=action_help)
     parser.set_defaults(action_name=action_name)
-    parser.add_argument('spec', metavar="SPEC",
-                        help='The specification file name')
-    parser.add_argument('--qualifier')
+    parser.add_argument("spec", metavar="SPEC", help="The specification file name")
+    parser.add_argument("--qualifier")
 
 
 def anod():
@@ -27,8 +24,9 @@ def anod():
     import e3.store
     import e3.store.cache
 
-    sandbox_dir = os.path.abspath(os.path.join(os.path.dirname(
-        sys.modules['__main__'].__file__), os.pardir))
+    sandbox_dir = os.path.abspath(
+        os.path.join(os.path.dirname(sys.modules["__main__"].__file__), os.pardir)
+    )
 
     sandbox = e3.anod.sandbox.SandBox()
     sandbox.root_dir = sandbox_dir
@@ -38,15 +36,14 @@ def anod():
 
     # Load the cache
     cache = e3.store.cache.load_cache(
-        'file-cache',
-        {'cache_dir': sandbox.tmp_cache_dir})
+        "file-cache", {"cache_dir": sandbox.tmp_cache_dir}
+    )
 
-    store = e3.store.load_store(
-        'http-simple-store', {}, cache)
+    store = e3.store.load_store("http-simple-store", {}, cache)
 
     m = Main()
     subparsers = m.argument_parser.add_subparsers()
-    anod_cmdline(subparsers, 'download', 'download a binary package')
+    anod_cmdline(subparsers, "download", "download a binary package")
     m.parse_args()
 
     action = m.args.action_name
@@ -54,17 +51,14 @@ def anod():
     qualifier = m.args.qualifier
 
     anod_cls = spec_repo.load(name=spec)
-    anod_instance = anod_cls(qualifier=qualifier,
-                             kind=action,
-                             jobs=1,
-                             env=e3.env.BaseEnv.from_env())
+    anod_instance = anod_cls(
+        qualifier=qualifier, kind=action, jobs=1, env=e3.env.BaseEnv.from_env()
+    )
 
     # ??? inject the sandbox
     anod_instance.sandbox = sandbox
 
-    driver = e3.anod.driver.AnodDriver(
-        anod_instance=anod_instance,
-        store=store)
+    driver = e3.anod.driver.AnodDriver(anod_instance=anod_instance, store=store)
 
     try:
         driver.activate(sandbox, spec_repo)

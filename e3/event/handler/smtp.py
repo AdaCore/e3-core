@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import json
 import mimetypes
 from email import encoders
@@ -12,7 +10,6 @@ from e3.event import EventHandler
 
 
 class SMTPHandler(EventHandler):
-
     def __init__(self, subject, from_addr, to_addr, smtp_servers):
         """Initialize a SMTP event manager.
 
@@ -29,18 +26,22 @@ class SMTPHandler(EventHandler):
 
     @classmethod
     def decode_config(self, config_str):
-        subject, from_addr, to_addr, smtp_servers = config_str.split(',', 3)
-        smtp_servers = config_str.split(',')
-        return {'subject': subject,
-                'from_addr': from_addr,
-                'to_addr': to_addr,
-                'smtp_servers': smtp_servers}
+        subject, from_addr, to_addr, smtp_servers = config_str.split(",", 3)
+        smtp_servers = config_str.split(",")
+        return {
+            "subject": subject,
+            "from_addr": from_addr,
+            "to_addr": to_addr,
+            "smtp_servers": smtp_servers,
+        }
 
     def encode_config(self):
-        return "%s,%s,%s,%s" % (self.subject,
-                                self.from_addr,
-                                self.to_addr,
-                                ",".join(self.smtp_servers))
+        return "%s,%s,%s,%s" % (
+            self.subject,
+            self.from_addr,
+            self.to_addr,
+            ",".join(self.smtp_servers),
+        )
 
     @property
     def subject(self):
@@ -58,45 +59,46 @@ class SMTPHandler(EventHandler):
         attachments = event.get_attachments()
 
         mail = MIMEMultipart()
-        mail['Subject'] = self.subject
-        mail['From'] = self.from_addr
-        mail['To'] = self.to_addr
-        mail['Date'] = formatdate(localtime=True)
-        mail['Message-ID'] = make_msgid()
-        mail.preamble = 'You will not see this in a MIME-aware mail reader.\n'
-        event_json = MIMEBase('application', 'json')
+        mail["Subject"] = self.subject
+        mail["From"] = self.from_addr
+        mail["To"] = self.to_addr
+        mail["Date"] = formatdate(localtime=True)
+        mail["Message-ID"] = make_msgid()
+        mail.preamble = "You will not see this in a MIME-aware mail reader.\n"
+        event_json = MIMEBase("application", "json")
         event_json.set_payload(json_content)
         encoders.encode_base64(event_json)
-        event_json.add_header('Content-Disposition',
-                              'attachment', filename='event')
+        event_json.add_header("Content-Disposition", "attachment", filename="event")
         mail.attach(event_json)
 
-        result = {'attachments': {}}
+        result = {"attachments": {}}
 
-        for name, (filename, _) in attachments.items():
+        for name, (filename, _) in list(attachments.items()):
             ctype, encoding = mimetypes.guess_type(filename)
 
-            if encoding == 'gzip' and ctype == 'application/x-tar':
-                attachment = MIMEBase('application', 'x-tar-gz')
+            if encoding == "gzip" and ctype == "application/x-tar":
+                attachment = MIMEBase("application", "x-tar-gz")
             elif encoding is None and ctype is not None:
-                attachment = MIMEBase(*ctype.split('/', 1))
+                attachment = MIMEBase(*ctype.split("/", 1))
             else:
-                attachment = MIMEBase('application', 'octet-stream')
-            with open(filename, 'rb') as data_f:
+                attachment = MIMEBase("application", "octet-stream")
+            with open(filename, "rb") as data_f:
                 attachment.set_payload(data_f.read())
 
-            result['attachments'][name] = {'path': filename,
-                                           'encoding': encoding,
-                                           'ctype': ctype}
+            result["attachments"][name] = {
+                "path": filename,
+                "encoding": encoding,
+                "ctype": ctype,
+            }
 
             encoders.encode_base64(attachment)
-            attachment.add_header('Content-Disposition', 'attachment',
-                                  filename=name)
+            attachment.add_header("Content-Disposition", "attachment", filename=name)
             mail.attach(attachment)
 
         return e3.net.smtp.sendmail(
             self.from_addr,
-            mail['To'].split(','),
+            mail["To"].split(","),
             mail.as_string(),
             self.smtp_servers,
-            message_id=mail['Message-ID'])
+            message_id=mail["Message-ID"],
+        )
