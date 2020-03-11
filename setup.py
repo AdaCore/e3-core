@@ -16,8 +16,6 @@ install_requires = [
 
 extras_require = {}
 
-extras_require[':python_version<"3.4"'] = ["enum34"]
-
 for p in ("darwin", "linux", "linux2", "win32"):
     platform_string = ":sys_platform=='%s'" % p
     extras_require[platform_string] = ["netifaces", "psutil"]
@@ -53,10 +51,8 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Build Tools",
     ],
     packages=find_packages(),
