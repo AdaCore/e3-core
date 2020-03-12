@@ -16,7 +16,7 @@ def fix_paths(site_pkg_dir, cov_data_file):
     site_pkg_dir = os.path.abspath(site_pkg_dir)
 
     paths = PathAliases()
-    paths.add(site_pkg_dir, ".")
+    paths.add(site_pkg_dir, "src")
 
     old_cov_file = NamedTemporaryFile()
     old_cov_file.close()
