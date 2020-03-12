@@ -79,7 +79,11 @@ from foo.bar2.module3 import name1
 
     expected += " ImportFrom(module='foo.bar2.module3'," " names=[], level=0)])"
     # from foo.bar2.module3 import name1 -- module matching .*3
-    assert ast.dump(node) == expected
+
+    ast_dump = ast.dump(node)
+    # Make the test compatible with Python 3.8
+    ast_dump = ast_dump.replace(", type_ignores=[]", "")
+    assert ast_dump == expected
 
     node2 = ast.parse(script, "<string>")
     with pytest.raises(RewriteNodeError) as err:
