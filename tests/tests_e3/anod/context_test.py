@@ -307,11 +307,11 @@ class TestContext(object):
         with pytest.raises(SchedulingError) as err:
             ac.schedule(ac.always_download_source_resolver)
 
-        assert "has a build_tree dependency on spec3" in str(err)
+        assert "has a build_tree dependency on spec3" in str(err.value)
         assert (
             'anod_build("spec3", qualifier="foo",'
             ' build="x86_64-linux", host="x86-linux",'
-            ' target="arm-elf")' in str(err)
+            ' target="arm-elf")' in str(err.value)
         )
 
     def test_add_anod_action11_install_dep(self):

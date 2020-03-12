@@ -113,8 +113,8 @@ def test_include():
 
     with pytest.raises(IOError) as err:
         yaml.load("b: !include foo.yaml\n", e3.yaml.OrderedDictYAMLLoader)
-    assert "No such file or directory" in str(err)
-    assert "foo.yaml" in str(err)
+    assert "No such file or directory" in str(err.value)
+    assert "foo.yaml" in str(err.value)
 
 
 def test_duplicatekey():

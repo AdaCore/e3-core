@@ -186,13 +186,13 @@ def test_unpack_error():
     e3.os.fs.touch("foo.tgz")
     with pytest.raises(e3.archive.ArchiveError) as err:
         e3.archive.unpack_archive("foo.tgz", "dest")
-    assert "unpack_archive: Cannot untar" in str(err)
+    assert "unpack_archive: Cannot untar" in str(err.value)
 
     # create an invalid zip
     e3.os.fs.touch("foo.zip")
     with pytest.raises(e3.archive.ArchiveError) as err:
         e3.archive.unpack_archive("foo.zip", "dest")
-    assert "unpack_archive: Cannot unzip" in str(err)
+    assert "unpack_archive: Cannot unzip" in str(err.value)
 
 
 def test_zip_no_root_dir():
