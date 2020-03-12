@@ -289,7 +289,7 @@ class Run(object):
             with open(prog) as f:
                 try:
                     header = f.read()[0:2]
-                except UnicodeDecodeError:  # py3-only
+                except UnicodeDecodeError:
                     # unknown header - cannot decode the first two bytes
                     return cmd_line
                 if header != "#!":

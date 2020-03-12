@@ -258,10 +258,7 @@ class PlanContext(object):
             caller_frames = inspect.getouterframes(frame=inspect.currentframe())
             caller_frames_in_plan = []
             for frame in caller_frames:
-                if isinstance(frame, tuple):  # py2-only
-                    frame_filename = frame[1]
-                else:  # py3-only
-                    frame_filename = frame.filename
+                frame_filename = frame.filename
                 if frame_filename.endswith(self.plan.plan_ext):
                     caller_frames_in_plan.append(frame)
         except Exception:  # defensive code
@@ -271,14 +268,7 @@ class PlanContext(object):
             if not caller_frames_in_plan:
                 # No information ?
                 pass
-            elif isinstance(caller_frames_in_plan[0], tuple):  # py2-only
-                plan_line = ";".join(
-                    (
-                        "{}:{}".format(caller_frame[1], caller_frame[2])
-                        for caller_frame in caller_frames_in_plan
-                    )
-                )
-            else:  # py3-only
+            else:
                 plan_line = ";".join(
                     (
                         "{}:{}".format(caller_frame.filename, caller_frame.lineno)

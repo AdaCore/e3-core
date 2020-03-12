@@ -193,7 +193,7 @@ class SandBox(object):
                 )
             with open(target, "wb") as f:
                 if isinstance(script_content, str):
-                    f.write(script_content.encode("utf-8"))  # py3-only
+                    f.write(script_content.encode("utf-8"))
                 else:
-                    f.write(script_content)  # py2-only
+                    f.write(script_content)
             chmod("a+x", target)

@@ -3,14 +3,10 @@
 
 from argparse import ArgumentParser
 import os
-import sys
 
 from e3.env import Env
 
-try:
-    from configparser import ConfigParser
-except ImportError:  # py3-only
-    from configparser import ConfigParser
+from configparser import ConfigParser
 
 
 def main(coverage_rc, omit_list_filename=None):
@@ -41,11 +37,6 @@ def main(coverage_rc, omit_list_filename=None):
         # special case for unix
         if os_name != "windows":
             exclude_lines.append("unix: no cover")
-
-        if os.path.basename(sys.executable).startswith("python3"):
-            exclude_lines.append("py2-only")
-        else:
-            exclude_lines.append("py3-only")
 
         config.set("report", "exclude_lines", "\n".join(exclude_lines))
 
