@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 from e3.collection.dag import DAG
@@ -10,7 +8,6 @@ import pytest
 
 
 class NopJob(Job):
-
     def run(self):
         pass
 
@@ -24,19 +21,17 @@ class NopJob(Job):
 
 
 class SleepJob(ProcessJob):
-
     @property
     def cmdline(self):
-        return [sys.executable, '-c', 'import time; time.sleep(6.0)']
+        return [sys.executable, "-c", "import time; time.sleep(6.0)"]
 
 
 class TestScheduler(object):
-
     def test_minimal_run(self):
         """Test with only two independent jobs."""
         dag = DAG()
-        dag.add_vertex('1')
-        dag.add_vertex('2')
+        dag.add_vertex("1")
+        dag.add_vertex("2")
         s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2)
         s.run(dag)
         assert s.max_active_jobs == 2
@@ -49,19 +44,18 @@ class TestScheduler(object):
             results.append(job.uid)
 
         dag = DAG()
-        dag.add_vertex('3')
-        dag.add_vertex('0')
-        dag.add_vertex('1')
-        s = Scheduler(Scheduler.simple_provider(NopJob), tokens=1,
-                      collect=collect)
+        dag.add_vertex("3")
+        dag.add_vertex("0")
+        dag.add_vertex("1")
+        s = Scheduler(Scheduler.simple_provider(NopJob), tokens=1, collect=collect)
         s.run(dag)
-        assert tuple(results) == ('0', '1', '3')
+        assert tuple(results) == ("0", "1", "3")
 
     def test_minimal_run2(self):
         """Test with two interdependent jobs."""
         dag = DAG()
-        dag.add_vertex('1')
-        dag.add_vertex('2', predecessors=['1'])
+        dag.add_vertex("1")
+        dag.add_vertex("2", predecessors=["1"])
         s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2)
         s.run(dag)
         assert s.max_active_jobs == 1
@@ -83,14 +77,13 @@ class TestScheduler(object):
 
         # This time test with two interdependent jobs
         dag = DAG()
-        dag.add_vertex('1')
-        dag.add_vertex('2')
-        s = Scheduler(Scheduler.simple_provider(NopJob),
-                      tokens=2, collect=collect)
+        dag.add_vertex("1")
+        dag.add_vertex("2")
+        s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2, collect=collect)
         s.run(dag)
         assert s.max_active_jobs == 2
-        assert results['1']
-        assert results['2']
+        assert results["1"]
+        assert results["2"]
 
     def test_skip(self):
         """Simple example in which all the tests are skipped."""
@@ -106,20 +99,20 @@ class TestScheduler(object):
 
         # This time test with two interdependent jobs
         dag = DAG()
-        dag.add_vertex('1')
-        dag.add_vertex('2')
+        dag.add_vertex("1")
+        dag.add_vertex("2")
         s = Scheduler(get_job, tokens=2, collect=collect)
         s.run(dag)
 
         # Check start_time end_time to be sure tests have not been run
-        for k, v in results.items():
+        for k, v in list(results.items()):
             assert v.start_time is None
             assert v.stop_time is None
 
     def test_timeout(self):
         """Ensure that jobs are interrupted correctly on timeout."""
         results = {}
-        pytest.importorskip('psutil')
+        pytest.importorskip("psutil")
 
         def get_job(uid, data, predecessors, notify_end):
             return SleepJob(uid, data, notify_end)
@@ -128,18 +121,18 @@ class TestScheduler(object):
             results[job.uid] = job
 
         dag = DAG()
-        dag.add_vertex('1')
-        dag.add_vertex('2')
+        dag.add_vertex("1")
+        dag.add_vertex("2")
         s = Scheduler(get_job, tokens=2, collect=collect, job_timeout=2)
         s.run(dag)
 
-        for k, v in results.items():
+        for k, v in list(results.items()):
             assert v.interrupted
 
     def test_keyboard_interrupt(self):
         """Ensure that jobs can be interrupted."""
         results = {}
-        pytest.importorskip('psutil')
+        pytest.importorskip("psutil")
 
         def get_job(uid, data, predecessors, notify_end):
             return NopJob(uid, data, notify_end)
@@ -148,19 +141,20 @@ class TestScheduler(object):
             results[job.uid] = job
 
         dag = DAG()
-        dag.add_vertex('1')
-        dag.add_vertex('2')
+        dag.add_vertex("1")
+        dag.add_vertex("2")
         s = Scheduler(get_job, tokens=2, collect=collect, job_timeout=2)
 
         # fake log_state that will raise a KeyboardInterrupt
         def fake_log_state():
             raise KeyboardInterrupt
+
         s.log_state = fake_log_state
 
         with pytest.raises(KeyboardInterrupt):
             s.run(dag)
 
-        for k, v in results.items():
+        for k, v in list(results.items()):
             assert v.interrupted
 
     def test_collect_feedback_scheme(self):
@@ -171,6 +165,7 @@ class TestScheduler(object):
         common data. Note that scheduler ensure that these functions
         are called sequentially.
         """
+
         class SchedulerContext(object):
             def __init__(self):
                 # Save in results tuples with first element being a bool
@@ -192,21 +187,22 @@ class TestScheduler(object):
                     self.results[job.uid] = [False, job]
                 else:
                     # Job '2' is always failing
-                    if job.uid == '2':
+                    if job.uid == "2":
                         self.results[job.uid] = [False, job]
                     else:
                         self.results[job.uid] = [True, job]
 
         dag = DAG()
-        dag.add_vertex('1')
-        dag.add_vertex('2')
-        dag.add_vertex('3', predecessors=['1', '2'])
-        dag.add_vertex('4', predecessors=['3'])
+        dag.add_vertex("1")
+        dag.add_vertex("2")
+        dag.add_vertex("3", predecessors=["1", "2"])
+        dag.add_vertex("4", predecessors=["3"])
         c = SchedulerContext()
         s = Scheduler(c.get_job, tokens=2, collect=c.collect)
         s.run(dag)
 
-        assert not c.results['2'][1].should_skip and not c.results['2'][0], \
-            'job "2" is run and should be marked as failed'
-        assert c.results['3'][1].should_skip, 'job "3" should be skipped'
-        assert c.results['4'][1].should_skip, 'job "4" should be skipped'
+        assert (
+            not c.results["2"][1].should_skip and not c.results["2"][0]
+        ), 'job "2" is run and should be marked as failed'
+        assert c.results["3"][1].should_skip, 'job "3" should be skipped'
+        assert c.results["4"][1].should_skip, 'job "4" should be skipped'

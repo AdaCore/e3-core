@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import json
 import os
 
@@ -12,23 +10,23 @@ import pytest
 
 def test_fingerprint():
     f1 = Fingerprint()
-    f1.add('foo', '2')
+    f1.add("foo", "2")
 
     f2 = Fingerprint()
-    f2.add('foo', '4')
+    f2.add("foo", "4")
 
     f12_diff = f2.compare_to(f1)
-    assert f12_diff['new'] == set([])
-    assert f12_diff['updated'] == {'foo'}
-    assert f12_diff['obsolete'] == set([])
+    assert f12_diff["new"] == set([])
+    assert f12_diff["updated"] == {"foo"}
+    assert f12_diff["obsolete"] == set([])
 
     f3 = Fingerprint()
     f3.add_file(__file__)
 
     f23_diff = f3.compare_to(f2)
-    assert f23_diff['new'] == {'foo'}
-    assert f23_diff['updated'] == set([])
-    assert f23_diff['obsolete'] == {os.path.basename(__file__)}
+    assert f23_diff["new"] == {"foo"}
+    assert f23_diff["updated"] == set([])
+    assert f23_diff["obsolete"] == {os.path.basename(__file__)}
 
     assert f1.checksum() != f2.checksum() != f3.checksum()
 
@@ -40,11 +38,11 @@ def test_fingerprint():
 
     f5 = Fingerprint()
     with pytest.raises(E3Error) as err:
-        f5.add('f4', f4)
-    assert 'f4 should be a string' in str(err.value)
+        f5.add("f4", f4)
+    assert "f4 should be a string" in str(err.value)
 
     f6 = Fingerprint()
-    f6.add('unicode', u'6')
+    f6.add("unicode", "6")
     assert len(f6.checksum()) == 64
 
 
@@ -59,9 +57,7 @@ def test_add_order_not_important():
 
         :rtype: Fingerprint
         """
-        idx_to_entry_map = {1: ('foo', '1'),
-                            2: ('bar', '2'),
-                            3: ('baz', '3')}
+        idx_to_entry_map = {1: ("foo", "1"), 2: ("bar", "2"), 3: ("baz", "3")}
         f = Fingerprint()
         f.add(*idx_to_entry_map[first])
         f.add(*idx_to_entry_map[second])
@@ -100,7 +96,7 @@ def test_fingerprint_version():
 
     f1 = Fingerprint()
 
-    e3.fingerprint.FINGERPRINT_VERSION = '0.0'
+    e3.fingerprint.FINGERPRINT_VERSION = "0.0"
     f2 = Fingerprint()
 
     assert f1 != f2
@@ -116,18 +112,18 @@ def test_invalid_fingerprint():
     """A fingerprint value should be hashable."""
     f1 = Fingerprint()
     with pytest.raises(E3Error):
-        f1.add('invalid', {})
+        f1.add("invalid", {})
 
 
 def test_fingerprint_eq():
     """Check fingerprint __eq__ function."""
     f1 = Fingerprint()
-    f1.add('1', '1')
+    f1.add("1", "1")
     assert f1 != 1
 
     f2 = Fingerprint()
-    f2.add('1', '1')
-    f2.add('2', '2')
+    f2.add("1", "1")
+    f2.add("2", "2")
     assert f1 != f2
     assert f1.checksum() != f2.checksum()
 
@@ -138,15 +134,15 @@ def test_fingerprint_save_and_load():
     # Create a directory where to store our fingerprints, allowing us
     # to use any fingerprint name without potentially colliding with
     # other files used by this testcase.
-    os.mkdir('fingerprints')
+    os.mkdir("fingerprints")
 
     def fingerprint_path(filename):
-        return os.path.join('fingerprints', filename)
+        return os.path.join("fingerprints", filename)
 
     # Save and then load a minimal fingerprint...
     f_min = Fingerprint()
 
-    f_min_filename = fingerprint_path('f_min')
+    f_min_filename = fingerprint_path("f_min")
     assert not os.path.exists(f_min_filename)
     f_min.save_to_file(f_min_filename)
 
@@ -158,10 +154,10 @@ def test_fingerprint_save_and_load():
     # Save and then load a fingerprint with more data than the minimum.
 
     f2 = Fingerprint()
-    f2.add('job1', 'job1sha1')
-    f2.add('job2', 'sha1job2')
+    f2.add("job1", "job1sha1")
+    f2.add("job2", "sha1job2")
 
-    f2_filename = fingerprint_path('f2')
+    f2_filename = fingerprint_path("f2")
     assert not os.path.exists(f2_filename)
     f2.save_to_file(f2_filename)
 
@@ -172,9 +168,9 @@ def test_fingerprint_save_and_load():
 
     # Trying to load from a file with invalid contents (bad JSON)
 
-    f_bad_filename = fingerprint_path('f_bad_JSON')
-    with open(f_bad_filename, 'w') as f:
-        f.write('yello{')
+    f_bad_filename = fingerprint_path("f_bad_JSON")
+    with open(f_bad_filename, "w") as f:
+        f.write("yello{")
 
     f3 = Fingerprint.load_from_file(f_bad_filename)
     assert f3 is None
@@ -183,8 +179,8 @@ def test_fingerprint_save_and_load():
     # is not an dictionary, and therefore clearly not something
     # that comes from a fingerprint...
 
-    f_not_filename = fingerprint_path('not_a_fingerprint')
-    with open(f_not_filename, 'w') as f:
+    f_not_filename = fingerprint_path("not_a_fingerprint")
+    with open(f_not_filename, "w") as f:
         json.dump([1, 2, 3], f)
 
     f4 = Fingerprint.load_from_file(f_not_filename)
@@ -193,8 +189,8 @@ def test_fingerprint_save_and_load():
     # Try to load from a file which is missing one of the mandatory
     # elements.
 
-    for key in ('fingerprint_version', 'elements'):
-        f_key_missing_filename = fingerprint_path('no_%s_key')
+    for key in ("fingerprint_version", "elements"):
+        f_key_missing_filename = fingerprint_path("no_%s_key")
 
         # To create the bad file without assuming too much in this test
         # how the fingerprint is saved to file, we save a valid fingerprint
@@ -204,8 +200,8 @@ def test_fingerprint_save_and_load():
         f2.save_to_file(f_key_missing_filename)
         with open(f_key_missing_filename) as f:
             data = json.load(f)
-        del(data[key])
-        with open(f_key_missing_filename, 'w') as f:
+        del data[key]
+        with open(f_key_missing_filename, "w") as f:
             json.dump(data, f)
 
         f5 = Fingerprint.load_from_file(f_key_missing_filename)
@@ -220,14 +216,14 @@ def test_fingerprint_save_and_load():
     # number, and then replace the good fingeprint in that file by
     # the modified one.
 
-    f_bad_version = fingerprint_path('bad_version')
+    f_bad_version = fingerprint_path("bad_version")
 
     f2.save_to_file(f_bad_version)
     with open(f_bad_version) as f:
         data = json.load(f)
-        data['fingerprint_version'] = '1.0'
-        data['elements']['fingerprint_version'] = '1.0'
-    with open(f_bad_version, 'w') as f:
+        data["fingerprint_version"] = "1.0"
+        data["elements"]["fingerprint_version"] = "1.0"
+    with open(f_bad_version, "w") as f:
         json.dump(data, f)
 
     f = Fingerprint.load_from_file(f_bad_version)

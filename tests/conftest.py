@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import logging
 import os
 
@@ -12,18 +10,20 @@ def init_testsuite_env():
     e3.log.activate(level=logging.DEBUG, e3_debug=True)
 
     # Force UTC timezone
-    os.environ['TZ'] = 'UTC'
-    os.environ['E3_ENABLE_FEATURE'] = 'smtp_ssl'
+    os.environ["TZ"] = "UTC"
+    os.environ["E3_ENABLE_FEATURE"] = "smtp_ssl"
     # Ignore E3_HOSTNAME variable
-    if 'E3_HOSTNAME' in os.environ:
-        del os.environ['E3_HOSTNAME']
+    if "E3_HOSTNAME" in os.environ:
+        del os.environ["E3_HOSTNAME"]
 
 
 init_testsuite_env()
 
 
 def pytest_addoption(parser):
-    parser.addoption('--ci', action='store_true',
-                     help='Tests are running on a CI server')
-    parser.addoption('--requirement-coverage-report',
-                     help='Report requirement coverage')
+    parser.addoption(
+        "--ci", action="store_true", help="Tests are running on a CI server"
+    )
+    parser.addoption(
+        "--requirement-coverage-report", help="Report requirement coverage"
+    )

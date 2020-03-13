@@ -4,13 +4,8 @@ install:
 script: tox
 matrix:
     include:
-        - python: 2.7
-          env: TOXENV=py27-ci-cov-codecov,checkstyle,security
-          dist: trusty
-          sudo: false
-          os: linux
-        - python: 3.5
-          env: TOXENV=py35-ci
-          dist: trusty
+        - python: 3.8
+          env: TOXENV=py38-ci-cov-codecov,checkstyle,security
+          dist: bionic
           sudo: false
           os: linux

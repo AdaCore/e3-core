@@ -7,7 +7,7 @@ import yaml
 
 def lookup(item, d):
     """Lookup an item in a dictionary."""
-    return {key for key, value in d.iteritems() if value == item}
+    return {key for key, value in d.items() if value == item}
 
 
 def merge_docs(requirement, coverage):
@@ -27,7 +27,7 @@ def merge_docs(requirement, coverage):
 
     for k in reqs:
         tests = lookup(k, reqs_cov)
-        reqs[k]['tests'] = tests
+        reqs[k]["tests"] = tests
     return reqs
 
 
@@ -39,17 +39,16 @@ def generate_rst(reqs_result, dest):
     :param dest: rst file to create
     :type dest: str
     """
-    with open(dest, 'w') as f:
+    with open(dest, "w") as f:
         for k in reqs_result:
-            f.write('- %s\n' % k)
-            f.write('  %s\n' % reqs_result[k]['desc'].encode('utf-8'))
-            tests = reqs_result[k]['tests']
+            f.write("- %s\n" % k)
+            f.write("  %s\n" % reqs_result[k]["desc"].encode("utf-8"))
+            tests = reqs_result[k]["tests"]
             if tests:
-                f.write('  **Covered by %s**\n' %
-                        ', '.join(reqs_result[k]['tests']))
+                f.write("  **Covered by %s**\n" % ", ".join(reqs_result[k]["tests"]))
             else:
-                f.write('  **Not yet covered**\n')
+                f.write("  **Not yet covered**\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_rst(merge_docs(sys.argv[1], sys.argv[2]), sys.argv[3])

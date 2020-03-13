@@ -10,7 +10,6 @@ exclude_lines =
     # os-specific
     defensive code
     # + <os>-only and <os>: no cover
-    # + py2-only or py3-only
 
 
 [html]

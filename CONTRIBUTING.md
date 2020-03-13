@@ -18,7 +18,7 @@ We also ask you to sign our [Contributor Licence Agreement](https://github.com/A
 Code conventions
 ----------------
 
-### PEP8, PEP257 and Pyflakes
+### PEP8, PEP257, Pyflakes, and Black
 
 All code should follow [PEP8](https://www.python.org/dev/peps/pep-0008/),
 [PEP257](https://www.python.org/dev/peps/pep-0257/).
@@ -41,27 +41,7 @@ in *reStructuredText* format:
 We also expect that [PyFlakes](https://pypi.python.org/pypi/pyflakes) has been
 run before sending a patch.
 
-### Python 3
-
-All `e3` Python 2 code is converted to Python 3 using `2to3`. To minimize
-the differences between the two versions, we're adding the following
-import statements at the beginning of each module:
-
-```python
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-```
-
-This ensures that:
-
- * all imports are absolute imports
- * the print statement cannot be used
- * the / operator means true division
-
-Note that this can be automated by running:
-
-`isort <your module>.py`
+The code is automatically formatted with Black.
 
 ### logger
 

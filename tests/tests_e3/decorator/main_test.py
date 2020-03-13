@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from random import random
 
 import e3.decorator
@@ -17,7 +15,7 @@ def test_memoize():
         del arg
         return random()
 
-    assert 'Do foo.' in t.__repr__()
+    assert "Do foo." in t.__repr__()
 
     assert t(1) == t(1)
     assert t(1) != t(2)
@@ -33,7 +31,6 @@ def test_memoize():
     # calling instance methods
 
     class C(object):
-
         @e3.decorator.memoize
         def t(self, arg):
             del arg

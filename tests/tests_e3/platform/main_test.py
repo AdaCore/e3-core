@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import e3.env
 import e3.platform
 
@@ -15,17 +13,15 @@ def test_platform():
 
     assert hash(b) == hash(a)
 
-    c = e3.platform.Platform.get(
-        platform_name='arm-linux')
+    c = e3.platform.Platform.get(platform_name="arm-linux")
 
     assert b != c
 
-    assert c.os.name == 'linux'
+    assert c.os.name == "linux"
 
 
 def test_is_host():
-    p = e3.platform.Platform.get(
-        machine=e3.env.Env().build.machine)
+    p = e3.platform.Platform.get(machine=e3.env.Env().build.machine)
     assert p.is_host
 
 
@@ -34,7 +30,7 @@ def test_immutable():
     a = e3.platform.Platform.get()
 
     with pytest.raises(AttributeError):
-        a.domain = 'example.net'
+        a.domain = "example.net"
 
-    b = a._replace(domain='example.net')
+    b = a._replace(domain="example.net")
     assert b != a
