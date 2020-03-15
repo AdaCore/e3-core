@@ -28,7 +28,7 @@ def test_simple_driver():
     driver = e3.anod.driver.AnodDriver(anod_instance=anod_instance, store=None)
 
     assert driver.call("why") is False
-    with pytest.raises(e3.anod.spec.AnodError) as err:
+    with pytest.raises(e3.anod.spec.AnodError):
         driver.download()
 
     assert ".activate() has not been called" in str(err)

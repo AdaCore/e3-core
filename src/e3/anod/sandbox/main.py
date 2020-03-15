@@ -1,14 +1,32 @@
+from __future__ import annotations
+
 import sys
+from typing import overload, TYPE_CHECKING
 
 import e3.log
 import stevedore
 from e3.anod.error import SandBoxError
 from e3.main import Main
 
+
+if TYPE_CHECKING:
+    from typing import Literal, Optional
+    from argparse import ArgumentParser
+
 logger = e3.log.getLogger("sandbox.main")
 
 
-def main(get_argument_parser=False):
+@overload
+def main(get_argument_parser: Literal[True]) -> ArgumentParser:
+    ...
+
+
+@overload
+def main(get_argument_parser: Literal[False] = False) -> None:
+    ...
+
+
+def main(get_argument_parser: bool = False) -> Optional[ArgumentParser]:
     """Manipulate an Anod sandbox.
 
     This function creates the main code for the entry-point e3-sandbox. To
@@ -24,7 +42,6 @@ def main(get_argument_parser=False):
 
     :param get_argument_parser: return e3.main.Main argument_parser instead
         of running the action.
-    :type get_argument_parser: bool
     """
     m = Main()
     m.parse_args(known_args_only=True)
@@ -59,3 +76,4 @@ def main(get_argument_parser=False):
     except SandBoxError as err:
         logger.error(err)
         sys.exit(1)
+    return None

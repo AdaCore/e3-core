@@ -1,14 +1,19 @@
 """Provides function to detect platform specific information."""
-
+from __future__ import annotations
 
 import os
 import re
 import sys
 from collections import namedtuple
 from platform import uname as platform_uname
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.platform_db import get_knowledge_base
+
+
+if TYPE_CHECKING:
+    from typing import Optional, Tuple, Union
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -34,7 +39,7 @@ class SystemInfo(object):
 
     network_ifs = None
     uname = None
-    core_number = None
+    core_number = 1
     nis_domain = None
     ld_info = None
 
@@ -45,19 +50,19 @@ class SystemInfo(object):
     _hostname = None
 
     @classmethod
-    def reset_cache(cls):
+    def reset_cache(cls) -> None:
         """Reset SystemInfo cache."""
         cls.network_ifs = None
         cls.uname = None
         cls.ld_info = None
-        cls.core_number = None
+        cls.core_number = 1
         cls._is_virtual = None
         cls._platform = None
         cls._os_version = None
         cls._hostname = None
 
     @classmethod
-    def fetch_system_data(cls):
+    def fetch_system_data(cls) -> None:
         """Fetch info from the host system.
 
         The function should be the only one that use system calls or programs
@@ -119,7 +124,7 @@ class SystemInfo(object):
                 import nis
             except ImportError:  # defensive code
                 e3.log.debug("cannot import nis", exc_info=True)
-                nis = None
+                nis = None  # type: ignore
 
             if nis is not None:
                 try:
@@ -130,20 +135,22 @@ class SystemInfo(object):
                     e3.log.debug("nis error", exc_info=True)
 
     @classmethod
-    def platform(cls):
+    def platform(cls) -> str:
         """Guess platform name.
 
         Internal function that guess base on uname system call the
         current platform
 
         :return: the platform name
-        :rtype: str
         """
         if cls._platform is not None:
             return cls._platform
 
         if cls.uname is None:
             cls.fetch_system_data()
+
+        if TYPE_CHECKING:
+            assert cls.uname is not None
 
         result = [
             p
@@ -157,25 +164,27 @@ class SystemInfo(object):
         ]
 
         if result:
-            result = result[0]
+            cls._platform = result[0]
         else:  # defensive code
-            result = UNKNOWN
+            cls._platform = UNKNOWN
 
-        cls._platform = result
-        return result
+        return cls._platform
 
     @classmethod
-    def os_version(cls):
+    def os_version(cls) -> Tuple[str, str]:
         """Compute OS version information.
 
         :return: a tuple containing os version and kernel version
-        :rtype: (str, str)
         """
         if cls._os_version is not None:
             return cls._os_version
 
         if cls.uname is None:
             cls.fetch_system_data()
+
+        if TYPE_CHECKING:
+            assert cls.uname is not None
+            assert cls.ld_info is not None
 
         version = UNKNOWN
         kernel_version = UNKNOWN
@@ -228,7 +237,9 @@ class SystemInfo(object):
                     ("wReserved", ctypes.c_byte),
                 ]
 
-            def get_os_version():
+            def get_os_version() -> Union[
+                Tuple[None, None, None], Tuple[float, int, bool]
+            ]:
                 """Return the real Windows kernel version.
 
                 On recent version, the kernel version returned by the
@@ -238,11 +249,12 @@ class SystemInfo(object):
 
                 :return: the version as a table
                     (major.minor, build number, is_server)
-                :rtype: (float, int, bool) | None
                 """
                 os_version = WinOSVersion()
                 os_version.dwOSVersionInfoSize = ctypes.sizeof(os_version)
-                retcode = ctypes.windll.Ntdll.RtlGetVersion(ctypes.byref(os_version))
+                retcode = ctypes.windll.Ntdll.RtlGetVersion(  # type: ignore
+                    ctypes.byref(os_version)
+                )
                 if retcode != 0:
                     return (None, None, None)
 
@@ -266,6 +278,8 @@ class SystemInfo(object):
                     else:
                         version = "8.1"
                 elif effective_version == 10.0:
+                    if TYPE_CHECKING:
+                        assert build_number is not None
                     if is_server:
                         if build_number < 17763:
                             version = "2016"
@@ -278,18 +292,20 @@ class SystemInfo(object):
         return version, kernel_version
 
     @classmethod
-    def is_virtual(cls):
+    def is_virtual(cls) -> bool:
         """Check if current machine is virtual or not.
 
         :return: True if the machine is a virtual machine (Solaris zone,
             VmWare)
-        :rtype: bool
         """
         if cls._is_virtual is not None:
             return cls._is_virtual
 
         if cls.uname is None:
             cls.fetch_system_data()
+
+        if TYPE_CHECKING:
+            assert cls.uname is not None
 
         result = False
 
@@ -317,17 +333,19 @@ class SystemInfo(object):
         return result
 
     @classmethod
-    def hostname(cls):
+    def hostname(cls) -> Tuple[str, str]:
         """Get hostname and associated domain.
 
         :return: a tuple (hostname, domain)
-        :rtype: (str, str)
         """
         if cls._hostname is not None:
             return cls._hostname
 
         if cls.uname is None:
             cls.fetch_system_data()
+
+        if TYPE_CHECKING:
+            assert cls.uname is not None
 
         # This is host so we can find the machine name using uname fields
         tmp = cls.uname.node.lower().split(".", 1)
@@ -360,15 +378,12 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
         return self._asdict()
 
     @classmethod
-    def get(cls, name, endian=None, compute_cores=False):
+    def get(cls, name: str, endian: Optional[str] = None, compute_cores=False) -> CPU:
         """Initialize CPU instance.
 
         :param name: cpu name
-        :type name: str
         :param endian: if not None override endianness default settings
-        :type endian: str
         :param compute_cores: if True compute the number of cores
-        :type compute_cores: bool
         """
         assert name in KNOWLEDGE_BASE.cpu_info, "invalid cpu name"
         bits = KNOWLEDGE_BASE.cpu_info[name]["bits"]
@@ -414,17 +429,19 @@ class OS(
         return self._asdict()
 
     @classmethod
-    def get(cls, name, is_host=False, version=UNKNOWN, mode=UNKNOWN):
+    def get(
+        cls,
+        name: str,
+        is_host: bool = False,
+        version: str = UNKNOWN,
+        mode: str = UNKNOWN,
+    ) -> OS:
         """Initialize OS instance.
 
         :param name: os name
-        :type name: str
         :param is_host: if True the OS instance is for the host system
-        :type is_host: bool
         :param version: os version
-        :type version: str | None
         :param mode: os mode
-        :type mode: str | None
         """
         is_bareboard = KNOWLEDGE_BASE.os_info[name]["is_bareboard"]
         if name.startswith("vxworks") and mode == "rtp":

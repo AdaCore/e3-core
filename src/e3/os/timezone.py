@@ -1,17 +1,18 @@
 """Return the current timezone offset."""
 
 
+from __future__ import annotations
+
 import sys
 from datetime import datetime
 
 from dateutil.tz import gettz
 
 
-def timezone():
+def timezone() -> float:
     """Return current timezone offset in hours.
 
     :return: offset from utc in hours
-    :rtype: float
     """
     if sys.platform == "win32":  # unix: no cover
         from ctypes import windll, Structure, pointer
@@ -36,10 +37,10 @@ def timezone():
     else:
         # Note that in case timezone cannot be computed then
         # utcoffset can return None.
-        result = datetime.now(gettz()).utcoffset()
-        if result is None:
-            result = 0  # defensive code
+        offset = datetime.now(gettz()).utcoffset()
+        if offset is None:
+            result = 0.0  # defensive code
         else:
-            result = result.total_seconds() // 3600
+            result = offset.total_seconds() // 3600
 
     return float(result)

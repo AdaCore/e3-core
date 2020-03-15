@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 import base64
 import calendar
 import json
 from datetime import datetime
 
 
-def get_payload(token):
+def get_payload(token: str) -> dict:
     """Get payload from a JSON Web Token.
 
     :param token: token
-    :type token: str
     :return: decoded payload
-    :rtype: dict
     """
     data = {}
     if token.count(".") == 2:
@@ -28,23 +28,17 @@ def get_payload(token):
     return data
 
 
-def utc_timestamp():
-    """Return the number of seconds since epoch UTC.
-
-    :return: the number of seconds since epoch UTC
-    :rtype: int
-    """
+def utc_timestamp() -> int:
+    """Return the number of seconds since epoch UTC."""
     d = datetime.utcnow()
     return calendar.timegm(d.utctimetuple())
 
 
-def is_valid(token):
+def is_valid(token: str) -> bool:
     """Return true if the token is still valid, false otherwise.
 
     :param token: full token
-    :type token: str
     :return: return true if the token is still valid, false otherwise
-    :rtype: bool
     """
     payload = get_payload(token)
 

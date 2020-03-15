@@ -1,9 +1,19 @@
+from __future__ import annotations
+
 import abc
 import logging
 from itertools import chain
+from typing import TYPE_CHECKING
+
 from e3.anod.status import ReturnValue
 from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Optional, Set
+    from e3.collection.dag import DAG
+    from e3.fingerprint import Fingerprint
+    from e3.job import Job, ProcessJob
 
 
 class Walk(object):
@@ -30,21 +40,20 @@ class Walk(object):
     :vartype scheduler: e3.job.scheduler.Scheduler
     """
 
-    def __init__(self, actions):
+    def __init__(self, actions: DAG):
         """Object initializer.
 
         :param actions: DAG of actions to perform.
-        :type actions: DAG
         """
         self.actions = actions
-        self.new_fingerprints = {}
-        self.job_status = {}
+        self.new_fingerprints: Dict[str, Optional[Fingerprint]] = {}
+        self.job_status: Dict[str, ReturnValue] = {}
         self.set_scheduling_params()
-        self.failure_source = {}
+        self.failure_source: Dict[str, Set[str]] = {}
 
         self.scheduler = Scheduler(
             job_provider=self.get_job,
-            collect=self.collect,
+            collect=self.collect,  # type: ignore
             queues=self.queues,
             tokens=self.tokens,
             job_timeout=self.job_timeout,
@@ -52,7 +61,7 @@ class Walk(object):
 
         self.scheduler.run(self.actions)
 
-    def set_scheduling_params(self):
+    def set_scheduling_params(self) -> None:
         """Set the parameters used when creating the scheduler.
 
         This method is expected to set the following attributes:
@@ -70,7 +79,9 @@ class Walk(object):
         self.tokens = 1
         self.job_timeout = DEFAULT_JOB_MAX_DURATION
 
-    def compute_fingerprint(self, uid, data, is_prediction=False):
+    def compute_fingerprint(
+        self, uid: str, data: Any, is_prediction: bool = False
+    ) -> Optional[Fingerprint]:
         """Compute the given action's Fingerprint.
 
         This method is expected to return a Fingerprint corresponding
@@ -82,20 +93,17 @@ class Walk(object):
         a different behavior may override this method.
 
         :param uid: A unique Job ID.
-        :type uid: str
         :param data: Data associated to the job.
-        :type data: T
         :param is_prediction: If True this is an attempt to compute the
             fingerprint before launching the job. In that case if the
             function returns None then the job will always be launched.
             When False, this is the computation done after running the
             job (that will be the final fingerprint saved for future
             comparison)
-        :rtype: e3.fingerprint.Fingerprint | None
         """
         return None
 
-    def save_fingerprint(self, uid, fingerprint):
+    def save_fingerprint(self, uid: str, fingerprint: Optional[Fingerprint]) -> None:
         """Save the given fingerprint.
 
         For systems that require fingerprint persistence, this method
@@ -109,16 +117,13 @@ class Walk(object):
         the format that suits them.
 
         :param uid: A unique Job ID.
-        :type uid: str
         :param fingerprint: The fingerprint corresponding to the given
             job, or None, if the fingerprint should be deleted instead
             of saved.
-        :type fingerprint: e3.fingerprint.Fingerprint | None
-        :rtype: None
         """
         pass
 
-    def load_previous_fingerprint(self, uid):
+    def load_previous_fingerprint(self, uid: str) -> Optional[Fingerprint]:
         """Get the fingerprint from the given action's previous execution.
 
         This method is expected to have the following behavior:
@@ -133,12 +138,15 @@ class Walk(object):
         a different behavior may override this method.
 
         :param uid: A unique Job ID.
-        :type uid: str
-        :rtype: e3.fingerprint.Fingerprint | None
         """
         return None
 
-    def should_execute_action(self, uid, previous_fingerprint, new_fingerprint):
+    def should_execute_action(
+        self,
+        uid: str,
+        previous_fingerprint: Optional[Fingerprint],
+        new_fingerprint: Optional[Fingerprint],
+    ) -> bool:
         """Return True if the given action should be performed.
 
         The purpose of this function is to provide a way to determine,
@@ -154,21 +162,17 @@ class Walk(object):
         to implement alternative strategies.
 
         :param uid: A unique Job ID.
-        :type uid: str
         :param previous_fingerprint: The fingerprint from the previous
             from the action's previous run.  None if the action has not
             been previously executed.
-        :type previous_fingerprint: e3.fingerprint.Fingerprint | None
         :param new_fingerprint: The fingerprint from the previous
             from the action's previous run.  None if the action has not
             been previously executed.
-        :type new_fingerprint: e3.fingerprint.Fingerprint | None
-        :rtype: bool
         """
         if previous_fingerprint is None or new_fingerprint is None:
             return True
         for pred_uid in self.actions.get_predecessors(uid):
-            if self.new_fingerprints[pred_uid] is None:
+            if self.new_fingerprints[str(pred_uid)] is None:
                 # One of the predecessors has no fingerprint, so
                 # this node's new_fingerprint cannot tell us whether
                 # this dependency has changed or not. We therefore
@@ -177,64 +181,67 @@ class Walk(object):
         return previous_fingerprint != new_fingerprint
 
     def create_skipped_job(
-        self, uid, data, predecessors, reason, notify_end, status=ReturnValue.failure
-    ):
+        self,
+        uid: str,
+        data: Any,
+        predecessors: Optional[List[str]],
+        reason: Optional[str],
+        notify_end: Callable[[str], None],
+        status: ReturnValue = ReturnValue.failure,
+    ) -> Job:
         """Return a failed job.
 
         This method always returns an EmptyJob. Deriving classes may
         override this method if they need something more specific.
 
         :param uid: A unique Job ID.
-        :type uid: str
         :param data: Data associated to the job to create.
-        :type data: T
         :param predecessors: A list of predecessor jobs, or None.
-        :type predecessors: list[e3.job.Job] | None
         :param reason: If not None, the reason for creating a failed job.
-        :type reason: str | None
         :notify_end: Same as the notify_end parameter in Job.__init__.
-        :type notify_end: str -> None
-        :rtype: Job
         """
         return EmptyJob(uid, data, notify_end, status=status)
 
     @abc.abstractmethod
-    def create_job(self, uid, data, predecessors, notify_end):
+    def create_job(
+        self,
+        uid: str,
+        data: Any,
+        predecessors: Optional[List[str]],
+        notify_end: Callable[[str], None],
+    ) -> ProcessJob:
         """Create a ProcessJob.
 
         :param uid: A unique Job ID.
-        :type uid: str
         :param data: Data associated to the job to create.
-        :type data: T
         :param predecessors: A list of predecessor jobs, or None.
-        :type predecessors: list[e3.job.Job] | None
         :notify_end: Same as the notify_end parameter in Job.__init__.
-        :type notify_end: str -> None
-        :rtype: ProcessJob
         """
         pass  # all: no cover
 
     @abc.abstractmethod
-    def request_requeue(self, job):
+    def request_requeue(self, job: ProcessJob) -> bool:
         """Requeue the given job.
 
         Return True if the job has been requeued, False otherwise.
 
         :param job: The job to requeue.
-        :type job: ProcessJob
-        :rtype: bool
         """
         pass  # all: no cover
 
-    def get_job(self, uid, data, predecessors, notify_end):
+    def get_job(
+        self,
+        uid: str,
+        data: Any,
+        predecessors: List[str],
+        notify_end: Callable[[str], None],
+    ) -> Job:
         """Return a Job.
 
         Same as self.create_job except that this function first checks
         whether any of the predecessors might have failed, in which case
         the failed job (creating using the create_skipped_job method)
         is returned.
-
-        :rtype: Job
         """
         # Get the latest fingerprint
         prev_fingerprint = self.load_previous_fingerprint(uid)
@@ -294,11 +301,12 @@ class Walk(object):
                 uid, data, predecessors, "skipped", notify_end, status=ReturnValue.skip
             )
 
-    def collect(self, job):
+    def collect(self, job: ProcessJob) -> bool:
         """Collect all the results from the given job.
 
         :param job: The job whose results we need to collect.
-        :type job: ProcessJob
+
+        :return: True if the job is requeued, False otherwise
         """
         # Only save the fingerprint if the job went as expected (either
         # success or skipped). Since we already removed the previous

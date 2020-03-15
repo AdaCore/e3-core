@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 import e3.error
@@ -7,6 +9,12 @@ from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 logger = e3.log.getLogger("buildspace")
+
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from typing import Optional, List
 
 
 class BuildSpace(object):
@@ -25,17 +33,16 @@ class BuildSpace(object):
         "src",
     )
 
-    def __init__(self, root_dir):
+    def __init__(self, root_dir: str):
         """Initialise a build space.
 
         :param root_dir: build space root dir
-        :type root_dir: str
         """
         self.directory_mapping = {k: k for k in self.DIRS}
         self.root_dir = os.path.abspath(root_dir)
         self.initialized = False
 
-    def exists(self):
+    def exists(self) -> bool:
         """Return True if the build space exists on disk.
 
         This function just checks the contents of self.root_dir,
@@ -44,7 +51,6 @@ class BuildSpace(object):
         is True or not.
 
         :return: True if self.root_dir is a buildspace, False otherwise.
-        :rtype: bool
         """
         # Start by verifying that the file used as build space markers
         # exists.
@@ -57,25 +63,25 @@ class BuildSpace(object):
         return True
 
     @property
-    def dirs(self):
+    def dirs(self) -> List[str]:
         return list(self.directory_mapping.values())
 
-    def subdir(self, name):
+    def subdir(self, name: str) -> str:
         if name not in self.DIRS:
             raise ValueError("invalid subdir %s" % name)
         return os.path.join(self.root_dir, self.directory_mapping[name])
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> str:
         if name.endswith("_dir") and name[:-4] in self.DIRS:
             return self.subdir(name[:-4])
         raise AttributeError("unknown build space attribute: %s" % name)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> str:
         if key.isupper() and key.endswith("_DIR"):
             return getattr(self, key.lower(), None)
         raise KeyError("invalid build space key: %s" % key)
 
-    def create(self, quiet=False):
+    def create(self, quiet: bool = False) -> None:
         """Create a build space.
 
         The function create all the necessary directories and files to have
@@ -83,7 +89,6 @@ class BuildSpace(object):
         directory content is reset.
 
         :param quiet: do not print info messages
-        :type quiet: bool
         """
         rm(self.tmp_dir, recursive=True)
 
@@ -95,7 +100,7 @@ class BuildSpace(object):
 
         self.initialized = True
 
-    def reset(self, keep=None):
+    def reset(self, keep: Optional[List[str]] = None) -> None:
         """Reset build space.
 
         The function delete the complete buildspace. The only elements that
@@ -106,12 +111,11 @@ class BuildSpace(object):
 
         :param keep: a list of directory to keep in addition
             to results and log. Each element should be part of BuildSpace.DIRS
-        :type keep: list[str] | None
         """
-        keep = set(keep) if keep is not None else set()
-        keep.update(("results", "log"))
+        dirs_to_keep = set(keep) if keep is not None else set()
+        dirs_to_keep.update(("results", "log"))
 
-        dirs_to_reset = set(self.DIRS) - keep
+        dirs_to_reset = set(self.DIRS) - dirs_to_keep
 
         for d in dirs_to_reset:
             rm(self.subdir(name=d), recursive=True)

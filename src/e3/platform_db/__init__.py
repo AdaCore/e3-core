@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import abc
-import stevedore
 from collections import namedtuple
 
 import e3.decorator
 import e3.log
+import stevedore
 
 
 class PlatformDBPlugin(object, metaclass=abc.ABCMeta):
@@ -50,7 +52,6 @@ class AmberCPUSupport(PlatformDBPlugin):
 def get_knowledge_base():
     """Load the knowledge base, including all content from plugins.
 
-    :rtype collections.namedtuple
     :return: The knowledge base with the keys (cpu_info, os_info,
         platform_info, build_targets, host_guess)
     """

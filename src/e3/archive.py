@@ -1,6 +1,8 @@
 """Support for reading and writing tar and zip archives."""
 
 
+from __future__ import annotations
+
 import fnmatch
 import os
 import sys
@@ -8,12 +10,17 @@ import tarfile
 import tempfile
 import zipfile
 from contextlib import closing
+from typing import TYPE_CHECKING
 
 import e3
 import e3.error
 import e3.fs
 import e3.log
 import e3.os.fs
+
+
+if TYPE_CHECKING:
+    from typing import Callable, List, Optional, Sequence
 
 logger = e3.log.getLogger("archive")
 
@@ -46,31 +53,26 @@ class ArchiveError(e3.error.E3Error):
     pass
 
 
-def is_known_archive_format(filename):
+def is_known_archive_format(filename: str) -> bool:
     """Check if a given path is a supported archive format.
 
     :param filename: path
-    :type filename: str
     :return: True if the path corresponding to a supported archive format
-    :rtype: bool
     """
     ext = e3.fs.extension(filename)
     return ext in (".tar.gz", ".tgz", ".tar.bz2", ".tar", ".zip")
 
 
-def check_type(filename, force_extension=None):
+def check_type(filename: str, force_extension: Optional[str] = None) -> str:
     """Return the archive extension.
 
     Internal function used by create_archive and unpack_archive.
 
     :param filename: the name of the archive to extract the extension
-    :type filename: str
     :param force_extension: specify the archive extension if not in the
         filename
-    :type force_extension: str | None
 
     :return: the file extension
-    :rtype: str
     """
     # Check extension
     if (
@@ -99,50 +101,41 @@ def check_type(filename, force_extension=None):
 
 
 def unpack_archive(
-    filename,
-    dest,
-    selected_files=None,
-    remove_root_dir=False,
-    unpack_cmd=None,
-    force_extension=None,
-    delete=False,
-    ignore=None,
-    preserve_timestamps=True,
-):
+    filename: str,
+    dest: str,
+    selected_files: Optional[Sequence[str]] = None,
+    remove_root_dir: bool = False,
+    unpack_cmd: Optional[Callable[..., None]] = None,
+    force_extension: Optional[str] = None,
+    delete: bool = False,
+    ignore: Optional[List[str]] = None,
+    preserve_timestamps: bool = True,
+) -> None:
     """Unpack an archive file (.tgz, .tar.gz, .tar or .zip).
 
     :param filename: archive to unpack
-    :type filename: str
     :param dest: destination directory (should exist)
-    :type dest: str
     :param selected_files: list of files to unpack (partial extraction). If
         None all files are unpacked
-    :type selected_files: collections.iterable[str] | None
     :param remove_root_dir: if True then the root dir of the archive is
         suppressed.
         if set to 'auto' then the root dir of the archive is suppressed only
         if it is possible. If not do not raise an exception in that case and
         fallback on the other method.
-    :type remove_root_dir: bool
     :param unpack_cmd: command to run to unpack the archive, if None use
         default methods or raise ArchiveError if archive format is not
         supported. If unpack_cmd is not None, then remove_root_dir is ignored.
         The unpack_cmd must raise ArchiveError in case of failure.
-    :type unpack_cmd: callable | None
     :param force_extension: specify the archive extension if not in the
         filename. If filename has no extension and force_extension is None
         unpack_archive will fail.
-    :type force_extension: str | None
     :param delete: if True and remove_root_dir is also True, remove files
         from dest if they do not exist in the archive
-    :type delete: bool
     :param ignore: a list of files/folders to keep when synchronizing with
         the final destination directory.
-    :type ignore: list[str] | None
     :param preserve_timestamps: if False and remove_root_dir is True, and the
         target directory exists, ensure that updated files get their timestamp
         updated to current time.
-    :type preserve_timestamps: bool
 
     :raise ArchiveError: in case of error
 
@@ -197,15 +190,12 @@ def unpack_archive(
                 with closing(tarfile.open(filename, mode=mode)) as fd:
                     check_selected = set(selected_files)
 
-                    def is_match(name, files):
+                    def is_match(name: str, files: Sequence[str]) -> bool:
                         """check if name match any of the expression in files.
 
                         :param name: file name
-                        :type name: str
                         :param files: list of patterns to test against
-                        :type files: list[str]/regex]
                         :return: True when the name is matched
-                        :rtype: bool
                         """
                         for pattern in files:
                             if fnmatch.fnmatch(name, pattern):
@@ -214,7 +204,7 @@ def unpack_archive(
                                 return True
                         return False
 
-                    dirs = []
+                    dirs: List[str] = []
 
                     # IMPORTANT: don't use the method extract. Always use the
                     # extractall function. Indeed extractall will set file
@@ -251,8 +241,10 @@ def unpack_archive(
 
         else:
             try:
-                with closing(E3ZipFile(filename, mode="r")) as fd:
-                    fd.extractall(tmp_dest, selected_files if selected_files else None)
+                with closing(E3ZipFile(filename, mode="r")) as zip_fd:
+                    zip_fd.extractall(
+                        tmp_dest, selected_files if selected_files else None
+                    )
             except zipfile.BadZipfile as e:
                 raise ArchiveError(
                     origin="unpack_archive",
@@ -312,13 +304,13 @@ def unpack_archive(
 
 
 def create_archive(
-    filename,
-    from_dir,
-    dest,
-    force_extension=None,
-    from_dir_rename=None,
-    no_root_dir=False,
-):
+    filename: str,
+    from_dir: str,
+    dest: str,
+    force_extension: Optional[str] = None,
+    from_dir_rename: Optional[str] = None,
+    no_root_dir: bool = False,
+) -> None:
     """Create an archive file (.tgz, .tar.gz, .tar or .zip).
 
     On Windows, if the python tarfile and zipfile modules are available, the
@@ -328,19 +320,13 @@ def create_archive(
     implementation is used.
 
     :param filename: archive to create
-    :type filename: str
     :param from_dir: directory to pack (full path)
-    :type from_dir: str
     :param dest: destination directory (should exist)
-    :type dest: str
     :param force_extension: specify the archive extension if not in the
         filename. If filename has no extension and force_extension is None
         create_archive will fail.
-    :type force_extension: str | None
     :param from_dir_rename: name of root directory in the archive.
-    :type from_dir_rename: str | None
     :param no_root_dir: create archive without the root dir (zip only)
-    :type no_root_dir: bool
 
     :raise ArchiveError: if an error occurs
     """
@@ -354,7 +340,7 @@ def create_archive(
         from_dir_rename = os.path.basename(from_dir)
 
     if ext == "zip":
-        archive = zipfile.ZipFile(filepath, "w", zipfile.ZIP_DEFLATED)
+        zip_archive = zipfile.ZipFile(filepath, "w", zipfile.ZIP_DEFLATED)
         for root, _, files in os.walk(from_dir):
             relative_root = os.path.relpath(
                 os.path.abspath(root), os.path.abspath(from_dir)
@@ -363,9 +349,8 @@ def create_archive(
                 zip_file_path = os.path.join(from_dir_rename, relative_root, f)
                 if no_root_dir:
                     zip_file_path = os.path.join(relative_root, f)
-                archive.write(os.path.join(root, f), zip_file_path)
-        archive.close()
-        return
+                zip_archive.write(os.path.join(root, f), zip_file_path)
+        zip_archive.close()
     else:
         if ext == "tar":
             tar_format = "w"
@@ -375,5 +360,5 @@ def create_archive(
             tar_format = "w:bz2"
         else:  # defensive code
             raise ArchiveError("unsupported format {}".format(tar_format))
-        with closing(tarfile.open(filepath, tar_format)) as archive:
-            archive.add(name=from_dir, arcname=from_dir_rename, recursive=True)
+        with closing(tarfile.open(filepath, tar_format)) as tar_archive:
+            tar_archive.add(name=from_dir, arcname=from_dir_rename, recursive=True)

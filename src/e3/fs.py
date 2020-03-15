@@ -1,5 +1,5 @@
 """High-Level file manipulation."""
-
+from __future__ import annotations
 
 import fnmatch
 import glob
@@ -10,6 +10,7 @@ import shutil
 import stat
 import sys
 from collections import namedtuple
+from typing import TYPE_CHECKING
 
 import e3
 import e3.error
@@ -18,22 +19,31 @@ import e3.os.fs
 
 logger = e3.log.getLogger("fs")
 
+if TYPE_CHECKING:
+    from typing import Callable, Iterable, List, Optional, Sequence, Tuple, Union
+
 
 class FSError(e3.error.E3Error):
     pass
 
 
-def cp(source, target, copy_attrs=True, recursive=False, preserve_symlinks=False):
+def cp(
+    source: str,
+    target: str,
+    copy_attrs: bool = True,
+    recursive: bool = False,
+    preserve_symlinks: bool = False,
+) -> None:
     """Copy files.
 
-    :param str source: a glob pattern
-    :param str target: target file or directory. If the source resolves as
+    :param source: a glob pattern
+    :param target: target file or directory. If the source resolves as
         several files then target should be a directory
-    :param bool copy_attrs: If True, also copy all the file attributes such as
+    :param copy_attrs: If True, also copy all the file attributes such as
         mode, timestamps, ownership, etc.
-    :param bool recursive: If True, recursive copy. This also preserves
+    :param recursive: If True, recursive copy. This also preserves
         attributes; if copy_attrs is False, a warning is emitted.
-    :param bool preserve_symlinks: if True symlinks are recreated in the
+    :param preserve_symlinks: if True symlinks are recreated in the
         destination folder
     :raise FSError: if an error occurs
     """
@@ -83,20 +93,18 @@ def cp(source, target, copy_attrs=True, recursive=False, preserve_symlinks=False
             ).with_traceback(sys.exc_info()[2])
 
 
-def directory_content(path, include_root_dir=False, unixpath=False):
+def directory_content(
+    path: str, include_root_dir: bool = False, unixpath: bool = False
+) -> List[str]:
     """Return the complete directory content (recusrsively).
 
     :param path: path for the which the content should be returned
-    :type path: str
     :param include_root_dir: if True include the root directory in the paths
         returned by the function. Otherwise return relative paths
-    :type include_root_dir: bool
     :param unixpath: if True return unix compatible paths (calling unixpath on
         all elements returned
-    :type unixpath: bool
     :return: a list of of path. Note that directories will end with a path
         separator
-    :rtype: list[str]
     """
     result = []
     for root, dirs, files in os.walk(path):
@@ -117,7 +125,9 @@ def directory_content(path, include_root_dir=False, unixpath=False):
     return result
 
 
-def echo_to_file(filename, content, append=False):
+def echo_to_file(
+    filename: str, content: Union[str, List[str]], append: bool = False
+) -> None:
     """Output content into a file.
 
     This function is useful when writing few content to a file for which we
@@ -125,11 +135,8 @@ def echo_to_file(filename, content, append=False):
     efficient to open a file and use the regular python I/O functions.
 
     :param filename: file to write into
-    :type filename: str
     :param content: string to be written
-    :type content: str | list[str]
     :param append: if True append to the file, otherwise overwrite.
-    :type append: bool
     """
     with open(filename, "a+" if append else "w+") as fd:
         if append:
@@ -143,24 +150,22 @@ def echo_to_file(filename, content, append=False):
 
 
 def find(
-    root, pattern=None, include_dirs=False, include_files=True, follow_symlinks=False
-):
+    root: str,
+    pattern: Optional[str] = None,
+    include_dirs: bool = False,
+    include_files: bool = True,
+    follow_symlinks: bool = False,
+) -> List[str]:
     """Find files or directory recursively.
 
     :param root: directory from which the research start
-    :type root: str
     :param pattern: glob pattern that files or directories should match in
         order to be included in the final result
-    :type pattern: str | None
     :param include_dirs: if True include directories
-    :type include_dirs: bool
     :param include_files: if True include regular files
-    :type include_files: bool
     :param follow_symlinks: if True include symbolic links
-    :type follow_symlinks: bool
 
     :return: a list of files
-    :rtype: list[str]
     """
     result = []
     for root, dirs, files in os.walk(root, followlinks=follow_symlinks):
@@ -176,16 +181,13 @@ def find(
     return result
 
 
-def get_filetree_state(path, ignore_hidden=True):
+def get_filetree_state(path: str, ignore_hidden: bool = True) -> str:
     """Compute a hash on a filetree to reflect its current state.
 
     :param path: root path of the file tree to be checked
-    :type path: str
     :param ignore_hidden: if True (default) then files and directories
         tarting with a dot are ignored.
-    :type ignore_hidden: bool
     :return: a hash as a string
-    :rtype: str
 
     The function will not report changes in the hash if a file is modified
     and its attributes (size, modification time and mode) are not changed.
@@ -194,7 +196,7 @@ def get_filetree_state(path, ignore_hidden=True):
     content of all files.
     """
 
-    def compute_state(file_path):
+    def compute_state(file_path: str) -> bytes:
         f_stat = os.lstat(file_path)
 
         state = ":".join(
@@ -231,42 +233,38 @@ def get_filetree_state(path, ignore_hidden=True):
     return result.hexdigest()
 
 
-def ls(path, emit_log_record=True):
+def ls(path: Union[str, List[str]], emit_log_record: bool = True) -> List[str]:
     """List files.
 
     :param path: glob pattern or glob pattern list
-    :type path: list[string] | string
     :param emit_log_record: if True, emit a log (debug) record
-    :type emit_log_record: bool
 
     :return: a list of filenames
-    :rtype: list[string]
 
     This function do not raise an error if no file matching the glob pattern
     is encountered. The only consequence is that an empty list is returned.
     """
     if isinstance(path, str):
-        path = (path,)
+        path_list = [path]
     else:
-        path = list(path)
+        path_list = list(path)
 
     if emit_log_record:
-        logger.debug("ls %s", " ".join(path))
+        logger.debug("ls %s", " ".join(path_list))
 
-    return list(sorted(itertools.chain.from_iterable((glob.glob(p) for p in path))))
+    return list(
+        sorted(itertools.chain.from_iterable((glob.glob(p) for p in path_list)))
+    )
 
 
-def mkdir(path, mode=0o755, quiet=False):
+def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
     """Create a directory.
 
     :param path: path to create. If intermediate directories do not exist
         the procedure create them
-    :type path: str
     :param mode: default is 0755
-    :type mode: int
     :param quiet: whether a log record should be emitted when creating the
         directory
-    :type quiet: bool
     :raise FSError: if an error occurs
 
     This function behaves quite like mkdir -p command shell. So if the
@@ -291,19 +289,17 @@ def mkdir(path, mode=0o755, quiet=False):
             ).with_traceback(sys.exc_info()[2])
 
 
-def mv(source, target):
+def mv(source: Union[str, List[str]], target: str) -> None:
     """Move files.
 
     :param source: a glob pattern
-    :type source: str | list[str]
     :param target: target file or directory. If the source resolves as
         several files then target should be a directory
-    :type target: str
 
     :raise FSError: if an error occurs
     """
 
-    def move_file(src, dst):
+    def move_file(src: str, dst: str):
         """Reimplementation of shutil.move.
 
         The implementation follows shutil.move from the standard library.
@@ -312,7 +308,7 @@ def mv(source, target):
         work.
         """
 
-        def same_file(src, dst):
+        def same_file(src: str, dst: str):
             if hasattr(os.path, "samefile"):
                 try:
                     return os.path.samefile(src, dst)
@@ -322,11 +318,11 @@ def mv(source, target):
                 os.path.abspath(dst)
             )
 
-        def basename(path):
+        def basename(path: str):
             sep = os.path.sep + (os.path.altsep or "")
             return os.path.basename(path.rstrip(sep))
 
-        def destinsrc(src, dst):
+        def destinsrc(src: str, dst: str):
             src = os.path.abspath(src)
             dst = os.path.abspath(dst)
             if not src.endswith(os.path.sep):
@@ -398,13 +394,12 @@ def mv(source, target):
         raise FSError(origin="mv", message=str(e)).with_traceback(sys.exc_info()[2])
 
 
-def rm(path, recursive=False, glob=True):
+def rm(path: Union[str, List[str]], recursive: bool = False, glob: bool = True) -> None:
     """Remove files.
 
     :param path: a glob pattern, or a list of glob patterns
-    :type path: str | list[str]
-    :param bool recursive: if True do a recursive deletion. Default is False
-    :param bool glob: if True globbing pattern expansion is used
+    :param recursive: if True do a recursive deletion. Default is False
+    :param glob: if True globbing pattern expansion is used
 
     :raise FSError: if an error occurs
 
@@ -426,16 +421,13 @@ def rm(path, recursive=False, glob=True):
         else:
             file_list = set(path)
 
-    def onerror(func, error_path, exc_info):
+    def onerror(func: Callable, error_path: str, exc_info: Tuple) -> None:
         """When shutil.rmtree fail, try again to delete the file.
 
         :param func: function to call on error
-        :type func: () -> None
         :param error_path: file or directory to remove
-        :type error_path: str
         :param exc_info: exception raised when the first delete attempt was
              made
-        :type exc_info: tuple
         """
         del exc_info
         e3.log.debug("error when running %s on %s", func, error_path)
@@ -501,15 +493,13 @@ def rm(path, recursive=False, glob=True):
             ).with_traceback(sys.exc_info()[2])
 
 
-def splitall(path):
+def splitall(path: str) -> Tuple[str, ...]:
     """Split a path into a list of path components.
 
     :param path: path to split
-    :type path: str
     :return: a list of path components
-    :rtype: tuple[str]
     """
-    dirnames = []
+    dirnames = []  # type: List[str]
     while 1:
         head, tail = os.path.split(path)
         if head == path:
@@ -553,42 +543,35 @@ VCS_IGNORE_LIST = (
 
 
 def sync_tree(
-    source,
-    target,
-    ignore=None,
-    file_list=None,
-    delete=True,
-    preserve_timestamps=True,
-    delete_ignore=False,
-):
+    source: str,
+    target: str,
+    ignore: Optional[Union[str, Sequence[str]]] = None,
+    file_list: Optional[List[str]] = None,
+    delete: bool = True,
+    preserve_timestamps: bool = True,
+    delete_ignore: bool = False,
+) -> Tuple[List[str], List[str]]:
     """Synchronize the files and directories between two directories.
 
     :param source: the directory from where the files and directories
         need to be copied
-    :type source: str
     :param target: the target directory
-    :type target: str
     :param ignore: glob pattern or list of files or directories to ignore,
         if the name starts with `/` then only the path is taken into
         account from the root of the source (or target) directory.
         If the ignore value contains a glob pattern, it is taken in account
         only if it doesn't contain a /, since for now the filtering
         is not segmented by '/'.
-    :type ignore: None | str | iterable[str]
     :param file_list: list of files to synchronize, if empty synchronize all
         files. Note that if file in the list is a directory then the complete
         content of that directory is included. Note also that ignore list
         takes precedence other file_list.
-    :type file_list: None | list[str]
     :param delete: if True, remove files from target if they do not exist
         in source
-    :type delete: bool
     :param preserve_timestamps: if True preserve original timestamps.
         If False updated files get their timestamps set to current time.
-    :type preserve_timestamps: bool
     :param delete_ignore: if True files that are explicitely ignored
         are deleted. Note delete should be set to True in that case.
-    :type delete_ignore: bool
     """
     # Some structure used when walking the trees to be synched
     FilesInfo = namedtuple("FilesInfo", ["rel_path", "source", "target"])
@@ -605,14 +588,12 @@ def sync_tree(
         abs_ignore_patterns = [fn for fn in norm_ignore_list if fn.startswith("/")]
         rel_ignore_patterns = [fn for fn in norm_ignore_list if not fn.startswith("/")]
 
-    def is_in_ignore_list(p):
+    def is_in_ignore_list(p: str) -> bool:
         """Check if a file should be ignored.
 
         :param p: path relative to source directory (note it starts with a /)
-        :type p: str
 
         :return: True if in the list of file to include
-        :rtype: bool
         """
         if ignore is None:
             return False
@@ -631,16 +612,18 @@ def sync_tree(
             )
         )
 
-    def is_in_file_list(p):
+    def is_in_file_list(p: str) -> bool:
         """Check if a file should be included.
 
         :param p: path relative to source directory (note it starts with a /)
-        :type p: str
 
         :return: True if in the list of file to include
-        :rtype: bool
         """
-        return file_list is None or any(
+        if file_list is None:
+            return True
+        if TYPE_CHECKING:
+            assert norm_file_list is not None
+        return any(
             [
                 f
                 for f in norm_file_list
@@ -650,44 +633,34 @@ def sync_tree(
             ]
         )
 
-    def isdir(fi):
+    def isdir(fi: FileInfo) -> bool:
         """Check if a file is a directory.
 
         :param fi: a FileInfo namedtuple
-        :type fi: FileInfo
 
         :return: True if fi is a directory
-        :rtype: bool
         """
         return fi.stat is not None and stat.S_ISDIR(fi.stat.st_mode)
 
-    def islink(fi):
+    def islink(fi: FileInfo) -> bool:
         """Check if a file is a link.
 
         :param fi: a FileInfo namedtuple
-        :type fi: FileInfo
 
         :return: True if fi is a symbolic link
-        :rtype: bool
         """
         return fi.stat is not None and stat.S_ISLNK(fi.stat.st_mode)
 
-    def isfile(fi):
+    def isfile(fi: FileInfo) -> bool:
         """Check if a file is a regular file.
 
         :param fi: a FileInfo namedtuple
-        :type fi: FileInfo
         :return: True if fi is a regular file
-        :rtype: bool
         """
         return fi.stat is not None and stat.S_ISREG(fi.stat.st_mode)
 
-    def cmp_files(src, dst):
-        """Fast compare two files.
-
-        :type src: FileInfo
-        :type dst: FileInfo
-        """
+    def cmp_files(src: FileInfo, dst: FileInfo) -> bool:
+        """Fast compare two files."""
         bufsize = 8 * 1024
         with open(src.path, "rb") as fp1, open(dst.path, "rb") as fp2:
             while True:
@@ -699,16 +672,13 @@ def sync_tree(
                 if len(b1) < bufsize:
                     return True
 
-    def need_update(src, dst):
+    def need_update(src: FileInfo, dst: FileInfo) -> bool:
         """Check if dst file should updated.
 
         :param src: the source FileInfo object
-        :type src: FileInfo
         :param dst: the target FileInfo object
-        :type dst: FileInfo
 
         :return: True if we should update dst
-        :rtype: bool
         """
         # when not preserving timestamps we cannot rely on the timestamps to
         # check if a file is up-to-date. In that case do a full content
@@ -724,13 +694,11 @@ def sync_tree(
             or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))
         )
 
-    def copystat(src, dst):
+    def copystat(src: FileInfo, dst: FileInfo):
         """Update attribute of dst file with src attributes.
 
         :param src: the source FileInfo object
-        :type src: FileInfo
         :param dst: the target FileInfo object
-        :type dst: FileInfo
         """
         if islink(src):  # windows: no cover
             mode = stat.S_IMODE(src.stat.st_mode)
@@ -769,13 +737,11 @@ def sync_tree(
                     ):
                         raise
 
-    def safe_copy(src, dst):
+    def safe_copy(src: FileInfo, dst: FileInfo):
         """Copy src file into dst preserving all attributes.
 
         :param src: the source FileInfo object
-        :type src: FileInfo
         :param dst: the target FileInfo object
-        :type dst: FileInfo
         """
         if islink(src):  # windows: no cover
             linkto = os.readlink(src.path)
@@ -805,11 +771,10 @@ def sync_tree(
                         shutil.copyfileobj(fsrc, fdst)
             copystat(src, dst)
 
-    def safe_mkdir(dst):
+    def safe_mkdir(dst: FileInfo):
         """Create a directory modifying parent directory permissions if needed.
 
         :param dst: directory to create
-        :type dst: FileInfo
         """
         try:
             os.makedirs(dst.path)
@@ -820,18 +785,16 @@ def sync_tree(
             e3.os.fs.chmod("a+wx", os.path.dirname(dst.path))
             os.makedirs(dst.path)
 
-    def walk(root_dir, target_root_dir, entry=None):
+    def walk(
+        root_dir: str, target_root_dir: str, entry: Optional[FilesInfo] = None
+    ) -> Iterable[FilesInfo]:
         """Walk through source and target file trees.
 
         :param root_dir: path to source tree
-        :type root_dir: str
         :param target_root_dir: path to target tree
-        :type target_root_dir: str
         :param entry: a FilesInfo object (used internally for the recursion)
-        :type entry: FilesInfo
 
         :return: an iterator that iterate other the relevant FilesInfo object
-        :rtype: collections.iterable(FilesInfo)
         """
         if entry is None:
             target_stat = None
@@ -912,8 +875,8 @@ def sync_tree(
         raise FSError(origin="sync_tree", message="%s does not exist" % source)
 
     # Keep track of deleted and updated files
-    deleted_list = []
-    updated_list = []
+    deleted_list: List[str] = []
+    updated_list: List[str] = []
 
     for wf in walk(source_top, target_top):
         if wf.source.stat is None and wf.target.stat is not None:
@@ -944,16 +907,14 @@ def sync_tree(
     return updated_list, deleted_list
 
 
-def extension(path):
+def extension(path: str) -> str:
     """Return the extension of a given filename.
 
     Contrary to os.path.splitext which returns .gz, the function will return
     .tar.gz if the file is FILENAME.tar.gz.
 
     :param path: a path
-    :type path: str
     :return: an extension
-    :rtype: str
     """
     root, ext = os.path.splitext(path)
     _, ext2 = os.path.splitext(root)

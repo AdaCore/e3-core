@@ -1,19 +1,23 @@
-def process_exit_code(handle):
+from __future__ import annotations
+
+from typing import Callable, List, Optional
+
+
+def process_exit_code(handle: int) -> Optional[int]:
     """Retrieve process exit code.
 
     Note that the method used ensure the process stays in a waitable state
 
     :param handle: process handle
-    :type handle: int
     :return: the exit code if process is finished or None otherwise
-    :rtype: int | None
     :raise: WindowsError in case the handle is invalid
     """
     from e3.os.windows.native_api import ProcessInfo, NT
     from ctypes import pointer, sizeof
 
     process_info = ProcessInfo.Basic()
-    status = NT.QueryInformationProcess(
+    query_infoprocess: Callable = NT.QueryInformationProcess  # type: ignore
+    status = query_infoprocess(
         handle,
         ProcessInfo.Basic.class_id,
         pointer(process_info),
@@ -30,20 +34,18 @@ def process_exit_code(handle):
         return exit_code
 
 
-def wait_for_objects(object_list, timeout=0, wait_for_all=False):
+def wait_for_objects(
+    object_list: List[int], timeout: int = 0, wait_for_all: bool = False
+) -> Optional[int]:
     """Wait until list of object are in signaled state.
 
     :param object_list: a list of handles
-    :type object_list: list[int]
     :param timeout: maximum waiting time in seconds. If 0 then maximum waiting
         time is set to infinity
-    :type timeout: int
     :param wait_for_all: if True wait for all object to be signaled. If False
         wait for one object to be signaled
-    :type wait_for_all: bool
     :return: index in the object list of the signaled object or None in case
         of timeout
-    :rtype: int | None
     :raise: WindowsError
     """
     from e3.os.windows.native_api import NT, Wait
@@ -58,7 +60,9 @@ def wait_for_objects(object_list, timeout=0, wait_for_all=False):
     handle_array = HANDLE * size
     handles = handle_array(*object_list)
 
-    object_index = NT.WaitForMultipleObjects(size, handles, wait_for_all, timeout)
+    wait_for_multiples_objects: Callable = NT.WaitForMultipleObjects  # type: ignore
+
+    object_index = wait_for_multiples_objects(size, handles, wait_for_all, timeout)
     if object_index == Wait.TIMEOUT:
         return None
     elif object_index == Wait.FAILED:  # defensive code

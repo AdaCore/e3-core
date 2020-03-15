@@ -1,15 +1,11 @@
+from __future__ import annotations
+
 import ctypes
 import sys
 import time
-from ctypes import (
-    POINTER,
-    Structure,
-    c_wchar_p,
-    cast,
-    create_unicode_buffer,
-    pointer,
-    sizeof,
-)
+from ctypes import POINTER, Structure, c_wchar_p
+from ctypes import cast as ctypes_cast
+from ctypes import create_unicode_buffer, pointer, sizeof
 from ctypes.wintypes import (
     BOOL,
     BOOLEAN,
@@ -24,6 +20,7 @@ from ctypes.wintypes import (
     USHORT,
 )
 from datetime import datetime
+from typing import List, Optional
 
 from e3.error import E3Error
 
@@ -145,7 +142,7 @@ class UnicodeString(Structure):
 
     _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]
 
-    def __init__(self, value=None, max_length=0):
+    def __init__(self, value: str = None, max_length: int = 0):
         strbuf = None
         length = 0
         if value is not None or max_length > 0:
@@ -155,9 +152,12 @@ class UnicodeString(Structure):
                 strbuf = create_unicode_buffer(value, max_length)
             else:
                 strbuf = create_unicode_buffer(max_length)
-        Structure.__init__(self, length * 2, max_length * 2, cast(strbuf, LPWSTR))
 
-    def __len__(self):
+        ctypes_strbuf = ctypes_cast(strbuf, LPWSTR)  # type: ignore
+
+        Structure.__init__(self, length * 2, max_length * 2, ctypes_strbuf)
+
+    def __len__(self) -> int:
         return self.length
 
 
@@ -201,7 +201,7 @@ class FileInfo(object):
         class_id = 6
 
     class Rename(Structure):
-        _fields_ = []
+        _fields_ = []  # type: List
         class_id = 10
 
     class Basic(Structure):
@@ -214,11 +214,11 @@ class FileInfo(object):
         ]
         class_id = 4
 
-        def __init__(self):
+        def __init__(self) -> None:
             Structure.__init__(self)
             self.file_attributes = FileAttribute(0)
 
-        def __str__(self):
+        def __str__(self) -> str:
             result = "creation_time:    %s\n" % self.creation_time
             result += "last_access_time: %s\n" % self.last_access_time
             result += "last_write_time:  %s\n" % self.last_write_time
@@ -259,14 +259,12 @@ class ObjectAttributes(Structure):
         ("security_quality_of_service", LPVOID),
     ]
 
-    def __init__(self, name, parent=None):
+    def __init__(self, name: UnicodeString, parent: Optional[HANDLE] = None):
         """Initialize ObjectAttributes.
 
         :param name: full path to the file if parent is None else filename
             inside parent directory
-        :type name: UnicodeString
         :param parent: handle of the parent directory
-        :type parent: HANDLE | None
         """
         Structure.__init__(
             self,
@@ -377,7 +375,7 @@ if sys.platform == "win32":
 
 
 class NTException(E3Error):
-    def __init__(self, status, message, origin=None):
+    def __init__(self, status: int, message: str, origin: Optional[str] = None):
         self.status = status
         if self.status < 0:
             self.status += 2 ** 32

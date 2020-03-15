@@ -7,16 +7,24 @@ Example::
 """
 
 
+from __future__ import annotations
+
 import os.path
 import re
 import sys
 from subprocess import PIPE
+from typing import TYPE_CHECKING
 
 import e3.log
 import e3.os.fs
 import e3.os.process
 from e3.fs import mkdir, rm
 from e3.vcs import VCSError
+
+if TYPE_CHECKING:
+    from typing import IO, List, Optional, TextIO, Tuple, Union
+
+    SVNCmd = List[Optional[str]]
 
 logger = e3.log.getLogger("vcs.svn")
 
@@ -35,22 +43,20 @@ class SVNRepository(object):
     """
 
     svn_bin = None
-    log_stream = sys.stdout
+    log_stream: Union[TextIO, IO[str]] = sys.stdout
 
-    def __init__(self, working_copy):
+    def __init__(self, working_copy: str):
         """Initialize a SVNRepository object.
 
         :param working_copy: working copy of the SVNRepository
-        :type working_copy: str
         """
         self.working_copy = working_copy
 
     @classmethod
-    def is_unix_svn(cls):
+    def is_unix_svn(cls) -> bool:
         """Check if svn is handling unix paths or windows paths.
 
         :return: True if unix paths should be used
-        :rtype: bool
         """
         if sys.platform != "win32":
             return True
@@ -62,13 +68,11 @@ class SVNRepository(object):
                 return False
 
     @classmethod
-    def local_url(cls, repo_path):
+    def local_url(cls, repo_path: str) -> str:
         """Return the url of a svn repository hosted locally.
 
         :param repo_path: path to the repo
-        :type repo_path: str
         :return: the url that can be used as repository url
-        :rtype: str
         """
         repo_path = os.path.abspath(repo_path)
         if not cls.is_unix_svn():
@@ -80,7 +84,7 @@ class SVNRepository(object):
             return "file://" + e3.os.fs.unixpath(repo_path)
 
     @classmethod
-    def create(cls, repo_path, initial_content_path=None):
+    def create(cls, repo_path: str, initial_content_path: Optional[str] = None) -> str:
         """Create a local subversion repository.
 
         This creates a local repository (not a working copy) that can be
@@ -89,17 +93,14 @@ class SVNRepository(object):
         repository.
 
         :param repo_path: a local directory where to create the repository
-        :type repo_path: str
         :param initial_content_path: directory containing the initial content
             of the repository. If set to None an empty repository is created.
-        :type initial_content_path: str | None
         :return: the URL of the newly created repository
-        :rtype: str
         """
         repo_path = os.path.abspath(repo_path)
         p = e3.os.process.Run(["svnadmin", "create", repo_path], output=cls.log_stream)
 
-        if cls.is_unix_svn():
+        if cls.is_unix_svn() and initial_content_path is not None:
             initial_content_path = e3.os.fs.unixpath(initial_content_path)
 
         if p.status != 0:
@@ -126,18 +127,15 @@ class SVNRepository(object):
                 )
         return cls.local_url(repo_path)
 
-    def svn_cmd(self, cmd, **kwargs):
+    def svn_cmd(self, cmd: SVNCmd, **kwargs) -> e3.os.process.Run:
         """Run a svn command.
 
         Add the non-interactive option to all command (accepted on all SVN.
         subcommands from version 1.5).
         :param cmd: the command line as a list of string, all None entries will
             be discarded
-        :type cmd: list[str | None]
         :param kwargs: additional parameters to provide to e3.os.process.Run
-        :type kwargs: dict
         :return: Result of the Run of the SVN command
-        :rtype: Run object
         :raise: SVNError
         """
         if self.__class__.svn_bin is None:
@@ -156,18 +154,18 @@ class SVNRepository(object):
         p = e3.os.process.Run(p_cmd, cwd=self.working_copy, **kwargs)
         if p.status != 0:
             raise SVNError(
-                "%s failed (exit status: %d)"
-                % (e3.os.process.command_line_image(p_cmd), p.status),
+                "{} failed (exit status: {})".format(
+                    e3.os.process.command_line_image(p_cmd), p.status
+                ),
                 origin="svn_cmd",
                 process=p,
             )
         return p
 
-    def get_info(self, item):
+    def get_info(self, item: str) -> str:
         """Return a specific item shown by svn info.
 
         The --show-item option is only available from 1.9.
-        :rtype: str
         :raise: SVNError
         """
         info = self.svn_cmd(["info"], output=PIPE).out
@@ -180,19 +178,17 @@ class SVNRepository(object):
         return m.group(1).strip()
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Return the last URL used for the checkout.
 
-        :rtype: str
         :raise: SVNError
         """
         return self.get_info("URL")
 
     @property
-    def current_revision(self):
+    def current_revision(self) -> str:
         """Return the current revision.
 
-        :rtype: str
         :raise: SVNError
         """
         try:
@@ -201,7 +197,12 @@ class SVNRepository(object):
             logger.exception("Cannot fetch last changed rev")
             raise SVNError("Cannot fetch last changed rev", "svn_cmd")
 
-    def update(self, url=None, revision=None, force_and_clean=False):
+    def update(
+        self,
+        url: Optional[str] = None,
+        revision: Optional[str] = None,
+        force_and_clean: bool = False,
+    ) -> bool:
         """Update a working copy or checkout a new one.
 
         If the directory is already a checkout, it tries to update it.
@@ -210,19 +211,15 @@ class SVNRepository(object):
         The option --remove-unversioned of the svn subcommand
         cleanup exists only from svn version 1.9.
         :param url: URL of a SVN repository
-        :type url: str
         :param revision: specific revision (default is last)
-        :type revision: str | None
         :param force_and_clean: if True: erase the content of non empty
         working_copy and use '--force' option for the svn update/checkout
         command
-        :type force_and_clean: bool
         :return: True if any local changes detected in the working copy
-        :rtype: bool
         :raise: SVNError
         """
 
-        def is_clean_svn_dir(dir_path):
+        def is_clean_svn_dir(dir_path: str) -> Tuple[bool, bool]:
             """Return a tuple (True if dir is SVN directory, True if clean)."""
             if os.path.exists(os.path.join(dir_path, ".svn")):
                 try:
@@ -234,11 +231,11 @@ class SVNRepository(object):
                 return True, status == ""
             return False, False
 
-        def is_empty_dir(dir_path):
+        def is_empty_dir(dir_path: str) -> bool:
             """Return True if the path is a directory and is empty."""
             return os.path.isdir(dir_path) and not os.listdir(dir_path)
 
-        options = ["--ignore-externals"]
+        options: SVNCmd = ["--ignore-externals"]
         if revision:
             options += ["-r", revision]
         if force_and_clean:
@@ -250,17 +247,20 @@ class SVNRepository(object):
             and (is_clean or not force_and_clean)
             and (not url or self.url == url)
         ):
-            self.svn_cmd(["update"] + options)
+            update_cmd: SVNCmd = ["update"]
+            self.svn_cmd(update_cmd + options)
             return not is_clean
         if os.path.exists(self.working_copy):
             if not is_empty_dir(self.working_copy) and not force_and_clean:
                 raise SVNError(
-                    "not empty {}".format(self.working_copy, url), origin="update"
+                    "not empty {} url {}".format(self.working_copy, url),
+                    origin="update",
                 )
             if is_svn_dir and not url:
                 url = self.url
             rm(self.working_copy, recursive=True)
 
         mkdir(self.working_copy)
-        self.svn_cmd(["checkout", url, "."] + options)
+        checkout_cmd: SVNCmd = ["checkout", url, "."]
+        self.svn_cmd(checkout_cmd + options)
         return not is_clean

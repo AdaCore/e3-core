@@ -1,10 +1,19 @@
+from __future__ import annotations
+
+import abc
+import threading
 from collections import namedtuple
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+import e3.log
 from e3.anod.status import ReturnValue
 from e3.os.process import Run
-import abc
-import e3.log
-import threading
+
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, List, Optional
+    from e3.job.scheduler import Scheduler
 
 logger = e3.log.getLogger("job")
 
@@ -46,26 +55,23 @@ class Job(object, metaclass=abc.ABCMeta):
     lock = threading.RLock()
     index_counter = 0
 
-    def __init__(self, uid, data, notify_end):
+    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]):
         """Initialize worker.
 
         :param uid: unique work identifier
-        :type uid: str
         :param data: work data
-        :type data: T
         :param notify_end: function that takes the job uid as parameter. The
             function is called whenever the job finish. The function is
             provided by the scheduler.
-        :type notify_end: str -> None
         """
         self.uid = uid
         self.data = data
         self.notify_end = notify_end
-        self.slot = None
-        self.handle = None
+        self.slot = 1
+        self.handle: Optional[threading.Thread] = None
         self.thread = None
-        self.__start_time = None
-        self.__stop_time = None
+        self.__start_time: Optional[datetime] = None
+        self.__stop_time: Optional[datetime] = None
         self.should_skip = False
         self.interrupted = False
         self.queue_name = "default"
@@ -75,49 +81,45 @@ class Job(object, metaclass=abc.ABCMeta):
             Job.index_counter += 1
 
     @property
-    def priority(self):
+    def priority(self) -> int:
         """Return job priority.
 
         This is used in ``e3.job.scheduler.Scheduler``.
-
-        :return: int
         """
         return 0
 
-    def record_start_time(self):
+    def record_start_time(self) -> None:
         """Log the starting time of a job."""
         with self.lock:
             self.__start_time = datetime.now()
 
-    def record_stop_time(self):
+    def record_stop_time(self) -> None:
         """Log the stopping time of a job."""
         with self.lock:
             self.__stop_time = datetime.now()
 
     @property
-    def timing_info(self):
+    def timing_info(self) -> JobTimingInfo:
         """Retrieve some job's timing information.
 
         :return: a JobTimingInfo object
-        :rtype: JobTimingInfo
         """
         with self.lock:
             start = self.__start_time
             stop = self.__stop_time
         if start is None:
-            duration = 0
+            duration = 0.0
         else:
             duration = ((stop or datetime.now()) - start).total_seconds()
         return JobTimingInfo(start, stop, duration)
 
-    def start(self, slot):
+    def start(self, slot: int) -> None:
         """Launch the job.
 
         :param slot: slot number
-        :type slot: int
         """
 
-        def task_function():
+        def task_function() -> None:
             self.record_start_time()
             try:
                 with self.lock:
@@ -135,26 +137,23 @@ class Job(object, metaclass=abc.ABCMeta):
         self.handle.start()
 
     @abc.abstractmethod
-    def run(self):
+    def run(self) -> None:
         """Job activity."""
         pass  # all: no cover
 
     @property
-    def status(self):
+    def status(self) -> ReturnValue:
         """Return he job's status.
 
         This is made a property because users of this class should not
         be allowed to set or change it value. The job's status is ...
         a property of the job!
-
-        :return: e3.anod.status.ReturnValue
         """
         return ReturnValue.success
 
-    def interrupt(self):
+    def interrupt(self) -> bool:
         """Interrupt current job.
 
-        :rtype: bool
         :return: True if interrupted, False if already interrupted
         """
         with self.lock:
@@ -162,14 +161,14 @@ class Job(object, metaclass=abc.ABCMeta):
             self.interrupted = True
         return not previous_state
 
-    def on_start(self, scheduler):
+    def on_start(self, scheduler: Scheduler) -> None:
         """Call whenever a job is started.
 
         This allow the user to do some logging on job startup
         """
         pass
 
-    def on_finish(self, scheduler):
+    def on_finish(self, scheduler: Scheduler) -> None:
         """Call whenever a job is finished.
 
         This allow the user to do some logging on job termination
@@ -180,21 +179,26 @@ class Job(object, metaclass=abc.ABCMeta):
 class EmptyJob(Job):
     """A job which does nothing."""
 
-    def __init__(self, uid, data, notify_end, status=ReturnValue.force_skip):
+    def __init__(
+        self,
+        uid: str,
+        data: Any,
+        notify_end: Callable[[str], None],
+        status=ReturnValue.force_skip,
+    ):
         """Initialize the EmptyJob.
 
         :param status: The job's status.
-        :type status: e3.anod.status.ReturnValue
         """
         super(EmptyJob, self).__init__(uid, data, notify_end)
         self.should_skip = True
         self.__status = status
 
-    def run(self):
+    def run(self) -> None:
         pass
 
     @property
-    def status(self):
+    def status(self) -> ReturnValue:
         """See Job.status' description."""
         return self.__status
 
@@ -207,15 +211,15 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
     :vartype proc_handle: e3.os.process.Run | None
     """
 
-    def __init__(self, uid, data, notify_end):
+    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]):
         super(ProcessJob, self).__init__(uid, data, notify_end)
-        self.proc_handle = None
+        self.proc_handle: Optional[Run] = None
 
         # Detect spawn issue to avoid returning "notready"
         # and creating a loop
         self.__spawn_error = False
 
-    def run(self):
+    def run(self) -> None:
         """Run the job."""
         cmd_options = self.cmd_options
 
@@ -242,7 +246,7 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
         )
 
     @property
-    def status(self):
+    def status(self) -> ReturnValue:
         """See Job.status' description."""
         if self.__spawn_error:
             return ReturnValue.failure
@@ -260,16 +264,15 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
                 return ReturnValue.failure
 
     @abc.abstractproperty
-    def cmdline(self):
+    def cmdline(self) -> List[str]:
         """Return the command line of the process to be spawned.
 
         :return: the command line
-        :rtype: list[str]
         """
         pass  # all: no cover
 
     @property
-    def cmd_options(self):
+    def cmd_options(self) -> dict:
         """Process options.
 
         Important note: don't use PIPE for output or error parameters this can
@@ -281,11 +284,10 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
         finish.
 
         :return: options for e3.os.process.Run as a dict
-        :rtype: dict
         """
         return {"output": None}
 
-    def interrupt(self):
+    def interrupt(self) -> bool:
         """Kill running process tree."""
         if super(ProcessJob, self).interrupt():
             if self.proc_handle is None:  # defensive code
@@ -295,3 +297,4 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
                 self.proc_handle.kill(recursive=True)
             else:  # defensive code
                 logger.debug("cannot interrupt, job %s has finished", self.uid)
+        return True

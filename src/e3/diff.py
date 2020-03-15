@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 import fnmatch
 import io
 import re
 from difflib import unified_diff
+from typing import TYPE_CHECKING
 
 import e3.error
 import e3.log
 import e3.os.process
+
+if TYPE_CHECKING:
+    from typing import Callable, List, Optional, Tuple, Union
 
 logger = e3.log.getLogger("diff")
 
@@ -15,28 +21,28 @@ class DiffError(e3.error.E3Error):
 
 
 def diff(
-    a, b, ignore=None, item1name="expected", item2name="output", ignore_white_chars=True
-):
+    a: Union[str, List[str]],
+    b: Union[str, List[str]],
+    ignore: Optional[str] = None,
+    item1name: str = "expected",
+    item2name: str = "output",
+    ignore_white_chars: bool = True,
+) -> str:
     """Compute diff between two files or list of strings.
 
     :param a: a filename or a list of strings
-    :type a: str | list[str]
     :param b: a filename or a list of strings
-    :type b: str | list[str]
     :param ignore: all lines matching this pattern in both files are
         ignored during comparison. If set to None, all lines are considered.
-    :type ignore: str | None
-    :param str item1name: name to display for a in the diff
-    :param str item2name: name to display for b in the diff
-    :param bool ignore_white_chars: if True (default) then empty lines,
+    :param item1name: name to display for a in the diff
+    :param item2name: name to display for b in the diff
+    :param ignore_white_chars: if True (default) then empty lines,
         trailing and leading white chars on each line are ignored
 
     :return: A diff string. If the string is equal to '' it means that there
         is no difference
-    :rtype: str
     """
-    contents = [[], []]
-    """:type: list[list[str]]"""
+    contents: List[List[str]] = [[], []]
 
     # Read first item
     if isinstance(a, list):
@@ -79,26 +85,26 @@ def diff(
     return "".join(unified_diff(contents[0], contents[1], item1name, item2name, n=1))
 
 
-def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
+def patch(
+    patch_file: str,
+    working_dir: str,
+    discarded_files: Optional[Union[List[str], Callable[[str], bool]]] = None,
+    filtered_patch: Optional[str] = None,
+) -> None:
     """Apply a patch, ignoring changes in files matching discarded_files.
 
     :param patch_file: the file containing the patch to apply
-    :type patch_file: str
     :param working_dir: the directory where to apply the patch
-    :type working_dir: str
     :param discarded_files: list of files or glob patterns (or function taking
         a filename and returning a boolean - True if the file should be
         discarded)
-    :type discarded_files: list[str] | (str) -> bool | None
     :param filtered_patch: name of the filtered patch. By default append
         '.filtered' to the patch_file name
-    :type filtered_patch: str | None
     """
 
-    def apply_patch(fname):
+    def apply_patch(fname: str) -> None:
         """Run the patch command.
 
-        :type fname: str
         :raise DiffError: when the patch command fails
         """
         cmd = ["patch", "-p0", "-f"]
@@ -125,17 +131,16 @@ def patch(patch_file, working_dir, discarded_files=None, filtered_patch=None):
     ) as fdout:
 
         # Two line headers that mark beginning of patches
-        header1 = ()
-        header2 = ()
+        header1: Union[Tuple, Tuple[str, str]] = ()
+        header2: Union[Tuple, Tuple[str, str]] = ()
         header2_regexp = None
         # whether the current patch line should discarded
         discard = False
 
-        def write_line(l):
+        def write_line(l: str) -> None:
             """Write line in filtered patch.
 
             :param l: the line to write
-            :type l: str
             """
             if not discard:
                 fdout.write(l)

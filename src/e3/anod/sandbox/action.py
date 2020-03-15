@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import os
 
@@ -30,19 +32,13 @@ class SandBoxAction(object, metaclass=abc.ABCMeta):
             )
 
     @abc.abstractproperty
-    def name(self):
-        """Return the action name.
-
-        :rtype: str
-        """
+    def name(self) -> str:
+        """Return the action name."""
         pass  # all: no cover
 
     @abc.abstractproperty
-    def help(self):
-        """Return the help string associated with this action.
-
-        :rtype: str
-        """
+    def help(self) -> str:
+        """Return the help string associated with this action."""
         pass  # all: no cover
 
     @abc.abstractmethod

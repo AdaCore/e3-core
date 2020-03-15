@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import sys
 from functools import wraps
+from typing import TYPE_CHECKING
 
 import e3.log
 import e3.store
@@ -9,9 +12,18 @@ from e3.error import E3Error
 
 logger = e3.log.getLogger("e3.anod.driver")
 
+if TYPE_CHECKING:
+    from typing import Any, Callable, Literal, TypeVar
+    from e3.anod.spec import Anod
+    from e3.store.backends.base import Store
+    from e3.anod.sandbox import SandBox
+    from e3.anod.loader import AnodSpecRepository
 
-def primitive_check():
-    def decorator(func):
+    F = TypeVar("F", bound=Callable[..., Any])
+
+
+def primitive_check() -> Callable[[F], F]:
+    def decorator(func: F) -> F:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not has_primitive(self.anod_instance, func.__name__):
@@ -20,25 +32,23 @@ def primitive_check():
                 raise AnodError(".activate() has not been called")
             return func(self, *args, **kwargs)
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
 
 
 class AnodDriver(object):
-    def __init__(self, anod_instance, store):
+    def __init__(self, anod_instance: Anod, store: Store):
         """Initialize the Anod driver for a given Anod instance.
 
         :param anod_instance: an Anod instance
-        :type anod_instance: e3.anod.spec.Anod
         :param store: the store backend for accessing source and
             binary packages
-        :type store: e3.store.backends.base.Store
         """
         self.anod_instance = anod_instance
         self.store = store
 
-    def activate(self, sandbox, spec_repository):
+    def activate(self, sandbox: SandBox, spec_repository: AnodSpecRepository) -> None:
         self.anod_instance.build_space = sandbox.get_build_space(
             name=self.anod_instance.build_space_name,
             platform=self.anod_instance.env.platform,
@@ -57,16 +67,15 @@ class AnodDriver(object):
                 self.anod_instance.deps[e.local_name] = dep_instance
         e3.log.debug("activating spec %s", self.anod_instance.uid)
 
-    def call(self, action):
+    def call(self, action: str):
         """Call an Anod action.
 
         :param action: the action (build, install, test, ...)
-        :type action: str
         """
         return getattr(self, action, self.unknown_action)()
 
     @staticmethod
-    def unknown_action():
+    def unknown_action() -> Literal[False]:
         logger.critical("unknown action")
         return False
 

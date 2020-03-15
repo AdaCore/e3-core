@@ -1,5 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 import yaml
+
 from e3.env import BaseEnv
+
+if TYPE_CHECKING:
+    from typing import Dict, List, Optional
 
 
 class Host(BaseEnv):
@@ -8,18 +15,14 @@ class Host(BaseEnv):
     See e3.env.BaseEnv
     """
 
-    def __init__(self, hostname, platform, version, **kwargs):
+    def __init__(self, hostname: str, platform: str, version: str, **kwargs):
         """Initialize an host entry.
 
         :param hostname: host name
-        :type hostname: str
         :param platform: platform name (see e3.platform)
-        :type platform: str
         :param version: platform version (usually OS version)
-        :type version: str
         :param kwargs: additional user defined data. each key from the data
             dict is accesiible like a regular attribute.
-        :type kwargs: dict
         """
         BaseEnv.__init__(self)
         self.set_build(name=str(platform), version=str(version), machine=str(hostname))
@@ -32,43 +35,37 @@ class HostDB(object):
     :ivar hosts: dict indexed by host name
     """
 
-    def __init__(self, filename=None):
+    def __init__(self, filename: Optional[str] = None):
         """Initialize a host database.
 
         :param filename: if not None, initialize the database from a yaml
             file. See HostDB.load_yaml_db method for details about the expected
             format
-        :type filename: str | None
         """
-        self.hosts = {}
+        self.hosts: Dict[str, Host] = {}
 
         if filename is not None:
             self.load_yaml_db(filename)
 
     @property
-    def hostnames(self):
+    def hostnames(self) -> List[str]:
         """Return the current list of host names.
 
         :return: a list of hostnames
-        :rtype: list[str]
         """
         return list(self.hosts.keys())
 
-    def add_host(self, hostname, platform, version, **data):
+    def add_host(self, hostname: str, platform: str, version: str, **data) -> None:
         """Add/Update a host entry.
 
         :param hostname: host name
-        :type hostname: str
         :param platform: platform name (see e3.platform)
-        :type platform : str
         :param version: platform/OS version
-        :type version: str
         :param data: additional host information
-        :type data: dict
         """
         self.hosts[hostname] = Host(hostname, platform, version, **data)
 
-    def load_yaml_db(self, filename):
+    def load_yaml_db(self, filename: str) -> None:
         """Load a yaml configuration file.
 
         The yaml file should be a dictionaty indexed by host name. Each entry
@@ -80,7 +77,6 @@ class HostDB(object):
         Additional keys for a host entry will be considered as additional data
 
         :param filename: path the yaml file
-        :type filename: str
         """
         with open(filename, "r") as fd:
             content = yaml.safe_load(fd)
@@ -94,16 +90,13 @@ class HostDB(object):
             version = hostinfo["build_os_version"]
             self.add_host(hostname, platform, version, **result)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Host:
         return self.hosts[key]
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Optional[Host] = None) -> Optional[Host]:
         """Return the Host named ``key`` of ``default``.
 
         :param key: host name
-        :type key: str
         :param default: default value to return if not found
-        :type default: None | Host
-        :rtype: Host
         """
         return self.hosts.get(key, default)

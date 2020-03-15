@@ -25,14 +25,22 @@ will also be provided::
 """
 
 
+from __future__ import annotations
+
 import logging
 import os
 import signal
 import sys
 
+from typing import TYPE_CHECKING
+
 import e3
 import e3.log
 from e3.env import Env
+
+if TYPE_CHECKING:
+    from typing import Optional, List
+    from argparse import Namespace
 
 
 class Main(object):
@@ -41,14 +49,12 @@ class Main(object):
     :ivar args: list of positional parameters after processing options
     """
 
-    def __init__(self, name=None, platform_args=False):
+    def __init__(self, name: Optional[str] = None, platform_args: bool = False):
         """Initialize Main object.
 
         :param name: name of the program (if not specified the filename without
             extension is taken)
-        :type name: str | None
         :param platform_args: add --build, --host, --target support
-        :type platform_args: bool
         """
         # On UNIX set a signal handler for SIGTERM that will raise SystemExit
         # This is to let an e3 application enough time to perform
@@ -137,7 +143,7 @@ class Main(object):
             # name that is improbable in practice.
             argument_parser.set_defaults(e3_main_platform_args_supported=True)
 
-        self.args = None
+        self.args: Optional[Namespace] = None
         self.argument_parser = argument_parser
         self.__log_handlers_set = False
 
@@ -156,15 +162,15 @@ class Main(object):
         if sys.platform != "win32":  # unix-only
             signal.signal(signal.SIGTERM, sigterm_handler)
 
-    def parse_args(self, args=None, known_args_only=False):
+    def parse_args(
+        self, args: Optional[List[str]] = None, known_args_only: bool = False
+    ) -> None:
         """Parse options and set console logger.
 
         :param args: the list of positional parameters. If None then
             ``sys.argv[1:]`` is used
-        :type args: list[str] | None
         :param known_args_only: does not produce an error when extra
             arguments are present
-        :type known_args_only: bool
         """
         if known_args_only:
             self.args, _ = self.argument_parser.parse_known_args(args)

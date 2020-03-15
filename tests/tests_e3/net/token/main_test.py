@@ -7,13 +7,11 @@ from e3.net.token import get_payload, is_valid, utc_timestamp
 FUTURE_TIMESTAMP = 9999999999999
 
 
-def create_token(payload):
+def create_token(payload: dict) -> str:
     """Return JSON Web Token.
 
     :param payload:
-    :type payload: dict
     :return: token
-    :rtype: str
     """
     payload_bytes = json.dumps(payload).encode("utf-8")
     data = (

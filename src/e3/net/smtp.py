@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import smtplib
 import socket
@@ -5,37 +7,39 @@ import socket
 import e3.log
 import e3.os.process
 
-logger = e3.log.getLogger("net.smtp")
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from typing import List, Optional
+
+logger = e3.log.getLogger("net.smtp")
 
 system_sendmail_fallback = False
 
 
 def sendmail(
-    from_email, to_emails, mail_as_string, smtp_servers, max_size=20, message_id=None
-):
+    from_email: str,
+    to_emails: List[str],
+    mail_as_string: str,
+    smtp_servers: List[str],
+    max_size: int = 20,
+    message_id: Optional[str] = None,
+) -> bool:
     """Send an email with stmplib.
 
     Fallback to /usr/lib/sendmail or /usr/sbin/sendmail if
     ``e3.net.smtp.system_sendmail_fallback`` is set to True (default False).
 
     :param from_email: the address sending this email (e.g. user@example.com)
-    :type from_email: str
     :param to_emails: A list of addresses to send this email to.
-    :type to_emails: list[str]
     :param mail_as_string: the message to send (with headers)
-    :type mail_as_string: str
     :param smtp_servers: list of smtp server names (hostname), in case of
        exception on a server, the next server in the list will be tried
-    :type smtp_servers: list[str]
     :param max_size: do not send the email via smptlib if bigger than
         'max_size' Mo.
-    :type max_size: int
     :param message_id: the message id (for debugging purposes)
-    :type message_id: str
 
     :return: boolean (sent / not sent)
-    :rtype: bool
 
     We prefer running smtplib so we can manage the email size.
     We run sendmail in case it fails, assuming the max_size on the system
@@ -49,7 +53,7 @@ def sendmail(
         logger.error("!!! message file too big (>= %d Mo): %f Mo", max_size, mail_size)
         return False
 
-    def system_sendmail():
+    def system_sendmail() -> bool:
         """Run the system sendmail."""
         if system_sendmail_fallback:
             for sendmail_bin in (

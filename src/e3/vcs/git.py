@@ -15,12 +15,15 @@ Example::
 """
 
 
+from __future__ import annotations
+
 import itertools
 import os
 import sys
 import tempfile
 from contextlib import closing
 from subprocess import PIPE
+from typing import TYPE_CHECKING
 
 import e3.fs
 import e3.log
@@ -33,6 +36,12 @@ logger = e3.log.getLogger("vcs.git")
 
 HEAD = "HEAD"
 FETCH_HEAD = "FETCH_HEAD"
+
+if TYPE_CHECKING:
+    from typing import Dict, Iterator, IO, List, Optional, TextIO, Union
+    from e3.os.process import Run
+
+    Git_Cmd = List[Optional[str]]
 
 
 # Implementation note: some git commands can produce a big amount of data (e.g.
@@ -53,28 +62,24 @@ class GitRepository(object):
     :ivar working_tree: path to the git working tree
     """
 
-    git = None
-    log_stream = sys.stdout
+    git: Optional[str] = None
+    log_stream: Union[TextIO, IO[str]] = sys.stdout
 
-    def __init__(self, working_tree):
+    def __init__(self, working_tree: str):
         """Initialize a GitRepository object.
 
         :param working_tree: working tree of the GitRepository
-        :type working_tree: str
         """
         self.working_tree = working_tree
 
     @classmethod
-    def create(cls, repo_path, initial_content_path=None):
+    def create(cls, repo_path: str, initial_content_path: Optional[str] = None) -> str:
         """Create a local Git repository.
 
         :param repo_path: a local directory where to create the repository
-        :type repo_path: str
         :param initial_content_path: directory containing the initial content
             of the repository. If set to None an empty repository is created.
-        :type initial_content_path: str | None
         :return: the URL of the newly created repository
-        :rtype: str
         """
         repo_path = os.path.abspath(repo_path)
         repo = cls(repo_path)
@@ -87,14 +92,11 @@ class GitRepository(object):
             repo.git_cmd(["commit", "-m", "initial content"])
         return repo_path
 
-    def git_cmd(self, cmd, **kwargs):
+    def git_cmd(self, cmd: Git_Cmd, **kwargs) -> Run:
         """Run a git command.
 
         :param cmd: the command line as a list of string, all None entries will
             be discarded
-        :type cmd: list[str | None]
-        :param kwargs: additional parameters to provide to e3.os.process.Run
-        :type kwargs: dict
         """
         if self.__class__.git is None:
             git_binary = e3.os.process.which("git", default=None)
@@ -111,21 +113,20 @@ class GitRepository(object):
         p = e3.os.process.Run(p_cmd, cwd=self.working_tree, **kwargs)
         if p.status != 0:
             raise GitError(
-                "%s failed (exit status: %d)"
-                % (e3.os.process.command_line_image(p_cmd), p.status),
+                "{} failed (exit status: {})".format(
+                    e3.os.process.command_line_image(p_cmd), p.status
+                ),
                 origin="git_cmd",
                 process=p,
             )
         return p
 
-    def init(self, url=None, remote="origin"):
+    def init(self, url: Optional[str] = None, remote: Optional[str] = "origin") -> None:
         """Initialize a new Git repository and configure the remote.
 
         :param url: url of the remote repository, if None create a local git
             repository
-        :type url: str | None
         :param remote: name of the remote to create
-        :type remote: str
         :raise: GitError
         """
         e3.fs.mkdir(self.working_tree)
@@ -139,104 +140,98 @@ class GitRepository(object):
         if url is not None:
             self.git_cmd(["remote", "add", remote, url])
 
-    def checkout(self, branch, force=False):
+    def checkout(self, branch: str, force: bool = False) -> None:
         """Checkout a given refspec.
 
         :param branch: name of the branch to checkout
-        :type branch: str
         :param force: throw away local changes if needed
-        :type force: bool
         :raise: GitError
         """
         cmd = ["checkout", "-q", "-f" if force else None, branch]
         self.git_cmd(cmd)
 
-    def describe(self, commit=HEAD):
+    def describe(self, commit: str = HEAD) -> str:
         """Get a human friendly revision for the given refspec.
 
         :param commit: commit object to describe.
-        :type commit: str
         :return: the most recent tag name with the number of additional commits
             on top of the tagged object and the abbreviated object name of the
             most recent commit (see `git help describe`).
-        :rtype: str
         :raise: GitError
         """
         p = self.git_cmd(["describe", "--always", commit], output=PIPE)
         return p.out.strip()
 
-    def write_local_diff(self, stream):
+    def write_local_diff(self, stream: IO[str]) -> None:
         """Write local changes in the working tree in stream.
 
         :param stream: an open file descriptor
-        :type stream: file
-        :rtype: str
         :raise: GitError
         """
-        cmd = ["--no-pager", "diff"]
+        cmd: Git_Cmd = ["--no-pager", "diff"]
         self.git_cmd(cmd, output=stream, error=self.log_stream)
 
-    def write_diff(self, stream, commit):
+    def write_diff(self, stream: IO[bytes], commit: str) -> None:
         """Write commit diff in stream.
 
         :param commit: revision naming a commit object, e.g. sha1 or symbolic
             refname
-        :type commit: str
         :param stream: an open file descriptor
-        :type stream: file
-        :rtype: str
         :raise: GitError
         """
-        cmd = ["--no-pager", "diff-tree", "--cc", "--no-commit-id", "--root", commit]
+        cmd: Git_Cmd = [
+            "--no-pager",
+            "diff-tree",
+            "--cc",
+            "--no-commit-id",
+            "--root",
+            commit,
+        ]
         self.git_cmd(cmd, output=stream, error=self.log_stream)
 
-    def fetch(self, url, refspec=None):
+    def fetch(self, url: str, refspec: Optional[str] = None) -> None:
         """Fetch remote changes.
 
         :param url: url of the remote repository
-        :type url: str
         :param refspec: specifies which refs to fetch and which local refs to
             update.
-        :type refspec: str | None
         :raise: GitError
         """
         self.git_cmd(["fetch", url, refspec])
 
-    def update(self, url, refspec, force=False):
+    def update(self, url: str, refspec: str, force: bool = False) -> None:
         """Fetch remote changes and checkout FETCH_HEAD.
 
         :param url: url of the remote repository
-        :type url: str
         :param refspec: specifies which refs to fetch and which local refs to
             update.
-        :type refspec: str
         :param force: throw away local changes if needed
-        :type force: bool
         :raise: GitError
         """
         self.fetch(url, refspec)
         self.checkout("FETCH_HEAD", force=force)
 
-    def fetch_gerrit_notes(self, url):
+    def fetch_gerrit_notes(self, url: str) -> None:
         """Fetch notes generated by Gerrit in `refs/notes/review`.
 
         :param url: url of the remote repository
-        :type url: str
         """
         self.fetch(url, "refs/notes/review:refs/notes/review")
 
-    def write_log(self, stream, max_count=50, rev_range=None, with_gerrit_notes=False):
+    def write_log(
+        self,
+        stream: IO[str],
+        max_count: int = 50,
+        rev_range: Optional[str] = None,
+        with_gerrit_notes: bool = False,
+    ) -> None:
         """Write formatted log to a stream.
 
         :param stream: an open stream where to write the log content
-        :type stream: file
         :param max_count: max number of commit to display
-        :type max_count: int
         :param rev_range: git revision range, see ``git log -h`` for details
-        :type rev_range: str
         :param with_gerrit_notes: if True also fetch Gerrit notes containing
             review data such as Submitted-at, Submitted-by.
-        :type with_gerrit_notes: bool
         :raise: GitError
         """
         # Format:
@@ -246,7 +241,7 @@ class GitRepository(object):
         #   %n: new line
         #   %B: raw body (unwrapped subject and body)
         #   %N: commit notes
-        cmd = [
+        cmd: Git_Cmd = [
             "log",
             "--format=format:%H%n%aE%n%ci%n"
             + ("%N%n" if with_gerrit_notes else "")
@@ -258,26 +253,22 @@ class GitRepository(object):
         ]
         self.git_cmd(cmd, output=stream, error=None)
 
-    def parse_log(self, stream, max_diff_size=0):
+    def parse_log(
+        self, stream: IO[str], max_diff_size: int = 0
+    ) -> Iterator[Dict[str, Union[str, dict]]]:
         """Parse a log stream generated with `write_log`.
 
         :param stream: stream of text to read
-        :type stream: file
         :param max_diff_size: max size of a diff, if <= 0 diff are ignored
-        :type max_diff_size: int
         :return: a generator returning commit information (directories with
             the following keys: sha, email, date, notes, message, diff). Note
             that the key diff is only set when max_diff_size is bigger than 0.
             The notes value is a dictionary built from the 'key:value' found in
             Gerrit notes.
-        :rtype: collections.Iterable[dict[str][str|dict]]
         """
 
-        def to_commit(object_content):
-            """Return commit information.
-
-            :type object_content: str
-            """
+        def to_commit(object_content: str) -> dict:
+            """Return commit information."""
             headers, body = object_content.split("\n\n", 1)
 
             # Retrieve sha, email, date, and (optionally) notes if some notes
@@ -345,12 +336,10 @@ class GitRepository(object):
             yield to_commit(stream.read(size_to_read))
             size_to_read = 0
 
-    def rev_parse(self, refspec=HEAD):
+    def rev_parse(self, refspec: str = HEAD) -> str:
         """Get the sha associated to a given refspec.
 
         :param refspec: refspec.
-        :type refspec: str
-        :rtype: str
         :raise: GitError
         """
         p = self.git_cmd(["rev-parse", "--revs-only", refspec], output=PIPE, error=PIPE)

@@ -18,15 +18,22 @@ we previously computed. If different, we should rebuild.
 """
 
 
+from __future__ import annotations
+
 import hashlib
 import json
 import os
+
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.env import Env
 from e3.error import E3Error
 from e3.fs import get_filetree_state
 from e3.hash import sha256
+
+if TYPE_CHECKING:
+    from typing import Dict, Optional, Set
 
 logger = e3.log.getLogger("fingerprint")
 
@@ -43,22 +50,20 @@ class Fingerprint(object):
         element.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise a new fingerprint instance."""
-        self.elements = {}
+        self.elements: Dict[str, str] = {}
         self.add("os_version", Env().build.os.version)
         # ??? add more detailed information about the build machine so that
         # even a minor OS upgrade trigger a rebuild
 
         self.add("fingerprint_version", FINGERPRINT_VERSION)
 
-    def add(self, name, value):
+    def add(self, name: str, value: str) -> None:
         """Add a fingerprint element.
 
         :param name: name of the new element
-        :type name: str
         :param value: associated value (should be a string)
-        :type value: str | unicode
         :raise: E3Error
         """
         if isinstance(value, str):
@@ -69,20 +74,18 @@ class Fingerprint(object):
                 "fingerprint.add",
             )
 
-    def add_dir(self, path):
+    def add_dir(self, path: str) -> None:
         """Add a file tree to the fingerprint.
 
         :param path: a path to a directory
-        :type path: str
         """
         assert os.path.isdir(path), "directory %s does not exist" % path
         self.elements[os.path.basename(path)] = get_filetree_state(path)
 
-    def add_file(self, filename):
+    def add_file(self, filename: str) -> None:
         """Add a file element to the fingerprint.
 
         :param filename: a path
-        :type filename: str
 
         Adding a filename element to a fingerprint is equivalent to do add
         an element for which key is the basename of the file and value is
@@ -91,13 +94,10 @@ class Fingerprint(object):
         assert os.path.isfile(filename), "filename %s does not exist" % filename
         self.elements[os.path.basename(filename)] = sha256(filename)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Implement == operator for two fingerprints.
 
         :param other: object to compare with
-        :type other: Fingerprint
-
-        :rtype: bool
 
         Two fingerprints are considered equals if both arguments are
         fingerprints and all elements of the fingerprint are equal
@@ -117,26 +117,21 @@ class Fingerprint(object):
 
         return True
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         """Implement != operator for two fingerprints.
 
         See __eq__ functions.
-        :type other: Fingerprint
         """
         return not self == other
 
-    def compare_to(self, other):
+    def compare_to(self, other: object) -> Optional[Dict[str, Set[str]]]:
         """Compare two fingerprints and return the differences.
-
-        :type other: Fingerprint | None
 
         :return: a dictionary that list the differences or None if the two
           Fingerprint are equals. The returned dictionary contains three
           items. 'updated' list the elements that are in both fingerprints but
           that are different, 'obsolete' list the elements that are only in
           self, and 'new' the elements that are only in other
-        :rtype: None | dict[str][str]
-
         :raise AssertError: if other is not a Fingerprint
         """
         # If other is None behave as if the previous fingerprint was an empty
@@ -165,19 +160,14 @@ class Fingerprint(object):
         else:
             return {"updated": updated, "new": new, "obsolete": obsolete}
 
-    def __str__(self):
-        """Return a string representation of the fingerprint.
-
-        :rtype: str
-        """
+    def __str__(self) -> str:
+        """Return a string representation of the fingerprint."""
         return "\n".join(
             ["%s: %s" % (k, self.elements[k]) for k in sorted(self.elements.keys())]
         )
 
-    def checksum(self):
+    def checksum(self) -> str:
         """Return the fingerprint's checksum.
-
-        :rtype: str
 
         At the moment, the fingerprint uses the SHA256 hashing algorithm
         to compute the checksum.
@@ -196,11 +186,10 @@ class Fingerprint(object):
                     checksum.update(chunk)
         return checksum.hexdigest()
 
-    def save_to_file(self, filename):
+    def save_to_file(self, filename: str) -> None:
         """Save the fingerprint to the given file.
 
         :param filename: The name of the file where to save the fingerprint.
-        :type filename: str
         """
         # Save the fingerprint in a format that makes it easy for us
         # to support multiple fingerprint versions.
@@ -215,7 +204,7 @@ class Fingerprint(object):
             json.dump(data, f, indent=2)
 
     @classmethod
-    def load_from_file(cls, filename):
+    def load_from_file(cls, filename: str) -> Optional[Fingerprint]:
         """Return the fingerprint saved in the given file.
 
         Return None in the following situations:
@@ -225,8 +214,6 @@ class Fingerprint(object):
 
         :param filename: The name of the file where to load the fingerprint
             from.
-        :type filename: str
-        :rtype: Fingerprint
         """
         if not os.path.isfile(filename):
             return None

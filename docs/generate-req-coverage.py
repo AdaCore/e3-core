@@ -10,14 +10,11 @@ def lookup(item, d):
     return {key for key, value in d.items() if value == item}
 
 
-def merge_docs(requirement, coverage):
+def merge_docs(requirement : str, coverage : str) -> dict:
     """Load requirement yaml and include the coverage info.
 
     :param requirement: yaml filename containing list of requirements
-    :type requirement: str
     :param coverage: yaml filename formatting as 'testname: requirement'
-    :type coverage: str
-    :rtype: dict
     """
     with open(requirement) as f:
         reqs = yaml.safe_load(f)
@@ -31,13 +28,11 @@ def merge_docs(requirement, coverage):
     return reqs
 
 
-def generate_rst(reqs_result, dest):
+def generate_rst(reqs_result : dict, dest : str):
     """Generate rst file from requirement coverage data.
 
     :param reqs_result: dictionary returned by merge_docs
-    :type reqs_result: dict
     :param dest: rst file to create
-    :type dest: str
     """
     with open(dest, "w") as f:
         for k in reqs_result:

@@ -4,16 +4,24 @@ This package provide a class called Env used to store global
 information. Env is a singleton so there is in fact only one instance.
 """
 
+from __future__ import annotations
 
 import abc
 import os
 import pickle
 import sys
+from collections import namedtuple
+
+from typing import TYPE_CHECKING
 
 import e3.log
 import e3.os.platform
-from collections import namedtuple
 from e3.platform import Platform
+
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, Iterable, List, Optional, Union
+    from argparse import Namespace
 
 logger = e3.log.getLogger("env")
 
@@ -45,41 +53,40 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def __init__(self, build=None, host=None, target=None):
+    def __init__(
+        self,
+        build: Optional[Platform] = None,
+        host: Optional[Platform] = None,
+        target: Optional[Platform] = None,
+    ):
         if not self._initialized:
             self.build = Platform.get() if build is None else build
             self.host = self.build if host is None else host
             self.target = self.host if target is None else target
-            self.environ = None
-            self.cwd = None
-            self.main_options = None
+            self.environ: Optional[dict] = None
+            self.cwd: Optional[str] = None
+            self.main_options: Optional[Namespace] = None
 
     @abc.abstractproperty
-    def _initialized(self):
+    def _initialized(self) -> bool:
         """Whether the new instance should be initialized.
 
         This is mostly useful to implement a singleton, as done in Env()
-        :rtype: bool
         """
         pass  # all: no cover
 
     @abc.abstractmethod
-    def _items(self):
-        """Return the list of instance variables.
-
-        :rtype: collections.Iterable
-        """
+    def _items(self) -> Iterable:
+        """Return the list of instance variables."""
         pass  # all: no cover
 
     @property
-    def platform(self):
+    def platform(self) -> str:
         """Compute the platform name based on the host and the target.
 
         For example for target ppc-elf hosted on linux, platform will
         be ppc-elf-linux. So the concept of platform embed both target
         and host concept.
-
-        :rtype: str
         """
         if self.is_cross:
             # In cross we need to append host information. For backward
@@ -94,11 +101,8 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
             return self.target.platform
 
     @property
-    def is_canadian(self):
-        """Return true if this is a canadian configuration.
-
-        :rtype: bool
-        """
+    def is_canadian(self) -> bool:
+        """Return true if this is a canadian configuration."""
         if self.build != self.host:
             if (self.build.platform, self.host.platform) in CANADIAN_EXCEPTIONS:
                 return False
@@ -107,31 +111,31 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
             return False
 
     @property
-    def is_cross(self):
-        """Return true if this is a cross configuration.
-
-        :rtype: bool
-        """
+    def is_cross(self) -> bool:
+        """Return true if this is a cross configuration."""
         if self.target != self.host:
             return True
         else:
             return False
 
-    def set_build(self, name=None, version=None, machine=None, mode=None):
+    def set_build(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        machine: Optional[str] = None,
+        mode: Optional[str] = None,
+    ):
         """Set build platform.
 
         :param name: a string that identify the system to be considered
             as the build. If None then build is unchanged. Note that passing
             an empty value will force the autodetection and possibly reset to
             the default value.
-        :type name: str | None
         :param version: a string containing the system version. If set
             to None the version is either a default or autodetected when
             possible
-        :type version: str | None
         :param machine: a string containing the name of the target
             machine.
-        :type machine: str | None
         :param mode: a string containing the name of the mode. This
             notion is needed on some targets such as VxWorks to switch between
             kernel mode and other modes such as rtp
@@ -147,20 +151,23 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         self.host = self.build
         self.target = self.build
 
-    def set_host(self, name=None, version=None, machine=None, mode=None):
+    def set_host(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        machine: Optional[str] = None,
+        mode: Optional[str] = None,
+    ) -> None:
         """Set host platform.
 
         :param name: a string that identify the system to be considered
             as the host. If None then host is set to the build one (the
             autodetected platform). If set to 'build' or 'target' then host
             is set respectively to current 'build' or 'target' value
-        :type name: str | None
         :param version: a string containing the system version. If set to
             None the version is either a default or autodetected when possible
-        :type version: str | None
         :param machine: a string containing the name of the target
             machine.
-        :type machine: str | None
         :param mode: a string containing the name of the mode. This
             notion is needed on some targets such as VxWorks to switch between
             kernel mode and other modes such as rtp
@@ -183,7 +190,13 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
             )
         self.target = self.host
 
-    def set_target(self, name=None, version=None, machine=None, mode=None):
+    def set_target(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        machine: Optional[str] = None,
+        mode: Optional[str] = None,
+    ) -> None:
         """Set target platform.
 
         :param name: a string that identify the system to be considered
@@ -191,14 +204,11 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
             'build' or 'host' then target is set respectively to current
             'build' or 'host' value. In that case target_version and
             target_machine are ignored.
-        :type name: str | None
         :param version: a string containing the system version. If set
             to None the version is either a default or autodetected when
             possible.
-        :type version: str | None
         :param machine: a string containing the name of the target
             machine.
-        :type machine: str | None
         :param mode: a string containing the name of the mode. This
             notion is needed on some targets such as VxWorks to switch between
             kernel mode and other modes such as rtp
@@ -218,29 +228,30 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
                 platform_name=name, version=version, machine=machine, mode=mode
             )
 
-    def set_env(self, build=None, host=None, target=None):
+    def set_env(
+        self,
+        build: Optional[str] = None,
+        host: Optional[str] = None,
+        target: Optional[str] = None,
+    ) -> None:
         """Set build/host/target.
 
         :param build: string as passed to --build option
-        :type build: str | None
         :param host: string as passed to --host
-        :type host: str | None
         :param target: string as passed to --target
-        :type target: str | None
         """
         saved_build = self.build
         saved_host = self.host
         saved_target = self.target
 
-        def get_platform(value, propagate_build_info=False):
+        def get_platform(
+            value: Optional[str], propagate_build_info: bool = False
+        ) -> Optional[Platform]:
             """Platform based on string value.
 
             :param value: a string representing a platform or None
-            :type value: str | None
             :param propagate_build_info: whether to propagate machine name
                 and OS version if no machine name set
-            :type propagate_build_info: bool
-            :rtype: a Platform instance or None
             """
             if value is None:
                 return None
@@ -257,7 +268,7 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
             elif split_value[0] == "target":
                 return saved_target
             elif not propagate_build_info:
-                return Platform.get(*split_value)
+                return Platform.get(*split_value)  # type: ignore
             else:
 
                 # Propagate machine name and OS version if necessary
@@ -270,7 +281,7 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
                     # Linux machine should not change the OS version
                     if split_value[1] is None:
                         split_value[1] = saved_build.os.version
-                return Platform.get(*split_value)
+                return Platform.get(*split_value)  # type: ignore
 
         # Retrieve final values for build, host and target
         build_opts = get_platform(build, propagate_build_info=True)
@@ -290,13 +301,12 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         if target_opts is not None:
             self.target = target_opts
 
-    def str_triplet(self):
+    def str_triplet(self) -> EnvInfo:
         """Return a triplet of strings suitable to call set_env.
 
         :return: a namedtuple suitable for a call to set_env
-        :rtype: EnvInfo
         """
-        result = []
+        result: List[Optional[str]] = []
         if not self.build.is_default:
             result.append(",".join([self.build.platform, self.build.os.version]))
         else:
@@ -322,11 +332,10 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
             result.append(None)
         return EnvInfo(*result)
 
-    def cmd_triplet(self):
+    def cmd_triplet(self) -> List[str]:
         """Return command line parameters corresponding to current env.
 
         :return: a list of command line parameters
-        :rtype: list(str)
         """
         build_str, host_str, target_str = self.str_triplet()
         result = []
@@ -341,16 +350,15 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
 
         return result
 
-    def get_attr(self, name, default_value=None, forced_value=None):
+    def get_attr(
+        self, name: str, default_value: Any = None, forced_value: Any = None
+    ) -> Any:
         """Return an attribute value.
 
         :param name: name of the attribute to check. Name can contain '.'
-        :type name: str
         :param default_value: returned value if forced_value not set and the
             attribute does not exist
-        :type default_value: object | None
         :param forced_value: if not None, this is the return value
-        :type forced_value: object | None
 
         :return: the attribute value
 
@@ -374,27 +382,22 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         return result
 
     @classmethod
-    def add_path(cls, path, append=False):
+    def add_path(cls, path: str, append: bool = False) -> None:
         """Set a path to PATH environment variable.
 
         :param path: path to add
-        :type path: str
         :param append: if True append, otherwise prepend. Default is prepend
-        :type append: bool
         """
         cls.add_search_path("PATH", path, append)
 
     @classmethod
-    def add_search_path(cls, env_var, path, append=False):
+    def add_search_path(cls, env_var: str, path: str, append: bool = False) -> None:
         """Add a path to the env_var search paths.
 
         :param env_var: the environment variable name (e.g. PYTHONPATH,
             LD_LIBRARY_PATH, ...)
-        :type env_var: str
         :param path: path to add
-        :type path: str
         :param append: if True append, otherwise prepend. Default is prepend
-        :type append: bool
         """
         if env_var not in os.environ:
             logger.debug("export {env_var}={path}".format(env_var=env_var, path=path))
@@ -418,29 +421,26 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
                 os.environ[env_var] = new_path
 
     @property
-    def dll_path_var(self):
+    def dll_path_var(self) -> str:
         env_var_name = {"windows": "PATH", "darwin": "DYLD_FALLBACK_LIBRARY_PATH"}
         return env_var_name.get(self.host.os.name.lower(), "LD_LIBRARY_PATH")
 
-    def add_dll_path(self, path, append=False):
+    def add_dll_path(self, path: str, append: bool = False) -> None:
         """Add a path to the dynamic libraries search paths.
 
         :param path: path to add
-        :type path: str
         :param append: if True append, otherwise prepend. Default is prepend
-        :type append: bool
         """
         # On most platforms LD_LIBRARY_PATH is used. For others use:
         self.add_search_path(self.dll_path_var, path, append)
 
     @property
-    def discriminants(self):
+    def discriminants(self) -> List[str]:
         """Compute discriminants.
 
         :return: the list of discriminants associated with the current context
             (target, host, ...). This is mainly used for testsuites to ensure a
             coherent set of base discriminants.
-        :rtype: list[str]
         """
         discs = [
             self.target.platform,
@@ -473,11 +473,10 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         return discs
 
     @property
-    def tmp_dir(self):
+    def tmp_dir(self) -> str:
         """Return current temporary directory.
 
         :return: a path
-        :rtype: str
 
         The function looks for several variables ``TMPDIR``, ``TMP``
         and in case none of these variables are defined fallback on
@@ -485,13 +484,12 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         """
         return os.environ.get("TMPDIR", os.environ.get("TMP", "/tmp"))
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Get current env as a dictionary.
 
         :return: the dictionary entries are all strings and thus the result
             can be used to format string. For example ``Env().target.os.name``
             will appear with the key ``target_os_name``, ...
-        :rtype: dict
         """
         result = {k: v for k, v in self._items()}
         result["is_canadian"] = self.is_canadian
@@ -504,7 +502,7 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         return result
 
     @classmethod
-    def from_platform_name(cls, platform):
+    def from_platform_name(cls, platform: str) -> Optional[AbstractBaseEnv]:
         """Return a BaseEnv object from a platform name.
 
         That's the reverse of platform property
@@ -550,7 +548,12 @@ class BaseEnv(AbstractBaseEnv):
     _initialized = False
     # Not a singleton, always initialize new instance
 
-    def __init__(self, build=None, host=None, target=None):
+    def __init__(
+        self,
+        build: Optional[Platform] = None,
+        host: Optional[Platform] = None,
+        target: Optional[Platform] = None,
+    ):
         """Initialize a BaseEnv object.
 
         On first instantiation, build attribute will be computed and host
@@ -558,45 +561,43 @@ class BaseEnv(AbstractBaseEnv):
 
         :param build: build architecture. If None then it is set to default
             build
-        :type build: Platform | None
         :param host: host architecture. If None then it is set to build
-        :type host: Platform | None
         :param target: target architecture. If None then it is set to target
-        :type target: Platform | None
         """
         # class variable that holds the current environment
-        self._instance = {}
+        self._instance: Dict[str, Any] = {}
 
         # class variable that holds the stack of saved environments state
-        self._context = []
+        self._context: List[Any] = []
         super(BaseEnv, self).__init__(build, host, target)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any) -> None:
         if name in ("_instance", "_context"):
             object.__setattr__(self, name, value)
         else:
             self._instance[name] = value
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> None:
         try:
             return self._instance[name]
         except KeyError as e:
             raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
-    def _items(self):
+    def _items(self) -> Iterable[Any]:
         return iter(self._instance.items())
 
-    def copy(self, build=None, host=None, target=None):
+    def copy(
+        self,
+        build: Optional[str] = None,
+        host: Optional[str] = None,
+        target: Optional[str] = None,
+    ) -> BaseEnv:
         """Copy an env.
 
         :param build: like build set_env parameter
-        :type build: str | None
         :param host: like host set_env parameter
-        :type host: str | None
         :param target: like target set_env parameter
-        :type target: str | None
         :return: a deep copy of the current env
-        :rtype: BaseEnv
         """
         result = BaseEnv()
         for k, v in self._items():
@@ -605,12 +606,10 @@ class BaseEnv(AbstractBaseEnv):
         return result
 
     @classmethod
-    def from_env(cls, env=None):
+    def from_env(cls, env: Union[Env, BaseEnv] = None) -> BaseEnv:
         """Return a new BaseEnv object from an env.
 
         :param env: env. If None copy the current Env
-        :type env: BaseEnv | Env
-        :rtype: BaseEnv
         """
         if env is None:
             return BaseEnv(build=Env().build, host=Env().host, target=Env().target)
@@ -628,12 +627,12 @@ class Env(AbstractBaseEnv):
     """
 
     # class variable that holds the current environment
-    _instance = {}
+    _instance: Dict[str, Any] = {}
 
     # class variable that holds the stack of saved environments state
-    _context = []
+    _context: List[Any] = []
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize or reuse an existing Env object (singleton).
 
         On first instantiation, build attribute will be computed and
@@ -642,10 +641,10 @@ class Env(AbstractBaseEnv):
         super(Env, self).__init__()
 
     @property
-    def _initialized(self):
+    def _initialized(self) -> bool:
         return "build" in Env._instance
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any) -> None:
         if name == "_instance":
             Env._instance = value
         elif name == "_context":
@@ -653,22 +652,21 @@ class Env(AbstractBaseEnv):
         else:
             self._instance[name] = value
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         try:
             return self._instance[name]
         except KeyError as e:
             raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
-    def _items(self):
+    def _items(self) -> Iterable[Any]:
         return iter(self._instance.items())
 
-    def store(self, filename=None):
+    def store(self, filename: Optional[str] = None):
         """Save environment into memory or file.
 
         :param filename: a string containing the path of the filename in which
             the environment will be saved. If set to None the environment is
             saved into memory in a stack like structure.
-        :type filename: str | None
         """
         # Store environment variables
         self.environ = os.environ.copy()
@@ -682,13 +680,12 @@ class Env(AbstractBaseEnv):
             with open(filename, "wb+") as fd:
                 pickle.dump(self._instance, fd)
 
-    def restore(self, filename=None):
+    def restore(self, filename: Optional[str] = None) -> None:
         """Restore environment from memory or a file.
 
         :param filename: a string containing the path of the filename from
             which the environment will be restored. If set to None the
             environment is pop the last saved one
-        :type filename: str | None
         """
         if filename is None:
             # We are restoring from memory.  In that case, just double-check
@@ -705,6 +702,9 @@ class Env(AbstractBaseEnv):
         else:
             return
 
+        if TYPE_CHECKING:
+            assert self.environ is not None
+
         # Restore environment variables value
         # Do not use os.environ = self.environ.copy()
         # or it will break the os.environ object and child process
@@ -717,4 +717,6 @@ class Env(AbstractBaseEnv):
                 os.environ[k] = self.environ[k]
 
         # Restore current directory
+        if TYPE_CHECKING:
+            assert self.cwd is not None
         os.chdir(self.cwd)

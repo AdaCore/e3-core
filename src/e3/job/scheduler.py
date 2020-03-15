@@ -1,11 +1,23 @@
+from __future__ import annotations
+
 import heapq
 import time
 from datetime import datetime
 from queue import Empty, Queue
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.collection.dag import DAGIterator
 from e3.job import Job
+
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Optional, Tuple
+    from e3.collection.dag import DAG
+
+    JobProviderCallback = Callable[[str, Any, List[str], Callable[[str], None]], Job]
+    CollectCallback = Callable[[Job], bool]
+
 
 logger = e3.log.getLogger("job.scheduler")
 
@@ -18,11 +30,11 @@ class Scheduler(object):
 
     def __init__(
         self,
-        job_provider,
-        collect=None,
-        queues=None,
-        tokens=1,
-        job_timeout=DEFAULT_JOB_MAX_DURATION,
+        job_provider: JobProviderCallback,
+        collect: Optional[CollectCallback] = None,
+        queues: Optional[Dict[str, int]] = None,
+        tokens: int = 1,
+        job_timeout: int = DEFAULT_JOB_MAX_DURATION,
     ):
         """Initialize Scheduler.
 
@@ -30,44 +42,40 @@ class Scheduler(object):
             The function takes as arguments: the job uid, the data
             associated with it, the list of predecessors id and and
             a notification function called when the job end.
-        :type job_provider: (str, T, list[str], str -> None) -> Job
         :param collect: function that collect results from the
             jobs. If the function returns True then the job is requeued
-        :type collect: Job -> bool
         :param queues: describes the list of queues handled by the
             scheduler. The format is a dictionary for which which
             keys are queue names and value the max number of tokens
             available at a given time. if None then a single queue
             called "default" is created. Its size is then given by
             the tokens parameter.
-        :type queues: dict(str, int) | None
         :param tokens: number of tokens for the default queue. Relevant
             only when queues is None
-        :type tokens: int
         :param job_timeout: maximum execution time for a job. The default
             is 24h. If set to None timeout are disabled but it also make
             the scheduller non interruptable when waiting for a job to
             finish.
-        :type job_timeout: int | None
         """
         self.job_provider = job_provider
-        self.collect = collect
         self.job_timeout = job_timeout
-        if self.collect is None:
-            self.collect = lambda x: False
+        if collect is None:
+            self.collect: Callable[[Job], bool] = lambda x: False
+        else:
+            self.collect = collect
 
-        self.active_jobs = []
+        self.active_jobs: List[Job] = []
         self.queued_jobs = 0
         self.all_jobs_queued = False
-        self.message_queue = None
-        self.dag = None
-        self.dag_iterator = None
-        self.start_time = None
-        self.stop_time = None
+        self.message_queue: Queue[Any] = Queue()
+        self.dag: Optional[DAG] = None
+        self.dag_iterator: Optional[DAGIterator] = None
+        self.start_time: Optional[datetime] = None
+        self.stop_time: Optional[datetime] = None
         self.max_active_jobs = 0
 
         # Initialize named queues
-        self.queues = {}
+        self.queues: Dict[str, List[Tuple[int, int, Job]]] = {}
         self.tokens = {}
         self.n_tokens = 0
 
@@ -89,7 +97,7 @@ class Scheduler(object):
         # self.n_tokens slots
         self.slots = list(range(self.n_tokens))
 
-    def safe_collect(self, *args, **kwargs):
+    def safe_collect(self, *args, **kwargs) -> bool:
         """Protect call to collect.
 
         This ensures for job such as JobProcess that there are no calls to
@@ -99,22 +107,21 @@ class Scheduler(object):
         lead easily to file locking issues and thus might cause crashes.
         """
         with Job.lock:
-            return self.collect(*args, **kwargs)
+            return self.collect(*args, **kwargs)  # type: ignore
 
-    def safe_job_provider(self, *args, **kwargs):
+    def safe_job_provider(self, *args, **kwargs) -> Job:
         """Protect call to job_provider.
 
         See safe_collect commment above.
         """
         with Job.lock:
-            return self.job_provider(*args, **kwargs)
+            return self.job_provider(*args, **kwargs)  # type: ignore
 
     @classmethod
-    def simple_provider(cls, job_class):
+    def simple_provider(cls, job_class: Callable[[], Job]):
         """Return a simple provider based on a given Job class.
 
         :param job_class: a subclass of Job
-        :type job_class: () -> Job
         """
 
         def provider(uid, data, predecessors, notify_end):
@@ -123,11 +130,10 @@ class Scheduler(object):
 
         return provider
 
-    def init_state(self, dag):
+    def init_state(self, dag: DAG):
         """Reinitialize the scheduler state (internal function).
 
         :param dag: the dag representing the list of job to execute
-        :type dag: e3.collection.dag
         """
         # Active jobs
         self.active_jobs = []
@@ -148,17 +154,16 @@ class Scheduler(object):
         self.max_active_jobs = 0
 
     @property
-    def is_finished(self):
+    def is_finished(self) -> bool:
         """Check if all jobs have been executed (internal).
 
         :return: True if complete
-        :rtype: bool
         """
         # The run is considered finished once there is no more job
         # in the DAG, the queues and that no job is running.
         return self.all_jobs_queued and self.queued_jobs == 0 and not self.active_jobs
 
-    def log_state(self):
+    def log_state(self) -> None:
         """Log the current state of the scheduler (internal)."""
         logger.debug(
             "non-ready?: %s, in queue: %s, running: %s",
@@ -167,12 +172,8 @@ class Scheduler(object):
             len(self.active_jobs),
         )
 
-    def run(self, dag):
-        """Launch the scheduler.
-
-        :param dag: jobs to be executed
-        :type dag: e3.collection.dag
-        """
+    def run(self, dag: DAG) -> None:
+        """Launch the scheduler."""
         self.init_state(dag)
 
         try:
@@ -191,12 +192,8 @@ class Scheduler(object):
             raise KeyboardInterrupt
         self.stop_time = datetime.now()
 
-    def push(self, job):
-        """Push a job into a queue.
-
-        :param job: a job
-        :type job: Job
-        """
+    def push(self, job: Job) -> None:
+        """Push a job into a queue."""
         # We use a tuple here to ensure the stability of the queue
         # when two jobs have similar priorities.
         heapq.heappush(
@@ -205,10 +202,13 @@ class Scheduler(object):
         self.global_queue_index += 1
         self.queued_jobs += 1
 
-    def enqueue(self):
+    def enqueue(self) -> None:
         """Push into the queues job that are ready (internal)."""
         if self.all_jobs_queued:
             return
+
+        if TYPE_CHECKING:
+            assert self.dag_iterator is not None
 
         try:
             while True:
@@ -232,7 +232,7 @@ class Scheduler(object):
         except StopIteration:
             self.all_jobs_queued = True
 
-    def launch(self):
+    def launch(self) -> None:
         """Launch next jobs in the queues (internal)."""
         if self.queued_jobs == 0:
             return
@@ -247,10 +247,14 @@ class Scheduler(object):
                 self.tokens[name] -= next_job.tokens
                 self.active_jobs.append(next_job)
 
-    def wait(self):
+    def wait(self) -> None:
         """Wait for the end of an active job."""
         if not self.active_jobs:
             return
+
+        if TYPE_CHECKING:
+            assert self.dag is not None
+            assert self.dag_iterator is not None
 
         # Wait for message from one the active jobs
         while True:

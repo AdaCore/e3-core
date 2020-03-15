@@ -4,10 +4,17 @@ to enable/disable a function, to memoize a function results...
 """
 
 
+from __future__ import annotations
+
 from functools import partial
 
+from typing import TYPE_CHECKING
 
-def enabled(func):
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict
+
+
+def enabled(func: Callable) -> Callable:
     """no-op. Do not change function behaviour.
 
     If you write the following code::
@@ -23,7 +30,7 @@ def enabled(func):
     return func
 
 
-def disabled(func):
+def disabled(func: Callable) -> Callable:
     """Disable the provided function, and does nothing.
 
     If you write the following code::
@@ -71,15 +78,15 @@ class memoize(object):
     No keyword argument can be passed to the decorated function.
     """
 
-    def __init__(self, func):
+    def __init__(self, func: Callable):
         """Initialize the decorator.
 
         :param func: function to decorate
         """
         self.func = func
-        self.cache = {}
+        self.cache: Dict[tuple, Any] = {}
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> Any:
         """Return the cache value if exist, else call func."""
         if kwargs:
             if len(kwargs) == 1 and kwargs.get("reset_cache"):
@@ -98,9 +105,9 @@ class memoize(object):
             # non-hashable arguments, skip the cache
             return self.func(*args)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return the function's docstring."""
-        return self.func.__doc__
+        return self.func.__doc__ or ""
 
     def __get__(self, obj, objtype):
         """Support instance methods."""
