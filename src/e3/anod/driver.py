@@ -49,10 +49,7 @@ class AnodDriver(object):
         self.store = store
 
     def activate(self, sandbox: SandBox, spec_repository: AnodSpecRepository) -> None:
-        self.anod_instance.build_space = sandbox.get_build_space(
-            name=self.anod_instance.build_space_name,
-            platform=self.anod_instance.env.platform,
-        )
+        self.anod_instance.bind_to_sandbox(sandbox)
 
         self.anod_instance.log = e3.log.getLogger("spec." + self.anod_instance.uid)
 

@@ -94,7 +94,6 @@ class ElectrolytJob(Job):
             anod_instance=self.data.anod_instance, store=self.store
         )
         anod_driver.activate(self.data.anod_instance.sandbox, self.spec_repo)
-        assert anod_driver.anod_instance.build_space is not None
         anod_driver.anod_instance.build_space.create(quiet=True)
         getattr(anod_driver.anod_instance, primitive)()
         self.__status = STATUS.success

@@ -40,8 +40,6 @@ class Make(object):
         self.anod_instance = anod_instance
         self.exec_dir = exec_dir
 
-        assert self.anod_instance.build_space is not None
-
         if self.exec_dir is None:
             self.exec_dir = self.anod_instance.build_space.build_dir
         self.makefile = makefile

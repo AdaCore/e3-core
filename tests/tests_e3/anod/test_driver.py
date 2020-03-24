@@ -31,8 +31,6 @@ def test_simple_driver():
     with pytest.raises(e3.anod.spec.AnodError):
         driver.download()
 
-    assert ".activate() has not been called" in str(err)
-
 
 def test_deps_driver():
     class Deps(e3.anod.spec.Anod):

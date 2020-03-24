@@ -62,7 +62,6 @@ class Package(object):
         :param anod_instance: the Anod instance that creates the package
         :return: the full path to the generated archive
         """
-        assert anod_instance.build_space is not None
         return os.path.join(
             anod_instance.build_space.binary_dir, self.pkg_name(anod_instance) + ".zip"
         )
@@ -73,7 +72,6 @@ class Package(object):
         :param anod_instance: the Anod instance that creates the package
         :return: the full path to the generated archive
         """
-        assert anod_instance.build_space is not None
         pkg_name = self.pkg_name(anod_instance)
         pkg_path = self.pkg_path(anod_instance)
 

@@ -160,7 +160,7 @@ class Anod(object):
         self.jobs = jobs
 
         # Set when self.bind_to_sandbox is called
-        self.build_space: Optional[BuildSpace] = None
+        self.__build_space: Optional[BuildSpace] = None
 
         # Default spec logger
         self.log = e3.log.getLogger("anod.spec")
@@ -206,6 +206,12 @@ class Anod(object):
         self._pre = None
 
     @property
+    def build_space(self) -> BuildSpace:
+        if self.__build_space is None:
+            raise AnodError("build space not set")
+        return self.__build_space
+
+    @property
     def has_package(self) -> bool:
         """Return true if the spec defines a binary package."""
         return (
@@ -220,7 +226,7 @@ class Anod(object):
         Binding an Anod instance to a sandbox will set the
         build_space attribute.
         """
-        self.build_space = sandbox.get_build_space(
+        self.__build_space = sandbox.get_build_space(
             name=self.build_space_name, platform=self.env.platform
         )
 
@@ -280,7 +286,7 @@ class Anod(object):
 
         Also directly access items returned by the ``pre`` callback.
         """
-        if self.build_space is None:
+        if self.__build_space is None:
             return "unknown"
 
         # First look for pre result

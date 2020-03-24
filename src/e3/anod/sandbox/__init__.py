@@ -151,7 +151,6 @@ class SandBox(object):
 
         :return: A BuildSpace object
         """
-        assert self.root_dir is not None
         if platform is None:
             platform = Env().platform
         return BuildSpace(root_dir=os.path.join(self.root_dir, platform, name))
