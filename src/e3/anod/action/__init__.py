@@ -6,9 +6,11 @@ from typing import TYPE_CHECKING
 from e3.anod.spec import Anod
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional, Tuple
+    from typing import Any, Dict, Final, List, Literal, Optional, Tuple, Union
     from e3.anod.package import Source, SourceBuilder
     from e3.collection.dag import DAG
+
+    Choice = Union[Literal[0], Literal[1], Literal[2]]
 
 
 class Action(object):
@@ -406,12 +408,12 @@ class Decision(Action, metaclass=abc.ABCMeta):
     :ivar: str
     """
 
-    LEFT = 0
-    RIGHT = 1
-    BOTH = 2
+    LEFT: Final = 0
+    RIGHT: Final = 1
+    BOTH: Final = 2
 
     def __init__(
-        self, root: Action, left: Action, right: Action, choice: Optional[int] = None
+        self, root: Action, left: Action, right: Action, choice: Optional[Choice] = None
     ):
         """Initialize a Decision instance.
 
@@ -423,10 +425,10 @@ class Decision(Action, metaclass=abc.ABCMeta):
         super(Decision, self).__init__(uid=root.uid + ".decision", data=None)
         self.initiator = root.uid
         self.choice = choice
-        self.expected_choice: Optional[int] = None
+        self.expected_choice: Optional[Choice] = None
         self.left_action = left
         self.right_action = right
-        self.triggers: List[Tuple[str, int, str]] = []
+        self.triggers: List[Tuple[str, Choice, str]] = []
         self.decision_maker: Optional[str] = None
 
     @property
@@ -439,7 +441,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         """return self.right_action.uid (this is a convenience property)."""
         return self.right_action.uid
 
-    def add_trigger(self, trigger: Action, decision: int, plan_line: str) -> None:
+    def add_trigger(self, trigger: Action, decision: Choice, plan_line: str) -> None:
         """Add a trigger to self.triggers.
 
         See the description of the "triggers" attribute for more
@@ -507,7 +509,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         else:
             return None
 
-    def set_decision(self, which: int, decision_maker: Optional[str]) -> None:
+    def set_decision(self, which: Choice, decision_maker: Optional[str]) -> None:
         """Record a choice made by an action in a plan.
 
         This method should be caused when an entry in our plan
@@ -528,7 +530,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def description(cls, decision: int) -> str:
+    def description(cls, decision: Choice) -> str:
         """Return a description of the decision (actually a choice).
 
         :param decision: The decision (actually a choice).
@@ -537,7 +539,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         """
         pass  # all: no cover
 
-    def suggest_plan_fix(self, choice: int) -> Optional[str]:
+    def suggest_plan_fix(self, choice: Choice) -> Optional[str]:
         """Suggest a plan line that would fix the conflict.
 
         :param choice: Decision.LEFT or Decision.RIGHT
@@ -551,8 +553,8 @@ class Decision(Action, metaclass=abc.ABCMeta):
 class CreateSourceOrDownload(Decision):
     """Decision between creating or downloading a source package."""
 
-    CREATE = Decision.LEFT
-    DOWNLOAD = Decision.RIGHT
+    CREATE: Final = Decision.LEFT
+    DOWNLOAD: Final = Decision.RIGHT
 
     def __init__(self, root: Action, left: CreateSource, right: DownloadSource):
         """Initialize a CreateSourceOrDownload instance.
@@ -566,15 +568,15 @@ class CreateSourceOrDownload(Decision):
         super(CreateSourceOrDownload, self).__init__(root=root, left=left, right=right)
 
     @classmethod
-    def description(cls, decision) -> str:
+    def description(cls, decision: Choice) -> str:
         return "CreateSource" if decision == Decision.LEFT else "DownloadSource"
 
 
 class BuildOrDownload(Decision):
     """Decision between building or downloading a component."""
 
-    BUILD = Decision.LEFT
-    INSTALL = Decision.RIGHT
+    BUILD: Final = Decision.LEFT
+    INSTALL: Final = Decision.RIGHT
 
     def __init__(self, root: Install, left: Build, right: DownloadBinary):
         """Initialize a BuildOrDownload instance.
@@ -589,10 +591,10 @@ class BuildOrDownload(Decision):
         super(BuildOrDownload, self).__init__(root=root, left=left, right=right)
 
     @classmethod
-    def description(cls, decision) -> str:
+    def description(cls, decision: Choice) -> str:
         return "Build" if decision == Decision.LEFT else "DownloadBinary"
 
-    def suggest_plan_fix(self, choice: int) -> str:
+    def suggest_plan_fix(self, choice: Choice) -> str:
         action = self.left_action if choice == Decision.LEFT else self.right_action
         spec_instance = action.data
 

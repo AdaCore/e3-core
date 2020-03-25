@@ -750,13 +750,15 @@ class AnodContext(object):
                     trigger_plan_line,
                 ) in decision.triggers
             )
-            # ??? type issue? BUG?
+            conflict_choice = decision.choice
+            if TYPE_CHECKING:
+                # we expect the decision to be either LEFT or RIGHT
+                # at this stage
+                assert conflict_choice is not None
             msg = (
                 "explicit {} decision made by {} conflicts with the "
                 "following decision{}:\n{}".format(
-                    decision.description(
-                        decision.get_expected_decision()  # type: ignore
-                    ),
+                    decision.description(conflict_choice),
                     decision.decision_maker,
                     "s" if len(decision.triggers) > 1 else "",
                     trigger_decisions,
