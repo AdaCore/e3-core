@@ -11,7 +11,7 @@ from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, List, Literal, NoReturn, Optional, Union
+    from typing import Callable, Dict, Final, List, Literal, NoReturn, Optional, Union
     from e3.anod.spec import Anod
 
     PrepareSrcCB = Callable[[Dict[str, Dict[str, str]], str], None]
@@ -170,7 +170,7 @@ class SharedSource(Source):
 
 class SourceBuilder(object):
 
-    DEFAULT_PATCH_CMD = 1
+    DEFAULT_PATCH_CMD: Final = 1
 
     def __init__(
         self,
@@ -281,8 +281,6 @@ class SourceBuilder(object):
             if self.__apply_patch is None:
                 return no_apply_patch
             else:
-                if TYPE_CHECKING:
-                    assert self.__apply_patch != 1
                 return self.__apply_patch
 
 
@@ -307,7 +305,7 @@ class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
             name=name,
             fullname=lambda: name,
             checkout=None,
-            apply_patch=self.DEFAULT_PATCH_CMD,  # type: ignore
+            apply_patch=self.DEFAULT_PATCH_CMD,
             kind="thirdparty",
         )
 
