@@ -23,7 +23,7 @@ import e3.log
 from e3.os.fs import which
 
 if TYPE_CHECKING:
-    from typing import IO, Any, List, Optional, Union
+    from typing import IO, Any, List, NoReturn, Optional, Union
 
     CmdLine = List[str]
     AnyCmdLine = Union[List[CmdLine], CmdLine]
@@ -467,7 +467,7 @@ class Run(object):
         self.close_files()
         logger.error(error)
 
-        def not_found(path: str) -> None:
+        def not_found(path: str) -> NoReturn:
             """Raise OSError.
 
             :param path: path of the executable

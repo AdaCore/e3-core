@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import os
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.anod.context import AnodContext
@@ -14,6 +15,9 @@ from e3.electrolyt.run import ElectrolytJobFactory
 from e3.env import BaseEnv
 from e3.fs import mkdir
 from e3.vcs.git import GitRepository
+
+if TYPE_CHECKING:
+    from typing import NoReturn
 
 logger = e3.log.getLogger("e3.anod.SandBox")
 
@@ -121,7 +125,7 @@ class SandBoxShowConfiguration(SandBoxAction):
 
         argument_parser = main(get_argument_parser=True)
 
-        def error(message):
+        def error(message) -> NoReturn:
             raise SandBoxError(message)
 
         argument_parser.error = error

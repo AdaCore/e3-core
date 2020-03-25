@@ -31,7 +31,7 @@ from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, FrozenSet, List, Optional, Tuple, Union
+    from typing import Callable, Dict, FrozenSet, List, NoReturn, Optional, Tuple, Union
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
     from e3.anod.spec import Anod
@@ -696,7 +696,7 @@ class AnodContext(object):
         return result
 
     @classmethod
-    def decision_error(cls, action: Action, decision: Decision) -> None:
+    def decision_error(cls, action: Action, decision: Decision) -> NoReturn:
         """Raise SchedulingError.
 
         :param action: action to consider
@@ -785,7 +785,7 @@ class AnodContext(object):
         elif isinstance(action, DownloadSource):
             return True
         else:
-            return cls.decision_error(action, decision)  # type: ignore
+            return cls.decision_error(action, decision)
 
     @classmethod
     def always_create_source_resolver(cls, action, decision):

@@ -11,7 +11,7 @@ from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, List, Literal, Optional, Union
+    from typing import Callable, Dict, List, Literal, NoReturn, Optional, Union
     from e3.anod.spec import Anod
 
     PrepareSrcCB = Callable[[Dict[str, Dict[str, str]], str], None]
@@ -259,7 +259,7 @@ class SourceBuilder(object):
             e3.log.debug("applying patch %s on %s", patch_file, dest)
             e3.diff.patch(patch_file, dest)
 
-        def no_apply_patch(r: str, p: str, d: str) -> None:
+        def no_apply_patch(r: str, p: str, d: str) -> NoReturn:
             """Raise an error (no apply_patch function defined)."""
             # Unused parameters
             del r, p, d
