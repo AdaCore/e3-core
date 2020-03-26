@@ -1,7 +1,10 @@
-from e3.event import EventHandler
-from e3.fs import mkdir, cp
+from __future__ import annotations
+
 import json
 import os
+
+from e3.event import EventHandler
+from e3.fs import cp, mkdir
 
 
 class FileHandler(EventHandler):

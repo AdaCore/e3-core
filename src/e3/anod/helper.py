@@ -1,13 +1,20 @@
 """Helpers classes and functions for ANOD."""
 
 
+from __future__ import annotations
+
 import io
 import os
 import re
+from typing import TYPE_CHECKING
 
 import e3.log
-from e3.anod.spec import parse_command
+from e3.anod.spec import Anod, parse_command
 from e3.os.fs import unixpath
+
+if TYPE_CHECKING:
+    from typing import Dict, List, Optional, Tuple, Union
+    from e3.os.process import Run
 
 log = e3.log.getLogger("anod.helpers")
 
@@ -15,39 +22,40 @@ log = e3.log.getLogger("anod.helpers")
 class Make(object):
     """Wrapper around GNU Make."""
 
-    def __init__(self, anod_instance, makefile=None, exec_dir=None, jobs=None):
+    def __init__(
+        self,
+        anod_instance: Anod,
+        makefile: Optional[str] = None,
+        exec_dir: Optional[str] = None,
+        jobs: Optional[int] = None,
+    ):
         """Initialize a Make object.
 
         :param anod_instance: an Anod instance
-        :type anod_instance: e3.anod.spec.Anod
         :param makefile: the Makefile to use
-        :type makefile: str | None
         :param exec_dir: path to the directory from where the make should be
             called. If None use the anod instance buildspace build dir.
-        :type exec_dir: str | None
         :param jobs: number of jobs to run in parallel
-        :type jobs: int | None
         """
         self.anod_instance = anod_instance
         self.exec_dir = exec_dir
+
         if self.exec_dir is None:
             self.exec_dir = self.anod_instance.build_space.build_dir
         self.makefile = makefile
         self.jobs = jobs
         if jobs is None:
             self.jobs = anod_instance.jobs
-        self.var_list = {}
-        self.default_target = None
+        self.var_list = {}  # type: Dict[str, str]
+        self.default_target = None  # type: Optional[str]
 
-    def set_var(self, name, value):
+    def set_var(self, name: str, value: Union[str, List[str]]) -> None:
         """Set a Make variable.
 
         :param name: name of the variable
-        :type name: str
         :param value: value of the variable, can be a string or a list
             if it's the list, it will be stored in a string with each
             value separated by a space character
-        :type value: str | list[str]
         """
         if isinstance(value, str):
             self.var_list[name] = value
@@ -55,48 +63,50 @@ class Make(object):
             # Assume we get a list
             self.var_list[name] = " ".join(value)
 
-    def set_default_target(self, target):
+    def set_default_target(self, target: str) -> None:
         """Set default make target.
 
         :param target: the target name to use if __call__ is called with
             target=None
-        :type target: str
         """
         self.default_target = target
 
-    def __call__(self, target=None, jobs=None, exec_dir=None, timeout=None):
+    def __call__(
+        self,
+        target: Optional[str] = None,
+        jobs: Optional[int] = None,
+        exec_dir: Optional[str] = None,
+        timeout: Optional[float] = None,
+    ) -> Run:
         """Call a make target.
 
         :param target: the target to use (use default_target if None)
-        :type target: str | None
         :param jobs: see __init__ documentation
-        :type jobs: int | None
         :param exec_dir: see __init__ documentation
-        :type exec_dir: str | None
         :param timeout: timeout to pass to ex.Run
-        :type timeout: int | None
         """
         cmdline = self.cmdline(target, jobs, exec_dir, timeout=timeout)
         cmd = cmdline["cmd"]
         options = cmdline["options"]
-        return self.anod_instance.shell(*cmd, **options)
+        return self.anod_instance.shell(*cmd, **options)  # type: ignore
 
-    def cmdline(self, target=None, jobs=None, exec_dir=None, timeout=None):
+    def cmdline(
+        self,
+        target: Optional[str] = None,
+        jobs: Optional[int] = None,
+        exec_dir: Optional[str] = None,
+        timeout: Optional[float] = None,
+    ) -> Dict[str, Union[List[str], dict]]:
         """Return the make command line.
 
         :param target: the target to use (use default_target if None)
-        :type target: str | None
         :param jobs: see __init__ documentation
-        :type jobs: int | None
         :param exec_dir: see __init__ documentation
-        :type exec_dir: str | None
         :param timeout: timeout to pass to ex.Run
-        :type timeout: int | None
 
         :return: a dictionary with the following keys
            - cmd: containing the command line to pass to gnatpython.ex.Run
            - options: options to pass to gnatpython.ex.Run
-        :rtype: dict
         """
         cmd_arg_list = ["make"]
 
@@ -130,30 +140,33 @@ class Make(object):
 class Configure(object):
     """Wrapper around ./configure."""
 
-    def __init__(self, anod_instance, src_dir=None, exec_dir=None, auto_target=True):
+    def __init__(
+        self,
+        anod_instance: Anod,
+        src_dir: Optional[str] = None,
+        exec_dir: Optional[str] = None,
+        auto_target: bool = True,
+    ):
         """Initialize a Configure object.
 
         :param anod_instance: an Anod instance
-        :type anod_instance: Anod
         :param src_dir: path to the directory containing the project sources.
             If None then use the anod_instance buildspace source dir.
-        :type src_dir: str | None
         :param exec_dir: path to the directory from where the configure should
             be called. If None then use the anod_instance buildspace build
             dir.
-        :type exec_dir: str | None
         :param auto_target: if True, automatically pass --target, --host and
             --build
-        :type auto_target: bool
         """
         self.anod_instance = anod_instance
-        self.src_dir = src_dir
-        if self.src_dir is None:
+        if src_dir is None:
             self.src_dir = self.anod_instance.build_space.src_dir
+        else:
+            self.src_dir = src_dir
         self.exec_dir = exec_dir
         if self.exec_dir is None:
             self.exec_dir = self.anod_instance.build_space.build_dir
-        self.args = []
+        self.args = []  # type: List[str]
 
         # Value of the --target, --host and --build arguments
         self.target = None
@@ -172,33 +185,29 @@ class Configure(object):
             else:
                 self.build = e.target.triplet
 
-        self.env = {}
+        self.env = {}  # type: dict
 
-    def add(self, *args):
+    def add(self, *args: str) -> None:
         """Add configure options.
 
         :param args: list of options to pass when calling configure
-        :type args: list[str]
         """
         self.args += args
 
-    def add_env(self, key, value):
+    def add_env(self, key: str, value: str) -> None:
         """Set environment variable when calling configure.
 
         :param key: environment variable name
-        :type key: str
         :param value: environment variable value
-        :type value: str
         """
         self.env[key] = value
 
-    def cmdline(self):
+    def cmdline(self) -> dict:
         """Return the configure command line.
 
         :return: a dictionary with the following keys
            - cmd: containing the command line to pass to gnatpython.ex.Run
            - options: options to pass to gnatpython.ex.Run
-        :rtype: dict
 
         If CONFIG_SHELL environment variable is set, the configure will be
         called with this shell.
@@ -237,27 +246,26 @@ class Configure(object):
             "options": cmd_options,
         }
 
-    def __call__(self):
+    def __call__(self) -> Run:
         cmdline = self.cmdline()
         cmd = cmdline["cmd"]
         options = cmdline["options"]
         return self.anod_instance.shell(*cmd, **options)
 
 
-def text_replace(filename, pattern):
+def text_replace(
+    filename: str, pattern: List[Tuple[Union[bytes, str], Union[bytes, str]]]
+) -> List[int]:
     """Replace patterns in a file.
 
     :param filename: file path
-    :type filename: str
     :param pattern: list of tuple (pattern, replacement)
-    :type pattern: list[(str, str)]
 
     Do not modify the file if no substitution is done. Note that substitutions
     are applied sequentially (order provided by the list `pattern`) and this
     is done line per line.
 
     :return: the number of substitution performed for each pattern
-    :rtype: list[int]
     """
     output = io.BytesIO()
     nb_substitution = [0 for _ in pattern]

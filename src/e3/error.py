@@ -1,16 +1,22 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import List, Optional, Union
+
+
 class E3Error(Exception):
     """Exception raised by functions defined in E3."""
 
-    def __init__(self, message, origin=None):
+    def __init__(self, message: Union[str, List[str]], origin: Optional[str] = None):
         """Initialize an E3Error.
 
         E3Error can store several messages and thus be used to propagate them.
 
         :param message: the exception message
-        :type message: str | list[str]
         :param origin: the name of the function, class, or module having raised
             the exception
-        :type origin: str
         """
         super(E3Error, self).__init__(message, origin)
         self.origin = origin
@@ -21,11 +27,10 @@ class E3Error(Exception):
             else:
                 self.messages.extend(message)
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: Union[str, List[str], E3Error]) -> E3Error:
         """Add messages to the current instance.
 
         :param other: a message or an E3Error instance
-        :type other: str | list[str] | E3Error
         """
         if isinstance(other, E3Error):
             self.messages.extend(other.messages)
@@ -35,7 +40,7 @@ class E3Error(Exception):
             self.messages.extend(other)
         return self
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.messages:
             error_msg = self.messages[-1]
         else:

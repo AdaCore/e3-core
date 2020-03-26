@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import cgi
 import contextlib
 import json
@@ -6,26 +8,31 @@ import socket
 import tempfile
 from collections import deque
 
-import e3.log
 import requests
 import requests.adapters
 import requests.exceptions
 import requests.packages.urllib3.exceptions
+from requests.packages.urllib3.util import Retry
+
+from typing import TYPE_CHECKING
+
+import e3.log
 import requests_toolbelt.multipart
 from e3.error import E3Error
 from e3.fs import rm
-from requests.packages.urllib3.util import Retry
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Union
+    from requests.auth import AuthBase
 
 logger = e3.log.getLogger("net.http")
 
 
-def get_filename(content_disposition):
+def get_filename(content_disposition: str) -> Optional[str]:
     """Return a filename from a HTTP Content-Disposition header.
 
     :param content_disposition: a Content-Disposition header string
-    :type content_disposition: str
     :return: the filename or None
-    :rtype: str
     """
     _, value = cgi.parse_header(content_disposition)
     return value.get("filename")
@@ -41,23 +48,21 @@ class BaseURL(object):
     The root class BaseURL does not use authentication
     """
 
-    def __init__(self, url):
+    def __init__(self, url: str):
         """Initialize a base url object.
 
         :param url: the base url
-        :type url: str
         """
         self.url = url
 
-    def get_auth(self):
+    def get_auth(self) -> Optional[Union[Tuple[str, str], AuthBase]]:
         """Return auth requests parameter.
 
         :return: authentication associated with the url
-        :rtype: (str, str) | requests.auth.AuthBase | None
         """
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.url
 
 
@@ -66,57 +71,58 @@ class HTTPSession(object):
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 
-    def __init__(self, base_urls=None):
+    def __init__(self, base_urls: Optional[Union[List[str], List[BaseURL]]] = None):
         """Initialize HTTP session.
 
         :param base_urls: list of urls used as prefix to subsequent requests.
             Preferred base url is the first one in the list. In case of error
             during a request the next urls are used.
-        :type base_urls: list[str] | list[BaseUrl] | None
         """
         if base_urls:
-            self.base_urls = deque(
+            self.base_urls: Union[Deque[BaseURL], Deque[None]] = deque(
                 [k if isinstance(k, BaseURL) else BaseURL(k) for k in base_urls]
             )
         else:
             self.base_urls = deque([None])
         self.session = requests.Session()
-        self.last_base_url = None
+        self.last_base_url: Optional[BaseURL] = None
 
-    def __enter__(self):
+    def __enter__(self) -> HTTPSession:
         self.session.__enter__()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.session.__exit__(exc_type, exc_val, exc_tb)
 
-    def set_max_retries(self, base_url=None, connect=None, read=None, redirect=None):
+    def set_max_retries(
+        self,
+        base_url: Optional[str] = None,
+        connect: Optional[int] = None,
+        read: Optional[int] = None,
+        redirect: Optional[int] = None,
+    ) -> None:
         """Retry configuration.
 
         :param base_url: base url for the HTTPAdapter
-        :type base_url: str
         :param connect: how many connection-related errors to retry on
-        :type connect: int | None
         :param read: how many times to retry on read errors
-        :type read: int | None
         :param redirect: how many redirects to perform. Limit this to avoid
             infinite redirect loops.
-        :type redirect: int | None
         """
         if base_url is None:
-            base_urls = self.base_urls
+            base_urls = [str(b) for b in self.base_urls if b is not None]
         else:
             base_urls = [base_url]
 
         for url in base_urls:
             self.session.mount(
-                str(url),
+                url,
                 requests.adapters.HTTPAdapter(
                     max_retries=Retry(connect=connect, read=read, redirect=redirect)
                 ),
             )
 
-    def request(self, method, url, **kwargs):
+    def request(self, method: str, url: str, **kwargs):
         """Send a request.
 
         See requests Session.request function.
@@ -143,6 +149,12 @@ class HTTPSession(object):
 
         for base_url in list(self.base_urls):
             if self.last_base_url != base_url:
+                # if base_url is None then it means that self.base_urls is deque([None])
+                # in that case last_base_url is always None. The code is confusing and
+                # we should remove that complexity by always forcing self.base_urls to
+                # be set. ???
+                if TYPE_CHECKING:
+                    assert base_url is not None
                 self.session.auth = base_url.get_auth()
                 self.last_base_url = base_url
 
@@ -151,7 +163,7 @@ class HTTPSession(object):
             # Handle data_streams. After some tests it seems that we need to
             # redo an instance of the multipart encoder for each attempt.
             if data_streams is not None:
-                data = {}
+                data: Dict[str, Any] = {}
                 for k, v in data_streams.items():
                     if hasattr(v, "seek"):
                         # This is a file. Assume that the key is the filename
@@ -197,28 +209,30 @@ class HTTPSession(object):
                 # got an error with that base url so put it last in our list
                 error_msgs.append("%s%s" % (message_prefix, e))
                 problematic_url = self.base_urls.popleft()
-                self.base_urls.append(problematic_url)
+                self.base_urls.append(problematic_url)  # type: ignore
 
         raise HTTPError(
             "got request error (%d):\n%s" % (len(error_msgs), "\n".join(error_msgs))
         )
 
-    def download_file(self, url, dest, filename=None, validate=None):
+    def download_file(
+        self,
+        url: str,
+        dest: str,
+        filename: Optional[str] = None,
+        validate: Optional[Callable[[str], bool]] = None,
+    ) -> Optional[str]:
         """Download a file.
 
         :param url: the url to GET
-        :type url: str
         :param dest: local directory path for the downloaded file
-        :type dest: str
         :param filename: the local path whether to store this resource, by
             default use the name provided  in the ``Content-Disposition``
             header.
         :param validate: function to call once the download is complete for
             detecting invalid / corrupted download. Takes the local path as
             parameter and returns a boolean.
-        :type validate: (str) -> bool
         :return: the name of the file or None if there is an error
-        :rtype: str
         """
         # When using stream=True, Requests cannot release the connection back
         # to the pool unless all the data is consumed or Response.close called.
@@ -261,4 +275,4 @@ class HTTPSession(object):
             logger.debug(e)
             if path is not None:
                 rm(path)
-            return None
+        return None

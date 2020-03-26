@@ -1,28 +1,33 @@
-from pkg_resources import get_distribution
-
-from e3.env import Env
-from e3.fs import mkdir, rm
-
-from e3.anod.error import SandBoxError
-import e3.log
-import e3.os.process
+from __future__ import annotations
 
 import os
 import sys
-import yaml
 
-from e3.os.fs import chmod
+import yaml
+from pkg_resources import get_distribution
+from typing import TYPE_CHECKING
+
+import e3.log
+import e3.os.process
 from e3.anod.buildspace import BuildSpace
+from e3.anod.error import SandBoxError
+from e3.env import Env
+from e3.fs import mkdir, rm
+from e3.os.fs import chmod
 
 logger = e3.log.getLogger("sandbox")
 
 
+if TYPE_CHECKING:
+    from typing import Any, Dict, Optional
+
+
 class SandBox(object):
-    def __init__(self):
-        self.__root_dir = None
-        self.build_id = None
-        self.build_date = None
-        self.build_version = None
+    def __init__(self) -> None:
+        self.__root_dir: Optional[str] = None
+        self.build_id: Optional[str] = None
+        self.build_date: Optional[str] = None
+        self.build_version: Optional[str] = None
 
         # Required directories for a sandbox
         self.dirs = (
@@ -36,19 +41,19 @@ class SandBox(object):
             "patch",
         )
 
-        self.meta_dir = None
-        self.tmp_dir = None
-        self.tmp_cache_dir = None
-        self.src_dir = None
-        self.log_dir = None
-        self.vcs_dir = None
-        self.patch_dir = None
-        self.bin_dir = None
-        self.__specs_dir = None
+        self.meta_dir: Optional[str] = None
+        self.tmp_dir: Optional[str] = None
+        self.tmp_cache_dir: Optional[str] = None
+        self.src_dir: Optional[str] = None
+        self.log_dir: Optional[str] = None
+        self.vcs_dir: Optional[str] = None
+        self.patch_dir: Optional[str] = None
+        self.bin_dir: Optional[str] = None
+        self.__specs_dir: Optional[str] = None
         self.is_alternate_specs_dir = False
 
         # Contains the loaded version of user.yaml if present
-        self.user_config = None
+        self.user_config: Optional[Dict[str, Any]] = None
 
         self.default_env = {
             "LANG": "C",
@@ -67,18 +72,17 @@ class SandBox(object):
             "GPR_RUNTIME_PATH": "",
         }
 
-    def set_default_env(self):
+    def set_default_env(self) -> None:
         """Reset all env variables that can influence the build outcome."""
         for k, v in self.default_env.items():
             logger.debug('export %s="%s"', k, v)
             os.environ[k] = v
 
     @property
-    def root_dir(self):
+    def root_dir(self) -> str:
         """Root path of the sandbox.
 
         :raise SandBoxError: when the sandbox is not initialized
-        :rtype: str
         """
         if self.__root_dir is None:
             raise SandBoxError(
@@ -87,7 +91,7 @@ class SandBox(object):
         return self.__root_dir
 
     @root_dir.setter
-    def root_dir(self, d):
+    def root_dir(self, d: str) -> None:
         new_dir = os.path.realpath(d)
         if new_dir == self.__root_dir:
             return  # nothing to do
@@ -108,8 +112,10 @@ class SandBox(object):
 
             # Accept both specs_dir and module_dir key (in that order) to
             # get the path to the anod specification files
-            specs_dir = self.user_config.get(
-                "specs_dir", self.user_config.get("module_dir")
+            specs_dir = (
+                self.user_config.get("specs_dir", self.user_config.get("module_dir"))
+                if self.user_config is not None
+                else None
             )
             if specs_dir is not None:
                 self.specs_dir = specs_dir
@@ -117,58 +123,58 @@ class SandBox(object):
             self.__specs_dir = os.path.join(new_dir, "specs")
 
     @property
-    def specs_dir(self):
+    def specs_dir(self) -> Optional[str]:
         """Return where to find anod specification files."""
         return self.__specs_dir
 
     @specs_dir.setter
-    def specs_dir(self, d):
+    def specs_dir(self, d: str) -> None:
         """Set an alternate specs dir.
 
         :param d: directory where to find anod specification files
-        :type d: str
         """
         # Expand ~, environment variables and eliminate symbolic links
         self.__specs_dir = os.path.realpath(os.path.expandvars(os.path.expanduser(d)))
         self.is_alternate_specs_dir = True
         logger.info("using alternate specs dir %s", d)
 
-    def create_dirs(self):
+    def create_dirs(self) -> None:
         """Create all required sandbox directories."""
         for d in self.dirs:
             mkdir(getattr(self, ("%s_dir" % d).replace(os.path.sep, "_")))
 
-    def get_build_space(self, name, platform=None):
+    def get_build_space(self, name: str, platform: Optional[str] = None) -> BuildSpace:
         """Get build space.
 
         :param name: build space name
-        :type name: str
         :param platform: platform name (if None use the default platform)
-        :type platform: str | None
 
         :return: A BuildSpace object
-        :rtype: BuildSpace
         """
         if platform is None:
             platform = Env().platform
         return BuildSpace(root_dir=os.path.join(self.root_dir, platform, name))
 
-    def dump_configuration(self):
+    def dump_configuration(self) -> None:
         # Compute command line for call to e3-sandbox create. Ensure that the
         # paths are made absolute (path to sandbox, script).
+        assert self.meta_dir is not None
         cmd_line = [sys.executable, os.path.abspath(__file__)]
         cmd_line += sys.argv[1:]
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
         with open(sandbox_conf, "w") as f:
             yaml.safe_dump({"cmd_line": cmd_line}, f)
 
-    def get_configuration(self):
+    def get_configuration(self) -> dict:
+        assert self.meta_dir is not None
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
-        with open(sandbox_conf, "r") as f:
+        with open(sandbox_conf) as f:
             return yaml.safe_load(f)
 
-    def write_scripts(self):
+    def write_scripts(self) -> None:
         from setuptools.command.easy_install import get_script_args
+
+        assert self.bin_dir is not None
 
         # Retrieve sandbox_scripts entry points
         e3_distrib = get_distribution("e3-core")

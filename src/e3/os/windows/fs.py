@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import struct
 from ctypes import (
@@ -8,6 +10,7 @@ from ctypes import (
     sizeof,
 )
 from ctypes.wintypes import HANDLE
+from typing import Any, Callable, Optional
 
 import e3.log
 from e3.os.windows.native_api import (
@@ -28,7 +31,12 @@ logger = e3.log.getLogger("os.windows.fs")
 
 
 class WithOpenFile(object):
-    def __init__(self, desired_access=None, shared_access=None, open_options=None):
+    def __init__(
+        self,
+        desired_access: Optional[int] = None,
+        shared_access: Optional[int] = None,
+        open_options: Optional[int] = None,
+    ):
         self.desired_access = desired_access
         self.shared_access = shared_access
         self.open_options = open_options
@@ -60,14 +68,13 @@ class NTFile(object):
     :ivar basic_info: ObjectAttributes object associated with the file
     """
 
-    def __init__(self, filename, parent=None):
+    def __init__(self, filename: str, parent: Optional[NTFile] = None):
         """Initialize a NTFile object.
 
         :param filename: path to the file or basename if parent is not None
-        :type filename: str | unicode
         :param parent: the parent NTFile object
-        :type parent: NTFile | None
         """
+        self.handle = None  # type: Optional[HANDLE]
         if parent is None:
             self.path = os.path.abspath(filename)
             self.nt_filename = UnicodeString("\\??\\%s" % self.path)
@@ -78,7 +85,6 @@ class NTFile(object):
             self.nt_filename = UnicodeString(str(filename))
             self.parent_handle = parent.handle
 
-        self.handle = None
         self.io_status = IOStatusBlock()
         self.basic_info = FileInfo.Basic()
 
@@ -100,18 +106,20 @@ class NTFile(object):
         ]
         return "\n".join(result)
 
-    def open(self, desired_access=None, shared_access=None, open_options=None):
+    def open(
+        self,
+        desired_access: Optional[int] = None,
+        shared_access: Optional[int] = None,
+        open_options: Optional[int] = None,
+    ):
         """Open file.
 
         :param desired_access: desired access
             (see e3.os.windows.native_api.Access)
-        :type desired_access: int
         :param shared_access: sharing parameters
             (see e3.os.windows.native_api.Shared)
-        :type shared_access: int
         :param open_options: open options
             (see e3.os.windows.native_api.OpenOptions)
-        :type open_options: int
         """
         if desired_access is None:
             desired_access = self.desired_access
@@ -121,7 +129,10 @@ class NTFile(object):
             open_options = self.open_options
 
         self.handle = HANDLE()
-        status = NT.OpenFile(
+
+        open_file: Callable = NT.OpenFile  # type: ignore
+
+        status = open_file(
             pointer(self.handle),
             desired_access,
             pointer(self.attr),
@@ -147,15 +158,16 @@ class NTFile(object):
             self.handle = None
 
     @property
-    def volume_path(self):
+    def volume_path(self) -> str:
         """Retrieve path to the volume containing the file.
 
         :return: path to a windows volume after junction resolution
-        :rtype: unicode
         :raise: NTException
         """
         result = create_unicode_buffer(1024)
-        status = NT.GetVolumePathName(c_wchar_p(self.path), result, 1024)
+
+        get_vol_name: Callable = NT.GetVolumePathName  # type: ignore
+        status = get_vol_name(c_wchar_p(self.path), result, 1024)
         if not status:
             raise NTException(
                 status=status,
@@ -164,19 +176,21 @@ class NTFile(object):
             )
         return result.value
 
-    @property
+    @property  # type: ignore
     @WithOpenFile(Access.READ_ATTRS)
-    def uid(self):
+    def uid(self) -> int:
         """Retrieve the ID of the file.
 
         On NTFS system we are sure that this ID is unique on the given volume
 
         :return: the uid
-        :rtype: int
-        ;raise: NTException
+        :raise: NTException
         """
         result = FileInfo.Internal()
-        status = NT.QueryInformationFile(
+
+        query_info_file: Callable = NT.QueryInformationFile  # type: ignore
+
+        status = query_info_file(
             self.handle,
             pointer(self.io_status),
             pointer(result),
@@ -241,7 +255,8 @@ class NTFile(object):
 
         :raise: NTException
         """
-        status = NT.SetInformationFile(
+        set_infofile: Callable = NT.SetInformationFile
+        status = set_infofile(
             self.handle,
             pointer(self.io_status),
             pointer(self.basic_info),
@@ -257,57 +272,55 @@ class NTFile(object):
         self.read_attributes()
 
     @property
-    def is_dir(self):
+    def is_dir(self) -> bool:
         """Check if file is a directory.
 
         Note that read_attributes methods should be called at least once
         otherwise the function will return False.
 
         :return: True if the file is a directory, False otherwise
-        :rtype: bool
         """
         return self.basic_info.file_attributes.attr & FileAttribute.DIRECTORY > 0
 
     @property
-    def is_readonly(self):
+    def is_readonly(self) -> bool:
         """Check if file is readonly.
 
         Note that read_attributes methods should be called at least once
         otherwise the function will return False.
 
         :return: True if readonly, False otherwise
-        :rtype: bool
         """
         return self.basic_info.file_attributes.attr & FileAttribute.READONLY > 0
 
     @property
-    def trash_path(self):
+    def trash_path(self) -> str:
         """Return path in which the file can move safely for deletion.
 
         On NTFS filesystem we are sure that the path is unique and thus
         that no existing file can exist at that location.
 
         :return: a path
-        :rtype: unicode
         """
         return os.path.join(self.volume_path, "tmp", "Trash", str("%016X" % self.uid))
 
     @WithOpenFile(Access.DELETE)
-    def rename(self, filename, replace=False):
+    def rename(self, filename: str, replace: bool = False):
         """Move file.
 
         :param filename: target location
-        :type filename: unicode
         :param replace: if True replace the target file if it exists
-        :type replace: bool
         :raise: NTException
         """
-        target = "\\??\\%s" % os.path.abspath(filename)
-        target = target.encode("utf_16_le")
+        file_target = "\\??\\%s" % os.path.abspath(filename)
+        target = file_target.encode("utf_16_le")
         s = "?PL%ss" % len(target)
         b = create_string_buffer(struct.calcsize(s))
         b.raw = struct.pack(s, replace, 0, len(target), target)
-        status = NT.SetInformationFile(
+
+        set_infofile: Callable = NT.SetInformationFile  # type: ignore
+
+        status = set_infofile(
             self.handle,
             pointer(self.io_status),
             b,
@@ -352,7 +365,7 @@ class NTFile(object):
         None,
         OpenOptions.SYNCHRONOUS_IO_NON_ALERT,
     )
-    def iterate_on_dir(self, fun, default_result=None):
+    def iterate_on_dir(self, fun: Callable, default_result: Any = None):
         """Iterate on directory.
 
         :param fun: function called on each entry (. are .. are skipped)
@@ -363,7 +376,10 @@ class NTFile(object):
         s_size = struct.calcsize("LLL")
         b_size = 100 * 1024
         b = create_string_buffer(b_size)
-        status = NT.QueryDirectoryFile(
+
+        query_dir_file: Callable = NT.QueryDirectoryFile  # type: ignore
+
+        status = query_dir_file(
             self.handle,
             None,
             None,
@@ -404,7 +420,7 @@ class NTFile(object):
                     break
                 pos += off
 
-            status = NT.QueryDirectoryFile(
+            status = query_dir_file(
                 self.handle,
                 None,
                 None,
@@ -419,17 +435,16 @@ class NTFile(object):
             )
         return result
 
-    @property
+    @property  # type: ignore
     @WithOpenFile(
         Access.LIST_DIRECTORY | Access.SYNCHRONIZE,
         None,
         OpenOptions.SYNCHRONOUS_IO_NON_ALERT,
     )
-    def is_dir_empty(self):
+    def is_dir_empty(self) -> bool:
         """Check if dir is empty.
 
         :return: True if the directory is empty
-        :rtype: boolean
         :raise: NTException
         """
 

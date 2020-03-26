@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import os
 
@@ -8,7 +10,7 @@ class HashError(e3.error.E3Error):
     pass
 
 
-def __compute_hash(path, kind):
+def __compute_hash(path: str, kind: str) -> str:
     if not os.path.isfile(path):
         raise HashError(kind, "cannot find %s" % path)
 
@@ -22,37 +24,34 @@ def __compute_hash(path, kind):
     return result.hexdigest()
 
 
-def md5(path):
+def md5(path: str) -> str:
     """Compute md5 hexadecimal digest of a file.
 
-    :param str path: path to a file
+    :param path: path to a file
 
     :return: the hash of the file content
-    :rtype: str
     :raise HashError: in case of error
     """
     return __compute_hash(path, "md5")
 
 
-def sha1(path):
+def sha1(path: str) -> str:
     """Compute sha1 hexadecimal digest of a file.
 
     :param str path: path to a file
 
     :return: the hash of the file content
-    :rtype: str
     :raise HashError: in case of error
     """
     return __compute_hash(path, "sha1")
 
 
-def sha256(path):
+def sha256(path: str) -> str:
     """Compute sha256 hexadecimal digest of a file.
 
     :param str path: path to a file
 
     :return: the hash of the file content
-    :rtype: str
     :raise HashError: in case of error
     """
     return __compute_hash(path, "sha256")

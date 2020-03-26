@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 import e3.log
 from e3.anod.action import (
     Build,
@@ -14,8 +17,8 @@ from e3.anod.action import (
     InstallSource,
     Root,
     Test,
-    UploadBinaryComponent,
     Upload,
+    UploadBinaryComponent,
     UploadSource,
     UploadSourceComponent,
 )
@@ -27,24 +30,41 @@ from e3.collection.dag import DAG
 from e3.env import BaseEnv
 from e3.error import E3Error
 
+if TYPE_CHECKING:
+    from typing import Callable, Dict, FrozenSet, List, NoReturn, Optional, Tuple, Union
+    from e3.anod.action import Action
+    from e3.anod.package import SourceBuilder
+    from e3.anod.spec import Anod
+    from e3.anod.loader import AnodSpecRepository
+    from e3.anod.sandbox import SandBox
+    from e3.collection.dag import VertexID
+    from e3.platform import Platform
+
+    # spec name, build env, target env, host env, qualifier, kind, source name
+    CacheKeyType = Tuple[
+        str, Platform, Platform, Platform, Optional[str], Optional[str], Optional[str]
+    ]
+
 logger = e3.log.getLogger("anod.context")
 
 
 class SchedulingError(E3Error):
     """Exception raised by scheduling algorithm."""
 
-    def __init__(self, message, origin=None, uid=None, initiators=None):
+    def __init__(
+        self,
+        message: Union[str, List[str]],
+        origin: Optional[str] = None,
+        uid: Optional[VertexID] = None,
+        initiators: Optional[List[VertexID]] = None,
+    ):
         """Scheduling error initialization.
 
         :param message: the exception message
-        :type message: str
         :param origin: the name of the function, class, or module having raised
             the exception
-        :type origin: str
         :param uid: uid of action that cause the error
-        :type uid: str
         :param initiators: list of uids involved in the failure
-        :type initiators: list[str] | None
         """
         super(SchedulingError, self).__init__(message, origin)
         self.uid = uid
@@ -71,19 +91,21 @@ class AnodContext(object):
         are conveyed by the plan and not by the specs
     """
 
-    def __init__(self, spec_repository, default_env=None, reject_duplicates=False):
+    def __init__(
+        self,
+        spec_repository: AnodSpecRepository,
+        default_env: Optional[BaseEnv] = None,
+        reject_duplicates: bool = False,
+    ):
         """Initialize a new context.
 
         :param spec_repository: an Anod repository
-        :type spec_repository: e3.anod.loader.AnodSpecRepository
         :param default_env: an env that should be considered as the
             default for the current context. Mainly useful to simulate
             another server context. If None then we assume that the
             context if the local server
-        :type default_env: BaseEnv | None
         :param reject_duplicates: if True, raise SchedulingError when two
             duplicated action are generated
-        :type reject_duplicates: bool
         """
         self.repo = spec_repository
         if default_env is None:
@@ -94,29 +116,30 @@ class AnodContext(object):
 
         self.tree = DAG()
         self.root = Root()
-        self.dependencies = {}
+        self.dependencies: Dict[str, Dict[str, Tuple[Dependency, Anod]]] = {}
         self.add(self.root)
-        self.cache = {}
-        self.sources = {}
+        self.cache: Dict[CacheKeyType, Anod] = {}
+        self.sources: Dict[str, Tuple[str, SourceBuilder]] = {}
 
-    def load(self, name, env, qualifier, kind, sandbox=None, source_name=None):
+    def load(
+        self,
+        name: str,
+        env: Optional[BaseEnv],
+        qualifier: Optional[str],
+        kind: str,
+        sandbox: Optional[SandBox] = None,
+        source_name: Optional[str] = None,
+    ) -> Anod:
         """Load a spec instance.
 
         :param name: spec name
-        :type name: str
         :param env: environment to use for the spec instance
-        :type env: BaseEnv | None
         :param qualifier: spec qualifier
-        :type qualifier: str | None
         :param kind: primitive used for the loaded spec
-        :type kind: str
         :param sandbox: is not None bind the anod instances to a sandbox
-        :type sandbox: None | Sandbox
         :param source_name: when the primitive is "source" we create a specific
             instance for each source package we have to create.
-        :type source_name: str | None
         :return: a spec instance
-        :rtype: e3.anod.spec.Anod
         """
         if env is None:
             env = self.default_env
@@ -138,24 +161,29 @@ class AnodContext(object):
             # Update the list of available sources. ??? Should be done
             # once per spec (and not once per spec instance). Need some
             # spec cleanup to achieve that ???
-            if self.cache[key].source_pkg_build is not None:
-                for s in self.cache[key].source_pkg_build:
+            source_builders = self.cache[key].source_pkg_build
+            if source_builders is not None:
+                for s in source_builders:
                     self.sources[s.name] = (name, s)
 
         return self.cache[key]
 
-    def add(self, data, *args):
+    def add(self, data: Action, *args: Action) -> None:
         """Add node to context tree.
 
         :param data: node data
-        :type data: e3.anod.action.Action
         :param args: list of predecessors
-        :type args: e3.anod.action.Action
         """
         preds = [k.uid for k in args]
         self.tree.update_vertex(data.uid, data, predecessors=preds, enable_checks=False)
 
-    def add_decision(self, decision_class, root, left, right):
+    def add_decision(
+        self,
+        decision_class: Callable[..., Decision],
+        root: Action,
+        left: Action,
+        right: Action,
+    ) -> None:
         """Add a decision node.
 
         This create the following subtree inside the dag::
@@ -164,67 +192,53 @@ class AnodContext(object):
                               |-> right
 
         :param decision_class: Decision subclass to use
-        :type decision_class: () -> Decision
         :param root: parent node of the decision node
-        :type root: e3.anod.action.Action
         :param left: left decision (child of Decision node)
-        :type left: e3.anod.action.Action
         :param right: right decision (child of Decision node)
-        :type right: e3.anod.action.Action
         """
         decision_action = decision_class(root, left, right)
         self.add(decision_action, left, right)
         self.connect(root, decision_action)
 
-    def connect(self, action, *args):
+    def connect(self, action: Action, *args: Action) -> None:
         """Add predecessors to a node.
 
         :param action: parent node
-        :type action: e3.anod.action.Action
         :param args: list of predecessors
-        :type args: list[e3.anod.action.Action]
         """
         preds = [k.uid for k in args]
         self.tree.update_vertex(action.uid, predecessors=preds, enable_checks=False)
 
-    def __contains__(self, data):
+    def __contains__(self, data: Action) -> bool:
         """Check if a given action is already in the internal DAG.
 
         :param data: an Action
-        :type data: e3.anod.action.Action
         """
         return data.uid in self.tree
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Action:
         """Retrieve action from the internal DAG based on its key.
 
         :param key: action uid
-        :type key: str
         :return: an Action
-        :rtype: e3.node.action.Action
         """
         return self.tree[key]
 
-    def predecessors(self, action):
+    def predecessors(self, action: Action) -> List[Action]:
         """Retrieve predecessors of a given action.
 
         :param action: the parent action
-        :type action: e3.anod.action.Action
         :return: the predecessor list
-        :rtype: list[e3.anod.action.Action]
         """
-        return [self[el] for el in self.tree.get_predecessors(action.uid)]
+        return [self[str(el)] for el in self.tree.get_predecessors(action.uid)]
 
-    def link_to_plan(self, vertex_id, plan_line, plan_args):
+    def link_to_plan(self, vertex_id: str, plan_line: str, plan_args: dict) -> None:
         """Tag the vertex with plan info.
 
         :param vertex_id: ID of the vertex
-        :type vertex_id: str
         :param plan_line: corresponding line:linenumber in the plan
-        :type plan_line: str
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
-        :type plan_args: dict
         """
         if self.reject_duplicates:
             previous_tag = self.tree.get_tag(vertex_id=vertex_id)
@@ -240,39 +254,30 @@ class AnodContext(object):
 
     def add_anod_action(
         self,
-        name,
-        env=None,
-        primitive=None,
-        qualifier=None,
-        source_packages=None,
-        upload=True,
-        plan_line=None,
-        plan_args=None,
-        sandbox=None,
-    ):
+        name: str,
+        env: BaseEnv,
+        primitive: str,
+        qualifier: Optional[str] = None,
+        source_packages: Optional[List[str]] = None,
+        upload: bool = True,
+        plan_line: Optional[str] = None,
+        plan_args: Optional[dict] = None,
+        sandbox: Optional[SandBox] = None,
+    ) -> Action:
         """Add an Anod action to the context.
 
         :param name: spec name
-        :type name: str
         :param env: spec environment
-        :type env: BaseEnv | None
         :param primitive: spec primitive
-        :type primitive: str
         :param qualifier: qualifier
-        :type qualifier: str | None
         :param source_packages: if not empty only create the specified list of
             source packages and not all source packages defined in the anod
             specification file
-        :type source_packages: list[str] | None
         :param upload: if True consider uploading to the store
-        :type upload: bool
         :param plan_line: corresponding line:linenumber in the plan
-        :type plan_line: str
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
-        :type plan_args: dict
         :return: the root added action
-        :rtype: Action
         """
         # First create the subtree for the spec
         result = self.add_spec(
@@ -304,6 +309,7 @@ class AnodContext(object):
             if build_action is not None:
                 spec = build_action.data
                 if spec.component is not None and upload:
+                    upload_bin: Union[UploadBinaryComponent, UploadSourceComponent]
                     if spec.has_package:
                         upload_bin = UploadBinaryComponent(spec)
                     else:
@@ -327,64 +333,50 @@ class AnodContext(object):
 
     def add_spec(
         self,
-        name,
-        env=None,
-        primitive=None,
-        qualifier=None,
-        source_packages=None,
-        expand_build=True,
-        source_name=None,
-        plan_line=None,
-        plan_args=None,
-        sandbox=None,
-        upload=False,
+        name: str,
+        env: BaseEnv,
+        primitive: str,
+        qualifier: Optional[str] = None,
+        source_packages: Optional[List[str]] = None,
+        expand_build: bool = True,
+        source_name: Optional[str] = None,
+        plan_line: Optional[str] = None,
+        plan_args: Optional[dict] = None,
+        sandbox: Optional[SandBox] = None,
+        upload: bool = False,
     ):
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
-        :type name: str
         :param env: spec environment
-        :type env: BaseEnv | None
         :param primitive: spec primitive
-        :type primitive: str
         :param qualifier: qualifier
-        :type qualifier: str | None
         :param source_packages: if not empty only create the specified list of
             source packages and not all source packages defined in the anod
             specification file
-        :type source_packages: list[str] | None
         :param expand_build: should build primitive be expanded
-        :type expand_build: bool
         :param source_name: source name associated with the source
             primitive
-        :type source_name: str | None
         :param plan_line: corresponding line:linenumber in the plan
-        :type plan_line: str
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
-        :type plan_args: dict
         :param sandbox: if not None, anod instance are automatically bind to
             the given sandbox
-        :type sandbox: None | Sandbox
         :param upload: if True consider uploads to the store (sources and
             binaries)
-        :type upload: bool
         """
 
-        def add_action(data, connect_with=None):
+        def add_action(data: Action, connect_with: Optional[Action] = None) -> None:
             self.add(data)
             if connect_with is not None:
                 self.connect(connect_with, data)
 
-        def add_dep(spec_instance, dep, dep_instance):
+        def add_dep(spec_instance: Anod, dep: Dependency, dep_instance: Anod) -> None:
             """Add a new dependency in an Anod instance dependencies dict.
 
             :param spec_instance: an Anod instance
-            :type spec_instance: Anod
             :param dep: the dependency we want to add
-            :type dep: Dependency
             :param dep_instance: the Anod instance loaded for that dependency
-            :type dep_instance: Anod
             """
             if dep.local_name in spec_instance.deps:
                 raise AnodError(
@@ -410,6 +402,7 @@ class AnodContext(object):
             sandbox=sandbox,
             source_name=source_name,
         )
+        result: Union[Build, CreateSources, CreateSource, Install, Test]
 
         # Initialize the resulting action based on the primitive name
         if primitive == "source":
@@ -423,6 +416,11 @@ class AnodContext(object):
                 # A consequence of calling add_action here
                 # will result in skipping dependencies parsing.
                 add_action(result)
+
+                if TYPE_CHECKING:
+                    # When creating sources we know that the
+                    # source_pkg_build attribute is set
+                    assert spec.source_pkg_build is not None
 
                 # Then one node for each source package
                 for sb in spec.source_pkg_build:
@@ -561,6 +559,10 @@ class AnodContext(object):
                     self.connect(self.root, upload_src)
                     self.connect(upload_src, result)
 
+                if TYPE_CHECKING:
+                    # When creating sources we know that the
+                    # source_pkg_build attribute is set
+                    assert spec.source_pkg_build is not None
                 for sb in spec.source_pkg_build:
                     if sb.name == source_name:
                         for checkout in sb.checkout:
@@ -569,7 +571,7 @@ class AnodContext(object):
                                     origin="add_spec",
                                     message="unknown repository {}".format(checkout),
                                 )
-                            co = Checkout(checkout, self.repo.repos.get(checkout))
+                            co = Checkout(checkout, self.repo.repos[checkout])
                             add_action(co, result)
 
         # Look for dependencies
@@ -683,7 +685,7 @@ class AnodContext(object):
                         upload=upload,
                     )
                     for repo in obj.checkout:
-                        r = Checkout(repo, self.repo.repos.get(repo))
+                        r = Checkout(repo, self.repo.repos[repo])
                         add_action(r, connect_with=source_action)
                     self.add_decision(
                         CreateSourceOrDownload,
@@ -694,13 +696,11 @@ class AnodContext(object):
         return result
 
     @classmethod
-    def decision_error(cls, action, decision):
+    def decision_error(cls, action: Action, decision: Decision) -> NoReturn:
         """Raise SchedulingError.
 
         :param action: action to consider
-        :type action: Action
         :param decision: decision to resolve
-        :type decision: Decision
         :raise SchedulingError
         """
         if decision.choice is None and decision.expected_choice in (
@@ -750,10 +750,15 @@ class AnodContext(object):
                     trigger_plan_line,
                 ) in decision.triggers
             )
+            conflict_choice = decision.choice
+            if TYPE_CHECKING:
+                # we expect the decision to be either LEFT or RIGHT
+                # at this stage
+                assert conflict_choice is not None
             msg = (
                 "explicit {} decision made by {} conflicts with the "
                 "following decision{}:\n{}".format(
-                    decision.description(decision.get_expected_decision()),
+                    decision.description(conflict_choice),
                     decision.decision_maker,
                     "s" if len(decision.triggers) > 1 else "",
                     trigger_decisions,
@@ -763,7 +768,9 @@ class AnodContext(object):
         raise SchedulingError(msg)
 
     @classmethod
-    def always_download_source_resolver(cls, action, decision):
+    def always_download_source_resolver(
+        cls, action: Action, decision: Decision
+    ) -> bool:
         """Force source download when scheduling a plan.
 
         The resolver takes the following decision:
@@ -771,11 +778,8 @@ class AnodContext(object):
         * any build that produces a package should be added explicitly
 
         :param action: action to consider
-        :type action: Action
         :param decision: decision to resolve
-        :type decision: Decision
         :return: True if the action should be scheduled, False otherwise
-        :rtype: False
         :raise SchedulingError: in case no decision can be taken
         """
         if isinstance(action, CreateSource):
@@ -795,15 +799,14 @@ class AnodContext(object):
         else:
             return cls.decision_error(action, decision)
 
-    def schedule(self, resolver):
+    def schedule(self, resolver: Callable[[Action, Decision], bool]) -> DAG:
         """Compute a DAG of scheduled actions.
 
         :param resolver: a function that helps the scheduler resolve cases
             for which a decision should be taken
-        :type resolver: (Action, Decision) -> bool
         """
         rev = self.tree.reverse_graph()
-        uploads = []
+        uploads: List[Tuple[Upload, FrozenSet[VertexID]]] = []
         dag = DAG()
 
         # Retrieve existing tags
@@ -813,6 +816,8 @@ class AnodContext(object):
         # be introduced. That's why checks are disabled when creating the
         # result graph.
         for uid, action in rev:
+            if TYPE_CHECKING:
+                assert uid is not None
             if uid == "root":
                 # Root node is always in the final DAG
                 dag.update_vertex(uid, action, enable_checks=False)
@@ -824,6 +829,8 @@ class AnodContext(object):
             elif isinstance(action, Upload):
                 uploads.append((action, self.tree.get_predecessors(uid)))
             else:
+                if TYPE_CHECKING:
+                    assert isinstance(action, Action)
                 # Compute the list of successors for the current node (i.e:
                 # predecessors in the reversed graph). Ignore Upload
                 # nodes as they will be processed only once the scheduling

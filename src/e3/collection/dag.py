@@ -1,8 +1,30 @@
 """Implementation of Direct Acyclic Graphs."""
 
 
+from __future__ import annotations
+
 from itertools import chain
+from typing import TYPE_CHECKING
+
 from e3.error import E3Error
+
+if TYPE_CHECKING:
+    from typing import (
+        Any,
+        Callable,
+        Dict,
+        FrozenSet,
+        Hashable,
+        List,
+        Iterator,
+        Optional,
+        Sequence,
+        Set,
+        Tuple,
+        Union,
+    )
+
+    VertexID = Hashable
 
 
 class DAGError(E3Error):
@@ -15,17 +37,15 @@ class DAGIterator(object):
     BUSY = 1
     VISITED = 2
 
-    def __init__(self, dag, enable_busy_state=False):
+    def __init__(self, dag: DAG, enable_busy_state: bool = False):
         """Initialize DAG iterator.
 
         :param dag: the dag on which iteration is done
-        :type dag: DAG
         :param enable_busy_state: used to implement topological parallel
             iteration. When False, a vertex has only 2 possible states: VISITED
             or NOT_VISITED. When true, calling the next() function on the
             iteratior puts the element in 'BUSY' state. It will only be moved
             to 'Visited' once calling the 'leave()' method.
-        :type enable_busy_state: bool
         """
         self.dag = dag
         self.non_visited = set(self.dag.vertex_data.keys())
@@ -37,24 +57,26 @@ class DAGIterator(object):
         # iteration overall (simplify conditions in next_element)
         self.pred_number = {k: len(v) for k, v in self.dag.vertex_predecessors_items()}
 
-    def __iter__(self):
+    def __iter__(self) -> DAGIterator:
         return self
 
-    def __next__(self):
+    def __next__(self) -> Union[Tuple[None, None], Tuple[VertexID, Any]]:
         """Retrieve next_element with with_predecessors=False.
 
         The intermediate function is needed in Python 3.x
-
-        :rtype: (None, None) | (str, T)
         """
-        return self.next_element()[0:2]
+        vertex_id, data, _ = self.next_element()
+        if vertex_id is None:
+            return (None, None)
+        return (vertex_id, data)
 
-    def next_element(self):
+    def next_element(
+        self,
+    ) -> Union[Tuple[None, None, None], Tuple[VertexID, Any, FrozenSet[VertexID]]]:
         """Retrieve next element in topological order.
 
-        :return: a tuple id, data, predecessors. (None, None, None) is
+        :return: a vertex id, data, predecessors. (None, None, None) is
             returned if no element is available).
-        :rtype: (str, T, list[str]) | (None, None, None)
         """
         if not self.non_visited:
             raise StopIteration
@@ -69,7 +91,10 @@ class DAGIterator(object):
                     minimal_cycle = self.dag.shortest_path(node, node)
                     if minimal_cycle is not None:
                         raise DAGError(
-                            "cycle detected: %s" % " -> ".join(minimal_cycle)
+                            "cycle detected: %s"
+                            % " -> ".join(
+                                [str(vertex_id) for vertex_id in minimal_cycle]
+                            )
                         )
                 raise DAGError("cycle detected (unknown error)")
 
@@ -91,11 +116,10 @@ class DAGIterator(object):
 
         return (result, self.dag.vertex_data[result], self.dag.get_predecessors(result))
 
-    def leave(self, vertex_id):
+    def leave(self, vertex_id: VertexID) -> None:
         """Switch element from BUSY to VISITED state.
 
         :param vertex_id: the vertex to leave
-        :type vertex_id: str
         """
         assert self.states[vertex_id] == self.BUSY
         self.states[vertex_id] = self.VISITED
@@ -114,42 +138,44 @@ class DAG(object):
         a vertex data, indexed by vertex id
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a DAG."""
-        self.vertex_data = {}
-        self.tags = {}
+        self.vertex_data: Dict[VertexID, Any] = {}
+        self.tags: Dict[VertexID, Any] = {}
 
-        self.__vertex_predecessors = {}
-        self.__vertex_successors = {}
-        self.__has_cycle = None
+        self.__vertex_predecessors: Dict[VertexID, FrozenSet[VertexID]] = {}
+        self.__vertex_successors: Dict[VertexID, FrozenSet[VertexID]] = {}
+        self.__has_cycle: Optional[bool] = None
 
     @property
-    def vertex_predecessors(self):
+    def vertex_predecessors(self) -> Dict[VertexID, FrozenSet[VertexID]]:
         """Return predecessors.
 
         Meant only for backward compatibility. Use vertex_predecessors_items.
 
         :return: a dictionary containing the list of predecessors for each
             vertex, indexed by vertex id
-        :rtype: dict
         """
         # We're doing a copy of the __vertex_predecessors dictionary
         # to avoid external modifications
         return dict(self.__vertex_predecessors)
 
-    def vertex_predecessors_items(self):
+    def vertex_predecessors_items(
+        self,
+    ) -> Iterator[Tuple[VertexID, FrozenSet[VertexID]]]:
         """Return predecessors.
 
         :return: a list of (vertex id, predecessors)
-        :rtype: dict
         """
         return iter(self.__vertex_predecessors.items())
 
-    def get_predecessors(self, vertex_id):
+    def get_predecessors(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
         """Get set of predecessors for a given vertex."""
         return self.__vertex_predecessors.get(vertex_id, frozenset())
 
-    def set_predecessors(self, vertex_id, predecessors):
+    def set_predecessors(
+        self, vertex_id: VertexID, predecessors: FrozenSet[VertexID]
+    ) -> None:
         """Set predecessors for a given vertex.
 
         Invalidate the global dictionary of vertex successors.
@@ -159,24 +185,26 @@ class DAG(object):
         self.__vertex_successors = {}
         self.__has_cycle = None
 
-    def get_successors(self, vertex_id):
+    def get_successors(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
         """Get set of successors for a given vertex.
 
         If the global dictionary of vertex successors has not been
         computed or if it has been invalidated then recompute it.
         """
         if self.__vertex_successors == {}:
-            self.__vertex_successors = {k: set() for k in self.__vertex_predecessors}
-            for k, v in self.__vertex_predecessors.items():
-                for el in v:
-                    self.__vertex_successors[el].add(k)
+            successors: Dict[VertexID, Set[VertexID]] = {
+                k: set() for k in self.__vertex_predecessors
+            }
+            for pred_k, pred_v in self.__vertex_predecessors.items():
+                for el in pred_v:
+                    successors[el].add(pred_k)
             # Use frozenset to prevent the modification of successors
-            for k, v in self.__vertex_successors.items():
-                self.__vertex_successors[k] = frozenset(v)
+            for succ_k, succ_v in successors.items():
+                self.__vertex_successors[succ_k] = frozenset(succ_v)
 
         return self.__vertex_successors.get(vertex_id, frozenset())
 
-    def add_tag(self, vertex_id, data):
+    def add_tag(self, vertex_id: VertexID, data: Any) -> None:
         """Tag a vertex.
 
         :param vertex_id: ID of the vertex to tag
@@ -184,7 +212,7 @@ class DAG(object):
         """
         self.tags[vertex_id] = data
 
-    def get_tag(self, vertex_id):
+    def get_tag(self, vertex_id: VertexID) -> Any:
         """Retrieve a tag associated with a vertex.
 
         :param vertex_id: ID of the vertex
@@ -193,8 +221,12 @@ class DAG(object):
         return self.tags.get(vertex_id)
 
     def get_context(
-        self, vertex_id, max_distance=None, max_element=None, reverse_order=False
-    ):
+        self,
+        vertex_id: VertexID,
+        max_distance: Optional[int] = None,
+        max_element: Optional[int] = None,
+        reverse_order: bool = False,
+    ) -> List[Tuple[int, VertexID, Any]]:
         r"""Get tag context.
 
         Returns the list of predecessors tags along with their vertex id and
@@ -222,18 +254,14 @@ class DAG(object):
         :param vertex_id: ID of the vertex
         :param max_distance: do not return resultsh having a distance higher
             than ``max_distance``
-        :type max_distance: int | None
         :param max_element: return only up-to ``max_element`` elements
-        :type max_element: int | None
         :param reverse_order: when True follow successors instead of
             predecessors
-        :type reverse_order: bool
         :return: a list of tuple (distance:int, tagged vertex id, tag content)
-        :rtype: list[tuple]
         """
         self.check()
 
-        def get_next(vid):
+        def get_next(vid: VertexID) -> FrozenSet[VertexID]:
             """Get successors or predecessors.
 
             :param vid: vertex id
@@ -244,7 +272,7 @@ class DAG(object):
                 result = self.get_predecessors(vid)
             return result
 
-        visited = set()
+        visited: Set[VertexID] = set()
         tags = []
         distance = 0
         node_tag = self.get_tag(vertex_id)
@@ -277,15 +305,17 @@ class DAG(object):
             closure_len = len(closure)
         return tags
 
-    def add_vertex(self, vertex_id, data=None, predecessors=None):
+    def add_vertex(
+        self,
+        vertex_id: VertexID,
+        data: Any = None,
+        predecessors: Optional[Sequence[VertexID]] = None,
+    ) -> None:
         """Add a new vertex into the DAG.
 
         :param vertex_id: the name of the vertex
-        :type vertex_id: collections.Hashable
         :param data: data for the vertex.
-        :type data: object
         :param predecessors: list of predecessors (vertex ids) or None
-        :type predecessors: list[str] | None
         :raise: DAGError if cycle is detected or else vertex already exist
         """
         if vertex_id in self.vertex_data:
@@ -295,58 +325,66 @@ class DAG(object):
         self.update_vertex(vertex_id, data, predecessors)
 
     def update_vertex(
-        self, vertex_id, data=None, predecessors=None, enable_checks=True
-    ):
+        self,
+        vertex_id: VertexID,
+        data: Any = None,
+        predecessors: Optional[
+            Union[Sequence[VertexID], Set[VertexID], FrozenSet[VertexID]]
+        ] = None,
+        enable_checks: bool = True,
+    ) -> None:
         """Update a vertex into the DAG.
 
         :param vertex_id: the name of the vertex
-        :type vertex_id: collections.Hashable
         :param data: data for the vertex. If None and vertex already exist
             then data value is preserved
-        :type data: object
         :param predecessors: list of predecessors (vertex ids) or None. If
             vertex already exists predecessors are added to the original
             predecessors
-        :type predecessors: list[str] | None
         :param enable_checks: if False check that all predecessors exists and
             that no cycle is introduce is not perform (for performance)
-        :type enable_checks: bool
         :raise: DAGError if cycle is detected
         """
         if predecessors is None:
-            predecessors = frozenset()
+            vertex_predecessors: FrozenSet[VertexID] = frozenset()
         else:
-            predecessors = frozenset(predecessors)
+            vertex_predecessors = frozenset(predecessors)
 
         if enable_checks:
             # Before doing changes ensure that the DAG is already valid
             self.check()
 
             non_existing_predecessors = [
-                k for k in predecessors if k not in self.vertex_data
+                k for k in vertex_predecessors if k not in self.vertex_data
             ]
             if non_existing_predecessors:
                 raise DAGError(
-                    message="predecessor on non existing vertices %s"
-                    % ", ".join(non_existing_predecessors),
+                    message="predecessor on non existing vertices {}".format(
+                        ", ".join([str(nid) for nid in non_existing_predecessors])
+                    ),
                     origin="DAG.update_vertex",
                 )
 
         if vertex_id not in self.vertex_data:
-            self.set_predecessors(vertex_id, predecessors)
+            self.set_predecessors(vertex_id, vertex_predecessors)
             self.vertex_data[vertex_id] = data
         else:
             previous_predecessors = self.get_predecessors(vertex_id)
-            self.set_predecessors(vertex_id, previous_predecessors | predecessors)
+            self.set_predecessors(
+                vertex_id, previous_predecessors | vertex_predecessors
+            )
 
             if enable_checks:
                 # Will raise DAGError if a cycle is created
                 if vertex_id in self.get_closure(vertex_id):
                     minimal_cycle = self.shortest_path(vertex_id, vertex_id)
+                    if TYPE_CHECKING:
+                        assert minimal_cycle is not None
                     self.set_predecessors(vertex_id, previous_predecessors)
                     raise DAGError(
-                        message="cannot update vertex (%s create a cycle: %s)"
-                        % (vertex_id, " -> ".join(minimal_cycle)),
+                        message="cannot update vertex ({} create a cycle: {})".format(
+                            vertex_id, " -> ".join([str(vid) for vid in minimal_cycle])
+                        ),
                         origin="DAG.update_vertex",
                     )
 
@@ -357,7 +395,9 @@ class DAG(object):
             # DAG modified without cycle checks, discard cached result
             self.__has_cycle = None
 
-    def shortest_path(self, source, target):
+    def shortest_path(
+        self, source: VertexID, target: VertexID
+    ) -> Optional[List[VertexID]]:
         """Compute the shortest path between two vertices of the DAG.
 
         :param source: vertex id of the source
@@ -365,7 +405,6 @@ class DAG(object):
             then the algorithm try to find the shortest cycle
         :return: a list of vertex. If there is no path between two nodes then
             return None
-        :rtype: list[str] | None
         """
         # We use the Dikjstra algorithm to compute the shortest path.
         # Note that this is a slight variation so that the algorithm
@@ -377,18 +416,22 @@ class DAG(object):
         infinite = len(self.vertex_data) + 1
 
         # Keep track of minimal distance between vertices and the sources
-        dist = {k: infinite for k in self.vertex_data}
+        dist: Dict[Optional[VertexID], int] = {k: infinite for k in self.vertex_data}
 
         # Keep track of the minimum distance
-        prev = {k: None for k in self.vertex_data}
+        prev: Dict[Optional[VertexID], Optional[VertexID]] = {
+            k: None for k in self.vertex_data
+        }
 
         # Set of non visited vertices
-        unvisited = {k for k in self.vertex_data}
+        unvisited: Set[Optional[VertexID]] = {k for k in self.vertex_data}
 
         # The only known distance at startup
         dist[target] = 0
 
-        if source == target:
+        path_source: Optional[VertexID] = source
+
+        if path_source == target:
             # If source is equal to target, default dikjstra algorithm does
             # not work. Add a fake node and use it as target. When iterating
             # on predecessors replace all occurences of sources to that node.
@@ -397,41 +440,45 @@ class DAG(object):
             dist[None] = infinite
             prev[None] = None
             unvisited.add(None)
-            source = None
+            path_source = None
 
         while unvisited:
             u = min(unvisited, key=lambda x: dist[x])
             unvisited.remove(u)
 
             # We have found our shortest path, so break
-            if u == source:
+            if u == path_source:
                 break
+            elif u is None:
+                continue
 
-            for v in self.get_predecessors(u):
+            for u_pred in self.get_predecessors(u):
                 # Handle cycle detection case.
-                if source is None and v == target:
+                if path_source is None and u_pred == target:
                     v = None
+                else:
+                    v = u_pred
 
                 alt = dist[u] + 1
                 if alt < dist[v]:
                     dist[v] = alt
                     prev[v] = u
 
-        if dist[source] == infinite:
+        if dist[path_source] == infinite:
             # No path exist between source and target (or no cycle).
             return None
         else:
-            result = [source]
+            result: List[Optional[VertexID]] = [path_source]
             while prev[result[-1]] is not None:
                 result.append(prev[result[-1]])
 
             # In case of cycle detection the first node is None which
             # is in reality our source node.
-            if source is None:
+            if path_source is None:
                 result[0] = target
-            return result
+            return result  # type: ignore
 
-    def check(self):
+    def check(self) -> None:
         """Check for cycles and inexisting nodes.
 
         :raise: DAGError if the DAG is not valid
@@ -461,15 +508,13 @@ class DAG(object):
         else:
             self.__has_cycle = False
 
-    def get_closure(self, vertex_id):
+    def get_closure(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
         """Retrieve closure of predecessors for a vertex.
 
         :param vertex_id: the vertex to inspect
-        :type vertex_id: collections.Hashable
         :return: a set of vertex_id
-        :rtype: set(collections.Hashable)
         """
-        visited = set()
+        visited: Set[VertexID] = set()
         closure = self.get_predecessors(vertex_id)
         closure_len = len(closure)
 
@@ -484,11 +529,10 @@ class DAG(object):
             closure_len = len(closure)
         return closure
 
-    def reverse_graph(self):
+    def reverse_graph(self) -> DAG:
         """Compute the reverse DAG.
 
         :return: the reverse DAG (edge inverted)
-        :rtype: DAG
         """
         result = DAG()
 
@@ -512,18 +556,18 @@ class DAG(object):
             self.__has_cycle = False
         return result
 
-    def __iter__(self):
+    def __iter__(self) -> DAGIterator:
         return DAGIterator(self)
 
-    def __contains__(self, vertex_id):
+    def __contains__(self, vertex_id: VertexID) -> bool:
         """Check if a vertex is present in the DAG."""
         return vertex_id in self.vertex_data
 
-    def __getitem__(self, vertex_id):
+    def __getitem__(self, vertex_id: VertexID) -> Any:
         """Get data associated with a vertex."""
         return self.vertex_data[vertex_id]
 
-    def __or__(self, other):
+    def __or__(self, other: DAG) -> DAG:
         """Merge two dags."""
         assert isinstance(other, DAG)
 
@@ -550,11 +594,10 @@ class DAG(object):
         result.check()
         return result
 
-    def as_dot(self):
+    def as_dot(self) -> str:
         """Return a Graphviz graph representation of the graph.
 
         :return: the dot source file
-        :rtype: str
         """
         result = ["digraph G {", 'rankdir="LR";']
         for vertex in self.vertex_data:
@@ -565,28 +608,29 @@ class DAG(object):
         result.append("}")
         return "\n".join(result)
 
-    def prune(self, fun, preserve_context=True):
+    def prune(
+        self, fun: Callable[[DAG, VertexID], str], preserve_context: bool = True
+    ) -> DAG:
         """Create a pruned graph.
 
         :param fun: function that return True whenever a node should be
             pruned. The function receive as parameter the dag and the node id
-        :type fun: (DAG, str) -> bool
         :param preserve_context: if True ensure that context is preserved
             (i.e: that calls to get_context will return the same value for
              both current graph and pruned graph). This means that any attempt
             to remove a node containing a tag will result in a DAGError.
-        :type preserve_context: bool
         :return: a new DAG
-        :rtype: DAG
         """
         result = DAG()
 
         # Used to maintain the new list of predecessors
-        pruned_node_predecessors = {}
+        pruned_node_predecessors: Dict[VertexID, Set[VertexID]] = {}
 
         for node, data in self:
             # The new list of predecessors is the union of predecessors of
             # pruned predecessors and the other predecessors.
+            if TYPE_CHECKING:
+                assert node is not None
             predecessors = set(
                 chain(
                     *[pruned_node_predecessors[k] for k in self.get_predecessors(node)]
@@ -609,14 +653,16 @@ class DAG(object):
                     result.add_tag(node, self.tags[node])
         return result
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.vertex_data)
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = []
         for vertex, predecessors in self.__vertex_predecessors.items():
             if predecessors:
-                result.append("%s -> %s" % (vertex, ", ".join(predecessors)))
+                result.append(
+                    "{} -> {}".format(vertex, ", ".join(str(p) for p in predecessors))
+                )
             else:
                 result.append("%s -> (none)" % vertex)
         return "\n".join(result)

@@ -1,16 +1,28 @@
+from __future__ import annotations
+
 import os
 import sys
 import traceback
 
+from typing import TYPE_CHECKING
+
 import e3.error
 import e3.log
 from e3.anod.driver import AnodDriver
-from e3.anod.status import ReturnValue
 from e3.anod.queries import get_source_builder
+from e3.anod.status import ReturnValue
 from e3.fs import mkdir, sync_tree
 from e3.job import Job
 from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
+
+if TYPE_CHECKING:
+    from typing import Callable, Dict, List, Literal
+    from e3.anod.action import Action
+    from e3.anod.sandbox import SandBox
+    from e3.anod.loader import AnodSpecRepository
+    from e3.collection.dag import DAG
+    from e3.store.backends.base import Store
 
 logger = e3.log.getLogger("electrolyt.exec")
 STATUS = ReturnValue
@@ -32,31 +44,24 @@ class ElectrolytJob(Job):
 
     def __init__(
         self,
-        uid,
-        data,
-        notify_end,
-        spec_repo,
-        sandbox,
-        store,
-        force_status=STATUS.unknown,
-        dry_run=False,
+        uid: str,
+        data: Action,
+        notify_end: Callable,
+        spec_repo: AnodSpecRepository,
+        sandbox: SandBox,
+        store: Store,
+        force_status: ReturnValue = STATUS.unknown,
+        dry_run: bool = False,
     ):
         """Initialize the context of the job.
 
         :param uid: uid of the job
-        :type uid: str
         :param data: object to be processed by the job
-        :type data: child of e3.anod.action.Action
         :param notify_end: callback to call when job is finished
-        :type notify_end: function
         :param sandbox: Same as the attribute of the same name.
-        :type sandbox: e3.anod.sandbox.SandBox
-        :ivar store: Same as the attribute of the same name.
-        :vartype store: e3.store.backends.base.Store
+        :param store: Same as the attribute of the same name.
         :param force_status: Same as the attribute of the same name.
-        :type force_status: e3.anod.status.ReturnValue
         :param dry_run: Same as the attribute of the same name.
-        :param dry_run: bool
         """
         super(ElectrolytJob, self).__init__(uid, data, notify_end)
         self.__status = force_status
@@ -65,7 +70,7 @@ class ElectrolytJob(Job):
         self.dry_run = dry_run
         self.store = store
 
-    def run(self):
+    def run(self) -> None:
         if self.__status == STATUS.unknown and not self.dry_run:
             try:
                 getattr(self, self.data.run_method)()
@@ -78,11 +83,11 @@ class ElectrolytJob(Job):
                 logger.error(traceback.format_tb(exc_traceback))
 
     @property
-    def status(self):
+    def status(self) -> ReturnValue:
         """See Job.status' description."""
         return self.__status
 
-    def run_anod_primitive(self, primitive=None):
+    def run_anod_primitive(self, primitive: str) -> None:
         """Run an anod primitive after setting up the sandbox."""
         self.data.anod_instance.sandbox = self.sandbox
         anod_driver = AnodDriver(
@@ -93,19 +98,19 @@ class ElectrolytJob(Job):
         getattr(anod_driver.anod_instance, primitive)()
         self.__status = STATUS.success
 
-    def do_build(self):
+    def do_build(self) -> None:
         """Run anod build primitive."""
         return self.run_anod_primitive("build")
 
-    def do_install(self):
+    def do_install(self) -> None:
         """Run anod install primitive."""
         return self.run_anod_primitive("install")
 
-    def do_test(self):
+    def do_test(self) -> None:
         """Run anod test primitive."""
         return self.run_anod_primitive("test")
 
-    def do_checkout(self):
+    def do_checkout(self) -> None:
         """Get sources from vcs to sandbox vcs_dir."""
         repo_name = self.data.repo_name
         repo_url = self.data.repo_data["url"]
@@ -115,6 +120,7 @@ class ElectrolytJob(Job):
             logger.error("%s vcs type not supported", repo_vcs)
             self.__status = STATUS.failure
             return
+        assert self.sandbox.vcs_dir is not None
         repo_dir = os.path.join(self.sandbox.vcs_dir, repo_name)
         g = GitRepository(repo_dir)
         if e3.log.default_output_stream is not None:
@@ -123,9 +129,11 @@ class ElectrolytJob(Job):
         g.update(repo_url, repo_revision, force=True)
         self.__status = STATUS.success
 
-    def do_createsource(self):
+    def do_createsource(self) -> None:
         """Prepare src from vcs to cache using sourcebuilders."""
         source_name = self.data.source_name
+        assert self.sandbox.tmp_dir is not None
+        assert self.sandbox.vcs_dir is not None
         tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, "cache")
         src = self.sandbox.vcs_dir
         src_builder = get_source_builder(
@@ -138,12 +146,14 @@ class ElectrolytJob(Job):
             # ??? missing repository state
             repo_dict[source_name] = {"working_dir": src_dir}
             mkdir(dest_dir)
+            if TYPE_CHECKING:
+                assert src_builder.prepare_src is not None
             src_builder.prepare_src(repo_dict, dest_dir)
             self.__status = STATUS.success
             logger.debug("%s created in cache/tmp", source_name)
         return
 
-    def do_getsource(self):
+    def do_getsource(self) -> None:
         """action_item from an intermediate node.
 
         This action should return success status so do_install
@@ -151,8 +161,9 @@ class ElectrolytJob(Job):
         """
         self.__status = STATUS.success
 
-    def do_installsource(self):
+    def do_installsource(self) -> None:
         """Install the source from tmp/cache to build_space/src."""
+        assert self.sandbox.tmp_dir is not None
         spec = self.data.spec
         spec.sandbox = self.sandbox
         anod_instance = AnodDriver(anod_instance=spec, store=self.store)
@@ -170,17 +181,17 @@ class ElectrolytJob(Job):
         sync_tree(src_dir, dest_dir, ignore=source.ignore)
         self.__status = STATUS.success
 
-    def do_uploadbinarycomponent(self):
+    def do_uploadbinarycomponent(self) -> None:
         """Upload a binary component."""
         # not implemented
         self.__status = STATUS.success
 
-    def do_uploadsource(self):
+    def do_uploadsource(self) -> None:
         """Upload a binary component."""
         # not implemented
         self.__status = STATUS.success
 
-    def do_root(self):
+    def do_root(self) -> None:
         """Express the final result of the exec."""
         # This method won't be executed unless all the predecessor jobs are
         # successful, so it will just report success state
@@ -189,14 +200,22 @@ class ElectrolytJob(Job):
 
 
 class ElectrolytJobFactory(object):
-    def __init__(self, sandbox, asr, store, dry_run=False):
-        self.job_status = {}
+    def __init__(
+        self,
+        sandbox: SandBox,
+        asr: AnodSpecRepository,
+        store: Store,
+        dry_run: bool = False,
+    ):
+        self.job_status: Dict[str, ReturnValue] = {}
         self.sandbox = sandbox
         self.asr = asr
         self.dry_run = dry_run
         self.store = store
 
-    def get_job(self, uid, data, predecessors, notify_end):
+    def get_job(
+        self, uid: str, data: Action, predecessors: List[str], notify_end: Callable
+    ) -> ElectrolytJob:
         force_fail = any(
             (
                 k
@@ -215,7 +234,8 @@ class ElectrolytJobFactory(object):
             dry_run=self.dry_run,
         )
 
-    def collect(self, job):
+    def collect(self, job: Job) -> Literal[False]:
+        """Return False as the job is never requeued."""
         self.job_status[job.uid] = job.status
         logger.info(
             "%-48s [queue=%-10s status=%-10s]",
@@ -223,7 +243,8 @@ class ElectrolytJobFactory(object):
             job.queue_name,
             self.job_status[job.uid].name,
         )
+        return False
 
-    def run(self, action_list):
+    def run(self, action_list: DAG) -> None:
         sch = Scheduler(self.get_job, self.collect)
         sch.run(action_list)

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 import e3.anod.error
 import e3.diff
@@ -7,36 +10,44 @@ from e3.archive import create_archive
 from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 
 
+if TYPE_CHECKING:
+    from typing import Callable, Dict, Final, List, Literal, NoReturn, Optional, Union
+    from e3.anod.spec import Anod
+
+    PrepareSrcCB = Callable[[Dict[str, Dict[str, str]], str], None]
+    ApplyPatchCB = Callable[[str, str, str], None]
+
+
 class Package(object):
     """Describe and generate a binary package."""
 
-    def __init__(self, prefix, publish=False, version=None):
+    def __init__(
+        self,
+        prefix: str,
+        publish: bool = False,
+        version: Optional[Callable[[], str]] = None,
+    ):
         """Create a binary package.
 
         :param prefix: prefix of the package to create, the name will be
             {prefix}-{version}-{platform}-bin.{exe,tar.gz}
             The version is by default set to 'unknown' and
             can be overridden by the version callback.
-        :type prefix: str
         :param publish: if True, publish the package (i.e. the package
             can be distributed to a customer).
-        :type publish: bool
         :param version: a callback returning the package version, if None the
             version is set to Anod.sandbox.build_version
-        :type version: () -> str | None
         """
         self.prefix = prefix
         self.name = prefix + "-{version}-{platform}-bin"
         self.publish = publish
         self.version = version
 
-    def pkg_name(self, anod_instance):
+    def pkg_name(self, anod_instance: Anod) -> str:
         """Return the final package filename.
 
         :param anod_instance: the Anod instance that creates the package
-        :type anod_instance: Anod
         :return: the name without extension of the package filename
-        :rtype: str
         """
         if self.version is not None:
             version = self.version()
@@ -45,25 +56,21 @@ class Package(object):
 
         return self.name.format(version=version, platform=anod_instance.env.platform)
 
-    def pkg_path(self, anod_instance):
+    def pkg_path(self, anod_instance: Anod) -> str:
         """Return the full path in which a package will be generated.
 
         :param anod_instance: the Anod instance that creates the package
-        :type anod_instance: Anod
         :return: the full path to the generated archive
-        :rtype: str
         """
         return os.path.join(
             anod_instance.build_space.binary_dir, self.pkg_name(anod_instance) + ".zip"
         )
 
-    def create_package(self, anod_instance):
+    def create_package(self, anod_instance: Anod) -> str:
         """Generate a package as a ZIP archive.
 
         :param anod_instance: the Anod instance that creates the package
-        :type anod_instance: Anod
         :return: the full path to the generated archive
-        :rtype: str
         """
         pkg_name = self.pkg_name(anod_instance)
         pkg_path = self.pkg_path(anod_instance)
@@ -87,12 +94,12 @@ class Source(object):
 
     def __init__(
         self,
-        name,
-        publish,
-        dest=None,
-        unpack_cmd=None,
-        remove_root_dir=True,
-        ignore=None,
+        name: str,
+        publish: bool,
+        dest: Optional[str] = None,
+        unpack_cmd: Optional[Callable] = None,
+        remove_root_dir: bool = True,
+        ignore: None = None,
     ):
         """Create a new source object.
 
@@ -100,18 +107,14 @@ class Source(object):
 
         :param name: source package short alias (the full package name will
             be written in the sources metadata)
-        :type name: str
         :param publish: whether the source package should be distributed with
             the official releases
-        :type publish: bool
         :param dest: subdirectory of the local `src_dir` where to extract the
             source package
-        :type dest: str | None
         :param unpack_cmd: the function to call to install the source package
             See gnatpython.fileutils.unpack_archive for more information
         :param remove_root_dir: if True (default) the root directory of the
             archive is ignored
-        :type remove_root_dir: bool
         :param ignore: unused during instantiation, kept for backward
             compatibiliy.
         """
@@ -126,26 +129,24 @@ class Source(object):
         self.dest = dest
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
-        self.builder = None
-        self.other_sources = None
+        self.builder: Optional[SourceBuilder] = None
+        self.other_sources: List[Source] = []
 
-    def set_builder(self, builder_function):
+    def set_builder(self, builder_function: SourceBuilder) -> None:
         """Set the SourceBuilder associated to this Source object."""
         self.builder = builder_function
 
-    def set_other_sources(self, other_sources):
+    def set_other_sources(self, other_sources: List[Source]) -> None:
         """Get the list of other sources to compute ``ignore`` property."""
         self.other_sources = other_sources
 
     @property
-    def ignore(self):
+    def ignore(self) -> List[str]:
         """Return list of paths to ignore when installing the source.
 
         By default, a source package is first unpacked and then install
         in the `dest` directory by using e3.fs.sync_tree. The ignore
         property returns a value that can be passed to e3.fs.sync_tree.
-
-        :rtype: list[str]
         """
         ignore_list = []
         for other_source in self.other_sources:
@@ -169,27 +170,24 @@ class SharedSource(Source):
 
 class SourceBuilder(object):
 
-    DEFAULT_PATCH_CMD = 1
+    DEFAULT_PATCH_CMD: Final = 1
 
     def __init__(
         self,
-        name,
-        fullname,
-        checkout,
-        prepare_src=None,
-        apply_patch=None,
-        kind="source",
+        name: str,
+        fullname: Callable[[], str],
+        checkout: Optional[List[str]],
+        prepare_src: Optional[PrepareSrcCB] = None,
+        apply_patch: Optional[Union[Literal[1], ApplyPatchCB]] = None,
+        kind: str = "source",
     ):
         """Define a builder for the source package.
 
         :param name: short name of the package (as used by build_source_list
             and test_source_list).
-        :type name: str
         :param fullname: callback providing the full package name
-        :type fullname: () -> str
         :param checkout: list of repository names needed to build the
             source package
-        :type checkout: list[str] | None
         :param prepare_src: a function (repo_dict, dest) where
             repo_dict is a dictionary of {repo_name: working directory}
             dest is the path to the dest directory
@@ -197,23 +195,20 @@ class SourceBuilder(object):
             Note that it is supported only if the SourceBuilder object has
             only one Repository object. The repository working directories
             should be considered read only
-        :type prepare_src: (dict[str][str], str) -> None | None
         :param apply_patch: a function(repository, patch_file, dest) where
             repository is the name of the repository used to create a patch
             patch_file is a patch to apply
             dest is the path to the dest directory
             If apply_patch is set to DEFAULT_PATCH_CMD, use the default
             apply_patch command
-        :type apply_patch: (str, str, str) -> None | None
         :param kind: type of source 'source' or 'thirdparty'
-        :type kind: str
         """
         self.name = name
         self.checkout = checkout if checkout is not None else []
-        self.repositories = {}
+        self.repositories = {}  # type: ignore
         self.kind = kind
         self.from_spec = None
-        self.source_query = None
+        self.source_query: Optional[Dict[str, Optional[str]]] = None
         self.__fullname = fullname
         self.__prepare_src = prepare_src
         self.__apply_patch = apply_patch
@@ -223,11 +218,10 @@ class SourceBuilder(object):
         return self.__fullname(*args, **kwargs)
 
     @property
-    def prepare_src(self):
+    def prepare_src(self) -> Optional[PrepareSrcCB]:
         """Return the callback used to prepare the source package.
 
         :return: the callback or None if no prepare_src is defined
-        :rtype: (dict[str][str], str) -> None | None
         :raise: SpecError
         """
         if self.__prepare_src is not None:
@@ -246,24 +240,26 @@ class SourceBuilder(object):
 
         # Set default function (a basic sync_tree call) that ignore
         # .svn, .git, .cvs, .cvsignore and .gitignore files
-        return lambda repos, dest: sync_tree(
-            list(repos.values())[0]["working_dir"], dest, ignore=VCS_IGNORE_LIST
-        )
+        def default_prepare_src(repos: Dict[str, Dict[str, str]], dest: str) -> None:
+            sync_tree(
+                list(repos.values())[0]["working_dir"], dest, ignore=VCS_IGNORE_LIST
+            )
+
+        return default_prepare_src
 
     @property
-    def apply_patch(self):
+    def apply_patch(self) -> ApplyPatchCB:
         """Return the callback used to apply a patch.
 
         :return: the callback
-        :rtype: (str, str, str) -> None
         """
 
-        def default_apply_patch(_, patch_file, dest):
+        def default_apply_patch(_: str, patch_file: str, dest: str) -> None:
             """Apply a patch file using e3.diff.patch."""
             e3.log.debug("applying patch %s on %s", patch_file, dest)
             e3.diff.patch(patch_file, dest)
 
-        def no_apply_patch(r, p, d):
+        def no_apply_patch(r: str, p: str, d: str) -> NoReturn:
             """Raise an error (no apply_patch function defined)."""
             # Unused parameters
             del r, p, d
@@ -292,7 +288,7 @@ class UnmanagedSourceBuilder(SourceBuilder):
     """Source builder for sources not managed by anod."""
 
     @property
-    def prepare_src(self):
+    def prepare_src(self) -> None:
         """Do not create source package."""
         return None
 
@@ -300,11 +296,10 @@ class UnmanagedSourceBuilder(SourceBuilder):
 class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
     """SourceBuilder for thirdparty packages."""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         """Create a SourceBuilder for a third party package.
 
         :param name: full package name (including extension)
-        :type name: str
         """
         super(ThirdPartySourceBuilder, self).__init__(
             name=name,
@@ -318,22 +313,24 @@ class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
 class ExternalSourceBuilder(UnmanagedSourceBuilder):
     """SourceBuilder to reference sources produced outside the setup."""
 
-    def __init__(self, name, bid=None, setup=None, date=None, query_name=None):
+    def __init__(
+        self,
+        name: str,
+        bid: Optional[str] = None,
+        setup: Optional[str] = None,
+        date: Optional[str] = None,
+        query_name: Optional[str] = None,
+    ):
         """Initialize ExternalSourceBuilder.
 
         :param name: source name
-        :type name: str
         :param bid: build id. If not None then setup and date parameters
             are ignored
-        :type bid: str
         :param setup: setup in which the source has been created. If bid
             is None then this parameter is mandatory
-        :type setup: str
         :param date: date of the required source
-        :type date: str
         :param query_name: name of the source in 'setup'. Defaults to 'name'
             if None.
-        :type query_name: str
         """
         super(ExternalSourceBuilder, self).__init__(
             name=name, fullname=lambda: name, checkout=None, kind="source"

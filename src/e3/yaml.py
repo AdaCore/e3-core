@@ -1,21 +1,31 @@
 """Modification of the yaml loader for E3."""
 
 
+from __future__ import annotations
+
 import os
 import re
 import sys
 from collections import OrderedDict
+from typing import TYPE_CHECKING
 
-import e3.log
 import yaml
 import yaml.constructor
 import yaml.parser
+
+import e3.log
 from e3.text import format_with_dict
 
-try:
-    from yaml import CLoader as Loader
-except ImportError:  # defensive code
+if TYPE_CHECKING:
+    # Conditonal imports do not work with mypy, unconditionaly use yaml.Loader
+    # for type checking
+    from typing import Any, IO, List, Set, Tuple, Union
     from yaml import Loader
+else:
+    try:
+        from yaml import CLoader as Loader
+    except ImportError:
+        from yaml import Loader
 
 
 class YamlError(Exception):
@@ -29,14 +39,18 @@ class OrderedDictYAMLLoader(Loader):
     inclusion of yaml files into another yaml
     """
 
-    def __init__(self, stream):
+    def __init__(self, stream: IO[str]):
         self.name = None
         self.stream = stream
         super(OrderedDictYAMLLoader, self).__init__(stream)
 
-        self.add_constructor("tag:yaml.org,2002:map", type(self).construct_yaml_map)
-        self.add_constructor("tag:yaml.org,2002:omap", type(self).construct_yaml_map)
-        self.add_constructor("!include", type(self).yaml_include)
+        self.add_constructor(
+            "tag:yaml.org,2002:map", type(self).construct_yaml_map
+        )  # type: ignore
+        self.add_constructor(
+            "tag:yaml.org,2002:omap", type(self).construct_yaml_map
+        )  # type: ignore
+        self.add_constructor("!include", type(self).yaml_include)  # type: ignore
 
     def yaml_include(self, node):
         # Get the path out of the yaml file
@@ -93,13 +107,8 @@ class OrderedDictYAMLLoader(Loader):
         return mapping
 
 
-def load_ordered(filename):
-    """Load a .yaml file, keep the file order.
-
-    :type filename: str
-
-    :rtype: OrderedDict
-    """
+def load_ordered(filename: str) -> OrderedDict:
+    """Load a .yaml file, keep the file order."""
     with open(filename) as f:
         return yaml.load(f, OrderedDictYAMLLoader)
 
@@ -143,22 +152,20 @@ class CaseParser(object):
     supported by the `re` module, in your case values.
     """
 
-    def __init__(self, initial_config, case_prefix="case_"):
+    def __init__(self, initial_config: dict, case_prefix: str = "case_"):
         self.__state = initial_config.copy()
         self.case_prefix = case_prefix
 
         # This contains the list of keys that have been updated. This
         # allow us to remove the keys part of initial_config that are
         # not modified.
-        self.keys = set()
+        self.keys: Set[str] = set()
 
-    def __parse_case(self, case_key, data):
+    def __parse_case(self, case_key: str, data: dict) -> Any:
         """Parse a case statement.
 
         :param case_key: the variable on which the case is evaluated
-        :type case_key: str
         :param data: the dictionary of case conditions
-        :type data: dict
 
         :return: the value of the matched element or None
         """
@@ -174,7 +181,7 @@ class CaseParser(object):
         else:
             return None
 
-    def __format_value(self, value):
+    def __format_value(self, value: Any) -> Any:
         """Format a value.
 
         :param value: the value to be formatted
@@ -193,14 +200,13 @@ class CaseParser(object):
 
         return value
 
-    def __update_state(self, key, value, cursor, prefix):
+    def __update_state(self, key: str, value: Any, cursor: Any, prefix: Tuple):
         """Update state.
 
         :param key: the key to modify. Leading or trailing '+' in the key name
             are interpreted respectively as append and prepend operators.
             For dictionaries these operators are interpreted as an update
             on the original value.
-        :type key: str
         :param value: the new value
         :param cursor: the object to be updated
         :param prefix: a tuple of string that gives the position of cursor in
@@ -231,7 +237,7 @@ class CaseParser(object):
                     e3.log.debug("prepend %s -> %s", real_key_str, real_value)
                     cursor[real_key] = real_value + cursor[real_key]
 
-    def parse(self, data):
+    def parse(self, data: Any) -> Any:
         """Parse.
 
         :param data: a python object. Note that dictionaries in that structure
@@ -242,7 +248,7 @@ class CaseParser(object):
         """
         return self.__parse(data, self.__state, ())
 
-    def __parse(self, data, cursor, prefix):
+    def __parse(self, data: Any, cursor: Any, prefix: tuple) -> Any:
         """Parse (internal).
 
         :param data: a python object. Note that dictionaries in that structure
@@ -279,15 +285,13 @@ class CaseParser(object):
             return cursor
 
 
-def load_with_config(filename, config):
+def load_with_config(filename: Union[str, List[str]], config: dict) -> Any:
     """Load yaml config files with case statement handling.
 
     :param filename: a path or list of path. When a list of path
         is given, config files are loaded in order each one
         updating the result of the previous parsing.
-    :type filename: str | list[str]
     :param config: initial state
-    :type config: dict
 
     :return: the final object
     """
@@ -314,18 +318,13 @@ def load_with_config(filename, config):
     return result
 
 
-def load_with_regexp_table(filename, selectors, data):
+def load_with_regexp_table(filename: str, selectors: List[str], data: dict) -> dict:
     """Load a yaml file using regexp tables.
 
     :param filename: the yaml file to load
-    :type filename: str
     :param selectors: a list of string that will be used to match the regexps
         in table
-    :type selectors: list[str]
     :param data: a dictionary used to replace part of value content
-    :type data: dict
-
-    :rtype: dict
 
     This function expect a yaml file that has the following format::
 

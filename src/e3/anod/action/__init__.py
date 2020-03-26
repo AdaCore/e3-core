@@ -1,6 +1,16 @@
+from __future__ import annotations
+
 import abc
+from typing import TYPE_CHECKING
 
 from e3.anod.spec import Anod
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, Final, List, Literal, Optional, Tuple, Union
+    from e3.anod.package import Source, SourceBuilder
+    from e3.collection.dag import DAG
+
+    Choice = Union[Literal[0], Literal[1], Literal[2]]
 
 
 class Action(object):
@@ -12,18 +22,17 @@ class Action(object):
 
     __slots__ = ("uid", "data")
 
-    def __init__(self, uid, data):
+    def __init__(self, uid: str, data: Any):
         """Initialize an Action.
 
         :param uid: an unique identifier
-        :type uid: str
         :param data: data associated with the node
         """
         self.uid = uid
         self.data = data
 
     @property
-    def run_method(self):
+    def run_method(self) -> str:
         return "do_%s" % self.__class__.__name__.lower()
 
 
@@ -37,11 +46,11 @@ class Root(Action):
 
     __slots__ = ("uid", "data")
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a root node."""
         super(Root, self).__init__(uid="root", data="root")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "root node"
 
 
@@ -56,18 +65,17 @@ class GetSource(Action):
 
     __slots__ = ("uid", "builder")
 
-    def __init__(self, builder):
+    def __init__(self, builder: SourceBuilder):
         """Object initializer.
 
         :param builder: A SourceBuilder object for the source we need to get.
-        :type builder: e3.anod.package.SourceBuilder
         """
         super(GetSource, self).__init__(
             uid="source_get.%s" % builder.name, data=builder
         )
         self.builder = builder
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "get source %s" % self.data.name
 
 
@@ -86,19 +94,18 @@ class DownloadSource(Download):
 
     __slots__ = ("uid", "builder")
 
-    def __init__(self, builder):
+    def __init__(self, builder: SourceBuilder):
         """Object initializer.
 
         :param builder: A SourceBuilder object for the source we need
             to download.
-        :type builder: e3.anod.package.SourceBuilder
         """
         super(DownloadSource, self).__init__(
             uid="download.%s" % builder.name, data=builder
         )
         self.builder = builder
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "download source %s" % self.builder.name
 
 
@@ -111,21 +118,18 @@ class InstallSource(Action):
 
     __slots__ = ("uid", "spec", "source")
 
-    def __init__(self, uid, spec, source):
+    def __init__(self, uid: str, spec: Anod, source: Source):
         """Object initializer.
 
         :param uid: The job ID for this source's install.
-        :type uid: str
         :param spec: The Anod instance of the spec providing those sources.
-        :type spec: e3.anod.spec.Anod
         :param source: The source we want to install.
-        :type source: e3.anod.package.Source
         """
         super(InstallSource, self).__init__(uid, data=(spec, source))
         self.spec = spec
         self.source = source
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "install source %s" % self.data[1].name
 
 
@@ -138,14 +142,12 @@ class CreateSource(Action):
 
     __slots__ = ("uid", "anod_instance", "source_name")
 
-    def __init__(self, anod_instance, source_name):
+    def __init__(self, anod_instance: Anod, source_name: str):
         """Initialize CreateSource object.
 
         :param anod_instance: The Anod instance of the spec providing
             the given source.
-        :type anod_instance: e3.anod.spec.Anod
         :param source_name: name of source package to assemble
-        :type source_name: str
         """
         super(CreateSource, self).__init__(
             uid="%s.%s" % (anod_instance.uid, source_name),
@@ -154,7 +156,7 @@ class CreateSource(Action):
         self.anod_instance = anod_instance
         self.source_name = source_name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "create source %s" % self.data[1]
 
 
@@ -168,18 +170,17 @@ class CreateSources(Action):
 
     __slots__ = ("uid", "anod_instance")
 
-    def __init__(self, anod_instance):
+    def __init__(self, anod_instance: Anod):
         """Initialize CreateSources object.
 
         :param anod_instance: the Anod instance of the spec
-        :type anod_instance: e3.anod.spec.Anod
         """
         super(CreateSources, self).__init__(
             uid="%s.sources" % anod_instance.uid, data=(anod_instance)
         )
         self.anod_instance = anod_instance
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "create all sources for %s.anod" % self.anod_instance.name
 
 
@@ -192,17 +193,15 @@ class Checkout(Action):
 
     __slots__ = ("uid", "repo_name", "repo_data")
 
-    def __init__(self, repo_name, repo_data):
+    def __init__(self, repo_name: str, repo_data: Dict[str, str]):
         """Initialize a Checkout object.
 
         :param repo_name: The name of the repository.
-        :type repo_name: str
         :param repo_data: A dictionary with the following keys:
             - 'url': The repository URL;
             - 'revision': The revision to checkout;
             - 'vcs': The Version Control System kind (a string).
                 At present, only 'git' is supported.
-        :type repo_data: dict
         """
         super(Checkout, self).__init__(
             uid="checkout.%s" % repo_name, data=(repo_name, repo_data)
@@ -210,7 +209,7 @@ class Checkout(Action):
         self.repo_name = repo_name
         self.repo_data = repo_data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "checkout %s" % self.data[0]
 
 
@@ -222,17 +221,16 @@ class AnodAction(Action):
 
     __slots__ = ("uid", "anod_instance")
 
-    def __init__(self, anod_instance):
+    def __init__(self, anod_instance: Anod):
         """Initialize an anod Action.
 
         :param anod_instance: an Anod spec instance
-        :type anod_instance: e3.anod.spec.Anod
         """
         assert isinstance(anod_instance, Anod)
         super(AnodAction, self).__init__(uid=anod_instance.uid, data=anod_instance)
         self.anod_instance = anod_instance
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = "%s %s for %s" % (
             self.data.kind,
             self.data.name,
@@ -269,18 +267,17 @@ class DownloadBinary(Download):
 
     __slots__ = ("uid", "data")
 
-    def __init__(self, data):
+    def __init__(self, data: Anod):
         """Initialize a DownloadBinary object.
 
         :param data: Anod instance
-        :type data: e3.anod.spec.Anod
         """
-        uid = data.uid.split(".")
-        uid[-1] = "download_bin"
-        uid = ".".join(uid)
+        data_uid = data.uid.split(".")
+        data_uid[-1] = "download_bin"
+        uid = ".".join(data_uid)
         super(DownloadBinary, self).__init__(uid=uid, data=data)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "download binary of %s" % self.uid.split(".", 1)[1].rsplit(".", 1)[0]
 
 
@@ -299,19 +296,18 @@ class UploadComponent(Upload):
     __slots__ = ("uid", "data", "anod_instance")
     str_prefix = ""
 
-    def __init__(self, data):
+    def __init__(self, data: Anod):
         """Initialize an UploadComponent object.
 
         :param data: Anod instance
-        :type data: e3.anod.spec.Anod
         """
-        uid = data.uid.split(".")
-        uid[-1] = "upload_bin"
-        uid = ".".join(uid)
+        data_uid = data.uid.split(".")
+        data_uid[-1] = "upload_bin"
+        uid = ".".join(data_uid)
         super(UploadComponent, self).__init__(uid=uid, data=data)
         self.anod_instance = data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "upload %s of %s" % (
             self.str_prefix,
             self.uid.split(".", 1)[1].rsplit(".", 1)[0],
@@ -335,24 +331,22 @@ class UploadSource(Upload):
 
     __slots__ = ("uid", "anod_instance", "source_name")
 
-    def __init__(self, anod_instance, source_name):
+    def __init__(self, anod_instance: Anod, source_name: str):
         """Initialize UploadSource object.
 
         :param anod_instance: The Anod instance of the spec providing
             the given source.
-        :type anod_instance: e3.anod.spec.Anod
         :param source_name: name of source package to assemble
-        :type source_name: str
         """
-        uid = anod_instance.uid.split(".")
-        uid[-1] = "upload_src"
-        uid.append(source_name)
-        uid = ".".join(uid)
+        instance_uid = anod_instance.uid.split(".")
+        instance_uid[-1] = "upload_src"
+        instance_uid.append(source_name)
+        uid = ".".join(instance_uid)
         super(UploadSource, self).__init__(uid=uid, data=(anod_instance, source_name))
         self.anod_instance = anod_instance
         self.source_name = source_name
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation."""
         return "upload source %s" % self.source_name
 
@@ -414,42 +408,40 @@ class Decision(Action, metaclass=abc.ABCMeta):
     :ivar: str
     """
 
-    LEFT = 0
-    RIGHT = 1
-    BOTH = 2
+    LEFT: Final = 0
+    RIGHT: Final = 1
+    BOTH: Final = 2
 
-    def __init__(self, root, left, right, choice=None):
+    def __init__(
+        self, root: Action, left: Action, right: Action, choice: Optional[Choice] = None
+    ):
         """Initialize a Decision instance.
 
         :param root: parent node
-        :type root: Action
         :param left: Same as the left_action attribute.
-        :type left: Action
         :param right: Same as the right_action attribute.
-        :type right: Action
         :param choice: Same as the attribute.
-        :type choice: int | None
         """
         super(Decision, self).__init__(uid=root.uid + ".decision", data=None)
         self.initiator = root.uid
         self.choice = choice
-        self.expected_choice = None
+        self.expected_choice: Optional[Choice] = None
         self.left_action = left
         self.right_action = right
-        self.triggers = []
-        self.decision_maker = None
+        self.triggers: List[Tuple[str, Choice, str]] = []
+        self.decision_maker: Optional[str] = None
 
     @property
-    def left(self):
+    def left(self) -> str:
         """return self.left_action.uid (this is a convenience property)."""
         return self.left_action.uid
 
     @property
-    def right(self):
+    def right(self) -> str:
         """return self.right_action.uid (this is a convenience property)."""
         return self.right_action.uid
 
-    def add_trigger(self, trigger, decision, plan_line):
+    def add_trigger(self, trigger: Action, decision: Choice, plan_line: str) -> None:
         """Add a trigger to self.triggers.
 
         See the description of the "triggers" attribute for more
@@ -459,20 +451,16 @@ class Decision(Action, metaclass=abc.ABCMeta):
             the given decision (which is actually more aptly
             described as a choice) to be recorded as the expected
             choice for our Decision.
-        :type trigger: Action
         :param decision: The expected choice when the trigger Action is
             scheduled.
-        :type decision: int
         :param plan_line: plan line associated with this action
-        :type plan_line: str
         """
         self.triggers.append((trigger.uid, decision, plan_line))
 
-    def apply_triggers(self, dag):
+    def apply_triggers(self, dag: DAG) -> None:
         """Apply triggers to the given dag.
 
         :param dag: a dag of scheduled actions
-        :type dag: e3.collection.dag.DAG
         """
         for uid, decision, _ in self.triggers:
             if uid in dag:
@@ -481,7 +469,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
                 elif self.expected_choice != decision:
                     self.expected_choice = Decision.BOTH
 
-    def get_decision(self):
+    def get_decision(self) -> Optional[str]:
         """Return uid of the choice made by the plan, or None.
 
         This function returns the choice made by the plan, if any.
@@ -497,7 +485,6 @@ class Decision(Action, metaclass=abc.ABCMeta):
 
         :return: None if the decision cannot be made; otherwise,
             return uid of the choice that was made.
-        :rtype: None | str
         """
         if self.choice is None or self.choice == Decision.BOTH:
             return None
@@ -509,12 +496,11 @@ class Decision(Action, metaclass=abc.ABCMeta):
             else:
                 return self.right
 
-    def get_expected_decision(self):
+    def get_expected_decision(self) -> Optional[str]:
         """Get expected decision.
 
         :return: uid of the expected action or None if no specific decision
             is expected.
-        :rtype: str | None
         """
         if self.expected_choice == Decision.LEFT:
             return self.left
@@ -523,7 +509,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         else:
             return None
 
-    def set_decision(self, which, decision_maker):
+    def set_decision(self, which: Choice, decision_maker: Optional[str]) -> None:
         """Record a choice made by an action in a plan.
 
         This method should be caused when an entry in our plan
@@ -532,11 +518,9 @@ class Decision(Action, metaclass=abc.ABCMeta):
         that action performs.
 
         :param which: Decision.LEFT or Decision.RIGHT
-        :type which: int
         :param decision_maker: Record who the decision maker is.
             This is typically the plan line of the action performing
             the choice being recorded.
-        :type decision_maker: None | str
         """
         if self.choice is None:
             self.choice = which
@@ -546,26 +530,22 @@ class Decision(Action, metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def description(cls, decision):
+    def description(cls, decision: Choice) -> str:
         """Return a description of the decision (actually a choice).
 
         :param decision: The decision (actually a choice).
-        :type decision: int
         :return: A description of the given parameter (named "decision",
             but actually a choice).
-        :rtype: str
         """
         pass  # all: no cover
 
-    def suggest_plan_fix(self, choice):
+    def suggest_plan_fix(self, choice: Choice) -> Optional[str]:
         """Suggest a plan line that would fix the conflict.
 
         :param choice: Decision.LEFT or Decision.RIGHT
-        :type choice: int
 
         :return: a line to add to the plan or None if no fix
              can be proposed
-        :rtype: str | None
         """
         return None
 
@@ -573,43 +553,37 @@ class Decision(Action, metaclass=abc.ABCMeta):
 class CreateSourceOrDownload(Decision):
     """Decision between creating or downloading a source package."""
 
-    CREATE = Decision.LEFT
-    DOWNLOAD = Decision.RIGHT
+    CREATE: Final = Decision.LEFT
+    DOWNLOAD: Final = Decision.RIGHT
 
-    def __init__(self, root, left, right):
+    def __init__(self, root: Action, left: CreateSource, right: DownloadSource):
         """Initialize a CreateSourceOrDownload instance.
 
         :param root: parent node
-        :type root: Action
         :param left: first choice
-        :type left: CreateSource
         :param right: second choice
-        :type right: DownloadSource
         """
         assert isinstance(left, CreateSource)
         assert isinstance(right, DownloadSource)
         super(CreateSourceOrDownload, self).__init__(root=root, left=left, right=right)
 
     @classmethod
-    def description(cls, decision):
+    def description(cls, decision: Choice) -> str:
         return "CreateSource" if decision == Decision.LEFT else "DownloadSource"
 
 
 class BuildOrDownload(Decision):
     """Decision between building or downloading a component."""
 
-    BUILD = Decision.LEFT
-    INSTALL = Decision.RIGHT
+    BUILD: Final = Decision.LEFT
+    INSTALL: Final = Decision.RIGHT
 
-    def __init__(self, root, left, right):
+    def __init__(self, root: Install, left: Build, right: DownloadBinary):
         """Initialize a BuildOrDownload instance.
 
         :param root: parent node
-        :type root: Install
         :param left: first choice
-        :type left: Build
         :param right: second choice
-        :type right: DownloadBinary
         """
         assert isinstance(left, Build)
         assert isinstance(right, DownloadBinary)
@@ -617,10 +591,10 @@ class BuildOrDownload(Decision):
         super(BuildOrDownload, self).__init__(root=root, left=left, right=right)
 
     @classmethod
-    def description(cls, decision):
+    def description(cls, decision: Choice) -> str:
         return "Build" if decision == Decision.LEFT else "DownloadBinary"
 
-    def suggest_plan_fix(self, choice):
+    def suggest_plan_fix(self, choice: Choice) -> str:
         action = self.left_action if choice == Decision.LEFT else self.right_action
         spec_instance = action.data
 

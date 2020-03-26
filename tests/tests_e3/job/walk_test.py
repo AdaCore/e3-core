@@ -59,7 +59,7 @@ def setup_sbx(request):
     os.mkdir(SBX_TMP_DIR)
 
 
-def job_source_basename(uid):
+def job_source_basename(uid: str) -> str:
     """Return the name of a source corresponding to the give job.
 
     In our testcase environment, we will consider that, if a DAG's action
@@ -74,30 +74,24 @@ def job_source_basename(uid):
     naming scheme (see DOWNLOAD_JOB_UID_PREFIX above).
 
     :param uid: A unique Job ID.
-    :type uid: str
-    :rtype: str
     """
     if uid.startswith(DOWNLOAD_JOB_UID_PREFIX):
         uid = uid[len(DOWNLOAD_JOB_UID_PREFIX) :]
     return uid + ".txt"
 
 
-def source_fullpath(uid):
+def source_fullpath(uid: str) -> str:
     """Return the fullpath of a job's sources, if present.
 
     :param uid: A unique Job ID.
-    :type uid: str
-    :rtype: str
     """
     return os.path.join(SBX_TMP_DIR, job_source_basename(uid))
 
 
-def source_store_fullpath(uid):
+def source_store_fullpath(uid: str) -> str:
     """Return the given job's fullpath to its sources in the store.
 
     :param uid: A unique Job ID.
-    :type uid: str
-    :rtype: str
     """
     assert uid.startswith(DOWNLOAD_JOB_UID_PREFIX)
     return os.path.join(STORE_DIR, job_source_basename(uid))

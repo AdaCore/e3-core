@@ -1,8 +1,15 @@
+from __future__ import annotations
+
 import abc
 from collections import namedtuple
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.error import E3Error
+
+if TYPE_CHECKING:
+    from typing import Any, Optional
+    from e3.store.cache.backends.base import Cache
 
 logger = e3.log.getLogger("store")
 
@@ -14,22 +21,19 @@ class ResourceInfo(object, metaclass=abc.ABCMeta):
     """
 
     @abc.abstractproperty
-    def uid(self):
+    def uid(self) -> str:
         """Return an unique identifier.
 
         This is meant to be used to implement a cache system.
-        :rtype: str
         """
         pass  # all: no cover
 
     @abc.abstractmethod
-    def verify(self, resource_path):
+    def verify(self, resource_path: str) -> bool:
         """Verify that a downloaded resource is valid.
 
         This is meant to validate the resource fingerprint (e.g. sha1sum).
         :param resource_path: path to the downloaded resource
-        :type resource_path: str
-        :rtype: bool
         """
         pass  # all: no cover
 
@@ -45,39 +49,31 @@ class StoreError(E3Error):
 
 
 class Store(object, metaclass=abc.ABCMeta):
-    def __init__(self, store_configuration, cache_backend):
+    def __init__(self, store_configuration: Any, cache_backend: Cache):
         """Initialize a Store object.
 
-        :param store_configuration:
-        :type store_configuration:
-        :param cache_backend:
-        :type cache_backend: e3.store.cache.backends.base.Cache
+        :param store_configuration: configuration for this store
+        :param cache_backend: a Cache instance
         :return:
-        :rtype:
         """
         self.store_configuration = store_configuration
         self.cache_backend = cache_backend
 
     @abc.abstractmethod
-    def get_resource_metadata(self, query):
+    def get_resource_metadata(self, query: dict) -> ResourceInfo:
         """Get a resource metadata from query.
 
         :param query: a dictionary containing store specific queries to
             identify a resource
-        :type query: dict
-        :rtype: ResourceInfo
         """
         pass  # all: no cover
 
-    def download_resource(self, metadata, dest):
+    def download_resource(self, metadata: ResourceInfo, dest: str) -> Optional[str]:
         """Download a resource identified by its metadata in dest.
 
         :param metadata: resource metadata
-        :type metadata: ResourceInfo
         :param dest: directory where the resource will be stored
-        :type dest: str
         :return: resource path
-        :rtype: str | None
         """
         cached_data = self.cache_backend.get(metadata.uid)
         if cached_data is not None:
@@ -106,17 +102,16 @@ class Store(object, metaclass=abc.ABCMeta):
         return local_path
 
     @abc.abstractmethod
-    def download_resource_content(self, metadata, dest):
+    def download_resource_content(
+        self, metadata: ResourceInfo, dest: str
+    ) -> Optional[str]:
         """Download a resource identified by its metadata in dest.
 
         The resource is supposed to be validated with metadata.verify
         once the download is completed.
 
         :param metadata: resource metadata
-        :type metadata: ResourceInfo
         :param dest: directory where the resource will be stored
-        :type dest: str
         :return: resource path
-        :rtype: str | None
         """
         pass  # all: no cover

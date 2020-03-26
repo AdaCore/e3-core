@@ -1,6 +1,11 @@
+from __future__ import annotations
+
 import os
 from collections import OrderedDict
 from distutils.version import StrictVersion
+from typing import TYPE_CHECKING
+
+import yaml
 
 import e3.anod.deps
 import e3.anod.package
@@ -8,7 +13,6 @@ import e3.env
 import e3.log
 import e3.os.process
 import e3.text
-import yaml
 from e3.anod.error import AnodError, ShellError
 from e3.yaml import load_with_config
 
@@ -22,8 +26,21 @@ SUPPORTED_API = (__version__, "1.5")
 logger = e3.log.getLogger("anod")
 
 
-def check_api_version(version):
-    """Make sure there are no API mismatch."""
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Optional, Sequence
+    from e3.anod.buildspace import BuildSpace
+    from e3.anod.sandbox import SandBox
+    from e3.env import BaseEnv
+
+    import e3.anod.package
+    import e3.anod.sandbox
+
+
+def check_api_version(version: str) -> None:
+    """Make sure there are no API mismatch.
+
+    :raise: AnodError if the API is not supported
+    """
     if version.strip() not in SUPPORTED_API:
         raise AnodError(
             origin="check_api_version",
@@ -32,13 +49,11 @@ def check_api_version(version):
         )
 
 
-def parse_command(command, build_space):
+def parse_command(command: Sequence[str], build_space: BuildSpace) -> List[str]:
     """Parse a command line formatting each string.
 
     :param command: the command line (a list of string)
-    :type command: list[str] | tuple[str]
     :param build_space: a build space object
-    :type build_space: e3.anod.sandbox.BuildSpace
     """
     cmd_dict = {}
     cmd_dict.update(
@@ -47,15 +62,11 @@ def parse_command(command, build_space):
     return [e3.text.format_with_dict(c, cmd_dict) for c in command]
 
 
-def has_primitive(anod_instance, name):
+def has_primitive(anod_instance: Anod, name: str) -> bool:
     """Return True if the primitive `name` is supported.
 
     :param anod_instance: an Anod instance
-    :type anod_instance: Anod
     :param name: name of the primitive ('build', 'install'...)
-    :type name: str
-
-    :rtype: bool
     """
     if name == "source":
         source_pkg_build = getattr(anod_instance, "source_pkg_build", None)
@@ -63,10 +74,10 @@ def has_primitive(anod_instance, name):
 
     try:
         func = getattr(anod_instance, name)
-        is_primitive = getattr(func, "is_primitive")
+        is_primitive: bool = getattr(func, "is_primitive")
     except AttributeError:
         return False
-    return bool(is_primitive)
+    return is_primitive
 
 
 class Anod(object):
@@ -85,9 +96,12 @@ class Anod(object):
     All attributes starting with spec_ are reserved by the driver and must not
     be overwritten.
 
-    Three attributes are set when loading the spec:
+    Several attributes are set when loading the spec:
 
+    :cvar api_version: which API version is in use
+    :cvar data_files: set of yaml files associated with the spec
     :cvar spec_checksum: the sha1 of the specification file content
+    :cvar spec_dir: directory where the specification files are located
     :cvar name: the basename of the specification file (without the .anod
          extension)
     :cvar sandbox: e3.anod.sandbox.SandBox object shared by all Anod instances
@@ -114,8 +128,11 @@ class Anod(object):
 
     # set when loading the spec
     spec_checksum = ""
-    sandbox = None
+    spec_dir = ""
+    sandbox: Optional[SandBox] = None
     name = ""
+    api_version = ""
+    data_files = ()
 
     # API
     Dependency = e3.anod.deps.Dependency
@@ -127,28 +144,23 @@ class Anod(object):
     ExternalSourceBuilder = e3.anod.package.ExternalSourceBuilder
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
-    def __init__(self, qualifier, kind, jobs=1, env=None):
+    def __init__(self, qualifier: str, kind: str, jobs: int = 1, env: BaseEnv = None):
         """Initialize an Anod instance.
 
         :param qualifier: the qualifier used when loading the spec
-        :type qualifier: str
         :param kind: the action kind (build, install, test, ...)
-        :type kind: str
         :param jobs: max parallelism level allowed for jobs spawned by this
             instance
-        :type jobs: int
         :param env: alternate platform environment
-        :type env: Env
         :raise: SpecError
         """
-        self.deps = OrderedDict()
-        """:type: OrderedDict[str, e3.anod.Anod]"""
+        self.deps: Dict[str, Anod] = OrderedDict()
 
         self.kind = kind
         self.jobs = jobs
 
         # Set when self.bind_to_sandbox is called
-        self.build_space = None
+        self.__build_space: Optional[BuildSpace] = None
 
         # Default spec logger
         self.log = e3.log.getLogger("anod.spec")
@@ -188,45 +200,49 @@ class Anod(object):
         )
 
         # Hold the config dictionary-like object
-        self._config = None
+        self._config: Optional[dict] = None
 
         # Hold the result of the pre function
         self._pre = None
 
     @property
-    def has_package(self):
-        """Return true if the spec defines a binary package.
+    def build_space(self) -> BuildSpace:
+        if self.__build_space is None:
+            raise AnodError("build space not set")
+        return self.__build_space
 
-        :rtype: bool
-        """
+    @property
+    def has_package(self) -> bool:
+        """Return true if the spec defines a binary package."""
         return (
             self.package is not None
             and self.package.name is not None
             and self.component is not None
         )
 
-    def bind_to_sandbox(self, sandbox):
+    def bind_to_sandbox(self, sandbox: SandBox) -> None:
         """Bind spec instance to a physical Anod sandbox.
 
         Binding an Anod instance to a sandbox will set the
         build_space attribute.
-
-        :param sandbox: a sandbox
-        :type sandbox: Sandbox
         """
-        self.build_space = sandbox.get_build_space(
+        self.__build_space = sandbox.get_build_space(
             name=self.build_space_name, platform=self.env.platform
         )
 
-    def bind_to_config(self, config):
+    def bind_to_config(self, config: dict) -> None:
         """Bind an Anod instance to a config.
 
         :param config: a dictionary-like object
-        :type config: dict
         """
         self._config = config
 
-    def load_config_file(self, extended=False, suffix=None, selectors=None):
+    def load_config_file(
+        self,
+        extended: bool = False,
+        suffix: Optional[str] = None,
+        selectors: dict = None,
+    ) -> Any:
         """Load a YAML config file associated with the current module.
 
         This function looks for a YAML starting with the spec basename. The
@@ -234,13 +250,9 @@ class Anod(object):
         initializing the spec.
 
         :param suffix: suffix of the configuration file (default is '')
-        :type suffix: str | unicode
         :param extended: if True then a special yaml parser is used with
             ability to use case statement
-        :type extended: bool
         :param selectors: additional selectors for extended mode
-        :type: dict | None
-        :rtype: T
         """
         # Compute data file location and check for existence
         if StrictVersion(self.api_version) >= StrictVersion("1.5"):
@@ -255,17 +267,17 @@ class Anod(object):
 
         if extended:
             # Ensure selectors is a dict
-            selectors = {} if selectors is None else selectors
+            config_selectors: dict = {} if selectors is None else selectors
 
             # Add environment information to selectors
-            selectors.update(self.env.to_dict())
+            config_selectors.update(self.env.to_dict())
 
-            return load_with_config(filename, selectors)
+            return load_with_config(filename, config_selectors)
         else:
             with open(filename) as f:
                 return yaml.safe_load(f.read())
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         """Access build_space attributes and pre callback values directly.
 
         Allow accessing all build_space attributes directly by using
@@ -273,11 +285,8 @@ class Anod(object):
         self.build_space.pkg_dir values.
 
         Also directly access items returned by the ``pre`` callback.
-
-        :type key: str
-        :rtype: T
         """
-        if self.build_space is None:
+        if self.__build_space is None:
             return "unknown"
 
         # First look for pre result
@@ -293,7 +302,12 @@ class Anod(object):
             return getattr(self.build_space, key.lower(), None)
 
     @classmethod
-    def primitive(cls, pre=None, post=None, version=None):
+    def primitive(
+        cls,
+        pre: Optional[Callable[[Anod], dict]] = None,
+        post: Optional[Callable[..., None]] = None,
+        version: Optional[Callable[..., str]] = None,
+    ) -> Callable:
         """Declare an anod primitive.
 
         Catch all exceptions and raise AnodError with the traceback
@@ -301,14 +315,11 @@ class Anod(object):
         :param pre: None or a special function to call before running the
             primitive. The function takes a unique parameter `self` and
             returns a dict
-        :type pre: None | Anod -> {}
         :param post: None or a callback function to call after running the
             primitive
-        :type post: None | () -> None
         :param version: None or a callback function returning the version
             that will be evaluated as a string. This callback is called
             after running the primitive
-        :type version: None | () -> str
         :raise: AnodError
         """
 
@@ -358,39 +369,37 @@ class Anod(object):
         return primitive_dec
 
     @property
-    def package(self):
+    def package(self) -> Optional[e3.anod.package.Package]:
         """Return binary package creation recipe.
 
-        If None don't create a binary package.
-
-        :rtype: e3.anod.package.Package | None
+        If None don't create a binary package, needs a component name set.
         """
         return None
 
     @property
-    def component(self):
+    def component(self) -> Optional[str]:
         """Return component name.
 
-        :rtype: str | None
+        If None, don't created a component (nor a binary package).
         """
         return None
 
     @property
-    def module_name(self):
+    def module_name(self) -> str:
         """For backward compatibility purpose."""
         return self.name
 
     @property
-    def anod_id(self):
+    def anod_id(self) -> str:
         """For backward compativility purpose."""
         return self.uid
 
     @property
-    def source_pkg_build(self):
+    def source_pkg_build(self) -> Optional[List[e3.anod.package.SourceBuilder]]:
         """Return list of SourceBuilder defined in the specification file."""
         return None
 
-    def shell(self, *command, **kwargs):
+    def shell(self, *command: str, **kwargs) -> e3.os.process.Run:
         """Run a subprocess using e3.os.process.Run.
 
         Contrary to what is done in e3.os.process.Run parse_shebang
@@ -402,7 +411,7 @@ class Anod(object):
 
         :raise: ShellError
         """
-        command = parse_command(command, self.build_space)
+        parsed_command = parse_command(command, self.build_space)
         if "parse_shebang" not in kwargs:
             kwargs["parse_shebang"] = True
         if "output" not in kwargs:
@@ -412,7 +421,9 @@ class Anod(object):
         if "python_executable" in kwargs:
             del kwargs["python_executable"]
 
-        r = e3.os.process.Run(command, **kwargs)
+        r = e3.os.process.Run(parsed_command, **kwargs)
+        if TYPE_CHECKING:
+            assert r.status is not None
         if r.status != 0:
             raise ShellError(
                 message="%s failed (exit status: %d)" % (" ".join(command), r.status),

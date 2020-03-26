@@ -1,13 +1,20 @@
 """Extensions to the standard Python logging system."""
 
+from __future__ import annotations
 
 import logging
 import re
 import sys
 import time
+from typing import TYPE_CHECKING
 
 from colorama import Fore, Style
+
 from tqdm import tqdm
+
+if TYPE_CHECKING:
+    from typing import IO, Optional, Sequence, TextIO, Union
+
 
 # Define default format for StreamHandler and FileHandler
 DEFAULT_STREAM_FMT = "%(levelname)-8s %(message)s"
@@ -15,7 +22,7 @@ DEFAULT_FILE_FMT = "%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s"
 
 # Default output stream (sys.stdout by default, or a file descriptor if
 # activate() is called with a filename.
-default_output_stream = sys.stdout
+default_output_stream: Union[TextIO, IO[str]] = sys.stdout
 
 # If sys.stdout is a terminal then enable "pretty" output for user
 # This includes progress bars and colors
@@ -27,13 +34,11 @@ else:
 console_logs = None
 
 
-def progress_bar(it, **kwargs):
+def progress_bar(it: Sequence, **kwargs):
     """Create a tqdm progress bar.
 
     :param it: an interator
-    :type it: collections.Iterator
     :param kwargs: see tqdm documentation
-    :type kwargs: dict
     :return: a tqdm progress bar iterator
     """
     if pretty_cli:  # all: no cover
@@ -60,10 +65,10 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
         (re.compile(r"^(CRITICAL)"), Fore.RED + Style.BRIGHT),
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         logging.StreamHandler.__init__(self)
 
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         msg = self.format(record)
 
         # Handle logging on several lines: indent all lines after the first one
@@ -80,7 +85,7 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
         tqdm.write(msg)
 
 
-def getLogger(name=None, prefix="e3"):
+def getLogger(name: Optional[str] = None, prefix: str = "e3") -> logging.Logger:
     """Get a logger with a default handler doing nothing.
 
     Calling this function instead of logging.getLogger will avoid warnings
@@ -89,16 +94,13 @@ def getLogger(name=None, prefix="e3"):
         'No handler could be found for logger...'
 
     :param name: logger name, if not specified return the root logger
-    :type name: str
     :param prefix: application prefix, will be prepended to the name
-    :type prefix:  str
-    :rtype: logging.Logger
     """
 
     class NullHandler(logging.Handler):
         """Handler doing nothing."""
 
-        def emit(self, _):
+        def emit(self, _: logging.LogRecord) -> None:
             pass
 
     logger = logging.getLogger("%s.%s" % (prefix, name))
@@ -112,22 +114,23 @@ def getLogger(name=None, prefix="e3"):
 
 
 def add_log_handlers(
-    level, log_format, datefmt=None, filename=None, set_default_output=True
-):
+    level: int,
+    log_format: str,
+    datefmt: Optional[str] = None,
+    filename: Optional[str] = None,
+    set_default_output: bool = True,
+) -> None:
     """Add log handlers using GMT.
 
     :param level: set the root logger level to the specified level
-    :type level: int
     :param log_format: format stream for the log handler
-    :type log_format: str
     :param datefmt: date/time format for the log handler
-    :type datefmt: str
     :param filename: use of a FileHandler, using the specified filename,
         instead of a StreamHandler. Set default_output_stream to write in this
         file.
-    :type filename: str
     """
     global default_output_stream
+    handler: Union[TqdmHandler, logging.StreamHandler, logging.FileHandler]
     if filename is None:
         if pretty_cli:  # all: no cover
             handler = TqdmHandler()
@@ -139,7 +142,7 @@ def add_log_handlers(
             default_output_stream = handler.stream
 
     fmt = logging.Formatter(log_format, datefmt)
-    fmt.converter = time.gmtime
+    fmt.converter = time.gmtime  # type: ignore
     handler.setFormatter(fmt)
 
     handler.setLevel(level)
@@ -147,27 +150,21 @@ def add_log_handlers(
 
 
 def activate(
-    stream_format=DEFAULT_STREAM_FMT,
-    file_format=DEFAULT_FILE_FMT,
-    datefmt=None,
-    level=logging.INFO,
-    filename=None,
-    e3_debug=False,
-):
+    stream_format: str = DEFAULT_STREAM_FMT,
+    file_format: str = DEFAULT_FILE_FMT,
+    datefmt: Optional[str] = None,
+    level: int = logging.INFO,
+    filename: str = None,
+    e3_debug: bool = False,
+) -> None:
     """Activate default E3 logging.
 
     :param level: set the root logger level to the specified level
-    :type level: int
     :param datefmt: date/time format for the log handler
-    :type datefmt: str
     :param stream_format: format string for the stream handler
-    :type stream_format: str
     :param file_format: format string for the file handler
-    :type file_format: str
     :param filename: redirect logs to a file in addition to the StreamHandler
-    :type filename: str
     :param e3_debug: activate full debug of the e3 library
-    :type e3_debug: bool
     """
     # By default do not filter anything. What is effectively logged
     # will be defined by setting/unsetting handlers

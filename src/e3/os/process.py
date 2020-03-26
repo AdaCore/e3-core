@@ -7,6 +7,8 @@ status
 """
 
 
+from __future__ import annotations
+
 import errno
 import logging
 import os
@@ -14,10 +16,17 @@ import signal
 import subprocess
 import sys
 import time
+from typing import TYPE_CHECKING
 
 import e3.env
 import e3.log
 from e3.os.fs import which
+
+if TYPE_CHECKING:
+    from typing import IO, Any, List, NoReturn, Optional, Union
+
+    CmdLine = List[str]
+    AnyCmdLine = Union[List[CmdLine], CmdLine]
 
 logger = e3.log.getLogger("os.process")
 
@@ -42,7 +51,7 @@ except ImportError:  # defensive code
     psutil = None
 
 
-def subprocess_setup():
+def subprocess_setup() -> None:
     """Reset SIGPIPE handler.
 
     Python installs a SIGPIPE handler by default. This is usually not
@@ -53,7 +62,7 @@ def subprocess_setup():
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # all: no cover
 
 
-def get_rlimit(platform=None):
+def get_rlimit(platform: Optional[str] = None) -> str:
     if platform is None:
         platform = e3.env.Env().build.platform
 
@@ -62,14 +71,13 @@ def get_rlimit(platform=None):
     return resource_filename(__name__, os.path.join("data", "rlimit-%s" % platform))
 
 
-def quote_arg(arg):
+def quote_arg(arg: str) -> str:
     """Return the quoted version of the given argument.
 
     Returns a human-friendly representation of the given argument, but with all
     extra quoting done if necessary.  The intent is to produce an argument
     image that can be copy/pasted on a POSIX shell command (at a shell prompt).
     :param arg: argument to quote
-    :type arg: str
     """
     # The empty argument is a bit of a special case, as it does not
     # contain any character that might need quoting, and yet still
@@ -123,13 +131,20 @@ def quote_arg(arg):
     return arg
 
 
-def command_line_image(cmds):
+def to_cmd_lines(cmds: AnyCmdLine) -> List[CmdLine]:
+    if isinstance(cmds[0], str):
+        # Turn the simple command into a special case of
+        # the multiple-commands case.  This will allow us
+        # to treat both cases the same way.
+        return [cmds]  # type: ignore
+    else:
+        return cmds  # type: ignore
+
+
+def command_line_image(cmds: AnyCmdLine) -> str:
     """Return a string image of the given command(s).
 
     :param cmds: Same as the cmds parameter in the Run.__init__ method.
-    :type: list[str] | list[list[str]]
-
-    :rtype: str
 
     This method also handles quoting as defined for POSIX shells.
     This means that arguments containing special characters
@@ -141,29 +156,23 @@ def command_line_image(cmds):
     The result is expected to be a string that can be sent verbatim
     to a shell for execution.
     """
-    if isinstance(cmds[0], str):
-        # Turn the simple command into a special case of
-        # the multiple-commands case.  This will allow us
-        # to treat both cases the same way.
-        cmds = (cmds,)
-    return " | ".join((" ".join((quote_arg(arg) for arg in cmd)) for cmd in cmds))
+    return " | ".join(
+        (" ".join((quote_arg(arg) for arg in cmd)) for cmd in to_cmd_lines(cmds))
+    )
 
 
-def enable_commands_handler(filename, mode="a"):
+def enable_commands_handler(filename: str, mode: str = "a") -> logging.Handler:
     """Add a handler that log all commands launched with Run in a file.
 
     :param filename: path to log the commands
-    :type filename: str
     :param mode: mode used to open the file (default is 'a')
-    :type mode: str
     :return: the added handler
-    :type: logging.Handler
     """
 
     class CmdFilter(logging.Filter):
         """Keep only e3.os.process.cmdline records."""
 
-        def filter(self, record):
+        def filter(self, record) -> int:
             return 1 if record.name == "e3." + CMD_LOGGER_NAME else 0
 
     # Here we don't attach the handler directly to the cmdline logger. Indeed
@@ -177,11 +186,10 @@ def enable_commands_handler(filename, mode="a"):
     return fh
 
 
-def disable_commands_handler(handler):
+def disable_commands_handler(handler: logging.Handler) -> None:
     """Disable special handler for commands.
 
     :param handler: Handler returned by enable_commands_handler
-    :type handler: logging.Handler
     """
     logging.getLogger().removeHandler(handler)
     handler.flush()
@@ -205,18 +213,18 @@ class Run(object):
 
     def __init__(
         self,
-        cmds,
-        cwd=None,
-        output=PIPE,
-        error=STDOUT,
-        input=None,
-        bg=False,
-        timeout=None,
-        env=None,
-        set_sigpipe=True,
-        parse_shebang=False,
-        ignore_environ=True,
-    ):
+        cmds: AnyCmdLine,
+        cwd: Optional[str] = None,
+        output: Union[int, str, IO, None] = PIPE,
+        error: Union[int, str, IO, None] = STDOUT,
+        input: Union[int, str, IO, None] = None,
+        bg: bool = False,
+        timeout: Optional[int] = None,
+        env: dict = None,
+        set_sigpipe: bool = True,
+        parse_shebang: bool = False,
+        ignore_environ: bool = True,
+    ) -> None:
         """Spawn a process.
 
         :param cmds: two possibilities:
@@ -226,37 +234,26 @@ class Run(object):
             different commands will be piped. This means that
             [['ps', '-a'], ['grep', 'vxsim']] will be equivalent to
             the system command line 'ps -a | grep vxsim'.
-        :type cmds: list[str] | list[list[str]]
         :param cwd: directory in which the process should be executed (string
             or None). If None then current directory is used
-        :type cwd: str | None
         :param output: can be PIPE (default), a filename string, a fd on an
             already opened file, a python file object or None (for stdout).
-        :type output: int | str | file | None
         :param error: same as output or STDOUT, which indicates that the
             stderr data from the applications should be captured into the same
             file handle as for stdout.
-        :type error: int | str | file | None
         :param input: same as output
-        :type input: int | str | file | None
         :param bg: if True then run in background
-        :type bg: bool
         :param timeout: limit execution time (in seconds), None means
             unlimited
-        :type timeout: int | None
         :param env: dictionary for environment variables (e.g. os.environ)
-        :type env: dict
         :param set_sigpipe: reset SIGPIPE handler to default value
-        :type set_sigpipe: bool
         :param parse_shebang: take the #! interpreter line into account
-        :type parse_shebang: bool
         :param ignore_environ: Applies only when env parameter is not None.
             When set to True (the default), the only environment variables
             passed to the program are the ones provided by the env parameter.
             Otherwise, the environment passed to the program consists of the
             environment variables currently defined (os.environ) augmented by
             the ones provided in env.
-        :type ignore_environ: bool
 
         :raise OSError: when trying to execute a non-existent file.
 
@@ -267,7 +264,7 @@ class Run(object):
         will be used for process stdin.
         """
 
-        def add_interpreter_command(cmd_line):
+        def add_interpreter_command(cmd_line: CmdLine) -> CmdLine:
             """Add the interpreter defined in the #! line to cmd_line.
 
             If the #! line cannot be parsed, just return the cmd_line
@@ -276,7 +273,6 @@ class Run(object):
             On windows, /usr/bin/env will be ignored to avoid a dependency on
             cygwin and /bin/bash & /bin/sh are replaced by $SHELL if defined.
             :param cmd_line: command line
-            :type cmd_line: list[str]
             """
             if not parse_shebang:
                 # nothing to do
@@ -330,7 +326,7 @@ class Run(object):
         self.output_file = File(output, "w")
         self.error_file = File(error, "w")
 
-        self.status = None
+        self.status: Optional[int] = None
         self.out = ""
         self.err = ""
         self.cmds = []
@@ -366,11 +362,8 @@ class Run(object):
                 rlimit_args = []
 
         try:
-            if isinstance(cmds[0], str):
-                self.cmds = rlimit_args + list(add_interpreter_command(cmds))
-            else:
-                self.cmds = [add_interpreter_command(c) for c in cmds]
-                self.cmds[0] = rlimit_args + list(self.cmds[0])
+            self.cmds = [add_interpreter_command(c) for c in to_cmd_lines(cmds)]
+            self.cmds[0] = rlimit_args + list(self.cmds[0])
 
             cmdlogger.debug(
                 "Run: cd %s; %s",
@@ -378,7 +371,7 @@ class Run(object):
                 self.command_line_image(),
             )
 
-            if isinstance(cmds[0], str):
+            if len(self.cmds) == 1:
                 popen_args = {
                     "stdin": self.input_file.fd,
                     "stdout": self.output_file.fd,
@@ -390,15 +383,15 @@ class Run(object):
 
                 if sys.platform != "win32" and set_sigpipe:  # windows: no cover
                     # preexec_fn is no supported on windows
-                    popen_args["preexec_fn"] = subprocess_setup
+                    popen_args["preexec_fn"] = subprocess_setup  # type: ignore
 
                 if sys.platform == "win32":
                     popen_args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-                self.internal = Popen(self.cmds, **popen_args)
+                self.internal = Popen(self.cmds[0], **popen_args)
 
             else:
-                runs = []
+                runs: List[Popen] = []
                 for index, cmd in enumerate(self.cmds):
                     if index == 0:
                         stdin = self.input_file.fd
@@ -427,7 +420,7 @@ class Run(object):
 
                     if sys.platform != "win32" and set_sigpipe:  # windows: no cover
                         # preexec_fn is no supported on windows
-                        popen_args["preexec_fn"] = subprocess_setup
+                        popen_args["preexec_fn"] = subprocess_setup  # type: ignore
 
                     if sys.platform == "win32":
                         popen_args[
@@ -455,32 +448,29 @@ class Run(object):
         if not bg:
             self.wait()
 
-    def command_line_image(self):
+    def command_line_image(self) -> str:
         """Get shell command line image of the spawned command(s).
-
-        :rtype: str
 
         This just a convenient wrapper around the function of the same
         name.
         """
         return command_line_image(self.cmds)
 
-    def close_files(self):
+    def close_files(self) -> None:
         """Close all file descriptors."""
         self.output_file.close()
         self.error_file.close()
         self.input_file.close()
 
-    def __error(self, error, cmds):
+    def __error(self, error: Exception, cmds: List[CmdLine]) -> None:
         """Set pid to -1 and status to 127 before closing files."""
         self.close_files()
         logger.error(error)
 
-        def not_found(path):
+        def not_found(path: str) -> NoReturn:
             """Raise OSError.
 
             :param path: path of the executable
-            :type path: str
             """
             logger.error("%s not found", path)
             e3.log.debug("PATH=%s", os.environ["PATH"])
@@ -490,19 +480,14 @@ class Run(object):
 
         # Try to send an helpful message if one of the executable has not
         # been found.
-        if isinstance(cmds[0], str):
-            if which(cmds[0], default=None) is None:
-                not_found(cmds[0])
-        else:
-            for cmd in cmds:
-                if which(cmd[0], default=None) is None:
-                    not_found(cmd[0])
+        for cmd in cmds:
+            if which(cmd[0], default=None) is None:
+                not_found(cmd[0])
 
-    def wait(self):
+    def wait(self) -> int:
         """Wait until process ends and return its status.
 
         :return: exit code of the process
-        :rtype: int
         """
         if self.status is not None:
             # Wait has already been called
@@ -528,7 +513,7 @@ class Run(object):
         self.close_files()
         return self.status
 
-    def poll(self):
+    def poll(self) -> Optional[int]:
         """Check the process status and set self.status if available.
 
         This method checks whether the underlying process has exited
@@ -538,7 +523,6 @@ class Run(object):
 
         :return: None if the process is still alive; otherwise, returns
           the process exit status.
-        :rtype: int | None
         """
         if self.status is not None:
             # Process is already terminated and wait been called
@@ -553,43 +537,35 @@ class Run(object):
         else:
             return None
 
-    def kill(self, recursive=True, timeout=3):
+    def kill(self, recursive: bool = True, timeout: int = 3) -> None:
         """Kill the process.
 
         :param recursive: if True, try to kill the complete process tree
-        :type recursive: bool
         :param timeout: wait timeout (in seconds) after sending the kill
             signal (when recursive=True)
-        :type timeout: int
         """
         if recursive:
             kill_process_tree(self.internal, timeout=timeout)
         else:
             self.internal.kill()
 
-    def interrupt(self):
+    def interrupt(self) -> None:
         """Send SIGINT to the process, kill on Windows."""
         if sys.platform == "win32":
             self.kill()  # Ctrl-C event is unreliable on Windows
         else:
             self.internal.send_signal(signal.SIGINT)
 
-    def is_running(self):
-        """Check whether the process is running.
-
-        :rtype: bool
-        """
+    def is_running(self) -> bool:
+        """Check whether the process is running."""
         if psutil is None:  # defensive code
             # psutil not imported, use our is_running function
             return is_running(self.pid)
         else:
             return self.internal.is_running()
 
-    def children(self):
-        """Return list of child processes (using psutil).
-
-        :rtype: list[psutil.Process]
-        """
+    def children(self) -> List[psutil.Process]:
+        """Return list of child processes (using psutil)."""
         if psutil is None:  # defensive code
             raise NotImplementedError("Run.children() require psutil")
         return self.internal.children()
@@ -598,15 +574,16 @@ class Run(object):
 class File(object):
     """Can be a PIPE, a file object."""
 
-    def __init__(self, name, mode="r"):
+    def __init__(self, name: Any, mode: str = "r"):
         """Create a new File.
 
         :param name: can be PIPE, STDOUT, a filename string, an opened fd, a
             python file object, or a command to pipe (if starts with |)
         :param mode: can be 'r' or 'w' if name starts with + the mode will be
-            a+ :type mode: str
+            a+
         """
         assert mode in "rw", "Mode should be r or w"
+        self.fd: Union[int, IO[str]]
 
         self.name = name
         self.to_close = False
@@ -633,32 +610,32 @@ class File(object):
             # this is a file descriptor
             self.fd = name
 
-    def get_command(self):
+    def get_command(self) -> Optional[str]:
         """Return the command to run to create the pipe."""
         if self.fd == subprocess.PIPE:
             return self.name[1:]
+        else:
+            return None
 
-    def close(self):
+    def close(self) -> None:
         """Close the file if needed."""
         if self.to_close:
-            self.fd.close()
+            fd = self.fd
+            fd.close()  # type: ignore
 
 
 class WaitError(Exception):
     pass
 
 
-def wait_for_processes(process_list, timeout):
+def wait_for_processes(process_list: List[Run], timeout: float) -> Optional[int]:
     """Wait for several processes spawned with Run.
 
     :param process_list: a list of Run objects
-    :type process_list: list[Run]
     :param timeout: a timeout in seconds. If 0 block until a process ends.
-    :type timeout: int
 
     :return: None in case of timeout or the index in process Run corresponding
         to the first process that end
-    :rtype: None | int
     """
     if len(process_list) == 0:
         return None
@@ -698,7 +675,7 @@ def wait_for_processes(process_list, timeout):
         # then select which support timeout arguments to wait.
         fd_r, fd_w = os.pipe()
 
-        def handler(signum, frame):
+        def handler(signum: int, frame: Any) -> None:
             del signum, frame
             os.write(fd_w, b"a")
 
@@ -720,7 +697,7 @@ def wait_for_processes(process_list, timeout):
 
                 while True:
                     try:
-                        l_r, _, _ = select.select(*select_args)
+                        l_r, _, _ = select.select(*select_args)  # type: ignore
                         if l_r:
                             os.read(fd_r, 1)
                         break
@@ -738,15 +715,13 @@ def wait_for_processes(process_list, timeout):
             signal.signal(signal.SIGCHLD, 0)
             os.close(fd_r)
             os.close(fd_w)
+    return None
 
 
-def is_running(pid):
+def is_running(pid: int) -> bool:
     """Check whether a process with the given pid is running.
 
     :param pid: an integer (e.g the value of Run().pid)
-    :type pid: int
-
-    :rtype: bool
     """
     if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.native_api import Access, NT
@@ -772,16 +747,13 @@ def is_running(pid):
         return True
 
 
-def kill_process_tree(pid, timeout=3):
+def kill_process_tree(pid: Union[int, psutil.Process], timeout: int = 3) -> bool:
     """Kill a hierarchy of processes.
 
     :param pid: pid of the toplevel process
-    :type pid: int | psutil.Process
     :param timeout: wait timeout after sending the kill signal
-    :type timeout: int
     :return: True if all processes either don't exist or have been killed,
         False if there are some processes still alive.
-    :rtype: bool
     """
     if isinstance(pid, psutil.Process):
         parent_process = pid
@@ -808,7 +780,7 @@ def kill_process_tree(pid, timeout=3):
         except psutil.NoSuchProcess:  # defensive code
             pass
 
-    def on_terminate(p):
+    def on_terminate(p: str) -> None:
         """Log info when a process terminate."""
         logger.info("process %s killed", p)
 

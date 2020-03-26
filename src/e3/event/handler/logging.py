@@ -1,7 +1,10 @@
-from e3.event import EventHandler
+from __future__ import annotations
+
 import json
 import logging
+
 import e3.log
+from e3.event import EventHandler
 
 
 class LoggingHandler(EventHandler):

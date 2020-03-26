@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 import collections
+from typing import TYPE_CHECKING
 
 import e3.os
 import e3.os.platform
 from e3.platform_db import get_knowledge_base
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, Optional
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -48,28 +54,24 @@ class Platform(
     @classmethod
     def get(
         cls,
-        platform_name=None,
-        version=None,
-        machine=None,
-        mode=None,
-        compute_default=False,
-    ):
+        platform_name: Optional[str] = None,
+        version: Optional[str] = None,
+        machine: Optional[str] = None,
+        mode: Optional[str] = None,
+        compute_default: bool = False,
+    ) -> Platform:
         """Return a Platform object.
 
         :param platform_name: if None or empty then automatically detect
             current platform (native). Otherwise should be a valid platform
             string.
-        :type platform_name: str | None
         :param version:  if None, assume default OS version or find it
             automatically (native case only). Otherwise should be a valid
             version string.
-        :type version: str | None
         :param machine: name of the machine
-        :type machine: str | None
         :param compute_default: if True compute the default Arch for the
             current machine (this parameter is for internal purpose only).
         :param mode: an os mode (ex: rtp for vxworks)
-        :type mode: str | None
         """
         # normalize arguments
         if not version:
@@ -90,6 +92,7 @@ class Platform(
         if compute_default:
             default_platform = cls.system_info.platform()
         else:
+            assert cls.default_arch is not None
             default_platform = cls.default_arch.platform
 
         # Check if the object correspond to the current machine and thus allow
@@ -129,21 +132,19 @@ class Platform(
         )
 
     @property
-    def is_virtual(self):
+    def is_virtual(self) -> bool:
         """Check if we are on a virtual system.
 
         :return: True if the system represented by Arch is a virtual machine
-        :rtype: bool
         """
         if not self.is_host:
             return False
         return self.system_info.is_virtual()
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """Export os and cpu variables as os_{var} and cpu_{var}.
 
         :return: a dictionary representing the current Arch instance
-        :rtype: dict
         """
         str_dict = self._asdict()
         str_dict["is_virtual"] = self.is_virtual
@@ -156,7 +157,7 @@ class Platform(
         del str_dict["cpu"]
         return str_dict
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a representation string of the object."""
         result = (
             "platform: %(platform)s\n"

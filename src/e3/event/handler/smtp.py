@@ -1,21 +1,30 @@
+from __future__ import annotations
+
 import json
 import mimetypes
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid
+from typing import TYPE_CHECKING
 
 import e3.net.smtp
 from e3.event import EventHandler
 
+if TYPE_CHECKING:
+    from typing import Dict, List, Union
+    from e3.event import Event
+
 
 class SMTPHandler(EventHandler):
-    def __init__(self, subject, from_addr, to_addr, smtp_servers):
-        """Initialize a SMTP event manager.
-
-        :param configuration: a dictionary with config parameters
-        :type configuration: dict
-        """
+    def __init__(
+        self,
+        subject: str,
+        from_addr: str,
+        to_addr: str,
+        smtp_servers: Union[str, List[str]],
+    ):
+        """Initialize a SMTP event manager."""
         self.default_subject = subject
         self.from_addr = from_addr
         self.to_addr = to_addr
@@ -25,17 +34,16 @@ class SMTPHandler(EventHandler):
             self.smtp_servers = smtp_servers
 
     @classmethod
-    def decode_config(self, config_str):
+    def decode_config(self, config_str: str) -> Dict[str, Union[str, List[str]]]:
         subject, from_addr, to_addr, smtp_servers = config_str.split(",", 3)
-        smtp_servers = config_str.split(",")
         return {
             "subject": subject,
             "from_addr": from_addr,
             "to_addr": to_addr,
-            "smtp_servers": smtp_servers,
+            "smtp_servers": smtp_servers.split(","),
         }
 
-    def encode_config(self):
+    def encode_config(self) -> str:
         return "%s,%s,%s,%s" % (
             self.subject,
             self.from_addr,
@@ -44,16 +52,14 @@ class SMTPHandler(EventHandler):
         )
 
     @property
-    def subject(self):
+    def subject(self) -> str:
         return self.default_subject
 
-    def send_event(self, event):
+    def send_event(self, event: Event) -> bool:
         """Send an event.
 
         :param event: an event
-        :type event: SMTPEvent
         :return: True if the event was sent successfully
-        :rtype: bool
         """
         json_content = json.dumps(event.as_dict())
         attachments = event.get_attachments()
@@ -71,7 +77,7 @@ class SMTPHandler(EventHandler):
         event_json.add_header("Content-Disposition", "attachment", filename="event")
         mail.attach(event_json)
 
-        result = {"attachments": {}}
+        result: Dict[str, Dict[str, dict]] = {"attachments": {}}
 
         for name, (filename, _) in list(attachments.items()):
             ctype, encoding = mimetypes.guess_type(filename)

@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import ast
 import os
 import re
 import sys
 from enum import Enum
+from typing import TYPE_CHECKING
 
 import e3.log
+
+if TYPE_CHECKING:
+    from typing import List, Optional
 
 logger = e3.log.getLogger("e3.sys")
 
@@ -29,27 +35,26 @@ class RewriteImportRule(object):
         reject = 0
         skip = 1
 
-    def __init__(self, module, name=".*", action=None):
+    def __init__(
+        self, module: str, name: str = ".*", action: Optional[RuleAction] = None
+    ):
         """Initialize the object.
 
         :param module: regexp suitable for re.match() to match against the
             module name (note that the string is automatically surrounded by
             ^ and $)
-        :type module: str
         :param name: regexp suitable for re.match() to match against the names
             imported via "from <module> import <names>" (note that the
             string is automatically surrounded by ^ and $)
-        :type name: str
         :param action: skip (default) to avoid importing the name, or reject
             to raise a RewriteNodeError
-        :type action: RewriteImportRule.RuleAction
         :raise: RewriteNodeError
         """
         self.module = module
         self.name = name
         self.action = action if action is not None else self.RuleAction.skip
 
-    def rewrite_node(self, node):
+    def rewrite_node(self, node: ast.stmt):
         """Rewrite a node.
 
         :param node: ast node
@@ -62,6 +67,8 @@ class RewriteImportRule(object):
             # node: ImportFrom(module, names)
             # first check whether the module match our rule
 
+            if TYPE_CHECKING:
+                assert node.module is not None
             if re.match("^" + self.module + "$", node.module):
 
                 # then we need to check whether our 'name' is in the
@@ -79,7 +86,7 @@ class RewriteImportRule(object):
 
         if check_in_names is not None:
             new_names = []
-            for _, var in enumerate(node.names):
+            for _, var in enumerate(node.names):  # type: ignore
                 if re.match("^" + check_in_names + "$", var.name):
                     if self.action == self.RuleAction.skip:
                         # don't import this name
@@ -92,7 +99,7 @@ class RewriteImportRule(object):
                         raise ValueError("unknown action %s", self.action)
                 else:
                     new_names.append(var)
-            node.names = new_names
+            node.names = new_names  # type: ignore
         return node
 
 
@@ -102,32 +109,31 @@ class RewriteImportNodeTransformer(ast.NodeTransformer):
     Currently only the RewriteImportRule are supported.
     """
 
-    def __init__(self, rules):
+    def __init__(self, rules: List[RewriteImportRule]):
         """Load a set of rules.
 
         :param rules: list of rule objects
-        :type rules: list[RewriteImportRule]
         """
         self.rules = rules
 
-    def visit_ImportFrom(self, node):
+    def visit_ImportFrom(self, node: ast.stmt) -> ast.stmt:
         for rule in self.rules:
             node = rule.rewrite_node(node)
         return node
 
-    def visit_Import(self, node):
+    def visit_Import(self, node: ast.stmt) -> ast.stmt:
         for rule in self.rules:
             node = rule.rewrite_node(node)
         return node
 
 
-def version():
+def version() -> str:
     import pkg_resources
 
     return pkg_resources.get_distribution("e3-core").version
 
 
-def sanity_check():
+def sanity_check() -> int:
     """Sanity check the E3 install."""
     errors = 0
     print("YAMLCheck:", end=" ")
@@ -159,7 +165,7 @@ def sanity_check():
     return errors
 
 
-def main():
+def main() -> None:
     from e3.env import Env
     import e3.main
 
@@ -177,6 +183,9 @@ def main():
     )
     m.parse_args()
 
+    if TYPE_CHECKING:
+        assert m.args is not None
+
     if m.args.version:
         print(version())
         return
@@ -192,11 +201,10 @@ def main():
         print(getattr(Env(), m.args.platform_info))
 
 
-def set_python_env(prefix):
+def set_python_env(prefix: str) -> None:
     """Set environment for a Python distribution.
 
     :param prefix: root directory of the python distribution
-    :type prefix: str
     """
     import e3.env
 
@@ -209,7 +217,7 @@ def set_python_env(prefix):
         env.add_dll_path(os.path.join(prefix, "lib"))
 
 
-def interpreter(prefix=None):
+def interpreter(prefix: Optional[str] = None) -> str:
     """Return location of the Python interpreter.
 
     When there are both a python3 and python binary file return the path to
@@ -217,9 +225,7 @@ def interpreter(prefix=None):
 
     :param prefix: root directory of the python distribution. if None location
         of the current interpreter is returned
-    :type prefix: None | str
     :return: python executable path
-    :rtype: str
     """
     if prefix is None:
         return sys.executable
@@ -237,19 +243,16 @@ def interpreter(prefix=None):
             return os.path.join(prefix, "bin", "python")
 
 
-def python_script(name, prefix=None):
+def python_script(name: str, prefix: Optional[str] = None) -> List[str]:
     """Return path to scripts contained in this Python distribution.
 
     :param name: the script name
-    :type name: str
     :param prefix: root directory of the Python distribution. if None the
         distribution currently used by this script will be used
-    :type prefix: None | str
     :return: a list that will be the prefix of your command line
-    :rtype: list[str]
     """
 
-    def has_relative_python_shebang(file_script):  # unix: no cover
+    def has_relative_python_shebang(file_script: str) -> bool:  # unix: no cover
         """Return True if the script contains #!python shebang.
 
         When producing relocatable python distribution we change the shebang

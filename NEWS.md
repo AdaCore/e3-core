@@ -1,3 +1,17 @@
+# Version 22.1.0 (2020-??-??) *NOT RELEASED YET*
+
+* Add type hinting and verify it with ``mypy``
+* Minor backward incompatible changes:
+  * some function argument are now mandatory:
+    * e3.anod.context.AnodContext.add_anod_action ``env``
+    * e3.anod.context.AnodContext.add_spec ``env`` and ``primitive``
+  * some attribute have been replaced by properties to avoid being marked as Optional
+    * e3.anod.spec.Anod ``build_space``
+
+# Version 22.0.0 (2020-03-13)
+
+Convert code to support Python >= 3.7 only.
+
 # Version 21.0.0 (2020-01-13)
 
 This is the last version supporting Python 2. Next major version will be Python 3 only.

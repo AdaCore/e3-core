@@ -1,3 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Callable, Dict, Optional
+
+
 class EntryPoint(object):
     """Plan Entry point.
 
@@ -5,20 +13,22 @@ class EntryPoint(object):
     also to annotate a given entry point with some additional metadata.
     """
 
-    def __init__(self, db, fun, kind, name=None, description=None):
+    def __init__(
+        self,
+        db: Dict[str, EntryPoint],
+        fun: Callable[[], None],
+        kind: str,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+    ):
         """Initialize an entry point.
 
         :param db: dictionary that tracks the list of entry points
-        :type db: dict[str, EntryPoint]
         :param fun: function that implement the entry point
-        :type fun: None -> None
         :param kind: name used in the plan for the entry point decorator
-        :type kind: str
         :param name: name of the entry point. If None then the function
             name is used
-        :type name: str | None
         :param description: a description of the entry point
-        :type description: str | None
         """
         if name is None:
             self.name = fun.__name__
@@ -31,7 +41,7 @@ class EntryPoint(object):
         assert self.name not in db, "duplicate entry point %s" % self.name
         db[self.name] = self
 
-    def execute(self):
+    def execute(self) -> None:
         """Execute an entry point."""
         self.executed = True
         self.fun()
@@ -47,18 +57,23 @@ class Machine(EntryPoint):
     """
 
     def __init__(
-        self, db, fun, kind, platform, version, site=None, name=None, description=None
+        self,
+        db: Dict[str, EntryPoint],
+        fun: Callable[[], None],
+        kind: str,
+        platform: str,
+        version: str,
+        site: Optional[str] = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
     ):
         """Initialize a Machine entry point.
 
         :param db: see EntryPoint
         :param fun: see EntryPoint
         :param platform: platform name
-        :type platform: str
         :param version: OS version
-        :type version: str
         :param site: site indication
-        :type site: str | None
         :param name: see EntryPoint
         :param description: see EntryPoint
         """
@@ -68,7 +83,13 @@ class Machine(EntryPoint):
         self.site = site
 
 
-def entry_point(db, cls, kind, *args, **kwargs):
+def entry_point(
+    db: Dict[str, EntryPoint],
+    cls: Callable[..., EntryPoint],
+    kind: str,
+    *args,
+    **kwargs
+) -> Callable:
     """Entry point decorator.
 
     Declare an electrolyt entry point (e.g. a machine name, a mailserver
@@ -80,11 +101,8 @@ def entry_point(db, cls, kind, *args, **kwargs):
     executed.
 
     :param db: dictionary where to register the entry point
-    :type db: dict
     :param cls: class of entry point
-    :type cls: T
     :param kind: entry point kind (machine name, mailserver preset, ...)
-    :type kind: str
     :param args: additional information to store with the entry point
     :param kwargs: additional information to store with the entry point
     """

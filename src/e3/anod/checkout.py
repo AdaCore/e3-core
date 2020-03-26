@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 import hashlib
 import json
 import os
 import tempfile
 from contextlib import closing
 from subprocess import PIPE
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.anod.status import ReturnValue
-from e3.fs import get_filetree_state, rm, sync_tree, VCS_IGNORE_LIST
-from e3.vcs.git import GitRepository, GitError
-from e3.vcs.svn import SVNRepository, SVNError
+from e3.fs import VCS_IGNORE_LIST, get_filetree_state, rm, sync_tree
+from e3.vcs.git import GitError, GitRepository
+from e3.vcs.svn import SVNError, SVNRepository
+
+if TYPE_CHECKING:
+    from typing import Callable, List, Optional, Tuple
 
 logger = e3.log.getLogger("e3.anod.checkout")
 
@@ -30,18 +36,15 @@ class CheckoutManager(object):
                                         created
     """
 
-    def __init__(self, name, working_dir, compute_changelog=True):
+    def __init__(self, name: str, working_dir: str, compute_changelog: bool = True):
         """Initialize CheckoutManager instance.
 
         :param name: a symbolic name for that checkout
-        :type name: str
         :param working_dir: working directory in which checkouts are
             performed. Note that the checkout will be done in the
             ```name``` subdirectory.
-        :type working_dir: str
         :param compute_changelog: if True compute a changelog of changes
             done since last update
-        :type compute_changelog: bool
         """
         self.name = name
         self.compute_changelog = compute_changelog
@@ -49,20 +52,20 @@ class CheckoutManager(object):
         self.metadata_file = self.working_dir + "_checkout.json"
         self.changelog_file = self.working_dir + "_changelog.json"
 
-    def update(self, vcs, url, revision=None):
+    def update(self, vcs: str, url: str, revision: Optional[str] = None) -> ReturnValue:
         """Update content of the working directory.
 
         :param vcs: vcd kind
-        :type vcs: str
         :param url: repository url
-        :type url: str
         :param revision: revision
-        :type revision: str | None
         """
         # Reset changelog file
         if os.path.isfile(self.changelog_file):
             rm(self.changelog_file)
 
+        update: Callable[
+            [str, Optional[str]], Tuple[ReturnValue, Optional[str], Optional[str]]
+        ]
         if vcs == "git":
             update = self.update_git
         elif vcs == "svn":
@@ -88,13 +91,13 @@ class CheckoutManager(object):
             )
         return result
 
-    def update_external(self, url, revision):
+    def update_external(
+        self, url: str, revision: Optional[str]
+    ) -> Tuple[ReturnValue, str, str]:
         """Update working dir using a local directory.
 
         :param url: path to the repository
-        :type url: str
         :param revision: ignored
-        :type revision: None
         """
         # Expand env variables and ~
         url = os.path.expandvars(os.path.expanduser(url))
@@ -103,14 +106,14 @@ class CheckoutManager(object):
             old_commit = get_filetree_state(self.working_dir)
         else:
             old_commit = ""
-        ignore_list = []
+        ignore_list: List[str] = []
 
         if os.path.isdir(os.path.join(url, ".git")):
             # It seems that this is a git repository. Get the list of files to
             # ignore
             try:
                 g = GitRepository(working_tree=url)
-                ignore_list = g.git_cmd(
+                ignore_list_lines = g.git_cmd(
                     [
                         "ls-files",
                         "-o",
@@ -121,7 +124,8 @@ class CheckoutManager(object):
                     output=PIPE,
                 ).out
                 ignore_list = [
-                    "/%s" % l.strip().rstrip("/") for l in ignore_list.splitlines()
+                    "/%s" % l.strip().rstrip("/")
+                    for l in ignore_list_lines.splitlines()
                 ]
                 logger.debug("Ignore in external: %s", ignore_list)
             except Exception:
@@ -142,13 +146,13 @@ class CheckoutManager(object):
         else:
             return ReturnValue.success, old_commit, new_commit
 
-    def update_git(self, url, revision):
+    def update_git(
+        self, url: str, revision: Optional[str]
+    ) -> Tuple[ReturnValue, Optional[str], Optional[str]]:
         """Update working dir using a Git repository.
 
         :param url: git repository url
-        :type url: str
         :param revision: git revision
-        :type revision: str
         """
         # For git repositories revision cannot be None
         if revision is None:
@@ -224,13 +228,13 @@ class CheckoutManager(object):
             result = ReturnValue.failure
         return result, old_commit, new_commit
 
-    def update_svn(self, url, revision):
+    def update_svn(
+        self, url: str, revision: Optional[str]
+    ) -> Tuple[ReturnValue, Optional[str], Optional[str]]:
         """Update working dir using a SVN repository.
 
         :param url: git repository url
-        :type url: str
         :param revision: git revision
-        :type revision: str
         """
         working_copy = SVNRepository(working_copy=self.working_dir)
         working_copy.log_stream = e3.log.default_output_stream

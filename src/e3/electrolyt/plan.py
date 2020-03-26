@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 import ast
 import imp
 import inspect
 from functools import partial
+from typing import TYPE_CHECKING
 
 from e3.electrolyt.entry_point import Machine, entry_point
 from e3.env import BaseEnv
 from e3.error import E3Error
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Optional
+    from e3.electrolyt.entry_point import EntryPoint
 
 
 class PlanError(E3Error):
@@ -21,19 +28,21 @@ class Plan(object):
     :vartype entry_points: dict
     """
 
-    def __init__(self, data, entry_point_cls=None, plan_ext=".plan"):
+    def __init__(
+        self,
+        data: Dict[str, Any],
+        entry_point_cls: Optional[Dict[str, Callable[..., EntryPoint]]] = None,
+        plan_ext: str = ".plan",
+    ):
         """Initialize a new plan.
 
         :param data: a dictionary defining additional globals to push
             into plan associated module
-        :type data: dict[str, T]
         :param entry_point_cls: dict associating a list of decorator name
             with an entry point class
-        :type entry_point_cls: dict[str, T]
         :param plan_ext: plan extension, by default ".plan". This is used to
             detect whether a specific frame is in a plan or in our code. See
             PlanContext._add_action
-        :type plan_ext: str
         """
         self.mod = imp.new_module("_anod_plan_")
 
@@ -41,7 +50,7 @@ class Plan(object):
         for k, v in data.items():
             self.mod.__dict__[k] = v
 
-        self.entry_points = {}
+        self.entry_points: Dict[str, EntryPoint] = {}
 
         if entry_point_cls is None:
             entry_point_cls = {}
@@ -55,27 +64,24 @@ class Plan(object):
         for name, cls in entry_point_cls.items():
             self.mod.__dict__[name] = partial(entry_point, self.entry_points, cls, name)
 
-    def load(self, filename):
+    def load(self, filename: str) -> None:
         """Load python code from file.
 
         :param filename: path to the python code
-        :type filename: str
         """
         with open(filename, "rb") as fd:
             source_code = fd.read()
         self.load_chunk(source_code, filename)
 
-    def check(self, code_ast):
+    def check(self, code_ast) -> None:
         """Check plan coding style."""
         del self, code_ast
 
-    def load_chunk(self, source_code, filename="<unknown>"):
+    def load_chunk(self, source_code: bytes, filename: str = "<unknown>") -> None:
         """Load a chunk of Python code.
 
         :param source_code: python source code
-        :type source_code: str
         :param filename: filename associated with the Python code
-        :type filename: str
         """
         code_ast = ast.parse(source_code, filename)
         self.check(code_ast)
@@ -88,14 +94,14 @@ class PlanContext(object):
 
     def __init__(
         self,
-        stack=None,
-        plan=None,
-        ignore_disabled=True,
-        server=None,
-        build=None,
-        host=None,
-        target=None,
-        enabled=True,
+        stack: List[BaseEnv] = None,
+        plan: Plan = None,
+        ignore_disabled: bool = True,
+        server: Optional[BaseEnv] = None,
+        build: Optional[str] = None,
+        host: Optional[str] = None,
+        target: Optional[str] = None,
+        enabled: bool = True,
         **kwargs
     ):
         """Initialize an execution context or a scope.
@@ -103,26 +109,17 @@ class PlanContext(object):
         :param stack: stack of BaseEnv object that keep track of scopes. Used
             only internally. User instantiation of PlanContext should be done
             with stack set to None.
-        :type stack: list[BaseEnv]
         :param plan: the plan to execute
-        :type plan: Plan
         :param ignore_disabled: when true, discard all lines in
             blocks "with defaults(enabled=False):"
-        :type ignore_disabled: bool
         :param server: a BaseEnv object that represent the host default env.
             server parameter is taken into account only during creation of
             the initial context.
-        :type server: BaseEnv
         :param build: see e3.env.BaseEnv.set_env
-        :type build: str | None
         :param host: see e3.env.BaseEnv.set_env
-        :type host: str | None
         :param target: see e3.env.BaseEnv.set_env
-        :type target: str | None
         :param enabled: whether the plan line is enabled or disabled
-        :type enabled: bool
         :param kwargs: additional data for the current scope/context
-        :type kwargs: dict
         """
         self.ignore_disabled = ignore_disabled
         if stack:
@@ -160,54 +157,48 @@ class PlanContext(object):
         # scopes. Only initial context use them. The overall scheme
         # works also because all scopes refer to the same stack of env
         # (because the object is mutable).
-        self.actions = {}
-        self.action_list = []
+        self.actions: Dict[str, Callable] = {}
+        self.action_list: List[BaseEnv] = []
 
-    def register_action(self, name, fun):
+    def register_action(self, name: str, fun: Callable):
         """Register a function that correspond to an action.
 
         :param name: name used in the plans
-        :type name: str
         :param fun: python function. The function itself does
             not require an implementation. Only signature is
             is used
-        :type fun: callable
         """
         self.actions[name] = fun
 
     @property
-    def env(self):
+    def env(self) -> BaseEnv:
         """Get environment for current scope.
 
         :return: the current scope environment
-        :rtype: BaseEnv
         """
         return self.stack[-1]
 
     @property
-    def default_env(self):
+    def default_env(self) -> BaseEnv:
         """Get initial environment.
 
         :return: the environment set during creation of the
             initial context
-        :rtype: BaseEnv
         """
         return self.stack[0]
 
-    def execute(self, plan, entry_point_name, verify=False):
+    def execute(
+        self, plan: Plan, entry_point_name: str, verify: bool = False
+    ) -> List[BaseEnv]:
         """Execute a plan.
 
         :param plan: the plan to execute
-        :type plan: Plan
         :param entry_point_name: entry point to call in the plan. It can be
             either a function name in the plan or an entry_point function
-        :type entry_point_name: str | fun
         :param verify: verify whether the entry point name is a
             electrolyt entry point
-        :type verify: bool
         :raise: PlanError
         :return: a list of plan actions
-        :rtype: list[callable]
         """
         # Give access to some useful data during plan execution
         plan.mod.__dict__["env"] = self.env
@@ -234,18 +225,18 @@ class PlanContext(object):
 
         return self.action_list
 
-    def _add_action(self, name, *args, **kwargs):
+    def _add_action(self, name: str, *args, **kwargs) -> None:
         """Process action calls in plans.
 
         :param name: action name
-        :type name: str
         :param args: positional arguments of the action call
-        :type args: list
         :param kwargs: keyword arguments of the action call
-        :type kwargs: dict
         """
         if self.ignore_disabled and not self.env.enabled:
             return
+
+        if TYPE_CHECKING:
+            assert self.plan is not None
 
         # ??? sometimes to understand the context it would be better to have
         # several lines of plan, e.g. when an action is created by calling
@@ -287,7 +278,11 @@ class PlanContext(object):
         # coming from environment). For the build, host and target arguments
         # a special processing is done to make the corresponding set_env
         # call on the result BaseEnv object
-        platform = {"build": None, "host": None, "target": None}
+        platform: Dict[str, Optional[str]] = {
+            "build": None,
+            "host": None,
+            "target": None,
+        }
 
         # Likewise board argument is used to change only the machine name
         # of the target. ??? change name ???

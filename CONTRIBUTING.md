@@ -30,11 +30,8 @@ in *reStructuredText* format:
 """Doc string for function
 
 :param myparam1: description for param1
-:type myparam1: param1-type
 :param myparam2: description for param1
-:type myparam2: param2-type | param2-other-accepted-type
 :return: description for returned object
-:rtype: type of returned object
 """
 ```
 

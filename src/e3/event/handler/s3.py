@@ -1,7 +1,8 @@
+from __future__ import annotations
+
+import json
 import mimetypes
 import tempfile
-import json
-
 from contextlib import closing
 
 from e3.event import EventHandler, unique_id
@@ -30,7 +31,7 @@ class S3Handler(EventHandler):
         }
 
     def encode_config(self):
-        return "%s,%s,%s" % (
+        return "%s,%s,%s,%s" % (
             self.event_s3_url,
             self.log_s3_url,
             self.sse,

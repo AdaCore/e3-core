@@ -1,27 +1,31 @@
+from __future__ import annotations
+
 import abc
 import json
 import os
-import stevedore
 import sys
 import time
 import uuid
+from typing import TYPE_CHECKING
 
 import e3.env
 import e3.hash
 import e3.log
+import stevedore
 from e3.date import timestamp_as_string
 from e3.error import E3Error
 from e3.fs import mkdir
 
-
 logger = e3.log.getLogger("event")
 
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, Optional, Tuple
 
-def unique_id():
+
+def unique_id() -> str:
     """Return a random globally unique id.
 
     :return: an id
-    :rtype: str
     """
     # Using clock_seq ensures that the uid of the event has at least
     # microsecond precision.
@@ -43,16 +47,13 @@ class Event(object):
       * end_time: time at which the event was closed
     """
 
-    def __init__(self, name, uid=None, **kwargs):
+    def __init__(self, name: str, uid: Optional[str] = None, **kwargs: Dict[str, str]):
         """Initialize an Event object.
 
         :param name: name of the event (e.g. e3_test)
-        :type name: str
         :param uid: unique identifier. If not given then an automatic uuid is
             computed
-        :type uid: str
         :param kwargs: additional key value pairs
-        :type kwargs: dict
         """
         # Internal attributes. All other attributes are store in _data. By
         # using this construct we ensure the used cannot modify directly these
@@ -65,69 +66,64 @@ class Event(object):
         self.uid = uid if uid is not None else unique_id()
         self.name = name
         self.begin_time = time.time()
-        self.end_time = None
+        self.end_time: Optional[float] = None
 
         for key, value in list(kwargs.items()):
-            self._data[key] = value
+            self._data[key] = value  # type: ignore
 
         self.set_formatter("begin_time", self.format_date)
         self.set_formatter("end_time", self.format_date)
 
-    def __enter__(self):
+    def __enter__(self) -> Event:
         return self
 
     def __exit__(self, _type, _value, _tb):
         self.close()
 
-    def set_formatter(self, key, fun):
+    def set_formatter(self, key: str, fun: Callable[[str, Any], dict]) -> None:
         """Add a formatter for a given key. (see as_dict).
 
         :param key: the event attribute to format
-        :type key: str
         :param fun: a function that takes the key and the associated value
             and return a dict
-        :type fun: str, T -> dict
         """
-        self._formatters[key] = fun
+        self._formatters[key] = fun  # type: ignore
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: str):
         """Store all attributes in the self._data dict."""
         # Once the event is closed disallow attributes modifications
         if self._closed:
             raise EventError("event %s (%s) closed" % (self.name, self.uid))
-        self._data[name] = value
+        self._data[name] = value  # type: ignore
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> str:
         """Attributes are retrieved in the _data internal dict."""
         try:
-            return self._data[name]
+            return self._data[name]  # type: ignore
         except KeyError as e:
             raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
-    def get_attachments(self):
+    def get_attachments(self) -> Dict[str, Tuple[str, str]]:
         """Return the list of attachments.
 
         :return: a list of tuple (path, sha1(path))
-        :rtype: list[(str, str)]
         """
-        return self._attachments
+        return self._attachments  # type: ignore
 
-    def attach_file(self, path, name="log"):
+    def attach_file(self, path: str, name: str = "log") -> None:
         """Attach log file to the event.
 
         When the event will be submitted, the log file will be attached.
         Note that some notification backend might cut or reject the attachment
         if too big.
         :param path: path to a log file
-        :type path: str
         :param name: name of the file to attach, by default 'log'
-        :type name: str
         """
         if self._closed:
-            raise EventError("event $s (%s) closed" % (self.name, self.uid))
-        self._attachments[name] = (path, e3.hash.sha1(path))
+            raise EventError("event %s (%s) closed" % (self.name, self.uid))
+        self._attachments[name] = (path, e3.hash.sha1(path))  # type: ignore
 
-    def close(self):
+    def close(self) -> None:
         """Close the event. Once done it is not supposed to be modified.
 
         Calling the method close() allow using it with
@@ -137,22 +133,19 @@ class Event(object):
             self.end_time = time.time()
             object.__setattr__(self, "_closed", True)
 
-    def format_date(self, key, value):
+    def format_date(self, key: str, value: float) -> Dict[str, str]:
         """Format timestamp fields.
 
         :param key: the data key
-        :type key: str
         :param value: a timestamp
-        :type value: float
         :return: a dict associating the original key to a human readable date
-        :rtype: dict[str, str]
         """
         if isinstance(value, float):
             return {key: timestamp_as_string(value)}
         else:
             return {key: value}
 
-    def as_dict(self):
+    def as_dict(self) -> Dict[str, str]:
         """Convert the event data into a dict that can be serialized as json.
 
         For each key, value of the _data dict by default add them into the
@@ -160,24 +153,21 @@ class Event(object):
         update the result.
 
         :return: a dict
-        :rtype: dict
         """
         result = {}
-        for key, value in list(self._data.items()):
+        for key, value in list(self._data.items()):  # type: ignore
             if key in self._formatters:
-                d = self._formatters[key](key, value)
+                d = self._formatters[key](key, value)  # type: ignore
                 result.update(d)
             else:
                 result[key] = value
         return result
 
-    def dump(self, event_dir):
+    def dump(self, event_dir: str) -> str:
         """Dump the event into a json file.
 
         :param event_dir: directory in which the json is dumped
-        :type event_dir: str
         :return: json file location
-        :rtype: str
         """
         result = {
             "data": self.as_dict(),
@@ -191,13 +181,11 @@ class Event(object):
         return json_filename
 
     @classmethod
-    def load(cls, json_filename):
+    def load(cls, json_filename: str) -> Event:
         """Retrieve an event from a JSON file.
 
         :param json_filename: file from which event is loaded
-        :type json_filename: str
         :return: an event
-        :rtype: Event
         """
         with open(json_filename) as fd:
             event_dict = json.load(fd)
@@ -218,29 +206,25 @@ class EventHandler(object, metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def send_event(self, event):
+    def send_event(self, event: Event) -> bool:
         """Send an event.
 
         :param event: an Event
-        :type event: Event
         :return: True on success, False otherwise
-        :rtype: bool
         """
         pass  # all: no cover
 
     @classmethod
-    def decode_config(cls, config_str):
+    def decode_config(cls, config_str: str) -> dict:
         """Decode a config string into a dict.
 
         :param config_str: the string containing configuration information
-        :type config_str: str
         :return: a dict that can be used as **kwargs for the handler
             initialization method
-        :rtype: dict
         """
         return {}
 
-    def encode_config(self):
+    def encode_config(self) -> str:
         """Encode the handler configuration into a string.
 
         This default implementation can be used for handlers that do not
@@ -249,7 +233,6 @@ class EventHandler(object, metaclass=abc.ABCMeta):
 
         :return: a string that contains the current handler configuration.
             The string should not contain the '|' character.
-        :rtype: str
         """
         return ""
 
@@ -261,17 +244,15 @@ class EventError(E3Error):
 class EventManager(object):
     """Manage a set of handlers that will be used to send events."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a manager."""
-        self.handlers = {}
+        self.handlers: Dict[str, EventHandler] = {}
 
-    def send_event(self, event):
+    def send_event(self, event: Event) -> bool:
         """Send an event to using all registered handlers.
 
         :param event: an event
-        :type event: Event
         :return: True if the event was sent successfully to all handlers
-        :rtype: bool
         """
         status = True
 
@@ -282,42 +263,37 @@ class EventManager(object):
 
         return status
 
-    def send_event_from_file(self, filename):
+    def send_event_from_file(self, filename: str) -> bool:
         """Send an event from a dumped event.
 
         :param filename: path to the json file containing the event
-        :type filename: str
         :return: True if the event was sent successfully to all handlers
-        :rtype: bool
         """
         e = Event.load(filename)
         return self.send_event(e)
 
-    def get_handler(self, name):
+    def get_handler(self, name: str) -> Callable[..., EventHandler]:
         """Get an handler class by name.
 
         Available handler classes are registered using the e3.event.handler
         entry_points in your setup.py
 
         :param name: handler name
-        :type name: str
         :return: an handler class
-        :rtype: obj
         """
         return stevedore.DriverManager("e3.event.handler", name).driver
 
-    def add_handler(self, name, *args, **kwargs):
+    def add_handler(self, name: str, *args, **kwargs) -> None:
         """Add an handler instance to the manager.
 
         args and kwargs are passed to the handler __init__ method
 
         :param name: the handler name
-        :type name: str
         """
         logger.info("Add handler %s (%s %s)", name, args, kwargs)
         self.handlers[name] = self.get_handler(name)(*args, **kwargs)
 
-    def load_handlers_from_env(self, var_name="E3_EVENT_HANDLERS"):
+    def load_handlers_from_env(self, var_name: str = "E3_EVENT_HANDLERS") -> None:
         """Add handlers by decoding an env variable.
 
         The variable value should have the following format:
@@ -331,12 +307,13 @@ class EventManager(object):
         configuration among several processes
 
         :param var_name: the name of the variable
-        :type var_name: str
         """
         handler_cfg_str = os.environ.get(var_name, "")
-        handler_cfg_dict = dict(
+        handler_cfg_dict: Dict[str, str] = dict(
             [
-                el.split("=", 1) if "=" in el else (el, "")
+                el.split("=", 1)  # type: ignore
+                if "=" in el
+                else (el, "")
                 for el in handler_cfg_str.split("|")
             ]
         )
@@ -344,15 +321,14 @@ class EventManager(object):
             handler = self.get_handler(handler_name)
             logger.info("Add handler %s (%s)", handler_name, handler_config)
             self.handlers[handler_name] = handler(
-                **handler.decode_config(handler_config)
+                **handler.decode_config(handler_config)  # type: ignore
             )
 
-    def handler_config_as_env(self, var_name="E3_EVENT_HANDLERS"):
+    def handler_config_as_env(self, var_name: str = "E3_EVENT_HANDLERS") -> None:
         """Add handlers by decoding an env variable.
 
         :param var_name: the name of the variable containing the handler
             configurations
-        :type var_name: str
         """
         result = []
         for handler_name, handler in list(self.handlers.items()):
@@ -366,18 +342,17 @@ class EventManager(object):
 default_manager = EventManager()
 
 
-def send_event(event):
+def send_event(event: Event) -> bool:
     """Send event using default manager.
 
     See EventManager.send_event
 
     :param event: an event
-    :type event: Event
     """
     return default_manager.send_event(event)
 
 
-def send_event_from_file(filename):
+def send_event_from_file(filename: str) -> bool:
     """Send event from a file using default manager.
 
     See EventManager.send_event_from_file
@@ -385,7 +360,7 @@ def send_event_from_file(filename):
     return default_manager.send_event_from_file(filename)
 
 
-def add_handler(name, *args, **kwargs):
+def add_handler(name: str, *args, **kwargs) -> None:
     """Add handler in the default manager.
 
     See EventManager.add_handler
@@ -393,23 +368,21 @@ def add_handler(name, *args, **kwargs):
     return default_manager.add_handler(name, *args, **kwargs)
 
 
-def load_handlers_from_env(var_name="E3_EVENT_HANDLERS"):
+def load_handlers_from_env(var_name: str = "E3_EVENT_HANDLERS") -> None:
     """Load handlers to default manager using env var.
 
     See EventManager.load_handlers_from_env
 
     :param var_name: the name of the variable containing the configuration
-    "type var_name: str
     """
     return default_manager.load_handlers_from_env(var_name=var_name)
 
 
-def handler_config_as_env(var_name="E3_EVENT_HANDLERS"):
+def handler_config_as_env(var_name: str = "E3_EVENT_HANDLERS") -> None:
     """Export default manager handler configurations into env.
 
     See EventManager.handler_config_as_env
 
     :param var_name: the name of the variable
-    :type var_name: str
     """
     return default_manager.handler_config_as_env(var_name=var_name)

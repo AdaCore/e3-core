@@ -54,8 +54,6 @@ def test_add_order_not_important():
         1, 2, or 3 (integers), and are meant as indices to (key, value)
         pairs in the idx_to_entry_map below, indicating which part
         of the fingerprint gets added in what order.
-
-        :rtype: Fingerprint
         """
         idx_to_entry_map = {1: ("foo", "1"), 2: ("bar", "2"), 3: ("baz", "3")}
         f = Fingerprint()

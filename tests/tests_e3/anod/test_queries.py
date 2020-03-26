@@ -13,11 +13,13 @@ class TestSourceClosure(object):
     def get_source_closure(self, name, expand_packages=True, other_builds=None):
         asr = AnodSpecRepository(self.spec_dir)
         ac = AnodContext(asr)
-        anod_instance = ac.add_anod_action(name, primitive="build").data
+        anod_instance = ac.add_anod_action(
+            name, env=ac.default_env, primitive="build"
+        ).data
         anod_instance = get_build_node(anod_instance, ac, anod_instance)
         if other_builds is not None:
             for b in other_builds:
-                ac.add_anod_action(b, primitive="build")
+                ac.add_anod_action(b, env=ac.default_env, primitive="build")
         return SourceClosure(
             anod_instance=anod_instance, context=ac, expand_packages=expand_packages
         )

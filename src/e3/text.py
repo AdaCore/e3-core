@@ -1,26 +1,25 @@
+from __future__ import annotations
+
 import re
+from typing import Dict
 
 
-def format_with_dict(pattern, values):
+def format_with_dict(pattern: str, values: Dict[str, str]) -> str:
     """Safely format a python string using % and a dictionary for values.
 
     This method is safer than using directly percent as it will escape
     automatically % in the pattern that cannot be replaced.
 
     :param pattern: a string that should be formatted
-    :type pattern: str | unicode
     :param values: a dictionary containing the values of the keys that can be
         replaced
-    :type values: dict
-
-    :rtype: str
     """
     key_regexp = r"|".join([r"\(%s\)" % k for k in values])
     result = re.sub(r"%%(?!%s)" % key_regexp, r"%%", pattern)
     return result % values
 
 
-def bytes_as_str(content):
+def bytes_as_str(content: bytes) -> str:
     """Safely convert bytes to a python string.
 
     This function attempts the conversion assuming a utf-8 enconding.
@@ -28,9 +27,7 @@ def bytes_as_str(content):
     representation, where some characters might be escaped.
 
     :param content: content to be transformed
-    :type content: bytes
     :return: a string
-    :rtype: str
     """
     try:
         result = content.decode("utf-8")
