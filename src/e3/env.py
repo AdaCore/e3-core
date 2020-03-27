@@ -240,6 +240,14 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         :param host: string as passed to --host
         :param target: string as passed to --target
         """
+        # Sanitize the input
+        if host is not None and target == host:
+            # Set target to None if it should inherit the value from host
+            target = None
+        if build is not None and host == build:
+            # Set host to None if it should inherit the value from build
+            host = None
+
         saved_build = self.build
         saved_host = self.host
         saved_target = self.target

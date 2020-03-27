@@ -117,6 +117,16 @@ def test_set_env():
     e.set_env("x86-linux,rhEs5", "x86_64-linux,debian7", "host")
     assert e.target.platform == "x86_64-linux"
 
+    # Special case to handle user input errors
+    e.set_env("x86-linux,rhEs5", "x86-linux,rhEs5", "x86-windows")
+    assert e.build == e.host
+
+    e.set_env("x86-linux,rhEs5", "x86-windows", "x86-windows")
+    assert e.host == e.target
+
+    e.set_env("x86-linux,rhEs5", "x86-linux,rhEs5", "x86-linux,rhEs5")
+    assert e.build == e.host == e.target
+
 
 def test_cmd_triplet():
     if e3.env.Env().build.platform == "x86-linux":
