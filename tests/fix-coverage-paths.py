@@ -2,6 +2,7 @@
 # strip .tox/*/lib/python*/site-packages paths from coverage data
 # show only paths corresponding to the real source files
 # From https://github.com/danilobellini/pytest-doctest-custom/
+# type: ignore
 
 
 import os

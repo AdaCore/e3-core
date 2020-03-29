@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# type: ignore
 """Generate the requirement coverage for e3-core doc."""
 
 import sys
