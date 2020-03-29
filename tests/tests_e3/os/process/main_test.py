@@ -351,7 +351,7 @@ def test_run_with_env():
 def test_no_rlimit(caplog):
     fake_rlimit = e3.os.process.get_rlimit(platform="null")
     old_get_rlimit = e3.os.process.get_rlimit
-    e3.os.process.get_rlimit = lambda: fake_rlimit
+    e3.os.process.get_rlimit = lambda: fake_rlimit  # type: ignore
 
     try:
         p1 = e3.os.process.Run([sys.executable, "-c", "print(1)"], timeout=2)

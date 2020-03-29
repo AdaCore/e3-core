@@ -1,5 +1,7 @@
 import os
 
+from typing import Dict
+
 import e3.electrolyt.plan as plan
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError
@@ -18,12 +20,16 @@ class TestContext(object):
 
         :param reject_duplicates: whether to reject duplicates in plan
         """
+
+        def repo_conf(name: str) -> Dict[str, str]:
+            return {"vcs": "git", "url": name, "branch": "master"}
+
         # Create a context for a x86-linux machine
         asr = AnodSpecRepository(self.spec_dir)
-        asr.repos["spec1-git"] = "spec1-git"
-        asr.repos["spec8-git"] = "spec8-git"
-        asr.repos["spec2-git"] = "spec2-git"
-        asr.repos["a-git"] = "a-git"
+        asr.repos["spec1-git"] = repo_conf("spec1")
+        asr.repos["spec8-git"] = repo_conf("spec8")
+        asr.repos["spec2-git"] = repo_conf("spec2")
+        asr.repos["a-git"] = repo_conf("a")
         env = BaseEnv()
         env.set_build("x86-linux", "rhes6", "mylinux")
         ac = AnodContext(asr, default_env=env, reject_duplicates=reject_duplicates)
