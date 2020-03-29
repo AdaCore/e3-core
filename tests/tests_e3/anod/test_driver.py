@@ -12,7 +12,7 @@ def test_simple_driver():
 
     class Simple(e3.anod.spec.Anod):
         @e3.anod.spec.Anod.primitive()
-        def download():
+        def download(self):
             pass
 
     with pytest.raises(e3.anod.spec.AnodError):

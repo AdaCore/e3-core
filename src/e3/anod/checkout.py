@@ -210,9 +210,7 @@ class CheckoutManager(object):
                     tmp_filename = fd.name
                 try:
                     with open(tmp_filename) as fd:
-                        commits = [
-                            commit for commit in g.parse_log(fd, max_diff_size=1024)
-                        ]
+                        commits = list(g.parse_log(fd, max_diff_size=1024))
                 finally:
                     rm(tmp_filename)
 

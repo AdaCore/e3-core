@@ -16,16 +16,16 @@ def test_fingerprint():
     f2.add("foo", "4")
 
     f12_diff = f2.compare_to(f1)
-    assert f12_diff["new"] == set([])
+    assert f12_diff["new"] == set()
     assert f12_diff["updated"] == {"foo"}
-    assert f12_diff["obsolete"] == set([])
+    assert f12_diff["obsolete"] == set()
 
     f3 = Fingerprint()
     f3.add_file(__file__)
 
     f23_diff = f3.compare_to(f2)
     assert f23_diff["new"] == {"foo"}
-    assert f23_diff["updated"] == set([])
+    assert f23_diff["updated"] == set()
     assert f23_diff["obsolete"] == {os.path.basename(__file__)}
 
     assert f1.checksum() != f2.checksum() != f3.checksum()

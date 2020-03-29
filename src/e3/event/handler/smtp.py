@@ -34,7 +34,7 @@ class SMTPHandler(EventHandler):
             self.smtp_servers = smtp_servers
 
     @classmethod
-    def decode_config(self, config_str: str) -> Dict[str, Union[str, List[str]]]:
+    def decode_config(cls, config_str: str) -> Dict[str, Union[str, List[str]]]:
         subject, from_addr, to_addr, smtp_servers = config_str.split(",", 3)
         return {
             "subject": subject,

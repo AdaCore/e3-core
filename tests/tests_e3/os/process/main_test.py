@@ -130,7 +130,7 @@ def test_wait_for_processes():
         ],
         bg=True,
     )
-    for i in range(2):
+    for _ in range(2):
         result = e3.os.process.wait_for_processes(process_list, 2)
         if result is not None:
             del process_list[result]
@@ -299,7 +299,7 @@ def test_kill_process_tree():
             f.write(prog)
 
         parent_process = e3.os.process.Run([sys.executable, gen_prog_name], bg=True)
-        for k in range(0, 100):
+        for _ in range(0, 100):
             try:
                 with open(pid_file) as f:
                     child_pid = f.read()

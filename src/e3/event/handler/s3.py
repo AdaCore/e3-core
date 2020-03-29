@@ -21,7 +21,7 @@ class S3Handler(EventHandler):
         self.sse = sse
 
     @classmethod
-    def decode_config(self, config_str):
+    def decode_config(cls, config_str):
         event_s3_url, log_s3_url, sse, aws_profile = config_str.split(",", 3)
         return {
             "event_s3_url": event_s3_url,
