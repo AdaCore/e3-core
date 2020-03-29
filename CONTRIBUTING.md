@@ -18,10 +18,32 @@ We also ask you to sign our [Contributor Licence Agreement](https://github.com/A
 Code conventions
 ----------------
 
-### PEP8, PEP257, Pyflakes, and Black
+### pre-commit checks
+
+Before contributing a change please activate pre-commit checks locally:
+
+```bash
+
+$ pip3 install pre-commit
+$ pre-commit install
+```
+
+Note that the pre-commit check configuration can be found in ``.pre-commit-config.yaml``. Before any change to that file please run:
+
+```bash
+$ pre-commit run --all-files
+```
+
+The pre-commit checks will format the code with Black, run flake8 and mypy.
+
+### Flake8, mypy, and Black
 
 All code should follow [PEP8](https://www.python.org/dev/peps/pep-0008/),
-[PEP257](https://www.python.org/dev/peps/pep-0257/).
+[PEP257](https://www.python.org/dev/peps/pep-0257/). The code is automatically
+formatted with Black at commit time.
+
+All changes should contain type hinting and running mypy should be clean of
+errors.
 
 You should also document your method's parameters and their return values
 in *reStructuredText* format:
@@ -34,10 +56,6 @@ in *reStructuredText* format:
 :return: description for returned object
 """
 ```
-
-We also expect that [PyFlakes](https://pypi.python.org/pypi/pyflakes) has been
-run before sending a patch.
-
 The code is automatically formatted with Black.
 
 ### logger
@@ -107,7 +125,7 @@ All public API methods must be documented.
 Testing
 -------
 
-All features or bug fixes must be tested.
+All features or bug fixes must be tested. Make sure that pre-commit checks are activated before any pull-requests.
 
 Requires: [tox](https://pypi.python.org/pypi/tox)
 If not already installed, install it via:
@@ -120,19 +138,6 @@ In order to run the public testsuite of `e3-core`, do:
 
 ```bash
 tox
-```
-
-To verify that the `e3-core` package is PEP8 compliant and that no error is
-reported by PyFlakes, do:
-
-```bash
-tox -e checkstyle
-```
-
-You can also verify the experimental support of Python 3 by running:
-
-```bash
-tox -e py34
 ```
 
 Coverage
