@@ -198,7 +198,7 @@ class AnodModule(object):
             if (
                 inspect.isclass(value)
                 and value.__module__ == mod_name
-                and "Anod" in [k.__name__ for k in value.__mro__]
+                and "Anod" in (k.__name__ for k in value.__mro__)
             ):
                 # This class is a child of Anod so register it.
                 # Note that even if we won't use directly the

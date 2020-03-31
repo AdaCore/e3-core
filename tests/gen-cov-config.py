@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# type: ignore
 
 
 from argparse import ArgumentParser

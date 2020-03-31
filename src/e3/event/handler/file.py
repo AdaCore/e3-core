@@ -24,7 +24,7 @@ class FileHandler(EventHandler):
         return True
 
     @classmethod
-    def decode_config(self, config_str):
+    def decode_config(cls, config_str):
         return {"log_dir": config_str}
 
     def encode_config(self):

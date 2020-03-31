@@ -424,7 +424,7 @@ class DAG(object):
         }
 
         # Set of non visited vertices
-        unvisited: Set[Optional[VertexID]] = {k for k in self.vertex_data}
+        unvisited: Set[Optional[VertexID]] = set(self.vertex_data)
 
         # The only known distance at startup
         dist[target] = 0
@@ -648,7 +648,7 @@ class DAG(object):
                 # Node is kept. Note that no check is needed as pruning
                 # operation cannot introduce a cycle.
                 result.update_vertex(node, data, predecessors, enable_checks=False)
-                pruned_node_predecessors[node] = set([node])
+                pruned_node_predecessors[node] = {node}
                 if node in self.tags:
                     result.add_tag(node, self.tags[node])
         return result

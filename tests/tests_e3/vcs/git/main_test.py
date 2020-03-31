@@ -36,7 +36,7 @@ def test_git_non_utf8():
         tmp_filename = fd.name
     try:
         with open(tmp_filename) as fd:
-            commits = [commit for commit in repo.parse_log(fd, max_diff_size=1024)]
+            commits = list(repo.parse_log(fd, max_diff_size=1024))
     finally:
         rm(tmp_filename)
 

@@ -56,9 +56,7 @@ def parse_command(command: Sequence[str], build_space: BuildSpace) -> List[str]:
     :param build_space: a build space object
     """
     cmd_dict = {}
-    cmd_dict.update(
-        dict((k.upper(), v) for (k, v) in list(build_space.__dict__.items()))
-    )
+    cmd_dict.update({k.upper(): v for (k, v) in list(build_space.__dict__.items())})
     return [e3.text.format_with_dict(c, cmd_dict) for c in command]
 
 
@@ -74,7 +72,7 @@ def has_primitive(anod_instance: Anod, name: str) -> bool:
 
     try:
         func = getattr(anod_instance, name)
-        is_primitive: bool = getattr(func, "is_primitive")
+        is_primitive: bool = func.is_primitive
     except AttributeError:
         return False
     return is_primitive

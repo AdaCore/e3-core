@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 import e3.error
 import e3.log
@@ -9,8 +10,6 @@ from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 logger = e3.log.getLogger("buildspace")
-
-from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:

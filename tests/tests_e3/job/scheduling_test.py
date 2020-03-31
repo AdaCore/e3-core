@@ -105,7 +105,7 @@ class TestScheduler(object):
         s.run(dag)
 
         # Check start_time end_time to be sure tests have not been run
-        for k, v in list(results.items()):
+        for v in results.values():
             assert v.start_time is None
             assert v.stop_time is None
 
@@ -126,7 +126,7 @@ class TestScheduler(object):
         s = Scheduler(get_job, tokens=2, collect=collect, job_timeout=2)
         s.run(dag)
 
-        for k, v in list(results.items()):
+        for v in results.values():
             assert v.interrupted
 
     def test_keyboard_interrupt(self):
@@ -154,7 +154,7 @@ class TestScheduler(object):
         with pytest.raises(KeyboardInterrupt):
             s.run(dag)
 
-        for k, v in list(results.items()):
+        for v in results.values():
             assert v.interrupted
 
     def test_collect_feedback_scheme(self):

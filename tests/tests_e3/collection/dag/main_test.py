@@ -9,7 +9,7 @@ def test_simple_dag():
     d.add_vertex("b")
     d.add_vertex("c")
     result = []
-    for vertex_id, data in d:
+    for vertex_id, _ in d:
         result.append(vertex_id)
     result.sort()
     assert result == ["a", "b", "c"]
@@ -28,7 +28,7 @@ def test_add_vertex():
     d.add_vertex("a", predecessors=["b"])
 
     result = []
-    for vertex_id, data in d:
+    for vertex_id, _ in d:
         result.append(vertex_id)
     assert result == ["b", "a"]
 
@@ -48,7 +48,7 @@ def test_add_vertex():
     }
 
     result = []
-    for vertex_id, data in d:
+    for vertex_id, _ in d:
         result.append(vertex_id)
     assert result == ["c", "b", "a"]
 
@@ -158,7 +158,7 @@ def test_iter_with_busy_state():
     d.add_vertex("b", predecessors=["a"])
 
     it = DAGIterator(d, enable_busy_state=True)
-    for nid, data in it:
+    for nid, _ in it:
         if nid is None:
             it.leave("a")
 
@@ -238,7 +238,7 @@ def test_pruned_dag():
         elif node.startswith("a"):
             assert len(preds) == 0
         else:
-            assert False, "invalid node"
+            raise AssertionError("invalid node")
 
     # By default prune ensure we keep context unchanged.
     # If we add a tag to 'b' (that would be suppressed) then we expect a

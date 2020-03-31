@@ -1,4 +1,4 @@
-The `e3` Project 
+The `e3` Project
 ================
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/979/badge)](https://bestpractices.coreinfrastructure.org/projects/979)

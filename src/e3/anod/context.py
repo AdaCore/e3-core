@@ -835,13 +835,11 @@ class AnodContext(object):
                 # predecessors in the reversed graph). Ignore Upload
                 # nodes as they will be processed only once the scheduling
                 # is done.
-                preds = list(
-                    [
-                        k
-                        for k in rev.get_predecessors(uid)
-                        if not isinstance(rev[k], Upload)
-                    ]
-                )
+                preds = [
+                    k
+                    for k in rev.get_predecessors(uid)
+                    if not isinstance(rev[k], Upload)
+                ]
 
                 if len(preds) == 1 and isinstance(rev[preds[0]], Decision):
                     decision = rev[preds[0]]

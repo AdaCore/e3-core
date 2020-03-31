@@ -1,5 +1,7 @@
 import os
 
+from typing import Dict
+
 import e3.electrolyt.plan as plan
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError
@@ -18,12 +20,16 @@ class TestContext(object):
 
         :param reject_duplicates: whether to reject duplicates in plan
         """
+
+        def repo_conf(name: str) -> Dict[str, str]:
+            return {"vcs": "git", "url": name, "branch": "master"}
+
         # Create a context for a x86-linux machine
         asr = AnodSpecRepository(self.spec_dir)
-        asr.repos["spec1-git"] = "spec1-git"
-        asr.repos["spec8-git"] = "spec8-git"
-        asr.repos["spec2-git"] = "spec2-git"
-        asr.repos["a-git"] = "a-git"
+        asr.repos["spec1-git"] = repo_conf("spec1")
+        asr.repos["spec8-git"] = repo_conf("spec8")
+        asr.repos["spec2-git"] = repo_conf("spec2")
+        asr.repos["a-git"] = repo_conf("a")
         env = BaseEnv()
         env.set_build("x86-linux", "rhes6", "mylinux")
         ac = AnodContext(asr, default_env=env, reject_duplicates=reject_duplicates)
@@ -88,15 +94,13 @@ class TestContext(object):
 
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 5, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            (
-                "root",
-                "mylinux.x86-linux.spec2.build",
-                "source_get.spec2-src",
-                "mylinux.x86-linux.spec2.source_install.spec2-src",
-                "download.spec2-src",
-            )
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec2.build",
+            "source_get.spec2-src",
+            "mylinux.x86-linux.spec2.source_install.spec2-src",
+            "download.spec2-src",
+        }
 
     def test_add_anod_action2_force_install(self):
         """Check that forcing an install with no package is rejected."""
@@ -138,14 +142,12 @@ class TestContext(object):
         assert len(ac.tree) == 6, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 4, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            (
-                "root",
-                "mylinux.x86-linux.spec3.build",
-                "mylinux.x86-linux.spec3.install",
-                "mylinux.x86-linux.spec3.upload_bin",
-            )
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec3.build",
+            "mylinux.x86-linux.spec3.install",
+            "mylinux.x86-linux.spec3.upload_bin",
+        }
 
     def test_add_anod_action4(self):
         # Simple spec with:
@@ -156,14 +158,12 @@ class TestContext(object):
         assert len(ac.tree) == 6, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 4, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            (
-                "root",
-                "mylinux.x86-linux.spec4.build",
-                "mylinux.x86-linux.spec4.install",
-                "mylinux.x86-linux.spec4.upload_bin",
-            )
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec4.build",
+            "mylinux.x86-linux.spec4.install",
+            "mylinux.x86-linux.spec4.upload_bin",
+        }
 
     def test_add_anod_action4_2(self):
         # Same previous example but calling install primitive instead of build
@@ -172,13 +172,11 @@ class TestContext(object):
         assert len(ac.tree) == 5, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 3, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            (
-                "root",
-                "mylinux.x86-linux.spec4.download_bin",
-                "mylinux.x86-linux.spec4.install",
-            )
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec4.download_bin",
+            "mylinux.x86-linux.spec4.install",
+        }
 
     def test_add_anod_action4_3(self):
         # Same as previous example but calling test primitive
@@ -187,9 +185,10 @@ class TestContext(object):
         assert len(ac.tree) == 2, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 2, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            ("root", "mylinux.x86-linux.spec4.test")
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec4.test",
+        }
 
     def test_add_anod_action5(self):
         # Case in which a source component should be uploaded (i.e: no binary
@@ -199,13 +198,11 @@ class TestContext(object):
         assert len(ac.tree) == 3, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 3, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            (
-                "root",
-                "mylinux.x86-linux.spec5.build",
-                "mylinux.x86-linux.spec5.upload_bin",
-            )
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec5.build",
+            "mylinux.x86-linux.spec5.upload_bin",
+        }
 
     def test_add_anod_action6(self):
         # Calling install on a spec without install primitive result in a build
@@ -215,9 +212,10 @@ class TestContext(object):
         assert len(ac.tree) == 2, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 2, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            ("root", "mylinux.x86-linux.spec6.build")
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec6.build",
+        }
 
     def test_add_anod_action6_2(self):
         # Same as previous example. Just ensure that if the spec is called
@@ -233,9 +231,10 @@ class TestContext(object):
         assert len(ac.tree) == 2, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 2, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            ("root", "mylinux.x86-linux.spec6.build")
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec6.build",
+        }
 
     def test_add_anod_action7(self):
         # Ensure that build_deps = None is accepted
@@ -243,9 +242,10 @@ class TestContext(object):
         ac.add_anod_action("spec7", env=ac.default_env, primitive="build")
         result = ac.schedule(ac.always_download_source_resolver)
         assert len(result) == 2, result.as_dot()
-        assert set(result.vertex_data.keys()) == set(
-            ("root", "mylinux.x86-linux.spec7.build")
-        )
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86-linux.spec7.build",
+        }
 
     def test_add_anod_action8(self):
         """Simple spec with source that does not exist."""
@@ -576,7 +576,7 @@ class TestContext(object):
                 plan_args=action.plan_args,
             )
 
-        for uid, action in ac.tree:
+        for uid, _ in ac.tree:
             if uid.endswith("sources"):
                 assert ac.tree.get_tag(uid)
             elif uid.endswith(".source.spec1-src"):
@@ -644,7 +644,7 @@ class TestContext(object):
                     plan_args=action.plan_args,
                 )
 
-            for uid, action in ac.tree:
+            for uid, _ in ac.tree:
                 if uid.endswith("build"):
                     assert ac.tree.get_tag(uid)["plan_args"]["weathers"] == "B"
         else:

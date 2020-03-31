@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# type: ignore
 """Generate the requirement coverage for e3-core doc."""
 
 import sys
@@ -10,7 +11,7 @@ def lookup(item, d):
     return {key for key, value in d.items() if value == item}
 
 
-def merge_docs(requirement : str, coverage : str) -> dict:
+def merge_docs(requirement: str, coverage: str) -> dict:
     """Load requirement yaml and include the coverage info.
 
     :param requirement: yaml filename containing list of requirements
@@ -28,7 +29,7 @@ def merge_docs(requirement : str, coverage : str) -> dict:
     return reqs
 
 
-def generate_rst(reqs_result : dict, dest : str):
+def generate_rst(reqs_result: dict, dest: str):
     """Generate rst file from requirement coverage data.
 
     :param reqs_result: dictionary returned by merge_docs
