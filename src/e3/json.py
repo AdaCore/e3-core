@@ -41,7 +41,7 @@ def load_from_json_file(
     :return: a Python object
     """
     if os.path.isfile(path):
-        with open(path, "r") as fd:
+        with open(path) as fd:
             content = json.load(fd)
         return content
     else:

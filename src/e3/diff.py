@@ -49,7 +49,7 @@ def diff(
         contents[0] = a
     else:
         try:
-            with open(a, "r") as f:
+            with open(a) as f:
                 contents[0] = f.readlines()
         except OSError:
             contents[0] = []
@@ -59,7 +59,7 @@ def diff(
         contents[1] = b
     else:
         try:
-            with open(b, "r") as f:
+            with open(b) as f:
                 contents[1] = f.readlines()
         except OSError:
             contents[1] = []
@@ -126,7 +126,7 @@ def patch(
 
     files_to_patch = 0
 
-    with io.open(patch_file, "r", newline="") as f, io.open(
+    with io.open(patch_file, newline="") as f, io.open(
         filtered_patch, "w", newline=""
     ) as fdout:
 

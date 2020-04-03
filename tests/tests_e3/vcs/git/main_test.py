@@ -75,7 +75,7 @@ def test_git_repo():
     # try with gerrit notes
     with open("log.txt", "w") as f:
         repo.write_log(f, with_gerrit_notes=True)
-    with open("log.txt", "r") as f:
+    with open("log.txt") as f:
         commits = list(repo.parse_log(f))
         assert "nobody@example.com" in commits[0]["notes"]["Code-Review+2"]
 
@@ -85,14 +85,14 @@ def test_git_repo():
     )
     with open("log.txt", "w") as f:
         repo.write_log(f, with_gerrit_notes=True)
-    with open("log.txt", "r") as f:
+    with open("log.txt") as f:
         commits = list(repo.parse_log(f))
         assert commits[0]["notes"] is None
 
     # try again without gerrit notes
     with open("log.txt", "w") as f:
         repo.write_log(f)
-    with open("log.txt", "r") as f:
+    with open("log.txt") as f:
         commits = list(repo.parse_log(f))
         assert "new file" in commits[0]["message"]
         assert commits[0]["email"] == "e3-core@example.net"
@@ -118,7 +118,7 @@ def test_git_repo():
     repo.git_cmd(["commit", "-a", "-m", "file update"])
     with open("log2.txt", "w") as f:
         repo.write_log(f)
-    with open("log2.txt", "r") as f:
+    with open("log2.txt") as f:
         commits = list(repo.parse_log(f, max_diff_size=1000))
         # assert b'diff too long' not in commits[1]['diff']
         assert "file update" in commits[0]["message"]
