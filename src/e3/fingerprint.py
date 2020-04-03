@@ -70,8 +70,7 @@ class Fingerprint:
             self.elements[name] = value
         else:
             raise E3Error(
-                f"value for {name} should be a string got {value}",
-                "fingerprint.add",
+                f"value for {name} should be a string got {value}", "fingerprint.add",
             )
 
     def add_dir(self, path: str) -> None:

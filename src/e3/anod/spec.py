@@ -258,8 +258,7 @@ class Anod:
         else:
             filename = "{}{}".format(self.name, "-" + suffix if suffix else "")
         assert filename in self.data_files, "invalid data file: {} ({})".format(
-            filename,
-            ", ".join(self.data_files),
+            filename, ", ".join(self.data_files),
         )
         filename = os.path.join(self.spec_dir, filename + ".yaml")
 

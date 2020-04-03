@@ -41,7 +41,7 @@ class Dependency:
         local_name: Optional[str] = None,
         require: str = "build_tree",
         track: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """Initialize a Dependency object.
 

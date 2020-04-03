@@ -235,8 +235,7 @@ def unpack_archive(
 
             except tarfile.TarError as e:
                 raise ArchiveError(
-                    origin="unpack_archive",
-                    message=f"Cannot untar {filename} ({e})",
+                    origin="unpack_archive", message=f"Cannot untar {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
 
         else:
@@ -247,8 +246,7 @@ def unpack_archive(
                     )
             except zipfile.BadZipfile as e:
                 raise ArchiveError(
-                    origin="unpack_archive",
-                    message=f"Cannot unzip {filename} ({e})",
+                    origin="unpack_archive", message=f"Cannot unzip {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
 
         if remove_root_dir:

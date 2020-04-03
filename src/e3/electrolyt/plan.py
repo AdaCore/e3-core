@@ -102,7 +102,7 @@ class PlanContext:
         host: Optional[str] = None,
         target: Optional[str] = None,
         enabled: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """Initialize an execution context or a scope.
 
@@ -261,8 +261,8 @@ class PlanContext:
                 pass
             else:
                 plan_line = ";".join(
-                        f"{caller_frame.filename}:{caller_frame.lineno}"
-                        for caller_frame in caller_frames_in_plan
+                    f"{caller_frame.filename}:{caller_frame.lineno}"
+                    for caller_frame in caller_frames_in_plan
                 )
 
         # First create our initial object based on current scope env

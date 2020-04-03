@@ -332,9 +332,7 @@ class ExternalSourceBuilder(UnmanagedSourceBuilder):
         :param query_name: name of the source in 'setup'. Defaults to 'name'
             if None.
         """
-        super().__init__(
-            name=name, fullname=lambda: name, checkout=None, kind="source"
-        )
+        super().__init__(name=name, fullname=lambda: name, checkout=None, kind="source")
         if query_name is None:
             query_name = name
         self.source_query = {

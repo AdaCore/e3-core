@@ -45,10 +45,7 @@ class SMTPHandler(EventHandler):
 
     def encode_config(self) -> str:
         return "{},{},{},{}".format(
-            self.subject,
-            self.from_addr,
-            self.to_addr,
-            ",".join(self.smtp_servers),
+            self.subject, self.from_addr, self.to_addr, ",".join(self.smtp_servers),
         )
 
     @property

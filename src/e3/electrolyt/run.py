@@ -217,9 +217,9 @@ class ElectrolytJobFactory:
         self, uid: str, data: Action, predecessors: List[str], notify_end: Callable
     ) -> ElectrolytJob:
         force_fail = any(
-                k
-                for k in predecessors
-                if self.job_status[k] not in (STATUS.success, STATUS.force_skip)
+            k
+            for k in predecessors
+            if self.job_status[k] not in (STATUS.success, STATUS.force_skip)
         )
         return ElectrolytJob(
             uid,

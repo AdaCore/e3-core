@@ -78,8 +78,7 @@ class S3Handler(EventHandler):
             # status. As a consequence the target url in s3 should be different
             # for call to send.
             success = s3_cp(
-                tempfile_name,
-                f"{self.event_s3_url}/{event.uid}-{unique_id()}.s3",
+                tempfile_name, f"{self.event_s3_url}/{event.uid}-{unique_id()}.s3",
             )
 
             if not success:

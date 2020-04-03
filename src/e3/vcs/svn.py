@@ -253,8 +253,7 @@ class SVNRepository:
         if os.path.exists(self.working_copy):
             if not is_empty_dir(self.working_copy) and not force_and_clean:
                 raise SVNError(
-                    f"not empty {self.working_copy} url {url}",
-                    origin="update",
+                    f"not empty {self.working_copy} url {url}", origin="update",
                 )
             if is_svn_dir and not url:
                 url = self.url

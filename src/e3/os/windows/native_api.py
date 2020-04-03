@@ -383,6 +383,5 @@ class NTException(E3Error):
 
     def __str__(self):
         return E3Error.__str__(self) + "(status={:X} '{}')".format(
-            self.status,
-            Status.msgs.get(self.status, "unknown"),
+            self.status, Status.msgs.get(self.status, "unknown"),
         )
