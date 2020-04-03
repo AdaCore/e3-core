@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     ApplyPatchCB = Callable[[str, str, str], None]
 
 
-class Package(object):
+class Package:
     """Describe and generate a binary package."""
 
     def __init__(
@@ -89,7 +89,7 @@ class Package(object):
         return pkg_path
 
 
-class Source(object):
+class Source:
     """Source package."""
 
     def __init__(
@@ -168,7 +168,7 @@ class SharedSource(Source):
     pass
 
 
-class SourceBuilder(object):
+class SourceBuilder:
 
     DEFAULT_PATCH_CMD: Final = 1
 

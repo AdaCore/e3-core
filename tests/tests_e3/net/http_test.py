@@ -106,7 +106,7 @@ def run_server(handler, func):
         server.server_close()
 
 
-class TestHTTP(object):
+class TestHTTP:
     def test_session(self):
         """Create a session in a context."""
         with HTTPSession():

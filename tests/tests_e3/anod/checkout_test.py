@@ -8,7 +8,7 @@ from e3.vcs.git import GitRepository
 from e3.os.fs import touch
 
 
-class TestCheckout(object):
+class TestCheckout:
     repo_data = os.path.join(os.path.dirname(__file__), "vcs_data")
     repo_data2 = os.path.join(os.path.dirname(__file__), "vcs_data2")
 

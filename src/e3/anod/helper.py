@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 log = e3.log.getLogger("anod.helpers")
 
 
-class Make(object):
+class Make:
     """Wrapper around GNU Make."""
 
     def __init__(
@@ -137,7 +137,7 @@ class Make(object):
         }
 
 
-class Configure(object):
+class Configure:
     """Wrapper around ./configure."""
 
     def __init__(

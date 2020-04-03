@@ -30,7 +30,7 @@ from e3.os.windows.native_api import (
 logger = e3.log.getLogger("os.windows.fs")
 
 
-class WithOpenFile(object):
+class WithOpenFile:
     def __init__(
         self,
         desired_access: Optional[int] = None,
@@ -56,7 +56,7 @@ class WithOpenFile(object):
         return wrapper
 
 
-class NTFile(object):
+class NTFile:
     """Class to manipulate Win32 paths.
 
     :ivar path: the full pathname

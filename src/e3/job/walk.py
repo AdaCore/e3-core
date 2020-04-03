@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from e3.job import Job, ProcessJob
 
 
-class Walk(object):
+class Walk:
     """An abstract class scheduling and executing a DAG of actions.
 
     :ivar actions: DAG of actions to perform.

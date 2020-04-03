@@ -53,7 +53,7 @@ class GitError(VCSError):
     pass
 
 
-class GitRepository(object):
+class GitRepository:
     """Interface to a Git Repository.
 
     :cvar git: path to the git binary

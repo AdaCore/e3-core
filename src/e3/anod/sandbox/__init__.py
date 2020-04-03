@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from typing import Any, Dict, Optional
 
 
-class SandBox(object):
+class SandBox:
     def __init__(self) -> None:
         self.__root_dir: Optional[str] = None
         self.build_id: Optional[str] = None
@@ -179,7 +179,7 @@ class SandBox(object):
         # Retrieve sandbox_scripts entry points
         e3_distrib = get_distribution("e3-core")
 
-        class SandboxDist(object):
+        class SandboxDist:
             def get_entry_map(self, group):
                 if group != "console_scripts":
                     return {}

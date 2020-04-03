@@ -38,7 +38,7 @@ CANADIAN_EXCEPTIONS = (
 EnvInfo = namedtuple("EnvInfo", ["build", "host", "target"])
 
 
-class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
+class AbstractBaseEnv(metaclass=abc.ABCMeta):
     """Environment Handling.
 
     Abstract class to factorize code between BaseEnv and Env.

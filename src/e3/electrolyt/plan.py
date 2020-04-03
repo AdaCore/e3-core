@@ -21,7 +21,7 @@ class PlanError(E3Error):
     pass
 
 
-class Plan(object):
+class Plan:
     """Electrolyt Plan.
 
     :ivar entry_points: list of entry points found in the plans
@@ -89,7 +89,7 @@ class Plan(object):
         exec(code, self.mod.__dict__)
 
 
-class PlanContext(object):
+class PlanContext:
     """Context in which a Plan is executed."""
 
     def __init__(

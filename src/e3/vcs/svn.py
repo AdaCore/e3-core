@@ -33,7 +33,7 @@ class SVNError(VCSError):
     pass
 
 
-class SVNRepository(object):
+class SVNRepository:
     """Interface to a SVN Repository.
 
     :cvar svn_bin: path to the SVN binary

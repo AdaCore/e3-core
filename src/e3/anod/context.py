@@ -71,7 +71,7 @@ class SchedulingError(E3Error):
         self.initiators = initiators
 
 
-class AnodContext(object):
+class AnodContext:
     """Anod context.
 
     :ivar repo: an anod spec repository

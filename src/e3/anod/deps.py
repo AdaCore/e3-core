@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from e3.anod.spec import Anod
 
 
-class BuildVar(object):
+class BuildVar:
     """Declare a dependency between an Anod spec and a variable."""
 
     def __init__(self, name: str, value: Hashable):
@@ -29,7 +29,7 @@ class BuildVar(object):
         return "%s=%s" % (self.name, self.value)
 
 
-class Dependency(object):
+class Dependency:
     def __init__(
         self,
         name: str,

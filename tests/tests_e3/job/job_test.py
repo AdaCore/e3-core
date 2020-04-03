@@ -4,7 +4,7 @@ from e3.anod.status import ReturnValue
 from e3.job import EmptyJob, ProcessJob
 
 
-class TestJob(object):
+class TestJob:
     def test_run_empty_job(self):
         """Try running an empty job...
 

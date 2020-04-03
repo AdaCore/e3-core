@@ -237,7 +237,7 @@ class FingerprintWalkDryRun(FingerprintWalk):
 
 
 @pytest.mark.parametrize("walk_class", [SimpleWalk, FingerprintWalk])
-class TestWalk(object):
+class TestWalk:
     def test_good_job_no_predecessors(self, walk_class, setup_sbx):
         """Simple case of a leaf job."""
         actions = DAG()

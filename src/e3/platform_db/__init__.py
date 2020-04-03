@@ -8,7 +8,7 @@ import e3.log
 import stevedore
 
 
-class PlatformDBPlugin(object, metaclass=abc.ABCMeta):
+class PlatformDBPlugin(metaclass=abc.ABCMeta):
     """Plugin API to extend the platform knowledge base.
 
     To create a plugin, override this class and the method ``update_db``. In

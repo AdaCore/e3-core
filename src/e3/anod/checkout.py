@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 logger = e3.log.getLogger("e3.anod.checkout")
 
 
-class CheckoutManager(object):
+class CheckoutManager:
     """Helper class to manage checkouts done by Anod tools.
 
     When a checkout manager is used in working_dir directory for a repository

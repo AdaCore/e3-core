@@ -19,7 +19,7 @@ class RewriteNodeError(Exception):
     pass
 
 
-class RewriteImportRule(object):
+class RewriteImportRule:
     """Rewrite Import node from AST.
 
     Skip or reject names imported by::

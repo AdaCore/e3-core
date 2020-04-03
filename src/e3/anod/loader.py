@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from e3.anod.spec import Anod
 
 
-class AnodSpecRepository(object):
+class AnodSpecRepository:
     """Anod spec repository.
 
     :ivar specs: A dictionary of AnodModule objects, indexed by spec name
@@ -133,7 +133,7 @@ class AnodSpecRepository(object):
         return self.specs[name].load(self)
 
 
-class AnodModule(object):
+class AnodModule:
     def __init__(self, name: str, path: str, data: List[str]):
         """Initialize an AnodModule instance.
 

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 logger = e3.log.getLogger("e3.anod.SandBox")
 
 
-class SandBoxAction(object, metaclass=abc.ABCMeta):
+class SandBoxAction(metaclass=abc.ABCMeta):
 
     require_sandbox = True
 

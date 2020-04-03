@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Callable, Dict, Optional
 
 
-class EntryPoint(object):
+class EntryPoint:
     """Plan Entry point.
 
     The class represent a valid entry point in an electrolyt plan. It's used

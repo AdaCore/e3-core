@@ -42,7 +42,7 @@ class HTTPError(E3Error):
     pass
 
 
-class BaseURL(object):
+class BaseURL:
     """Represent a base url object along with its authentication.
 
     The root class BaseURL does not use authentication
@@ -66,7 +66,7 @@ class BaseURL(object):
         return self.url
 
 
-class HTTPSession(object):
+class HTTPSession:
 
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)

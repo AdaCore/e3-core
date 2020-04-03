@@ -113,7 +113,7 @@ def load_ordered(filename: str) -> OrderedDict:
         return yaml.load(f, OrderedDictYAMLLoader)
 
 
-class CaseParser(object):
+class CaseParser:
     """Parse case statements in an OrderedDict.
 
     Each time a key starting with ``case_`` (or the prefix you choose) if

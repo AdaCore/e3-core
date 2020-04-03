@@ -59,7 +59,7 @@ class FileAttribute(Structure):
         return ",".join(result)
 
 
-class Access(object):
+class Access:
     """Desired Access constants."""
 
     LIST_DIRECTORY = 0x0001
@@ -80,7 +80,7 @@ class Access(object):
     PROCESS_QUERY_INFORMATION = 0x0400
 
 
-class Share(object):
+class Share:
     """Share Access constants."""
 
     NOTHING = 0x00
@@ -90,7 +90,7 @@ class Share(object):
     ALL = 0x07
 
 
-class OpenOptions(object):
+class OpenOptions:
     """File Open options."""
 
     BACKUP_INTENT = 0x00004000
@@ -98,7 +98,7 @@ class OpenOptions(object):
     DELETE_ON_CLOSE = 0x00001000
 
 
-class Wait(object):
+class Wait:
     """Constants for WaitFor* functions."""
 
     OBJECT = 0x0000
@@ -108,7 +108,7 @@ class Wait(object):
     INFINITE = 0xFFFFFFFF
 
 
-class Status(object):
+class Status:
     """Error constants."""
 
     ACCESS_DENIED = 0xC0000022
@@ -186,10 +186,10 @@ class FileTime(Structure):
             return "none"
 
 
-class FileInfo(object):
+class FileInfo:
     """Declaration of structures returned by QueryInformationFile."""
 
-    class Names(object):
+    class Names:
         class_id = 12
 
     class Disposition(Structure):
@@ -227,7 +227,7 @@ class FileInfo(object):
             return result
 
 
-class ProcessInfo(object):
+class ProcessInfo:
     """Declaration of structure returned by QueryInformationProcess."""
 
     class Basic(Structure):
@@ -278,7 +278,7 @@ class ObjectAttributes(Structure):
 
 
 # Declare the Win32 functions return types and signature
-class NT(object):
+class NT:
     Sleep = None
     GetVolumePathName = None
     SetInformationFile = None

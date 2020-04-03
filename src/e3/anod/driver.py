@@ -37,7 +37,7 @@ def primitive_check() -> Callable[[F], F]:
     return decorator
 
 
-class AnodDriver(object):
+class AnodDriver:
     def __init__(self, anod_instance: Anod, store: Store):
         """Initialize the Anod driver for a given Anod instance.
 

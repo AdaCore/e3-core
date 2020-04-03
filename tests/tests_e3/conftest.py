@@ -15,7 +15,7 @@ import pytest
 RESULTS_DIR = os.environ.get("RESULTS_DIR")
 
 
-class RequirementCoverage(object):
+class RequirementCoverage:
     """Track requirements <-> tests."""
 
     output_filename = None

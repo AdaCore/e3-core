@@ -51,7 +51,7 @@ def disabled(func: Callable) -> Callable:
     return empty_func
 
 
-class memoize(object):
+class memoize:
     """Memoize function return values.
 
     Avoid repeating the calculation of results for previously-processed

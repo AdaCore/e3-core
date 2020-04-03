@@ -25,7 +25,7 @@ logger = e3.log.getLogger("job.scheduler")
 DEFAULT_JOB_MAX_DURATION = 3600 * 24
 
 
-class Scheduler(object):
+class Scheduler:
     """Handle parallel execution of interdependent jobs."""
 
     def __init__(

@@ -29,7 +29,7 @@ class Host(BaseEnv):
         self._instance.update(kwargs)
 
 
-class HostDB(object):
+class HostDB:
     """Host database.
 
     :ivar hosts: dict indexed by host name

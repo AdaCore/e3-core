@@ -32,7 +32,7 @@ def unique_id() -> str:
     return str(uuid.uuid1(clock_seq=int(1000 * time.time())))
 
 
-class Event(object):
+class Event:
     """Event class for notifying external services.
 
     An event is composed of:
@@ -197,7 +197,7 @@ class Event(object):
         return result
 
 
-class EventHandler(object, metaclass=abc.ABCMeta):
+class EventHandler(metaclass=abc.ABCMeta):
     """Interface to implement in order to be able to send events.
 
     One method needs to be implemented by a new EventManager:
@@ -241,7 +241,7 @@ class EventError(E3Error):
     pass
 
 
-class EventManager(object):
+class EventManager:
     """Manage a set of handlers that will be used to send events."""
 
     def __init__(self) -> None:

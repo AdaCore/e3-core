@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 logger = e3.log.getLogger("store")
 
 
-class ResourceInfo(object, metaclass=abc.ABCMeta):
+class ResourceInfo(metaclass=abc.ABCMeta):
     """Object representing resource metadata.
 
     This is subclassed by all store drivers.
@@ -48,7 +48,7 @@ class StoreError(E3Error):
     pass
 
 
-class Store(object, metaclass=abc.ABCMeta):
+class Store(metaclass=abc.ABCMeta):
     def __init__(self, store_configuration: Any, cache_backend: Cache):
         """Initialize a Store object.
 

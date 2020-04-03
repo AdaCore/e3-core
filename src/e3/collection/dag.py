@@ -31,7 +31,7 @@ class DAGError(E3Error):
     pass
 
 
-class DAGIterator(object):
+class DAGIterator:
 
     NOT_VISITED = 0
     BUSY = 1
@@ -128,7 +128,7 @@ class DAGIterator(object):
             self.pred_number[k] -= 1
 
 
-class DAG(object):
+class DAG:
     """Represent a Directed Acyclic Graph.
 
     :ivar vertex_data: a dictionary containing all vertex data

@@ -21,7 +21,7 @@ logger = e3.log.getLogger("job")
 JobTimingInfo = namedtuple("JobTimingInfo", ["start_time", "stop_time", "duration"])
 
 
-class Job(object, metaclass=abc.ABCMeta):
+class Job(metaclass=abc.ABCMeta):
     """Handle a single Job.
 
     :ivar slot: number associated with the job during its execution. At a

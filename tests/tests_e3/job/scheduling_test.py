@@ -26,7 +26,7 @@ class SleepJob(ProcessJob):
         return [sys.executable, "-c", "import time; time.sleep(6.0)"]
 
 
-class TestScheduler(object):
+class TestScheduler:
     def test_minimal_run(self):
         """Test with only two independent jobs."""
         dag = DAG()
@@ -166,7 +166,7 @@ class TestScheduler(object):
         are called sequentially.
         """
 
-        class SchedulerContext(object):
+        class SchedulerContext:
             def __init__(self):
                 # Save in results tuples with first element being a bool
                 # indicating success or failure and the second the job itself

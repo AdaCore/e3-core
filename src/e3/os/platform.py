@@ -24,7 +24,7 @@ Uname = namedtuple(
 )
 
 
-class SystemInfo(object):
+class SystemInfo:
     """Gather info about the system.
 
     :cvar network_ifs: dictionary addressed by network interface name for which

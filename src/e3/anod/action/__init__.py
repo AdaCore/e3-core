@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     Choice = Union[Literal[0], Literal[1], Literal[2]]
 
 
-class Action(object):
+class Action:
     """Action object.
 
     Action objects are used as node in DAG produced by anod scheduler. Only

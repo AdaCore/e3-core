@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from typing import Optional, List
 
 
-class BuildSpace(object):
+class BuildSpace:
     """Build space located inside a sandbox."""
 
     DIRS = (

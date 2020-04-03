@@ -78,7 +78,7 @@ def has_primitive(anod_instance: Anod, name: str) -> bool:
     return is_primitive
 
 
-class Anod(object):
+class Anod:
     """Anod base class.
 
     To write an Anod specification file, you'll need to subclass Anod. A very

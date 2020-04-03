@@ -42,7 +42,7 @@ FINGERPRINT_VERSION = "1.2"
 # This ensures we don't try to compare fingerprints with different meanings.
 
 
-class Fingerprint(object):
+class Fingerprint:
     """Fingerprint class.
 
     :ivar elements: a dictionary containing the checksum/id for each element

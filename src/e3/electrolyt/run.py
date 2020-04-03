@@ -199,7 +199,7 @@ class ElectrolytJob(Job):
         logger.info("result: OK")
 
 
-class ElectrolytJobFactory(object):
+class ElectrolytJobFactory:
     def __init__(
         self,
         sandbox: SandBox,

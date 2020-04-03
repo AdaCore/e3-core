@@ -196,7 +196,7 @@ def disable_commands_handler(handler: logging.Handler) -> None:
     handler.close()
 
 
-class Run(object):
+class Run:
     """Class to handle processes.
 
     :ivar cmds: The ``cmds`` argument passed to the __init__ method
@@ -571,7 +571,7 @@ class Run(object):
         return self.internal.children()
 
 
-class File(object):
+class File:
     """Can be a PIPE, a file object."""
 
     def __init__(self, name: Any, mode: str = "r"):
