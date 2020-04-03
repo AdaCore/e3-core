@@ -57,7 +57,7 @@ setup(
     ],
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    package_data={"e3": ["os/data/rlimit-*"]},
+    package_data={"e3": ["py.typed", "os/data/rlimit-*"]},
     install_requires=install_requires,
     extras_require=extras_require,
     entry_points={
