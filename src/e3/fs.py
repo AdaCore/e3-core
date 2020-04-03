@@ -848,8 +848,7 @@ def sync_tree(
             elif is_in_file_list(el.rel_path):
                 yield el
                 if isdir(el.source):
-                    for x in walk(root_dir, target_root_dir, el):
-                        yield x
+                    yield from walk(root_dir, target_root_dir, el)
             else:
                 yield FilesInfo(el.rel_path, FileInfo(el.source.path, None), el.target)
 
