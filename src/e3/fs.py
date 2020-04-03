@@ -824,7 +824,7 @@ def sync_tree(
 
         result = []
         for name in all_names:
-            rel_path = "%s/%s" % (entry.rel_path, name)
+            rel_path = f"{entry.rel_path}/{name}"
 
             source_full_path = os.path.join(entry.source.path, name)
             target_full_path = os.path.join(entry.target.path, name)

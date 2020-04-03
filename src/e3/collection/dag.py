@@ -604,7 +604,7 @@ class DAG:
             result.append('"%s"' % vertex)
         for vertex, predecessors in self.__vertex_predecessors.items():
             for predecessor in predecessors:
-                result.append('"%s" -> "%s"' % (vertex, predecessor))
+                result.append(f'"{vertex}" -> "{predecessor}"')
         result.append("}")
         return "\n".join(result)
 

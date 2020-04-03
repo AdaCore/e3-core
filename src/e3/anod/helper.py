@@ -116,7 +116,7 @@ class Make:
         cmd_arg_list += ["-j", "%s" % str(jobs) if jobs is not None else str(self.jobs)]
 
         for key in self.var_list:
-            cmd_arg_list.append("%s=%s" % (key, self.var_list[key]))
+            cmd_arg_list.append("{}={}".format(key, self.var_list[key]))
 
         if target is None:
             target = self.default_target

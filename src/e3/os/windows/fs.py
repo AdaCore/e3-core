@@ -101,8 +101,8 @@ class NTFile:
 
     def __str__(self):
         result = [
-            "%-20s: %s" % ("path", self.path),
-            "%-20s: %s" % ("nt_filename", self.nt_filename),
+            "{:<20}: {}".format("path", self.path),
+            "{:<20}: {}".format("nt_filename", self.nt_filename),
         ]
         return "\n".join(result)
 
@@ -330,7 +330,7 @@ class NTFile:
         if status < 0:
             raise NTException(
                 status=status,
-                message="move of %s to %s failed" % (self.path, filename),
+                message=f"move of {self.path} to {filename} failed",
                 origin="NTFile.rename",
             )
 

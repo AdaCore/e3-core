@@ -66,7 +66,7 @@ def migrate_v1_5():
                     pass
                 os.rename(name + ".yaml", os.path.join(prefix, "%s.yaml" % suffix))
             except Exception as er:  # defensive code
-                print("error for %s.yaml %s %s" % (name, prefix, suffix))
+                print(f"error for {name}.yaml {prefix} {suffix}")
                 print(er)
         else:
             print("unknown yaml file %s.yaml" % name)

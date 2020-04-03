@@ -153,7 +153,7 @@ class Source:
             if other_source.name != self.name and other_source.dest:
                 ignore_path = os.path.relpath(other_source.dest, self.dest)
                 if not ignore_path.startswith(os.pardir):
-                    ignore_list.append("/{}".format(ignore_path))
+                    ignore_list.append(f"/{ignore_path}")
         return ignore_list
 
 

@@ -175,7 +175,7 @@ def patch(
                 if callable(discarded_files):
                     for fn in path_list:
                         if discarded_files(fn):
-                            logger.debug("patch %s discarding %s" % (patch_file, fn))
+                            logger.debug(f"patch {patch_file} discarding {fn}")
                             discard = True
                             break
                 else:
@@ -183,7 +183,7 @@ def patch(
                         for fn in path_list:
                             if fnmatch.fnmatch(fn, pattern):
                                 logger.debug(
-                                    "patch %s discarding %s" % (patch_file, fn)
+                                    f"patch {patch_file} discarding {fn}"
                                 )
                                 discard = True
                                 break

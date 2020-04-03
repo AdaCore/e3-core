@@ -137,7 +137,7 @@ class SandBoxShowConfiguration(SandBoxAction):
 
         for k, v in vars(args).items():
             if k in self.keys:
-                print("%s = %s" % (k, v))
+                print(f"{k} = {v}")
 
 
 class SandBoxExec(SandBoxCreate):

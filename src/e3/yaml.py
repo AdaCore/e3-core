@@ -312,7 +312,7 @@ def load_with_config(filename: Union[str, List[str]], config: dict) -> Any:
             )
         except (yaml.parser.ParserError, yaml.constructor.ConstructorError) as e:
             raise YamlError(
-                "%s is an invalid yaml file: %s" % (f, e), "load_with_config"
+                f"{f} is an invalid yaml file: {e}", "load_with_config"
             ).with_traceback(sys.exc_info()[2])
 
     return result

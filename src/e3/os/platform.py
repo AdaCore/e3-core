@@ -260,7 +260,7 @@ class SystemInfo:
 
                 return (
                     float(
-                        "%s.%s" % (os_version.dwMajorVersion, os_version.dwMinorVersion)
+                        f"{os_version.dwMajorVersion}.{os_version.dwMinorVersion}"
                     ),
                     os_version.dwBuildNumber,
                     os_version.wProductType != 1,

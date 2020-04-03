@@ -400,7 +400,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         :param append: if True append, otherwise prepend. Default is prepend
         """
         if env_var not in os.environ:
-            logger.debug("export {env_var}={path}".format(env_var=env_var, path=path))
+            logger.debug(f"export {env_var}={path}")
             os.environ[env_var] = path
         else:
             if append:
@@ -497,7 +497,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         result["platform"] = self.platform
 
         for c in ("host", "target", "build"):
-            result.update({"%s_%s" % (c, k): v for k, v in result[c].to_dict().items()})
+            result.update({f"{c}_{k}": v for k, v in result[c].to_dict().items()})
             del result[c]
         return result
 
@@ -528,7 +528,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             else:
                 host_cpu = "x86"
             try:
-                e.set_build("%s-%s" % (host_cpu, host))
+                e.set_build(f"{host_cpu}-{host}")
                 e.set_target(target_name)
                 found = True
             except KeyError:

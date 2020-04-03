@@ -169,7 +169,7 @@ class SVNRepository:
         :raise: SVNError
         """
         info = self.svn_cmd(["info"], output=PIPE).out
-        m = re.search(r"^{item}: *(.*)\n".format(item=item), info, flags=re.M)
+        m = re.search(fr"^{item}: *(.*)\n", info, flags=re.M)
         if m is None:
             logger.debug("svn info result:\n%s", info)
             raise SVNError(
@@ -253,7 +253,7 @@ class SVNRepository:
         if os.path.exists(self.working_copy):
             if not is_empty_dir(self.working_copy) and not force_and_clean:
                 raise SVNError(
-                    "not empty {} url {}".format(self.working_copy, url),
+                    f"not empty {self.working_copy} url {url}",
                     origin="update",
                 )
             if is_svn_dir and not url:

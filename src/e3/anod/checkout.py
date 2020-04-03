@@ -206,7 +206,7 @@ class CheckoutManager:
             elif self.compute_changelog:
                 # Fetch the change log and dump it into the changelog file
                 with closing(tempfile.NamedTemporaryFile(mode="w", delete=False)) as fd:
-                    g.write_log(fd, rev_range="%s..%s" % (old_commit, new_commit))
+                    g.write_log(fd, rev_range=f"{old_commit}..{new_commit}")
                     tmp_filename = fd.name
                 try:
                     with open(tmp_filename) as fd:

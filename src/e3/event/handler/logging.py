@@ -23,4 +23,4 @@ class LoggingHandler(EventHandler):
         return {"logger_name": logger_name, "level": level}
 
     def encode_config(self):
-        return "%s,%s" % (self.logger_name, self.level)
+        return f"{self.logger_name},{self.level}"

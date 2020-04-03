@@ -26,7 +26,7 @@ class BuildVar:
         self.kind = "var"
 
     def __str__(self) -> str:
-        return "%s=%s" % (self.name, self.value)
+        return f"{self.name}={self.value}"
 
 
 class Dependency:

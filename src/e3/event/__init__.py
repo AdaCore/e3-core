@@ -93,7 +93,7 @@ class Event:
         """Store all attributes in the self._data dict."""
         # Once the event is closed disallow attributes modifications
         if self._closed:
-            raise EventError("event %s (%s) closed" % (self.name, self.uid))
+            raise EventError(f"event {self.name} ({self.uid}) closed")
         self._data[name] = value  # type: ignore
 
     def __getattr__(self, name: str) -> str:
@@ -120,7 +120,7 @@ class Event:
         :param name: name of the file to attach, by default 'log'
         """
         if self._closed:
-            raise EventError("event %s (%s) closed" % (self.name, self.uid))
+            raise EventError(f"event {self.name} ({self.uid}) closed")
         self._attachments[name] = (path, e3.hash.sha1(path))  # type: ignore
 
     def close(self) -> None:
@@ -175,7 +175,7 @@ class Event:
             "closed": self._closed,
         }
         mkdir(event_dir)
-        json_filename = os.path.join(event_dir, "%s-%s.json" % (self.uid, unique_id()))
+        json_filename = os.path.join(event_dir, f"{self.uid}-{unique_id()}.json")
         with open(json_filename, "w") as fd:
             json.dump(result, fd)
         return json_filename
@@ -334,7 +334,7 @@ class EventManager:
         for handler_name, handler in list(self.handlers.items()):
             config_str = handler.encode_config()
             assert "|" not in config_str
-            result.append("%s=%s" % (handler_name, config_str))
+            result.append(f"{handler_name}={config_str}")
         os.environ[var_name] = "|".join(result)
 
 

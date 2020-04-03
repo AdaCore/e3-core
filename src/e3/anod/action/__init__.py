@@ -227,7 +227,7 @@ class AnodAction(Action):
         self.anod_instance = anod_instance
 
     def __str__(self) -> str:
-        result = "%s %s for %s" % (
+        result = "{} {} for {}".format(
             self.data.kind,
             self.data.name,
             self.data.env.platform,
@@ -304,7 +304,7 @@ class UploadComponent(Upload):
         self.anod_instance = data
 
     def __str__(self) -> str:
-        return "upload %s of %s" % (
+        return "upload {} of {}".format(
             self.str_prefix,
             self.uid.split(".", 1)[1].rsplit(".", 1)[0],
         )
@@ -594,13 +594,13 @@ class BuildOrDownload(Decision):
         action = self.left_action if choice == Decision.LEFT else self.right_action
         spec_instance = action.data
 
-        args = ['"{}"'.format(spec_instance.name)]
+        args = [f'"{spec_instance.name}"']
         if spec_instance.qualifier:
-            args.append('qualifier="{}"'.format(spec_instance.qualifier))
-        args.append('build="{}"'.format(spec_instance.env.build.platform))
+            args.append(f'qualifier="{spec_instance.qualifier}"')
+        args.append(f'build="{spec_instance.env.build.platform}"')
         if spec_instance.env.host.platform != spec_instance.env.build.platform:
-            args.append('host="{}"'.format(spec_instance.env.host.platform))
+            args.append(f'host="{spec_instance.env.host.platform}"')
         if spec_instance.env.target.platform != spec_instance.env.host.platform:
-            args.append('target="{}"'.format(spec_instance.env.target.platform))
+            args.append(f'target="{spec_instance.env.target.platform}"')
 
         return "anod_{}({})".format(spec_instance.kind, ", ".join(args))

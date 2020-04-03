@@ -68,9 +68,9 @@ def require_vcs(prog, request):
     """
     if not which(prog):
         if request.config.getoption("ci"):
-            pytest.fail("{} not available".format(prog))
+            pytest.fail(f"{prog} not available")
         else:
-            pytest.skip("{} not available".format(prog))
+            pytest.skip(f"{prog} not available")
 
 
 @pytest.fixture(autouse=True)
@@ -127,8 +127,8 @@ def pytest_runtest_makereport(item, call):
         outcome = rep.outcome.upper()
         test_name = rep.nodeid.replace("/", ".").replace("::", "--")
         if rep.longreprtext:
-            with open(os.path.join(RESULTS_DIR, "{}.diff".format(test_name)), "w") as f:
+            with open(os.path.join(RESULTS_DIR, f"{test_name}.diff"), "w") as f:
                 f.write(rep.longreprtext)
 
         with open(os.path.join(RESULTS_DIR, "results"), "a") as f:
-            f.write("{}:{}\n".format(test_name, outcome))
+            f.write(f"{test_name}:{outcome}\n")

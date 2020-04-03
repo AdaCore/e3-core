@@ -177,7 +177,7 @@ class FileTime(Structure):
             return datetime.fromtimestamp(self.filetime // 10000000 - 11644473600)
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
-            raise ValueError("filetime '%s' failed with %s" % (self.filetime, err))
+            raise ValueError(f"filetime '{self.filetime}' failed with {err}")
 
     def __str__(self):
         try:
@@ -382,7 +382,7 @@ class NTException(E3Error):
         E3Error.__init__(self, message, origin=origin)
 
     def __str__(self):
-        return E3Error.__str__(self) + "(status=%X '%s')" % (
+        return E3Error.__str__(self) + "(status={:X} '{}')".format(
             self.status,
             Status.msgs.get(self.status, "unknown"),
         )

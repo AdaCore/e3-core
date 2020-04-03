@@ -70,7 +70,7 @@ class Fingerprint:
             self.elements[name] = value
         else:
             raise E3Error(
-                "value for %s should be a string got %s" % (name, value),
+                f"value for {name} should be a string got {value}",
                 "fingerprint.add",
             )
 
@@ -163,7 +163,7 @@ class Fingerprint:
     def __str__(self) -> str:
         """Return a string representation of the fingerprint."""
         return "\n".join(
-            ["%s: %s" % (k, self.elements[k]) for k in sorted(self.elements.keys())]
+            ["{}: {}".format(k, self.elements[k]) for k in sorted(self.elements.keys())]
         )
 
     def checksum(self) -> str:

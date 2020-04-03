@@ -46,6 +46,6 @@ class E3Error(Exception):
         else:
             error_msg = self.__class__.__name__
         if self.origin:
-            return "%s: %s\n" % (self.origin, error_msg)
+            return f"{self.origin}: {error_msg}\n"
         else:
             return error_msg

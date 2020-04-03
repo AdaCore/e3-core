@@ -256,8 +256,8 @@ class Anod:
         if StrictVersion(self.api_version) >= StrictVersion("1.5"):
             filename = os.path.join(self.name, suffix if suffix else "config")
         else:
-            filename = "%s%s" % (self.name, "-" + suffix if suffix else "")
-        assert filename in self.data_files, "invalid data file: %s (%s)" % (
+            filename = "{}{}".format(self.name, "-" + suffix if suffix else "")
+        assert filename in self.data_files, "invalid data file: {} ({})".format(
             filename,
             ", ".join(self.data_files),
         )
@@ -355,7 +355,7 @@ class Anod:
                 except Exception as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)
                     raise AnodError(
-                        "%s %s fails (got exception: %s)" % (self.name, f.__name__, e)
+                        f"{self.name} {f.__name__} fails (got exception: {e})"
                     )
 
             primitive_func.is_primitive = True

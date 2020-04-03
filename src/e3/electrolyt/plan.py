@@ -261,10 +261,8 @@ class PlanContext:
                 pass
             else:
                 plan_line = ";".join(
-                    (
-                        "{}:{}".format(caller_frame.filename, caller_frame.lineno)
+                        f"{caller_frame.filename}:{caller_frame.lineno}"
                         for caller_frame in caller_frames_in_plan
-                    )
                 )
 
         # First create our initial object based on current scope env
