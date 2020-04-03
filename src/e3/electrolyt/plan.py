@@ -3,6 +3,8 @@ from __future__ import annotations
 import ast
 import imp
 import inspect
+import itertools
+from datetime import datetime, timezone
 from functools import partial
 from typing import TYPE_CHECKING
 
@@ -11,7 +13,7 @@ from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Optional
+    from typing import Any, Callable, Dict, Iterator, List, Optional
     from e3.electrolyt.entry_point import EntryPoint
 
 
@@ -19,6 +21,57 @@ class PlanError(E3Error):
     """Error when parsing or executing the plan."""
 
     pass
+
+
+class ConditionalConstant:
+    """Allow defining constant in the plan that can depend on external values.
+
+    Note that ConditionalConstant are meant to enable/disable part of the
+    plan but not to modify the plan completely. In particular it is not
+    recommended to write things such as:
+
+        if my_const:
+            anod_build("my_component")
+
+    In that case tools parsing the plan won't be able to detect potential issues.
+    Instead use:
+
+        with defaults(enabled="my_const"):
+             anod_build("my_component")
+    """
+
+    RECORD: List[ConditionalConstant] = []
+
+    def __init__(self, name: str, value: bool) -> None:
+        """Set constant value.
+
+        :param name: constant name for debug info
+        :param value: boolean value
+        """
+        self.value = value
+        self.name = name
+        self.RECORD.append(self)
+
+    def __bool__(self) -> bool:
+        return self.value
+
+    @classmethod
+    def shuffle(cls) -> Iterator[List[ConditionalConstant]]:
+        """Generate all possible set of values for all conditional constants.
+
+        In some cases we want to evaluate the plan for different set of values
+        for the conditional constants to verify that the plan will still be
+        valid under different conditions.
+        """
+        initial_values = tuple(bool(c) for c in cls.RECORD)
+        for shuffeld_values in itertools.product(
+            [True, False], repeat=len(initial_values)
+        ):
+            if shuffeld_values != initial_values:
+                # Replace conditional values by these new shuffled values
+                for idx, value in enumerate(shuffeld_values):
+                    cls.RECORD[idx].value = value
+                yield cls.RECORD
 
 
 class Plan(object):
@@ -63,6 +116,20 @@ class Plan(object):
 
         for name, cls in entry_point_cls.items():
             self.mod.__dict__[name] = partial(entry_point, self.entry_points, cls, name)
+
+        self.plan_date = datetime.now(timezone.utc)
+        self.mod.__dict__["cond"] = self.cond
+
+    def cond(self, name: str, date: Callable[[datetime], bool]) -> ConditionalConstant:
+        """Generate a new conditional constant.
+
+        :param name: constant name
+        :param date: function that takes the plan date and return a boolean.
+            This can be used to set a value depending on the day of the week,
+            e.g. by setting the constant to True on weekend:
+            lambda d: d.isoweekday() in [6, 7]
+        """
+        return ConditionalConstant(name, date(self.plan_date))
 
     def load(self, filename: str) -> None:
         """Load python code from file.
