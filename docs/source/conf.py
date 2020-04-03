@@ -52,18 +52,18 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"e3-core"
-copyright = u"2017, AdaCore"
-author = u"AdaCore"
+project = "e3-core"
+copyright = "2017, AdaCore"
+author = "AdaCore"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = u"21.0"
+version = "21.0"
 # The full version, including alpha/beta/rc tags.
-release = u"21.0"
+release = "21.0"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -97,7 +97,7 @@ latex_elements = {}
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "e3-core.tex", u"e3-core Documentation", u"AdaCore", "manual")
+    (master_doc, "e3-core.tex", "e3-core Documentation", "AdaCore", "manual")
 ]
 
 
@@ -105,7 +105,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "e3-core", u"e3-core Documentation", [author], 1)]
+man_pages = [(master_doc, "e3-core", "e3-core Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -117,7 +117,7 @@ texinfo_documents = [
     (
         master_doc,
         "e3-core",
-        u"e3-core Documentation",
+        "e3-core Documentation",
         author,
         "e3-core",
         "One line description of project.",
