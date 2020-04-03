@@ -252,7 +252,7 @@ def ls(path: Union[str, List[str]], emit_log_record: bool = True) -> List[str]:
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
 
-    return sorted(itertools.chain.from_iterable((glob.glob(p) for p in path_list)))
+    return sorted(itertools.chain.from_iterable(glob.glob(p) for p in path_list))
 
 
 def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
@@ -597,16 +597,14 @@ def sync_tree(
             return False
 
         return (
-            any((f for f in abs_ignore_patterns if p == f or p.startswith(f + "/")))
+            any(f for f in abs_ignore_patterns if p == f or p.startswith(f + "/"))
             or any(
-                (f for f in rel_ignore_patterns if p[1:] == f or p.endswith("/" + f))
+                f for f in rel_ignore_patterns if p[1:] == f or p.endswith("/" + f)
             )
             or any(
-                (
                     f
                     for f in norm_ignore_list
                     if "/" not in f and fnmatch.fnmatch(os.path.basename(p), f)
-                )
             )
         )
 
@@ -622,13 +620,11 @@ def sync_tree(
         if TYPE_CHECKING:
             assert norm_file_list is not None
         return any(
-            (
                 f
                 for f in norm_file_list
                 if f == p[1:]
                 or p.startswith("/" + f + "/")
                 or f.startswith(p[1:] + "/")
-            )
         )
 
     def isdir(fi: FileInfo) -> bool:

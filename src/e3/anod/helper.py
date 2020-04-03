@@ -283,7 +283,7 @@ def text_replace(
                 output.write(line.encode("utf-8"))
             else:
                 output.write(line)
-    if any((nb for nb in nb_substitution)):
+    if any(nb for nb in nb_substitution):
         # file changed, update it
         with open(filename, "wb") as f:
             f.write(output.getvalue())

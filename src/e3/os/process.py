@@ -157,7 +157,7 @@ def command_line_image(cmds: AnyCmdLine) -> str:
     to a shell for execution.
     """
     return " | ".join(
-        (" ".join((quote_arg(arg) for arg in cmd)) for cmd in to_cmd_lines(cmds))
+        " ".join(quote_arg(arg) for arg in cmd) for cmd in to_cmd_lines(cmds)
     )
 
 

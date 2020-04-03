@@ -109,7 +109,7 @@ def test_ls(caplog):
     assert e3.fs.ls("*") == ["a", "b", "c"]
 
     # Reproduce issue #213: add test with generator
-    assert e3.fs.ls((k for k in ("a", "c"))) == ["a", "c"]
+    assert e3.fs.ls(k for k in ("a", "c")) == ["a", "c"]
 
 
 def test_mkdir(caplog):
