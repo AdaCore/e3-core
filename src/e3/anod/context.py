@@ -66,7 +66,7 @@ class SchedulingError(E3Error):
         :param uid: uid of action that cause the error
         :param initiators: list of uids involved in the failure
         """
-        super(SchedulingError, self).__init__(message, origin)
+        super().__init__(message, origin)
         self.uid = uid
         self.initiators = initiators
 

@@ -42,7 +42,7 @@ class OrderedDictYAMLLoader(Loader):
     def __init__(self, stream: IO[str]):
         self.name = None
         self.stream = stream
-        super(OrderedDictYAMLLoader, self).__init__(stream)
+        super().__init__(stream)
 
         self.add_constructor(
             "tag:yaml.org,2002:map", type(self).construct_yaml_map

@@ -63,7 +63,7 @@ class ElectrolytJob(Job):
         :param force_status: Same as the attribute of the same name.
         :param dry_run: Same as the attribute of the same name.
         """
-        super(ElectrolytJob, self).__init__(uid, data, notify_end)
+        super().__init__(uid, data, notify_end)
         self.__status = force_status
         self.sandbox = sandbox
         self.spec_repo = spec_repo

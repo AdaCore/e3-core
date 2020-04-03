@@ -301,7 +301,7 @@ class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
 
         :param name: full package name (including extension)
         """
-        super(ThirdPartySourceBuilder, self).__init__(
+        super().__init__(
             name=name,
             fullname=lambda: name,
             checkout=None,
@@ -332,7 +332,7 @@ class ExternalSourceBuilder(UnmanagedSourceBuilder):
         :param query_name: name of the source in 'setup'. Defaults to 'name'
             if None.
         """
-        super(ExternalSourceBuilder, self).__init__(
+        super().__init__(
             name=name, fullname=lambda: name, checkout=None, kind="source"
         )
         if query_name is None:

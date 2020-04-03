@@ -146,7 +146,7 @@ class SandBoxExec(SandBoxCreate):
     help = "Execute anod action in an sandbox"
 
     def add_parsers(self):
-        super(SandBoxExec, self).add_parsers()
+        super().add_parsers()
         self.parser.add_argument("--specs-dir", help="Alternate spec directory to use")
         self.parser.add_argument(
             "--create-sandbox", action="store_true", help="Create the sandbox if needed"

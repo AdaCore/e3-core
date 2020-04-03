@@ -569,7 +569,7 @@ class BaseEnv(AbstractBaseEnv):
 
         # class variable that holds the stack of saved environments state
         self._context: List[Any] = []
-        super(BaseEnv, self).__init__(build, host, target)
+        super().__init__(build, host, target)
 
     def __setattr__(self, name: str, value: Any) -> None:
         if name in ("_instance", "_context"):
@@ -638,7 +638,7 @@ class Env(AbstractBaseEnv):
         On first instantiation, build attribute will be computed and
         host and target set to the build attribute.
         """
-        super(Env, self).__init__()
+        super().__init__()
 
     @property
     def _initialized(self) -> bool:

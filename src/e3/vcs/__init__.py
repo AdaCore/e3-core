@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class VCSError(E3Error):
     def __init__(self, message: str, origin: str, process: Optional[Run] = None):
-        super(VCSError, self).__init__(message, origin)
+        super().__init__(message, origin)
         self.origin = origin
         self.message = message
         self.process = process

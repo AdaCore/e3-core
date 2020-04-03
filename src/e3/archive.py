@@ -29,7 +29,7 @@ class E3ZipFile(zipfile.ZipFile):
     """Override default ZipFile with attributes preservation."""
 
     def _extract_member(self, member, path, pwd):
-        result = super(E3ZipFile, self)._extract_member(member, path, pwd)
+        result = super()._extract_member(member, path, pwd)
 
         if sys.platform != "win32":
             # Try to preserve attributes on non Windows platforms as

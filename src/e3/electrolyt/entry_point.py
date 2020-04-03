@@ -77,7 +77,7 @@ class Machine(EntryPoint):
         :param name: see EntryPoint
         :param description: see EntryPoint
         """
-        super(Machine, self).__init__(db, fun, kind, name, description)
+        super().__init__(db, fun, kind, name, description)
         self.platform = platform
         self.version = version
         self.site = site
