@@ -53,7 +53,7 @@ class GitError(VCSError):
     pass
 
 
-class GitRepository(object):
+class GitRepository:
     """Interface to a Git Repository.
 
     :cvar git: path to the git binary
@@ -284,7 +284,7 @@ class GitRepository(object):
             if result["notes"]:
                 try:
                     result["notes"] = dict(
-                        (l.split(": ", 1) for l in result["notes"].splitlines())
+                        l.split(": ", 1) for l in result["notes"].splitlines()
                     )
                 except ValueError:
                     # Notes format invalid, discard it

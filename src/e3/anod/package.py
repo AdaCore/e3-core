@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     ApplyPatchCB = Callable[[str, str, str], None]
 
 
-class Package(object):
+class Package:
     """Describe and generate a binary package."""
 
     def __init__(
@@ -89,7 +89,7 @@ class Package(object):
         return pkg_path
 
 
-class Source(object):
+class Source:
     """Source package."""
 
     def __init__(
@@ -153,7 +153,7 @@ class Source(object):
             if other_source.name != self.name and other_source.dest:
                 ignore_path = os.path.relpath(other_source.dest, self.dest)
                 if not ignore_path.startswith(os.pardir):
-                    ignore_list.append("/{}".format(ignore_path))
+                    ignore_list.append(f"/{ignore_path}")
         return ignore_list
 
 
@@ -168,7 +168,7 @@ class SharedSource(Source):
     pass
 
 
-class SourceBuilder(object):
+class SourceBuilder:
 
     DEFAULT_PATCH_CMD: Final = 1
 
@@ -301,7 +301,7 @@ class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
 
         :param name: full package name (including extension)
         """
-        super(ThirdPartySourceBuilder, self).__init__(
+        super().__init__(
             name=name,
             fullname=lambda: name,
             checkout=None,
@@ -332,9 +332,7 @@ class ExternalSourceBuilder(UnmanagedSourceBuilder):
         :param query_name: name of the source in 'setup'. Defaults to 'name'
             if None.
         """
-        super(ExternalSourceBuilder, self).__init__(
-            name=name, fullname=lambda: name, checkout=None, kind="source"
-        )
+        super().__init__(name=name, fullname=lambda: name, checkout=None, kind="source")
         if query_name is None:
             query_name = name
         self.source_query = {

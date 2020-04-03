@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from argparse import Namespace
 
 
-class Main(object):
+class Main:
     """Class that implement argument parsing.
 
     :ivar args: list of positional parameters after processing options

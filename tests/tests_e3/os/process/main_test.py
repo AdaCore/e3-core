@@ -206,7 +206,7 @@ def test_output_append():
     p_out = "p.out"
     e3.os.process.Run([sys.executable, "-c", 'print("line1")'], output=p_out)
     e3.os.process.Run([sys.executable, "-c", 'print("line2")'], output="+" + p_out)
-    with open(p_out, "r") as fd:
+    with open(p_out) as fd:
         content = fd.read().strip()
     assert content == "line1\nline2"
 
@@ -305,7 +305,7 @@ def test_kill_process_tree():
                     child_pid = f.read()
                     if child_pid:
                         break
-            except IOError:
+            except OSError:
                 pass
             time.sleep(0.1)
         e3.fs.rm(gen_prog_name)

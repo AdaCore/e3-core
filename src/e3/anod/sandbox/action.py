@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 logger = e3.log.getLogger("e3.anod.SandBox")
 
 
-class SandBoxAction(object, metaclass=abc.ABCMeta):
+class SandBoxAction(metaclass=abc.ABCMeta):
 
     require_sandbox = True
 
@@ -137,7 +137,7 @@ class SandBoxShowConfiguration(SandBoxAction):
 
         for k, v in vars(args).items():
             if k in self.keys:
-                print("%s = %s" % (k, v))
+                print(f"{k} = {v}")
 
 
 class SandBoxExec(SandBoxCreate):
@@ -146,7 +146,7 @@ class SandBoxExec(SandBoxCreate):
     help = "Execute anod action in an sandbox"
 
     def add_parsers(self):
-        super(SandBoxExec, self).add_parsers()
+        super().add_parsers()
         self.parser.add_argument("--specs-dir", help="Alternate spec directory to use")
         self.parser.add_argument(
             "--create-sandbox", action="store_true", help="Create the sandbox if needed"
@@ -189,7 +189,7 @@ class SandBoxExec(SandBoxCreate):
                 raise SandBoxError(
                     "plan file %s does not exist" % args.plan, origin="SandBoxExec.run"
                 )
-            with open(args.plan, "r") as plan_fd:
+            with open(args.plan) as plan_fd:
                 plan_content = ["def main_entry_point():"]
                 plan_content += [
                     "    %s" % line for line in plan_fd.read().splitlines()

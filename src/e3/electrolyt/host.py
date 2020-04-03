@@ -29,7 +29,7 @@ class Host(BaseEnv):
         self._instance.update(kwargs)
 
 
-class HostDB(object):
+class HostDB:
     """Host database.
 
     :ivar hosts: dict indexed by host name
@@ -78,7 +78,7 @@ class HostDB(object):
 
         :param filename: path the yaml file
         """
-        with open(filename, "r") as fd:
+        with open(filename) as fd:
             content = yaml.safe_load(fd)
 
         for hostname, hostinfo in content.items():

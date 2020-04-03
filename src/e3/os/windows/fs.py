@@ -30,7 +30,7 @@ from e3.os.windows.native_api import (
 logger = e3.log.getLogger("os.windows.fs")
 
 
-class WithOpenFile(object):
+class WithOpenFile:
     def __init__(
         self,
         desired_access: Optional[int] = None,
@@ -56,7 +56,7 @@ class WithOpenFile(object):
         return wrapper
 
 
-class NTFile(object):
+class NTFile:
     """Class to manipulate Win32 paths.
 
     :ivar path: the full pathname
@@ -101,8 +101,8 @@ class NTFile(object):
 
     def __str__(self):
         result = [
-            "%-20s: %s" % ("path", self.path),
-            "%-20s: %s" % ("nt_filename", self.nt_filename),
+            "{:<20}: {}".format("path", self.path),
+            "{:<20}: {}".format("nt_filename", self.nt_filename),
         ]
         return "\n".join(result)
 
@@ -330,7 +330,7 @@ class NTFile(object):
         if status < 0:
             raise NTException(
                 status=status,
-                message="move of %s to %s failed" % (self.path, filename),
+                message=f"move of {self.path} to {filename} failed",
                 origin="NTFile.rename",
             )
 

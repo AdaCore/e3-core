@@ -157,7 +157,7 @@ def command_line_image(cmds: AnyCmdLine) -> str:
     to a shell for execution.
     """
     return " | ".join(
-        (" ".join((quote_arg(arg) for arg in cmd)) for cmd in to_cmd_lines(cmds))
+        " ".join(quote_arg(arg) for arg in cmd) for cmd in to_cmd_lines(cmds)
     )
 
 
@@ -196,7 +196,7 @@ def disable_commands_handler(handler: logging.Handler) -> None:
     handler.close()
 
 
-class Run(object):
+class Run:
     """Class to handle processes.
 
     :ivar cmds: The ``cmds`` argument passed to the __init__ method
@@ -571,7 +571,7 @@ class Run(object):
         return self.internal.children()
 
 
-class File(object):
+class File:
     """Can be a PIPE, a file object."""
 
     def __init__(self, name: Any, mode: str = "r"):
@@ -701,7 +701,7 @@ def wait_for_processes(process_list: List[Run], timeout: float) -> Optional[int]
                         if l_r:
                             os.read(fd_r, 1)
                         break
-                    except select.error:
+                    except OSError:
                         pass
 
                 remain = timeout - time.time() + start

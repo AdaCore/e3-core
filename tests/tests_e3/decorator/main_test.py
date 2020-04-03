@@ -30,7 +30,7 @@ def test_memoize():
     # Verify that the cache is working also when
     # calling instance methods
 
-    class C(object):
+    class C:
         @e3.decorator.memoize
         def t(self, arg):
             del arg

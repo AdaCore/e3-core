@@ -24,7 +24,7 @@ Uname = namedtuple(
 )
 
 
-class SystemInfo(object):
+class SystemInfo:
     """Gather info about the system.
 
     :cvar network_ifs: dictionary addressed by network interface name for which
@@ -259,9 +259,7 @@ class SystemInfo(object):
                     return (None, None, None)
 
                 return (
-                    float(
-                        "%s.%s" % (os_version.dwMajorVersion, os_version.dwMinorVersion)
-                    ),
+                    float(f"{os_version.dwMajorVersion}.{os_version.dwMinorVersion}"),
                     os_version.dwBuildNumber,
                     os_version.wProductType != 1,
                 )

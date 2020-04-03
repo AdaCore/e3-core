@@ -4,7 +4,7 @@ from e3.anod.status import ReturnValue
 from e3.job import EmptyJob, ProcessJob
 
 
-class TestJob(object):
+class TestJob:
     def test_run_empty_job(self):
         """Try running an empty job...
 
@@ -57,7 +57,7 @@ class TestJob(object):
             def cmdline(self):
                 # This will be called by self.run() and simulate an error
                 # when spawning the job
-                raise IOError("spawn issue")
+                raise OSError("spawn issue")
 
         job = SpawnIssueProcessJob("myuid", {}, None)
         job.run()

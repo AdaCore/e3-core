@@ -31,7 +31,7 @@ class S3Handler(EventHandler):
         }
 
     def encode_config(self):
-        return "%s,%s,%s,%s" % (
+        return "{},{},{},{}".format(
             self.event_s3_url,
             self.log_s3_url,
             self.sse,
@@ -53,7 +53,7 @@ class S3Handler(EventHandler):
         for name, attach in list(event.get_attachments().items()):
             attach_path = attach[0]
             # Push the attachment
-            s3_url = "%s/%s/%s" % (self.log_s3_url, event.uid, name)
+            s3_url = f"{self.log_s3_url}/{event.uid}/{name}"
             success = s3_cp(attach_path, s3_url)
             if not success:
                 return False
@@ -78,8 +78,7 @@ class S3Handler(EventHandler):
             # status. As a consequence the target url in s3 should be different
             # for call to send.
             success = s3_cp(
-                tempfile_name,
-                "%s/%s-%s.s3" % (self.event_s3_url, event.uid, unique_id()),
+                tempfile_name, f"{self.event_s3_url}/{event.uid}-{unique_id()}.s3",
             )
 
             if not success:

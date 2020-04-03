@@ -78,7 +78,7 @@ def has_primitive(anod_instance: Anod, name: str) -> bool:
     return is_primitive
 
 
-class Anod(object):
+class Anod:
     """Anod base class.
 
     To write an Anod specification file, you'll need to subclass Anod. A very
@@ -256,10 +256,9 @@ class Anod(object):
         if StrictVersion(self.api_version) >= StrictVersion("1.5"):
             filename = os.path.join(self.name, suffix if suffix else "config")
         else:
-            filename = "%s%s" % (self.name, "-" + suffix if suffix else "")
-        assert filename in self.data_files, "invalid data file: %s (%s)" % (
-            filename,
-            ", ".join(self.data_files),
+            filename = "{}{}".format(self.name, "-" + suffix if suffix else "")
+        assert filename in self.data_files, "invalid data file: {} ({})".format(
+            filename, ", ".join(self.data_files),
         )
         filename = os.path.join(self.spec_dir, filename + ".yaml")
 
@@ -355,7 +354,7 @@ class Anod(object):
                 except Exception as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)
                     raise AnodError(
-                        "%s %s fails (got exception: %s)" % (self.name, f.__name__, e)
+                        f"{self.name} {f.__name__} fails (got exception: {e})"
                     )
 
             primitive_func.is_primitive = True

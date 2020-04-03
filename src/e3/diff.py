@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import fnmatch
-import io
 import re
 from difflib import unified_diff
 from typing import TYPE_CHECKING
@@ -49,9 +48,9 @@ def diff(
         contents[0] = a
     else:
         try:
-            with open(a, "r") as f:
+            with open(a) as f:
                 contents[0] = f.readlines()
-        except IOError:
+        except OSError:
             contents[0] = []
 
     # Do same thing for the second one
@@ -59,9 +58,9 @@ def diff(
         contents[1] = b
     else:
         try:
-            with open(b, "r") as f:
+            with open(b) as f:
                 contents[1] = f.readlines()
-        except IOError:
+        except OSError:
             contents[1] = []
 
     # Filter empty lines in both items and ignore white chars at beginning
@@ -126,7 +125,7 @@ def patch(
 
     files_to_patch = 0
 
-    with io.open(patch_file, "r", newline="") as f, io.open(
+    with open(patch_file, newline="") as f, open(
         filtered_patch, "w", newline=""
     ) as fdout:
 
@@ -160,6 +159,7 @@ def patch(
             elif not header2:
                 # Check if line next to a header first line confirm that that
                 # this is the start of a new patch
+                assert header2_regexp is not None
                 m = re.search(header2_regexp, line)
                 if m is None:
                     write_line(header1[0])
@@ -175,16 +175,14 @@ def patch(
                 if callable(discarded_files):
                     for fn in path_list:
                         if discarded_files(fn):
-                            logger.debug("patch %s discarding %s" % (patch_file, fn))
+                            logger.debug(f"patch {patch_file} discarding {fn}")
                             discard = True
                             break
                 else:
                     for pattern in discarded_files:
                         for fn in path_list:
                             if fnmatch.fnmatch(fn, pattern):
-                                logger.debug(
-                                    "patch %s discarding %s" % (patch_file, fn)
-                                )
+                                logger.debug(f"patch {patch_file} discarding {fn}")
                                 discard = True
                                 break
                         if discard:

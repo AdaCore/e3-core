@@ -106,7 +106,7 @@ def run_server(handler, func):
         server.server_close()
 
 
-class TestHTTP(object):
+class TestHTTP:
     def test_session(self):
         """Create a session in a context."""
         with HTTPSession():
@@ -159,7 +159,7 @@ class TestHTTP(object):
     def test_fallback(self):
         def func(server, base_url):
             def inner_func(server2, base_url2):
-                logging.info("servers: %s, %s" % (base_url, base_url2))
+                logging.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
                     session.set_max_retries(connect=4)
                     result = session.download_file(base_url + "dummy", dest=".")
@@ -174,7 +174,7 @@ class TestHTTP(object):
     def test_content_abort(self):
         def func(server, base_url):
             def inner_func(server2, base_url2):
-                logging.info("servers: %s, %s" % (base_url, base_url2))
+                logging.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
                     session.DEFAULT_TIMEOUT = (10.0, 0.2)
                     session.set_max_retries(connect=4)

@@ -252,7 +252,7 @@ def ls(path: Union[str, List[str]], emit_log_record: bool = True) -> List[str]:
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
 
-    return sorted(itertools.chain.from_iterable((glob.glob(p) for p in path_list)))
+    return sorted(itertools.chain.from_iterable(glob.glob(p) for p in path_list))
 
 
 def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
@@ -597,16 +597,12 @@ def sync_tree(
             return False
 
         return (
-            any((f for f in abs_ignore_patterns if p == f or p.startswith(f + "/")))
+            any(f for f in abs_ignore_patterns if p == f or p.startswith(f + "/"))
+            or any(f for f in rel_ignore_patterns if p[1:] == f or p.endswith("/" + f))
             or any(
-                (f for f in rel_ignore_patterns if p[1:] == f or p.endswith("/" + f))
-            )
-            or any(
-                (
-                    f
-                    for f in norm_ignore_list
-                    if "/" not in f and fnmatch.fnmatch(os.path.basename(p), f)
-                )
+                f
+                for f in norm_ignore_list
+                if "/" not in f and fnmatch.fnmatch(os.path.basename(p), f)
             )
         )
 
@@ -622,13 +618,9 @@ def sync_tree(
         if TYPE_CHECKING:
             assert norm_file_list is not None
         return any(
-            (
-                f
-                for f in norm_file_list
-                if f == p[1:]
-                or p.startswith("/" + f + "/")
-                or f.startswith(p[1:] + "/")
-            )
+            f
+            for f in norm_file_list
+            if f == p[1:] or p.startswith("/" + f + "/") or f.startswith(p[1:] + "/")
         )
 
     def isdir(fi: FileInfo) -> bool:
@@ -762,7 +754,7 @@ def sync_tree(
                 with open(src.path, "rb") as fsrc:
                     with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
-            except IOError:
+            except OSError:
                 rm(dst.path, glob=False)
                 with open(src.path, "rb") as fsrc:
                     with open(dst.path, "wb") as fdst:
@@ -824,7 +816,7 @@ def sync_tree(
 
         result = []
         for name in all_names:
-            rel_path = "%s/%s" % (entry.rel_path, name)
+            rel_path = f"{entry.rel_path}/{name}"
 
             source_full_path = os.path.join(entry.source.path, name)
             target_full_path = os.path.join(entry.target.path, name)
@@ -852,8 +844,7 @@ def sync_tree(
             elif is_in_file_list(el.rel_path):
                 yield el
                 if isdir(el.source):
-                    for x in walk(root_dir, target_root_dir, el):
-                        yield x
+                    yield from walk(root_dir, target_root_dir, el)
             else:
                 yield FilesInfo(el.rel_path, FileInfo(el.source.path, None), el.target)
 

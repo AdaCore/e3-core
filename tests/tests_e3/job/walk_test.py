@@ -121,12 +121,12 @@ class ControlledJob(ProcessJob):
     """
 
     def __init__(self, uid, data, notify_end):
-        super(ControlledJob, self).__init__(uid, data, notify_end)
+        super().__init__(uid, data, notify_end)
         self.run_count = 0
 
     def run(self):
         self.run_count += 1
-        return super(ControlledJob, self).run()
+        return super().run()
 
     @property
     def cmdline(self):
@@ -154,7 +154,7 @@ class SimpleWalk(Walk):
         # The list of jobs (by UID) that have been requeued.
         self.saved_jobs = {}
         self.requeued = {}
-        super(SimpleWalk, self).__init__(actions)
+        super().__init__(actions)
 
     def request_requeue(self, job):
         """Requeue the job is not already queued once."""
@@ -180,7 +180,7 @@ class SimpleWalk(Walk):
         # as a way to record some information each time this method
         # is called, so as to be able to verify some aspects of
         # the class' behavior.
-        job = super(SimpleWalk, self).get_job(uid, data, predecessors, notify_end)
+        job = super().get_job(uid, data, predecessors, notify_end)
         self.saved_jobs[job.uid] = job
         return job
 
@@ -237,7 +237,7 @@ class FingerprintWalkDryRun(FingerprintWalk):
 
 
 @pytest.mark.parametrize("walk_class", [SimpleWalk, FingerprintWalk])
-class TestWalk(object):
+class TestWalk:
     def test_good_job_no_predecessors(self, walk_class, setup_sbx):
         """Simple case of a leaf job."""
         actions = DAG()

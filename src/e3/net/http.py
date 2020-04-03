@@ -42,7 +42,7 @@ class HTTPError(E3Error):
     pass
 
 
-class BaseURL(object):
+class BaseURL:
     """Represent a base url object along with its authentication.
 
     The root class BaseURL does not use authentication
@@ -66,7 +66,7 @@ class BaseURL(object):
         return self.url
 
 
-class HTTPSession(object):
+class HTTPSession:
 
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
@@ -185,7 +185,7 @@ class HTTPSession(object):
 
             # Compute final url
             if base_url is not None:
-                final_url = "%s/%s" % (base_url, url)
+                final_url = f"{base_url}/{url}"
                 message_prefix = "%s: " % base_url
             else:
                 final_url = url
@@ -198,7 +198,7 @@ class HTTPSession(object):
                 logger.debug("%s %s", method, final_url)
                 response = self.session.request(method, final_url, **kwargs)
                 if response.status_code != 200:
-                    error_msgs.append("%s%s" % (message_prefix, response.text))
+                    error_msgs.append(f"{message_prefix}{response.text}")
                     response.raise_for_status()
                 return response
             except (
@@ -207,7 +207,7 @@ class HTTPSession(object):
                 requests.packages.urllib3.exceptions.HTTPError,
             ) as e:
                 # got an error with that base url so put it last in our list
-                error_msgs.append("%s%s" % (message_prefix, e))
+                error_msgs.append(f"{message_prefix}{e}")
                 problematic_url = self.base_urls.popleft()
                 self.base_urls.append(problematic_url)  # type: ignore
 

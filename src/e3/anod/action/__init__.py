@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     Choice = Union[Literal[0], Literal[1], Literal[2]]
 
 
-class Action(object):
+class Action:
     """Action object.
 
     Action objects are used as node in DAG produced by anod scheduler. Only
@@ -48,7 +48,7 @@ class Root(Action):
 
     def __init__(self) -> None:
         """Initialize a root node."""
-        super(Root, self).__init__(uid="root", data="root")
+        super().__init__(uid="root", data="root")
 
     def __str__(self) -> str:
         return "root node"
@@ -70,9 +70,7 @@ class GetSource(Action):
 
         :param builder: A SourceBuilder object for the source we need to get.
         """
-        super(GetSource, self).__init__(
-            uid="source_get.%s" % builder.name, data=builder
-        )
+        super().__init__(uid="source_get.%s" % builder.name, data=builder)
         self.builder = builder
 
     def __str__(self) -> str:
@@ -100,9 +98,7 @@ class DownloadSource(Download):
         :param builder: A SourceBuilder object for the source we need
             to download.
         """
-        super(DownloadSource, self).__init__(
-            uid="download.%s" % builder.name, data=builder
-        )
+        super().__init__(uid="download.%s" % builder.name, data=builder)
         self.builder = builder
 
     def __str__(self) -> str:
@@ -125,7 +121,7 @@ class InstallSource(Action):
         :param spec: The Anod instance of the spec providing those sources.
         :param source: The source we want to install.
         """
-        super(InstallSource, self).__init__(uid, data=(spec, source))
+        super().__init__(uid, data=(spec, source))
         self.spec = spec
         self.source = source
 
@@ -149,9 +145,8 @@ class CreateSource(Action):
             the given source.
         :param source_name: name of source package to assemble
         """
-        super(CreateSource, self).__init__(
-            uid="%s.%s" % (anod_instance.uid, source_name),
-            data=(anod_instance, source_name),
+        super().__init__(
+            uid=f"{anod_instance.uid}.{source_name}", data=(anod_instance, source_name),
         )
         self.anod_instance = anod_instance
         self.source_name = source_name
@@ -175,9 +170,7 @@ class CreateSources(Action):
 
         :param anod_instance: the Anod instance of the spec
         """
-        super(CreateSources, self).__init__(
-            uid="%s.sources" % anod_instance.uid, data=(anod_instance)
-        )
+        super().__init__(uid="%s.sources" % anod_instance.uid, data=(anod_instance))
         self.anod_instance = anod_instance
 
     def __str__(self) -> str:
@@ -203,9 +196,7 @@ class Checkout(Action):
             - 'vcs': The Version Control System kind (a string).
                 At present, only 'git' is supported.
         """
-        super(Checkout, self).__init__(
-            uid="checkout.%s" % repo_name, data=(repo_name, repo_data)
-        )
+        super().__init__(uid="checkout.%s" % repo_name, data=(repo_name, repo_data))
         self.repo_name = repo_name
         self.repo_data = repo_data
 
@@ -227,14 +218,12 @@ class AnodAction(Action):
         :param anod_instance: an Anod spec instance
         """
         assert isinstance(anod_instance, Anod)
-        super(AnodAction, self).__init__(uid=anod_instance.uid, data=anod_instance)
+        super().__init__(uid=anod_instance.uid, data=anod_instance)
         self.anod_instance = anod_instance
 
     def __str__(self) -> str:
-        result = "%s %s for %s" % (
-            self.data.kind,
-            self.data.name,
-            self.data.env.platform,
+        result = "{} {} for {}".format(
+            self.data.kind, self.data.name, self.data.env.platform,
         )
         if self.data.qualifier:
             result += " (qualifier=%s)" % self.data.qualifier
@@ -275,7 +264,7 @@ class DownloadBinary(Download):
         data_uid = data.uid.split(".")
         data_uid[-1] = "download_bin"
         uid = ".".join(data_uid)
-        super(DownloadBinary, self).__init__(uid=uid, data=data)
+        super().__init__(uid=uid, data=data)
 
     def __str__(self) -> str:
         return "download binary of %s" % self.uid.split(".", 1)[1].rsplit(".", 1)[0]
@@ -304,13 +293,12 @@ class UploadComponent(Upload):
         data_uid = data.uid.split(".")
         data_uid[-1] = "upload_bin"
         uid = ".".join(data_uid)
-        super(UploadComponent, self).__init__(uid=uid, data=data)
+        super().__init__(uid=uid, data=data)
         self.anod_instance = data
 
     def __str__(self) -> str:
-        return "upload %s of %s" % (
-            self.str_prefix,
-            self.uid.split(".", 1)[1].rsplit(".", 1)[0],
+        return "upload {} of {}".format(
+            self.str_prefix, self.uid.split(".", 1)[1].rsplit(".", 1)[0],
         )
 
 
@@ -342,7 +330,7 @@ class UploadSource(Upload):
         instance_uid[-1] = "upload_src"
         instance_uid.append(source_name)
         uid = ".".join(instance_uid)
-        super(UploadSource, self).__init__(uid=uid, data=(anod_instance, source_name))
+        super().__init__(uid=uid, data=(anod_instance, source_name))
         self.anod_instance = anod_instance
         self.source_name = source_name
 
@@ -422,7 +410,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         :param right: Same as the right_action attribute.
         :param choice: Same as the attribute.
         """
-        super(Decision, self).__init__(uid=root.uid + ".decision", data=None)
+        super().__init__(uid=root.uid + ".decision", data=None)
         self.initiator = root.uid
         self.choice = choice
         self.expected_choice: Optional[Choice] = None
@@ -565,7 +553,7 @@ class CreateSourceOrDownload(Decision):
         """
         assert isinstance(left, CreateSource)
         assert isinstance(right, DownloadSource)
-        super(CreateSourceOrDownload, self).__init__(root=root, left=left, right=right)
+        super().__init__(root=root, left=left, right=right)
 
     @classmethod
     def description(cls, decision: Choice) -> str:
@@ -588,7 +576,7 @@ class BuildOrDownload(Decision):
         assert isinstance(left, Build)
         assert isinstance(right, DownloadBinary)
         assert isinstance(root, Install)
-        super(BuildOrDownload, self).__init__(root=root, left=left, right=right)
+        super().__init__(root=root, left=left, right=right)
 
     @classmethod
     def description(cls, decision: Choice) -> str:
@@ -598,13 +586,13 @@ class BuildOrDownload(Decision):
         action = self.left_action if choice == Decision.LEFT else self.right_action
         spec_instance = action.data
 
-        args = ['"{}"'.format(spec_instance.name)]
+        args = [f'"{spec_instance.name}"']
         if spec_instance.qualifier:
-            args.append('qualifier="{}"'.format(spec_instance.qualifier))
-        args.append('build="{}"'.format(spec_instance.env.build.platform))
+            args.append(f'qualifier="{spec_instance.qualifier}"')
+        args.append(f'build="{spec_instance.env.build.platform}"')
         if spec_instance.env.host.platform != spec_instance.env.build.platform:
-            args.append('host="{}"'.format(spec_instance.env.host.platform))
+            args.append(f'host="{spec_instance.env.host.platform}"')
         if spec_instance.env.target.platform != spec_instance.env.host.platform:
-            args.append('target="{}"'.format(spec_instance.env.target.platform))
+            args.append(f'target="{spec_instance.env.target.platform}"')
 
         return "anod_{}({})".format(spec_instance.kind, ", ".join(args))

@@ -382,7 +382,7 @@ def test_sandbox_source_auto_ignore(git_specs_dir):
     assert "found 2" in p.out
     assert "found 1" in p.out
     for subdir in ("3", "3/2", "3/2/1"):
-        assert "found .anod in {}".format(subdir) in p.out
+        assert f"found .anod in {subdir}" in p.out
     assert "result: OK" in p.out
 
 
@@ -606,7 +606,7 @@ def test_sandbox_user_yaml(git_specs_dir):
         ]
     )
     assert "build dummyspec" in p.out
-    assert "using alternate specs dir {}".format(local_spec_dir) in p.out
+    assert f"using alternate specs dir {local_spec_dir}" in p.out
 
     sbx = e3.anod.sandbox.SandBox()
     sbx.root_dir = sandbox_dir

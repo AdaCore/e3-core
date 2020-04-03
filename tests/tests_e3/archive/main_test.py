@@ -126,7 +126,7 @@ def test_unpack_cmd():
 
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
-    class TestResult(object):
+    class TestResult:
         def store_result(self, **kwargs):
             self.kwargs = kwargs
 

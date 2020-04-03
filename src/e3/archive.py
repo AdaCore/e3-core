@@ -29,7 +29,7 @@ class E3ZipFile(zipfile.ZipFile):
     """Override default ZipFile with attributes preservation."""
 
     def _extract_member(self, member, path, pwd):
-        result = super(E3ZipFile, self)._extract_member(member, path, pwd)
+        result = super()._extract_member(member, path, pwd)
 
         if sys.platform != "win32":
             # Try to preserve attributes on non Windows platforms as
@@ -235,8 +235,7 @@ def unpack_archive(
 
             except tarfile.TarError as e:
                 raise ArchiveError(
-                    origin="unpack_archive",
-                    message="Cannot untar %s (%s)" % (filename, e),
+                    origin="unpack_archive", message=f"Cannot untar {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
 
         else:
@@ -247,8 +246,7 @@ def unpack_archive(
                     )
             except zipfile.BadZipfile as e:
                 raise ArchiveError(
-                    origin="unpack_archive",
-                    message="Cannot unzip %s (%s)" % (filename, e),
+                    origin="unpack_archive", message=f"Cannot unzip {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
 
         if remove_root_dir:
@@ -359,6 +357,6 @@ def create_archive(
         elif ext == "tar.bz2":
             tar_format = "w:bz2"
         else:  # defensive code
-            raise ArchiveError("unsupported format {}".format(tar_format))
+            raise ArchiveError(f"unsupported format {tar_format}")
         with closing(tarfile.open(filepath, tar_format)) as tar_archive:
             tar_archive.add(name=from_dir, arcname=from_dir_rename, recursive=True)

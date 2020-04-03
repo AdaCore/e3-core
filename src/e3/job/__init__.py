@@ -21,7 +21,7 @@ logger = e3.log.getLogger("job")
 JobTimingInfo = namedtuple("JobTimingInfo", ["start_time", "stop_time", "duration"])
 
 
-class Job(object, metaclass=abc.ABCMeta):
+class Job(metaclass=abc.ABCMeta):
     """Handle a single Job.
 
     :ivar slot: number associated with the job during its execution. At a
@@ -190,7 +190,7 @@ class EmptyJob(Job):
 
         :param status: The job's status.
         """
-        super(EmptyJob, self).__init__(uid, data, notify_end)
+        super().__init__(uid, data, notify_end)
         self.should_skip = True
         self.__status = status
 
@@ -212,7 +212,7 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
     """
 
     def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]):
-        super(ProcessJob, self).__init__(uid, data, notify_end)
+        super().__init__(uid, data, notify_end)
         self.proc_handle: Optional[Run] = None
 
         # Detect spawn issue to avoid returning "notready"
@@ -289,7 +289,7 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
 
     def interrupt(self) -> bool:
         """Kill running process tree."""
-        if super(ProcessJob, self).interrupt():
+        if super().interrupt():
             if self.proc_handle is None:  # defensive code
                 logger.debug("cancel job %s", self.uid)
             elif self.proc_handle.is_running():

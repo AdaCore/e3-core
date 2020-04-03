@@ -91,7 +91,7 @@ def get_source_builder(
     return builder
 
 
-class SourceClosure(object):
+class SourceClosure:
     """Helper object to resolve source closure for a given spec instance."""
 
     def __init__(

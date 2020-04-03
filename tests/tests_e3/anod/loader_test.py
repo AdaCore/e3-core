@@ -8,7 +8,7 @@ from e3.os.process import Run
 import pytest
 
 
-class TestLoader(object):
+class TestLoader:
 
     spec_dir = os.path.join(os.path.dirname(__file__), "data")
     spec2_dir = os.path.join(os.path.dirname(__file__), "data2")

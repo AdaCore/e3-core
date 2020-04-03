@@ -103,7 +103,7 @@ def getLogger(name: Optional[str] = None, prefix: str = "e3") -> logging.Logger:
         def emit(self, _: logging.LogRecord) -> None:
             pass
 
-    logger = logging.getLogger("%s.%s" % (prefix, name))
+    logger = logging.getLogger(f"{prefix}.{name}")
 
     if prefix not in __null_handler_set:
         # Make sure that the root logger has at least an handler attached to
@@ -170,7 +170,7 @@ def activate(
     # will be defined by setting/unsetting handlers
     logging.getLogger("").setLevel(logging.DEBUG)
     if console_logs:
-        stream_format = "{}: {}".format(console_logs, file_format)
+        stream_format = f"{console_logs}: {file_format}"
 
     # Set logging handlers
     add_log_handlers(level=level, log_format=stream_format, datefmt=datefmt)

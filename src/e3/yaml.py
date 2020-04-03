@@ -42,7 +42,7 @@ class OrderedDictYAMLLoader(Loader):
     def __init__(self, stream: IO[str]):
         self.name = None
         self.stream = stream
-        super(OrderedDictYAMLLoader, self).__init__(stream)
+        super().__init__(stream)
 
         self.add_constructor(
             "tag:yaml.org,2002:map", type(self).construct_yaml_map
@@ -113,7 +113,7 @@ def load_ordered(filename: str) -> OrderedDict:
         return yaml.load(f, OrderedDictYAMLLoader)
 
 
-class CaseParser(object):
+class CaseParser:
     """Parse case statements in an OrderedDict.
 
     Each time a key starting with ``case_`` (or the prefix you choose) if
@@ -306,13 +306,13 @@ def load_with_config(filename: Union[str, List[str]], config: dict) -> Any:
             e3.log.debug("load config file: %s", f)
             conf_data = load_ordered(f)
             result = parser.parse(conf_data)
-        except IOError:
+        except OSError:
             raise YamlError("cannot read: %s" % f, "load_with_config").with_traceback(
                 sys.exc_info()[2]
             )
         except (yaml.parser.ParserError, yaml.constructor.ConstructorError) as e:
             raise YamlError(
-                "%s is an invalid yaml file: %s" % (f, e), "load_with_config"
+                f"{f} is an invalid yaml file: {e}", "load_with_config"
             ).with_traceback(sys.exc_info()[2])
 
     return result

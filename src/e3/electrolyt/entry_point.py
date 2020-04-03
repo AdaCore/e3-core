@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Callable, Dict, Optional
 
 
-class EntryPoint(object):
+class EntryPoint:
     """Plan Entry point.
 
     The class represent a valid entry point in an electrolyt plan. It's used
@@ -77,7 +77,7 @@ class Machine(EntryPoint):
         :param name: see EntryPoint
         :param description: see EntryPoint
         """
-        super(Machine, self).__init__(db, fun, kind, name, description)
+        super().__init__(db, fun, kind, name, description)
         self.platform = platform
         self.version = version
         self.site = site

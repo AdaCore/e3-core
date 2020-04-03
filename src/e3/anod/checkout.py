@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 logger = e3.log.getLogger("e3.anod.checkout")
 
 
-class CheckoutManager(object):
+class CheckoutManager:
     """Helper class to manage checkouts done by Anod tools.
 
     When a checkout manager is used in working_dir directory for a repository
@@ -206,7 +206,7 @@ class CheckoutManager(object):
             elif self.compute_changelog:
                 # Fetch the change log and dump it into the changelog file
                 with closing(tempfile.NamedTemporaryFile(mode="w", delete=False)) as fd:
-                    g.write_log(fd, rev_range="%s..%s" % (old_commit, new_commit))
+                    g.write_log(fd, rev_range=f"{old_commit}..{new_commit}")
                     tmp_filename = fd.name
                 try:
                     with open(tmp_filename) as fd:

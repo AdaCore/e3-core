@@ -38,5 +38,5 @@ class ShellError(AnodError):
         origin: Optional[str] = None,
         process: Optional["Run"] = None,
     ):
-        super(ShellError, self).__init__(message, origin)
+        super().__init__(message, origin)
         self.process = process

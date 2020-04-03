@@ -75,9 +75,9 @@ def test_discarded():
         "data_patch_universal.txt", current_dir, discarded_files=["*file_to_patch*"]
     )
 
-    with open(new, "r") as fd:
+    with open(new) as fd:
         expected = fd.read()
-    with open("data.txt", "r") as fd:
+    with open("data.txt") as fd:
         result = fd.read()
     assert result == expected
 
@@ -87,9 +87,9 @@ def test_discarded():
         "data_patch_universal.txt", current_dir, discarded_files=["*file_to_patch*"]
     )
 
-    with open(new, "r") as fd:
+    with open(new) as fd:
         expected = fd.read()
-    with open("data.txt", "r") as fd:
+    with open("data.txt") as fd:
         result = fd.read()
     assert result == expected
 

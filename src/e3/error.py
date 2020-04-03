@@ -18,7 +18,7 @@ class E3Error(Exception):
         :param origin: the name of the function, class, or module having raised
             the exception
         """
-        super(E3Error, self).__init__(message, origin)
+        super().__init__(message, origin)
         self.origin = origin
         self.messages = []
         if message is not None:
@@ -46,6 +46,6 @@ class E3Error(Exception):
         else:
             error_msg = self.__class__.__name__
         if self.origin:
-            return "%s: %s\n" % (self.origin, error_msg)
+            return f"{self.origin}: {error_msg}\n"
         else:
             return error_msg

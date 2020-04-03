@@ -21,7 +21,7 @@ class PlanError(E3Error):
     pass
 
 
-class Plan(object):
+class Plan:
     """Electrolyt Plan.
 
     :ivar entry_points: list of entry points found in the plans
@@ -89,7 +89,7 @@ class Plan(object):
         exec(code, self.mod.__dict__)
 
 
-class PlanContext(object):
+class PlanContext:
     """Context in which a Plan is executed."""
 
     def __init__(
@@ -102,7 +102,7 @@ class PlanContext(object):
         host: Optional[str] = None,
         target: Optional[str] = None,
         enabled: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """Initialize an execution context or a scope.
 
@@ -261,10 +261,8 @@ class PlanContext(object):
                 pass
             else:
                 plan_line = ";".join(
-                    (
-                        "{}:{}".format(caller_frame.filename, caller_frame.lineno)
-                        for caller_frame in caller_frames_in_plan
-                    )
+                    f"{caller_frame.filename}:{caller_frame.lineno}"
+                    for caller_frame in caller_frames_in_plan
                 )
 
         # First create our initial object based on current scope env

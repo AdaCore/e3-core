@@ -8,7 +8,7 @@ from e3.vcs.git import GitRepository
 from e3.os.fs import touch
 
 
-class TestCheckout(object):
+class TestCheckout:
     repo_data = os.path.join(os.path.dirname(__file__), "vcs_data")
     repo_data2 = os.path.join(os.path.dirname(__file__), "vcs_data2")
 
@@ -59,7 +59,7 @@ class TestCheckout(object):
         logging.info("And then do an update and check that cleanup was done")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.unchanged
-        with open(os.path.join("myrepo", "file3.txt"), "r") as fd:
+        with open(os.path.join("myrepo", "file3.txt")) as fd:
             assert fd.read().strip() == "new file!"
 
         logging.info("Check that we can switch from one svn url to another")
@@ -96,7 +96,7 @@ class TestCheckout(object):
             fd.write("new file modified!")
         result = m.update(vcs="git", url=url4, revision="master")
         assert result == ReturnValue.unchanged
-        with open(os.path.join("myrepo", "file3.txt"), "r") as fd:
+        with open(os.path.join("myrepo", "file3.txt")) as fd:
             assert fd.read().strip() == "new file!"
 
         result = m.update(vcs="future-vcs", url="dummy")

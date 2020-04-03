@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 DEFAULT_TIMEOUT = 3600 * 24
 
 
-class Cache(object, metaclass=abc.ABCMeta):
+class Cache(metaclass=abc.ABCMeta):
     def __init__(self, cache_configuration: Any):
         self.cache_configuration = cache_configuration
 

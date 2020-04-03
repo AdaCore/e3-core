@@ -11,7 +11,7 @@ from e3.env import BaseEnv
 import pytest
 
 
-class TestContext(object):
+class TestContext:
 
     spec_dir = os.path.join(os.path.dirname(__file__), "context_data")
 

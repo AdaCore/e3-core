@@ -38,7 +38,7 @@ CANADIAN_EXCEPTIONS = (
 EnvInfo = namedtuple("EnvInfo", ["build", "host", "target"])
 
 
-class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
+class AbstractBaseEnv(metaclass=abc.ABCMeta):
     """Environment Handling.
 
     Abstract class to factorize code between BaseEnv and Env.
@@ -400,7 +400,7 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         :param append: if True append, otherwise prepend. Default is prepend
         """
         if env_var not in os.environ:
-            logger.debug("export {env_var}={path}".format(env_var=env_var, path=path))
+            logger.debug(f"export {env_var}={path}")
             os.environ[env_var] = path
         else:
             if append:
@@ -497,7 +497,7 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
         result["platform"] = self.platform
 
         for c in ("host", "target", "build"):
-            result.update({"%s_%s" % (c, k): v for k, v in result[c].to_dict().items()})
+            result.update({f"{c}_{k}": v for k, v in result[c].to_dict().items()})
             del result[c]
         return result
 
@@ -528,7 +528,7 @@ class AbstractBaseEnv(object, metaclass=abc.ABCMeta):
             else:
                 host_cpu = "x86"
             try:
-                e.set_build("%s-%s" % (host_cpu, host))
+                e.set_build(f"{host_cpu}-{host}")
                 e.set_target(target_name)
                 found = True
             except KeyError:
@@ -569,7 +569,7 @@ class BaseEnv(AbstractBaseEnv):
 
         # class variable that holds the stack of saved environments state
         self._context: List[Any] = []
-        super(BaseEnv, self).__init__(build, host, target)
+        super().__init__(build, host, target)
 
     def __setattr__(self, name: str, value: Any) -> None:
         if name in ("_instance", "_context"):
@@ -638,7 +638,7 @@ class Env(AbstractBaseEnv):
         On first instantiation, build attribute will be computed and
         host and target set to the build attribute.
         """
-        super(Env, self).__init__()
+        super().__init__()
 
     @property
     def _initialized(self) -> bool:

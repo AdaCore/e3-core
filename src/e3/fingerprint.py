@@ -42,7 +42,7 @@ FINGERPRINT_VERSION = "1.2"
 # This ensures we don't try to compare fingerprints with different meanings.
 
 
-class Fingerprint(object):
+class Fingerprint:
     """Fingerprint class.
 
     :ivar elements: a dictionary containing the checksum/id for each element
@@ -70,8 +70,7 @@ class Fingerprint(object):
             self.elements[name] = value
         else:
             raise E3Error(
-                "value for %s should be a string got %s" % (name, value),
-                "fingerprint.add",
+                f"value for {name} should be a string got {value}", "fingerprint.add",
             )
 
     def add_dir(self, path: str) -> None:
@@ -163,7 +162,7 @@ class Fingerprint(object):
     def __str__(self) -> str:
         """Return a string representation of the fingerprint."""
         return "\n".join(
-            ["%s: %s" % (k, self.elements[k]) for k in sorted(self.elements.keys())]
+            ["{}: {}".format(k, self.elements[k]) for k in sorted(self.elements.keys())]
         )
 
     def checksum(self) -> str:

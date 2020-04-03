@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from e3.anod.spec import Anod
 
 
-class BuildVar(object):
+class BuildVar:
     """Declare a dependency between an Anod spec and a variable."""
 
     def __init__(self, name: str, value: Hashable):
@@ -26,10 +26,10 @@ class BuildVar(object):
         self.kind = "var"
 
     def __str__(self) -> str:
-        return "%s=%s" % (self.name, self.value)
+        return f"{self.name}={self.value}"
 
 
-class Dependency(object):
+class Dependency:
     def __init__(
         self,
         name: str,
@@ -41,7 +41,7 @@ class Dependency(object):
         local_name: Optional[str] = None,
         require: str = "build_tree",
         track: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """Initialize a Dependency object.
 

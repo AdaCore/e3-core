@@ -13,7 +13,7 @@ class FileHandler(EventHandler):
 
     def send_event(self, event):
         d = event.as_dict()
-        prefix = "%s-%s" % (d["name"], d["uid"])
+        prefix = "{}-{}".format(d["name"], d["uid"])
         log_file = os.path.join(self.log_dir, prefix + ".log")
         attach_dir = os.path.join(self.log_dir, prefix)
         mkdir(attach_dir)

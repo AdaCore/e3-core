@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 log = e3.log.getLogger("anod.helpers")
 
 
-class Make(object):
+class Make:
     """Wrapper around GNU Make."""
 
     def __init__(
@@ -116,7 +116,7 @@ class Make(object):
         cmd_arg_list += ["-j", "%s" % str(jobs) if jobs is not None else str(self.jobs)]
 
         for key in self.var_list:
-            cmd_arg_list.append("%s=%s" % (key, self.var_list[key]))
+            cmd_arg_list.append("{}={}".format(key, self.var_list[key]))
 
         if target is None:
             target = self.default_target
@@ -137,7 +137,7 @@ class Make(object):
         }
 
 
-class Configure(object):
+class Configure:
     """Wrapper around ./configure."""
 
     def __init__(
@@ -283,7 +283,7 @@ def text_replace(
                 output.write(line.encode("utf-8"))
             else:
                 output.write(line)
-    if any((nb for nb in nb_substitution)):
+    if any(nb for nb in nb_substitution):
         # file changed, update it
         with open(filename, "wb") as f:
             f.write(output.getvalue())

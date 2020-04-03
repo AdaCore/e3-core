@@ -66,12 +66,12 @@ class SchedulingError(E3Error):
         :param uid: uid of action that cause the error
         :param initiators: list of uids involved in the failure
         """
-        super(SchedulingError, self).__init__(message, origin)
+        super().__init__(message, origin)
         self.uid = uid
         self.initiators = initiators
 
 
-class AnodContext(object):
+class AnodContext:
     """Anod context.
 
     :ivar repo: an anod spec repository
@@ -510,9 +510,7 @@ class AnodContext(object):
             return result
 
         if not has_primitive(spec, primitive):
-            raise SchedulingError(
-                "spec %s does not support primitive %s" % (name, primitive)
-            )
+            raise SchedulingError(f"spec {name} does not support primitive {primitive}")
 
         # Add the action in the DAG
         add_action(result)
@@ -569,7 +567,7 @@ class AnodContext(object):
                             if checkout not in self.repo.repos:
                                 raise SchedulingError(
                                     origin="add_spec",
-                                    message="unknown repository {}".format(checkout),
+                                    message=f"unknown repository {checkout}",
                                 )
                             co = Checkout(checkout, self.repo.repos[checkout])
                             add_action(co, result)
@@ -635,7 +633,7 @@ class AnodContext(object):
 
         # Look for source dependencies (i.e sources needed)
         if "%s_source_list" % primitive in dir(spec):
-            source_list = getattr(spec, "{}_source_list".format(primitive))
+            source_list = getattr(spec, f"{primitive}_source_list")
             for s in source_list:
                 # set source builder
                 if s.name in self.sources:
@@ -734,7 +732,7 @@ class AnodContext(object):
                     left_decision, right_decision
                 )
         elif decision.choice == Decision.BOTH:
-            msg = "cannot do both %s and %s" % (decision.left, decision.right)
+            msg = f"cannot do both {decision.left} and {decision.right}"
         else:
             trigger_decisions = "\n".join(
                 "{} made by {} initiated by {}".format(
