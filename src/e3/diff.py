@@ -159,6 +159,7 @@ def patch(
             elif not header2:
                 # Check if line next to a header first line confirm that that
                 # this is the start of a new patch
+                assert header2_regexp is not None
                 m = re.search(header2_regexp, line)
                 if m is None:
                     write_line(header1[0])
