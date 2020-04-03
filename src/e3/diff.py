@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import fnmatch
-import io
 import re
 from difflib import unified_diff
 from typing import TYPE_CHECKING
@@ -126,7 +125,7 @@ def patch(
 
     files_to_patch = 0
 
-    with io.open(patch_file, newline="") as f, io.open(
+    with open(patch_file, newline="") as f, open(
         filtered_patch, "w", newline=""
     ) as fdout:
 
@@ -182,9 +181,7 @@ def patch(
                     for pattern in discarded_files:
                         for fn in path_list:
                             if fnmatch.fnmatch(fn, pattern):
-                                logger.debug(
-                                    f"patch {patch_file} discarding {fn}"
-                                )
+                                logger.debug(f"patch {patch_file} discarding {fn}")
                                 discard = True
                                 break
                         if discard:
