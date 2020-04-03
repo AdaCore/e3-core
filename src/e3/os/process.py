@@ -701,7 +701,7 @@ def wait_for_processes(process_list: List[Run], timeout: float) -> Optional[int]
                         if l_r:
                             os.read(fd_r, 1)
                         break
-                    except select.error:
+                    except OSError:
                         pass
 
                 remain = timeout - time.time() + start

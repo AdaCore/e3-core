@@ -64,7 +64,7 @@ class FileCache(Cache):
             with open(cache_file, "rb") as fd:
                 if not self._is_expired(fd):
                     return pickle.load(fd)
-        except IOError as err:
+        except OSError as err:
             if err.errno == errno.ENOENT:
                 pass  # Cache file was removed after the exists check
         return default

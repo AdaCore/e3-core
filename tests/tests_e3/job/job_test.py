@@ -57,7 +57,7 @@ class TestJob:
             def cmdline(self):
                 # This will be called by self.run() and simulate an error
                 # when spawning the job
-                raise IOError("spawn issue")
+                raise OSError("spawn issue")
 
         job = SpawnIssueProcessJob("myuid", {}, None)
         job.run()

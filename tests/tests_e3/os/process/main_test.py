@@ -305,7 +305,7 @@ def test_kill_process_tree():
                     child_pid = f.read()
                     if child_pid:
                         break
-            except IOError:
+            except OSError:
                 pass
             time.sleep(0.1)
         e3.fs.rm(gen_prog_name)

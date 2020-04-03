@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import smtplib
-import socket
 
 import e3.log
 import e3.os.process
@@ -80,7 +79,7 @@ def sendmail(
     for smtp_server in smtp_servers:
         try:
             s = smtp_class(smtp_server)
-        except (socket.error, smtplib.SMTPException) as e:
+        except (OSError, smtplib.SMTPException) as e:
             logger.debug(e)
             logger.debug("cannot connect to smtp server %s", smtp_server)
             continue
@@ -91,7 +90,7 @@ def sendmail(
                     # was accepted for delivery to all addresses
                     break
                 continue
-            except (socket.error, smtplib.SMTPException) as e:
+            except (OSError, smtplib.SMTPException) as e:
                 logger.debug(e)
                 logger.debug("smtp server error: %s", smtp_server)
                 continue
@@ -99,7 +98,7 @@ def sendmail(
                 try:
                     s.quit()
                     logger.debug("smtp quit")
-                except (socket.error, smtplib.SMTPException):
+                except (OSError, smtplib.SMTPException):
                     # The message has already been delivered, ignore all errors
                     # when terminating the session.
                     pass

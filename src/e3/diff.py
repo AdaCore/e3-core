@@ -51,7 +51,7 @@ def diff(
         try:
             with open(a, "r") as f:
                 contents[0] = f.readlines()
-        except IOError:
+        except OSError:
             contents[0] = []
 
     # Do same thing for the second one
@@ -61,7 +61,7 @@ def diff(
         try:
             with open(b, "r") as f:
                 contents[1] = f.readlines()
-        except IOError:
+        except OSError:
             contents[1] = []
 
     # Filter empty lines in both items and ignore white chars at beginning

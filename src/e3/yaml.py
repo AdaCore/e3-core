@@ -306,7 +306,7 @@ def load_with_config(filename: Union[str, List[str]], config: dict) -> Any:
             e3.log.debug("load config file: %s", f)
             conf_data = load_ordered(f)
             result = parser.parse(conf_data)
-        except IOError:
+        except OSError:
             raise YamlError("cannot read: %s" % f, "load_with_config").with_traceback(
                 sys.exc_info()[2]
             )
