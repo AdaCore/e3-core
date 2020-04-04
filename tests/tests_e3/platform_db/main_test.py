@@ -19,8 +19,14 @@ def test_knownledge_base():
     try:
         stevedore.ExtensionManager.ENTRY_POINT_CACHE["e3.platform_db"].append(mydb_ep)
 
+        db = get_knowledge_base()
+        # Check that the new amber CPU has been inserted
+        for cpu_name in ("amber23", "amber25"):
+            assert cpu_name not in db.cpu_info
+
         # Force a reload of the platform_db knowledge base
-        db = get_knowledge_base(reset_cache=True)
+        get_knowledge_base.cache_clear()
+        db = get_knowledge_base()
 
         # Check that the new amber CPU has been inserted
         for cpu_name in ("amber23", "amber25"):

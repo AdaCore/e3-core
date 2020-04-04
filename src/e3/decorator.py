@@ -9,6 +9,7 @@ from __future__ import annotations
 from functools import partial
 
 from typing import TYPE_CHECKING
+from warnings import warn
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict
@@ -85,6 +86,11 @@ class memoize:
         """
         self.func = func
         self.cache: Dict[tuple, Any] = {}
+        warn(
+            "this decorator will be removed in a later version of e3-core, "
+            "please use functools.lru_cache instead",
+            category=DeprecationWarning,
+        )
 
     def __call__(self, *args, **kwargs) -> Any:
         """Return the cache value if exist, else call func."""

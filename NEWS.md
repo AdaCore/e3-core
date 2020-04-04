@@ -7,6 +7,7 @@
     * e3.anod.context.AnodContext.add_spec ``env`` and ``primitive``
   * some attribute have been replaced by properties to avoid being marked as Optional
     * e3.anod.spec.Anod ``build_space``
+* Deprecate e3.decorator.memoize, use functools.lru_cache instead
 
 # Version 22.0.0 (2020-03-13)
 

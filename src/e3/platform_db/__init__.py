@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import abc
 from collections import namedtuple
+from functools import lru_cache
 
-import e3.decorator
 import e3.log
 import stevedore
 
@@ -48,7 +48,7 @@ class AmberCPUSupport(PlatformDBPlugin):
         )
 
 
-@e3.decorator.memoize
+@lru_cache()
 def get_knowledge_base():
     """Load the knowledge base, including all content from plugins.
 
