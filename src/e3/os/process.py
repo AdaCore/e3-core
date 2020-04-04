@@ -23,10 +23,22 @@ import e3.log
 from e3.os.fs import which
 
 if TYPE_CHECKING:
-    from typing import IO, Any, List, NoReturn, Optional, Union
+    from typing import cast, Any, IO, List, Literal, NoReturn, Optional, Union
 
     CmdLine = List[str]
     AnyCmdLine = Union[List[CmdLine], CmdLine]
+    STDOUT_VALUE = Literal[-1]
+    PIPE_VALUE = Literal[-2]
+    DEVNULL_VALUE = Literal[-3]
+
+    # Make STDOUT subprocess constant visible in e3.os.process
+    STDOUT = cast(STDOUT_VALUE, subprocess.STDOUT)
+    PIPE = cast(PIPE_VALUE, subprocess.PIPE)
+    DEVNULL = cast(DEVNULL_VALUE, subprocess.DEVNULL)
+else:
+    STDOUT = subprocess.STDOUT
+    PIPE = subprocess.PIPE
+    DEVNULL = subprocess.DEVNULL
 
 logger = e3.log.getLogger("os.process")
 
@@ -36,9 +48,6 @@ CMD_LOGGER_NAME = "os.process.cmdline"
 
 cmdlogger = e3.log.getLogger(CMD_LOGGER_NAME)
 
-# Make STDOUT subprocess constant visible in e3.os.process
-STDOUT = subprocess.STDOUT
-PIPE = subprocess.PIPE
 
 # Use psutil.Popen when available to get psutil.Process properties and
 # methods available in Run.internal
@@ -215,9 +224,9 @@ class Run:
         self,
         cmds: AnyCmdLine,
         cwd: Optional[str] = None,
-        output: Union[int, str, IO, None] = PIPE,
-        error: Union[int, str, IO, None] = STDOUT,
-        input: Union[int, str, IO, None] = None,
+        output: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = PIPE,
+        error: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = STDOUT,
+        input: Union[DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,
         bg: bool = False,
         timeout: Optional[int] = None,
         env: dict = None,
