@@ -5,11 +5,11 @@ import json
 import os
 import tempfile
 from contextlib import closing
-from subprocess import PIPE
 from typing import TYPE_CHECKING
 
 import e3.log
 from e3.anod.status import ReturnValue
+from e3.os.process import PIPE
 from e3.fs import VCS_IGNORE_LIST, get_filetree_state, rm, sync_tree
 from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
