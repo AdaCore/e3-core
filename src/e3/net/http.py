@@ -122,7 +122,13 @@ class HTTPSession:
                 ),
             )
 
-    def request(self, method: str, url: str, **kwargs):
+    def request(
+        self,
+        method: str,
+        url: str,
+        data_streams: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ):
         """Send a request.
 
         See requests Session.request function.
@@ -140,12 +146,6 @@ class HTTPSession:
         headers one modified.
         """
         error_msgs = []
-        data_streams = None
-
-        # Keep data_streams apart as it is not an argument to request
-        if "data_streams" in kwargs:
-            data_streams = kwargs["data_streams"]
-            del kwargs["data_streams"]
 
         for base_url in list(self.base_urls):
             if self.last_base_url != base_url:
