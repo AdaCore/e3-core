@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import imp
 import inspect
 import os
 import sys
+import types
 
 import yaml
 from typing import TYPE_CHECKING
@@ -171,7 +171,7 @@ class AnodModule:
 
         # Create a new module
         mod_name = "anod_" + self.name
-        anod_module = imp.new_module(mod_name)
+        anod_module = types.ModuleType(mod_name)
 
         try:
             with open(self.path) as fd:

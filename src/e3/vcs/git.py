@@ -22,26 +22,31 @@ import os
 import sys
 import tempfile
 from contextlib import closing
-from subprocess import PIPE
 from typing import TYPE_CHECKING
 
 import e3.fs
 import e3.log
 import e3.os.fs
 import e3.os.process
+from e3.os.process import PIPE
 from e3.text import bytes_as_str
 from e3.vcs import VCSError
 
-logger = e3.log.getLogger("vcs.git")
-
-HEAD = "HEAD"
-FETCH_HEAD = "FETCH_HEAD"
-
 if TYPE_CHECKING:
-    from typing import Dict, Iterator, IO, List, Optional, TextIO, Union
-    from e3.os.process import Run
+    from typing import Dict, Final, Iterator, IO, List, Literal, Optional, TextIO, Union
+    from e3.os.process import Run, STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
 
     Git_Cmd = List[Optional[str]]
+    GIT_LOG_STREAM_VALUE = Literal[-4]
+
+# Special value to direct outputs to the git log stream
+# STDOUT, PIPE, and DEVNULL values are between -1 and -3
+GIT_LOG_STREAM: GIT_LOG_STREAM_VALUE = -4
+
+logger = e3.log.getLogger("vcs.git")
+
+HEAD: Final = "HEAD"
+FETCH_HEAD: Final = "FETCH_HEAD"
 
 
 # Implementation note: some git commands can produce a big amount of data (e.g.
@@ -92,11 +97,20 @@ class GitRepository:
             repo.git_cmd(["commit", "-m", "initial content"])
         return repo_path
 
-    def git_cmd(self, cmd: Git_Cmd, **kwargs) -> Run:
+    def git_cmd(
+        self,
+        cmd: Git_Cmd,
+        output: Union[
+            STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, GIT_LOG_STREAM_VALUE, str, IO, None
+        ] = GIT_LOG_STREAM,
+        **kwargs
+    ) -> Run:
         """Run a git command.
 
         :param cmd: the command line as a list of string, all None entries will
             be discarded
+        :param output: see e3.os.process.Run, by default it is the
+            ``log_stream`` class attribute.
         """
         if self.__class__.git is None:
             git_binary = e3.os.process.which("git", default=None)
@@ -104,13 +118,13 @@ class GitRepository:
                 raise GitError("cannot find git", "git_cmd")
             self.__class__.git = e3.os.fs.unixpath(git_binary)
 
-        if "output" not in kwargs:
-            kwargs["output"] = self.log_stream
+        if output == GIT_LOG_STREAM:
+            output = self.log_stream
 
         p_cmd = [arg for arg in cmd if arg is not None]
         p_cmd.insert(0, self.__class__.git)
 
-        p = e3.os.process.Run(p_cmd, cwd=self.working_tree, **kwargs)
+        p = e3.os.process.Run(p_cmd, cwd=self.working_tree, output=output, **kwargs)
         if p.status != 0:
             raise GitError(
                 "{} failed (exit status: {})".format(

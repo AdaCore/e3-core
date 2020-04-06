@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import ast
-import imp
 import inspect
+import types
 from functools import partial
 from typing import TYPE_CHECKING
 
@@ -44,7 +44,7 @@ class Plan:
             detect whether a specific frame is in a plan or in our code. See
             PlanContext._add_action
         """
-        self.mod = imp.new_module("_anod_plan_")
+        self.mod = types.ModuleType("_anod_plan_")
 
         # Some additional user symbols
         for k, v in data.items():

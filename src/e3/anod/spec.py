@@ -27,10 +27,11 @@ logger = e3.log.getLogger("anod")
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Optional, Sequence
+    from typing import Any, Callable, Dict, IO, List, Optional, Sequence, Union
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
+    from e3.os.process import STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
 
     import e3.anod.package
     import e3.anod.sandbox
@@ -396,7 +397,14 @@ class Anod:
         """Return list of SourceBuilder defined in the specification file."""
         return None
 
-    def shell(self, *command: str, **kwargs) -> e3.os.process.Run:
+    def shell(
+        self,
+        *command: str,
+        parse_shebang=True,
+        output: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,
+        python_executable: None = None,
+        **kwargs,
+    ) -> e3.os.process.Run:
         """Run a subprocess using e3.os.process.Run.
 
         Contrary to what is done in e3.os.process.Run parse_shebang
@@ -406,19 +414,21 @@ class Anod:
         Note that calling shell() raises an exception when the
         process returns an exit code that is not 0.
 
+        Same options as e3.os.process.Run with some small differences:
+
+        :param python_executable: kept for backward compatibility but ignored
+        :param output: by default set to anod build space log stream
+        :param parse_shebang: by default set True
+
         :raise: ShellError
         """
         parsed_command = parse_command(command, self.build_space)
-        if "parse_shebang" not in kwargs:
-            kwargs["parse_shebang"] = True
-        if "output" not in kwargs:
-            kwargs["output"] = e3.log.default_output_stream
+        if output is None:
+            output = e3.log.default_output_stream
 
-        # For backward compatibility ???
-        if "python_executable" in kwargs:
-            del kwargs["python_executable"]
-
-        r = e3.os.process.Run(parsed_command, **kwargs)
+        r = e3.os.process.Run(
+            parsed_command, parse_shebang=parse_shebang, output=output, **kwargs
+        )
         if TYPE_CHECKING:
             assert r.status is not None
         if r.status != 0:

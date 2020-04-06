@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import collections
+import collections.abc
 from typing import TYPE_CHECKING
 
 import e3.anod.error
@@ -20,7 +20,7 @@ class BuildVar:
         :param name: name of the variable
         :param value: variable value
         """
-        assert isinstance(value, collections.Hashable)
+        assert isinstance(value, collections.abc.Hashable)
         self.name = name
         self.value = value
         self.kind = "var"
