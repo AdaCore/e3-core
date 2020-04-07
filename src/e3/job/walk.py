@@ -21,20 +21,22 @@ class Walk:
 
     :ivar actions: DAG of actions to perform.
     :vartype actions: DAG
+    :ivar prev_fingerprints: A dict of e3.fingerprint.Fingerprint objects,
+          indexed by the corresponding job ID. This dictionary contains
+          the former fingerprints a given job or None if there was no
+          such fingerprint.
+          (with the job corresponding to a given entry in the DAG of
+          actions).
+    :vartype prev_fingerprints: Dict[str, Optional[Fingerprint]]
     :ivar new_fingerprints: A dict of e3.fingerprint.Fingerprint objects,
         indexed by the corresponding job ID. This dictionary contains
         the fingerprints we compute each time we create a new job
         (with the job corresponding to a given entry in the DAG of
         actions).
-        Note that there are situations where the user might not be able
-        to compute the fingerprint without running the job and waiting
-        for it to be complete (see method "can_predict_new_fingerprint").
-        In that situation, the fingerprint is only inserted after the job
-        completes succesfully.
-    :vartype new_fingerprints: dict
+    :vartype new_fingerprints: Dict[str, Optional[Fingerprint]]
     :ivar job_status: A dictionary of job status (ReturnValue), indexed by
         job unique IDs.
-    :vartype job_status: dict
+    :vartype job_status: Dict[str, ReturnValue]
     :ivar scheduler: The scheduler used to schedule and execute all
         the actions.
     :vartype scheduler: e3.job.scheduler.Scheduler
@@ -46,6 +48,7 @@ class Walk:
         :param actions: DAG of actions to perform.
         """
         self.actions = actions
+        self.prev_fingerprints: Dict[str, Optional[Fingerprint]] = {}
         self.new_fingerprints: Dict[str, Optional[Fingerprint]] = {}
         self.job_status: Dict[str, ReturnValue] = {}
         self.set_scheduling_params()
@@ -244,7 +247,7 @@ class Walk:
         is returned.
         """
         # Get the latest fingerprint
-        prev_fingerprint = self.load_previous_fingerprint(uid)
+        self.prev_fingerprints[uid] = self.load_previous_fingerprint(uid)
 
         # And reset the fingerprint on disk
         self.save_fingerprint(uid, None)
@@ -293,7 +296,7 @@ class Walk:
             )
 
         if self.should_execute_action(
-            uid, prev_fingerprint, self.new_fingerprints[uid]
+            uid, self.prev_fingerprints[uid], self.new_fingerprints[uid]
         ):
             return self.create_job(uid, data, predecessors, notify_end)
         else:
