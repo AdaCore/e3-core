@@ -175,3 +175,33 @@ def test_plan_disable_lines():
     assert actions2[1].spec == "bar1"
     assert actions2[2].spec == "bar2"
     assert actions2[3].spec == "bar3"
+
+
+def test_plan_disable_lines_with_conditional_constants():
+    """Check that lines in enabled=False blocks are disabled."""
+    context = _get_new_plancontext("myserver")
+
+    myplan = _get_plan(
+        data={},
+        content=[
+            "def myserver():\n",
+            '    build("foo")\n'
+            '    enabled = cond("old", date=lambda x: x.year == 2001)\n'
+            "    with defaults(enabled=enabled):\n"
+            '        build("bar")\n',
+        ],
+    )
+
+    actions = context.execute(myplan, "myserver")
+    assert len(actions) == 1
+    assert actions[0].spec == "foo"
+
+    context2 = _get_new_plancontext("myserver", ignore_disabled=False)
+    actions2 = context2.execute(myplan, "myserver")
+    assert len(actions2) == 2
+    assert actions2[0].spec == "foo"
+    assert actions2[1].spec == "bar"
+
+    assert not actions2[1].plan_args["enabled"]
+    list(myplan.toggleable_bool_group.shuffle())
+    assert actions2[1].plan_args["enabled"]

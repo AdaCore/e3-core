@@ -3,15 +3,18 @@ from __future__ import annotations
 import ast
 import inspect
 import types
+from datetime import datetime, timezone
 from functools import partial
 from typing import TYPE_CHECKING
 
+from e3.collection.toggleable_bool import ToggleableBooleanGroup
 from e3.electrolyt.entry_point import Machine, entry_point
 from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict, List, Optional
+    from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
 
 
@@ -63,6 +66,21 @@ class Plan:
 
         for name, cls in entry_point_cls.items():
             self.mod.__dict__[name] = partial(entry_point, self.entry_points, cls, name)
+
+        self.plan_date = datetime.now(timezone.utc)
+        self.mod.__dict__["cond"] = self.cond
+        self.toggleable_bool_group = ToggleableBooleanGroup()
+
+    def cond(self, name: str, date: Callable[[datetime], bool]) -> ToggleableBoolean:
+        """Generate a new conditional boolean.
+
+        :param name: variable name
+        :param date: function that takes the plan date and return a boolean.
+            This can be used to set a value depending on the day of the week,
+            e.g. by setting the constant to True on weekend:
+            lambda d: d.isoweekday() in [6, 7]
+        """
+        return self.toggleable_bool_group.add(name, date(self.plan_date))
 
     def load(self, filename: str) -> None:
         """Load python code from file.
