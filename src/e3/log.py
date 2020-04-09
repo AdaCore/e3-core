@@ -31,7 +31,7 @@ if sys.stdout.isatty():  # all: no cover (not used in production!)
 else:
     pretty_cli = False
 
-console_logs = None
+console_logs: Optional[str] = None
 
 
 def progress_bar(it: Sequence, **kwargs):
