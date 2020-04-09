@@ -46,7 +46,7 @@ class Platform(
     - is_default: True if the platform is the default one
     """
 
-    default_arch = None
+    default_arch: Optional[Platform] = None
     system_info = e3.os.platform.SystemInfo
 
     __slots__ = ()
