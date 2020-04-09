@@ -201,7 +201,7 @@ class Anod:
         self._config: Optional[dict] = None
 
         # Hold the result of the pre function
-        self._pre = None
+        self._pre: Optional[Dict[str, Any]] = None
 
     @property
     def build_space(self) -> BuildSpace:
@@ -212,11 +212,7 @@ class Anod:
     @property
     def has_package(self) -> bool:
         """Return true if the spec defines a binary package."""
-        return (
-            self.package is not None
-            and self.package.name is not None
-            and self.component is not None
-        )
+        return self.package is not None and self.component is not None
 
     def bind_to_sandbox(self, sandbox: SandBox) -> None:
         """Bind spec instance to a physical Anod sandbox.
