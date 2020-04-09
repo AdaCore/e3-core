@@ -44,10 +44,10 @@ class SystemInfo:
     ld_info = None
 
     # Cache for SystemInfo methods
-    _platform = None
-    _os_version = None
-    _is_virtual = None
-    _hostname = None
+    _platform: Optional[str] = None
+    _os_version: Optional[Tuple[str, str]] = None
+    _is_virtual: Optional[bool] = None
+    _hostname: Optional[Tuple[str, str]] = None
 
     @classmethod
     def reset_cache(cls) -> None:
