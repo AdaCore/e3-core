@@ -179,10 +179,7 @@ class Fingerprint:
         checksum = hashlib.sha256()
         for key in key_list:
             for chunk in (key, self.elements[key]):
-                if isinstance(chunk, str):
-                    checksum.update(chunk.encode("utf-8"))
-                else:
-                    checksum.update(chunk)
+                checksum.update(chunk.encode("utf-8"))
         return checksum.hexdigest()
 
     def save_to_file(self, filename: str) -> None:
