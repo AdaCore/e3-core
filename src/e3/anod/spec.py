@@ -331,7 +331,8 @@ class Anod:
                 # the current sandbox. This avoid mainly to loose track of
                 # temporary files that are then accumulating on the
                 # filesystems.
-                if self.build_space is not None and self.build_space.initialized:
+                # ??? Temporary fix for T409-012 ???
+                if self.__build_space is not None and self.build_space.initialized:
                     for tmp_var in ("TMP", "TEMP", "TMPDIR"):
                         os.environ[tmp_var] = self.build_space.tmp_dir
 
