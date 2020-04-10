@@ -99,7 +99,7 @@ def test_deploy_sandbox():
         fd.write("        pass\n")
 
     assert (
-        "cannot get resource metadata from store"
+        "no download metadata returned by the download primitive"
         in e3.os.process.Run([os.path.join("bin", "anod"), "download", "b"]).out
     )
 
