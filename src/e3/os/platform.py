@@ -45,8 +45,15 @@ class SystemInfo:
 
     # Cache for SystemInfo methods
     _platform: Optional[str] = None
+
+    # _os_version is a tuple: os version, kernel version
     _os_version: Optional[Tuple[str, str]] = None
+
+    # When _is_virtual is True it means the host is a VM
     _is_virtual: Optional[bool] = None
+
+    # _hostname is a tuble: hostname, domain. Joining with a dot hostname and domain
+    # represent the FQDN
     _hostname: Optional[Tuple[str, str]] = None
 
     @classmethod
@@ -376,7 +383,9 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
         return self._asdict()
 
     @classmethod
-    def get(cls, name: str, endian: Optional[str] = None, compute_cores=False) -> CPU:
+    def get(
+        cls, name: str, endian: Optional[str] = None, compute_cores: bool = False
+    ) -> CPU:
         """Initialize CPU instance.
 
         :param name: cpu name
