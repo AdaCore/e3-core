@@ -17,7 +17,7 @@ from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, List, Literal
+    from typing import Callable, Dict, FrozenSet, Literal
     from e3.anod.action import Action
     from e3.anod.sandbox import SandBox
     from e3.anod.loader import AnodSpecRepository
@@ -214,7 +214,7 @@ class ElectrolytJobFactory:
         self.store = store
 
     def get_job(
-        self, uid: str, data: Action, predecessors: List[str], notify_end: Callable
+        self, uid: str, data: Action, predecessors: FrozenSet[str], notify_end: Callable
     ) -> ElectrolytJob:
         force_fail = any(
             k
