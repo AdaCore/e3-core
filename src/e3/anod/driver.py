@@ -83,6 +83,8 @@ class AnodDriver:
         # the Anod spec.
         self.anod_instance.build_space.create(quiet=True)
         download_data = self.anod_instance.download()
+        if download_data is None:
+            raise AnodError("no download metadata returned by the download primitive")
         try:
             metadata = self.store.get_resource_metadata(download_data)
         except E3Error as err:
