@@ -181,7 +181,7 @@ def enable_commands_handler(filename: str, mode: str = "a") -> logging.Handler:
     class CmdFilter(logging.Filter):
         """Keep only e3.os.process.cmdline records."""
 
-        def filter(self, record) -> int:
+        def filter(self, record: logging.LogRecord) -> int:
             return 1 if record.name == "e3." + CMD_LOGGER_NAME else 0
 
     # Here we don't attach the handler directly to the cmdline logger. Indeed
