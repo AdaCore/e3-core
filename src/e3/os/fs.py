@@ -31,7 +31,7 @@ class OSFSError(e3.error.E3Error):
 logger = e3.log.getLogger("os_fs")
 
 
-def cd(path: str):
+def cd(path: str) -> None:
     """Change current directory.
 
     :param path: directory name
@@ -217,7 +217,7 @@ def __safe_unlink_func() -> Tuple[Callable[[str], None], Callable[[str], None]]:
 safe_remove, safe_rmdir = __safe_unlink_func()
 
 
-def force_remove_file(path: str):
+def force_remove_file(path: str) -> None:
     """Force file removing, changing permissions if first attempt failed.
 
     :param path: path of the file to remove
@@ -250,7 +250,7 @@ def max_path() -> int:
         return os.pathconf("/", "PC_PATH_MAX")
 
 
-def mv(source: str, target: str):
+def mv(source: str, target: str) -> None:
     """Move a file.
 
     :param target: file to move
@@ -263,7 +263,7 @@ def mv(source: str, target: str):
         shutil.move(source, target)
 
 
-def touch(filename: str):
+def touch(filename: str) -> None:
     """Update file access and modification times. Create the file if needed.
 
     :param filename: file to update
