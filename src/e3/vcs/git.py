@@ -33,7 +33,18 @@ from e3.text import bytes_as_str
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import Dict, Final, Iterator, IO, List, Literal, Optional, TextIO, Union
+    from typing import (
+        Any,
+        Dict,
+        Final,
+        Iterator,
+        IO,
+        List,
+        Literal,
+        Optional,
+        TextIO,
+        Union,
+    )
     from e3.os.process import Run, STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
 
     Git_Cmd = List[Optional[str]]
@@ -103,7 +114,7 @@ class GitRepository:
         output: Union[
             STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, GIT_LOG_STREAM_VALUE, str, IO, None
         ] = GIT_LOG_STREAM,
-        **kwargs
+        **kwargs: Any
     ) -> Run:
         """Run a git command.
 
