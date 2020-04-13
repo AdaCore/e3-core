@@ -344,7 +344,7 @@ class AnodContext:
         plan_args: Optional[dict] = None,
         sandbox: Optional[SandBox] = None,
         upload: bool = False,
-    ):
+    ) -> Union[Build, CreateSources, CreateSource, Install, Test]:
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
