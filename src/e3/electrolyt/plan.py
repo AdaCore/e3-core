@@ -146,7 +146,7 @@ class PlanContext:
             self.plan = plan
             new = self.stack[-1].copy(build=build, host=host, target=target)
 
-            if new.enabled and not enabled:
+            if not enabled:
                 # we are in a block with enabled=False set, disable all
                 # lines in that block
                 new.enabled = enabled
