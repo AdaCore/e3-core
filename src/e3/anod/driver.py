@@ -64,7 +64,7 @@ class AnodDriver:
                 self.anod_instance.deps[e.local_name] = dep_instance
         e3.log.debug("activating spec %s", self.anod_instance.uid)
 
-    def call(self, action: str):
+    def call(self, action: str) -> Any:
         """Call an Anod action.
 
         :param action: the action (build, install, test, ...)
