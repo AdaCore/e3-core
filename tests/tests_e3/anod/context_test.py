@@ -15,7 +15,7 @@ class TestContext:
 
     spec_dir = os.path.join(os.path.dirname(__file__), "context_data")
 
-    def create_context(self, reject_duplicates=True) -> AnodContext:
+    def create_context(self, reject_duplicates: bool = True) -> AnodContext:
         """Create a spec repository and anod context.
 
         :param reject_duplicates: whether to reject duplicates in plan
