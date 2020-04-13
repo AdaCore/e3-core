@@ -93,7 +93,6 @@ def test_unsupported():
     """Test unsupported archive format."""
     with pytest.raises(e3.archive.ArchiveError) as err:
         e3.archive.create_archive("foo.foo", os.getcwd(), "dest")
-        raise
     assert 'unknown format "foo.foo"' in str(err)
 
 

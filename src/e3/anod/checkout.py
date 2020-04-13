@@ -166,10 +166,7 @@ class CheckoutManager:
         # This ensure that when the url does not change, git will not
         # redownload all the objects on each objects (and thus avoid
         # disk space leaks).
-        if isinstance(url, str):
-            remote_name = hashlib.sha256(url.encode("utf-8")).hexdigest()
-        else:
-            remote_name = hashlib.sha256(url).hexdigest()
+        remote_name = hashlib.sha256(url.encode("utf-8")).hexdigest()
         g.init()
 
         # Do the remote addition manually as in that context we can ignore

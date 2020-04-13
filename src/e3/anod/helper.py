@@ -92,14 +92,15 @@ class Make:
 
     def cmdline(
         self,
-        target: Optional[str] = None,
+        target: Optional[Union[str, List[str]]] = None,
         jobs: Optional[int] = None,
         exec_dir: Optional[str] = None,
         timeout: Optional[float] = None,
     ) -> Dict[str, Union[List[str], dict]]:
         """Return the make command line.
 
-        :param target: the target to use (use default_target if None)
+        :param target: optional target or list of targets to use
+            (use default_target if None)
         :param jobs: see __init__ documentation
         :param exec_dir: see __init__ documentation
         :param timeout: timeout to pass to ex.Run
@@ -279,10 +280,7 @@ def text_replace(
                 line, count = re.subn(regexp, replacement, line)
                 if count:
                     nb_substitution[pattern_index] += count
-            if isinstance(line, str):
-                output.write(line.encode("utf-8"))
-            else:
-                output.write(line)
+            output.write(line)
     if any(nb for nb in nb_substitution):
         # file changed, update it
         with open(filename, "wb") as f:

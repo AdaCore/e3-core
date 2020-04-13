@@ -202,11 +202,7 @@ def get_filetree_state(path: str, ignore_hidden: bool = True) -> str:
         state = ":".join(
             [file_path, str(f_stat.st_mode), str(f_stat.st_size), str(f_stat.st_mtime)]
         )
-        if isinstance(file_path, str):
-            # Make sure to encode unicode objects before hashing
-            return state.encode("utf-8")
-        else:
-            return state
+        return state.encode("utf-8")
 
     path = os.path.abspath(path)
     result = hashlib.sha1()

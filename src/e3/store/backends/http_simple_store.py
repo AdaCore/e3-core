@@ -45,7 +45,7 @@ class HTTPSimpleStore(Store):
         :param query: a dict containing two keys 'sha' and 'url'. sha is the
             sha1sum of the resource and url is the remote url
         """
-        if query is None or "sha" not in query or "url" not in query:
+        if "sha" not in query or "url" not in query:
             raise StoreError('missing either "sha" or "url" in query')
         return HTTPSimpleStoreResourceInfo(query["url"], query["sha"])
 

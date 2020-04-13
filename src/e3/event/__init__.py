@@ -19,7 +19,7 @@ from e3.fs import mkdir
 logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Optional, Tuple
+    from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 
 def unique_id() -> str:
@@ -133,7 +133,7 @@ class Event:
             self.end_time = time.time()
             object.__setattr__(self, "_closed", True)
 
-    def format_date(self, key: str, value: float) -> Dict[str, str]:
+    def format_date(self, key: str, value: Union[float, str]) -> Dict[str, str]:
         """Format timestamp fields.
 
         :param key: the data key

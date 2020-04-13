@@ -369,7 +369,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             return forced_value
 
         attributes = name.split(".")
-        result = self
+        result: Any = self
         for a in attributes:
             if not hasattr(result, a):
                 return default_value
