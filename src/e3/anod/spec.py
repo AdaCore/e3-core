@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from collections import OrderedDict
 from distutils.version import StrictVersion
 from typing import TYPE_CHECKING
 
@@ -153,7 +152,7 @@ class Anod:
         :param env: alternate platform environment
         :raise: SpecError
         """
-        self.deps: Dict[str, Anod] = OrderedDict()
+        self.deps: Dict[str, Anod] = {}
 
         self.kind = kind
         self.jobs = jobs
@@ -169,7 +168,7 @@ class Anod:
 
         # Create the parsed qualifier (dict version). In the future
         # self.parsed_qualifier should be replaced by self.qualifier
-        self.parsed_qualifier = OrderedDict()
+        self.parsed_qualifier = {}
         if qualifier:
             qual_dict = [
                 (key, value)
