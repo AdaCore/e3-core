@@ -124,7 +124,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         version: Optional[str] = None,
         machine: Optional[str] = None,
         mode: Optional[str] = None,
-    ):
+    ) -> None:
         """Set build platform.
 
         :param name: a string that identify the system to be considered
@@ -661,7 +661,7 @@ class Env(AbstractBaseEnv):
     def _items(self) -> Iterable[Any]:
         return iter(self._instance.items())
 
-    def store(self, filename: Optional[str] = None):
+    def store(self, filename: Optional[str] = None) -> None:
         """Save environment into memory or file.
 
         :param filename: a string containing the path of the filename in which
