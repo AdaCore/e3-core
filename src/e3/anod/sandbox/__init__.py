@@ -136,7 +136,7 @@ class SandBox:
         # Expand ~, environment variables and eliminate symbolic links
         self.__specs_dir = os.path.realpath(os.path.expandvars(os.path.expanduser(d)))
         self.is_alternate_specs_dir = True
-        logger.info("using alternate specs dir %s", d)
+        logger.debug("using alternate specs dir %s", d)
 
     def create_dirs(self) -> None:
         """Create all required sandbox directories."""
