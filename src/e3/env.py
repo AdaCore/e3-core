@@ -606,7 +606,7 @@ class BaseEnv(AbstractBaseEnv):
         return result
 
     @classmethod
-    def from_env(cls, env: Union[Env, BaseEnv] = None) -> BaseEnv:
+    def from_env(cls, env: Optional[Union[Env, BaseEnv]] = None) -> BaseEnv:
         """Return a new BaseEnv object from an env.
 
         :param env: env. If None copy the current Env

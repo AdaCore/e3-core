@@ -112,8 +112,8 @@ class PlanContext:
 
     def __init__(
         self,
-        stack: List[BaseEnv] = None,
-        plan: Plan = None,
+        stack: Optional[List[BaseEnv]] = None,
+        plan: Optional[Plan] = None,
         ignore_disabled: bool = True,
         server: Optional[BaseEnv] = None,
         build: Optional[str] = None,
