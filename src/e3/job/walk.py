@@ -10,7 +10,7 @@ from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Optional, Set
+    from typing import Any, Callable, Dict, FrozenSet, Optional, Set
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
     from e3.job import Job, ProcessJob
@@ -187,7 +187,7 @@ class Walk:
         self,
         uid: str,
         data: Any,
-        predecessors: Optional[List[str]],
+        predecessors: FrozenSet[str],
         reason: Optional[str],
         notify_end: Callable[[str], None],
         status: ReturnValue = ReturnValue.failure,
@@ -210,7 +210,7 @@ class Walk:
         self,
         uid: str,
         data: Any,
-        predecessors: Optional[List[str]],
+        predecessors: FrozenSet[str],
         notify_end: Callable[[str], None],
     ) -> ProcessJob:
         """Create a ProcessJob.
@@ -236,7 +236,7 @@ class Walk:
         self,
         uid: str,
         data: Any,
-        predecessors: List[str],
+        predecessors: FrozenSet[str],
         notify_end: Callable[[str], None],
     ) -> Job:
         """Return a Job.

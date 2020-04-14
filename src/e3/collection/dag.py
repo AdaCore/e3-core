@@ -70,12 +70,10 @@ class DAGIterator:
             return (None, None)
         return (vertex_id, data)
 
-    def next_element(
-        self,
-    ) -> Union[Tuple[None, None, None], Tuple[VertexID, Any, FrozenSet[VertexID]]]:
+    def next_element(self,) -> Tuple[Union[None, VertexID], Any, FrozenSet[VertexID]]:
         """Retrieve next element in topological order.
 
-        :return: a vertex id, data, predecessors. (None, None, None) is
+        :return: a vertex id, data, predecessors. (None, None, frozenset()) is
             returned if no element is available).
         """
         if not self.non_visited:
@@ -99,7 +97,7 @@ class DAGIterator:
                 raise DAGError("cycle detected (unknown error)")
 
             # No vertex is ready to be visited
-            return None, None, None
+            return None, None, frozenset()
 
         # Remove the vertex from the "non_visited_list" and when
         # enable_busy_state, mark the vertex as BUSY, mark it VISITED

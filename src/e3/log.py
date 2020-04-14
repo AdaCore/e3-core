@@ -13,7 +13,7 @@ from colorama import Fore, Style
 from tqdm import tqdm
 
 if TYPE_CHECKING:
-    from typing import IO, Optional, Sequence, TextIO, Union
+    from typing import Any, IO, Optional, Iterator, TextIO, Union
 
 
 # Define default format for StreamHandler and FileHandler
@@ -34,7 +34,7 @@ else:
 console_logs: Optional[str] = None
 
 
-def progress_bar(it: Sequence, **kwargs):
+def progress_bar(it: Iterator, **kwargs: Any) -> tqdm:
     """Create a tqdm progress bar.
 
     :param it: an interator

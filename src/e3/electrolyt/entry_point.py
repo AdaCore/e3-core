@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, Optional
+    from typing import Any, Callable, Dict, Optional
 
 
 class EntryPoint:
@@ -87,8 +87,8 @@ def entry_point(
     db: Dict[str, EntryPoint],
     cls: Callable[..., EntryPoint],
     kind: str,
-    *args,
-    **kwargs
+    *args: Any,
+    **kwargs: Any
 ) -> Callable:
     """Entry point decorator.
 

@@ -6,7 +6,7 @@ import yaml
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional
+    from typing import Any, Dict, List, Optional
 
 
 class Host(BaseEnv):
@@ -15,14 +15,16 @@ class Host(BaseEnv):
     See e3.env.BaseEnv
     """
 
-    def __init__(self, hostname: str, platform: str, version: str, **kwargs):
+    def __init__(
+        self, hostname: str, platform: str, version: str, **kwargs: Any
+    ) -> None:
         """Initialize an host entry.
 
         :param hostname: host name
         :param platform: platform name (see e3.platform)
         :param version: platform version (usually OS version)
         :param kwargs: additional user defined data. each key from the data
-            dict is accesiible like a regular attribute.
+            dict is accessible like a regular attribute.
         """
         BaseEnv.__init__(self)
         self.set_build(name=str(platform), version=str(version), machine=str(hostname))
@@ -55,7 +57,7 @@ class HostDB:
         """
         return list(self.hosts.keys())
 
-    def add_host(self, hostname: str, platform: str, version: str, **data) -> None:
+    def add_host(self, hostname: str, platform: str, version: str, **data: Any) -> None:
         """Add/Update a host entry.
 
         :param hostname: host name

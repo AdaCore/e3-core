@@ -7,7 +7,7 @@ import e3.anod.error
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Hashable, Optional
+    from typing import Any, Hashable, Optional
     from e3.anod.spec import Anod
 
 
@@ -41,8 +41,8 @@ class Dependency:
         local_name: Optional[str] = None,
         require: str = "build_tree",
         track: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Initialize a Dependency object.
 
         :param name: basename of the Anod spec file (without .anod extension)

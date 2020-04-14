@@ -91,7 +91,7 @@ class Plan:
             source_code = fd.read()
         self.load_chunk(source_code, filename)
 
-    def check(self, code_ast) -> None:
+    def check(self, code_ast: ast.AST) -> None:
         """Check plan coding style."""
         del self, code_ast
 
@@ -120,7 +120,7 @@ class PlanContext:
         host: Optional[str] = None,
         target: Optional[str] = None,
         enabled: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ):
         """Initialize an execution context or a scope.
 
@@ -178,7 +178,7 @@ class PlanContext:
         self.actions: Dict[str, Callable] = {}
         self.action_list: List[BaseEnv] = []
 
-    def register_action(self, name: str, fun: Callable):
+    def register_action(self, name: str, fun: Callable) -> None:
         """Register a function that correspond to an action.
 
         :param name: name used in the plans
@@ -243,7 +243,7 @@ class PlanContext:
 
         return self.action_list
 
-    def _add_action(self, name: str, *args, **kwargs) -> None:
+    def _add_action(self, name: str, *args: Any, **kwargs: Any) -> None:
         """Process action calls in plans.
 
         :param name: action name

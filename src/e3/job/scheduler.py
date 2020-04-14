@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import heapq
 import time
+import typing
 from datetime import datetime
 from queue import Empty, Queue
 from typing import TYPE_CHECKING
@@ -12,10 +13,12 @@ from e3.job import Job
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Optional, Tuple
+    from typing import Any, Callable, Dict, FrozenSet, List, Optional, Tuple, Type
     from e3.collection.dag import DAG
 
-    JobProviderCallback = Callable[[str, Any, List[str], Callable[[str], None]], Job]
+    JobProviderCallback = Callable[
+        [str, Any, FrozenSet[str], Callable[[str], None]], Job
+    ]
     CollectCallback = Callable[[Job], bool]
 
 
@@ -97,7 +100,7 @@ class Scheduler:
         # self.n_tokens slots
         self.slots = list(range(self.n_tokens))
 
-    def safe_collect(self, *args, **kwargs) -> bool:
+    def safe_collect(self, job: Job) -> bool:
         """Protect call to collect.
 
         This ensures for job such as JobProcess that there are no calls to
@@ -107,30 +110,41 @@ class Scheduler:
         lead easily to file locking issues and thus might cause crashes.
         """
         with Job.lock:
-            return self.collect(*args, **kwargs)  # type: ignore
+            return self.collect(job)
 
-    def safe_job_provider(self, *args, **kwargs) -> Job:
+    def safe_job_provider(
+        self,
+        uid: str,
+        data: Any,
+        predecessors: FrozenSet[str],
+        notify_end: Callable[[str], None],
+    ) -> Job:
         """Protect call to job_provider.
 
         See safe_collect commment above.
         """
         with Job.lock:
-            return self.job_provider(*args, **kwargs)  # type: ignore
+            return self.job_provider(uid, data, predecessors, notify_end)
 
     @classmethod
-    def simple_provider(cls, job_class: Callable[[], Job]):
+    def simple_provider(cls, job_class: Type[Job]) -> JobProviderCallback:
         """Return a simple provider based on a given Job class.
 
         :param job_class: a subclass of Job
         """
 
-        def provider(uid, data, predecessors, notify_end):
+        def provider(
+            uid: str,
+            data: Any,
+            predecessors: FrozenSet[str],
+            notify_end: Callable[[str], None],
+        ) -> Job:
             del predecessors
             return job_class(uid, data, notify_end)
 
         return provider
 
-    def init_state(self, dag: DAG):
+    def init_state(self, dag: DAG) -> None:
         """Reinitialize the scheduler state (internal function).
 
         :param dag: the dag representing the list of job to execute
@@ -218,9 +232,9 @@ class Scheduler:
                     return
 
                 job = self.safe_job_provider(
-                    uid,
+                    typing.cast(str, uid),
                     data,
-                    predecessors=predecessors,
+                    predecessors=typing.cast(typing.FrozenSet[str], predecessors),
                     notify_end=self.message_queue.put,
                 )
                 if job.should_skip:

@@ -22,7 +22,7 @@ from e3.fs import mkdir, rm
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import IO, List, Optional, TextIO, Tuple, Union
+    from typing import Any, IO, List, Optional, TextIO, Tuple, Union
 
     SVNCmd = List[Optional[str]]
 
@@ -127,7 +127,7 @@ class SVNRepository:
                 )
         return cls.local_url(repo_path)
 
-    def svn_cmd(self, cmd: SVNCmd, **kwargs) -> e3.os.process.Run:
+    def svn_cmd(self, cmd: SVNCmd, **kwargs: Any) -> e3.os.process.Run:
         """Run a svn command.
 
         Add the non-interactive option to all command (accepted on all SVN.

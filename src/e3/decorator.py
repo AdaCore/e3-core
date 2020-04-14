@@ -92,7 +92,7 @@ class memoize:
             category=DeprecationWarning,
         )
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """Return the cache value if exist, else call func."""
         if kwargs:
             if len(kwargs) == 1 and kwargs.get("reset_cache"):

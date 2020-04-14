@@ -396,10 +396,10 @@ class Anod:
     def shell(
         self,
         *command: str,
-        parse_shebang=True,
+        parse_shebang: bool = True,
         output: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,
         python_executable: None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> e3.os.process.Run:
         """Run a subprocess using e3.os.process.Run.
 

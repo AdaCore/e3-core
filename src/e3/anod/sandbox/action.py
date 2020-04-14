@@ -125,7 +125,7 @@ class SandBoxShowConfiguration(SandBoxAction):
 
         argument_parser = main(get_argument_parser=True)
 
-        def error(message) -> NoReturn:
+        def error(message: str) -> NoReturn:
             raise SandBoxError(message)
 
         argument_parser.error = error

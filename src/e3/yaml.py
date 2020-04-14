@@ -200,7 +200,7 @@ class CaseParser:
 
         return value
 
-    def __update_state(self, key: str, value: Any, cursor: Any, prefix: Tuple):
+    def __update_state(self, key: str, value: Any, cursor: Any, prefix: Tuple) -> None:
         """Update state.
 
         :param key: the key to modify. Leading or trailing '+' in the key name

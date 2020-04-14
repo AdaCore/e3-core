@@ -111,7 +111,7 @@ class NTFile:
         desired_access: Optional[int] = None,
         shared_access: Optional[int] = None,
         open_options: Optional[int] = None,
-    ):
+    ) -> None:
         """Open file.
 
         :param desired_access: desired access
@@ -305,7 +305,7 @@ class NTFile:
         return os.path.join(self.volume_path, "tmp", "Trash", str("%016X" % self.uid))
 
     @WithOpenFile(Access.DELETE)
-    def rename(self, filename: str, replace: bool = False):
+    def rename(self, filename: str, replace: bool = False) -> None:
         """Move file.
 
         :param filename: target location
@@ -365,7 +365,7 @@ class NTFile:
         None,
         OpenOptions.SYNCHRONOUS_IO_NON_ALERT,
     )
-    def iterate_on_dir(self, fun: Callable, default_result: Any = None):
+    def iterate_on_dir(self, fun: Callable, default_result: Any = None) -> Any:
         """Iterate on directory.
 
         :param fun: function called on each entry (. are .. are skipped)

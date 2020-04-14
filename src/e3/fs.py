@@ -293,7 +293,7 @@ def mv(source: Union[str, List[str]], target: str) -> None:
     :raise FSError: if an error occurs
     """
 
-    def move_file(src: str, dst: str):
+    def move_file(src: str, dst: str) -> None:
         """Reimplementation of shutil.move.
 
         The implementation follows shutil.move from the standard library.
@@ -302,7 +302,7 @@ def mv(source: Union[str, List[str]], target: str) -> None:
         work.
         """
 
-        def same_file(src: str, dst: str):
+        def same_file(src: str, dst: str) -> bool:
             if hasattr(os.path, "samefile"):
                 try:
                     return os.path.samefile(src, dst)
@@ -312,11 +312,11 @@ def mv(source: Union[str, List[str]], target: str) -> None:
                 os.path.abspath(dst)
             )
 
-        def basename(path: str):
+        def basename(path: str) -> str:
             sep = os.path.sep + (os.path.altsep or "")
             return os.path.basename(path.rstrip(sep))
 
-        def destinsrc(src: str, dst: str):
+        def destinsrc(src: str, dst: str) -> bool:
             src = os.path.abspath(src)
             dst = os.path.abspath(dst)
             if not src.endswith(os.path.sep):
@@ -353,7 +353,7 @@ def mv(source: Union[str, List[str]], target: str) -> None:
             else:
                 shutil.copy2(src, real_dst)
                 rm(src)
-        return real_dst
+        return
 
     if isinstance(source, str):
         logger.debug("mv %s %s", source, target)
@@ -680,7 +680,7 @@ def sync_tree(
             or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))
         )
 
-    def copystat(src: FileInfo, dst: FileInfo):
+    def copystat(src: FileInfo, dst: FileInfo) -> None:
         """Update attribute of dst file with src attributes.
 
         :param src: the source FileInfo object
@@ -723,7 +723,7 @@ def sync_tree(
                     ):
                         raise
 
-    def safe_copy(src: FileInfo, dst: FileInfo):
+    def safe_copy(src: FileInfo, dst: FileInfo) -> None:
         """Copy src file into dst preserving all attributes.
 
         :param src: the source FileInfo object
@@ -757,7 +757,7 @@ def sync_tree(
                         shutil.copyfileobj(fsrc, fdst)
             copystat(src, dst)
 
-    def safe_mkdir(dst: FileInfo):
+    def safe_mkdir(dst: FileInfo) -> None:
         """Create a directory modifying parent directory permissions if needed.
 
         :param dst: directory to create

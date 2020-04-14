@@ -24,6 +24,8 @@ from e3.fs import rm
 if TYPE_CHECKING:
     from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Union
     from requests.auth import AuthBase
+    from requests.models import Response
+
 
 logger = e3.log.getLogger("net.http")
 
@@ -127,8 +129,8 @@ class HTTPSession:
         method: str,
         url: str,
         data_streams: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Response:
         """Send a request.
 
         See requests Session.request function.
