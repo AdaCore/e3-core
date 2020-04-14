@@ -142,7 +142,7 @@ class UnicodeString(Structure):
 
     _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]
 
-    def __init__(self, value: str = None, max_length: int = 0):
+    def __init__(self, value: Optional[str] = None, max_length: int = 0):
         strbuf = None
         length = 0
         if value is not None or max_length > 0:

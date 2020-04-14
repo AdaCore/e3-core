@@ -14,7 +14,7 @@ class SandBoxMigrate(SandBoxAction):
     help = "Migrate to a newer anod API version"
     require_sandbox = False
 
-    def add_parsers(self):
+    def add_parsers(self) -> None:
         self.parser.add_argument("api_version", help="API version")
         self.parser.add_argument("spec_dir", help="Path to spec directory")
 
@@ -25,7 +25,7 @@ class SandBoxMigrate(SandBoxAction):
         migrate_v1_5()
 
 
-def migrate_v1_5():
+def migrate_v1_5() -> None:
     """Migrate to API 1.5.
 
     Move all .yaml files in subdirs, when the name of a yaml

@@ -154,7 +154,7 @@ def activate(
     file_format: str = DEFAULT_FILE_FMT,
     datefmt: Optional[str] = None,
     level: int = logging.INFO,
-    filename: str = None,
+    filename: Optional[str] = None,
     e3_debug: bool = False,
 ) -> None:
     """Activate default E3 logging.

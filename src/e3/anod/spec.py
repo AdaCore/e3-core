@@ -142,7 +142,9 @@ class Anod:
     ExternalSourceBuilder = e3.anod.package.ExternalSourceBuilder
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
-    def __init__(self, qualifier: str, kind: str, jobs: int = 1, env: BaseEnv = None):
+    def __init__(
+        self, qualifier: str, kind: str, jobs: int = 1, env: Optional[BaseEnv] = None
+    ):
         """Initialize an Anod instance.
 
         :param qualifier: the qualifier used when loading the spec
@@ -235,7 +237,7 @@ class Anod:
         self,
         extended: bool = False,
         suffix: Optional[str] = None,
-        selectors: dict = None,
+        selectors: Optional[dict] = None,
     ) -> Any:
         """Load a YAML config file associated with the current module.
 

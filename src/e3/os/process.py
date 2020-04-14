@@ -229,7 +229,7 @@ class Run:
         input: Union[DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,
         bg: bool = False,
         timeout: Optional[int] = None,
-        env: dict = None,
+        env: Optional[dict] = None,
         set_sigpipe: bool = True,
         parse_shebang: bool = False,
         ignore_environ: bool = True,
