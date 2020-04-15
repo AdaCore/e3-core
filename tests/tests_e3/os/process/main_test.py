@@ -62,6 +62,8 @@ def test_rlimit():
         e.store()
         e.set_build("x86_64-windows")
         run_test()
+        e.set_build("x86_64-windows64")
+        run_test()
         e.restore()
 
 
