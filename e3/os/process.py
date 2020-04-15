@@ -60,6 +60,8 @@ def subprocess_setup():
 def get_rlimit(platform=None):
     if platform is None:
         platform = e3.env.Env().build.platform
+    if platform == "x86_64-windows64":
+        platform = "x86_64-windows"
 
     from pkg_resources import resource_filename
     return resource_filename(
