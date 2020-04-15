@@ -599,6 +599,7 @@ def test_sandbox_user_yaml(git_specs_dir):
     p = e3.os.process.Run(
         [
             "e3-sandbox",
+            "-v",
             "exec",
             "--plan",
             os.path.join(sandbox_dir, "test.plan"),
