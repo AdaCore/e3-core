@@ -13,6 +13,7 @@ def init_testsuite_env():
     # Force UTC timezone
     os.environ["TZ"] = "UTC"
     os.environ["E3_ENABLE_FEATURE"] = "smtp_ssl"
+    os.environ["E3_CONFIG"] = "/dev/null"
     # Ignore E3_HOSTNAME variable
     if "E3_HOSTNAME" in os.environ:
         del os.environ["E3_HOSTNAME"]
