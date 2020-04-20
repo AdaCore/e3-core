@@ -6,6 +6,7 @@ import yaml
 from e3.env import Env
 from e3.fs import rm
 from e3.os.fs import cd, which
+from e3.config import Config
 
 import pytest
 
@@ -41,6 +42,7 @@ def env_protect(request):
     Env().store()
     tempd = tempfile.mkdtemp()
     cd(tempd)
+    Config.data = {}
 
     def restore_env():
         Env().restore()
