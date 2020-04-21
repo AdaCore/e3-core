@@ -1,24 +1,35 @@
 """Extensions to the standard Python logging system."""
 
 from __future__ import annotations
+from dataclasses import dataclass
 
 import logging
 import re
 import sys
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from colorama import Fore, Style
 
 from tqdm import tqdm
 
+from e3.config import ConfigSection
+
 if TYPE_CHECKING:
     from typing import Any, IO, Optional, Iterator, TextIO, Union
 
 
-# Define default format for StreamHandler and FileHandler
-DEFAULT_STREAM_FMT = "%(levelname)-8s %(message)s"
-DEFAULT_FILE_FMT = "%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s"
+@dataclass
+class LogConfig(ConfigSection):
+    title: ClassVar[str] = "log"
+
+    pretty: bool = True
+    stream_fmt: str = "%(levelname)-8s %(message)s"
+    file_fmt: str = "%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s"
+
+
+log_config = LogConfig.load()
+
 
 # Default output stream (sys.stdout by default, or a file descriptor if
 # activate() is called with a filename.
@@ -27,7 +38,7 @@ default_output_stream: Union[TextIO, IO[str]] = sys.stdout
 # If sys.stdout is a terminal then enable "pretty" output for user
 # This includes progress bars and colors
 if sys.stdout.isatty():  # all: no cover (not used in production!)
-    pretty_cli = True
+    pretty_cli = log_config.pretty
 else:
     pretty_cli = False
 
@@ -150,8 +161,8 @@ def add_log_handlers(
 
 
 def activate(
-    stream_format: str = DEFAULT_STREAM_FMT,
-    file_format: str = DEFAULT_FILE_FMT,
+    stream_format: str = log_config.stream_fmt,
+    file_format: str = log_config.file_fmt,
     datefmt: Optional[str] = None,
     level: int = logging.INFO,
     filename: Optional[str] = None,
