@@ -95,7 +95,6 @@ class Config:
               [log.fmt]
         :return: the configuration dict
         """
-
         if not cls.data:
             cls.load()
 
