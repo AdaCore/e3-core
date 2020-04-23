@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import base64
-import calendar
 import json
-from datetime import datetime
+from e3.date import utc_timestamp
 
 
 def get_payload(token: str) -> dict:
@@ -26,12 +25,6 @@ def get_payload(token: str) -> dict:
         except (ValueError, TypeError):
             pass
     return data
-
-
-def utc_timestamp() -> int:
-    """Return the number of seconds since epoch UTC."""
-    d = datetime.utcnow()
-    return calendar.timegm(d.utctimetuple())
 
 
 def is_valid(token: str) -> bool:

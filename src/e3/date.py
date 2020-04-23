@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import calendar
+from datetime import datetime
 import time
 from typing import TYPE_CHECKING, overload
 
@@ -26,3 +28,9 @@ def timestamp_as_string(value: Optional[float]) -> Optional[str]:
     if value is None:
         return None
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(value))
+
+
+def utc_timestamp() -> int:
+    """Return the number of seconds since epoch UTC."""
+    d = datetime.utcnow()
+    return calendar.timegm(d.utctimetuple())
