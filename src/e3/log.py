@@ -53,12 +53,12 @@ def progress_bar(it: Iterator, **kwargs: Any) -> tqdm:
     :return: a tqdm progress bar iterator
     """
     if pretty_cli:  # all: no cover
-        return tqdm(it, **kwargs)
+        return tqdm(it, file=sys.stderr, **kwargs)
     else:
         # When pretty cli is disabled return a progress bar that do nothing.
         # returning just the iterator will break calls to tqdm method
         # otherwise.
-        return tqdm(it, disable=True, **kwargs)
+        return tqdm(it, disable=True, file=sys.stderr, **kwargs)
 
 
 __null_handler_set = set()
@@ -93,7 +93,7 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
         for reg, color in self.color_subst:
             msg = re.sub(reg, color + r"\1" + Fore.RESET + Style.RESET_ALL, msg)
 
-        tqdm.write(msg)
+        tqdm.write(msg, file=sys.stderr)
 
 
 def getLogger(name: Optional[str] = None, prefix: str = "e3") -> logging.Logger:
