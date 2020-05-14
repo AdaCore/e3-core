@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import time
+import json
 from typing import TYPE_CHECKING, ClassVar
 
 from colorama import Fore, Style
@@ -16,7 +17,7 @@ from tqdm import tqdm
 from e3.config import ConfigSection
 
 if TYPE_CHECKING:
-    from typing import Any, IO, Optional, Iterator, Sequence, TextIO, Union
+    from typing import Any, IO, Optional, Iterator, Sequence, TextIO, Union, List, Set
 
 
 @dataclass
@@ -43,6 +44,32 @@ else:
     pretty_cli = False
 
 console_logs: Optional[str] = None
+
+
+class JsonFormatter(logging.Formatter):
+    """Logging formatter for creating JSON logs."""
+
+    # standard attributes that will always be printed
+    STD_ATTR = ["asctime", "levelname", "name", "message", "module"]
+    # custom attributes
+    _extra_attr: Set[str] = set()
+
+    def add_attr(self, attrs: List[str]) -> None:
+        self._extra_attr.update(attrs)
+
+    def format(self, record):
+
+        # Parent's format is called in order to setup additional attributes
+        _ = super(JsonFormatter, self).format(record)
+
+        json_record = {
+            attr: getattr(record, attr, None)
+            for attr in self.STD_ATTR + list(self._extra_attr)
+        }
+        # we delete empty values
+        json_record = {attr: val for attr, val in json_record.items() if val}
+
+        return json.dumps(json_record)
 
 
 def progress_bar(it: Union[Iterator, Sequence], **kwargs: Any) -> tqdm:
@@ -124,12 +151,33 @@ def getLogger(name: Optional[str] = None, prefix: str = "e3") -> logging.Logger:
     return logger
 
 
+def add_formatter_attr(attrs: List[str]) -> None:
+    """Add custom attributes to JSON formatter.
+
+    This function has to be called after setting up a handler with
+    activate function
+
+    :param attrs: list of custom attributes to add
+    """
+
+    def get_json_formatter() -> Optional[JsonFormatter]:
+        for hdlr in logging.getLogger("").handlers:
+            if isinstance(hdlr.formatter, JsonFormatter):
+                return hdlr.formatter
+        return None
+
+    json_fmt = get_json_formatter()
+    if json_fmt:
+        json_fmt.add_attr(attrs)
+
+
 def add_log_handlers(
     level: int,
     log_format: str,
     datefmt: Optional[str] = None,
     filename: Optional[str] = None,
     set_default_output: bool = True,
+    json_format: bool = False,
 ) -> None:
     """Add log handlers using GMT.
 
@@ -142,6 +190,8 @@ def add_log_handlers(
     """
     global default_output_stream
     handler: Union[TqdmHandler, logging.StreamHandler, logging.FileHandler]
+    fmt: Union[logging.Formatter, JsonFormatter]
+
     if filename is None:
         if pretty_cli:  # all: no cover
             handler = TqdmHandler()
@@ -152,7 +202,11 @@ def add_log_handlers(
         if set_default_output:
             default_output_stream = handler.stream
 
-    fmt = logging.Formatter(log_format, datefmt)
+    if json_format:
+        fmt = JsonFormatter(log_format, datefmt)
+    else:
+        fmt = logging.Formatter(log_format, datefmt)
+
     fmt.converter = time.gmtime  # type: ignore
     handler.setFormatter(fmt)
 
@@ -167,6 +221,7 @@ def activate(
     level: int = logging.INFO,
     filename: Optional[str] = None,
     e3_debug: bool = False,
+    json_format: bool = False,
 ) -> None:
     """Activate default E3 logging.
 
@@ -193,6 +248,7 @@ def activate(
             log_format=file_format,
             datefmt=datefmt,
             filename=filename,
+            json_format=json_format,
         )
 
     if e3_debug:
