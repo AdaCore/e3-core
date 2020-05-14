@@ -69,7 +69,7 @@ class SchedulingError(E3Error):
         """
         super().__init__(message, origin)
         self.uid = uid
-        self.initiators = initiators
+        self.initiators = initiators if initiators is not None else []
 
 
 class AnodContext:
