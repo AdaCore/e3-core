@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import os
-import sys
-import traceback
 
 from typing import TYPE_CHECKING
 
@@ -76,11 +74,9 @@ class ElectrolytJob(Job):
                 getattr(self, self.data.run_method)()
             except Exception as e:
                 self.__status = STATUS.failure
-                logger.error(
+                logger.exception(
                     "Exception occurred in action %s %s", self.data.run_method, e
                 )
-                _, _, exc_traceback = sys.exc_info()
-                logger.error(traceback.format_tb(exc_traceback))
 
     @property
     def status(self) -> ReturnValue:
