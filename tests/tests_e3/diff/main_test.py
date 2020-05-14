@@ -32,7 +32,7 @@ def test_patch():
 
     # By default empty line, leading and trailing whitespaces are ignored
     assert e3.diff.diff(expected + [""], output) == ""
-    assert e3.diff.diff([" " + l + " " for l in expected], output) == ""
+    assert e3.diff.diff([" " + line + " " for line in expected], output) == ""
     assert e3.diff.diff(expected, output, ignore_white_chars=False) == ""
 
     # we can also ignore specific pattern

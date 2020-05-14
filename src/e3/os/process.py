@@ -306,7 +306,7 @@ class Run:
                 f.seek(0)
                 line = f.readline()
                 interpreter_cmds = [
-                    l.strip() for l in line[line.find("!") + 1 :].split()
+                    word.strip() for word in line[line.find("!") + 1 :].split()
                 ]
                 # Pass the program path to the interpreter
                 if len(cmd_line) > 1:

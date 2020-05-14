@@ -136,13 +136,13 @@ def patch(
         # whether the current patch line should discarded
         discard = False
 
-        def write_line(l: str) -> None:
+        def write_line(line: str) -> None:
             """Write line in filtered patch.
 
             :param l: the line to write
             """
             if not discard:
-                fdout.write(l)
+                fdout.write(line)
 
         for line in f:
             if not header1:

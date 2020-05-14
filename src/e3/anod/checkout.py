@@ -124,8 +124,8 @@ class CheckoutManager:
                     output=PIPE,
                 ).out
                 ignore_list = [
-                    "/%s" % l.strip().rstrip("/")
-                    for l in ignore_list_lines.splitlines()
+                    "/%s" % f.strip().rstrip("/")
+                    for f in ignore_list_lines.splitlines()
                 ]
                 logger.debug("Ignore in external: %s", ignore_list)
             except Exception:

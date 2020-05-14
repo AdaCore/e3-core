@@ -309,7 +309,8 @@ class GitRepository:
             if result["notes"]:
                 try:
                     result["notes"] = dict(
-                        l.split(": ", 1) for l in result["notes"].splitlines()
+                        notes_line.split(": ", 1)
+                        for notes_line in result["notes"].splitlines()
                     )
                 except ValueError:
                     # Notes format invalid, discard it
