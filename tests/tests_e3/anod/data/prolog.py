@@ -4,4 +4,4 @@ if "spec_config" not in globals():
     spec_config = None
 
 if spec_config is not None:
-    PROLOG_WAS_EXECUTED = True
+    PROLOG_WAS_EXECUTED = True  # type: ignore
