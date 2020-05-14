@@ -16,7 +16,7 @@ from tqdm import tqdm
 from e3.config import ConfigSection
 
 if TYPE_CHECKING:
-    from typing import Any, IO, Optional, Iterator, TextIO, Union
+    from typing import Any, IO, Optional, Iterator, Sequence, TextIO, Union
 
 
 @dataclass
@@ -45,7 +45,7 @@ else:
 console_logs: Optional[str] = None
 
 
-def progress_bar(it: Iterator, **kwargs: Any) -> tqdm:
+def progress_bar(it: Union[Iterator, Sequence], **kwargs: Any) -> tqdm:
     """Create a tqdm progress bar.
 
     :param it: an interator

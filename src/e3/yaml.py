@@ -372,7 +372,7 @@ def load_with_regexp_table(filename: str, selectors: List[str], data: dict) -> d
                 result[key] = line[-1]
                 break
 
-    # At this stage we have our dictionnary filled. Now use data to replace to
+    # At this stage we have our dictionary filled. Now use data to replace to
     # replace %()s strings.
 
     for key in result:

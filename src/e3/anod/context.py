@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     CacheKeyType = Tuple[
         str, Platform, Platform, Platform, Optional[str], Optional[str], Optional[str]
     ]
+    ResolverType = Callable[[Action, Decision], bool]
 
 logger = e3.log.getLogger("anod.context")
 
@@ -797,7 +798,7 @@ class AnodContext:
         else:
             return cls.decision_error(action, decision)
 
-    def schedule(self, resolver: Callable[[Action, Decision], bool]) -> DAG:
+    def schedule(self, resolver: ResolverType) -> DAG:
         """Compute a DAG of scheduled actions.
 
         :param resolver: a function that helps the scheduler resolve cases

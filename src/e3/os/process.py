@@ -358,7 +358,7 @@ class Run:
                     env = tmp
             else:
                 # ignore_environ is False, so get a copy of the current
-                # environment and update it with the env dictionnary.
+                # environment and update it with the env dictionary.
                 tmp = os.environ.copy()
                 tmp.update(env)
                 env = tmp
