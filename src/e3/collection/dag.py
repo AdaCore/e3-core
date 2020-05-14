@@ -607,7 +607,7 @@ class DAG:
         return "\n".join(result)
 
     def prune(
-        self, fun: Callable[[DAG, VertexID], str], preserve_context: bool = True
+        self, fun: Callable[[DAG, VertexID], bool], preserve_context: bool = True
     ) -> DAG:
         """Create a pruned graph.
 
