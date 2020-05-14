@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import time
+import json
 from typing import TYPE_CHECKING, ClassVar
 
 from colorama import Fore, Style
@@ -16,7 +17,18 @@ from tqdm import tqdm
 from e3.config import ConfigSection
 
 if TYPE_CHECKING:
-    from typing import Any, IO, Optional, Iterator, Sequence, TextIO, Union
+    from typing import (
+        Any,
+        IO,
+        Optional,
+        Iterator,
+        Sequence,
+        TextIO,
+        Union,
+        List,
+        Tuple,
+    )
+    from logging import _ExcInfoType
 
 
 @dataclass
@@ -43,6 +55,112 @@ else:
     pretty_cli = False
 
 console_logs: Optional[str] = None
+
+
+class JSONFormatter(logging.Formatter):
+    """Logging formatter for creating JSON logs.
+
+    It will print some standard attributes defined in STD_ATTR
+    plus application extra attributes defined in _extra_attr
+    """
+
+    # standard attributes that will always be printed
+    STD_ATTR = ["asctime", "levelname", "name", "message", "module"]
+    # custom attributes
+    _extra_attr: List[str] = ["anod_uui"]
+
+    def format(self, record: logging.LogRecord) -> str:
+        """convert record into JSON."""
+        # Parent's format is called in order to setup additional attributes
+        _ = super(JSONFormatter, self).format(record)
+
+        json_record = {
+            attr: getattr(record, attr, None)
+            for attr in self.STD_ATTR + list(self._extra_attr)
+        }
+        # we delete empty values
+        json_record = {attr: val for attr, val in json_record.items() if val}
+
+        return json.dumps(json_record)
+
+
+class E3LoggerAdapter(logging.LoggerAdapter):
+    """LoggerAdapter to add custom keywords."""
+
+    def process(self, msg: Any, kwargs: Any) -> Tuple[Any, Any]:
+        """Allow to handle extra parameter.
+
+        It is called by super method log. It is overwritten here because
+        the standard process method will get rid of extra attribute
+        """
+        return msg, kwargs
+
+    def log(
+        self, level: int, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+    ) -> None:
+        """Integrate additional keywords using standard interface.
+
+        :param level: see logging module
+        :param args: see logging module
+        :param anod_uui: Anod UUI
+        :param kwargs: other parameter supported by std logger._log method
+        """
+        extra_attrs = {"anod_uui": anod_uui}
+        extra = kwargs.setdefault("extra", {})
+        # we use the standard 'extra' parameter to pass additional keywords
+        extra.update(extra_attrs)
+        super(E3LoggerAdapter, self).log(level, msg, *args, **kwargs)
+
+    def info(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+        """Wrap standard logger.info method.
+
+        It allows to add extra keyword parameters
+        """
+        self.log(logging.INFO, msg, *args, anod_uui=anod_uui, **kwargs)
+
+    def debug(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+        """Wrap standard logger.debug method.
+
+        It allows to add extra keyword parameters
+        """
+        self.log(logging.DEBUG, msg, *args, anod_uui=anod_uui, **kwargs)
+
+    def warning(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+        """Wrap standard logger.warning method.
+
+        It allows to add extra keyword parameters
+        """
+        self.log(logging.WARNING, msg, *args, anod_uui=anod_uui, **kwargs)
+
+    def error(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+        """Wrap standard logger.error method.
+
+        It allows to add extra keyword parameters
+        """
+        self.log(logging.ERROR, msg, *args, anod_uui=anod_uui, **kwargs)
+
+    def critical(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+        """Wrap of standard logger.critical method.
+
+        It allows to add extra keyword parameters
+        """
+        self.log(logging.CRITICAL, msg, *args, anod_uui=anod_uui, **kwargs)
+
+    def exception(
+        self,
+        msg: Any,
+        *args: Any,
+        exc_info: _ExcInfoType = True,
+        anod_uui: int = 0,
+        **kwargs: Any,
+    ) -> None:
+        """Wrap standard logger.exception method.
+
+        It allows to add extra keyword parameters
+        """
+        self.log(
+            logging.ERROR, msg, *args, exc_info=exc_info, anod_uui=anod_uui, **kwargs
+        )
 
 
 def progress_bar(it: Union[Iterator, Sequence], **kwargs: Any) -> tqdm:
@@ -96,7 +214,7 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
         tqdm.write(msg, file=sys.stderr)
 
 
-def getLogger(name: Optional[str] = None, prefix: str = "e3") -> logging.Logger:
+def getLogger(name: Optional[str] = None, prefix: str = "e3") -> E3LoggerAdapter:
     """Get a logger with a default handler doing nothing.
 
     Calling this function instead of logging.getLogger will avoid warnings
@@ -121,7 +239,7 @@ def getLogger(name: Optional[str] = None, prefix: str = "e3") -> logging.Logger:
         # it to avoid warnings.
         logging.getLogger(prefix).addHandler(NullHandler())
         __null_handler_set.add(prefix)
-    return logger
+    return E3LoggerAdapter(logger, {})
 
 
 def add_log_handlers(
@@ -130,6 +248,7 @@ def add_log_handlers(
     datefmt: Optional[str] = None,
     filename: Optional[str] = None,
     set_default_output: bool = True,
+    json_format: bool = False,
 ) -> None:
     """Add log handlers using GMT.
 
@@ -142,6 +261,8 @@ def add_log_handlers(
     """
     global default_output_stream
     handler: Union[TqdmHandler, logging.StreamHandler, logging.FileHandler]
+    fmt: Union[logging.Formatter, JSONFormatter]
+
     if filename is None:
         if pretty_cli:  # all: no cover
             handler = TqdmHandler()
@@ -152,7 +273,11 @@ def add_log_handlers(
         if set_default_output:
             default_output_stream = handler.stream
 
-    fmt = logging.Formatter(log_format, datefmt)
+    if json_format:
+        fmt = JSONFormatter(log_format, datefmt)
+    else:
+        fmt = logging.Formatter(log_format, datefmt)
+
     fmt.converter = time.gmtime  # type: ignore
     handler.setFormatter(fmt)
 
@@ -167,6 +292,7 @@ def activate(
     level: int = logging.INFO,
     filename: Optional[str] = None,
     e3_debug: bool = False,
+    json_format: bool = False,
 ) -> None:
     """Activate default E3 logging.
 
@@ -193,6 +319,7 @@ def activate(
             log_format=file_format,
             datefmt=datefmt,
             filename=filename,
+            json_format=json_format,
         )
 
     if e3_debug:
