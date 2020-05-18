@@ -1,4 +1,5 @@
 import os
+import sys
 
 import e3.anod.helper
 import e3.anod.sandbox
@@ -613,4 +614,8 @@ def test_sandbox_user_yaml(git_specs_dir):
     sbx.root_dir = sandbox_dir
 
     assert sbx.is_alternate_specs_dir
-    assert sbx.specs_dir == local_spec_dir
+
+    if sys.platform == "win32":
+        assert sbx.specs_dir.lower() == local_spec_dir.lower()
+    else:
+        assert sbx.specs_dir == local_spec_dir

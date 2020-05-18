@@ -38,7 +38,9 @@ def test_svn_repo():
     repos_path = os.path.join(cwd, "repos")
     project_url = SVNRepository.create(repo_path=repos_path)
     project_url = project_url + "/Test_Project"
-    p = Run(["svn", "import", project_path, project_url, "-m", "initial import"])
+    p = Run(
+        ["svn", "import", unixpath(project_path), project_url, "-m", "initial import"]
+    )
     assert p.status == 0, p.out
 
     # --- checkout project into working dir A
@@ -118,7 +120,9 @@ def test_svn_repo():
     svn_d.update(url=project_url)  # update with the same URL
     assert os.path.exists(bar_path)
     project2_url = project_url + "2"
-    p = Run(["svn", "import", project_path, project2_url, "-m", "initial import"])
+    p = Run(
+        ["svn", "import", unixpath(project_path), project2_url, "-m", "initial import"]
+    )
     assert p.status == 0, p.out
     with pytest.raises(SVNError) as err:
         svn_d.update(url=project2_url)  # update with new URL
