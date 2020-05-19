@@ -105,6 +105,13 @@ class Main:
             help="disable color and progress bars",
         )
         log_group.add_argument(
+            "--json-log",
+            default=False,
+            action="store_true",
+            help="enable JSON formatted logs",
+        )
+
+        log_group.add_argument(
             "--console-logs",
             metavar="LINE_PREFIX",
             help="disable color, progress bars, and redirect as much as"
@@ -191,7 +198,10 @@ class Main:
                 e3.log.console_logs = self.args.console_logs
 
             e3.log.activate(
-                level=level, filename=self.args.log_file, e3_debug=self.args.verbose > 1
+                level=level,
+                filename=self.args.log_file,
+                json_format=self.args.json_log,
+                e3_debug=self.args.verbose > 1,
             )
             self.__log_handlers_set = True
 
