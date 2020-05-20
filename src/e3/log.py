@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         Union,
         List,
         Tuple,
+        Mapping,
     )
     from logging import _ExcInfoType
 
@@ -69,6 +70,24 @@ class JSONFormatter(logging.Formatter):
     # custom attributes
     _extra_attr: List[str] = ["anod_uui"]
 
+    def __init__(
+        self,
+        date_fmt: Optional[str] = None,
+        context: Optional[Mapping[str, Any]] = None,
+    ):
+        """Initialize formatter with context.
+
+        :param date_fmt: see logging module
+        :param context: dict to add context information to log records
+        """
+        # We need to pass fmt and datefmt parameters for
+        # asctime atribute to be created
+        super(JSONFormatter, self).__init__(fmt="%(asctime)s", datefmt=date_fmt)
+
+        if context is None:
+            context = {}
+        self.context = context
+
     def format(self, record: logging.LogRecord) -> str:
         """convert record into JSON."""
         # Parent's format is called in order to setup additional attributes
@@ -78,6 +97,8 @@ class JSONFormatter(logging.Formatter):
             attr: getattr(record, attr, None)
             for attr in self.STD_ATTR + list(self._extra_attr)
         }
+        # we add context information
+        json_record.update(self.context)
         # we delete empty values
         json_record = {attr: val for attr, val in json_record.items() if val}
 
@@ -274,7 +295,7 @@ def add_log_handlers(
             default_output_stream = handler.stream
 
     if json_format:
-        fmt = JSONFormatter(log_format, datefmt)
+        fmt = JSONFormatter(datefmt, {"context": console_logs})
     else:
         fmt = logging.Formatter(log_format, datefmt)
 
@@ -310,7 +331,9 @@ def activate(
         stream_format = f"{console_logs}: {file_format}"
 
     # Set logging handlers
-    add_log_handlers(level=level, log_format=stream_format, datefmt=datefmt)
+    add_log_handlers(
+        level=level, log_format=stream_format, datefmt=datefmt, json_format=json_format
+    )
 
     # Log to a file if necessary
     if filename is not None:
