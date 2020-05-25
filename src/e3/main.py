@@ -105,17 +105,17 @@ class Main:
             help="disable color and progress bars",
         )
         log_group.add_argument(
-            "--json-log",
-            default=False,
+            "--json-logs",
+            default="json-logs" in os.environ.get("E3_ENABLE_FEATURE", "").split(","),
             action="store_true",
-            help="enable JSON formatted logs",
+            help="enable JSON formatted logs. They can be activated as well by"
+            " setting the env var E3_ENABLE_FEATURE=json-logs.",
         )
-
         log_group.add_argument(
             "--console-logs",
             metavar="LINE_PREFIX",
             help="disable color, progress bars, and redirect as much as"
-            " possible to stdout, starting lines with the given prefix",
+            " possible to stdout, starting lines with the given prefix.",
         )
 
         if platform_args:
@@ -200,7 +200,7 @@ class Main:
             e3.log.activate(
                 level=level,
                 filename=self.args.log_file,
-                json_format=self.args.json_log,
+                json_format=self.args.json_logs,
                 e3_debug=self.args.verbose > 1,
             )
             self.__log_handlers_set = True

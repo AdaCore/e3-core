@@ -4,6 +4,7 @@ import json
 import dateutil.parser
 import e3.log
 import e3.os.process
+from logging import LogRecord
 
 
 def test_log():
@@ -120,3 +121,40 @@ def test_json_log_exception():
 
     record = json.loads(lines[0])
     assert "exc_text" in record
+
+
+def test_json_context():
+    """test context attribute when console_logs is used."""
+    p = e3.os.process.Run(
+        [
+            sys.executable,
+            "-c",
+            "\n".join(
+                (
+                    "import e3.log",
+                    "e3.log.console_logs='test_json'",
+                    'e3.log.activate(filename="log.json",json_format=True)',
+                    'l = e3.log.getLogger("test_log")',
+                    'l.debug("message")',
+                )
+            ),
+        ]
+    )
+
+    assert p.status == 0
+
+    with open("log.json") as f:
+        lines = f.readlines()
+
+    record = json.loads(lines[0])
+    assert "context" in record
+    assert record["context"] == "test_json"
+
+
+def test_json_formatter():
+    """test json formatter."""
+    formatter = e3.log.JSONFormatter()
+    record = LogRecord("_test_", 20, "module.py", 20, "Message", (), None)
+    json_string = formatter.format(record)
+    record_dict = json.loads(json_string)
+    assert (len(record_dict.keys())) == 5
