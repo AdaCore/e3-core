@@ -749,12 +749,12 @@ def sync_tree(
             try:
                 with open(src.path, "rb") as fsrc:
                     with open(dst.path, "wb") as fdst:
-                        shutil.copyfileobj(fsrc, fdst)
+                        shutil.copyfileobj(fsrc, fdst)  # type: ignore
             except OSError:
                 rm(dst.path, glob=False)
                 with open(src.path, "rb") as fsrc:
                     with open(dst.path, "wb") as fdst:
-                        shutil.copyfileobj(fsrc, fdst)
+                        shutil.copyfileobj(fsrc, fdst)  # type: ignore
             copystat(src, dst)
 
     def safe_mkdir(dst: FileInfo) -> None:
