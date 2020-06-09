@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-from datetime import datetime
 
 import os
 
@@ -28,12 +27,6 @@ with open(version_file) as f:
 
 with open(os.path.join(os.path.dirname(__file__), "README.md")) as f:
     long_description = f.read()
-
-# If the version contains only the two first digits, add the date in
-# YYYYMMDD format to create a version following PEP 286:
-# 'N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]'
-if e3_version.count(".") == 1:
-    e3_version = e3_version + "." + datetime.utcnow().strftime("%Y%m%d")
 
 setup(
     name="e3-core",
