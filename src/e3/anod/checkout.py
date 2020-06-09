@@ -99,9 +99,6 @@ class CheckoutManager:
         :param url: path to the repository
         :param revision: ignored
         """
-        # Expand env variables and ~
-        url = os.path.expandvars(os.path.expanduser(url))
-
         if os.path.isdir(self.working_dir):
             old_commit = get_filetree_state(self.working_dir)
         else:
