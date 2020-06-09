@@ -133,8 +133,7 @@ class SandBox:
 
         :param d: directory where to find anod specification files
         """
-        # Expand ~, environment variables and eliminate symbolic links
-        self.__specs_dir = os.path.realpath(os.path.expandvars(os.path.expanduser(d)))
+        self.__specs_dir = d
         self.is_alternate_specs_dir = True
         logger.debug("using alternate specs dir %s", d)
 
