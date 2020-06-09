@@ -1,9 +1,24 @@
 # To verify the content, run ``check-manifest``
+include *.md
+include mypy.ini
 include README.md CONTRIBUTING.md
 include tox.ini
 include VERSION COPYING3
-recursive-include docs *.rst *.py
+include *.yaml
+include *.yml
+recursive-include docs *.bat
+recursive-include docs Makefile
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs *.txt
+recursive-include docs *.yaml
 recursive-include tests *.anod
+recursive-include tests *.plan
 recursive-include tests *.py
+recursive-include tests *.rc
+recursive-include tests *.txt
+recursive-include tests *.yaml
+recursive-include tests *.zip
+recursive-include tools *.c
+recursive-include tools *.txt
 prune docs/_build
-exclude .gitreview
