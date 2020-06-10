@@ -24,7 +24,7 @@ def test_run_shebang(caplog):
         f.write(b'print("running %s" % sys.argv[1])\n')
     e3.os.fs.chmod("a+x", prog_filename)
     p = e3.os.process.Run([prog_filename, "atest"], parse_shebang=True)
-    assert p.out == "running atest\n"
+    assert p.out.replace("\r", "") == "running atest\n"
 
     # Create a shebang spawning a file that does not exist
     with open(prog_filename, "wb") as f:

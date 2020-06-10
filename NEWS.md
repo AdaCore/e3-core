@@ -7,7 +7,12 @@
     * e3.anod.context.AnodContext.add_spec ``env`` and ``primitive``
   * some attribute have been replaced by properties to avoid being marked as Optional
     * e3.anod.spec.Anod ``build_space``
+  * e3.os.process out and err attributes preserve CR characters
 * Deprecate e3.decorator.memoize, use functools.lru_cache instead
+* Prevent crash when a process launched by e3.os.process.Run does not emit utf-8
+  on stdout or stderr. Output and error is now processed using bytes_as_str and
+  bytes version of output and error is available through raw_out and raw_err
+  attributes.
 
 # Version 22.0.0 (2020-03-13)
 
