@@ -569,7 +569,24 @@ def sync_tree(
     """
     # Some structure used when walking the trees to be synched
     FilesInfo = namedtuple("FilesInfo", ["rel_path", "source", "target"])
-    FileInfo = namedtuple("FileInfo", ["path", "stat"])
+
+    # The basename in the FileInfo structure is used to compare casing of
+    # source and destination.
+    FileInfo = namedtuple("FileInfo", ["path", "stat", "basename"])
+
+    # Normalize casing function for path comparison. path_key function
+    # return a version of the path that is in lower case for case sensitive
+    # and case preserving filesystems. The return value can be used for
+    # path comparisons.
+    if sys.platform == "win32":
+
+        def path_key(p: str) -> str:
+            return p.lower()
+
+    else:
+
+        def path_key(p: str) -> str:
+            return p
 
     # normalize the list of file to synchronize
     norm_file_list = None
@@ -592,9 +609,19 @@ def sync_tree(
         if ignore is None:
             return False
 
+        pk = path_key(p)
+
         return (
-            any(f for f in abs_ignore_patterns if p == f or p.startswith(f + "/"))
-            or any(f for f in rel_ignore_patterns if p[1:] == f or p.endswith("/" + f))
+            any(
+                f
+                for f in abs_ignore_patterns
+                if pk == path_key(f) or pk.startswith(path_key(f + "/"))
+            )
+            or any(
+                f
+                for f in rel_ignore_patterns
+                if pk[1:] == path_key(f) or p.endswith("/" + f)
+            )
             or any(
                 f
                 for f in norm_ignore_list
@@ -613,10 +640,15 @@ def sync_tree(
             return True
         if TYPE_CHECKING:
             assert norm_file_list is not None
+
+        pk = path_key(p)
+
         return any(
             f
             for f in norm_file_list
-            if f == p[1:] or p.startswith("/" + f + "/") or f.startswith(p[1:] + "/")
+            if path_key(f) == pk[1:]
+            or pk.startswith(path_key("/" + f + "/"))
+            or path_key(f).startswith(pk[1:] + "/")
         )
 
     def isdir(fi: FileInfo) -> bool:
@@ -678,6 +710,7 @@ def sync_tree(
             )
             or src.stat.st_size != dst.stat.st_size
             or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))
+            or src.basename != dst.basename
         )
 
     def copystat(src: FileInfo, dst: FileInfo) -> None:
@@ -747,6 +780,14 @@ def sync_tree(
                 rm(dst.path, recursive=False, glob=False)
 
             try:
+                if dst.basename != src.basename:
+                    rm(dst.path, glob=False)
+                    dst = FileInfo(
+                        os.path.join(os.path.dirname(dst.path), src.basename),
+                        None,
+                        src.basename,
+                    )
+
                 with open(src.path, "rb") as fsrc:
                     with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)  # type: ignore
@@ -757,13 +798,22 @@ def sync_tree(
                         shutil.copyfileobj(fsrc, fdst)  # type: ignore
             copystat(src, dst)
 
-    def safe_mkdir(dst: FileInfo) -> None:
+    def safe_mkdir(src: FileInfo, dst: FileInfo) -> None:
         """Create a directory modifying parent directory permissions if needed.
 
         :param dst: directory to create
         """
+        if isfile(dst) or islink(dst):
+            rm(dst.path, glob=False)
+
         try:
-            os.makedirs(dst.path)
+            if isdir(dst):
+                if dst.basename != src.basename:
+                    os.rename(
+                        dst.path, os.path.join(os.path.dirname(dst.path), src.basename)
+                    )
+            else:
+                os.makedirs(dst.path)
         except OSError:
             # in case of error to change parent directory
             # permissions. The permissions will be then
@@ -789,45 +839,55 @@ def sync_tree(
 
             entry = FilesInfo(
                 "",
-                FileInfo(root_dir, os.lstat(root_dir)),
-                FileInfo(target_root_dir, target_stat),
+                FileInfo(root_dir, os.lstat(root_dir), ""),
+                FileInfo(target_root_dir, target_stat, ""),
             )
             yield entry
+
         try:
-            source_names = set(os.listdir(entry.source.path))
+            source_names = {path_key(k): k for k in os.listdir(entry.source.path)}
         except Exception:  # defensive code
             e3.log.debug("cannot get sources list", exc_info=True)
             # Don't crash in case a source directory cannot be read
             return
 
-        target_names = set()
+        target_names = {}
         if isdir(entry.target):
             try:
-                target_names = set(os.listdir(entry.target.path))
+                target_names = {path_key(k): k for k in os.listdir(entry.target.path)}
             except Exception:
                 e3.log.debug("cannot get targets list", exc_info=True)
-                target_names = set()
+                target_names = {}
 
-        all_names = source_names | target_names
+        all_names = set(source_names.keys()) | set(target_names.keys())
 
         result = []
         for name in all_names:
             rel_path = f"{entry.rel_path}/{name}"
 
-            source_full_path = os.path.join(entry.source.path, name)
-            target_full_path = os.path.join(entry.target.path, name)
+            source_full_path = os.path.join(
+                entry.source.path, source_names.get(name, name)
+            )
+            target_full_path = os.path.join(
+                entry.target.path, target_names.get(name, name)
+            )
             source_stat = None
             target_stat = None
 
             if name in source_names:
                 source_stat = os.lstat(source_full_path)
 
-            source_file = FileInfo(source_full_path, source_stat)
+            source_file = FileInfo(
+                source_full_path, source_stat, os.path.basename(source_full_path)
+            )
 
             if name in target_names:
                 target_stat = os.lstat(target_full_path)
 
-            target_file = FileInfo(target_full_path, target_stat)
+            target_file = FileInfo(
+                target_full_path, target_stat, os.path.basename(target_full_path)
+            )
+
             result.append(FilesInfo(rel_path, source_file, target_file))
 
         for el in result:
@@ -835,14 +895,20 @@ def sync_tree(
                 logger.debug("ignore %s", el.rel_path)
                 if delete_ignore:
                     yield FilesInfo(
-                        el.rel_path, FileInfo(el.source.path, None), el.target
+                        el.rel_path,
+                        FileInfo(el.source.path, None, el.source.basename),
+                        el.target,
                     )
             elif is_in_file_list(el.rel_path):
                 yield el
                 if isdir(el.source):
                     yield from walk(root_dir, target_root_dir, el)
             else:
-                yield FilesInfo(el.rel_path, FileInfo(el.source.path, None), el.target)
+                yield FilesInfo(
+                    el.rel_path,
+                    FileInfo(el.source.path, None, el.source.basename),
+                    el.target,
+                )
 
     source_top = os.path.normpath(source).rstrip(os.path.sep)
     target_top = os.path.normpath(target).rstrip(os.path.sep)
@@ -878,11 +944,8 @@ def sync_tree(
                     safe_copy(wf.source, wf.target)
                     updated_list.append(wf.target.path)
                 elif isdir(wf.source):
-                    if isfile(wf.target) or islink(wf.target):
-                        rm(wf.target.path, glob=False)
-                    if not isdir(wf.target):
-                        safe_mkdir(wf.target)
-                        updated_list.append(wf.target.path)
+                    safe_mkdir(wf.source, wf.target)
+                    updated_list.append(wf.target.path)
                     copystat_dir_list.append((wf.source, wf.target))
 
     # Adjust directory permissions once all files have been copied
