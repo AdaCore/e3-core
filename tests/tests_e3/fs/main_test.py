@@ -234,6 +234,29 @@ def test_sync_tree_with_symlinks():
     assert os.path.exists(os.path.join(m2, "c"))
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="test relevant only on win32")
+def test_sync_tree_case_insensitive():
+    e3.fs.mkdir("test/a")
+    e3.fs.mkdir("test/b")
+    e3.os.fs.touch("test/a/initial.txt")
+    e3.os.fs.touch("test/b/Initial.txt")
+    e3.fs.mkdir("test/a/Subdir")
+    e3.fs.mkdir("test/b/subdir")
+    e3.fs.echo_to_file("test/b/OLD.txt", "Version_Old")
+    e3.fs.echo_to_file("test/a/old.txt", "Version_New")
+    e3.fs.echo_to_file("test/b/old2.txt", "Version_Old")
+    e3.fs.echo_to_file("test/a/OLD2.txt", "Version_New")
+
+    e3.fs.sync_tree("test/a", "test/b")
+    assert e3.fs.directory_content("test/b") == e3.fs.directory_content("test/a")
+
+    # Adjust some casing of a file that is up-to-date. Sync_tree should be case
+    # preserving and thus adjust the casing
+    os.rename("test/b/OLD2.txt", "test/b/Old2.txt")
+    e3.fs.sync_tree("test/a", "test/b")
+    assert e3.fs.directory_content("test/b") == e3.fs.directory_content("test/a")
+
+
 def test_sync_tree_preserve_timestamps():
     """Run sync_tree without preserving timestamps."""
     e3.fs.mkdir("a")
