@@ -38,6 +38,21 @@ def test_run_shebang(caplog):
     assert "doesnot exist" in caplog.text
 
 
+def test_split_err_out():
+    """Split err and out to distinct pipes."""
+    p = e3.os.process.Run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; sys.stdout.write('stdout'); sys.stderr.write('stderr')",
+        ],
+        output=e3.os.process.PIPE,
+        error=e3.os.process.PIPE,
+    )
+    assert p.out == "stdout"
+    assert p.err == "stderr"
+
+
 def test_rlimit():
     """rlimit kill the child process after a timeout."""
 
