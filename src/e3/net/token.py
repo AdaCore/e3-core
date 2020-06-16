@@ -21,7 +21,7 @@ def get_payload(token: str) -> dict:
         if rem > 0:
             payload += "=" * (4 - rem)
         try:
-            data = json.loads(base64.b64decode(payload).decode("utf-8"))
+            data = json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))
         except (ValueError, TypeError):
             pass
     return data
