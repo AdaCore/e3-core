@@ -53,6 +53,14 @@ def test_split_err_out():
     assert p.err == "stderr"
 
 
+def test_non_utf8_out():
+    """Test that we can get an output for a process not emitting utf-8."""
+    p = e3.os.process.Run(
+        [sys.executable, "-c", "import sys; sys.stdout.buffer.write(b'\\xff\\xff')"]
+    )
+    assert p.out == "\\xff\\xff"
+
+
 def test_rlimit():
     """rlimit kill the child process after a timeout."""
 
