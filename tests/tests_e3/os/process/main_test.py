@@ -24,7 +24,7 @@ def test_run_shebang(caplog):
         f.write(b'print("running %s" % sys.argv[1])\n')
     e3.os.fs.chmod("a+x", prog_filename)
     p = e3.os.process.Run([prog_filename, "atest"], parse_shebang=True)
-    assert p.out == "running atest\n"
+    assert p.out.replace("\r", "") == "running atest\n"
 
     # Create a shebang spawning a file that does not exist
     with open(prog_filename, "wb") as f:
@@ -36,6 +36,29 @@ def test_run_shebang(caplog):
         e3.os.process.Run([prog_filename], parse_shebang=True)
     assert "doesnot" in str(err)
     assert "doesnot exist" in caplog.text
+
+
+def test_split_err_out():
+    """Split err and out to distinct pipes."""
+    p = e3.os.process.Run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; sys.stdout.write('stdout'); sys.stderr.write('stderr')",
+        ],
+        output=e3.os.process.PIPE,
+        error=e3.os.process.PIPE,
+    )
+    assert p.out == "stdout"
+    assert p.err == "stderr"
+
+
+def test_non_utf8_out():
+    """Test that we can get an output for a process not emitting utf-8."""
+    p = e3.os.process.Run(
+        [sys.executable, "-c", "import sys; sys.stdout.buffer.write(b'\\xff\\xff')"]
+    )
+    assert p.out == "\\xff\\xff"
 
 
 def test_rlimit():

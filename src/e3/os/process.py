@@ -21,6 +21,8 @@ from typing import TYPE_CHECKING
 import e3.env
 import e3.log
 from e3.os.fs import which
+from e3.text import bytes_as_str
+
 
 if TYPE_CHECKING:
     from typing import cast, Any, IO, List, Literal, NoReturn, Optional, Union
@@ -217,8 +219,9 @@ class Run:
         the process has exited, its initial value is None.  When a problem
         running the command is detected and a process does not get
         created, its value gets set to the special value 127.
-    :ivar out: process standard output  (if instanciated with output = PIPE)
-    :ivar err: same as out but for standard error
+    :ivar raw_out: process standard output as bytes (if instanciated with
+        output = PIPE). Use self.out to get a decoded string.
+    :ivar raw_err: same as raw_out but for standard error.
     :ivar pid: PID. Set to -1 if the command failed to run.
     """
 
@@ -338,8 +341,8 @@ class Run:
         self.error_file = File(error, "w")
 
         self.status: Optional[int] = None
-        self.out = ""
-        self.err = ""
+        self.raw_out = b""
+        self.raw_err = b""
         self.cmds = []
 
         if env is not None:
@@ -389,7 +392,7 @@ class Run:
                     "stderr": self.error_file.fd,
                     "cwd": cwd,
                     "env": env,
-                    "universal_newlines": True,
+                    "universal_newlines": False,
                 }
 
                 if sys.platform != "win32" and set_sigpipe:  # windows: no cover
@@ -415,10 +418,8 @@ class Run:
                     # (e.g. gzip -dc foo.txt | tar -xf -)
                     if index == len(self.cmds) - 1:
                         stdout = self.output_file.fd
-                        txt_mode = True
                     else:
                         stdout = subprocess.PIPE
-                        txt_mode = False
 
                     popen_args = {
                         "stdin": stdin,
@@ -426,7 +427,7 @@ class Run:
                         "stderr": self.error_file.fd,
                         "cwd": cwd,
                         "env": env,
-                        "universal_newlines": txt_mode,
+                        "universal_newlines": False,
                     }
 
                     if sys.platform != "win32" and set_sigpipe:  # windows: no cover
@@ -458,6 +459,26 @@ class Run:
 
         if not bg:
             self.wait()
+
+    @property
+    def out(self) -> str:
+        """Process output as string.
+
+        Attempt is done to decode as utf-8 the output. If the output is not in
+        utf-8 a string representation will be returned
+        (see e3.text.bytes_as_str).
+        """
+        return bytes_as_str(self.raw_out)
+
+    @property
+    def err(self) -> str:
+        """Process error as string.
+
+        Attempt is done to decode as utf-8 the output. If the output is not in
+        utf-8 a string representation will be returned
+        (see e3.text.bytes_as_str).
+        """
+        return bytes_as_str(self.raw_err)
 
     def command_line_image(self) -> str:
         """Get shell command line image of the spawned command(s).
@@ -514,11 +535,14 @@ class Run:
         ):
             self.status = self.internal.wait()
         else:
-            tmp_input = None
+            tmp_input: Optional[Union[str, bytes]] = None
             if self.input_file.fd == subprocess.PIPE:
                 tmp_input = self.input_file.get_command()
 
-            (self.out, self.err) = self.internal.communicate(tmp_input)
+            if isinstance(tmp_input, str):
+                tmp_input = tmp_input.encode("utf-8")
+
+            (self.raw_out, self.raw_err) = self.internal.communicate(tmp_input)
             self.status = self.internal.returncode
 
         self.close_files()
