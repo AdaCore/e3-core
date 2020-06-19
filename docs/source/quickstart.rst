@@ -98,7 +98,6 @@ Add ``print(Env().build`` will output more info on the build platform:
     machine:  ida
     is_hie:   False
     is_host:  True
-    is_virtual: False
     triplet:  x86_64-apple-darwin16.5.0
     domain:   unknown
     OS

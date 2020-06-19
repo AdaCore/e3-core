@@ -467,9 +467,6 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         if self.target.os.name.lower() == "windows":
             discs.append("NT")
 
-        if (not self.is_cross and not self.is_canadian) and self.build.is_virtual:
-            discs.append("virtual_machine")  # all: no cover
-
         return discs
 
     @property
