@@ -2,8 +2,10 @@ import smtplib
 from email.utils import make_msgid
 
 import e3.net.smtp
+from e3.error import E3Error
 
 import mock
+import pytest
 
 
 def test_sendmail():
@@ -74,3 +76,27 @@ def test_sendmail_onerror(caplog):
         )
         assert result is True
         assert "Message-ID: %s sent successfully" % mid in caplog.text
+
+
+def test_send_message():
+    from_addr = "e3@example.net"
+    to_addresses = ["info@example.net", "info@example.com"]
+    msg_content = "test mail content"
+    msg_subject = "test mail subject"
+
+    with mock.patch("smtplib.SMTP_SSL") as mock_smtp:
+        smtp_mock = mock_smtp.return_value
+        smtp_mock.sendmail.return_value = {}
+        e3.net.smtp.send_message(
+            from_addr, to_addresses, msg_subject, msg_content, ["smtp.localhost"]
+        )
+
+        assert smtp_mock.sendmail.called
+        assert smtp_mock.sendmail.call_count == 1
+
+        smtp_mock.sendmail.return_value = {"error": 2}
+
+        with pytest.raises(E3Error):
+            e3.net.smtp.send_message(
+                from_addr, to_addresses, msg_subject, msg_content, ["smtp.localhost"]
+            )

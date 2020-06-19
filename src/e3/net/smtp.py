@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import os
 import smtplib
+from email.message import Message
 
 import e3.log
 import e3.os.process
+from e3.error import E3Error
 
 from typing import TYPE_CHECKING
 
@@ -112,3 +114,32 @@ def sendmail(
         logger.debug("Message-ID: %s sent successfully", message_id)
 
     return True
+
+
+def send_message(
+    from_email: str,
+    to_emails: List[str],
+    subject: str,
+    content: str,
+    smtp_servers: List[str],
+) -> None:
+    """Send an e-mail message.
+
+    :param from_email: the address sending this email (e.g. user@example.com)
+    :param to_emails: A list of addresses to send this email to
+    :param subject: the e-mail's subject
+    :param content: the e-mail's content
+    """
+    msg = Message()
+    msg["To"] = ", ".join(to_emails)
+    msg["From"] = from_email
+    msg["Subject"] = subject
+    msg.set_payload(content, "utf-8")
+
+    if not sendmail(
+        from_email=from_email,
+        to_emails=to_emails,
+        mail_as_string=msg.as_string(),
+        smtp_servers=smtp_servers,
+    ):
+        raise E3Error(f"error when sending email {subject}")
