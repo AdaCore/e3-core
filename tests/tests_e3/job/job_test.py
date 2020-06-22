@@ -4,6 +4,10 @@ from e3.anod.status import ReturnValue
 from e3.job import EmptyJob, ProcessJob
 
 
+class InvalidProcessJob(ProcessJob):
+    cmdline = [sys.executable, "-c", "import sys; sys.exit(6)"]
+
+
 class TestJob:
     def test_run_empty_job(self):
         """Try running an empty job...
@@ -40,14 +44,18 @@ class TestJob:
 
     def test_invalid_job_status(self, caplog):
         """Verify that when the return code is invalid we return a failure."""
-
-        class InvalidProcessJob(ProcessJob):
-            cmdline = [sys.executable, "-c", "import sys; sys.exit(6)"]
-
         job = InvalidProcessJob("myuid", {}, None)
         job.run()
         assert job.status is ReturnValue.failure
         assert "job myuid returned an unknown status 6" in caplog.text
+
+    def test_none_job_status(self, caplog):
+        """Verify that when the return code is None, we return a failure."""
+        job = InvalidProcessJob("myuid", {}, None)
+        job.run()
+        job.proc_handle.status = None
+        assert job.status is ReturnValue.failure
+        assert "job myuid returned None for status" in caplog.text
 
     def test_spawn_issue(self):
         """Verify that status is set to failure when the spawn fails."""
