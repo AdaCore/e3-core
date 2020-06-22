@@ -254,7 +254,11 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
             return ReturnValue.notready
         else:
             try:
-                return ReturnValue(self.proc_handle.status)
+                if self.proc_handle.status is None:
+                    logger.exception("job %s returned None for status", self.uid)
+                    return ReturnValue.failure
+                else:
+                    return ReturnValue(self.proc_handle.status)
             except ValueError:
                 logger.exception(
                     "job %s returned an unknown status %s",
