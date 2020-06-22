@@ -27,6 +27,7 @@ will also be provided::
 
 from __future__ import annotations
 
+from argparse import ArgumentParser
 import logging
 import os
 import signal
@@ -49,12 +50,20 @@ class Main:
     :ivar args: list of positional parameters after processing options
     """
 
-    def __init__(self, name: Optional[str] = None, platform_args: bool = False):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        platform_args: bool = False,
+        argument_parser: Optional[ArgumentParser] = None,
+    ):
         """Initialize Main object.
 
         :param name: name of the program (if not specified the filename without
             extension is taken)
         :param platform_args: add --build, --host, --target support
+        :param argument_parser: the ArgumentParser to use for parsing
+            command-line arguments (if not specified, an ArgumentParser will be
+            created by Main)
         """
         # On UNIX set a signal handler for SIGTERM that will raise SystemExit
         # This is to let an e3 application enough time to perform
@@ -68,9 +77,8 @@ class Main:
         else:
             self.name = os.path.splitext(os.path.basename(main.__file__))[0]
 
-        from argparse import ArgumentParser
-
-        argument_parser = ArgumentParser()
+        if argument_parser is None:
+            argument_parser = ArgumentParser()
 
         log_group = argument_parser.add_argument_group(title="Logging arguments")
         log_group.add_argument(
