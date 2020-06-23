@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import IntEnum
 
 
-class ReturnValue(Enum):
+class ReturnValue(IntEnum):
     """Return values for anod commands."""
 
     success = 0
