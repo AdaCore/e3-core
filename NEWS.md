@@ -1,4 +1,6 @@
-# Version 22.1.0 (2020-??-??) *NOT RELEASED YET*
+# Version 22.2.0 (2020-??-??) *NOT RELEASED YET*
+
+# Version 22.1.0 (2020-06-22)
 
 * Add type hinting and verify it with ``mypy``
 * Minor backward incompatible changes:
