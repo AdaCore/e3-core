@@ -242,6 +242,7 @@ def test_sync_tree_case_insensitive():
     e3.os.fs.touch("test/b/Initial.txt")
     e3.fs.mkdir("test/a/Subdir")
     e3.fs.mkdir("test/b/subdir")
+    e3.fs.mkdir("test/a/Subdir2")
     e3.fs.echo_to_file("test/b/OLD.txt", "Version_Old")
     e3.fs.echo_to_file("test/a/old.txt", "Version_New")
     e3.fs.echo_to_file("test/b/old2.txt", "Version_Old")
