@@ -807,19 +807,31 @@ def sync_tree(
             rm(dst.path, glob=False)
 
         try:
-            if isdir(dst):
-                if dst.basename != src.basename:
-                    os.rename(
-                        dst.path, os.path.join(os.path.dirname(dst.path), src.basename)
-                    )
+            # Final dirname with right casing
+            if dst.basename != src.basename:
+                dest_dir = os.path.join(os.path.dirname(dst.path), src.basename)
             else:
-                os.makedirs(dst.path)
+                dest_dir = dst.path
+
+            if isdir(dst):
+                # For directories in case of non-matching casing just do a rename
+                # This ensure sync_tree is efficient in case content of the directory
+                # is similar between src and dst.
+                if dst.basename != src.basename:
+                    os.rename(dst.path, dest_dir)
+            else:
+                os.makedirs(dest_dir)
         except OSError:
             # in case of error to change parent directory
             # permissions. The permissions will be then
             # set correctly at the end of rsync.
             e3.os.fs.chmod("a+wx", os.path.dirname(dst.path))
-            os.makedirs(dst.path)
+
+            if isdir(dst):
+                if dst.basename != src.basename:
+                    os.rename(dst.path, dest_dir)
+            else:
+                os.makedirs(dest_dir)
 
     def walk(
         root_dir: str, target_root_dir: str, entry: Optional[FilesInfo] = None
