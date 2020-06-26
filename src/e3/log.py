@@ -26,10 +26,13 @@ if TYPE_CHECKING:
         TextIO,
         Union,
         List,
+        TypeVar,
         Tuple,
         Mapping,
     )
     from logging import _ExcInfoType
+
+    T = TypeVar("T")
 
 
 @dataclass
@@ -184,7 +187,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         )
 
 
-def progress_bar(it: Union[Iterator, Sequence], **kwargs: Any) -> tqdm:
+def progress_bar(it: Union[Iterator[T], Sequence[T]], **kwargs: Any) -> Iterator[T]:
     """Create a tqdm progress bar.
 
     :param it: an interator
