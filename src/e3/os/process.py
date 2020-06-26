@@ -405,12 +405,14 @@ class Run:
                 self.internal = Popen(self.cmds[0], **popen_args)
 
             else:
-                runs: List[Popen] = []
+                runs: List[subprocess.Popen] = []
                 for index, cmd in enumerate(self.cmds):
                     if index == 0:
-                        stdin = self.input_file.fd
+                        stdin: Union[int, IO[Any]] = self.input_file.fd
                     else:
-                        stdin = runs[index - 1].stdout
+                        previous_stdout = runs[index - 1].stdout
+                        assert previous_stdout is not None
+                        stdin = previous_stdout
 
                     # When connecting two processes using a Pipe don't use
                     # universal_newlines mode. Indeed commands transmitting

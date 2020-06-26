@@ -11,7 +11,6 @@ import json
 from typing import TYPE_CHECKING, ClassVar
 
 from colorama import Fore, Style
-
 from tqdm import tqdm
 
 from e3.config import ConfigSection
