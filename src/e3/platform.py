@@ -109,6 +109,7 @@ class Platform(
             is_default = platform_name == default_platform
 
         # Fill other attributes
+        assert platform_name is not None
         pi = KNOWLEDGE_BASE.platform_info[platform_name]
         cpu = e3.os.platform.CPU.get(pi["cpu"], pi.get("endian", None), is_host)
         os = e3.os.platform.OS.get(pi["os"], is_host, version=version, mode=mode)
