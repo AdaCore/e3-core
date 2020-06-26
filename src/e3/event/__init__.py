@@ -19,7 +19,8 @@ from e3.fs import mkdir
 logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Optional, Tuple, Union
+    from types import TracebackType
+    from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 
 def unique_id() -> str:
@@ -77,7 +78,12 @@ class Event:
     def __enter__(self) -> Event:
         return self
 
-    def __exit__(self, _type, _value, _tb):
+    def __exit__(
+        self,
+        _type: Optional[Type[BaseException]],
+        _val: Optional[BaseException],
+        _tb: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def set_formatter(self, key: str, fun: Callable[[str, Any], dict]) -> None:

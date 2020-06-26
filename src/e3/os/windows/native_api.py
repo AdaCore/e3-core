@@ -50,7 +50,7 @@ class FileAttribute(Structure):
 
     _fields_ = [("attr", ULONG)]
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = []
         for k in FileAttribute.__dict__:
             if not k.startswith("_") and k.isupper():
@@ -166,20 +166,20 @@ class FileTime(Structure):
 
     _fields_ = [("filetime", LARGE_INTEGER)]
 
-    def __init__(self, t):
+    def __init__(self, t: datetime) -> None:
         timestamp = (t - datetime(1970, 1, 1)).total_seconds()
         timestamp = (int(timestamp) + 11644473600) * 10000000
         Structure.__init__(self, timestamp)
 
     @property
-    def as_datetime(self):
+    def as_datetime(self) -> datetime:
         try:
             return datetime.fromtimestamp(self.filetime // 10000000 - 11644473600)
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
             raise ValueError(f"filetime '{self.filetime}' failed with {err}")
 
-    def __str__(self):
+    def __str__(self) -> str:
         try:
             return str(time.ctime(self.filetime // 10000000 - 11644473600))
         except ValueError:  # defensive code

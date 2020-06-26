@@ -789,7 +789,7 @@ class AnodContext:
             return cls.decision_error(action, decision)
 
     @classmethod
-    def always_create_source_resolver(cls, action, decision):
+    def always_create_source_resolver(cls, action: Action, decision: Decision) -> bool:
         """Force source creation when scheduling a plan."""
         if isinstance(action, CreateSource):
             return True

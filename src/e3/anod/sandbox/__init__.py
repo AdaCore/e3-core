@@ -179,12 +179,12 @@ class SandBox:
         e3_distrib = get_distribution("e3-core")
 
         class SandboxDist:
-            def get_entry_map(self, group):
+            def get_entry_map(self, group):  # type: ignore
                 if group != "console_scripts":
                     return {}
                 return e3_distrib.get_entry_map("sandbox_scripts")
 
-            def as_requirement(self):
+            def as_requirement(self):  # type: ignore
                 return e3_distrib.as_requirement()
 
         for script in get_script_args(dist=SandboxDist()):
