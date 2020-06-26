@@ -601,7 +601,7 @@ class Run:
         else:
             return self.internal.is_running()
 
-    def children(self) -> List[psutil.Process]:
+    def children(self) -> List[Any]:
         """Return list of child processes (using psutil)."""
         if psutil is None:  # defensive code
             raise NotImplementedError("Run.children() require psutil")
@@ -784,7 +784,7 @@ def is_running(pid: int) -> bool:
         return True
 
 
-def kill_process_tree(pid: Union[int, psutil.Process], timeout: int = 3) -> bool:
+def kill_process_tree(pid: Union[int, Any], timeout: int = 3) -> bool:
     """Kill a hierarchy of processes.
 
     :param pid: pid of the toplevel process
