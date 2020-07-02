@@ -46,7 +46,7 @@ def disabled(func: Callable) -> Callable:
     """
     del func
 
-    def empty_func(*args, **kargs):
+    def empty_func(*args: Any, **kargs: Any) -> None:
         del args, kargs
 
     return empty_func
@@ -115,7 +115,7 @@ class memoize:
         """Return the function's docstring."""
         return self.func.__doc__ or ""
 
-    def __get__(self, obj, objtype):
+    def __get__(self, obj: Any, objtype: Any) -> Any:
         """Support instance methods."""
         del objtype
         return partial(self.__call__, obj)

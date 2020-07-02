@@ -40,7 +40,7 @@ class ToggleableBooleanGroup:
     def __getitem__(self, key: int) -> ToggleableBoolean:
         return self.series[key]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.series)
 
     def shuffle(self) -> Iterator[List[ToggleableBoolean]]:
@@ -87,5 +87,5 @@ class ToggleableBoolean:
     def __bool__(self) -> bool:
         return self.value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name}: {self.value}"

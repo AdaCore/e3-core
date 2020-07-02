@@ -22,7 +22,8 @@ from e3.error import E3Error
 from e3.fs import rm
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Union
+    from types import TracebackType
+    from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Type, Union
     from requests.auth import AuthBase
     from requests.models import Response
 
@@ -93,7 +94,12 @@ class HTTPSession:
         self.session.__enter__()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         self.session.__exit__(exc_type, exc_val, exc_tb)
 
     def set_max_retries(

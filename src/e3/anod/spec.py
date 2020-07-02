@@ -318,8 +318,8 @@ class Anod:
         :raise: AnodError
         """
 
-        def primitive_dec(f, pre=pre, post=post, version=version):
-            def primitive_func(self, *args, **kwargs):
+        def primitive_dec(f, pre=pre, post=post, version=version):  # type: ignore
+            def primitive_func(self, *args, **kwargs):  # type: ignore
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
                 result = False

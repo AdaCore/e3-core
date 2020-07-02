@@ -40,7 +40,8 @@ import e3.log
 from e3.env import Env
 
 if TYPE_CHECKING:
-    from typing import Optional, List
+    from types import FrameType
+    from typing import Optional, List, NoReturn
     from argparse import Namespace
 
 
@@ -162,7 +163,7 @@ class Main:
         self.argument_parser = argument_parser
         self.__log_handlers_set = False
 
-        def sigterm_handler(sig, frame):  # unix-only
+        def sigterm_handler(sig: int, frame: FrameType) -> NoReturn:  # unix-only
             """Automatically convert SIGTERM to SystemExit exception.
 
             This is done to give enough time to an application killed by

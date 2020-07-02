@@ -1,14 +1,30 @@
 from __future__ import annotations
+from dataclasses import dataclass
+
+from typing import TYPE_CHECKING
 
 import abc
-from collections import namedtuple
 from functools import lru_cache
 
 import e3.log
 import stevedore
 
+if TYPE_CHECKING:
+    from typing import Any, Dict
 
-class PlatformDBPlugin(metaclass=abc.ABCMeta):
+    PlatformDBEntry = Dict[str, Dict[str, Any]]
+
+
+@dataclass
+class KnowledgeBase:
+    cpu_info: PlatformDBEntry
+    os_info: PlatformDBEntry
+    platform_info: PlatformDBEntry
+    build_targets: PlatformDBEntry
+    host_guess: PlatformDBEntry
+
+
+class PlatformDBPlugin(KnowledgeBase, metaclass=abc.ABCMeta):
     """Plugin API to extend the platform knowledge base.
 
     To create a plugin, override this class and the method ``update_db``. In
@@ -23,22 +39,15 @@ class PlatformDBPlugin(metaclass=abc.ABCMeta):
                 'my_db = e3.mypackage.platform_db:MyPlatformDBPlugin']}
     """
 
-    def __init__(self, cpu_info, os_info, platform_info, build_targets, host_guess):
-        self.cpu_info = cpu_info
-        self.os_info = os_info
-        self.platform_info = platform_info
-        self.build_targets = build_targets
-        self.host_guess = host_guess
-
     @abc.abstractmethod
-    def update_db(self):
+    def update_db(self) -> None:
         pass  # all: no cover
 
 
 class AmberCPUSupport(PlatformDBPlugin):
     """Plugin example adding support for Amber CPUs."""
 
-    def update_db(self):
+    def update_db(self) -> None:
         """Add support for Amber CPUs."""
         self.cpu_info.update(
             {
@@ -49,7 +58,7 @@ class AmberCPUSupport(PlatformDBPlugin):
 
 
 @lru_cache()
-def get_knowledge_base():
+def get_knowledge_base() -> KnowledgeBase:
     """Load the knowledge base, including all content from plugins.
 
     :return: The knowledge base with the keys (cpu_info, os_info,
@@ -78,7 +87,4 @@ def get_knowledge_base():
         e3.log.debug("loading knowledge base plugins %s", ",".join(plugin_names))
 
         ext.map_method("update_db")
-    return namedtuple(
-        "KnowledgeBase",
-        ("cpu_info", "os_info", "platform_info", "build_targets", "host_guess"),
-    )(CPU_INFO, OS_INFO, PLATFORM_INFO, BUILD_TARGETS, HOST_GUESS)
+    return KnowledgeBase(CPU_INFO, OS_INFO, PLATFORM_INFO, BUILD_TARGETS, HOST_GUESS)

@@ -28,7 +28,7 @@ logger = e3.log.getLogger("archive")
 class E3ZipFile(zipfile.ZipFile):
     """Override default ZipFile with attributes preservation."""
 
-    def _extract_member(self, member, path, pwd):
+    def _extract_member(self, member, path, pwd):  # type: ignore
         result = super()._extract_member(member, path, pwd)
 
         if sys.platform != "win32":

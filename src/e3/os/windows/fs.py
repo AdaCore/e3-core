@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import os
 import struct
 from ctypes import (
@@ -10,7 +12,6 @@ from ctypes import (
     sizeof,
 )
 from ctypes.wintypes import HANDLE
-from typing import Any, Callable, Optional
 
 import e3.log
 from e3.os.windows.native_api import (
@@ -27,6 +28,10 @@ from e3.os.windows.native_api import (
     UnicodeString,
 )
 
+if TYPE_CHECKING:
+    from typing import Any, Callable, Optional, Tuple
+
+
 logger = e3.log.getLogger("os.windows.fs")
 
 
@@ -41,8 +46,8 @@ class WithOpenFile:
         self.shared_access = shared_access
         self.open_options = open_options
 
-    def __call__(self, f):
-        def wrapper(obj, *args, **kwargs):
+    def __call__(self, f: Callable) -> Any:
+        def wrapper(obj, *args, **kwargs):  # type: ignore
             should_open = not obj.handle
             if should_open:
                 obj.open(self.desired_access, self.shared_access, self.open_options)
@@ -74,7 +79,7 @@ class NTFile:
         :param filename: path to the file or basename if parent is not None
         :param parent: the parent NTFile object
         """
-        self.handle = None  # type: Optional[HANDLE]
+        self.handle: Optional[HANDLE] = None
         if parent is None:
             self.path = os.path.abspath(filename)
             self.nt_filename = UnicodeString("\\??\\%s" % self.path)
@@ -99,7 +104,7 @@ class NTFile:
         # the user has sufficient rights. It has no effect otherwise
         self.open_options = OpenOptions.BACKUP_INTENT
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = [
             "{:<20}: {}".format("path", self.path),
             "{:<20}: {}".format("nt_filename", self.nt_filename),
@@ -147,14 +152,14 @@ class NTFile:
                 origin="NTFile.open",
             )
 
-    def close(self):
+    def close(self) -> None:
         """Close file.
 
         If a call has been done to open, close the handle associated
         with the file and reset the handle to None.
         """
         if self.handle:
-            NT.Close(self.handle)
+            NT.Close(self.handle)  # type: ignore
             self.handle = None
 
     @property
@@ -206,7 +211,7 @@ class NTFile:
 
         return result.index_number
 
-    def read_attributes_internal(self):
+    def read_attributes_internal(self) -> None:
         """Retrieve file basic attributes (internal function).
 
         The function is used internally to check file basic attributes
@@ -214,7 +219,8 @@ class NTFile:
         attributes are stored in basic_info Python attribute. It requires
         less rights than the read_attributes method.
         """
-        status = NT.QueryAttributesFile(pointer(self.attr), pointer(self.basic_info))
+        query_attr_file: Callable = NT.QueryAttributesFile  # type: ignore
+        status = query_attr_file(pointer(self.attr), pointer(self.basic_info))
         if status < 0:
             raise NTException(
                 status=status,
@@ -223,7 +229,7 @@ class NTFile:
             )
 
     @WithOpenFile(Access.READ_ATTRS)
-    def read_attributes(self):
+    def read_attributes(self) -> FileInfo.Basic:
         """Retrieve file basic information.
 
         It updates the basic_info attribute including timestamp information
@@ -231,7 +237,7 @@ class NTFile:
         :raise: NTException
         """
         result = FileInfo.Basic()
-        status = NT.QueryInformationFile(
+        status = NT.QueryInformationFile(  # type: ignore
             self.handle,
             pointer(self.io_status),
             pointer(result),
@@ -250,12 +256,12 @@ class NTFile:
         return result
 
     @WithOpenFile(Access.WRITE_ATTRS | Access.READ_ATTRS)
-    def write_attributes(self):
+    def write_attributes(self) -> None:
         """Update file attributes.
 
         :raise: NTException
         """
-        set_infofile: Callable = NT.SetInformationFile
+        set_infofile: Callable = NT.SetInformationFile  # type: ignore
         status = set_infofile(
             self.handle,
             pointer(self.io_status),
@@ -334,7 +340,7 @@ class NTFile:
                 origin="NTFile.rename",
             )
 
-    def move_to_trash(self):
+    def move_to_trash(self) -> None:
         """Move file to trash location.
 
         :raise: NTException
@@ -342,13 +348,13 @@ class NTFile:
         self.rename(self.trash_path, True)
 
     @WithOpenFile(Access.DELETE, Share.DELETE)
-    def dispose(self):
+    def dispose(self) -> None:
         """Remove the file (low level).
 
         The remove is effective on call to close method
         """
         fd = FileInfo.Disposition(1)
-        status = NT.SetInformationFile(
+        status = NT.SetInformationFile(  # type: ignore
             self.handle,
             pointer(self.io_status),
             pointer(fd),
@@ -448,7 +454,7 @@ class NTFile:
         :raise: NTException
         """
 
-        def check_file(filename, parent):
+        def check_file(filename: str, parent: Optional[NTFile]) -> Tuple[bool, bool]:
             f = NTFile(filename, parent)
             try:
                 f.read_attributes_internal()
@@ -458,7 +464,7 @@ class NTFile:
 
         return self.iterate_on_dir(check_file, True)
 
-    def unlink(self):
+    def unlink(self) -> None:
         """Remove file safely.
 
         :raise: NTException
@@ -510,7 +516,7 @@ class NTFile:
                     raise
 
             # Wait a few ms before attempting again to open the file
-            NT.Sleep(5)
+            NT.Sleep(5)  # type: ignore
             try_counter -= 1
 
         if try_counter == 0:
@@ -578,7 +584,7 @@ class NTFile:
                             break
                         raise
 
-                NT.Sleep(5)
+                NT.Sleep(5)  # type: ignore
                 try_counter -= 1
 
         finally:

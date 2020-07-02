@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import json
 import mimetypes
 import tempfile
@@ -10,18 +12,28 @@ from e3.fs import rm
 from e3.os.process import Run
 from e3.sys import python_script
 
+if TYPE_CHECKING:
+    from typing import Dict, Optional
+    from e3.event import Event
+
 
 class S3Handler(EventHandler):
     """Event handler that relies on AWS S3."""
 
-    def __init__(self, event_s3_url, log_s3_url, sse="AES256", profile=None):
+    def __init__(
+        self,
+        event_s3_url: str,
+        log_s3_url: str,
+        sse: str = "AES256",
+        profile: Optional[str] = None,
+    ) -> None:
         self.event_s3_url = event_s3_url
         self.log_s3_url = log_s3_url
         self.aws_profile = profile
         self.sse = sse
 
     @classmethod
-    def decode_config(cls, config_str):
+    def decode_config(cls, config_str: str) -> Dict[str, Optional[str]]:
         event_s3_url, log_s3_url, sse, aws_profile = config_str.split(",", 3)
         return {
             "event_s3_url": event_s3_url,
@@ -30,7 +42,7 @@ class S3Handler(EventHandler):
             "profile": aws_profile if aws_profile else None,
         }
 
-    def encode_config(self):
+    def encode_config(self) -> str:
         return "{},{},{},{}".format(
             self.event_s3_url,
             self.log_s3_url,
@@ -38,8 +50,8 @@ class S3Handler(EventHandler):
             self.aws_profile if self.aws_profile is not None else "",
         )
 
-    def send_event(self, event):
-        def s3_cp(from_path, s3_url):
+    def send_event(self, event: Event) -> bool:
+        def s3_cp(from_path: str, s3_url: str) -> bool:
             cmd = ["s3", "cp", "--sse=%s" % self.sse]
             if self.aws_profile:
                 cmd.append("--profile=%s" % self.aws_profile)

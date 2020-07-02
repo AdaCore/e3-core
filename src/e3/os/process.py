@@ -405,12 +405,14 @@ class Run:
                 self.internal = Popen(self.cmds[0], **popen_args)
 
             else:
-                runs: List[Popen] = []
+                runs: List[subprocess.Popen] = []
                 for index, cmd in enumerate(self.cmds):
                     if index == 0:
-                        stdin = self.input_file.fd
+                        stdin: Union[int, IO[Any]] = self.input_file.fd
                     else:
-                        stdin = runs[index - 1].stdout
+                        previous_stdout = runs[index - 1].stdout
+                        assert previous_stdout is not None
+                        stdin = previous_stdout
 
                     # When connecting two processes using a Pipe don't use
                     # universal_newlines mode. Indeed commands transmitting
@@ -599,7 +601,7 @@ class Run:
         else:
             return self.internal.is_running()
 
-    def children(self) -> List[psutil.Process]:
+    def children(self) -> List[Any]:
         """Return list of child processes (using psutil)."""
         if psutil is None:  # defensive code
             raise NotImplementedError("Run.children() require psutil")
@@ -782,7 +784,7 @@ def is_running(pid: int) -> bool:
         return True
 
 
-def kill_process_tree(pid: Union[int, psutil.Process], timeout: int = 3) -> bool:
+def kill_process_tree(pid: Union[int, Any], timeout: int = 3) -> bool:
     """Kill a hierarchy of processes.
 
     :param pid: pid of the toplevel process

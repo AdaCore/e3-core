@@ -11,7 +11,17 @@ from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, Final, List, Literal, NoReturn, Optional, Union
+    from typing import (
+        Any,
+        Callable,
+        Dict,
+        Final,
+        List,
+        Literal,
+        NoReturn,
+        Optional,
+        Union,
+    )
     from e3.anod.spec import Anod
 
     PrepareSrcCB = Callable[[Dict[str, Dict[str, str]], str], None]
@@ -213,9 +223,9 @@ class SourceBuilder:
         self.__prepare_src = prepare_src
         self.__apply_patch = apply_patch
 
-    def fullname(self, *args, **kwargs):
+    def fullname(self, *args: Any, **kwargs: Any) -> str:
         # ??? add support for the GPL mode
-        return self.__fullname(*args, **kwargs)
+        return self.__fullname(*args, **kwargs)  # type: ignore
 
     @property
     def prepare_src(self) -> Optional[PrepareSrcCB]:

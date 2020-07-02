@@ -107,7 +107,9 @@ def entry_point(
     :param kwargs: additional information to store with the entry point
     """
 
-    def entry_point_dec(f, ldb=db, lcls=cls, lkind=kind, largs=args, lkwargs=kwargs):
+    def entry_point_dec(  # type: ignore
+        f, ldb=db, lcls=cls, lkind=kind, largs=args, lkwargs=kwargs
+    ):
         lcls(ldb, f, lkind, *largs, **lkwargs)
         return f
 

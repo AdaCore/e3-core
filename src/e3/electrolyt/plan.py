@@ -13,7 +13,8 @@ from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Optional
+    from types import TracebackType
+    from typing import Any, Callable, Dict, List, Type, Optional
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
 
@@ -345,11 +346,18 @@ class PlanContext:
         # Push the action in the current list
         self.action_list.append(result)
 
-    def __enter__(self):
+    def __enter__(self) -> None:
+        assert self.plan is not None
         self.plan.mod.__dict__["env"] = self.env
         return None
 
-    def __exit__(self, _type, _value, _tb):
+    def __exit__(
+        self,
+        _type: Optional[Type[BaseException]],
+        _value: Optional[BaseException],
+        _tb: Optional[TracebackType],
+    ) -> None:
         del _type, _value, _tb
         self.stack.pop()
+        assert self.plan is not None
         self.plan.mod.__dict__["env"] = self.env
