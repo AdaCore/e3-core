@@ -470,8 +470,10 @@ class AnodContext:
                 # We have an explicit call to install() in the plan but the
                 # spec has no binary package to download.
                 raise SchedulingError(
-                    "error in plan at {}: "
-                    "install should be replaced by build".format(plan_line)
+                    f"error in plan at {plan_line}: "
+                    "install should be replaced by build - "
+                    f"the spec {spec.name} has a build primitive "
+                    "but does not define a package"
                 )
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
