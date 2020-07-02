@@ -16,22 +16,6 @@ def test_system_info():
     assert s.os_version() == os_version
 
 
-def test_is_virtual():
-    """Check detection of virtual machines."""
-    s = e3.os.platform.SystemInfo
-    is_virtual = s.is_virtual()
-    s.reset_cache()
-    assert s.is_virtual() == is_virtual
-
-    # Second call should use the cache
-    assert s.is_virtual() == is_virtual
-
-    # Detect virtual machine (fake the network here)
-    s.network_ifs = {"eth0": {"AF_LINK": [{"addr": "00:0c:29:dc:40:00"}]}}
-    s._is_virtual = None
-    assert s.is_virtual() is True
-
-
 def test_hostname():
     """Test SystemInfo.hostname."""
     s = e3.os.platform.SystemInfo

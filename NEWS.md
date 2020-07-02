@@ -1,5 +1,8 @@
 # Version 22.2.0 (2020-??-??) *NOT RELEASED YET*
 
+* Minor backward incompatible changes:
+  * the discrimiant ``is_virtual`` has been removed
+
 # Version 22.1.0 (2020-06-22)
 
 * Add type hinting and verify it with ``mypy``

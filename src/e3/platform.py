@@ -131,23 +131,12 @@ class Platform(
             is_default,
         )
 
-    @property
-    def is_virtual(self) -> bool:
-        """Check if we are on a virtual system.
-
-        :return: True if the system represented by Arch is a virtual machine
-        """
-        if not self.is_host:
-            return False
-        return self.system_info.is_virtual()
-
     def to_dict(self) -> Dict[str, Any]:
         """Export os and cpu variables as os_{var} and cpu_{var}.
 
         :return: a dictionary representing the current Arch instance
         """
         str_dict = self._asdict()
-        str_dict["is_virtual"] = self.is_virtual
 
         for key, var in self.os.as_dict().items():
             str_dict["os_" + key] = var
@@ -164,7 +153,6 @@ class Platform(
             "machine:  %(machine)s\n"
             "is_hie:   %(is_hie)s\n"
             "is_host:  %(is_host)s\n"
-            "is_virtual: %(is_virtual)s\n"
             "triplet:  %(triplet)s\n"
             "domain:   %(domain)s\n"
             "OS\n"

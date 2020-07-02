@@ -27,9 +27,6 @@ Uname = namedtuple(
 class SystemInfo:
     """Gather info about the system.
 
-    :cvar network_ifs: dictionary addressed by network interface name for which
-        each value is the result of netifaces.ifaddresses function on the given
-        interface
     :cvar uname: instance of Uname namedtuple containing the result of
         ``uname`` system call.
     :cvar core_number: integer containing the number of processor cores on the
@@ -37,7 +34,6 @@ class SystemInfo:
     :cvar nis_domain: host nis domain
     """
 
-    network_ifs = None
     uname = None
     core_number = 1
     nis_domain = None
@@ -49,9 +45,6 @@ class SystemInfo:
     # _os_version is a tuple: os version, kernel version
     _os_version: Optional[Tuple[str, str]] = None
 
-    # When _is_virtual is True it means the host is a VM
-    _is_virtual: Optional[bool] = None
-
     # _hostname is a tuble: hostname, domain. Joining with a dot hostname and domain
     # represent the FQDN
     _hostname: Optional[Tuple[str, str]] = None
@@ -59,11 +52,9 @@ class SystemInfo:
     @classmethod
     def reset_cache(cls) -> None:
         """Reset SystemInfo cache."""
-        cls.network_ifs = None
         cls.uname = None
         cls.ld_info = None
         cls.core_number = 1
-        cls._is_virtual = None
         cls._platform = None
         cls._os_version = None
         cls._hostname = None
@@ -92,20 +83,6 @@ class SystemInfo:
                 "major_version": ld.major_version(),
                 "version": ld.version(),
             }
-
-        # Fetch network interfaces
-        try:
-            from netifaces import interfaces, ifaddresses, address_families
-
-            # use string for address families instead of integers which are
-            # system dependents
-            cls.network_ifs = {
-                itf: {address_families[k]: v for k, v in ifaddresses(itf).items()}
-                for itf in interfaces()
-            }
-        except Exception:  # defensive code
-            e3.log.debug("cannot get network info", exc_info=True)
-            cls.network_ifs = None
 
         # Fetch core numbers. Note that the methods does not work
         # on AIX platform but we usually override manually that
@@ -295,47 +272,6 @@ class SystemInfo:
 
         cls._os_version = (version, kernel_version)
         return version, kernel_version
-
-    @classmethod
-    def is_virtual(cls) -> bool:
-        """Check if current machine is virtual or not.
-
-        :return: True if the machine is a virtual machine (Solaris zone,
-            VmWare)
-        """
-        if cls._is_virtual is not None:
-            return cls._is_virtual
-
-        if cls.uname is None:
-            cls.fetch_system_data()
-
-        if TYPE_CHECKING:
-            assert cls.uname is not None
-
-        result = False
-
-        if (
-            cls.uname.system == "SunOS" and cls.uname.version == "Generic_Virtual"
-        ):  # solaris-only
-            result = True
-        else:
-            if cls.network_ifs is not None:
-                for interface in list(cls.network_ifs.values()):
-                    for family in ("AF_LINK", "AF_PACKET"):
-                        if family in interface:
-                            for el in interface[family]:
-                                addr = el["addr"].lower()
-                                if addr.startswith("00:0c:29") or addr.startswith(
-                                    "00:50:56"
-                                ):
-                                    result = True
-                                    break
-                        if result:
-                            break
-                    if result:
-                        break
-        cls._is_virtual = result
-        return result
 
     @classmethod
     def hostname(cls) -> Tuple[str, str]:
