@@ -50,11 +50,11 @@ class Scheduler:
         :param queues: describes the list of queues handled by the
             scheduler. The format is a dictionary for which which
             keys are queue names and value the max number of tokens
-            available at a given time. if None then a single queue
+            available at a given time. if empty then a single queue
             called "default" is created. Its size is then given by
             the tokens parameter.
         :param tokens: number of tokens for the default queue. Relevant
-            only when queues is None
+            only when queues is empty
         :param job_timeout: maximum execution time for a job. The default
             is 24h. If set to None timeout are disabled but it also make
             the scheduller non interruptable when waiting for a job to
@@ -82,7 +82,7 @@ class Scheduler:
         self.tokens = {}
         self.n_tokens = 0
 
-        if queues is None:
+        if not queues:
             # If no queues are specificied create a default one
             # with no name.
             queues = {"default": tokens}

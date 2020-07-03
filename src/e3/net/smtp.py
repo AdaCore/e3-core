@@ -11,7 +11,7 @@ from e3.error import E3Error
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import List, Optional
+    from typing import List, Optional, Sequence
 
 logger = e3.log.getLogger("net.smtp")
 
@@ -22,7 +22,7 @@ def sendmail(
     from_email: str,
     to_emails: List[str],
     mail_as_string: str,
-    smtp_servers: List[str],
+    smtp_servers: Sequence[str],
     max_size: int = 20,
     message_id: Optional[str] = None,
 ) -> bool:
