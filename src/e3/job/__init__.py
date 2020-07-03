@@ -15,6 +15,8 @@ if TYPE_CHECKING:
     from typing import Any, Callable, List, Optional
     from e3.job.scheduler import Scheduler
 
+    NotifyEndType = Callable[[str], None]
+
 logger = e3.log.getLogger("job")
 
 
@@ -55,7 +57,7 @@ class Job(metaclass=abc.ABCMeta):
     lock = threading.RLock()
     index_counter = 0
 
-    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]):
+    def __init__(self, uid: str, data: Any, notify_end: NotifyEndType):
         """Initialize worker.
 
         :param uid: unique work identifier
