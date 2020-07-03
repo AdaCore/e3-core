@@ -20,7 +20,10 @@ import e3.os.fs
 
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Optional, Sequence
+    from typing import Callable, List, Literal, Optional, Sequence, Union
+
+    UnpackAutoRemoveDirType = Literal["auto"]
+    RemoveRootDirType = Union[Literal["auto"], bool]
 
 logger = e3.log.getLogger("archive")
 
@@ -104,7 +107,7 @@ def unpack_archive(
     filename: str,
     dest: str,
     selected_files: Optional[Sequence[str]] = None,
-    remove_root_dir: bool = False,
+    remove_root_dir: RemoveRootDirType = False,
     unpack_cmd: Optional[Callable[..., None]] = None,
     force_extension: Optional[str] = None,
     delete: bool = False,
