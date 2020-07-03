@@ -78,8 +78,10 @@ class Fingerprint:
 
         :param path: a path to a directory
         """
-        assert os.path.isdir(path), "directory %s does not exist" % path
-        self.elements[os.path.basename(path)] = get_filetree_state(path)
+        if os.path.isdir(path):
+            self.elements[os.path.abspath(path)] = get_filetree_state(path)
+        else:
+            self.elements[os.path.abspath(path)] = ""
 
     def add_file(self, filename: str) -> None:
         """Add a file element to the fingerprint.
@@ -90,8 +92,10 @@ class Fingerprint:
         an element for which key is the basename of the file and value is
         is the sha256 of the content
         """
-        assert os.path.isfile(filename), "filename %s does not exist" % filename
-        self.elements[os.path.basename(filename)] = sha256(filename)
+        if os.path.isfile(filename):
+            self.elements[os.path.abspath(filename)] = sha256(filename)
+        else:
+            self.elements[os.path.abspath(filename)] = ""
 
     def __eq__(self, other: object) -> bool:
         """Implement == operator for two fingerprints.

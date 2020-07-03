@@ -26,7 +26,7 @@ def test_fingerprint():
     f23_diff = f3.compare_to(f2)
     assert f23_diff["new"] == {"foo"}
     assert f23_diff["updated"] == set()
-    assert f23_diff["obsolete"] == {os.path.basename(__file__)}
+    assert f23_diff["obsolete"] == {os.path.abspath(__file__)}
 
     assert f1.checksum() != f2.checksum() != f3.checksum()
 
