@@ -26,7 +26,7 @@ logger = e3.log.getLogger("anod")
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, IO, List, Optional, Sequence, Union
+    from typing import Any, Callable, Dict, IO, List, Optional, Sequence, Tuple, Union
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
@@ -130,7 +130,7 @@ class Anod:
     sandbox: Optional[SandBox] = None
     name = ""
     api_version = ""
-    data_files = ()
+    data_files: Tuple[str, ...] = ()
 
     # API
     Dependency = e3.anod.deps.Dependency
