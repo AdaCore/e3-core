@@ -51,6 +51,9 @@ class Walk:
         self.prev_fingerprints: Dict[str, Optional[Fingerprint]] = {}
         self.new_fingerprints: Dict[str, Optional[Fingerprint]] = {}
         self.job_status: Dict[str, ReturnValue] = {}
+        self.queues: Dict[str, int] = {}
+        self.tokens = 1
+        self.job_timeout = DEFAULT_JOB_MAX_DURATION
         self.set_scheduling_params()
         self.failure_source: Dict[str, Set[str]] = {}
 
@@ -78,9 +81,7 @@ class Walk:
         DEFAULT_JOB_MAX_DURATION. Child classes requiring different
         scheduling parameters should override this method.
         """
-        self.queues = None
-        self.tokens = 1
-        self.job_timeout = DEFAULT_JOB_MAX_DURATION
+        pass
 
     def compute_fingerprint(
         self, uid: str, data: Any, is_prediction: bool = False
