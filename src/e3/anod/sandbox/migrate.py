@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from e3.anod.sandbox import SandBoxError
+from e3.anod.error import SandBoxError
 from e3.anod.sandbox.action import SandBoxAction
 from e3.os.fs import cd
 

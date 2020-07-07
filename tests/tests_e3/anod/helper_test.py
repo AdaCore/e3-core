@@ -29,8 +29,7 @@ def test_make():
                 m2.cmdline("all")["cmd"],
             )
 
-    Anod.sandbox = SandBox()
-    Anod.sandbox.root_dir = os.getcwd()
+    Anod.sandbox = SandBox(root_dir=os.getcwd())
     Anod.sandbox.create_dirs()
 
     am = AnodMake(qualifier="", kind="build", jobs=10)
@@ -53,8 +52,7 @@ def test_configure():
             c = Configure(self)
             return c.cmdline()
 
-    Anod.sandbox = SandBox()
-    Anod.sandbox.root_dir = os.getcwd()
+    Anod.sandbox = SandBox(root_dir=os.getcwd())
     Anod.sandbox.create_dirs()
 
     ac = AnodConf(qualifier="", kind="build", jobs=10)
@@ -114,8 +112,7 @@ def test_configure_opts():
 
     os.environ["CONFIG_SHELL"] = "ksh"
 
-    Anod.sandbox = SandBox()
-    Anod.sandbox.root_dir = os.getcwd()
+    Anod.sandbox = SandBox(root_dir=os.getcwd())
     Anod.sandbox.create_dirs()
 
     ac = AnodConf(qualifier="", kind="build", jobs=10)

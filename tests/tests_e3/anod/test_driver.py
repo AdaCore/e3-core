@@ -8,21 +8,13 @@ import pytest
 
 
 def test_simple_driver():
-    sandbox = e3.anod.sandbox.SandBox()
+    sandbox = e3.anod.sandbox.SandBox(root_dir=os.getcwd())
 
     class Simple(e3.anod.spec.Anod):
         @e3.anod.spec.Anod.primitive()
         def download(self):
             pass
 
-    with pytest.raises(e3.anod.spec.AnodError):
-        anod_instance = Simple(qualifier="", kind="build")
-        anod_instance.sandbox = None
-        e3.anod.driver.AnodDriver(anod_instance=anod_instance, store=None).activate(
-            sandbox, None
-        )
-
-    sandbox.root_dir = os.getcwd()
     anod_instance = Simple(qualifier="", kind="build")
     anod_instance.sandbox = sandbox
     driver = e3.anod.driver.AnodDriver(anod_instance=anod_instance, store=None)
@@ -40,8 +32,7 @@ def test_deps_driver():
         def build(self):
             return self.deps["parent"].parent_info
 
-    sandbox = e3.anod.sandbox.SandBox()
-    sandbox.root_dir = os.getcwd()
+    sandbox = e3.anod.sandbox.SandBox(root_dir=os.getcwd())
     anod_instance = Deps(qualifier="", kind="build")
     anod_instance.sandbox = sandbox
 

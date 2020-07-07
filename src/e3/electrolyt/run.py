@@ -116,7 +116,6 @@ class ElectrolytJob(Job):
             logger.error("%s vcs type not supported", repo_vcs)
             self.__status = STATUS.failure
             return
-        assert self.sandbox.vcs_dir is not None
         repo_dir = os.path.join(self.sandbox.vcs_dir, repo_name)
         g = GitRepository(repo_dir)
         if e3.log.default_output_stream is not None:
@@ -128,8 +127,6 @@ class ElectrolytJob(Job):
     def do_createsource(self) -> None:
         """Prepare src from vcs to cache using sourcebuilders."""
         source_name = self.data.source_name
-        assert self.sandbox.tmp_dir is not None
-        assert self.sandbox.vcs_dir is not None
         tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, "cache")
         src = self.sandbox.vcs_dir
         src_builder = get_source_builder(
@@ -159,7 +156,6 @@ class ElectrolytJob(Job):
 
     def do_installsource(self) -> None:
         """Install the source from tmp/cache to build_space/src."""
-        assert self.sandbox.tmp_dir is not None
         spec = self.data.spec
         spec.sandbox = self.sandbox
         anod_instance = AnodDriver(anod_instance=spec, store=self.store)

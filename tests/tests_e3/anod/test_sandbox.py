@@ -1,6 +1,7 @@
 import os
 import sys
 
+import e3.anod.error
 import e3.anod.helper
 import e3.anod.sandbox
 import e3.env
@@ -132,18 +133,13 @@ def test_sandbox_show_config_err():
 
 def test_sandbox_env():
     os.environ["GPR_PROJECT_PATH"] = "/foo"
-    sandbox = e3.anod.sandbox.SandBox()
+    sandbox = e3.anod.sandbox.SandBox(root_dir=os.getcwd())
     sandbox.set_default_env()
     assert os.environ["GPR_PROJECT_PATH"] == ""
 
 
 def test_sandbox_rootdir():
-    sandbox = e3.anod.sandbox.SandBox()
-    with pytest.raises(e3.anod.sandbox.SandBoxError):
-        assert sandbox.root_dir
-
-    sandbox.root_dir = "foo"
-    sandbox.root_dir = "foo"
+    sandbox = e3.anod.sandbox.SandBox(root_dir="foo")
     assert os.path.relpath(sandbox.tmp_dir, sandbox.root_dir) == "tmp"
     assert (
         os.path.relpath(
@@ -610,8 +606,7 @@ def test_sandbox_user_yaml(git_specs_dir):
     assert "build dummyspec" in p.out
     assert f"using alternate specs dir {local_spec_dir}" in p.out
 
-    sbx = e3.anod.sandbox.SandBox()
-    sbx.root_dir = sandbox_dir
+    sbx = e3.anod.sandbox.SandBox(root_dir=sandbox_dir)
 
     assert sbx.is_alternate_specs_dir
 
