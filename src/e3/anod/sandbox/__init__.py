@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 import e3.log
 import e3.os.process
 from e3.anod.buildspace import BuildSpace
-from e3.anod.error import SandBoxError
 from e3.env import Env
 from e3.fs import mkdir, rm
 from e3.os.fs import chmod
@@ -23,8 +22,8 @@ if TYPE_CHECKING:
 
 
 class SandBox:
-    def __init__(self) -> None:
-        self.__root_dir: Optional[str] = None
+    def __init__(self, root_dir: str) -> None:
+        self.root_dir: str = root_dir
         self.build_id: Optional[str] = None
         self.build_date: Optional[str] = None
         self.build_version: Optional[str] = None
@@ -40,20 +39,44 @@ class SandBox:
             "vcs",
             "patch",
         )
-
-        self.meta_dir: Optional[str] = None
-        self.tmp_dir: Optional[str] = None
-        self.tmp_cache_dir: Optional[str] = None
-        self.src_dir: Optional[str] = None
-        self.log_dir: Optional[str] = None
-        self.vcs_dir: Optional[str] = None
-        self.patch_dir: Optional[str] = None
-        self.bin_dir: Optional[str] = None
-        self.__specs_dir: Optional[str] = None
+        self.meta_dir: str = ""
+        self.tmp_dir: str = ""
+        self.tmp_cache_dir: str = ""
+        self.src_dir: str = ""
+        self.log_dir: str = ""
+        self.vcs_dir: str = ""
+        self.patch_dir: str = ""
+        self.bin_dir: str = ""
         self.is_alternate_specs_dir = False
 
         # Contains the loaded version of user.yaml if present
         self.user_config: Optional[Dict[str, Any]] = None
+
+        # For each directory create an attribute containing its path
+        for d in self.dirs:
+            setattr(
+                self,
+                (f"{d}_dir").replace(os.path.sep, "_"),
+                os.path.join(self.root_dir, d),
+            )
+
+        # specs_dir path can be changed by a configuration in user.yaml
+        user_yaml = os.path.join(self.root_dir, "user.yaml")
+        if os.path.exists(user_yaml):
+            with open(user_yaml) as f:
+                self.user_config = yaml.safe_load(f)
+
+            # Accept both specs_dir and module_dir key (in that order) to
+            # get the path to the anod specification files
+            specs_dir = (
+                self.user_config.get("specs_dir", self.user_config.get("module_dir"))
+                if self.user_config is not None
+                else None
+            )
+            if specs_dir is not None:
+                self.specs_dir = specs_dir
+        else:
+            self.__specs_dir = os.path.join(self.root_dir, "specs")
 
         self.default_env = {
             "LANG": "C",
@@ -77,50 +100,6 @@ class SandBox:
         for k, v in self.default_env.items():
             logger.debug('export %s="%s"', k, v)
             os.environ[k] = v
-
-    @property
-    def root_dir(self) -> str:
-        """Root path of the sandbox.
-
-        :raise SandBoxError: when the sandbox is not initialized
-        """
-        if self.__root_dir is None:
-            raise SandBoxError(
-                origin="root_dir", message="sandbox not loaded. Please call load()"
-            )
-        return self.__root_dir
-
-    @root_dir.setter
-    def root_dir(self, d: str) -> None:
-        new_dir = os.path.realpath(d)
-        if new_dir == self.__root_dir:
-            return  # nothing to do
-
-        self.__root_dir = new_dir
-
-        # For each directory create an attribute containing its path
-        for d in self.dirs:
-            setattr(
-                self, ("%s_dir" % d).replace(os.path.sep, "_"), os.path.join(new_dir, d)
-            )
-
-        # specs_dir path can be changed by a configuration in user.yaml
-        user_yaml = os.path.join(new_dir, "user.yaml")
-        if os.path.exists(user_yaml):
-            with open(user_yaml) as f:
-                self.user_config = yaml.safe_load(f)
-
-            # Accept both specs_dir and module_dir key (in that order) to
-            # get the path to the anod specification files
-            specs_dir = (
-                self.user_config.get("specs_dir", self.user_config.get("module_dir"))
-                if self.user_config is not None
-                else None
-            )
-            if specs_dir is not None:
-                self.specs_dir = specs_dir
-        else:
-            self.__specs_dir = os.path.join(new_dir, "specs")
 
     @property
     def specs_dir(self) -> Optional[str]:

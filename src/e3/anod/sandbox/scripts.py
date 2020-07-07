@@ -30,8 +30,7 @@ def anod():
         os.path.join(os.path.dirname(sys.modules["__main__"].__file__), os.pardir)
     )
 
-    sandbox = e3.anod.sandbox.SandBox()
-    sandbox.root_dir = sandbox_dir
+    sandbox = e3.anod.sandbox.SandBox(root_dir=sandbox_dir)
 
     # Load the local specs
     spec_repo = e3.anod.loader.AnodSpecRepository(sandbox.specs_dir)

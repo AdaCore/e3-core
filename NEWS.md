@@ -2,6 +2,7 @@
 
 * Minor backward incompatible changes:
   * the discrimiant ``is_virtual`` has been removed
+  * e3.anod.sandbox.SandBox now has a mandatory root_dir attribute
 
 # Version 22.1.0 (2020-06-22)
 

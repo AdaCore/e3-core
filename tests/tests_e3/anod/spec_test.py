@@ -94,8 +94,7 @@ def test_primitive():
     with_primitive3 = WithPrimitive("error2", "build")
     with_primitive4 = WithPrimitive("error3", "build")
 
-    Anod.sandbox = SandBox()
-    Anod.sandbox.root_dir = os.getcwd()
+    Anod.sandbox = SandBox(root_dir=os.getcwd())
     Anod.sandbox.spec_dir = os.path.join(os.path.dirname(__file__), "data")
     Anod.sandbox.create_dirs()
     # Activate the logging
