@@ -48,6 +48,7 @@ class SandBox:
         self.patch_dir: str = ""
         self.bin_dir: str = ""
         self.is_alternate_specs_dir = False
+        self.__specs_dir: Optional[str] = None
 
         # Contains the loaded version of user.yaml if present
         self.user_config: Optional[Dict[str, Any]] = None
