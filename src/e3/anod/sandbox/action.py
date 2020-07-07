@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING
 
 import e3.log
 from e3.anod.context import AnodContext
+from e3.anod.error import SandBoxError
 from e3.anod.loader import AnodSpecRepository
-from e3.anod.sandbox import SandBox, SandBoxError
+from e3.anod.sandbox import SandBox
 from e3.anod.sandbox.main import main
 from e3.anod.spec import check_api_version
 from e3.electrolyt.plan import Plan, PlanContext
@@ -79,8 +80,7 @@ class SandBoxCreate(SandBoxAction):
         )
 
     def run(self, args):
-        sandbox = SandBox()
-        sandbox.root_dir = args.sandbox
+        sandbox = SandBox(root_dir=args.sandbox)
 
         sandbox.create_dirs()
 
@@ -114,8 +114,7 @@ class SandBoxShowConfiguration(SandBoxAction):
             )
             print(msg)
 
-        sandbox = SandBox()
-        sandbox.root_dir = args.sandbox
+        sandbox = SandBox(root_dir=args.sandbox)
 
         try:
             cmd_line = sandbox.get_configuration()["cmd_line"]
@@ -160,8 +159,7 @@ class SandBoxExec(SandBoxCreate):
         self.parser.add_argument("--resolver", help="Use specific resolver")
 
     def run(self, args):
-        sandbox = SandBox()
-        sandbox.root_dir = args.sandbox
+        sandbox = SandBox(root_dir=args.sandbox)
 
         if args.specs_dir:
             sandbox.specs_dir = args.specs_dir
