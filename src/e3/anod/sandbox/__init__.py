@@ -136,7 +136,6 @@ class SandBox:
     def dump_configuration(self) -> None:
         # Compute command line for call to e3-sandbox create. Ensure that the
         # paths are made absolute (path to sandbox, script).
-        assert self.meta_dir is not None
         cmd_line = [sys.executable, os.path.abspath(__file__)]
         cmd_line += sys.argv[1:]
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
@@ -144,15 +143,12 @@ class SandBox:
             yaml.safe_dump({"cmd_line": cmd_line}, f)
 
     def get_configuration(self) -> dict:
-        assert self.meta_dir is not None
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
         with open(sandbox_conf) as f:
             return yaml.safe_load(f)
 
     def write_scripts(self) -> None:
         from setuptools.command.easy_install import get_script_args
-
-        assert self.bin_dir is not None
 
         # Retrieve sandbox_scripts entry points
         e3_distrib = get_distribution("e3-core")
