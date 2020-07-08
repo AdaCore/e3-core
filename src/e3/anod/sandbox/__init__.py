@@ -48,7 +48,7 @@ class SandBox:
         self.patch_dir: str = ""
         self.bin_dir: str = ""
         self.is_alternate_specs_dir = False
-        self.__specs_dir: Optional[str] = None
+        self.__specs_dir = os.path.join(self.root_dir, "specs")
 
         # Contains the loaded version of user.yaml if present
         self.user_config: Optional[Dict[str, Any]] = None
@@ -76,8 +76,6 @@ class SandBox:
             )
             if specs_dir is not None:
                 self.specs_dir = specs_dir
-        else:
-            self.__specs_dir = os.path.join(self.root_dir, "specs")
 
         self.default_env = {
             "LANG": "C",
@@ -103,7 +101,7 @@ class SandBox:
             os.environ[k] = v
 
     @property
-    def specs_dir(self) -> Optional[str]:
+    def specs_dir(self) -> str:
         """Return where to find anod specification files."""
         return self.__specs_dir
 
