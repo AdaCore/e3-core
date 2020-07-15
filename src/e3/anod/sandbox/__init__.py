@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 class SandBox:
     def __init__(self, root_dir: str) -> None:
-        self.root_dir: str = root_dir
+        self.root_dir: str = os.path.realpath(root_dir)
         self.build_id: Optional[str] = None
         self.build_date: Optional[str] = None
         self.build_version: Optional[str] = None
