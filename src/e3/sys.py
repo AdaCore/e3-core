@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import os
 import re
+import struct
 import sys
 from enum import Enum
 from dataclasses import asdict
@@ -244,7 +245,12 @@ def interpreter(prefix: Optional[str] = None) -> str:
         if os.path.exists(python3):
             return python3
         else:
-            return os.path.join(prefix, "python.exe")
+            # Might be the python location when in a venv
+            python3 = os.path.join(prefix, "Scripts", "python.exe")
+            if os.path.exists(python3):
+                return python3
+            else:
+                return os.path.join(prefix, "python.exe")
     else:  # windows: no cover
         python3 = os.path.join(prefix, "bin", "python3")
         if os.path.exists(python3):
@@ -346,3 +352,90 @@ def is_console() -> bool:
             return False
     else:  # win32: no cover
         return False
+
+
+def relocate_python_distrib(
+    python_distrib_dir: Optional[str] = None,
+    freeze: bool = False,
+    platform: Optional[str] = None,
+) -> None:
+    """Adjust shebangs to freeze a Python distrib or make it relocatable.
+
+    :param python_distrib_dir: Python distrib prefix. If None the current
+        Python is used.
+    :param freeze: if True use absolute paths in shebangs. If not use relative paths.
+    :param platform: if None use sys.platform. Otherwise should be a platform value
+        as returned by sys.platform.
+    """
+    if platform is None:
+        platform = sys.platform
+
+    if python_distrib_dir is None:
+        python_distrib_dir = sys.prefix
+
+    if platform == "win32":
+        script_dir = os.path.join(python_distrib_dir, "Scripts")
+    else:
+        script_dir = os.path.join(python_distrib_dir, "bin")
+
+    # The python interpreter of the selected distribution
+    python_binary = interpreter(prefix=python_distrib_dir)
+
+    # Search all scripts
+    for fname in os.listdir(script_dir):
+        script_path = os.path.join(script_dir, fname)
+
+        with open(script_path, "rb") as fd:
+            content = fd.read()
+
+        # By default shebang is found in file first line
+        shebang_offset = 0
+
+        if not content.startswith(b"#!"):
+            if platform != "win32":
+                continue
+
+            # Check if the file is windows executable with an embedded script.
+
+            # Windows executable starts with a MS-DOS header. Location
+            # of PE header can be found at offset 0x3c.
+            pe_offset = struct.unpack_from("I", content, offset=0x3C)[0]
+            if content[pe_offset : pe_offset + 4] != b"PE\0\0":
+                # Not a PE file
+                continue
+
+            # Does the executable contains a shebang ?
+            offsets = [m.start() for m in re.finditer(b"#!.*python", content)]
+
+            if not offsets:
+                # No python shebang
+                continue
+
+            assert len(offsets) == 1
+
+            shebang_offset = offsets[0]
+
+        launcher = content[:shebang_offset]
+        payload = content[shebang_offset:]
+
+        script_offset = payload.find(b"\n")
+        shebang = payload[:script_offset]
+        payload = payload[script_offset:]
+
+        if b"python" not in shebang:
+            continue
+
+        # At this stage we are sure that this is a Python script
+        if freeze:
+            shebang = b"#!" + python_binary.encode("utf-8")
+        else:
+            shebang = os.path.basename(python_binary).encode("utf-8")
+            if platform == "win32":
+                shebang = b"#!" + shebang
+            else:
+                shebang = b"#!/usr/bin/env " + shebang
+
+        with open(script_path, "wb") as fd:
+            fd.write(launcher)
+            fd.write(shebang)
+            fd.write(payload)

@@ -1,9 +1,12 @@
 import ast
+import logging
 import os
 import sys
 
+import e3.env
 import e3.fs
 import e3.os.fs
+import e3.os.process
 import e3.sys
 from e3.sys import RewriteImportNodeTransformer, RewriteImportRule, RewriteNodeError
 
@@ -163,3 +166,60 @@ def test_python_func():
         assert e3.sys.interpreter(os.getcwd()) == os.path.join(
             os.getcwd(), "bin", "python3"
         )
+
+
+@pytest.mark.xfail(
+    os.environ.get("TRAVIS", "") == "true", reason="Test not working on travis"
+)
+def test_relocate_python_distrib():
+    env = e3.env.Env()
+
+    # Create a venv and add pip manually to ensure no upgrade is done.
+    p = e3.os.process.Run(
+        [sys.executable, "-m", "venv", "--without-pip", "--copies", "my_env"]
+    )
+    assert p.status == 0, f"output was:\n{p.out}"
+
+    p = e3.os.process.Run([e3.sys.interpreter("./my_env"), "-m", "ensurepip"])
+    assert p.status == 0, f"output was:\n{p.out}"
+
+    # Move the venv and check that calling a script inside it will
+    # result in a failure as absolute location to Python interpreter will
+    # be wrong
+    e3.fs.mv("my_env", "moved_env")
+    logging.info(e3.fs.ls("./moved_env/*/*"))
+
+    if sys.platform == "win32":
+        script = "./Scripts/pip3.exe"
+    else:
+        script = "./bin/pip3"
+
+    try:
+        p = e3.os.process.Run([os.path.join("./moved_env", script), "--help"])
+        # On Windows we will get a status != 0 in case of error
+        assert p.status != 0
+    except FileNotFoundError:
+        # On Unixes we get an exception (interpreter not found)
+        pass
+
+    # Apply relocation on the venv and freeze the interpreter
+    e3.sys.relocate_python_distrib(
+        python_distrib_dir=os.path.abspath("./moved_env"), freeze=True
+    )
+    p = e3.os.process.Run([os.path.join("./moved_env", script), "--help"])
+    assert p.status == 0
+
+    # Move the environment, relocate it but make it relocatable this time.
+    e3.fs.mv("moved_env", "moved_env2")
+    logging.info("Make venv non location specific")
+    e3.sys.relocate_python_distrib(python_distrib_dir=os.path.abspath("./moved_env2"))
+
+    # Moving the venv should result in a working environment providing PATH is
+    # set correctly
+    e3.fs.mv("moved_env2", "moved_env3")
+    env.add_path(os.path.abspath(os.path.join("moved_env3", "bin")))
+    env.add_path(os.path.abspath(os.path.join("moved_env3", "Scripts")))
+    env.add_path(os.path.abspath("moved_env3"))
+
+    p = e3.os.process.Run([os.path.join("moved_env3", script), "--help"])
+    assert p.status == 0, f"output was:\n{p.out}"
