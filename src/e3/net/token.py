@@ -39,4 +39,4 @@ def is_valid(token: str) -> bool:
     # do not consider a token valid if it will be valid less than 5 min
     deadline = utc_timestamp() + 5 * 60
 
-    return payload.get("typ") == "Bearer" and payload.get("exp", 0) > deadline
+    return payload.get("exp", 0) > deadline

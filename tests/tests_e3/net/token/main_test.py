@@ -40,26 +40,21 @@ def test_get_payload():
 
 
 def test_valid_token():
-    valid_token = create_token({"typ": "Bearer", "exp": FUTURE_TIMESTAMP})
+    valid_token = create_token({"exp": FUTURE_TIMESTAMP})
     assert is_valid(valid_token)
 
     near_future = utc_timestamp() + 7 * 60
-    near_future_token = create_token({"typ": "Bearer", "exp": near_future})
+    near_future_token = create_token({"exp": near_future})
     assert is_valid(near_future_token)
 
 
-def test_wrong_token_type():
-    badtype_token = create_token({"typ": "badtype", "exp": FUTURE_TIMESTAMP})
-    assert not is_valid(badtype_token)
-
-
 def test_old_token():
-    old_token = create_token({"typ": "Bearer", "exp": 1419064452})
+    old_token = create_token({"exp": 1419064452})
     assert not is_valid(old_token)
 
     # Verify that a token valid for less than 5 min will be considered invalid
     expire_soon_date = utc_timestamp() + 4 * 60
-    expire_soon_token = create_token({"typ": "Bearer", "exp": expire_soon_date})
+    expire_soon_token = create_token({"exp": expire_soon_date})
     assert not is_valid(expire_soon_token)
 
 
