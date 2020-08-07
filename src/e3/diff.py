@@ -106,13 +106,13 @@ def patch(
 
         :raise DiffError: when the patch command fails
         """
-        cmd = ["patch", "-p0", "-f"]
-        p = e3.os.process.Run(cmd, cwd=working_dir, input=fname)
+        cmd = ["git", "apply", fname]
+        p = e3.os.process.Run(cmd, cwd=working_dir)
         if p.status != 0:
             raise DiffError(
                 origin="patch",
-                message="running %s < %s in %s failed with %s"
-                % (" ".join(cmd), fname, working_dir, p.out),
+                message="running %s in %s failed with %s"
+                % (" ".join(cmd), working_dir, p.out),
             )
         logger.debug(p.out)
 

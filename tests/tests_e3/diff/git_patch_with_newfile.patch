@@ -1,0 +1,11 @@
+--- a/file_to_patch.orig.txt
++++ b/file_to_patch.orig.txt
+@@ -1 +1 @@
+-Sentense if conteining error
++Sentence is not containing any error
+diff --git a/new_file b/new_file
+new file mode 100644
+index 0000000..e69de29
+-- 
+2.20.1
+
