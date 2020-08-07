@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import logging
+import os
 import re
 import sys
 import time
@@ -30,6 +31,7 @@ if TYPE_CHECKING:
         Mapping,
     )
     from logging import _ExcInfoType
+    from argparse import ArgumentParser, _ArgumentGroup, Namespace
 
     T = TypeVar("T")
 
@@ -306,6 +308,95 @@ def add_log_handlers(
 
     handler.setLevel(level)
     logging.getLogger("").addHandler(handler)
+
+
+def add_logging_argument_group(
+    argument_parser: ArgumentParser, default_level: int = logging.WARNING,
+) -> _ArgumentGroup:
+    """Add an argument group with logging options to the argument parser.
+
+    To be used with `e3.log.activate_with_args`.
+
+    :param argument_parser: the parser in which the group will be created
+    :param default_level: the logging level that will be used by default
+    """
+    log_group = argument_parser.add_argument_group(title="logging arguments")
+    log_group.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="make the log output to the console more verbose",
+    )
+    log_group.add_argument(
+        "--log-file",
+        metavar="FILE",
+        default=None,
+        help="store all the logs into the specified file",
+    )
+    log_group.add_argument(
+        "--loglevel",
+        default=default_level,
+        help="set the console log level",
+        choices={
+            "DEBUG": logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "CRITICAL": logging.CRITICAL,
+        },
+    )
+    log_group.add_argument(
+        "--nocolor",
+        default=False,
+        action="store_true",
+        help="disable color and progress bars",
+    )
+    log_group.add_argument(
+        "--json-logs",
+        default="json-logs" in os.environ.get("E3_ENABLE_FEATURE", "").split(","),
+        action="store_true",
+        help="enable JSON formatted logs. They can be activated as well by"
+        " setting the env var E3_ENABLE_FEATURE=json-logs.",
+    )
+    log_group.add_argument(
+        "--console-logs",
+        metavar="LINE_PREFIX",
+        help="disable color, progress bars, and redirect as much as"
+        " possible to stdout, starting lines with the given prefix.",
+    )
+
+    return log_group
+
+
+def activate_with_args(args: Namespace, default_level: int = logging.WARNING) -> None:
+    """Activate the e3 log using argument parsed.
+
+    To be used with `e3.log.add_logging_argument_group`.
+
+    :param args: the result of parsing arguments
+    :param default_level: the logging level assumed by default
+    """
+    global console_logs
+    global pretty_cli
+
+    if args.verbose > 0:
+        level = default_level - 10 * args.verbose
+    else:
+        level = args.loglevel
+
+    if args.console_logs:
+        console_logs = args.console_logs
+
+    if args.nocolor:
+        pretty_cli = False
+
+    activate(
+        level=level,
+        filename=args.log_file,
+        json_format=args.json_logs,
+        e3_debug=level == logging.DEBUG,
+    )
 
 
 def activate(

@@ -81,54 +81,10 @@ class Main:
         if argument_parser is None:
             argument_parser = ArgumentParser()
 
-        log_group = argument_parser.add_argument_group(title="Logging arguments")
-        log_group.add_argument(
-            "-v",
-            "--verbose",
-            action="count",
-            default=0,
-            help="make the log outputted on the console more verbose (this "
-            "sets the log level to DEBUG)",
-        )
-        log_group.add_argument(
-            "--log-file",
-            metavar="FILE",
-            default=None,
-            help="store all the logs into the specified file",
-        )
-        log_group.add_argument(
-            "--loglevel",
-            default=logging.INFO,
-            help="set the console log level",
-            choices={
-                "DEBUG": logging.DEBUG,
-                "INFO": logging.INFO,
-                "ERROR": logging.ERROR,
-                "CRITICAL": logging.CRITICAL,
-            },
-        )
-        log_group.add_argument(
-            "--nocolor",
-            default=False,
-            action="store_true",
-            help="disable color and progress bars",
-        )
-        log_group.add_argument(
-            "--json-logs",
-            default="json-logs" in os.environ.get("E3_ENABLE_FEATURE", "").split(","),
-            action="store_true",
-            help="enable JSON formatted logs. They can be activated as well by"
-            " setting the env var E3_ENABLE_FEATURE=json-logs.",
-        )
-        log_group.add_argument(
-            "--console-logs",
-            metavar="LINE_PREFIX",
-            help="disable color, progress bars, and redirect as much as"
-            " possible to stdout, starting lines with the given prefix.",
-        )
+        e3.log.add_logging_argument_group(argument_parser, default_level=logging.INFO)
 
         if platform_args:
-            plat_group = argument_parser.add_argument_group(title="Platform arguments")
+            plat_group = argument_parser.add_argument_group(title="platform arguments")
             plat_group.add_argument(
                 "--build",
                 default=None,  # to force autodetection
@@ -193,25 +149,8 @@ class Main:
         else:
             self.args = self.argument_parser.parse_args(args)
 
-        if self.args.nocolor:
-            e3.log.pretty_cli = False
-
         if not self.__log_handlers_set:
-            # First set level of verbosity
-            if self.args.verbose:
-                level = logging.DEBUG
-            else:
-                level = self.args.loglevel
-
-            if self.args.console_logs:
-                e3.log.console_logs = self.args.console_logs
-
-            e3.log.activate(
-                level=level,
-                filename=self.args.log_file,
-                json_format=self.args.json_logs,
-                e3_debug=self.args.verbose > 1,
-            )
+            e3.log.activate_with_args(self.args, logging.INFO)
             self.__log_handlers_set = True
 
         # Export options to env
