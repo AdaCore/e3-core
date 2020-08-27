@@ -79,6 +79,7 @@ def test_mainprog_with_console_logs():
         r"^mymain:.*:.*: DEBUG    this is an info line\r?\n"
         "mymain:.*:.* DEBUG    this is a debug line",
         p.out,
+        re.MULTILINE,
     )
 
 
