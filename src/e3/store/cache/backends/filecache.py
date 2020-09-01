@@ -8,7 +8,7 @@ import time
 from typing import TYPE_CHECKING
 
 import e3.log
-from e3.fs import mkdir, rm
+from e3.fs import mkdir, rm, mv
 from e3.store.cache.backends.base import DEFAULT_TIMEOUT, Cache
 
 try:
@@ -91,7 +91,7 @@ class FileCache(Cache):
                 # atomic rename does not work on windows if the dest file
                 # already exist
                 rm(dest_file)
-            os.rename(tmp_file.name, dest_file)
+            mv(tmp_file.name, dest_file)
             return True
 
         finally:

@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 
 import e3.diff
 import e3.fs
@@ -253,7 +254,7 @@ def test_sync_tree_case_insensitive():
 
     # Adjust some casing of a file that is up-to-date. Sync_tree should be case
     # preserving and thus adjust the casing
-    os.rename("test/b/OLD2.txt", "test/b/Old2.txt")
+    shutil.move("test/b/OLD2.txt", "test/b/Old2.txt")
     e3.fs.sync_tree("test/a", "test/b")
     assert e3.fs.directory_content("test/b") == e3.fs.directory_content("test/a")
 
