@@ -6,6 +6,7 @@
 
 
 import os
+import shutil
 import sys
 
 from coverage.sqldata import CoverageData
@@ -21,7 +22,7 @@ def fix_paths(site_pkg_dir, cov_data_file):
 
     old_cov_file = NamedTemporaryFile()
     old_cov_file.close()
-    os.rename(cov_data_file, old_cov_file.name)
+    shutil.move(cov_data_file, old_cov_file.name)
 
     old_coverage_data = CoverageData(old_cov_file.name)
     old_coverage_data.read()

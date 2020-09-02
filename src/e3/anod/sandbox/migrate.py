@@ -40,6 +40,7 @@ def migrate_v1_5() -> None:
     """
     from glob import glob
     import os
+    from e3.fs import mv
 
     for f in glob("*.yaml"):
         print("looking at %s" % f)
@@ -50,7 +51,7 @@ def migrate_v1_5() -> None:
             except OSError:
                 pass
             try:
-                os.rename(name + ".yaml", os.path.join(name, "config.yaml"))
+                mv(name + ".yaml", os.path.join(name, "config.yaml"))
             except OSError:  # defensive code
                 print("error for %s" % name)
         elif "-" in name:
@@ -64,7 +65,7 @@ def migrate_v1_5() -> None:
                     os.mkdir(prefix)
                 except OSError:  # defensive code
                     pass
-                os.rename(name + ".yaml", os.path.join(prefix, "%s.yaml" % suffix))
+                mv(name + ".yaml", os.path.join(prefix, "%s.yaml" % suffix))
             except Exception as er:  # defensive code
                 print(f"error for {name}.yaml {prefix} {suffix}")
                 print(er)
