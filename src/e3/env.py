@@ -340,13 +340,13 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         build_str, host_str, target_str = self.str_triplet()
         result = []
         if build_str is not None:
-            result.append("--build=%s" % build_str)
+            result.append(f"--build={build_str}")
 
         if host_str is not None:
-            result.append("--host=%s" % host_str)
+            result.append(f"--host={host_str}")
 
         if target_str is not None:
-            result.append("--target=%s" % target_str)
+            result.append(f"--target={target_str}")
 
         return result
 

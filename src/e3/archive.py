@@ -98,7 +98,7 @@ def check_type(filename: str, force_extension: Optional[str] = None) -> str:
         ext = "zip"
     else:
         raise ArchiveError(
-            origin="unpack_archive", message='unknown format "%s"' % filename
+            origin="unpack_archive", message=f'unknown format "{filename}"'
         )
     return ext
 
@@ -148,11 +148,11 @@ def unpack_archive(
     # First do some checks such as archive existence or destination directory
     # existence.
     if not os.path.isfile(filename):
-        raise ArchiveError(origin="unpack_archive", message="cannot find %s" % filename)
+        raise ArchiveError(origin="unpack_archive", message=f"cannot find {filename}")
 
     if not os.path.isdir(dest):
         raise ArchiveError(
-            origin="unpack_archive", message="dest dir %s does not exist" % dest
+            origin="unpack_archive", message=f"dest dir {dest} does not exist"
         )
 
     if selected_files is None:
@@ -229,7 +229,7 @@ def unpack_archive(
 
                         if check_selected:
                             raise ArchiveError(
-                                "unpack_archive", "Cannot untar %s " % filename
+                                "unpack_archive", f"Cannot untar {filename} "
                             )
 
                         fd.extractall(path=tmp_dest, members=member_list)

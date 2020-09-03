@@ -79,7 +79,7 @@ class OrderedDictYAMLLoader(Loader):
             raise yaml.constructor.ConstructorError(
                 context=None,
                 context_mark=None,
-                problem="expected a mapping node, but found %s" % node.id,
+                problem=f"expected a mapping node, but found {node.id}",
                 problem_mark=node.start_mark,
             )
 
@@ -92,7 +92,7 @@ class OrderedDictYAMLLoader(Loader):
                 raise yaml.constructor.ConstructorError(
                     context="while constructing a mapping",
                     context_mark=node.start_mark,
-                    problem="found unacceptable key (%s)" % exc,
+                    problem=f"found unacceptable key ({exc})",
                     problem_mark=key_node.start_mark,
                 )
             value = self.construct_object(value_node, deep=deep)
@@ -100,7 +100,7 @@ class OrderedDictYAMLLoader(Loader):
                 raise yaml.constructor.ConstructorError(
                     context="while constructing a mapping",
                     context_mark=node.start_mark,
-                    problem="found duplicate key (%s)" % key,
+                    problem=f"found duplicate key ({key})",
                     problem_mark=key_node.start_mark,
                 )
             mapping[key] = value
@@ -173,7 +173,7 @@ class CaseParser:
         key_val = str(self.__state[key])
 
         result = next(
-            ((key_val, k, data[k]) for k in data if re.match("^%s$" % k, key_val)), None
+            ((key_val, k, data[k]) for k in data if re.match(f"^{k}$", key_val)), None
         )
         if result is not None:
             e3.log.debug("%s=%s match %s", key, result[0], result[1])
@@ -307,7 +307,7 @@ def load_with_config(filename: Union[str, List[str]], config: dict) -> Any:
             conf_data = load_ordered(f)
             result = parser.parse(conf_data)
         except OSError:
-            raise YamlError("cannot read: %s" % f, "load_with_config").with_traceback(
+            raise YamlError(f"cannot read: {f}", "load_with_config").with_traceback(
                 sys.exc_info()[2]
             )
         except (yaml.parser.ParserError, yaml.constructor.ConstructorError) as e:
@@ -345,27 +345,27 @@ def load_with_regexp_table(filename: str, selectors: List[str], data: dict) -> d
     with open(filename) as f:
         conf_data = yaml.load(f.read(), OrderedDictYAMLLoader)
 
-    assert isinstance(conf_data, dict), (
-        "top level object in %s should be a dict" % filename
-    )
+    assert isinstance(
+        conf_data, dict
+    ), f"top level object in {filename} should be a dict"
 
     result = {}
 
     for key in conf_data:
         key_data = conf_data[key]
-        assert isinstance(key_data, list), "value for key %s is not a list" % key
+        assert isinstance(key_data, list), f"value for key {key} is not a list"
 
         for line in key_data:
-            assert isinstance(line, list), (
-                "value for key %s should be a list of list" % key
-            )
+            assert isinstance(
+                line, list
+            ), f"value for key {key} should be a list of list"
             assert len(line) == len(selectors) + 1
 
             has_matched = True
             for index, r in enumerate(line[0:-1]):
                 if len(r) == 0:
                     r = ".*"
-                if not re.search(r"^%s$" % r, str(selectors[index])):
+                if not re.search(fr"^{r}$", str(selectors[index])):
                     has_matched = False
 
             if has_matched:

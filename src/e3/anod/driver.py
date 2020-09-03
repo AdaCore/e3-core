@@ -27,7 +27,7 @@ def primitive_check() -> Callable[[F], F]:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not has_primitive(self.anod_instance, func.__name__):
-                raise AnodError("no primitive %s" % func.__name__)
+                raise AnodError(f"no primitive {func.__name__}")
             elif self.anod_instance.build_space is None:
                 raise AnodError(".activate() has not been called")
             return func(self, *args, **kwargs)
@@ -53,7 +53,7 @@ class AnodDriver:
 
         self.anod_instance.log = e3.log.getLogger("spec." + self.anod_instance.uid)
 
-        for e in getattr(self.anod_instance, "%s_deps" % self.anod_instance.kind, ()):
+        for e in getattr(self.anod_instance, f"{self.anod_instance.kind}_deps", ()):
             if isinstance(e, self.anod_instance.Dependency):
                 dep_class = spec_repository.load(e.name)
                 dep_instance = dep_class(

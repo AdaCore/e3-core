@@ -12,7 +12,7 @@ class HashError(e3.error.E3Error):
 
 def __compute_hash(path: str, kind: str) -> str:
     if not os.path.isfile(path):
-        raise HashError(kind, "cannot find %s" % path)
+        raise HashError(kind, f"cannot find {path}")
 
     with open(path, "rb") as f:
         result = getattr(hashlib, kind)()

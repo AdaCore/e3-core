@@ -194,7 +194,7 @@ class HTTPSession:
             # Compute final url
             if base_url is not None:
                 final_url = f"{base_url}/{url}"
-                message_prefix = "%s: " % base_url
+                message_prefix = f"{base_url}: "
             else:
                 final_url = url
                 message_prefix = ""

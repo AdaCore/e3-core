@@ -114,7 +114,7 @@ class Make:
         if self.makefile is not None:
             cmd_arg_list += ["-f", unixpath(self.makefile)]
 
-        cmd_arg_list += ["-j", "%s" % str(jobs) if jobs is not None else str(self.jobs)]
+        cmd_arg_list += ["-j", str(jobs) if jobs is not None else str(self.jobs)]
 
         for key in self.var_list:
             cmd_arg_list.append("{}={}".format(key, self.var_list[key]))

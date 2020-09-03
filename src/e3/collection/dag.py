@@ -318,7 +318,7 @@ class DAG:
         """
         if vertex_id in self.vertex_data:
             raise DAGError(
-                message="vertex %s already exist" % vertex_id, origin="DAG.add_vertex"
+                message=f"vertex {vertex_id} already exist", origin="DAG.add_vertex"
             )
         self.update_vertex(vertex_id, data, predecessors)
 
@@ -493,7 +493,7 @@ class DAG:
             if len([k for k in preds if k not in self.vertex_data]) > 0:
                 self.__has_cycle = True
                 raise DAGError(
-                    message="invalid nodes in predecessors of %s" % node,
+                    message=f"invalid nodes in predecessors of {node}",
                     origin="DAG.check",
                 )
         # raise DAGError if cycle
@@ -599,7 +599,7 @@ class DAG:
         """
         result = ["digraph G {", 'rankdir="LR";']
         for vertex in self.vertex_data:
-            result.append('"%s"' % vertex)
+            result.append(f'"{vertex}"')
         for vertex, predecessors in self.__vertex_predecessors.items():
             for predecessor in predecessors:
                 result.append(f'"{vertex}" -> "{predecessor}"')
@@ -638,7 +638,7 @@ class DAG:
             if fun(self, node):
                 # Check if node can pruned
                 if node in self.tags and preserve_context:
-                    raise DAGError("suppressing %s impact context" % node)
+                    raise DAGError(f"suppressing {node} impact context")
 
                 # Node is pruned keep track of its predecessors
                 pruned_node_predecessors[node] = predecessors
@@ -662,5 +662,5 @@ class DAG:
                     "{} -> {}".format(vertex, ", ".join(str(p) for p in predecessors))
                 )
             else:
-                result.append("%s -> (none)" % vertex)
+                result.append(f"{vertex} -> (none)")
         return "\n".join(result)

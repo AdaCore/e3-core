@@ -347,8 +347,8 @@ class Anod:
                 except AnodError:
                     self.log.exception("%s %s fails", self.name, f.__name__)
                     raise AnodError(
-                        "%s %s fails (AnodError exception in primitive)"
-                        % (self.name, f.__name__)
+                        f"{self.name} {f.__name__} fails "
+                        "(AnodError exception in primitive)"
                     )
                 except Exception as e:
                     self.log.exception("%s %s fails", self.name, f.__name__)

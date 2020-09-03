@@ -63,7 +63,7 @@ def cp(
 
     if file_number == 0:
         # If there is no source files raise an error
-        raise FSError(origin="cp", message='can\'t find files matching "%s"' % source)
+        raise FSError(origin="cp", message=f'can\'t find files matching "{source}"')
     elif file_number > 1:
         # If we have more than one file to copy then check that target is a
         # directory
@@ -89,7 +89,7 @@ def cp(
         except Exception as e:
             logger.error(e, exc_info=True)
             raise FSError(
-                origin="cp", message="error occurred while copying %s" % f
+                origin="cp", message=f"error occurred while copying {f}"
             ).with_traceback(sys.exc_info()[2])
 
 
@@ -279,7 +279,7 @@ def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
                 return
             logger.error(e)
             raise FSError(
-                origin="mkdir", message="can't create %s" % path
+                origin="mkdir", message=f"can't create {path}"
             ).with_traceback(sys.exc_info()[2])
 
 
@@ -335,7 +335,7 @@ def mv(source: Union[str, List[str]], target: str) -> None:
 
             real_dst = os.path.join(dst, basename(src))
             if os.path.exists(real_dst):
-                raise FSError("Destination path '%s' already exists" % real_dst)
+                raise FSError(f"Destination path '{real_dst}' already exists")
         try:
             os.rename(src, real_dst)
         except OSError:
@@ -366,9 +366,7 @@ def mv(source: Union[str, List[str]], target: str) -> None:
         nb_files = len(file_list)
 
         if nb_files == 0:
-            raise FSError(
-                origin="mv", message='cannot find files matching "%s"' % source
-            )
+            raise FSError(origin="mv", message=f'cannot find files matching "{source}"')
         elif nb_files == 1:
             source = file_list[0]
             if os.path.isdir(source) and os.path.isdir(target):
@@ -377,7 +375,7 @@ def mv(source: Union[str, List[str]], target: str) -> None:
                 move_file(source, target)
         elif not os.path.isdir(target):
             # More than one file to move but the target is not a directory
-            raise FSError("mv", "%s should be a directory" % target)
+            raise FSError("mv", f"{target} should be a directory")
         else:
             for f in file_list:
                 f_dest = os.path.join(target, os.path.basename(f))
@@ -483,7 +481,7 @@ def rm(path: Union[str, List[str]], recursive: bool = False, glob: bool = True) 
         except Exception as e:  # defensive code
             logger.error(e)
             raise FSError(
-                origin="rm", message="error occurred while removing %s" % f
+                origin="rm", message=f"error occurred while removing {f}"
             ).with_traceback(sys.exc_info()[2])
 
 
@@ -935,7 +933,7 @@ def sync_tree(
     )
 
     if not os.path.exists(source):
-        raise FSError(origin="sync_tree", message="%s does not exist" % source)
+        raise FSError(origin="sync_tree", message=f"{source} does not exist")
 
     # Keep track of deleted and updated files
     deleted_list: List[str] = []

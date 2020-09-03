@@ -118,7 +118,7 @@ class SandBox:
     def create_dirs(self) -> None:
         """Create all required sandbox directories."""
         for d in self.dirs:
-            mkdir(getattr(self, ("%s_dir" % d).replace(os.path.sep, "_")))
+            mkdir(getattr(self, f"{d}_dir".replace(os.path.sep, "_")))
 
     def get_build_space(self, name: str, platform: Optional[str] = None) -> BuildSpace:
         """Get build space.

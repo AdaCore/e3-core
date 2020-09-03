@@ -219,11 +219,11 @@ class FileInfo:
             self.file_attributes = FileAttribute(0)
 
         def __str__(self) -> str:
-            result = "creation_time:    %s\n" % self.creation_time
-            result += "last_access_time: %s\n" % self.last_access_time
-            result += "last_write_time:  %s\n" % self.last_write_time
-            result += "change_time:      %s\n" % self.change_time
-            result += "file_attributes:  %s" % self.file_attributes
+            result = f"creation_time:    {self.creation_time}\n"
+            result += f"last_access_time: {self.last_access_time}\n"
+            result += f"last_write_time:  {self.last_write_time}\n"
+            result += f"change_time:      {self.change_time}\n"
+            result += f"file_attributes:  {self.file_attributes}"
             return result
 
 

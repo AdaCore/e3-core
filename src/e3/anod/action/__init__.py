@@ -70,11 +70,11 @@ class GetSource(Action):
 
         :param builder: A SourceBuilder object for the source we need to get.
         """
-        super().__init__(uid="source_get.%s" % builder.name, data=builder)
+        super().__init__(uid=f"source_get.{builder.name}", data=builder)
         self.builder = builder
 
     def __str__(self) -> str:
-        return "get source %s" % self.data.name
+        return f"get source {self.data.name}"
 
 
 class Download(Action):
@@ -98,11 +98,11 @@ class DownloadSource(Download):
         :param builder: A SourceBuilder object for the source we need
             to download.
         """
-        super().__init__(uid="download.%s" % builder.name, data=builder)
+        super().__init__(uid=f"download.{builder.name}", data=builder)
         self.builder = builder
 
     def __str__(self) -> str:
-        return "download source %s" % self.builder.name
+        return f"download source {self.builder.name}"
 
 
 class InstallSource(Action):
@@ -126,7 +126,7 @@ class InstallSource(Action):
         self.source = source
 
     def __str__(self) -> str:
-        return "install source %s" % self.data[1].name
+        return f"install source {self.data[1].name}"
 
 
 class CreateSource(Action):
@@ -152,7 +152,7 @@ class CreateSource(Action):
         self.source_name = source_name
 
     def __str__(self) -> str:
-        return "create source %s" % self.data[1]
+        return f"create source {self.data[1]}"
 
 
 class CreateSources(Action):
@@ -170,11 +170,11 @@ class CreateSources(Action):
 
         :param anod_instance: the Anod instance of the spec
         """
-        super().__init__(uid="%s.sources" % anod_instance.uid, data=(anod_instance))
+        super().__init__(uid=f"{anod_instance.uid}.sources", data=(anod_instance))
         self.anod_instance = anod_instance
 
     def __str__(self) -> str:
-        return "create all sources for %s.anod" % self.anod_instance.name
+        return f"create all sources for {self.anod_instance.name}.anod"
 
 
 class Checkout(Action):
@@ -196,12 +196,12 @@ class Checkout(Action):
             - 'vcs': The Version Control System kind (a string).
                 At present, only 'git' is supported.
         """
-        super().__init__(uid="checkout.%s" % repo_name, data=(repo_name, repo_data))
+        super().__init__(uid=f"checkout.{repo_name}", data=(repo_name, repo_data))
         self.repo_name = repo_name
         self.repo_data = repo_data
 
     def __str__(self) -> str:
-        return "checkout %s" % self.data[0]
+        return f"checkout {self.data[0]}"
 
 
 class AnodAction(Action):
@@ -226,7 +226,7 @@ class AnodAction(Action):
             self.data.kind, self.data.name, self.data.env.platform,
         )
         if self.data.qualifier:
-            result += " (qualifier=%s)" % self.data.qualifier
+            result += f" (qualifier={self.data.qualifier})"
         return result
 
 
@@ -336,7 +336,7 @@ class UploadSource(Upload):
 
     def __str__(self) -> str:
         """Return string representation."""
-        return "upload source %s" % self.source_name
+        return f"upload source {self.source_name}"
 
 
 class Decision(Action, metaclass=abc.ABCMeta):

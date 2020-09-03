@@ -38,7 +38,7 @@ class EntryPoint:
         self.kind = kind
         self.description = description
         self.executed = False
-        assert self.name not in db, "duplicate entry point %s" % self.name
+        assert self.name not in db, f"duplicate entry point {self.name}"
         db[self.name] = self
 
     def execute(self) -> None:
@@ -88,7 +88,7 @@ def entry_point(
     cls: Callable[..., EntryPoint],
     kind: str,
     *args: Any,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> Callable:
     """Entry point decorator.
 

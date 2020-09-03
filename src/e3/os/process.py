@@ -81,7 +81,7 @@ def get_rlimit(platform: Optional[str] = None) -> str:
 
     from pkg_resources import resource_filename
 
-    return resource_filename(__name__, os.path.join("data", "rlimit-%s" % platform))
+    return resource_filename(__name__, os.path.join("data", f"rlimit-{platform}"))
 
 
 def quote_arg(arg: str) -> str:
@@ -139,7 +139,7 @@ def quote_arg(arg: str) -> str:
             # Also, it seems to be nicer to print new-line characters
             # as '\n' rather than as a new-line...
             arg = arg.replace("\n", r"'\n'")
-            return "'%s'" % arg
+            return f"'{arg}'"
     # No quoting needed.  Return the argument as is.
     return arg
 
@@ -508,9 +508,7 @@ class Run:
             """
             logger.error("%s not found", path)
             e3.log.debug("PATH=%s", os.environ["PATH"])
-            raise OSError(
-                errno.ENOENT, "No such file or directory, %s not found" % path
-            )
+            raise OSError(errno.ENOENT, f"No such file or directory, {path} not found")
 
         # Try to send an helpful message if one of the executable has not
         # been found.
