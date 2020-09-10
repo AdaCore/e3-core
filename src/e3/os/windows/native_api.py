@@ -227,6 +227,14 @@ class FileInfo:
             return result
 
 
+class ObjectInfo:
+    """Declaration of structures returned by QueryObjectInformation."""
+
+    class Name(Structure):
+        _fields_: List = []
+        class_id = 1
+
+
 class ProcessInfo:
     """Declaration of structure returned by QueryInformationProcess."""
 
@@ -290,6 +298,7 @@ class NT:
     QueryInformationProcess = None
     WaitForMultipleObjects = None
     OpenProcess = None
+    QueryObject = None
 
     @classmethod
     def init_api(cls):
@@ -320,6 +329,10 @@ class NT:
             ULONG,
             INT,
         ]
+        cls.QueryObject = ntdll.NtQueryObject
+        cls.QueryObject.restype = NTSTATUS
+        cls.QueryObject.argtypes = [HANDLE, INT, LPVOID, ULONG, LPVOID]
+
         cls.QueryAttributesFile = ntdll.NtQueryAttributesFile
         cls.QueryAttributesFile.restype = NTSTATUS
         cls.QueryAttributesFile.argtypes = [
