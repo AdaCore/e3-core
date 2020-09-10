@@ -74,7 +74,7 @@ class HTTPSession:
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 
-    def __init__(self, base_urls: Optional[Union[List[str], List[BaseURL]]] = None):
+    def __init__(self, base_urls: Optional[List[Union[str, BaseURL]]] = None):
         """Initialize HTTP session.
 
         :param base_urls: list of urls used as prefix to subsequent requests.
