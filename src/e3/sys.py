@@ -318,3 +318,31 @@ def python_script(name: str, prefix: Optional[str] = None) -> List[str]:
             return [interpreter(prefix), script]
     else:
         return [interpreter(prefix), os.path.join(prefix, "bin", name)]
+
+
+def is_console() -> bool:
+    """Check if stdin is a console or not.
+
+    :return: True if stdin is an interactive console
+    """
+    stdin_fd = sys.stdin.fileno()
+
+    # First check using isatty call. On Windows isatty will return True only
+    # if in a Win32 console (for example cygwin or msys ptys are not win32
+    # consoles).
+    is_tty = os.isatty(stdin_fd)
+    if is_tty:
+        return True
+
+    if sys.platform == "win32":  # unix: no cover
+
+        from msvcrt import get_osfhandle
+        from e3.os.windows.object import object_name
+
+        stdin_name = object_name(get_osfhandle(stdin_fd))
+        if re.match(r"\\Device\\NamedPipe\\(cygwin|msys).*-pty.*$", stdin_name):
+            return True
+        else:
+            return False
+    else:  # win32: no cover
+        return False
