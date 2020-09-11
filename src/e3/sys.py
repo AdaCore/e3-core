@@ -373,9 +373,9 @@ def relocate_python_distrib(
     if python_distrib_dir is None:
         python_distrib_dir = sys.prefix
 
-    if platform == "win32":
+    if platform == "win32":  # unix: no cover
         script_dir = os.path.join(python_distrib_dir, "Scripts")
-    else:
+    else:  # win32: no cover
         script_dir = os.path.join(python_distrib_dir, "bin")
 
     # The python interpreter of the selected distribution
@@ -385,6 +385,9 @@ def relocate_python_distrib(
     for fname in os.listdir(script_dir):
         script_path = os.path.join(script_dir, fname)
 
+        if not os.path.isfile(script_path):
+            continue
+
         with open(script_path, "rb") as fd:
             content = fd.read()
 
@@ -392,28 +395,28 @@ def relocate_python_distrib(
         shebang_offset = 0
 
         if not content.startswith(b"#!"):
-            if platform != "win32":
+            if platform != "win32":  # win32: no cover
                 continue
+            else:  # unix: no cover
+                # Check if the file is windows executable with an embedded script.
 
-            # Check if the file is windows executable with an embedded script.
+                # Windows executable starts with a MS-DOS header. Location
+                # of PE header can be found at offset 0x3c.
+                pe_offset = struct.unpack_from("I", content, offset=0x3C)[0]
+                if content[pe_offset : pe_offset + 4] != b"PE\0\0":
+                    # Not a PE file
+                    continue
 
-            # Windows executable starts with a MS-DOS header. Location
-            # of PE header can be found at offset 0x3c.
-            pe_offset = struct.unpack_from("I", content, offset=0x3C)[0]
-            if content[pe_offset : pe_offset + 4] != b"PE\0\0":
-                # Not a PE file
-                continue
+                # Does the executable contains a shebang ?
+                offsets = [m.start() for m in re.finditer(b"#!.*python", content)]
 
-            # Does the executable contains a shebang ?
-            offsets = [m.start() for m in re.finditer(b"#!.*python", content)]
+                if not offsets:
+                    # No python shebang
+                    continue
 
-            if not offsets:
-                # No python shebang
-                continue
+                assert len(offsets) == 1
 
-            assert len(offsets) == 1
-
-            shebang_offset = offsets[0]
+                shebang_offset = offsets[0]
 
         launcher = content[:shebang_offset]
         payload = content[shebang_offset:]
@@ -430,9 +433,9 @@ def relocate_python_distrib(
             shebang = b"#!" + python_binary.encode("utf-8")
         else:
             shebang = os.path.basename(python_binary).encode("utf-8")
-            if platform == "win32":
+            if platform == "win32":  # unix: no cover
                 shebang = b"#!" + shebang
-            else:
+            else:  # win32: no cover
                 shebang = b"#!/usr/bin/env " + shebang
 
         with open(script_path, "wb") as fd:
