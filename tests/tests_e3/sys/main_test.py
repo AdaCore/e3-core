@@ -190,9 +190,18 @@ def test_relocate_python_distrib():
     logging.info(e3.fs.ls("./moved_env/*/*"))
 
     if sys.platform == "win32":
-        script = "./Scripts/pip3.exe"
+        script_dir = "./Scripts"
+        script = f"{script_dir}/pip3.exe"
+
     else:
-        script = "./bin/pip3"
+        script_dir = "./bin"
+        script = f"{script_dir}/pip3"
+
+    # Add some additional files in either bin or Scripts to check that relocation
+    # works even when other content has been added to a Python distrib.
+    e3.fs.mkdir(os.path.join("./moved_env", script_dir, "dummy_dir"))
+    with open(os.path.join("./moved_env", script_dir, "dummy_sh.sh"), "w") as fd:
+        fd.write("#!/bin/bash\necho")
 
     try:
         p = e3.os.process.Run([os.path.join("./moved_env", script), "--help"])
