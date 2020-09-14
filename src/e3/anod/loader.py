@@ -129,6 +129,11 @@ class AnodSpecRepository:
                 else:
                     self.repos[repo_name] = repo_data
 
+        # Make sure that all revision are strings and not floats
+        for repo_conf in self.repos.values():
+            if "revision" in repo_conf:
+                repo_conf["revision"] = str(repo_conf["revision"])
+
         if spec_config is None:
             spec_config = SpecConfig()
         spec_config.spec_dir = self.spec_dir
