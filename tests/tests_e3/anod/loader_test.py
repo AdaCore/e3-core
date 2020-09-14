@@ -40,7 +40,7 @@ class TestLoader:
         assert "invalid spec code" in str(err.value)
 
     def test_spec_loader_prolog(self):
-        spec_repo = AnodSpecRepository(self.spec_dir, spec_config=True)
+        spec_repo = AnodSpecRepository(self.spec_dir)
         anod_class = spec_repo.load("prolog_test")
 
         # We should be able to load a spec twice
