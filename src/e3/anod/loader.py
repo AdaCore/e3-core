@@ -4,8 +4,8 @@ import inspect
 import os
 import sys
 import types
-
 import yaml
+
 from typing import TYPE_CHECKING
 
 import e3.hash
@@ -22,6 +22,20 @@ if TYPE_CHECKING:
     from e3.anod.spec import Anod
 
 
+class SpecConfig:
+    """Contain specification files configuration.
+
+    :ivar spec_dir: path to the anod specs
+    :ivar repositories: dict containing the list of repositories metadata
+        (content of config/repositories)
+    """
+
+    def __init__(self) -> None:
+        # Both values are set by AnodSpecRepository init
+        self.spec_dir = ""
+        self.repositories: Dict[str, Any] = {}
+
+
 class AnodSpecRepository:
     """Anod spec repository.
 
@@ -33,12 +47,22 @@ class AnodSpecRepository:
     files.
     """
 
-    def __init__(self, spec_dir: str, spec_config: Any = None):
+    def __init__(
+        self,
+        spec_dir: str,
+        spec_config: Any = None,
+        # Ideally should be spec_config: Optional[SpecConfig] = None,
+        # We keep it to Any to avoid mypy issues on other projects
+        extra_repositories_config: Optional[dict] = None,
+    ):
         """Initialize an AnodSpecRepository.
 
         :param spec_dir: directory containing the anod specs.
         :param spec_config: dictionary containing the configuration for this
             AnodSpecRepository
+        :param extra_repositories_config: first read the configuration from
+            <spec_dir>/config/repositories.yaml and update the result with
+            extra_repositories_config
         """
         logger.debug("initialize spec repository (%s)", spec_dir)
 
@@ -97,6 +121,23 @@ class AnodSpecRepository:
         if os.path.isfile(repo_file):
             with open(repo_file) as fd:
                 self.repos = yaml.safe_load(fd)
+
+        if extra_repositories_config:
+            for repo_name, repo_data in extra_repositories_config.items():
+                if repo_name in self.repos:
+                    self.repos[repo_name].update(repo_data)
+                else:
+                    self.repos[repo_name] = repo_data
+
+        # Make sure that all revision are strings and not floats
+        for repo_conf in self.repos.values():
+            if "revision" in repo_conf:
+                repo_conf["revision"] = str(repo_conf["revision"])
+
+        if spec_config is None:
+            spec_config = SpecConfig()
+        spec_config.spec_dir = self.spec_dir
+        spec_config.repositories = self.repos
 
         # Declare spec prolog
         prolog_file = os.path.join(spec_dir, "prolog.py")

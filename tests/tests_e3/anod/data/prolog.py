@@ -5,3 +5,6 @@ if "spec_config" not in globals():
 
 if spec_config is not None:
     PROLOG_WAS_EXECUTED = True  # type: ignore
+    E3_CORE_REVISION = spec_config.repositories.get("e3-core", {}).get("revision")
+    E3_EXTRA_REVISION = spec_config.repositories.get("e3-extra", {}).get("revision")
+    FOO = getattr(spec_config, "foo", None)
