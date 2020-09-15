@@ -1,8 +1,8 @@
 import os
 
 from e3.anod.error import SandBoxError
-from e3.anod.loader import AnodSpecRepository
-from e3.fs import sync_tree
+from e3.anod.loader import AnodSpecRepository, SpecConfig
+from e3.fs import cp, sync_tree
 from e3.os.process import Run
 
 import pytest
@@ -48,6 +48,36 @@ class TestLoader:
 
         anod_instance = anod_class("prolog_test", "", "build")
         assert anod_instance.prolog_test, "prolog not executed properly"
+
+    def test_spec_loader_prolog_with_repos(self):
+        sync_tree(self.spec_dir, "specs_dir")
+        repositories_yaml = os.path.join("specs_dir", "config", "repositories.yaml")
+        cp(repositories_yaml + ".tmpl", repositories_yaml)
+
+        spec_repo = AnodSpecRepository("specs_dir")
+        anod_class = spec_repo.load("prolog_test")
+        assert anod_class.e3_version == "20.1"
+        assert anod_class.has_foo is False
+        assert anod_class.e3_extra_version is None
+
+        override_conf = {
+            "e3-core": {"revision": 21.0},
+            "e3-extra": {"vcs": "git", "url": "unknown", "revision": "master"},
+        }
+
+        spec_config = SpecConfig()
+        spec_config.foo = 2
+
+        spec_repo2 = AnodSpecRepository(
+            "specs_dir",
+            spec_config=spec_config,
+            extra_repositories_config=override_conf,
+        )
+        anod_class2 = spec_repo2.load("prolog_test")
+        assert anod_class2.e3_version == "21.0"
+        assert anod_class2.e3_extra_version == "master"
+
+        assert anod_class2.has_foo is True
 
     def test_spec_inheritance(self):
         """Load a spec that inherit from another spec."""

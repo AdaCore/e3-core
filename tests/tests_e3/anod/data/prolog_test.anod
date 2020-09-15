@@ -3,3 +3,6 @@ from e3.anod.spec import Anod
 
 class PrologTest(Anod):
     prolog_test = PROLOG_WAS_EXECUTED
+    e3_version = E3_CORE_REVISION
+    e3_extra_version = E3_EXTRA_REVISION
+    has_foo = FOO is not None
