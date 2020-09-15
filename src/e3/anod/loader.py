@@ -43,7 +43,7 @@ class AnodSpecRepository:
         logger.debug("initialize spec repository (%s)", spec_dir)
 
         if not os.path.isdir(spec_dir):
-            raise SandBoxError("spec directory %s does not exist" % spec_dir)
+            raise SandBoxError(f"spec directory {spec_dir} does not exist")
         self.spec_dir = spec_dir
         self.api_version = __version__
         self.specs = {}
@@ -129,7 +129,7 @@ class AnodSpecRepository:
 
         :param name: name of the spec to load
         """
-        assert name in self.specs, "spec %s not found" % name
+        assert name in self.specs, f"spec {name} not found"
         return self.specs[name].load(self)
 
 
@@ -185,7 +185,7 @@ class AnodModule:
             logger.error("exception: %s", e)
             logger.error("cannot load code of %s", self.name)
             raise SandBoxError(
-                origin="load", message="invalid spec code for %s" % self.name
+                origin="load", message=f"invalid spec code for {self.name}"
             ).with_traceback(sys.exc_info()[2])
 
         # At this stage we have loaded completely the module. Now we need to
@@ -217,7 +217,7 @@ class AnodModule:
                 return value
 
         logger.error("spec %s does not contains an Anod subclass", self.name)
-        raise SandBoxError("cannot find Anod subclass in %s" % self.path, "load")
+        raise SandBoxError(f"cannot find Anod subclass in {self.path}", "load")
 
 
 def spec(name: str) -> Callable[..., Anod]:

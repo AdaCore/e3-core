@@ -48,4 +48,4 @@ def load_from_json_file(
         if ignore_non_existing:
             return default
         else:
-            raise JsonError("json file %s does not exist" % path)
+            raise JsonError(f"json file {path} does not exist")

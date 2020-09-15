@@ -240,7 +240,7 @@ class SourceBuilder:
         # Else provide a default function if we have exactly 1 checkout
         if not self.checkout:
             raise e3.anod.error.SpecError(
-                "no checkout associated to the builder %s" % self.name, "prepare_src"
+                f"no checkout associated to the builder {self.name}", "prepare_src"
             )
         elif len(self.checkout) > 1:
             raise e3.anod.error.SpecError(
@@ -274,7 +274,7 @@ class SourceBuilder:
             # Unused parameters
             del r, p, d
             raise e3.anod.error.AnodError(
-                "no apply_patch function defined in SourceBuilder %s" % self.name,
+                f"no apply_patch function defined in SourceBuilder {self.name}",
                 "apply_path",
             )
 

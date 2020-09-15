@@ -105,7 +105,7 @@ class SVNRepository:
 
         if p.status != 0:
             raise SVNError(
-                "cannot create svn repository in %s" % repo_path, origin="create"
+                f"cannot create svn repository in {repo_path}", origin="create"
             )
         if initial_content_path is not None:
             p = e3.os.process.Run(
@@ -115,14 +115,14 @@ class SVNRepository:
                     initial_content_path,
                     cls.local_url(repo_path),
                     "-m",
-                    "Initial import from %s" % initial_content_path,
+                    f"Initial import from {initial_content_path}",
                 ],
                 output=cls.log_stream,
             )
             if p.status != 0:
                 raise SVNError(
-                    "cannot perform initial import of %s into %s"
-                    % (initial_content_path, repo_path),
+                    f"cannot perform initial import of {initial_content_path}"
+                    f" into {repo_path}",
                     origin="create",
                 )
         return cls.local_url(repo_path)
@@ -172,9 +172,7 @@ class SVNRepository:
         m = re.search(fr"^{item}: *(.*)\n", info, flags=re.M)
         if m is None:
             logger.debug("svn info result:\n%s", info)
-            raise SVNError(
-                "Cannot fetch item %s from svn_info" % item, origin="get_info"
-            )
+            raise SVNError(f"Cannot fetch item {item} from svn_info", origin="get_info")
         return m.group(1).strip()
 
     @property

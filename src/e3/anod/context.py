@@ -451,7 +451,7 @@ class AnodContext:
         elif primitive == "install":
             result = Install(spec)
         else:  # defensive code
-            raise ValueError("add_spec error: %s is not known" % primitive)
+            raise ValueError(f"add_spec error: {primitive} is not known")
 
         # If this action is directly linked with a plan line make sure
         # to register the link between the action and the plan even
@@ -578,10 +578,10 @@ class AnodContext:
         # Look for dependencies
         spec_dependencies = []
         if (
-            "%s_deps" % primitive in dir(spec)
-            and getattr(spec, "%s_deps" % primitive) is not None
+            f"{primitive}_deps" in dir(spec)
+            and getattr(spec, f"{primitive}_deps") is not None
         ):
-            spec_dependencies += getattr(spec, "%s_deps" % primitive)
+            spec_dependencies += getattr(spec, f"{primitive}_deps")
 
         for e in spec_dependencies:
             if isinstance(e, Dependency):
@@ -635,7 +635,7 @@ class AnodContext:
                 self.connect(result, child_action)
 
         # Look for source dependencies (i.e sources needed)
-        if "%s_source_list" % primitive in dir(spec):
+        if f"{primitive}_source_list" in dir(spec):
             source_list = getattr(spec, f"{primitive}_source_list")
             for s in source_list:
                 # set source builder

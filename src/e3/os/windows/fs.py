@@ -82,7 +82,7 @@ class NTFile:
         self.handle: Optional[HANDLE] = None
         if parent is None:
             self.path = os.path.abspath(filename)
-            self.nt_filename = UnicodeString("\\??\\%s" % self.path)
+            self.nt_filename = UnicodeString(f"\\??\\{self.path}")
             self.parent_handle = None
         else:
             assert "\\" not in filename and "/" not in filename
@@ -148,7 +148,7 @@ class NTFile:
         if status < 0:
             raise NTException(
                 status=status,
-                message="cannot open file %s" % self.path,
+                message=f"cannot open file {self.path}",
                 origin="NTFile.open",
             )
 
@@ -176,7 +176,7 @@ class NTFile:
         if not status:
             raise NTException(
                 status=status,
-                message="cannot find volume for %s" % self.path,
+                message=f"cannot find volume for {self.path}",
                 origin="NTFile.volume_path",
             )
         return result.value
@@ -224,7 +224,7 @@ class NTFile:
         if status < 0:
             raise NTException(
                 status=status,
-                message="cannot query attributes %s" % self.path,
+                message=f"cannot query attributes {self.path}",
                 origin="NTFile.read_attributes_internal",
             )
 
@@ -272,7 +272,7 @@ class NTFile:
         if status < 0:
             raise NTException(
                 status=status,
-                message="cannot write attributes to %s" % self.path,
+                message=f"cannot write attributes to {self.path}",
                 origin="NTFile.write_attributes",
             )
         self.read_attributes()
@@ -318,9 +318,9 @@ class NTFile:
         :param replace: if True replace the target file if it exists
         :raise: NTException
         """
-        file_target = "\\??\\%s" % os.path.abspath(filename)
+        file_target = f"\\??\\{os.path.abspath(filename)}"
         target = file_target.encode("utf_16_le")
-        s = "?PL%ss" % len(target)
+        s = f"?PL{len(target)}s"
         b = create_string_buffer(struct.calcsize(s))
         b.raw = struct.pack(s, replace, 0, len(target), target)
 
@@ -408,7 +408,7 @@ class NTFile:
         if status < 0:
             raise NTException(
                 status=status,
-                message="can't read dir %s" % self.path,
+                message=f"can't read dir {self.path}",
                 origin="NTFile.iterate_on_dir",
             )
 
@@ -522,7 +522,7 @@ class NTFile:
         if try_counter == 0:
             raise NTException(
                 status=1,
-                message="cannot open file %s for deletion" % self.path,
+                message=f"cannot open file {self.path} for deletion",
                 origin="NTFile.unlink",
             )
 
@@ -535,7 +535,7 @@ class NTFile:
                 if self.is_dir and not self.is_dir_empty:
                     raise NTException(
                         status=1,
-                        message="directory not empty: %s" % self.path,
+                        message=f"directory not empty: {self.path}",
                         origin="NTFile.unlink",
                     )
 
@@ -563,7 +563,7 @@ class NTFile:
                         if not self.is_dir_empty:
                             raise NTException(
                                 status=e.status,
-                                message="dir %s is not empty" % self.path,
+                                message=f"dir {self.path} is not empty",
                                 origin="NTFile.unlink",
                             )
                     elif e.status == Status.CANNOT_DELETE:  # defensive code

@@ -73,7 +73,7 @@ class CheckoutManager:
         elif vcs == "external":
             update = self.update_external
         else:
-            logger.error("Invalid repository type: %s" % vcs)
+            logger.error(f"Invalid repository type: {vcs}")
             return ReturnValue.failure
 
         result, old_commit, new_commit = update(url=url, revision=revision)
@@ -121,8 +121,7 @@ class CheckoutManager:
                     output=PIPE,
                 ).out
                 ignore_list = [
-                    "/%s" % f.strip().rstrip("/")
-                    for f in ignore_list_lines.splitlines()
+                    f"/{f.strip().rstrip('/')}" for f in ignore_list_lines.splitlines()
                 ]
                 logger.debug("Ignore in external: %s", ignore_list)
             except Exception:
@@ -181,7 +180,7 @@ class CheckoutManager:
             old_commit = g.rev_parse()
 
             # Using fetch + checkout ensure caching is effective
-            g.git_cmd(["fetch", "-f", remote_name, "%s:refs/e3-checkout" % revision])
+            g.git_cmd(["fetch", "-f", remote_name, f"{revision}:refs/e3-checkout"])
             g.checkout("refs/e3-checkout", force=True)
             new_commit = g.rev_parse()
 
@@ -216,7 +215,7 @@ class CheckoutManager:
                 result = ReturnValue.success
 
         except GitError:
-            logger.exception("Error during git update %s" % self.name)
+            logger.exception(f"Error during git update {self.name}")
             result = ReturnValue.failure
         return result, old_commit, new_commit
 

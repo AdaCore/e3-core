@@ -43,7 +43,7 @@ def migrate_v1_5() -> None:
     from e3.fs import mv
 
     for f in glob("*.yaml"):
-        print("looking at %s" % f)
+        print(f"looking at {f}")
         name, _ = os.path.splitext(os.path.basename(f))
         if os.path.exists(name + ".anod"):
             try:
@@ -53,9 +53,9 @@ def migrate_v1_5() -> None:
             try:
                 mv(name + ".yaml", os.path.join(name, "config.yaml"))
             except OSError:  # defensive code
-                print("error for %s" % name)
+                print(f"error for {name}")
         elif "-" in name:
-            print("suffix detected in %s" % f)
+            print(f"suffix detected in {f}")
             prefix, suffix = name.rsplit("-", 1)
             if not os.path.exists(prefix + ".anod"):
                 prefix, suffix2 = prefix.rsplit("-", 1)
@@ -65,9 +65,9 @@ def migrate_v1_5() -> None:
                     os.mkdir(prefix)
                 except OSError:  # defensive code
                     pass
-                mv(name + ".yaml", os.path.join(prefix, "%s.yaml" % suffix))
+                mv(name + ".yaml", os.path.join(prefix, f"{suffix}.yaml"))
             except Exception as er:  # defensive code
                 print(f"error for {name}.yaml {prefix} {suffix}")
                 print(er)
         else:
-            print("unknown yaml file %s.yaml" % name)
+            print(f"unknown yaml file {name}.yaml")

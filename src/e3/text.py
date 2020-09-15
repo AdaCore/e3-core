@@ -14,7 +14,7 @@ def format_with_dict(pattern: str, values: Dict[str, str]) -> str:
     :param values: a dictionary containing the values of the keys that can be
         replaced
     """
-    key_regexp = r"|".join([r"\(%s\)" % k for k in values])
+    key_regexp = r"|".join([fr"\({k}\)" for k in values])
     result = re.sub(r"%%(?!%s)" % key_regexp, r"%%", pattern)
     return result % values
 

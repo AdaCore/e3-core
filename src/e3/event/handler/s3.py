@@ -52,9 +52,9 @@ class S3Handler(EventHandler):
 
     def send_event(self, event: Event) -> bool:
         def s3_cp(from_path: str, s3_url: str) -> bool:
-            cmd = ["s3", "cp", "--sse=%s" % self.sse]
+            cmd = ["s3", "cp", f"--sse={self.sse}"]
             if self.aws_profile:
-                cmd.append("--profile=%s" % self.aws_profile)
+                cmd.append(f"--profile={self.aws_profile}")
             cmd += [from_path, s3_url]
 
             s3 = Run(python_script("aws") + cmd, output=None)

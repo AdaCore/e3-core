@@ -135,7 +135,7 @@ class SourceClosure:
 
         # Otherwise consider the sources and recursively iterate on the
         # dependencies.
-        for source in getattr(spec, "%s_source_list" % spec.kind, []):
+        for source in getattr(spec, f"{spec.kind}_source_list", []):
             publish_source = publish and source.publish
             self.source_list[SourceKey(spec.uid, source.name, publish_source)] = None
 
