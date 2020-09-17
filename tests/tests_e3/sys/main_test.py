@@ -175,9 +175,13 @@ def test_relocate_python_distrib():
     env = e3.env.Env()
 
     # Create a venv and add pip manually to ensure no upgrade is done.
-    p = e3.os.process.Run(
-        [sys.executable, "-m", "venv", "--without-pip", "--copies", "my_env"]
-    )
+    # Create a venv and add pip manually to ensure no upgrade is done.
+    if sys.platform == "win32":
+        p = e3.os.process.Run(
+            [sys.executable, "-m", "venv", "--copies", "--without-pip", "my_env"]
+        )
+    else:
+        p = e3.os.process.Run([sys.executable, "-m", "venv", "--without-pip", "my_env"])
     assert p.status == 0, f"output was:\n{p.out}"
 
     p = e3.os.process.Run([e3.sys.interpreter("./my_env"), "-m", "ensurepip"])
