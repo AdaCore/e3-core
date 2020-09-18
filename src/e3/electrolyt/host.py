@@ -26,7 +26,7 @@ class Host(BaseEnv):
         :param kwargs: additional user defined data. each key from the data
             dict is accessible like a regular attribute.
         """
-        BaseEnv.__init__(self)
+        super().__init__()
         self.set_build(name=str(platform), version=str(version), machine=str(hostname))
         self._instance.update(kwargs)
 

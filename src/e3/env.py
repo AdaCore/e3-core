@@ -20,7 +20,7 @@ from e3.platform import Platform
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Iterable, List, Optional, Union
+    from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar, Union
     from argparse import Namespace
 
 logger = e3.log.getLogger("env")
@@ -539,6 +539,10 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             return e
 
 
+if TYPE_CHECKING:
+    BaseEnv_T = TypeVar("BaseEnv_T", bound="BaseEnv")
+
+
 class BaseEnv(AbstractBaseEnv):
     """BaseEnv."""
 
@@ -584,11 +588,11 @@ class BaseEnv(AbstractBaseEnv):
         return iter(self._instance.items())
 
     def copy(
-        self,
+        self: BaseEnv_T,
         build: Optional[str] = None,
         host: Optional[str] = None,
         target: Optional[str] = None,
-    ) -> BaseEnv:
+    ) -> BaseEnv_T:
         """Copy an env.
 
         :param build: like build set_env parameter
@@ -596,22 +600,24 @@ class BaseEnv(AbstractBaseEnv):
         :param target: like target set_env parameter
         :return: a deep copy of the current env
         """
-        result = BaseEnv()
+        result = self.__class__()
         for k, v in self._items():
             setattr(result, k, v)
         result.set_env(build, host, target)
         return result
 
     @classmethod
-    def from_env(cls, env: Optional[Union[Env, BaseEnv]] = None) -> BaseEnv:
+    def from_env(
+        cls: Type[BaseEnv_T], env: Optional[Union[Env, BaseEnv]] = None
+    ) -> BaseEnv_T:
         """Return a new BaseEnv object from an env.
 
         :param env: env. If None copy the current Env
         """
         if env is None:
-            return BaseEnv(build=Env().build, host=Env().host, target=Env().target)
+            return cls(build=Env().build, host=Env().host, target=Env().target)
         else:
-            return BaseEnv(build=env.build, host=env.host, target=env.target)
+            return cls(build=env.build, host=env.host, target=env.target)
 
 
 class Env(AbstractBaseEnv):

@@ -4,6 +4,10 @@
   * the discrimiant ``is_virtual`` has been removed
   * e3.anod.sandbox.SandBox now has a mandatory root_dir attribute
   * AnodSpecRepositories spec_config should now subclass SpecConfig
+  * PlanContext now returns PlanActionEnv, a subclass of BaseEnv. Contrary
+    to the previous BaseEnv objects, returned PlanActionEnv always have
+    the following attributes set: "push_to_store", "default_build",
+    "module", "source_packages"
 
 # Version 22.1.0 (2020-06-22)
 
