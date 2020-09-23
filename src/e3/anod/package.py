@@ -53,6 +53,17 @@ class Package:
         self.publish = publish
         self.version = version
 
+    @property
+    def is_simple_archive(self) -> bool:
+        """
+        Check if package creation can be bypassed.
+
+        If true it means that package creation can be bypassed
+        in some context such as user mode. By default it is
+        True
+        """
+        return True
+
     def pkg_name(self, anod_instance: Anod) -> str:
         """Return the final package filename.
 
@@ -97,16 +108,6 @@ class Package:
             from_dir_rename=pkg_name,
         )
         return pkg_path
-
-    def is_simple_archive(self) -> bool:
-        """
-        Check if package creation can be bypassed.
-
-        If true it means that package creation can be bypassed
-        in some context such as user mode. By default it is
-        True
-        """
-        return True
 
 
 class Source:
