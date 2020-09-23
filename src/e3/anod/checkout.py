@@ -55,7 +55,7 @@ class CheckoutManager:
     def update(self, vcs: str, url: str, revision: Optional[str] = None) -> ReturnValue:
         """Update content of the working directory.
 
-        :param vcs: vcd kind
+        :param vcs: vcs kind
         :param url: repository url
         :param revision: revision
         """
