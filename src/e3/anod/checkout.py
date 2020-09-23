@@ -142,6 +142,15 @@ class CheckoutManager:
         else:
             return ReturnValue.success, old_commit, new_commit
 
+    @staticmethod
+    def git_remote_name(url: str) -> str:
+        """Return the remote name computed for an url.
+
+        :param url: the git url
+        :return: the remote name
+        """
+        return hashlib.sha256(url.encode("utf-8")).hexdigest()
+
     def update_git(
         self, url: str, revision: Optional[str]
     ) -> Tuple[ReturnValue, Optional[str], Optional[str]]:
@@ -162,7 +171,8 @@ class CheckoutManager:
         # This ensure that when the url does not change, git will not
         # redownload all the objects on each objects (and thus avoid
         # disk space leaks).
-        remote_name = hashlib.sha256(url.encode("utf-8")).hexdigest()
+        remote_name = self.git_remote_name(url)
+
         g.init()
 
         # Do the remote addition manually as in that context we can ignore
