@@ -623,13 +623,15 @@ class AnodContext:
                     # We have a build tree dependency that produced a
                     # subtree starting with an install node. In that case
                     # we expect the user to choose BUILD as decision.
-                    dec = self.predecessors(child_action)[0]
-                    if isinstance(dec, BuildOrDownload):
-                        dec.add_trigger(
-                            result,
-                            BuildOrDownload.BUILD,
-                            plan_line if plan_line is not None else "unknown line",
-                        )
+                    child_action_preds = self.predecessors(child_action)
+                    if child_action_preds:
+                        dec = child_action_preds[0]
+                        if isinstance(dec, BuildOrDownload):
+                            dec.add_trigger(
+                                result,
+                                BuildOrDownload.BUILD,
+                                plan_line if plan_line is not None else "unknown line",
+                            )
 
                 # Connect child dependency
                 self.connect(result, child_action)
