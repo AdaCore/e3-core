@@ -112,7 +112,7 @@ class TestHTTP:
         with HTTPSession():
             pass
 
-    def test_retry(self):
+    def test_retry(self, socket_enabled):
         def func(server, base_url):
             with HTTPSession() as session:
                 session.set_max_retries(base_url, connect=5)
@@ -124,7 +124,7 @@ class TestHTTP:
 
         run_server(RetryHandler, func)
 
-    def test_content_dispo(self):
+    def test_content_dispo(self, socket_enabled):
         def func(server, base_url):
             with HTTPSession() as session:
                 result = session.download_file(base_url + "dummy", dest=".")
@@ -135,7 +135,7 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_content_validation(self):
+    def test_content_validation(self, socket_enabled):
         def validate(path):
             return False
 
@@ -148,7 +148,7 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_error(self):
+    def test_error(self, socket_enabled):
         def func(server, base_url):
             with HTTPSession() as session:
                 result = session.download_file(base_url + "dummy", dest=".")
@@ -156,7 +156,7 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_fallback(self):
+    def test_fallback(self, socket_enabled):
         def func(server, base_url):
             def inner_func(server2, base_url2):
                 logging.info(f"servers: {base_url}, {base_url2}")
@@ -171,7 +171,7 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_content_abort(self):
+    def test_content_abort(self, socket_enabled):
         def func(server, base_url):
             def inner_func(server2, base_url2):
                 logging.info(f"servers: {base_url}, {base_url2}")
@@ -187,7 +187,7 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_post_stream_data(self):
+    def test_post_stream_data(self, socket_enabled):
         def outter_func(nok_server, nok_url):
             def func(server, url):
                 with HTTPSession(base_urls=[nok_url, url]) as session:
