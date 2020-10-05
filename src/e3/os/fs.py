@@ -95,7 +95,7 @@ def chmod(mode: str, filename: str) -> int:
                 elif permlist.isdigit():
                     raise OSFSError(
                         origin="chmod",
-                        message="numeric mode not supported," " use os.chmod instead",
+                        message="numeric mode not supported, use os.chmod instead",
                     )
                 else:
                     action_mask = 0

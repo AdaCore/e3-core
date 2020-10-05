@@ -21,7 +21,7 @@ class HTTPSimpleStoreResourceInfo(ResourceInfo):
         resource_sha = e3.hash.sha1(resource_path)
         if resource_sha != self.sha:
             logger.critical(
-                "wrong sha for resource %s " "expecting %s got %s",
+                "wrong sha for resource %s expecting %s got %s",
                 resource_path,
                 self.sha,
                 resource_sha,

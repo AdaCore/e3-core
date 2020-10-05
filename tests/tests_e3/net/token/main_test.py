@@ -14,9 +14,7 @@ def create_token(payload: dict) -> str:
     :return: token
     """
     payload_bytes = json.dumps(payload).encode("utf-8")
-    data = (
-        b"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" + b"." + base64.b64encode(payload_bytes)
-    )
+    data = b"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." + base64.b64encode(payload_bytes)
     signature = hashlib.sha256(data).hexdigest().encode("utf-8")
     token = data + b"." + signature
     return token.decode("utf-8")

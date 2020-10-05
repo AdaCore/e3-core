@@ -80,7 +80,7 @@ from foo.bar2.module3 import name1
     )
     # from foo.bar2.module import name2 - not modified
 
-    expected += " ImportFrom(module='foo.bar2.module3'," " names=[], level=0)])"
+    expected += " ImportFrom(module='foo.bar2.module3', names=[], level=0)])"
     # from foo.bar2.module3 import name1 -- module matching .*3
 
     ast_dump = ast.dump(node)
