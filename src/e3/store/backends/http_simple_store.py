@@ -42,6 +42,7 @@ class HTTPSimpleStore(Store):
         """Return resource metadata directly computed from the query.
 
         There is no remote server involved here.
+
         :param query: a dict containing two keys 'sha' and 'url'. sha is the
             sha1sum of the resource and url is the remote url
         """

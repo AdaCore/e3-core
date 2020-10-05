@@ -42,12 +42,12 @@ class ConfigSection:
         """Load a section of the configuration file.
 
         To load a new section, subclass ConfigSection and document the
-        fields that you expect to parse, e.g.
+        fields that you expect to parse, e.g.::
 
-        @dataclass
-        class MyConfig(ConfigSection):
-            title = "my_config_subsection"
-            option : str = "default value"
+            @dataclass
+            class MyConfig(ConfigSection):
+                title = "my_config_subsection"
+                option : str = "default value"
 
         my_config = MyConfig.load()
 

@@ -194,7 +194,8 @@ class Checkout(Action):
             - 'url': The repository URL;
             - 'revision': The revision to checkout;
             - 'vcs': The Version Control System kind (a string).
-                At present, only 'git' is supported.
+
+        At present, only 'git' is supported.
         """
         super().__init__(uid=f"checkout.{repo_name}", data=(repo_name, repo_data))
         self.repo_name = repo_name

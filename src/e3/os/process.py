@@ -613,7 +613,7 @@ class File:
         """Create a new File.
 
         :param name: can be PIPE, STDOUT, a filename string, an opened fd, a
-            python file object, or a command to pipe (if starts with |)
+            python file object, or a command to pipe (if starts with ``|``)
         :param mode: can be 'r' or 'w' if name starts with + the mode will be
             a+
         """

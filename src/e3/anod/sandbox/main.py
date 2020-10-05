@@ -32,8 +32,8 @@ def main(get_argument_parser: bool = False) -> Optional[ArgumentParser]:
     This function creates the main code for the entry-point e3-sandbox. To
     create new actions it is possible to create new sandbox plugins. e.g. to
     add a new plugin ``foo`` from a package ``e3-contrib``, derives the
-    class :class:`SandBoxAction` and register the extension by adding in
-    :file:`e3-contrib/setup.py`::
+    class py:class:`SandBoxAction` and register the extension by adding in
+    py:file:`e3-contrib/setup.py`::
 
         entry_points={
             'e3.anod.sandbox.sandbox_action': [

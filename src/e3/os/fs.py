@@ -153,7 +153,7 @@ def df(path: str, full: bool = False) -> Union[int, Tuple]:
     :param full: if True return full disk information otherwise only
         space left.
 
-    :return: either space left in Mo or a :py:func:`collections.namedtuple`
+    :return: either space left in Mo or a py:meth:`collections.namedtuple`
         with ``total``, ``used`` and ``free`` attributes. Each attribute is
         an int representing Mo.
     """
