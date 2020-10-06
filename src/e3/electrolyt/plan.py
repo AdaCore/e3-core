@@ -14,7 +14,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Dict, List, Type, Optional
+    from typing import Any, Callable, Dict, List, Optional, Type
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
 
@@ -108,12 +108,29 @@ class Plan:
         exec(code, self.mod.__dict__)
 
 
+class PlanActionEnv(BaseEnv):
+    """Store the action environment.
+
+    This includes the build/host/target as well as additional parameters
+    coming from the plan.
+    """
+
+    action: str
+    plan_line: str
+    plan_args: Dict[str, Any]
+    plan_call_args: Dict[str, Any]
+    push_to_store: bool
+    default_build: bool
+    module: Optional[str]
+    source_packages: Optional[List[str]]
+
+
 class PlanContext:
     """Context in which a Plan is executed."""
 
     def __init__(
         self,
-        stack: Optional[List[BaseEnv]] = None,
+        stack: Optional[List[PlanActionEnv]] = None,
         plan: Optional[Plan] = None,
         ignore_disabled: bool = True,
         server: Optional[BaseEnv] = None,
@@ -121,11 +138,12 @@ class PlanContext:
         host: Optional[str] = None,
         target: Optional[str] = None,
         enabled: bool = True,
+        default_push_to_store: bool = False,
         **kwargs: Any,
     ):
         """Initialize an execution context or a scope.
 
-        :param stack: stack of BaseEnv object that keep track of scopes. Used
+        :param stack: stack of PlanAction object that keep track of scopes. Used
             only internally. User instantiation of PlanContext should be done
             with stack set to None.
         :param plan: the plan to execute
@@ -138,10 +156,14 @@ class PlanContext:
         :param host: see e3.env.BaseEnv.set_env
         :param target: see e3.env.BaseEnv.set_env
         :param enabled: whether the plan line is enabled or disabled
+        :param default_push_to_store: whether pushing packages in the package store
+            is enabled or not, this is the default value and can be overriden
+            by setting push_to_store attribute
         :param kwargs: additional data for the current scope/context
         """
         self.ignore_disabled = ignore_disabled
         if stack:
+            assert server is None, "passing server and stack is not supported"
             # This is a scope creation, so copy current env
             self.stack = stack
             self.plan = plan
@@ -156,12 +178,16 @@ class PlanContext:
             self.stack = []
             if server is not None:
                 # This is a new context
-                new = server.copy(build, host, target)
+                new = PlanActionEnv.from_env(server)
             else:
                 # This is a new context with no server information. In that
                 # case retrieve defaults for the local machine.
-                new = BaseEnv()
+                new = PlanActionEnv()
                 new.set_env(build, host, target)
+            new.push_to_store = default_push_to_store
+            new.default_build = False
+            new.module = None
+            new.source_packages = None
             new.enabled = enabled
 
         # Store additional data
@@ -177,7 +203,7 @@ class PlanContext:
         # works also because all scopes refer to the same stack of env
         # (because the object is mutable).
         self.actions: Dict[str, Callable] = {}
-        self.action_list: List[BaseEnv] = []
+        self.action_list: List[PlanActionEnv] = []
 
     def register_action(self, name: str, fun: Callable) -> None:
         """Register a function that correspond to an action.
@@ -190,7 +216,7 @@ class PlanContext:
         self.actions[name] = fun
 
     @property
-    def env(self) -> BaseEnv:
+    def env(self) -> PlanActionEnv:
         """Get environment for current scope.
 
         :return: the current scope environment
@@ -208,7 +234,7 @@ class PlanContext:
 
     def execute(
         self, plan: Plan, entry_point_name: str, verify: bool = False
-    ) -> List[BaseEnv]:
+    ) -> List[PlanActionEnv]:
         """Execute a plan.
 
         :param plan: the plan to execute

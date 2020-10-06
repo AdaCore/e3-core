@@ -443,15 +443,7 @@ class TestContext:
 
         # Execute the plan and create anod actions
         for action in cm.execute(myplan, "myserver"):
-            primitive = action.action.replace("anod_", "", 1)
-            ac.add_anod_action(
-                name=action.module,
-                env=current_env if action.default_build else action,
-                primitive=primitive,
-                qualifier=action.qualifier,
-                plan_line=action.plan_line,
-                plan_args=action.plan_args,
-            )
+            ac.add_plan_action(action)
 
         # Create a reverse tag to have a working get_context
         # when looking for parameters such as weathers we want to
@@ -566,15 +558,7 @@ class TestContext:
 
         # Execute the plan and create anod actions
         for action in cm.execute(myplan, "myserver"):
-            primitive = action.action.replace("anod_", "", 1)
-            ac.add_anod_action(
-                name=action.module,
-                env=current_env if action.default_build else action,
-                primitive=primitive,
-                qualifier=action.qualifier,
-                plan_line=action.plan_line,
-                plan_args=action.plan_args,
-            )
+            ac.add_plan_action(action)
 
         for uid, _ in ac.tree:
             if uid.endswith("sources"):
@@ -634,15 +618,7 @@ class TestContext:
             # Execute the plan and create anod actions
             # Execute the plan and create anod actions
             for action in cm.execute(myplan, "myserver"):
-                primitive = action.action.replace("anod_", "", 1)
-                ac.add_anod_action(
-                    name=action.module,
-                    env=current_env if action.default_build else action,
-                    primitive=primitive,
-                    qualifier=action.qualifier,
-                    plan_line=action.plan_line,
-                    plan_args=action.plan_args,
-                )
+                ac.add_plan_action(action)
 
             for uid, _ in ac.tree:
                 if uid.endswith("build"):
@@ -651,15 +627,7 @@ class TestContext:
 
             with pytest.raises(SchedulingError):
                 for action in cm.execute(myplan, "myserver"):
-                    primitive = action.action.replace("anod_", "", 1)
-                    ac.add_anod_action(
-                        name=action.module,
-                        env=current_env if action.default_build else action,
-                        primitive=primitive,
-                        qualifier=action.qualifier,
-                        plan_line=action.plan_line,
-                        plan_args=action.plan_args,
-                    )
+                    ac.add_plan_action(action)
 
     def test_plan_call_args(self):
         """Retrieve call args values."""

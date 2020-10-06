@@ -27,6 +27,7 @@ from e3.anod.error import AnodError
 from e3.anod.package import UnmanagedSourceBuilder
 from e3.anod.spec import has_primitive
 from e3.collection.dag import DAG
+from e3.electrolyt.plan import PlanActionEnv
 from e3.env import BaseEnv
 from e3.error import E3Error
 
@@ -253,6 +254,35 @@ class AnodContext:
                 )
         self.tree.add_tag(vertex_id, {"plan_line": plan_line, "plan_args": plan_args})
 
+    def add_plan_action(
+        self, plan_action_env: PlanActionEnv, sandbox: Optional[SandBox] = None
+    ) -> Optional[Action]:
+        """Add an Anod action to the context.
+
+        :param plan_action_env: the PlanActionEnv object as returned by PlanContext
+        :param sandbox: the SandBox object that will be used to run commands
+        :return: the root added action or None if this is not an anod action
+        """
+        action_name = plan_action_env.action
+        if not action_name.startswith("anod_") or plan_action_env.module is None:
+            return None
+
+        primitive = action_name.replace("anod_", "", 1)
+
+        return self.add_anod_action(
+            name=plan_action_env.module,
+            env=self.default_env
+            if plan_action_env.default_build
+            else BaseEnv.from_env(plan_action_env),
+            primitive=primitive,
+            qualifier=plan_action_env.qualifier,
+            source_packages=plan_action_env.source_packages,
+            upload=plan_action_env.push_to_store,
+            plan_line=plan_action_env.plan_line,
+            plan_args=plan_action_env.plan_args,
+            sandbox=sandbox,
+        )
+
     def add_anod_action(
         self,
         name: str,
@@ -265,10 +295,13 @@ class AnodContext:
         plan_args: Optional[dict] = None,
         sandbox: Optional[SandBox] = None,
     ) -> Action:
-        """Add an Anod action to the context.
+        """Add an Anod action to the context (internal function).
+
+        Note that using add_anod_action should be avoided when possible
+        and replaced by a call to add_plan_action.
 
         :param name: spec name
-        :param env: spec environment
+        :param env: context in which to load the spec
         :param primitive: spec primitive
         :param qualifier: qualifier
         :param source_packages: if not empty only create the specified list of
@@ -278,6 +311,7 @@ class AnodContext:
         :param plan_line: corresponding line:linenumber in the plan
         :param plan_args: action args after plan execution, taking into
             account plan context (such as with defaults(XXX):)
+        :param sandbox: the SandBox object that will be used to run commands
         :return: the root added action
         """
         # First create the subtree for the spec
@@ -349,7 +383,7 @@ class AnodContext:
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
-        :param env: spec environment
+        :param env: context in which to load the spec
         :param primitive: spec primitive
         :param qualifier: qualifier
         :param source_packages: if not empty only create the specified list of
