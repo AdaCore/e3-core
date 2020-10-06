@@ -231,7 +231,7 @@ class Run:
         cwd: Optional[str] = None,
         output: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = PIPE,
         error: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = STDOUT,
-        input: Union[DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,
+        input: Union[DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,  # noqa: A002
         bg: bool = False,
         timeout: Optional[int] = None,
         env: Optional[dict] = None,
