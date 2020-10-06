@@ -91,8 +91,8 @@ class Anod:
         class MyProduct(Anod):
             pass
 
-    All attributes starting with spec_ are reserved by the driver and must not
-    be overwritten.
+    All attributes starting with ``spec_`` are reserved by the driver and must
+    not be overwritten.
 
     Several attributes are set when loading the spec:
 

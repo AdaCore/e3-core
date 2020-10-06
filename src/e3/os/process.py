@@ -231,7 +231,7 @@ class Run:
         cwd: Optional[str] = None,
         output: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = PIPE,
         error: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = STDOUT,
-        input: Union[DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,
+        input: Union[DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,  # noqa: A002
         bg: bool = False,
         timeout: Optional[int] = None,
         env: Optional[dict] = None,
@@ -613,7 +613,7 @@ class File:
         """Create a new File.
 
         :param name: can be PIPE, STDOUT, a filename string, an opened fd, a
-            python file object, or a command to pipe (if starts with |)
+            python file object, or a command to pipe (if starts with ``|``)
         :param mode: can be 'r' or 'w' if name starts with + the mode will be
             a+
         """

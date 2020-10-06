@@ -198,7 +198,7 @@ class CheckoutManager:
             p = g.git_cmd(["status", "--porcelain"], output=PIPE)
             if p.out:
                 logger.error(
-                    "Repository %s is locally modified, saving " "diff in stash\n%s",
+                    "Repository %s is locally modified, saving diff in stash\n%s",
                     self.name,
                     p.out,
                 )
@@ -247,8 +247,7 @@ class CheckoutManager:
                 old_commit = working_copy.current_revision
             except SVNError:
                 logger.error(
-                    "Unable to get SVN informations form the %s " "working dir",
-                    self.name,
+                    "Unable to get SVN informations form the %s working dir", self.name,
                 )
         try:
             # Remove local change and update the working copy
@@ -262,7 +261,7 @@ class CheckoutManager:
             new_commit = working_copy.current_revision
             if local_change_detected:
                 logger.error(
-                    "Repository %s was locally modified," " clean done.", self.name
+                    "Repository %s was locally modified, clean done.", self.name
                 )
             if old_commit == new_commit:
                 result = ReturnValue.unchanged

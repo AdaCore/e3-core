@@ -615,7 +615,7 @@ class DAG:
             pruned. The function receive as parameter the dag and the node id
         :param preserve_context: if True ensure that context is preserved
             (i.e: that calls to get_context will return the same value for
-             both current graph and pruned graph). This means that any attempt
+            both current graph and pruned graph). This means that any attempt
             to remove a node containing a tag will result in a DAGError.
         :return: a new DAG
         """

@@ -101,7 +101,7 @@ class Main:
                 default=None,  # to force autodetection
                 help="Set the target platform, target os version, "
                 "target machine, and target mode",
-                metavar="TARGET[,TARGET_VERSION[,TARGET_MACHINE[," "TARGET_MODE]]]",
+                metavar="TARGET[,TARGET_VERSION[,TARGET_MACHINE[,TARGET_MODE]]]",
             )
             # We add a default to a fake option as a way to encode
             # the fact that this parser supports the standard

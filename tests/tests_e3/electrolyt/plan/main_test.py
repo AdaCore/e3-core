@@ -120,7 +120,7 @@ def test_entry_points():
         '    build("b")',
         "",
         '@ms_preset(name="foo")',
-        "def run_foo():" '    build("c")',
+        'def run_foo():    build("c")',
     ]
 
     myplan = _get_plan({}, plan_content)

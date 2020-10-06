@@ -162,6 +162,7 @@ class Walk:
               the given action;
             - when fingerprints are in use, execute the given action
               if the fingerprint has changed.
+
         However, child classes may want to override this method
         to implement alternative strategies.
 

@@ -21,7 +21,7 @@ class HTTPSimpleStoreResourceInfo(ResourceInfo):
         resource_sha = e3.hash.sha1(resource_path)
         if resource_sha != self.sha:
             logger.critical(
-                "wrong sha for resource %s " "expecting %s got %s",
+                "wrong sha for resource %s expecting %s got %s",
                 resource_path,
                 self.sha,
                 resource_sha,
@@ -42,6 +42,7 @@ class HTTPSimpleStore(Store):
         """Return resource metadata directly computed from the query.
 
         There is no remote server involved here.
+
         :param query: a dict containing two keys 'sha' and 'url'. sha is the
             sha1sum of the resource and url is the remote url
         """

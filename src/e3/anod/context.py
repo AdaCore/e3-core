@@ -738,7 +738,7 @@ class AnodContext:
 
         :param action: action to consider
         :param decision: decision to resolve
-        :raise SchedulingError
+        :raise: SchedulingError
         """
         if decision.choice is None and decision.expected_choice in (
             Decision.LEFT,

@@ -1,6 +1,7 @@
 """High-Level interface to SVN repository.
 
 Example::
+
     svn = SVNRepository(working_copy='/tmp/working_dir')
     svn.update(url='file:///path_to_local_repo', revision=1,
                force_and_clean=True)
@@ -132,6 +133,7 @@ class SVNRepository:
 
         Add the non-interactive option to all command (accepted on all SVN.
         subcommands from version 1.5).
+
         :param cmd: the command line as a list of string, all None entries will
             be discarded
         :param kwargs: additional parameters to provide to e3.os.process.Run

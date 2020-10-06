@@ -626,7 +626,7 @@ class Env(AbstractBaseEnv):
     Env is a singleton holding the current environment and platform
     information. It is set by e3.main when the --build/--host/--target option
     are passed to the command line and can be then changed by calling
-    :meth:`set_build`, :meth:`set_host`, and :meth:`set_target`.
+    py:meth:`set_build`, py:meth:`set_host`, and py:meth:`set_target`.
     """
 
     # class variable that holds the current environment

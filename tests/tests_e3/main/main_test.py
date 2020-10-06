@@ -85,7 +85,7 @@ def test_mainprog_with_console_logs():
 
 @pytest.mark.skipif(
     sys.platform in ("win32", "sunos5"),
-    reason="Signal handler not set on windows." " Bug in signal handling in solaris",
+    reason="Signal handler not set on windows. Bug in signal handling in solaris",
 )
 def test_sigterm():
     with open("mymain.py", "w") as f:
