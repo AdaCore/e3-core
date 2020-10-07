@@ -10,20 +10,44 @@ from e3.job.walk import Walk
 
 import pytest
 
-# A directory where we have the equivalent of a sandbox; basically,
-# a place where we store some information as we perform the actions
-# of a given DAG.
-SBX_DIR = os.path.join(os.getcwd(), "sbx")
 
-# A place where to store fingerprints...
-FINGERPRINT_DIR = os.path.join(SBX_DIR, "fingerprints")
+class SbxDirs:
+    def __init__(self) -> None:
+        self.sbx_dir = "/dev/null"
+        self.fingerprint_dir = "/dev/null"
+        self.store_dir = "/dev/null"
+        self.sbx_tmp_dir = "/dev/null"
 
-# A directory where download nodes will get their files from.
-STORE_DIR = os.path.join(SBX_DIR, "store")
+    def set_dirs(self, root_dir: str) -> None:
+        # A directory where we have the equivalent of a sandbox;
+        # basically, a place where we store some information as we
+        # perform the actions
+        # of a given DAG.
+        self.sbx_dir = os.path.join(root_dir, "sbx")
 
-# A place where to store anything else that we might need between
-# two runs via the Walk class.
-SBX_TMP_DIR = os.path.join(SBX_DIR, "tmp")
+        # A place where to store fingerprints...
+        self.fingerprint_dir = os.path.join(self.sbx_dir, "fingerprints")
+
+        # A directory where download nodes will get their files from.
+        self.store_dir = os.path.join(self.sbx_dir, "store")
+
+        # A place where to store anything else that we might need
+        # between two runs via the Walk class.
+        self.sbx_tmp_dir = os.path.join(self.sbx_dir, "tmp")
+
+    def delete_sbx(self) -> None:
+        if os.path.exists(self.sbx_dir):
+            rm(self.sbx_dir, True)
+
+    def mkdirs(self) -> None:
+        os.mkdir(self.sbx_dir)
+        os.mkdir(self.fingerprint_dir)
+        os.mkdir(self.store_dir)
+        os.mkdir(self.sbx_tmp_dir)
+
+
+sbx_dirs = SbxDirs()
+
 
 # By convention in this testcase, jobs whose UID start with this prefix
 # will copy a file from STORE_DIR whose name is '<UID minus prefix>.txt'
@@ -45,18 +69,11 @@ def setup_sbx(request):
     a finalizer is put in place to automatically delete that
     directory upon test tear-down.
     """
+    sbx_dirs.set_dirs(root_dir=os.getcwd())
+    request.addfinalizer(sbx_dirs.delete_sbx)
 
-    def delete_sbx():
-        if os.path.exists(SBX_DIR):
-            rm(SBX_DIR, True)
-
-    request.addfinalizer(delete_sbx)
-
-    delete_sbx()
-    os.mkdir(SBX_DIR)
-    os.mkdir(FINGERPRINT_DIR)
-    os.mkdir(STORE_DIR)
-    os.mkdir(SBX_TMP_DIR)
+    sbx_dirs.delete_sbx()
+    sbx_dirs.mkdirs()
 
 
 def job_source_basename(uid: str) -> str:
@@ -85,7 +102,7 @@ def source_fullpath(uid: str) -> str:
 
     :param uid: A unique Job ID.
     """
-    return os.path.join(SBX_TMP_DIR, job_source_basename(uid))
+    return os.path.join(sbx_dirs.sbx_tmp_dir, job_source_basename(uid))
 
 
 def source_store_fullpath(uid: str) -> str:
@@ -94,7 +111,7 @@ def source_store_fullpath(uid: str) -> str:
     :param uid: A unique Job ID.
     """
     assert uid.startswith(DOWNLOAD_JOB_UID_PREFIX)
-    return os.path.join(STORE_DIR, job_source_basename(uid))
+    return os.path.join(sbx_dirs.store_dir, job_source_basename(uid))
 
 
 class DryRunJob(EmptyJob):
@@ -188,7 +205,7 @@ class SimpleWalk(Walk):
 class FingerprintWalk(SimpleWalk):
     @classmethod
     def fingerprint_filename(cls, uid):
-        return os.path.join(FINGERPRINT_DIR, uid)
+        return os.path.join(sbx_dirs.fingerprint_dir, uid)
 
     def compute_fingerprint(self, uid, data, is_prediction=False):
         if "fingerprint_after_job" in uid and is_prediction:
