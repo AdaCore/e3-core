@@ -111,7 +111,7 @@ def patch(
         if p.status != 0:
             raise DiffError(
                 origin="patch",
-                message="running %s < %s in %s failed with %s"
+                message="running %s < %s in %s failed with:\n%s"
                 % (" ".join(cmd), fname, working_dir, p.out),
             )
         logger.debug(p.out)
