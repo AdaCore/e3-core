@@ -290,7 +290,6 @@ def test_interrupt():
 
 @pytest.mark.skipif(psutil is None, reason="require psutil")
 def test_kill_process_tree():
-
     is_appveyor_test = bool(os.environ.get("APPVEYOR"))
     wait_timeout = 3
     if is_appveyor_test:
@@ -303,21 +302,22 @@ def test_kill_process_tree():
     assert p1.status != 2
     assert not p1.is_running()
 
+    time.sleep(2.0)
+
     def get_one_child(idx):
-        pid_file = "child_pid_%d" % idx
-        gen_prog_name = "child_prog_%d" % idx
+        pid_file = f"child_pid_{idx}"
+        gen_prog_name = f"child_prog_{idx}"
         prog = textwrap.dedent(
-            """\
+            f"""\
             import e3.os.process, os, sys, time
             child_cmd = "import os, time;"
-            child_cmd += "f = open('%s', 'w');"
+            child_cmd += "f = open('{pid_file}', 'w');"
             child_cmd += "f.write(str(os.getpid()));"
             child_cmd += "f.close();"
             child_cmd += "time.sleep(60);"
             e3.os.process.Run([sys.executable, '-c', child_cmd])
             time.sleep(60)
             """
-            % pid_file
         )
 
         with open(gen_prog_name, "w") as f:
@@ -332,11 +332,19 @@ def test_kill_process_tree():
                         break
             except OSError:
                 pass
+
             time.sleep(0.1)
+        child_pid = int(child_pid)
         e3.fs.rm(gen_prog_name)
         e3.fs.rm(pid_file)
-        child_process = psutil.Process(int(child_pid))
-        assert parent_process.children()[0].pid == int(child_pid)
+        child_process = psutil.Process(child_pid)
+
+        # Make sure that the child process is indeed a child of parent_process
+        for proc in psutil.Process(parent_process.pid).children(recursive=True):
+            if proc.pid == child_pid:
+                break
+        else:
+            raise AssertionError("issue when trying to get child process")
         return parent_process, child_process
 
     p2, p2_child = get_one_child(1)
