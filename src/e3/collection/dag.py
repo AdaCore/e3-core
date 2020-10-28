@@ -474,7 +474,7 @@ class DAG:
             # is in reality our source node.
             if path_source is None:
                 result[0] = target
-            return result  # type: ignore
+            return result
 
     def check(self) -> None:
         """Check for cycles and inexisting nodes.
