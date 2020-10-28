@@ -28,6 +28,7 @@ class Make:
         makefile: Optional[str] = None,
         exec_dir: Optional[str] = None,
         jobs: Optional[int] = None,
+        make_exe: str = "make",
     ):
         """Initialize a Make object.
 
@@ -36,6 +37,7 @@ class Make:
         :param exec_dir: path to the directory from where the make should be
             called. If None use the anod instance buildspace build dir.
         :param jobs: number of jobs to run in parallel
+        :param make: make executable to use (by default make on the path)
         """
         self.anod_instance = anod_instance
         self.exec_dir = exec_dir
@@ -48,6 +50,7 @@ class Make:
             self.jobs = anod_instance.jobs
         self.var_list = {}  # type: Dict[str, str]
         self.default_target = None  # type: Optional[str]
+        self.make_exe = make_exe
 
     def set_var(self, name: str, value: Union[str, List[str]]) -> None:
         """Set a Make variable.
@@ -109,7 +112,7 @@ class Make:
            - cmd: containing the command line to pass to gnatpython.ex.Run
            - options: options to pass to gnatpython.ex.Run
         """
-        cmd_arg_list = ["make"]
+        cmd_arg_list = [self.make_exe]
 
         if self.makefile is not None:
             cmd_arg_list += ["-f", unixpath(self.makefile)]
