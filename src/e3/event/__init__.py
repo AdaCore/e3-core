@@ -48,7 +48,7 @@ class Event:
       * end_time: time at which the event was closed
     """
 
-    def __init__(self, name: str, uid: Optional[str] = None, **kwargs: Dict[str, str]):
+    def __init__(self, name: str, uid: Optional[str] = None, **kwargs: Dict[str, Any]):
         """Initialize an Event object.
 
         :param name: name of the event (e.g. e3_test)
@@ -70,7 +70,7 @@ class Event:
         self.end_time: Optional[float] = None
 
         for key, value in list(kwargs.items()):
-            self._data[key] = value  # type: ignore
+            self._data[key] = value
 
         self.set_formatter("begin_time", self.format_date)
         self.set_formatter("end_time", self.format_date)
@@ -93,19 +93,19 @@ class Event:
         :param fun: a function that takes the key and the associated value
             and return a dict
         """
-        self._formatters[key] = fun  # type: ignore
+        self._formatters[key] = fun
 
-    def __setattr__(self, name: str, value: str) -> None:
+    def __setattr__(self, name: str, value: Any) -> None:
         """Store all attributes in the self._data dict."""
         # Once the event is closed disallow attributes modifications
         if self._closed:
             raise EventError(f"event {self.name} ({self.uid}) closed")
-        self._data[name] = value  # type: ignore
+        self._data[name] = value
 
-    def __getattr__(self, name: str) -> str:
+    def __getattr__(self, name: str) -> Any:
         """Attributes are retrieved in the _data internal dict."""
         try:
-            return self._data[name]  # type: ignore
+            return self._data[name]
         except KeyError as e:
             raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
@@ -114,7 +114,7 @@ class Event:
 
         :return: a list of tuple (path, sha1(path))
         """
-        return self._attachments  # type: ignore
+        return self._attachments
 
     def attach_file(self, path: str, name: str = "log") -> None:
         """Attach log file to the event.
@@ -127,7 +127,7 @@ class Event:
         """
         if self._closed:
             raise EventError(f"event {self.name} ({self.uid}) closed")
-        self._attachments[name] = (path, e3.hash.sha1(path))  # type: ignore
+        self._attachments[name] = (path, e3.hash.sha1(path))
 
     def close(self) -> None:
         """Close the event. Once done it is not supposed to be modified.
@@ -161,9 +161,9 @@ class Event:
         :return: a dict
         """
         result = {}
-        for key, value in list(self._data.items()):  # type: ignore
+        for key, value in list(self._data.items()):
             if key in self._formatters:
-                d = self._formatters[key](key, value)  # type: ignore
+                d = self._formatters[key](key, value)
                 result.update(d)
             else:
                 result[key] = value
