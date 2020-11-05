@@ -110,9 +110,8 @@ def test_primitive():
 
     with_primitive2.build_space.create()
 
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(AnodError):
         with_primitive2.build()
-    assert "foobar" in str(err.value)
 
     assert with_primitive2.package.name.startswith("mypackage")
 
@@ -121,9 +120,8 @@ def test_primitive():
     assert with_primitive2["PKG_DIR"].endswith("pkg")
 
     with_primitive3.build_space.create()
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(AnodError):
         with_primitive3.build()
-    assert "build fails" in str(err.value)
 
 
 def test_api_version():
