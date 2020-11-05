@@ -52,7 +52,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "e3-core"
-copyright = "2017, AdaCore"
+copyright = "2017, AdaCore"  # noqa: A001
 author = "AdaCore"
 
 # The version info for the project you're documenting, acts as replacement for
