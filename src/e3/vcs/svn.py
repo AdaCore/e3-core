@@ -149,6 +149,11 @@ class SVNRepository:
         if "output" not in kwargs:
             kwargs["output"] = self.log_stream
 
+        if "env" not in kwargs:
+            kwargs["env"] = {"LC_ALL": "C"}
+        else:
+            kwargs["env"]["LC_ALL"] = "C"
+
         p_cmd = [arg for arg in cmd if arg is not None]
         p_cmd.insert(0, self.__class__.svn_bin)
         p_cmd.append("--non-interactive")
