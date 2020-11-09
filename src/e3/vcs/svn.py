@@ -151,6 +151,7 @@ class SVNRepository:
 
         if "env" not in kwargs:
             kwargs["env"] = {"LC_ALL": "C"}
+            kwargs["ignore_environ"] = False
         else:
             kwargs["env"]["LC_ALL"] = "C"
 
