@@ -55,6 +55,7 @@ class Main:
         self,
         name: Optional[str] = None,
         platform_args: bool = False,
+        default_x86_64_on_windows: bool = False,
         argument_parser: Optional[ArgumentParser] = None,
     ):
         """Initialize Main object.
@@ -65,6 +66,8 @@ class Main:
         :param argument_parser: the ArgumentParser to use for parsing
             command-line arguments (if not specified, an ArgumentParser will be
             created by Main)
+        :param default_x86_64_on_windows: set the default build platform to
+            x86_64-windows64 on Windows.
         """
         # On UNIX set a signal handler for SIGTERM that will raise SystemExit
         # This is to let an e3 application enough time to perform
@@ -85,6 +88,7 @@ class Main:
 
         if platform_args:
             plat_group = argument_parser.add_argument_group(title="platform arguments")
+
             plat_group.add_argument(
                 "--build",
                 default=None,  # to force autodetection
@@ -114,6 +118,11 @@ class Main:
             # To avoid clashes with user-defined options, we use a dest
             # name that is improbable in practice.
             argument_parser.set_defaults(e3_main_platform_args_supported=True)
+            e = Env()
+            # we set the default build platform for windows if activated by
+            # the caller
+            if e.build.os.name == "windows" and default_x86_64_on_windows:
+                argument_parser.set_defaults(build="x86_64-windows64")
 
         self.args: Optional[Namespace] = None
         self.argument_parser = argument_parser
