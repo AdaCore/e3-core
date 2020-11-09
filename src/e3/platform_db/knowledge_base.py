@@ -171,5 +171,6 @@ HOST_GUESS: PlatformDBEntry = {
     "x86_64-linux": {"os": "Linux", "cpu": "x86_64"},
     "sparc-solaris": {"os": "SunOS", "cpu": "sparc"},
     "x86-solaris": {"os": "SunOS", "cpu": "i386"},
+    "x86_64-windows64": {"os": "Windows", "cpu": None},
     "x86-windows": {"os": "Windows", "cpu": None},
 }
