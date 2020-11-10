@@ -817,7 +817,7 @@ def kill_process_tree(pid: Union[int, Any], timeout: int = 3) -> bool:
 
     def on_terminate(p: str) -> None:
         """Log info when a process terminate."""
-        logger.info("process %s killed", p)
+        logger.debug("process %s killed", p)
 
     try:
         gone, alive = psutil.wait_procs(
