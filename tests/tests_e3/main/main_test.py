@@ -84,6 +84,26 @@ def test_mainprog_with_console_logs():
 
 
 @pytest.mark.skipif(
+    sys.platform not in ("win32"), reason="This test is only for windows platform",
+)
+def test_x86_64_windows_default():
+    with open("mymain.py", "w") as f:
+        f.write(
+            "\n".join(
+                (
+                    "#!/usr/bin/env python",
+                    "from e3.main import Main",
+                    "m = Main(platform_args=True, default_x86_64_on_windows=True)",
+                    "m.parse_args()",
+                    "print(m.args.build)",
+                )
+            )
+        )
+    p = e3.os.process.Run([sys.executable, "mymain.py", "--nocolor"], timeout=10)
+    assert "x86_64-windows64" in p.out
+
+
+@pytest.mark.skipif(
     sys.platform in ("win32", "sunos5"),
     reason="Signal handler not set on windows. Bug in signal handling in solaris",
 )
