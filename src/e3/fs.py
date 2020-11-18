@@ -6,6 +6,7 @@ import glob
 import hashlib
 import itertools
 import os
+import re
 import shutil
 import stat
 import sys
@@ -16,6 +17,7 @@ import e3
 import e3.error
 import e3.log
 import e3.os.fs
+from e3.collection.trie import Trie
 
 logger = e3.log.getLogger("fs")
 
@@ -594,8 +596,27 @@ def sync_tree(
     # normalize ignore patterns
     if ignore is not None:
         norm_ignore_list = [fn.replace("\\", "/") for fn in ignore]
-        abs_ignore_patterns = [fn for fn in norm_ignore_list if fn.startswith("/")]
-        rel_ignore_patterns = [fn for fn in norm_ignore_list if not fn.startswith("/")]
+
+        ignore_path_suffixes = Trie(use_suffix=True, match_delimiter="/")
+        ignore_path_prefixes = Trie(match_delimiter="/")
+
+        ignore_base_regexp_list = []
+        ignore_base_regexp: Optional[re.Pattern[str]] = None
+
+        for pattern in norm_ignore_list:
+            pk = path_key(pattern)
+            if "/" not in pk:
+                # This is a regexp on the basename using fnmatch.
+                ignore_base_regexp_list.append(fnmatch.translate(pk))
+            elif pattern.startswith("/"):
+                # An absolute path
+                ignore_path_prefixes.add(pk)
+            else:
+                # A relative path
+                ignore_path_suffixes.add(pk)
+
+        if ignore_base_regexp_list:
+            ignore_base_regexp = re.compile("|".join(ignore_base_regexp_list))
 
     def is_in_ignore_list(p: str) -> bool:
         """Check if a file should be ignored.
@@ -610,20 +631,11 @@ def sync_tree(
         pk = path_key(p)
 
         return (
-            any(
-                f
-                for f in abs_ignore_patterns
-                if pk == path_key(f) or pk.startswith(path_key(f + "/"))
-            )
-            or any(
-                f
-                for f in rel_ignore_patterns
-                if pk[1:] == path_key(f) or p.endswith("/" + f)
-            )
-            or any(
-                f
-                for f in norm_ignore_list
-                if "/" not in f and fnmatch.fnmatch(os.path.basename(p), f)
+            ignore_path_prefixes.match(pk)
+            or ignore_path_suffixes.match(pk)
+            or (
+                ignore_base_regexp is not None
+                and bool(re.match(ignore_base_regexp, os.path.basename(pk)))
             )
         )
 
