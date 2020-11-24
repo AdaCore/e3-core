@@ -50,6 +50,20 @@ class S3Handler(EventHandler):
             self.aws_profile if self.aws_profile is not None else "",
         )
 
+    def s3_prefix(self, event: Event) -> str:
+        """Additional prefix that depends on the event itself.
+
+        This hook allows a user to add a prefix that depends on the event itself.
+        Note that sufixes are still automatically computed so distinct events can
+        return the same prefix. The final s3 url used will be
+        {log_s3_url}/{s3_prefix}{automatic suffix} for logs and
+        {event_s3_url}/{s3_prefix}{automatic suffix} for events metadata.
+
+        :param event: an event
+        :return: the prefix
+        """
+        return ""
+
     def send_event(self, event: Event) -> bool:
         def s3_cp(from_path: str, s3_url: str) -> bool:
             cmd = ["s3", "cp", f"--sse={self.sse}"]
@@ -65,7 +79,7 @@ class S3Handler(EventHandler):
         for name, attach in list(event.get_attachments().items()):
             attach_path = attach[0]
             # Push the attachment
-            s3_url = f"{self.log_s3_url}/{event.uid}/{name}"
+            s3_url = f"{self.log_s3_url}/{self.s3_prefix(event)}{event.uid}/{name}"
             success = s3_cp(attach_path, s3_url)
             if not success:
                 return False
@@ -90,7 +104,9 @@ class S3Handler(EventHandler):
             # status. As a consequence the target url in s3 should be different
             # for call to send.
             success = s3_cp(
-                tempfile_name, f"{self.event_s3_url}/{event.uid}-{unique_id()}.s3",
+                tempfile_name,
+                f"{self.event_s3_url}/{self.s3_prefix(event)}"
+                f"{event.uid}-{unique_id()}.s3",
             )
 
             if not success:
