@@ -1,0 +1,22 @@
+diff --git a/file1 b/file1
+new file mode 100644
+index 0000000..4d2254f
+--- /dev/null
++++ b/file1
+@@ -0,0 +1,4 @@
++bla
++bli
++
++blu
+\ No newline at end of file
+diff --git a/file2 b/file2
+new file mode 100644
+index 0000000..43d161b
+--- /dev/null
++++ b/file2
+@@ -0,0 +1,4 @@
++bli
++
++blu
++bla
+\ No newline at end of file
