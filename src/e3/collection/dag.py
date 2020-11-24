@@ -311,6 +311,11 @@ class DAG:
     ) -> None:
         """Add a new vertex into the DAG.
 
+        Note that this function always checks that there is no cycle in the
+        current DAG. If you prefer to insert all your node first and then
+        do the check at the end use update_vertex calls followed by a call
+        to check.
+
         :param vertex_id: the name of the vertex
         :param data: data for the vertex.
         :param predecessors: list of predecessors (vertex ids) or None
@@ -506,25 +511,23 @@ class DAG:
         else:
             self.__has_cycle = False
 
-    def get_closure(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
+    def get_closure(self, vertex_id: VertexID) -> Set[VertexID]:
         """Retrieve closure of predecessors for a vertex.
 
         :param vertex_id: the vertex to inspect
         :return: a set of vertex_id
         """
-        visited: Set[VertexID] = set()
-        closure = self.get_predecessors(vertex_id)
-        closure_len = len(closure)
+        closure: Set[VertexID] = set()
+        to_visit = set(self.get_predecessors(vertex_id))
 
-        while True:
-            for n in closure - visited:
-                visited.add(n)
+        while len(to_visit) > 0:
+            next_visit: Set[VertexID] = set()
+            for n in to_visit:
+                closure.add(n)
+                next_visit |= self.get_predecessors(n)
 
-                closure |= self.get_predecessors(n)
+            to_visit = next_visit - closure
 
-            if len(closure) == closure_len:
-                break
-            closure_len = len(closure)
         return closure
 
     def reverse_graph(self) -> DAG:
