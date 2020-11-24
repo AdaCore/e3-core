@@ -78,8 +78,10 @@ class Main:
 
         if name is not None:
             self.name = name
-        else:
+        elif hasattr(main, "__file__"):
             self.name = os.path.splitext(os.path.basename(main.__file__))[0]
+        else:
+            self.name = "unknown"
 
         if argument_parser is None:
             argument_parser = ArgumentParser()
