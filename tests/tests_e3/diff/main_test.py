@@ -111,3 +111,73 @@ def test_patch_invalid():
 
     with pytest.raises(e3.diff.DiffError):
         e3.diff.patch("patch2.txt", current_dir)
+
+
+def test_patch_git_format():
+    test_dir = os.path.dirname(__file__)
+    file_to_patch = os.path.join(test_dir, "git_file.txt")
+    patch_file = os.path.join(test_dir, "git_diff.patch")
+
+    cwd = os.getcwd()
+
+    e3.fs.cp(file_to_patch, cwd)
+    e3.fs.cp(patch_file, cwd)
+
+    e3.diff.patch("git_diff.patch", cwd)
+    with open(os.path.join(cwd, "git_file.txt")) as fd:
+        content = fd.read()
+    assert "That's nice it's working !" in content
+
+
+def test_patch_git_format_ignore():
+    test_dir = os.path.dirname(__file__)
+    file_to_patch = os.path.join(test_dir, "git_file.txt")
+    patch_file = os.path.join(test_dir, "git_diff.patch")
+
+    cwd = os.getcwd()
+
+    e3.fs.cp(file_to_patch, cwd)
+    e3.fs.cp(patch_file, cwd)
+
+    e3.diff.patch("git_diff.patch", cwd, discarded_files=["a/*"])
+    with open(os.path.join(cwd, "git_file.txt")) as fd:
+        content = fd.read()
+    assert "That's nice it's working !" in content
+
+    e3.fs.cp(file_to_patch, cwd)
+    e3.diff.patch("git_diff.patch", cwd, discarded_files=["git_file.txt"])
+    with open(os.path.join(cwd, "git_file.txt")) as fd:
+        content = fd.read()
+    assert "That's nice it's working !" not in content
+
+
+def test_patch_git_with_headers():
+
+    test_dir = os.path.dirname(__file__)
+    patch_file = os.path.join(test_dir, "git_patch_with_header")
+
+    cwd = os.getcwd()
+
+    e3.fs.cp(patch_file, cwd)
+
+    e3.diff.patch("git_patch_with_header", cwd)
+    assert os.path.isfile("file1")
+    assert os.path.isfile("file2")
+
+    e3.fs.rm("file1")
+    e3.fs.rm("file2")
+    e3.diff.patch("git_patch_with_header", cwd, discarded_files=["file1"])
+    assert not os.path.isfile("file1")
+    assert os.path.isfile("file2")
+
+    e3.fs.rm("file1")
+    e3.fs.rm("file2")
+    e3.diff.patch("git_patch_with_header", cwd, discarded_files=["file2"])
+    assert os.path.isfile("file1")
+    assert not os.path.isfile("file2")
+
+    e3.fs.rm("file1")
+    e3.fs.rm("file2")
+    e3.diff.patch("git_patch_with_header", cwd, discarded_files=["file*"])
+    assert not os.path.isfile("file1")
+    assert not os.path.isfile("file2")

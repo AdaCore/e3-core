@@ -100,14 +100,23 @@ def patch(
     :param filtered_patch: name of the filtered patch. By default append
         '.filtered' to the patch_file name
     """
+    is_git_patch = False
+    with open(patch_file) as f:
+        first_line = f.readline()
+    if first_line.startswith("diff --git"):
+        is_git_patch = True
 
     def apply_patch(fname: str) -> None:
         """Run the patch command.
 
         :raise DiffError: when the patch command fails
         """
-        cmd = ["patch", "-p0", "-f"]
-        p = e3.os.process.Run(cmd, cwd=working_dir, input=fname)
+        if is_git_patch:
+            cmd = ["git", "apply", fname]
+            p = e3.os.process.Run(cmd, cwd=working_dir)
+        else:
+            cmd = ["patch", "-p0", "-f"]
+            p = e3.os.process.Run(cmd, cwd=working_dir, input=fname)
         if p.status != 0:
             raise DiffError(
                 origin="patch",
@@ -116,6 +125,34 @@ def patch(
             )
         logger.debug(p.out)
 
+    def discard_patch(path: str) -> bool:
+        """Check if a file should be discarded.
+
+        :param path: the path as encountered in the patch
+        :return: True if the patch for that file should be discarded
+        """
+        if discarded_files is None:
+            return False
+
+        if path == "/dev/null":
+            return False
+
+        if is_git_patch and len(path) >= 2 and path[0] in "ab" and path[1] in "/\\":
+            path = path[2:]
+
+        if callable(discarded_files):
+            if discarded_files(path):
+                logger.debug(f"patch {patch_file} discarding {path}")
+                return True
+            else:
+                return False
+        else:
+            for pattern in discarded_files:
+                if fnmatch.fnmatch(path, pattern):
+                    logger.debug(f"patch {patch_file} discarding {path}")
+                    return True
+            return False
+
     if discarded_files is None:
         apply_patch(patch_file)
         return
@@ -123,83 +160,104 @@ def patch(
     if filtered_patch is None:
         filtered_patch = patch_file + ".filtered"
 
-    files_to_patch = 0
+    def process_regular_patch() -> int:
+        """Process a patch not formatted with git diff.
 
-    with open(patch_file, newline="") as f, open(
-        filtered_patch, "w", newline=""
-    ) as fdout:
+        :return: the number of files to patch after filtering
+        """
+        assert filtered_patch is not None
+        files_to_patch = 0
+        with open(patch_file, newline="") as f, open(
+            filtered_patch, "w", newline=""
+        ) as fdout:
 
-        # Two line headers that mark beginning of patches
-        header1: Union[Tuple, Tuple[str, str]] = ()
-        header2: Union[Tuple, Tuple[str, str]] = ()
-        header2_regexp = None
-        # whether the current patch line should discarded
-        discard = False
+            # Two line headers that mark beginning of patches
+            header1: Union[Tuple, Tuple[str, str]] = ()
+            header2: Union[Tuple, Tuple[str, str]] = ()
+            header2_regexp = None
+            # whether the current patch line should discarded
+            discard = False
 
-        def write_line(line: str) -> None:
-            """Write line in filtered patch.
+            def write_line(line: str) -> None:
+                """Write line in filtered patch.
 
-            :param l: the line to write
-            """
-            if not discard:
-                fdout.write(line)
-
-        for line in f:
-            if not header1:
-                # Check if we have a potential start of a 2 lines patch header
-                m = re.search(r"^[\*-]{3} ([^ \t\n]+)", line)
-                if m is None:
-                    write_line(line)
-                else:
-                    header1 = (line, m.group(1))
-                    if line[0] == "-":
-                        header2_regexp = r"^\+{3} ([^ \n\t]+)"
-                    else:
-                        header2_regexp = r"^-{3} ([^ \n\t]+)"
-            elif not header2:
-                # Check if line next to a header first line confirm that that
-                # this is the start of a new patch
-                assert header2_regexp is not None
-                m = re.search(header2_regexp, line)
-                if m is None:
-                    write_line(header1[0])
-                    header1 = ()
-                    write_line(line)
-                else:
-                    header2 = (line, m.group(1))
-            else:
-                # This is the start of patch. Decide whether to discard it or
-                # not
-                discard = False
-                path_list = [fn for fn in (header1[1], header2[1]) if fn != "/dev/null"]
-                if callable(discarded_files):
-                    for fn in path_list:
-                        if discarded_files(fn):
-                            logger.debug(f"patch {patch_file} discarding {fn}")
-                            discard = True
-                            break
-                else:
-                    for pattern in discarded_files:
-                        for fn in path_list:
-                            if fnmatch.fnmatch(fn, pattern):
-                                logger.debug(f"patch {patch_file} discarding {fn}")
-                                discard = True
-                                break
-                        if discard:
-                            break
+                :param l: the line to write
+                """
                 if not discard:
-                    files_to_patch += 1
-                    write_line(header1[0])
-                    write_line(header2[0])
-                    write_line(line)
-                header1 = ()
-                header2 = ()
-        # Dangling lines
-        if header1:
-            write_line(header1[0])
-        if header2:  # defensive code
-            write_line(header2[0])
+                    fdout.write(line)
 
+            for line in f:
+                if not header1:
+                    # Check if we have a potential start of a 2 lines patch header
+                    m = re.search(r"^[\*-]{3} ([^ \t\n]+)", line)
+                    if m is None:
+                        write_line(line)
+                    else:
+                        header1 = (line, m.group(1))
+                        if line[0] == "-":
+                            header2_regexp = r"^\+{3} ([^ \n\t]+)"
+                        else:
+                            header2_regexp = r"^-{3} ([^ \n\t]+)"
+                elif not header2:
+                    # Check if line next to a header first line confirm that that
+                    # this is the start of a new patch
+                    assert header2_regexp is not None
+                    m = re.search(header2_regexp, line)
+                    if m is None:
+                        write_line(header1[0])
+                        header1 = ()
+                        write_line(line)
+                    else:
+                        header2 = (line, m.group(1))
+                else:
+                    # This is the start of patch. Decide whether to discard it or
+                    # not
+                    path_list = [header1[1], header2[1]]
+                    discard = any((discard_patch(fn) for fn in path_list))
+
+                    if not discard:
+                        files_to_patch += 1
+                        write_line(header1[0])
+                        write_line(header2[0])
+                        write_line(line)
+                    header1 = ()
+                    header2 = ()
+            # Dangling lines
+            if header1:
+                write_line(header1[0])
+            if header2:  # defensive code
+                write_line(header2[0])
+        return files_to_patch
+
+    def process_git_patch() -> int:
+        """Process a patch formatted with git diff.
+
+        :return: the number of files to patch after filtering
+        """
+        assert filtered_patch is not None
+        files_to_patch = 0
+        with open(patch_file, newline="") as f, open(
+            filtered_patch, "w", newline=""
+        ) as fdout:
+            discard = False
+            for line in f:
+                m = re.match("diff --git ([^ \n\t]+) ([^ \n\t]+)\r?\n?$", line)
+                if m is not None:
+                    # This is the start of a git patch
+                    path_list = [m.group(1), m.group(2)]
+                    discard = any((discard_patch(fn) for fn in path_list))
+
+                    if not discard:
+                        files_to_patch += 1
+
+                if not discard:
+                    fdout.write(line)
+        return files_to_patch
+
+    if is_git_patch:
+        files_to_patch = process_git_patch()
+    else:
+        files_to_patch = process_regular_patch()
     if files_to_patch:
         apply_patch(filtered_patch)
     else:
