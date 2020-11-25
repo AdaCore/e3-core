@@ -131,7 +131,7 @@ def test_git_repo():
     giturl = "file://%s" % working_tree.replace("\\", "/")
     repo2.init(url=giturl, remote="tree1")
     repo2.update(url=giturl, refspec="master")
-    repo2.rev_parse() == repo.rev_parse()
+    assert repo2.rev_parse() == repo.rev_parse()
 
     repo2.fetch_gerrit_notes(url=giturl)
     p = repo2.git_cmd(
