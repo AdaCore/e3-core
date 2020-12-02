@@ -100,11 +100,14 @@ def patch(
     :param filtered_patch: name of the filtered patch. By default append
         '.filtered' to the patch_file name
     """
+    # Detect if we can use git apply. I.e if the patch was generated with git
+    # with default prefixes.
     is_git_patch = False
+
     with open(patch_file) as f:
-        first_line = f.readline()
-    if first_line.startswith("diff --git"):
-        is_git_patch = True
+        content = f.read()
+        if re.search(r"^diff --git a/.* b/", content, flags=re.M):
+            is_git_patch = True
 
     def apply_patch(fname: str) -> None:
         """Run the patch command.

@@ -132,7 +132,7 @@ def test_patch_git_format():
 def test_patch_git_format_ignore():
     test_dir = os.path.dirname(__file__)
     file_to_patch = os.path.join(test_dir, "git_file.txt")
-    patch_file = os.path.join(test_dir, "git_diff.patch")
+    patch_file = os.path.join(test_dir, "*.patch")
 
     cwd = os.getcwd()
 
@@ -149,6 +149,18 @@ def test_patch_git_format_ignore():
     with open(os.path.join(cwd, "git_file.txt")) as fd:
         content = fd.read()
     assert "That's nice it's working !" not in content
+
+    e3.fs.cp(file_to_patch, cwd)
+    e3.diff.patch("git_diff_show.patch", cwd)
+    with open(os.path.join(cwd, "git_file.txt")) as fd:
+        content = fd.read()
+    assert "That's nice it's working !" in content
+
+    e3.fs.cp(file_to_patch, cwd)
+    e3.diff.patch("git_diff_no_prefix.patch", cwd)
+    with open(os.path.join(cwd, "git_file.txt")) as fd:
+        content = fd.read()
+    assert "That's nice it's working !" in content
 
 
 def test_patch_git_with_headers():
