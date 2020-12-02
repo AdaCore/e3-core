@@ -1,0 +1,14 @@
+from e3.anod.spec import Anod
+
+
+class MissingSrcPkgDep(Anod):
+
+    build_deps = [
+        Anod.Dependency("missing_src_pkg_dep_src")]
+
+    build_source_list = [
+        Anod.Source("a-src", dest="", publish=False)]
+
+    @Anod.primitive()
+    def build(self):
+        pass

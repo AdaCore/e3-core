@@ -617,6 +617,10 @@ class AnodContext:
         ):
             spec_dependencies += getattr(spec, f"{primitive}_deps")
 
+        source_spec_dependencies_names = {
+            d.name for d in spec_dependencies if d.kind == "source"
+        }
+
         for e in spec_dependencies:
             if isinstance(e, Dependency):
                 if e.kind == "source":
@@ -676,7 +680,18 @@ class AnodContext:
             for s in source_list:
                 # set source builder
                 if s.name in self.sources:
-                    s.set_builder(self.sources[s.name])
+                    sb_spec, sb = self.sources[s.name]
+                    if (
+                        sb_spec != spec.name
+                        and sb_spec not in source_spec_dependencies_names
+                    ):
+                        logger.warning(
+                            f"{spec.name}.anod ({primitive}): source {s.name}"
+                            f" coming from {sb_spec} but there is no"
+                            f" source_pkg dependency for {sb_spec} in {primitive}_deps",
+                        )
+                    s.set_builder(sb)
+
                 # set other sources to compute source ignore
                 s.set_other_sources(source_list)
                 # add source install node
