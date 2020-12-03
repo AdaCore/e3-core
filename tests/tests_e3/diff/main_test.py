@@ -2,7 +2,7 @@ import os
 
 import e3.diff
 import e3.fs
-
+import e3.archive
 import pytest
 
 
@@ -193,3 +193,14 @@ def test_patch_git_with_headers():
     e3.diff.patch("git_patch_with_header", cwd, discarded_files=["file*"])
     assert not os.path.isfile("file1")
     assert not os.path.isfile("file2")
+
+
+def test_patch_git_binary():
+    test_dir = os.path.dirname(__file__)
+    patch_file = os.path.join(test_dir, "unicorn.patch")
+    cwd = os.getcwd()
+    e3.fs.cp(patch_file, cwd)
+    e3.diff.patch("unicorn.patch", cwd)
+    assert os.path.isfile("unicorn.zip")
+    e3.archive.unpack_archive("unicorn.zip", dest=".")
+    assert os.path.isfile("unicorn.txt")
