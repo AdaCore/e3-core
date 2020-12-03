@@ -660,3 +660,12 @@ class TestContext:
             "The spec duplicate_dep has two dependencies with the same "
             "local_name attribute (spec3)" in str(err)
         )
+
+    def test_add_anod_action_missing_src_pkg_dep(self, caplog):
+        ac = self.create_context()
+        ac.add_anod_action("missing_src_pkg_dep", env=ac.default_env, primitive="build")
+        assert (
+            "source a-src coming from missing_src_pkg_dep_src"
+            " but there is no source_pkg dependency for"
+            " missing_src_pkg_dep_src in build_deps" in caplog.text
+        )
