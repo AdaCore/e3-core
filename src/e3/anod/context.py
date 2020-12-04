@@ -684,6 +684,12 @@ class AnodContext:
                     if (
                         sb_spec != spec.name
                         and sb_spec not in source_spec_dependencies_names
+                        # ignore unmanaged source builders which do not
+                        # create many issues (no need to find the source
+                        # builder to apply patches, update repositories, ...)
+                        # and this creates too many warnings in production that
+                        # we do not have time to fix
+                        and not isinstance(sb, UnmanagedSourceBuilder)
                     ):
                         logger.warning(
                             f"{spec.name}.anod ({primitive}): source {s.name}"

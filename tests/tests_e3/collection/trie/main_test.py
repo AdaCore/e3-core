@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+import pytest
 import time
 from typing import TYPE_CHECKING
 from e3.collection.trie import Trie
@@ -16,6 +17,7 @@ def load_words() -> List[str]:
 ENGLISH_WORD_LIST = load_words()
 
 
+@pytest.mark.xfail(reason="unstable test, duration might be too short")
 def test_simple_word_matching():
     t = Trie(word_list=ENGLISH_WORD_LIST[:10])
 
