@@ -530,9 +530,10 @@ class DAG:
 
         return closure
 
-    def reverse_graph(self) -> DAG:
+    def reverse_graph(self, enable_checks: bool = True) -> DAG:
         """Compute the reverse DAG.
 
+        :param enable_checks: whether to check that "self" is valid (no cycle)
         :return: the reverse DAG (edge inverted)
         """
         result = DAG()
@@ -546,15 +547,16 @@ class DAG:
             result.update_vertex(node, data=self.vertex_data[node], enable_checks=False)
             for p in predecessors:
                 result.update_vertex(p, predecessors=[node], enable_checks=False)
-        try:
-            result.check()
-        except DAGError:
-            # Check detected
-            self.__has_cycle = True
-            raise
-        else:
-            # No cycle in the DAG
-            self.__has_cycle = False
+
+        if enable_checks:
+            try:
+                result.check()
+            except DAGError:
+                # Check detected
+                self.__has_cycle = True
+                raise
+            else:
+                self.__has_cycle = False
         return result
 
     def __iter__(self) -> DAGIterator:

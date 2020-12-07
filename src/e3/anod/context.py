@@ -858,7 +858,7 @@ class AnodContext:
         :param resolver: a function that helps the scheduler resolve cases
             for which a decision should be taken
         """
-        rev = self.tree.reverse_graph()
+        rev = self.tree.reverse_graph(enable_checks=False)
         uploads: List[Tuple[Upload, FrozenSet[VertexID]]] = []
         dag = DAG()
 
