@@ -144,6 +144,15 @@ class DAG:
         self.__vertex_predecessors: Dict[VertexID, FrozenSet[VertexID]] = {}
         self.__vertex_successors: Dict[VertexID, FrozenSet[VertexID]] = {}
         self.__has_cycle: Optional[bool] = None
+        self.__cached_topological_order: Optional[List[Tuple[VertexID, Any]]] = None
+
+    def reset_caches(self) -> None:
+        """Reset caches for DAG properties (cycle and cached topological order).
+
+        This is a mandatory step when changing DAG edges.
+        """
+        self.__has_cycle = None
+        self.__cached_topological_order = None
 
     @property
     def vertex_predecessors(self) -> Dict[VertexID, FrozenSet[VertexID]]:
@@ -181,7 +190,7 @@ class DAG:
         self.__vertex_predecessors[vertex_id] = predecessors
         # Reset successors and cycle check results which are now invalid
         self.__vertex_successors = {}
-        self.__has_cycle = None
+        self.reset_caches()
 
     def get_successors(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
         """Get set of successors for a given vertex.
@@ -394,9 +403,11 @@ class DAG:
             if data is not None:
                 self.vertex_data[vertex_id] = data
 
-        if not enable_checks:
+        if enable_checks:
+            self.__cached_topological_order = None
+        else:
             # DAG modified without cycle checks, discard cached result
-            self.__has_cycle = None
+            self.reset_caches()
 
     def shortest_path(
         self, source: VertexID, target: VertexID
@@ -502,14 +513,17 @@ class DAG:
                     origin="DAG.check",
                 )
         # raise DAGError if cycle
+        topological_order = []
         try:
-            for _ in DAGIterator(self):
-                pass
+            for vertex_id, data in DAGIterator(self):
+                if vertex_id is not None:
+                    topological_order.append((vertex_id, data))
         except DAGError:
             self.__has_cycle = True
             raise
         else:
             self.__has_cycle = False
+            self.__cached_topological_order = topological_order
 
     def get_closure(self, vertex_id: VertexID) -> Set[VertexID]:
         """Retrieve closure of predecessors for a vertex.
@@ -548,6 +562,15 @@ class DAG:
             for p in predecessors:
                 result.update_vertex(p, predecessors=[node], enable_checks=False)
 
+        # The reversed topological order for "self" is a valid topological
+        # order for "result".
+        result.__has_cycle = self.__has_cycle
+        result.__cached_topological_order = (
+            None
+            if self.__cached_topological_order is None
+            else list(reversed(self.__cached_topological_order))
+        )
+
         if enable_checks:
             try:
                 result.check()
@@ -557,10 +580,15 @@ class DAG:
                 raise
             else:
                 self.__has_cycle = False
+
         return result
 
-    def __iter__(self) -> DAGIterator:
-        return DAGIterator(self)
+    def __iter__(self) -> Iterator[Tuple[VertexID, Any]]:
+        return (
+            iter(DAGIterator(self))
+            if self.__cached_topological_order is None
+            else iter(self.__cached_topological_order)
+        )
 
     def __contains__(self, vertex_id: VertexID) -> bool:
         """Check if a vertex is present in the DAG."""
