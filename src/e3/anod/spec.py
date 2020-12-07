@@ -23,6 +23,7 @@ SUPPORTED_API = (__version__, "1.5")
 # only the version 1.4 and 1.5. Default is still 1.4
 
 logger = e3.log.getLogger("anod")
+spec_logger = e3.log.getLogger("anod.spec")
 
 
 if TYPE_CHECKING:
@@ -183,7 +184,7 @@ class Anod:
         self.__build_space: Optional[BuildSpace] = None
 
         # Default spec logger
-        self.log = e3.log.getLogger("anod.spec")
+        self.log = spec_logger
 
         # Set spec environment
         self.env = e3.env.BaseEnv.from_env(env)
