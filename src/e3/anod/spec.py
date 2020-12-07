@@ -78,6 +78,26 @@ def has_primitive(anod_instance: Anod, name: str) -> bool:
     return is_primitive
 
 
+def fetch_attr(instance: Any, name: str, default_value: Any) -> Any:
+    """Return an attribute or the default value if missing.
+
+    Unlike `getattr(instance, name, default_value)`, this works only on
+    attributes present in the class (so class attributes or properties) and
+    this does not hide AttributeError exceptions that getting an existing
+    attribute might raise.
+    """
+    # Singleton used to determine whether call to gettattr returns the default
+    # value (i.e. attribute is missing) or just returns the attribute value (it
+    # could be None).
+    sentinel = object()
+
+    return (
+        default_value
+        if getattr(type(instance), name, sentinel) is sentinel
+        else getattr(instance, name)
+    )
+
+
 class Anod:
     """Anod base class.
 
@@ -186,7 +206,8 @@ class Anod:
         self.qualifier = qualifier
 
         # Default build space name is the spec name
-        if "build_space_name" not in dir(self):
+        build_space_name = fetch_attr(self, "build_space_name", None)
+        if build_space_name is None:
             self.build_space_name = self.name
 
         # UID of the spec instance
