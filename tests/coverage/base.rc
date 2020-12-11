@@ -3,8 +3,7 @@ branch = False
 # we can probably activate it once we have more coverage
 
 [report]
-fail_under = 60
-# ideally should be around 90, work in progress
+fail_under = 94
 exclude_lines =
     all: no cover
     if TYPE_CHECKING:
