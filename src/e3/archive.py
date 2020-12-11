@@ -59,7 +59,7 @@ class E3ZipFile(zipfile.ZipFile):
                 attr = member.external_attr >> 16 & 0x1FF
                 if attr != 0:
                     os.chmod(result, attr)
-            except AttributeError:
+            except AttributeError:  # defensive code
                 pass
         return result
 
