@@ -259,13 +259,6 @@ class Anod:
             name=self.build_space_name, platform=self.env.platform
         )
 
-    def bind_to_config(self, config: dict) -> None:
-        """Bind an Anod instance to a config.
-
-        :param config: a dictionary-like object
-        """
-        self._config = config
-
     def load_config_file(
         self,
         extended: bool = False,
