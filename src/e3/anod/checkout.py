@@ -15,7 +15,8 @@ from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Optional, Tuple
+    from typing import Callable, List, Literal, Optional, Tuple, Union
+    from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.checkout")
 
@@ -52,7 +53,12 @@ class CheckoutManager:
         self.metadata_file = self.working_dir + "_checkout.json"
         self.changelog_file = self.working_dir + "_changelog.json"
 
-    def update(self, vcs: str, url: str, revision: Optional[str] = None) -> ReturnValue:
+    def update(
+        self,
+        vcs: Union[Literal["git"], Literal["svn"], Literal["external"]],
+        url: str,
+        revision: Optional[str] = None,
+    ) -> ReturnValue:
         """Update content of the working directory.
 
         :param vcs: vcs kind
@@ -73,8 +79,7 @@ class CheckoutManager:
         elif vcs == "external":
             update = self.update_external
         else:
-            logger.error(f"Invalid repository type: {vcs}")
-            return ReturnValue.failure
+            assert_never()
 
         result, old_commit, new_commit = update(url=url, revision=revision)
 
