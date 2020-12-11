@@ -129,7 +129,7 @@ class CheckoutManager:
                     f"/{f.strip().rstrip('/')}" for f in ignore_list_lines.splitlines()
                 ]
                 logger.debug("Ignore in external: %s", ignore_list)
-            except Exception:
+            except Exception:  # defensive code
                 # don't crash on exception
                 pass
 
@@ -186,7 +186,7 @@ class CheckoutManager:
             remote_list = g.git_cmd(["remote"], output=PIPE).out.splitlines()
             if remote_name not in remote_list:
                 g.git_cmd(["remote", "add", remote_name, url])
-        except Exception:
+        except Exception:  # defensive code
             # Ignore exception as it probably means that remote already exist
             # In case of real error the failure will be detected later.
             pass
@@ -209,9 +209,12 @@ class CheckoutManager:
                 )
                 g.git_cmd(["stash", "save", "-u"])
 
-            if old_commit == new_commit:
-                result = ReturnValue.unchanged
-            elif self.compute_changelog:
+            result = (
+                ReturnValue.unchanged
+                if old_commit == new_commit
+                else ReturnValue.success
+            )
+            if self.compute_changelog:
                 # Fetch the change log and dump it into the changelog file
                 with closing(tempfile.NamedTemporaryFile(mode="w", delete=False)) as fd:
                     g.write_log(fd, rev_range=f"{old_commit}..{new_commit}")
@@ -224,10 +227,6 @@ class CheckoutManager:
 
                 with open(self.changelog_file, "w") as fd:
                     json.dump(commits, fd)
-                # We have removed local changes or updated the git repository
-                result = ReturnValue.success
-            else:
-                result = ReturnValue.success
 
         except GitError:
             logger.exception(f"Error during git update {self.name}")
