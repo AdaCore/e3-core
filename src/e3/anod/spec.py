@@ -26,7 +26,18 @@ logger = e3.log.getLogger("anod")
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, IO, List, Optional, Sequence, Tuple, Union
+    from typing import (
+        Any,
+        Callable,
+        Dict,
+        IO,
+        List,
+        Literal,
+        Optional,
+        Sequence,
+        Tuple,
+        Union,
+    )
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
@@ -34,6 +45,20 @@ if TYPE_CHECKING:
 
     import e3.anod.package
     import e3.anod.sandbox
+
+    BUILD_PRIMITIVE = Literal["build"]
+    DOWNLOAD_PRIMITIVE = Literal["download"]
+    INSTALL_PRIMITIVE = Literal["install"]
+    TEST_PRIMITIVE = Literal["test"]
+    SOURCE_PRIMITIVE = Literal["source"]
+
+    # Anod Dependency can target a build, install, or source
+    DEPENDENCY_PRIMITIVE = Union[
+        BUILD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE,
+    ]
+
+    # Supported primitivies are build, install, source, and test
+    PRIMITIVE = Union[DEPENDENCY_PRIMITIVE, TEST_PRIMITIVE]
 
 
 def check_api_version(version: str) -> None:
@@ -60,8 +85,12 @@ def parse_command(command: Sequence[str], build_space: BuildSpace) -> List[str]:
     return [e3.text.format_with_dict(c, cmd_dict) for c in command]
 
 
-def has_primitive(anod_instance: Anod, name: str) -> bool:
+def has_primitive(
+    anod_instance: Anod, name: Union[Literal["download"], PRIMITIVE]
+) -> bool:
     """Return True if the primitive `name` is supported.
+
+    Note that download is currently considered as a primitive in that context.
 
     :param anod_instance: an Anod instance
     :param name: name of the primitive ('build', 'install'...)
@@ -143,7 +172,11 @@ class Anod:
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
     def __init__(
-        self, qualifier: str, kind: str, jobs: int = 1, env: Optional[BaseEnv] = None
+        self,
+        qualifier: str,
+        kind: PRIMITIVE,
+        jobs: int = 1,
+        env: Optional[BaseEnv] = None,
     ):
         """Initialize an Anod instance.
 

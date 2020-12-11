@@ -7,8 +7,9 @@ import e3.anod.error
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, Hashable, Optional
-    from e3.anod.spec import Anod
+    from typing import Any, Hashable, Literal, Optional, Union
+    from e3.anod.spec import Anod, DEPENDENCY_PRIMITIVE
+    from e3.mypy import assert_never
 
 
 class BuildVar:
@@ -30,6 +31,9 @@ class BuildVar:
 
 
 class Dependency:
+
+    kind: DEPENDENCY_PRIMITIVE
+
     def __init__(
         self,
         name: str,
@@ -39,7 +43,9 @@ class Dependency:
         build: Optional[str] = None,
         qualifier: Optional[str] = None,
         local_name: Optional[str] = None,
-        require: str = "build_tree",
+        require: Union[
+            Literal["build_tree"], Literal["installation"], Literal["source_pkg"]
+        ] = "build_tree",
         track: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -80,11 +86,14 @@ class Dependency:
                 "require should be build_tree, installation or source_pkg"
                 " not %s." % require
             )
-        self.kind = {
-            "build_tree": "build",
-            "installation": "install",
-            "source_pkg": "source",
-        }[require]
+        if require == "build_tree":
+            self.kind = "build"
+        elif require == "installation":
+            self.kind = "install"
+        elif require == "source_pkg":
+            self.kind = "source"
+        else:
+            assert_never()
         self.track = track
 
     def env(self, parent: Anod, default_env: BaseEnv) -> BaseEnv:

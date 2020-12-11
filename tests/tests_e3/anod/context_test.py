@@ -429,12 +429,19 @@ class TestContext:
         for a in ("anod_build", "anod_install", "anod_source", "anod_test"):
             cm.register_action(a, anod_action)
 
+        # Also register unsupported actions to verify that this does not
+        # crash the plan parser
+        cm.register_action("anod_foo", anod_action)
+        cm.register_action("foo", lambda: None)
+
         # Create a simple plan
         content = [
             "def myserver():",
             '    anod_build("spec12", weathers="foo")',
             '    anod_build("spec10", weathers="foo")',
             '    anod_build("spec11", weathers="bar")',
+            '    anod_foo("spec666")',
+            "    foo()",
         ]
         with open("plan.txt", "w") as f:
             f.write("\n".join(content))
