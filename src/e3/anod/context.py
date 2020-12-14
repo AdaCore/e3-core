@@ -25,7 +25,7 @@ from e3.anod.action import (
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
 from e3.anod.package import UnmanagedSourceBuilder
-from e3.anod.spec import has_primitive
+from e3.anod.spec import has_primitive, fetch_attr
 from e3.collection.dag import DAG
 from e3.electrolyt.plan import PlanActionEnv
 from e3.env import BaseEnv
@@ -609,13 +609,8 @@ class AnodContext:
                             co = Checkout(checkout, self.repo.repos[checkout])
                             add_action(co, result)
 
-        # Look for dependencies
-        spec_dependencies = []
-        if (
-            f"{primitive}_deps" in dir(spec)
-            and getattr(spec, f"{primitive}_deps") is not None
-        ):
-            spec_dependencies += getattr(spec, f"{primitive}_deps")
+        # Look for dependencies. Consider that "None" means "no dependency".
+        spec_dependencies = list(fetch_attr(spec, f"{primitive}_deps", None) or [])
 
         source_spec_dependencies_names = {
             d.name for d in spec_dependencies if d.kind == "source"
@@ -675,8 +670,8 @@ class AnodContext:
                 self.connect(result, child_action)
 
         # Look for source dependencies (i.e sources needed)
-        if f"{primitive}_source_list" in dir(spec):
-            source_list = getattr(spec, f"{primitive}_source_list")
+        source_list = fetch_attr(spec, f"{primitive}_source_list", None)
+        if source_list is not None:
             for s in source_list:
                 # set source builder
                 if s.name in self.sources:
@@ -863,7 +858,7 @@ class AnodContext:
         :param resolver: a function that helps the scheduler resolve cases
             for which a decision should be taken
         """
-        rev = self.tree.reverse_graph()
+        rev = self.tree.reverse_graph(enable_checks=False)
         uploads: List[Tuple[Upload, FrozenSet[VertexID]]] = []
         dag = DAG()
 
