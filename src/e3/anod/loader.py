@@ -264,7 +264,7 @@ class AnodModule:
                 self.anod_class.api_version = repository.api_version  # type: ignore
                 return value
 
-        logger.error("spec %s does not contains an Anod subclass", self.name)
+        logger.error(f"spec {self.name} does not contains an Anod subclass")
         raise SandBoxError(f"cannot find Anod subclass in {self.path}", "load")
 
 
