@@ -241,6 +241,13 @@ class AnodModule:
                 and value.__module__ == mod_name
                 and "Anod" in (k.__name__ for k in value.__mro__)
             ):
+                # Reject class named "Anod" this is reserved to the base
+                # class and can cause some issues when reused
+                if value.__name__ == "Anod":
+                    raise SandBoxError(
+                        f"{self.name}.anod must not use Anod as a class name", "load"
+                    )
+
                 # This class is a child of Anod so register it.
                 # Note that even if we won't use directly the
                 # module we need to keep a reference on it in order
