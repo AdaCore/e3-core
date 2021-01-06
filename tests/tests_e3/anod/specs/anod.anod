@@ -3,7 +3,7 @@ import os
 import e3.anod.spec
 
 
-class Anod(e3.anod.spec.Anod):
+class Anod_(e3.anod.spec.Anod):
 
     def setenv(self):
         """Add the install directory to PATH."""

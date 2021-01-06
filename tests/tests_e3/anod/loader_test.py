@@ -143,3 +143,10 @@ class TestLoader:
         anod_class = spec_repo.load("parent")
         anod_instance = anod_class("", "build")
         assert anod_instance["PKG_DIR"] == "unknown"
+
+    def test_reuse_anod(self):
+        """Reject spec reusing Anod class name."""
+        spec_repo = AnodSpecRepository(self.spec_dir)
+        with pytest.raises(SandBoxError) as err:
+            spec_repo.load("reuse_anod")
+        assert "must not use Anod" in str(err)
