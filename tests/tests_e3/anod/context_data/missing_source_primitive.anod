@@ -1,0 +1,14 @@
+from e3.anod.spec import Anod
+
+
+class MissingSourcePrimitive(Anod):
+    """Missing source_pkg_build (source primitive), so shouldn't be able to perform
+    `anod source`"""
+
+    @Anod.primitive()
+    def build(self):
+        print("build")
+
+    @Anod.primitive()
+    def install(self):
+        print("install")
