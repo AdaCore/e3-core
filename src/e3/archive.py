@@ -21,9 +21,21 @@ import e3.os.fs
 
 if TYPE_CHECKING:
     from typing import Callable, List, Literal, Optional, Sequence, Union
+    from e3.mypy import assert_never
 
     UnpackAutoRemoveDirType = Literal["auto"]
     RemoveRootDirType = Union[Literal["auto"], bool]
+
+    TAR_GZ = Literal["tar.gz"]
+    TAR_BZ2 = Literal["tar.bz2"]
+    TAR = Literal["tar"]
+    ZIP = Literal["zip"]
+
+else:
+    TAR_GZ = "tar.gz"
+    TAR_BZ = "tar.bz2"
+    TAR = "tar"
+    ZIP = "zip"
 
 logger = e3.log.getLogger("archive")
 
@@ -47,7 +59,7 @@ class E3ZipFile(zipfile.ZipFile):
                 attr = member.external_attr >> 16 & 0x1FF
                 if attr != 0:
                     os.chmod(result, attr)
-            except AttributeError:
+            except AttributeError:  # defensive code
                 pass
         return result
 
@@ -66,7 +78,9 @@ def is_known_archive_format(filename: str) -> bool:
     return ext in (".tar.gz", ".tgz", ".tar.bz2", ".tar", ".zip")
 
 
-def check_type(filename: str, force_extension: Optional[str] = None) -> str:
+def check_type(
+    filename: str, force_extension: Optional[str] = None
+) -> Union[TAR_GZ, TAR_BZ2, TAR, ZIP]:
     """Return the archive extension.
 
     Internal function used by create_archive and unpack_archive.
@@ -83,24 +97,23 @@ def check_type(filename: str, force_extension: Optional[str] = None) -> str:
         or filename.endswith(".tgz")
         or (force_extension is not None and force_extension in [".tar.gz", ".tgz"])
     ):
-        ext = "tar.gz"
+        return "tar.gz"
     elif filename.endswith(".tar.bz2") or (
         force_extension is not None and force_extension == ".tar.bz2"
     ):
-        ext = "tar.bz2"
+        return "tar.bz2"
     elif filename.endswith(".tar") or (
         force_extension is not None and force_extension == ".tar"
     ):
-        ext = "tar"
+        return "tar"
     elif filename.endswith(".zip") or (
         force_extension is not None and force_extension == ".zip"
     ):
-        ext = "zip"
+        return "zip"
     else:
         raise ArchiveError(
             origin="unpack_archive", message=f'unknown format "{filename}"'
         )
-    return ext
 
 
 def unpack_archive(
@@ -181,7 +194,7 @@ def unpack_archive(
         tmp_dest = dest
 
     try:
-        if ext in ("tar", "tar.bz2", "tar.gz"):
+        if ext == "tar" or ext == "tar.bz2" or ext == "tar.gz":
             try:
                 # Set the right mode
                 mode = "r:"
@@ -241,7 +254,7 @@ def unpack_archive(
                     origin="unpack_archive", message=f"Cannot untar {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
 
-        else:
+        elif ext == "zip":
             try:
                 with closing(E3ZipFile(filename, mode="r")) as zip_fd:
                     zip_fd.extractall(
@@ -251,6 +264,8 @@ def unpack_archive(
                 raise ArchiveError(
                     origin="unpack_archive", message=f"Cannot unzip {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
+        else:
+            assert_never()
 
         if remove_root_dir:
             # First check that we have only one dir in our temp destination,
@@ -359,7 +374,7 @@ def create_archive(
             tar_format = "w:gz"
         elif ext == "tar.bz2":
             tar_format = "w:bz2"
-        else:  # defensive code
-            raise ArchiveError(f"unsupported format {tar_format}")
+        else:
+            assert_never()
         with closing(tarfile.open(filepath, tar_format)) as tar_archive:
             tar_archive.add(name=from_dir, arcname=from_dir_rename, recursive=True)

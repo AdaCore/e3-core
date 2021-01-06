@@ -99,9 +99,6 @@ class TestCheckout:
         with open(os.path.join("myrepo", "file3.txt")) as fd:
             assert fd.read().strip() == "new file!"
 
-        result = m.update(vcs="future-vcs", url="dummy")
-        assert result == ReturnValue.failure
-
         result = m.update(vcs="git", url=url4 + "non-existing", revision="master")
         assert result == ReturnValue.failure
 

@@ -1,16 +1,23 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import hashlib
 import os
 
 import e3.error
+
+if TYPE_CHECKING:
+    from typing import Literal, Union
 
 
 class HashError(e3.error.E3Error):
     pass
 
 
-def __compute_hash(path: str, kind: str) -> str:
+def __compute_hash(
+    path: str, kind: Union[Literal["md5"], Literal["sha1"], Literal["sha256"]]
+) -> str:
     if not os.path.isfile(path):
         raise HashError(kind, f"cannot find {path}")
 

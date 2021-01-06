@@ -15,7 +15,8 @@ from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Optional, Tuple
+    from typing import Callable, List, Literal, Optional, Tuple, Union
+    from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.checkout")
 
@@ -52,7 +53,12 @@ class CheckoutManager:
         self.metadata_file = self.working_dir + "_checkout.json"
         self.changelog_file = self.working_dir + "_changelog.json"
 
-    def update(self, vcs: str, url: str, revision: Optional[str] = None) -> ReturnValue:
+    def update(
+        self,
+        vcs: Union[Literal["git"], Literal["svn"], Literal["external"]],
+        url: str,
+        revision: Optional[str] = None,
+    ) -> ReturnValue:
         """Update content of the working directory.
 
         :param vcs: vcs kind
@@ -73,8 +79,7 @@ class CheckoutManager:
         elif vcs == "external":
             update = self.update_external
         else:
-            logger.error(f"Invalid repository type: {vcs}")
-            return ReturnValue.failure
+            assert_never()
 
         result, old_commit, new_commit = update(url=url, revision=revision)
 
@@ -124,7 +129,7 @@ class CheckoutManager:
                     f"/{f.strip().rstrip('/')}" for f in ignore_list_lines.splitlines()
                 ]
                 logger.debug("Ignore in external: %s", ignore_list)
-            except Exception:
+            except Exception:  # defensive code
                 # don't crash on exception
                 pass
 
@@ -181,7 +186,7 @@ class CheckoutManager:
             remote_list = g.git_cmd(["remote"], output=PIPE).out.splitlines()
             if remote_name not in remote_list:
                 g.git_cmd(["remote", "add", remote_name, url])
-        except Exception:
+        except Exception:  # defensive code
             # Ignore exception as it probably means that remote already exist
             # In case of real error the failure will be detected later.
             pass
@@ -204,9 +209,12 @@ class CheckoutManager:
                 )
                 g.git_cmd(["stash", "save", "-u"])
 
-            if old_commit == new_commit:
-                result = ReturnValue.unchanged
-            elif self.compute_changelog:
+            result = (
+                ReturnValue.unchanged
+                if old_commit == new_commit
+                else ReturnValue.success
+            )
+            if self.compute_changelog:
                 # Fetch the change log and dump it into the changelog file
                 with closing(tempfile.NamedTemporaryFile(mode="w", delete=False)) as fd:
                     g.write_log(fd, rev_range=f"{old_commit}..{new_commit}")
@@ -219,10 +227,6 @@ class CheckoutManager:
 
                 with open(self.changelog_file, "w") as fd:
                     json.dump(commits, fd)
-                # We have removed local changes or updated the git repository
-                result = ReturnValue.success
-            else:
-                result = ReturnValue.success
 
         except GitError:
             logger.exception(f"Error during git update {self.name}")

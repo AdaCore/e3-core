@@ -32,20 +32,32 @@ from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, FrozenSet, List, NoReturn, Optional, Tuple, Union
+    from typing import (
+        cast,
+        Callable,
+        Dict,
+        FrozenSet,
+        List,
+        NoReturn,
+        Optional,
+        Tuple,
+        Union,
+    )
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
-    from e3.anod.spec import Anod
+    from e3.anod.spec import Anod, PRIMITIVE
     from e3.anod.loader import AnodSpecRepository
     from e3.anod.sandbox import SandBox
     from e3.collection.dag import VertexID
     from e3.platform import Platform
+    from e3.mypy import assert_never
 
     # spec name, build env, target env, host env, qualifier, kind, source name
     CacheKeyType = Tuple[
         str, Platform, Platform, Platform, Optional[str], Optional[str], Optional[str]
     ]
     ResolverType = Callable[[Action, Decision], bool]
+
 
 logger = e3.log.getLogger("anod.context")
 
@@ -128,7 +140,7 @@ class AnodContext:
         name: str,
         env: Optional[BaseEnv],
         qualifier: Optional[str],
-        kind: str,
+        kind: PRIMITIVE,
         sandbox: Optional[SandBox] = None,
         source_name: Optional[str] = None,
     ) -> Anod:
@@ -268,6 +280,16 @@ class AnodContext:
             return None
 
         primitive = action_name.replace("anod_", "", 1)
+        if (
+            primitive != "build"
+            and primitive != "install"
+            and primitive != "test"
+            and primitive != "source"
+        ):
+            logger.warning(f"Unknown primtive {primitive}")
+            return None
+        elif TYPE_CHECKING:
+            primitive = cast(PRIMITIVE, primitive)
 
         return self.add_anod_action(
             name=plan_action_env.module,
@@ -287,7 +309,7 @@ class AnodContext:
         self,
         name: str,
         env: BaseEnv,
-        primitive: str,
+        primitive: PRIMITIVE,
         qualifier: Optional[str] = None,
         source_packages: Optional[List[str]] = None,
         upload: bool = True,
@@ -364,13 +386,15 @@ class AnodContext:
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrDownload):
                     el.set_decision(BuildOrDownload.INSTALL, plan_line)
+        elif primitive != "source" and primitive != "test":
+            assert_never()
         return result
 
     def add_spec(
         self,
         name: str,
         env: BaseEnv,
-        primitive: str,
+        primitive: PRIMITIVE,
         qualifier: Optional[str] = None,
         source_packages: Optional[List[str]] = None,
         expand_build: bool = True,
@@ -484,8 +508,8 @@ class AnodContext:
             result = Test(spec)
         elif primitive == "install":
             result = Install(spec)
-        else:  # defensive code
-            raise ValueError(f"add_spec error: {primitive} is not known")
+        else:
+            assert_never()
 
         # If this action is directly linked with a plan line make sure
         # to register the link between the action and the plan even
