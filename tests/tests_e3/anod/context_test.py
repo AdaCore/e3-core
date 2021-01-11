@@ -367,6 +367,23 @@ class TestContext:
         assert "mylinux.x86-linux.spec13.download_bin" in keys
         assert "mylinux.x86-linux.spec13.install" in keys
 
+    def test_source_fails_when_missing_source_primitive(self):
+        """Source action should fail when the source primitive is undefined.
+
+        Check that a SchedulingError is thrown if the source primitive is absent and a
+        source packaging action is required.
+        """
+        ac = self.create_context()
+
+        # `anod source` should fail on a spec without a source primitive
+        with pytest.raises(
+            SchedulingError,
+            match=r"spec missing_source_primitive does not support primitive source",
+        ):
+            ac.add_anod_action(
+                "missing_source_primitive", env=ac.default_env, primitive="source"
+            )
+
     def test_add_anod_action_unmanaged_source(self):
         """Check no source creation for thirdparties."""
         ac = self.create_context()

@@ -465,6 +465,9 @@ class AnodContext:
 
         # Initialize the resulting action based on the primitive name
         if primitive == "source":
+            if not has_primitive(spec, "source"):
+                raise SchedulingError(f"spec {name} does not support primitive source")
+
             if source_name is not None:
                 result = CreateSource(spec, source_name)
 
