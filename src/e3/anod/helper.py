@@ -13,7 +13,7 @@ from e3.anod.spec import Anod, parse_command
 from e3.os.fs import unixpath
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Tuple, Union
+    from typing import Dict, List, Optional, Tuple
     from e3.os.process import Run
 
 log = e3.log.getLogger("anod.helpers")
@@ -52,7 +52,7 @@ class Make:
         self.default_target = None  # type: Optional[str]
         self.make_exe = make_exe
 
-    def set_var(self, name: str, value: Union[str, List[str]]) -> None:
+    def set_var(self, name: str, value: str | List[str]) -> None:
         """Set a Make variable.
 
         :param name: name of the variable
@@ -95,11 +95,11 @@ class Make:
 
     def cmdline(
         self,
-        target: Optional[Union[str, List[str]]] = None,
+        target: Optional[str | List[str]] = None,
         jobs: Optional[int] = None,
         exec_dir: Optional[str] = None,
         timeout: Optional[float] = None,
-    ) -> Dict[str, Union[List[str], dict]]:
+    ) -> Dict[str, List[str] | dict]:
         """Return the make command line.
 
         :param target: optional target or list of targets to use
@@ -258,7 +258,7 @@ class Configure:
 
 
 def text_replace(
-    filename: str, pattern: List[Tuple[Union[bytes, str], Union[bytes, str]]]
+    filename: str, pattern: List[Tuple[bytes | str, bytes | str]]
 ) -> List[int]:
     """Replace patterns in a file.
 

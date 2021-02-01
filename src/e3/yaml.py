@@ -19,7 +19,7 @@ from e3.text import format_with_dict
 if TYPE_CHECKING:
     # Conditonal imports do not work with mypy, unconditionaly use yaml.Loader
     # for type checking
-    from typing import Any, IO, List, Set, Tuple, Union
+    from typing import Any, IO, List, Set, Tuple
     from yaml import Loader
 else:
     try:
@@ -285,7 +285,7 @@ class CaseParser:
             return cursor
 
 
-def load_with_config(filename: Union[str, List[str]], config: dict) -> Any:
+def load_with_config(filename: str | List[str], config: dict) -> Any:
     """Load yaml config files with case statement handling.
 
     :param filename: a path or list of path. When a list of path

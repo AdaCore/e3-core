@@ -43,7 +43,6 @@ if TYPE_CHECKING:
         Literal,
         Optional,
         TextIO,
-        Union,
     )
     from e3.os.process import Run, STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
 
@@ -79,7 +78,7 @@ class GitRepository:
     """
 
     git: Optional[str] = None
-    log_stream: Union[TextIO, IO[str]] = sys.stdout
+    log_stream: TextIO | IO[str] = sys.stdout
 
     def __init__(self, working_tree: str):
         """Initialize a GitRepository object.
@@ -111,9 +110,13 @@ class GitRepository:
     def git_cmd(
         self,
         cmd: Git_Cmd,
-        output: Union[
-            STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, GIT_LOG_STREAM_VALUE, str, IO, None
-        ] = GIT_LOG_STREAM,
+        output: STDOUT_VALUE
+        | DEVNULL_VALUE
+        | PIPE_VALUE
+        | GIT_LOG_STREAM_VALUE
+        | str
+        | IO
+        | None = GIT_LOG_STREAM,
         **kwargs: Any
     ) -> Run:
         """Run a git command.
@@ -280,7 +283,7 @@ class GitRepository:
 
     def parse_log(
         self, stream: IO[str], max_diff_size: int = 0
-    ) -> Iterator[Dict[str, Union[str, dict]]]:
+    ) -> Iterator[Dict[str, str | dict]]:
         """Parse a log stream generated with `write_log`.
 
         :param stream: stream of text to read

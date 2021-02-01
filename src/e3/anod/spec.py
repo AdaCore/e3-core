@@ -54,9 +54,7 @@ if TYPE_CHECKING:
     SOURCE_PRIMITIVE = Literal["source"]
 
     # Anod Dependency can target a build, install, or source
-    DEPENDENCY_PRIMITIVE = Union[
-        BUILD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE,
-    ]
+    DEPENDENCY_PRIMITIVE = Union[BUILD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE]
 
     # Supported primitivies are build, install, source, and test
     PRIMITIVE = Union[DEPENDENCY_PRIMITIVE, TEST_PRIMITIVE]
@@ -86,9 +84,7 @@ def parse_command(command: Sequence[str], build_space: BuildSpace) -> List[str]:
     return [e3.text.format_with_dict(c, cmd_dict) for c in command]
 
 
-def has_primitive(
-    anod_instance: Anod, name: Union[Literal["download"], PRIMITIVE]
-) -> bool:
+def has_primitive(anod_instance: Anod, name: Literal["download"] | PRIMITIVE) -> bool:
     """Return True if the primitive `name` is supported.
 
     Note that download is currently considered as a primitive in that context.
@@ -440,7 +436,7 @@ class Anod:
         self,
         *command: str,
         parse_shebang: bool = True,
-        output: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,
+        output: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = None,
         python_executable: None = None,
         **kwargs: Any,
     ) -> e3.os.process.Run:

@@ -15,7 +15,7 @@ from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Literal, Optional, Tuple, Union
+    from typing import Callable, List, Literal, Optional, Tuple
     from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.checkout")
@@ -55,7 +55,7 @@ class CheckoutManager:
 
     def update(
         self,
-        vcs: Union[Literal["git"], Literal["svn"], Literal["external"]],
+        vcs: Literal["git"] | Literal["svn"] | Literal["external"],
         url: str,
         revision: Optional[str] = None,
     ) -> ReturnValue:

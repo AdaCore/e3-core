@@ -7,7 +7,7 @@ import e3.anod.error
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, Hashable, Literal, Optional, Union
+    from typing import Any, Hashable, Literal, Optional
     from e3.anod.spec import Anod, DEPENDENCY_PRIMITIVE
     from e3.mypy import assert_never
 
@@ -43,9 +43,9 @@ class Dependency:
         build: Optional[str] = None,
         qualifier: Optional[str] = None,
         local_name: Optional[str] = None,
-        require: Union[
-            Literal["build_tree"], Literal["installation"], Literal["source_pkg"]
-        ] = "build_tree",
+        require: Literal["build_tree"]
+        | Literal["installation"]
+        | Literal["source_pkg"] = "build_tree",
         track: bool = False,
         **kwargs: Any,
     ) -> None:

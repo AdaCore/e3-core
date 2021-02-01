@@ -22,7 +22,7 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, List, Optional, Sequence, Tuple, Union
+    from typing import Callable, Iterable, List, Optional, Sequence, Tuple
 
 
 class FSError(e3.error.E3Error):
@@ -127,9 +127,7 @@ def directory_content(
     return result
 
 
-def echo_to_file(
-    filename: str, content: Union[str, List[str]], append: bool = False
-) -> None:
+def echo_to_file(filename: str, content: str | List[str], append: bool = False) -> None:
     """Output content into a file.
 
     This function is useful when writing few content to a file for which we
@@ -231,7 +229,7 @@ def get_filetree_state(path: str, ignore_hidden: bool = True) -> str:
     return result.hexdigest()
 
 
-def ls(path: Union[str, List[str]], emit_log_record: bool = True) -> List[str]:
+def ls(path: str | List[str], emit_log_record: bool = True) -> List[str]:
     """List files.
 
     :param path: glob pattern or glob pattern list
@@ -285,7 +283,7 @@ def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
             ).with_traceback(sys.exc_info()[2])
 
 
-def mv(source: Union[str, List[str]], target: str) -> None:
+def mv(source: str | List[str], target: str) -> None:
     """Move files.
 
     :param source: a glob pattern
@@ -388,7 +386,7 @@ def mv(source: Union[str, List[str]], target: str) -> None:
         raise FSError(origin="mv", message=str(e)).with_traceback(sys.exc_info()[2])
 
 
-def rm(path: Union[str, List[str]], recursive: bool = False, glob: bool = True) -> None:
+def rm(path: str | List[str], recursive: bool = False, glob: bool = True) -> None:
     """Remove files.
 
     :param path: a glob pattern, or a list of glob patterns
@@ -539,7 +537,7 @@ VCS_IGNORE_LIST = (
 def sync_tree(
     source: str,
     target: str,
-    ignore: Optional[Union[str, Sequence[str]]] = None,
+    ignore: Optional[str | Sequence[str]] = None,
     file_list: Optional[List[str]] = None,
     delete: bool = True,
     preserve_timestamps: bool = True,

@@ -13,7 +13,7 @@ from e3.platform_db import get_knowledge_base
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional, Tuple, Union
+    from typing import Any, Dict, Optional, Tuple
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -221,9 +221,7 @@ class SystemInfo:
                     ("wReserved", ctypes.c_byte),
                 ]
 
-            def get_os_version() -> Union[
-                Tuple[None, None, None], Tuple[float, int, bool]
-            ]:
+            def get_os_version() -> Tuple[None, None, None] | Tuple[float, int, bool]:
                 """Return the real Windows kernel version.
 
                 On recent version, the kernel version returned by the

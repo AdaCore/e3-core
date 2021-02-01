@@ -9,7 +9,7 @@ import e3.log
 from e3.event import EventHandler
 
 if TYPE_CHECKING:
-    from typing import Dict, Union
+    from typing import Dict
     from e3.event import Event
 
 
@@ -25,7 +25,7 @@ class LoggingHandler(EventHandler):
         return True
 
     @classmethod
-    def decode_config(cls, config_str: str) -> Dict[str, Union[str, int]]:
+    def decode_config(cls, config_str: str) -> Dict[str, str | int]:
         logger_name, level = config_str.split(",")
         return {"logger_name": logger_name, "level": int(level)}
 

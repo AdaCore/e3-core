@@ -8,7 +8,7 @@ import os
 import e3.error
 
 if TYPE_CHECKING:
-    from typing import Literal, Union
+    from typing import Literal
 
 
 class HashError(e3.error.E3Error):
@@ -16,7 +16,7 @@ class HashError(e3.error.E3Error):
 
 
 def __compute_hash(
-    path: str, kind: Union[Literal["md5"], Literal["sha1"], Literal["sha256"]]
+    path: str, kind: Literal["md5"] | Literal["sha1"] | Literal["sha256"]
 ) -> str:
     if not os.path.isfile(path):
         raise HashError(kind, f"cannot find {path}")

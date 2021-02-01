@@ -41,7 +41,6 @@ if TYPE_CHECKING:
         NoReturn,
         Optional,
         Tuple,
-        Union,
     )
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
@@ -67,7 +66,7 @@ class SchedulingError(E3Error):
 
     def __init__(
         self,
-        message: Union[str, List[str]],
+        message: str | List[str],
         origin: Optional[str] = None,
         uid: Optional[VertexID] = None,
         initiators: Optional[List[VertexID]] = None,
@@ -366,7 +365,7 @@ class AnodContext:
             if build_action is not None:
                 spec = build_action.data
                 if spec.component is not None and upload:
-                    upload_bin: Union[UploadBinaryComponent, UploadSourceComponent]
+                    upload_bin: UploadBinaryComponent | UploadSourceComponent
                     if spec.has_package:
                         upload_bin = UploadBinaryComponent(spec)
                     else:
@@ -403,7 +402,7 @@ class AnodContext:
         plan_args: Optional[dict] = None,
         sandbox: Optional[SandBox] = None,
         upload: bool = False,
-    ) -> Union[Build, CreateSources, CreateSource, Install, Test]:
+    ) -> Build | CreateSources | CreateSource | Install | Test:
         """Expand an anod action into a tree (internal).
 
         :param name: spec name
@@ -461,7 +460,7 @@ class AnodContext:
             sandbox=sandbox,
             source_name=source_name,
         )
-        result: Union[Build, CreateSources, CreateSource, Install, Test]
+        result: Build | CreateSources | CreateSource | Install | Test
 
         # Initialize the resulting action based on the primitive name
         if primitive == "source":

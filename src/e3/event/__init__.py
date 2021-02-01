@@ -20,7 +20,7 @@ logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
+    from typing import Any, Callable, Dict, Optional, Tuple, Type
 
 
 def unique_id() -> str:
@@ -139,7 +139,7 @@ class Event:
             self.end_time = time.time()
             object.__setattr__(self, "_closed", True)
 
-    def format_date(self, key: str, value: Union[float, str]) -> Dict[str, str]:
+    def format_date(self, key: str, value: float | str) -> Dict[str, str]:
         """Format timestamp fields.
 
         :param key: the data key
