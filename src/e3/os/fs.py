@@ -157,7 +157,7 @@ def df(path: str, full: bool = False) -> Union[int, Tuple]:
         with ``total``, ``used`` and ``free`` attributes. Each attribute is
         an int representing Mo.
     """
-    _ntuple_diskusage = collections.namedtuple("usage", "total used free")
+    _ntuple_diskusage = collections.namedtuple("_ntuple_diskusage", "total used free")
     if sys.platform == "win32":  # unix: no cover
         import ctypes
 

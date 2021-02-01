@@ -20,7 +20,8 @@ import e3.os.fs
 
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Literal, Optional, Sequence, Union
+    from typing import Callable, List, Literal, Optional, Sequence, Text, Union
+    from os import PathLike
     from e3.mypy import assert_never
 
     UnpackAutoRemoveDirType = Literal["auto"]
@@ -43,8 +44,13 @@ logger = e3.log.getLogger("archive")
 class E3ZipFile(zipfile.ZipFile):
     """Override default ZipFile with attributes preservation."""
 
-    def _extract_member(self, member, path, pwd):  # type: ignore
-        result = super()._extract_member(member, path, pwd)
+    def _extract_member(
+        self,
+        member: Union[Text, zipfile.ZipInfo],
+        path: Optional[Union[str, PathLike[str]]],
+        pwd: Optional[bytes],
+    ) -> str:
+        result = super()._extract_member(member, path, pwd)  # type: ignore
 
         if sys.platform != "win32":
             # Try to preserve attributes on non Windows platforms as
