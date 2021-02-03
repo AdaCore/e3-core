@@ -23,7 +23,7 @@ from e3.fs import rm
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Type, Union
+    from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Type
     from requests.auth import AuthBase
     from requests.models import Response
 
@@ -58,7 +58,7 @@ class BaseURL:
         """
         self.url = url
 
-    def get_auth(self) -> Optional[Union[Tuple[str, str], AuthBase]]:
+    def get_auth(self) -> Optional[Tuple[str, str] | AuthBase]:
         """Return auth requests parameter.
 
         :return: authentication associated with the url
@@ -74,7 +74,7 @@ class HTTPSession:
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 
-    def __init__(self, base_urls: Optional[List[Union[str, BaseURL]]] = None):
+    def __init__(self, base_urls: Optional[List[str | BaseURL]] = None):
         """Initialize HTTP session.
 
         :param base_urls: list of urls used as prefix to subsequent requests.
@@ -82,7 +82,7 @@ class HTTPSession:
             during a request the next urls are used.
         """
         if base_urls:
-            self.base_urls: Union[Deque[BaseURL], Deque[None]] = deque(
+            self.base_urls: Deque[BaseURL] | Deque[None] = deque(
                 [k if isinstance(k, BaseURL) else BaseURL(k) for k in base_urls]
             )
         else:

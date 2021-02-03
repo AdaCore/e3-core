@@ -229,9 +229,9 @@ class Run:
         self,
         cmds: AnyCmdLine,
         cwd: Optional[str] = None,
-        output: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = PIPE,
-        error: Union[STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = STDOUT,
-        input: Union[DEVNULL_VALUE, PIPE_VALUE, str, IO, None] = None,  # noqa: A002
+        output: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
+        error: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = STDOUT,
+        input: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = None,  # noqa: A002
         bg: bool = False,
         timeout: Optional[int] = None,
         env: Optional[dict] = None,
@@ -408,7 +408,7 @@ class Run:
                 runs: List[subprocess.Popen] = []
                 for index, cmd in enumerate(self.cmds):
                     if index == 0:
-                        stdin: Union[int, IO[Any]] = self.input_file.fd
+                        stdin: int | IO[Any] = self.input_file.fd
                     else:
                         previous_stdout = runs[index - 1].stdout
                         assert previous_stdout is not None
@@ -535,7 +535,7 @@ class Run:
         ):
             self.status = self.internal.wait()
         else:
-            tmp_input: Optional[Union[str, bytes]] = None
+            tmp_input: Optional[str | bytes] = None
             if self.input_file.fd == subprocess.PIPE:
                 tmp_input = self.input_file.get_command()
 
@@ -618,7 +618,7 @@ class File:
             a+
         """
         assert mode in "rw", "Mode should be r or w"
-        self.fd: Union[int, IO[str]]
+        self.fd: int | IO[str]
 
         self.name = name
         self.to_close = False
@@ -782,7 +782,7 @@ def is_running(pid: int) -> bool:
         return True
 
 
-def kill_process_tree(pid: Union[int, Any], timeout: int = 3) -> bool:
+def kill_process_tree(pid: int | Any, timeout: int = 3) -> bool:
     """Kill a hierarchy of processes.
 
     :param pid: pid of the toplevel process

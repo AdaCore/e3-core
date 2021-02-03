@@ -21,7 +21,6 @@ if TYPE_CHECKING:
         Sequence,
         Set,
         Tuple,
-        Union,
     )
 
     VertexID = Hashable
@@ -60,7 +59,7 @@ class DAGIterator:
     def __iter__(self) -> DAGIterator:
         return self
 
-    def __next__(self) -> Union[Tuple[None, None], Tuple[VertexID, Any]]:
+    def __next__(self) -> Tuple[None, None] | Tuple[VertexID, Any]:
         """Retrieve next_element with with_predecessors=False.
 
         The intermediate function is needed in Python 3.x
@@ -70,7 +69,7 @@ class DAGIterator:
             return (None, None)
         return (vertex_id, data)
 
-    def next_element(self,) -> Tuple[Union[None, VertexID], Any, FrozenSet[VertexID]]:
+    def next_element(self,) -> Tuple[Optional[VertexID], Any, FrozenSet[VertexID]]:
         """Retrieve next element in topological order.
 
         :return: a vertex id, data, predecessors. (None, None, frozenset()) is
@@ -341,7 +340,7 @@ class DAG:
         vertex_id: VertexID,
         data: Any = None,
         predecessors: Optional[
-            Union[Sequence[VertexID], Set[VertexID], FrozenSet[VertexID]]
+            Sequence[VertexID] | Set[VertexID] | FrozenSet[VertexID]
         ] = None,
         enable_checks: bool = True,
     ) -> None:

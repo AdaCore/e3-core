@@ -24,7 +24,6 @@ if TYPE_CHECKING:
         Iterator,
         Sequence,
         TextIO,
-        Union,
         List,
         TypeVar,
         Tuple,
@@ -50,7 +49,7 @@ log_config = LogConfig.load()
 
 # Default output stream (sys.stdout by default, or a file descriptor if
 # activate() is called with a filename.
-default_output_stream: Union[TextIO, IO[str]] = sys.stdout
+default_output_stream: TextIO | IO[str] = sys.stdout
 
 # If sys.stdout is a terminal then enable "pretty" output for user
 # This includes progress bars and colors
@@ -188,7 +187,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         )
 
 
-def progress_bar(it: Union[Iterator[T], Sequence[T]], **kwargs: Any) -> Iterator[T]:
+def progress_bar(it: Iterator[T] | Sequence[T], **kwargs: Any) -> Iterator[T]:
     """Create a tqdm progress bar.
 
     :param it: an interator
@@ -285,8 +284,8 @@ def add_log_handlers(
         file.
     """
     global default_output_stream
-    handler: Union[TqdmHandler, logging.StreamHandler, logging.FileHandler]
-    fmt: Union[logging.Formatter, JSONFormatter]
+    handler: TqdmHandler | logging.StreamHandler | logging.FileHandler
+    fmt: logging.Formatter | JSONFormatter
 
     if filename is None:
         if pretty_cli:  # all: no cover

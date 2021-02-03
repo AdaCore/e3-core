@@ -21,7 +21,7 @@ import e3.error
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, List, Literal, Optional, Tuple, Union
+    from typing import Any, Callable, List, Literal, Optional, Tuple
 
 
 class OSFSError(e3.error.E3Error):
@@ -146,7 +146,7 @@ def df(path: str, full: Literal[True]) -> Tuple:
     ...
 
 
-def df(path: str, full: bool = False) -> Union[int, Tuple]:
+def df(path: str, full: bool = False) -> int | Tuple:
     """Disk space available on the filesystem containing the given path.
 
     :param path: a path

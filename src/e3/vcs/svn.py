@@ -23,7 +23,7 @@ from e3.fs import mkdir, rm
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import Any, IO, List, Optional, TextIO, Tuple, Union
+    from typing import Any, IO, List, Optional, TextIO, Tuple
 
     SVNCmd = List[Optional[str]]
 
@@ -44,7 +44,7 @@ class SVNRepository:
     """
 
     svn_bin = None
-    log_stream: Union[TextIO, IO[str]] = sys.stdout
+    log_stream: TextIO | IO[str] = sys.stdout
 
     def __init__(self, working_copy: str):
         """Initialize a SVNRepository object.

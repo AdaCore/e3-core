@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from e3.mypy import assert_never
 
     UnpackAutoRemoveDirType = Literal["auto"]
-    RemoveRootDirType = Union[Literal["auto"], bool]
+    RemoveRootDirType = Union[bool, Literal["auto"]]
 
     TAR_GZ = Literal["tar.gz"]
     TAR_BZ2 = Literal["tar.bz2"]
@@ -46,8 +46,8 @@ class E3ZipFile(zipfile.ZipFile):
 
     def _extract_member(
         self,
-        member: Union[Text, zipfile.ZipInfo],
-        path: Optional[Union[str, PathLike[str]]],
+        member: Text | zipfile.ZipInfo,
+        path: Optional[str | PathLike[str]],
         pwd: Optional[bytes],
     ) -> str:
         result = super()._extract_member(member, path, pwd)  # type: ignore
@@ -86,7 +86,7 @@ def is_known_archive_format(filename: str) -> bool:
 
 def check_type(
     filename: str, force_extension: Optional[str] = None
-) -> Union[TAR_GZ, TAR_BZ2, TAR, ZIP]:
+) -> TAR_GZ | TAR_BZ2 | TAR | ZIP:
     """Return the archive extension.
 
     Internal function used by create_archive and unpack_archive.

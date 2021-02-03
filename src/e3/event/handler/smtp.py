@@ -12,17 +12,13 @@ import e3.net.smtp
 from e3.event import EventHandler
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Union
+    from typing import Dict, List
     from e3.event import Event
 
 
 class SMTPHandler(EventHandler):
     def __init__(
-        self,
-        subject: str,
-        from_addr: str,
-        to_addr: str,
-        smtp_servers: Union[str, List[str]],
+        self, subject: str, from_addr: str, to_addr: str, smtp_servers: str | List[str],
     ):
         """Initialize a SMTP event manager."""
         self.default_subject = subject
@@ -34,7 +30,7 @@ class SMTPHandler(EventHandler):
             self.smtp_servers = smtp_servers
 
     @classmethod
-    def decode_config(cls, config_str: str) -> Dict[str, Union[str, List[str]]]:
+    def decode_config(cls, config_str: str) -> Dict[str, str | List[str]]:
         subject, from_addr, to_addr, smtp_servers = config_str.split(",", 3)
         return {
             "subject": subject,

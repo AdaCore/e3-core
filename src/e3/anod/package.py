@@ -20,7 +20,6 @@ if TYPE_CHECKING:
         Literal,
         NoReturn,
         Optional,
-        Union,
     )
     from e3.anod.spec import Anod
 
@@ -199,7 +198,7 @@ class SourceBuilder:
         fullname: Callable[[], str],
         checkout: Optional[List[str]],
         prepare_src: Optional[PrepareSrcCB] = None,
-        apply_patch: Optional[Union[Literal[1], ApplyPatchCB]] = None,
+        apply_patch: Optional[Literal[1] | ApplyPatchCB] = None,
         kind: str = "source",
     ):
         """Define a builder for the source package.
