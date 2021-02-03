@@ -10,7 +10,7 @@ from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, FrozenSet, Optional, Set
+    from typing import Any, Callable, FrozenSet, Optional
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
     from e3.job import Job, ProcessJob
@@ -55,7 +55,7 @@ class Walk:
         self.tokens = 1
         self.job_timeout = DEFAULT_JOB_MAX_DURATION
         self.set_scheduling_params()
-        self.failure_source: dict[str, Set[str]] = {}
+        self.failure_source: dict[str, set[str]] = {}
 
         self.scheduler = Scheduler(
             job_provider=self.get_job,

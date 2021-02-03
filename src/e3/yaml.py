@@ -19,7 +19,7 @@ from e3.text import format_with_dict
 if TYPE_CHECKING:
     # Conditonal imports do not work with mypy, unconditionaly use yaml.Loader
     # for type checking
-    from typing import Any, IO, Set, Tuple
+    from typing import Any, IO, Tuple
     from yaml import Loader
 else:
     try:
@@ -159,7 +159,7 @@ class CaseParser:
         # This contains the list of keys that have been updated. This
         # allow us to remove the keys part of initial_config that are
         # not modified.
-        self.keys: Set[str] = set()
+        self.keys: set[str] = set()
 
     def __parse_case(self, case_key: str, data: dict) -> Any:
         """Parse a case statement.

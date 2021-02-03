@@ -17,7 +17,6 @@ if TYPE_CHECKING:
         Iterator,
         Optional,
         Sequence,
-        Set,
         Tuple,
     )
 
@@ -196,7 +195,7 @@ class DAG:
         computed or if it has been invalidated then recompute it.
         """
         if self.__vertex_successors == {}:
-            successors: dict[VertexID, Set[VertexID]] = {
+            successors: dict[VertexID, set[VertexID]] = {
                 k: set() for k in self.__vertex_predecessors
             }
             for pred_k, pred_v in self.__vertex_predecessors.items():
@@ -276,7 +275,7 @@ class DAG:
                 result = self.get_predecessors(vid)
             return result
 
-        visited: Set[VertexID] = set()
+        visited: set[VertexID] = set()
         tags = []
         distance = 0
         node_tag = self.get_tag(vertex_id)
@@ -338,7 +337,7 @@ class DAG:
         vertex_id: VertexID,
         data: Any = None,
         predecessors: Optional[
-            Sequence[VertexID] | Set[VertexID] | FrozenSet[VertexID]
+            Sequence[VertexID] | set[VertexID] | FrozenSet[VertexID]
         ] = None,
         enable_checks: bool = True,
     ) -> None:
@@ -435,7 +434,7 @@ class DAG:
         }
 
         # Set of non visited vertices
-        unvisited: Set[Optional[VertexID]] = set(self.vertex_data)
+        unvisited: set[Optional[VertexID]] = set(self.vertex_data)
 
         # The only known distance at startup
         dist[target] = 0
@@ -522,17 +521,17 @@ class DAG:
             self.__has_cycle = False
             self.__cached_topological_order = topological_order
 
-    def get_closure(self, vertex_id: VertexID) -> Set[VertexID]:
+    def get_closure(self, vertex_id: VertexID) -> set[VertexID]:
         """Retrieve closure of predecessors for a vertex.
 
         :param vertex_id: the vertex to inspect
         :return: a set of vertex_id
         """
-        closure: Set[VertexID] = set()
+        closure: set[VertexID] = set()
         to_visit = set(self.get_predecessors(vertex_id))
 
         while len(to_visit) > 0:
-            next_visit: Set[VertexID] = set()
+            next_visit: set[VertexID] = set()
             for n in to_visit:
                 closure.add(n)
                 next_visit |= self.get_predecessors(n)
@@ -652,7 +651,7 @@ class DAG:
         result = DAG()
 
         # Used to maintain the new list of predecessors
-        pruned_node_predecessors: dict[VertexID, Set[VertexID]] = {}
+        pruned_node_predecessors: dict[VertexID, set[VertexID]] = {}
 
         for node, data in self:
             # The new list of predecessors is the union of predecessors of

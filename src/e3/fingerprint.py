@@ -33,7 +33,7 @@ from e3.fs import get_filetree_state
 from e3.hash import sha256
 
 if TYPE_CHECKING:
-    from typing import Optional, Set
+    from typing import Optional
 
 logger = e3.log.getLogger("fingerprint")
 
@@ -127,7 +127,7 @@ class Fingerprint:
         """
         return not self == other
 
-    def compare_to(self, other: object) -> Optional[dict[str, Set[str]]]:
+    def compare_to(self, other: object) -> Optional[dict[str, set[str]]]:
         """Compare two fingerprints and return the differences.
 
         :return: a dictionary that list the differences or None if the two
