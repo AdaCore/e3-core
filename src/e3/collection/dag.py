@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         Callable,
-        FrozenSet,
         Hashable,
         Iterator,
         Optional,
@@ -65,7 +64,7 @@ class DAGIterator:
             return (None, None)
         return (vertex_id, data)
 
-    def next_element(self,) -> tuple[Optional[VertexID], Any, FrozenSet[VertexID]]:
+    def next_element(self,) -> tuple[Optional[VertexID], Any, frozenset[VertexID]]:
         """Retrieve next element in topological order.
 
         :return: a vertex id, data, predecessors. (None, None, frozenset()) is
@@ -136,8 +135,8 @@ class DAG:
         self.vertex_data: dict[VertexID, Any] = {}
         self.tags: dict[VertexID, Any] = {}
 
-        self.__vertex_predecessors: dict[VertexID, FrozenSet[VertexID]] = {}
-        self.__vertex_successors: dict[VertexID, FrozenSet[VertexID]] = {}
+        self.__vertex_predecessors: dict[VertexID, frozenset[VertexID]] = {}
+        self.__vertex_successors: dict[VertexID, frozenset[VertexID]] = {}
         self.__has_cycle: Optional[bool] = None
         self.__cached_topological_order: Optional[list[tuple[VertexID, Any]]] = None
 
@@ -150,7 +149,7 @@ class DAG:
         self.__cached_topological_order = None
 
     @property
-    def vertex_predecessors(self) -> dict[VertexID, FrozenSet[VertexID]]:
+    def vertex_predecessors(self) -> dict[VertexID, frozenset[VertexID]]:
         """Return predecessors.
 
         Meant only for backward compatibility. Use vertex_predecessors_items.
@@ -164,19 +163,19 @@ class DAG:
 
     def vertex_predecessors_items(
         self,
-    ) -> Iterator[tuple[VertexID, FrozenSet[VertexID]]]:
+    ) -> Iterator[tuple[VertexID, frozenset[VertexID]]]:
         """Return predecessors.
 
         :return: a list of (vertex id, predecessors)
         """
         return iter(self.__vertex_predecessors.items())
 
-    def get_predecessors(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
+    def get_predecessors(self, vertex_id: VertexID) -> frozenset[VertexID]:
         """Get set of predecessors for a given vertex."""
         return self.__vertex_predecessors.get(vertex_id, frozenset())
 
     def set_predecessors(
-        self, vertex_id: VertexID, predecessors: FrozenSet[VertexID]
+        self, vertex_id: VertexID, predecessors: frozenset[VertexID]
     ) -> None:
         """Set predecessors for a given vertex.
 
@@ -187,7 +186,7 @@ class DAG:
         self.__vertex_successors = {}
         self.reset_caches()
 
-    def get_successors(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
+    def get_successors(self, vertex_id: VertexID) -> frozenset[VertexID]:
         """Get set of successors for a given vertex.
 
         If the global dictionary of vertex successors has not been
@@ -263,7 +262,7 @@ class DAG:
         """
         self.check()
 
-        def get_next(vid: VertexID) -> FrozenSet[VertexID]:
+        def get_next(vid: VertexID) -> frozenset[VertexID]:
             """Get successors or predecessors.
 
             :param vid: vertex id
@@ -336,7 +335,7 @@ class DAG:
         vertex_id: VertexID,
         data: Any = None,
         predecessors: Optional[
-            Sequence[VertexID] | set[VertexID] | FrozenSet[VertexID]
+            Sequence[VertexID] | set[VertexID] | frozenset[VertexID]
         ] = None,
         enable_checks: bool = True,
     ) -> None:
@@ -353,7 +352,7 @@ class DAG:
         :raise: DAGError if cycle is detected
         """
         if predecessors is None:
-            vertex_predecessors: FrozenSet[VertexID] = frozenset()
+            vertex_predecessors: frozenset[VertexID] = frozenset()
         else:
             vertex_predecessors = frozenset(predecessors)
 

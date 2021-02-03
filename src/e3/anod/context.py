@@ -35,7 +35,6 @@ if TYPE_CHECKING:
     from typing import (
         cast,
         Callable,
-        FrozenSet,
         NoReturn,
         Optional,
         Tuple,
@@ -883,7 +882,7 @@ class AnodContext:
             for which a decision should be taken
         """
         rev = self.tree.reverse_graph(enable_checks=False)
-        uploads: list[tuple[Upload, FrozenSet[VertexID]]] = []
+        uploads: list[tuple[Upload, frozenset[VertexID]]] = []
         dag = DAG()
 
         # Retrieve existing tags
