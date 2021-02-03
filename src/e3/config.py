@@ -16,7 +16,7 @@ import logging
 import os
 
 if TYPE_CHECKING:
-    from typing import Type, TypeVar
+    from typing import TypeVar
 
     T = TypeVar("T", bound="ConfigSection")
 
@@ -38,7 +38,7 @@ class ConfigSection:
     title: ClassVar[str]
 
     @classmethod
-    def load(cls: Type[T]) -> T:
+    def load(cls: type[T]) -> T:
         """Load a section of the configuration file.
 
         To load a new section, subclass ConfigSection and document the

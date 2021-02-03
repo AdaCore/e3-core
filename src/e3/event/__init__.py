@@ -20,7 +20,7 @@ logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Optional, Type
+    from typing import Any, Callable, Optional
 
 
 def unique_id() -> str:
@@ -80,7 +80,7 @@ class Event:
 
     def __exit__(
         self,
-        _type: Optional[Type[BaseException]],
+        _type: Optional[type[BaseException]],
         _val: Optional[BaseException],
         _tb: Optional[TracebackType],
     ) -> None:

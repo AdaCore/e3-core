@@ -13,7 +13,7 @@ from e3.job import Job
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, FrozenSet, Optional, Type
+    from typing import Any, Callable, FrozenSet, Optional
     from e3.collection.dag import DAG
 
     JobProviderCallback = Callable[
@@ -127,7 +127,7 @@ class Scheduler:
             return self.job_provider(uid, data, predecessors, notify_end)
 
     @classmethod
-    def simple_provider(cls, job_class: Type[Job]) -> JobProviderCallback:
+    def simple_provider(cls, job_class: type[Job]) -> JobProviderCallback:
         """Return a simple provider based on a given Job class.
 
         :param job_class: a subclass of Job

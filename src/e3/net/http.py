@@ -23,7 +23,7 @@ from e3.fs import rm
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Deque, Optional, Type
+    from typing import Any, Callable, Deque, Optional
     from requests.auth import AuthBase
     from requests.models import Response
 
@@ -96,7 +96,7 @@ class HTTPSession:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:

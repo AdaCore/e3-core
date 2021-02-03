@@ -20,7 +20,7 @@ from e3.platform import Platform
 
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Optional, Type, TypeVar
+    from typing import Any, Iterable, Optional, TypeVar
     from argparse import Namespace
 
 logger = e3.log.getLogger("env")
@@ -608,7 +608,7 @@ class BaseEnv(AbstractBaseEnv):
 
     @classmethod
     def from_env(
-        cls: Type[BaseEnv_T], env: Optional[Env | BaseEnv] = None
+        cls: type[BaseEnv_T], env: Optional[Env | BaseEnv] = None
     ) -> BaseEnv_T:
         """Return a new BaseEnv object from an env.
 

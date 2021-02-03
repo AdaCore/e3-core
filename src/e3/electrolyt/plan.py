@@ -14,7 +14,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Optional, Type
+    from typing import Any, Callable, Optional
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
 
@@ -379,7 +379,7 @@ class PlanContext:
 
     def __exit__(
         self,
-        _type: Optional[Type[BaseException]],
+        _type: Optional[type[BaseException]],
         _value: Optional[BaseException],
         _tb: Optional[TracebackType],
     ) -> None:
