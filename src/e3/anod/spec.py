@@ -30,7 +30,6 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         Callable,
-        Dict,
         IO,
         Literal,
         Optional,
@@ -203,7 +202,7 @@ class Anod:
         :param env: alternate platform environment
         :raise: SpecError
         """
-        self.deps: Dict[str, Anod] = {}
+        self.deps: dict[str, Anod] = {}
 
         self.kind = kind
         self.jobs = jobs
@@ -253,7 +252,7 @@ class Anod:
         self._config: Optional[dict] = None
 
         # Hold the result of the pre function
-        self._pre: Optional[Dict[str, Any]] = None
+        self._pre: Optional[dict[str, Any]] = None
 
     @property
     def build_space(self) -> BuildSpace:

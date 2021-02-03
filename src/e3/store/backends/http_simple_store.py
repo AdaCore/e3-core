@@ -7,7 +7,7 @@ from e3.net.http import HTTPSession
 from e3.store.backends.base import ResourceInfo, Store, StoreError
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
+    from typing import Optional
 
 logger = e3.log.getLogger("store.httpsimplestore")
 
@@ -37,7 +37,7 @@ class HTTPSimpleStoreResourceInfo(ResourceInfo):
 
 class HTTPSimpleStore(Store):
     def get_resource_metadata(
-        self, query: Dict[str, str]
+        self, query: dict[str, str]
     ) -> HTTPSimpleStoreResourceInfo:
         """Return resource metadata directly computed from the query.
 

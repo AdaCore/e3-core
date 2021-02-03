@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         Callable,
-        Dict,
         FrozenSet,
         Hashable,
         Iterator,
@@ -136,11 +135,11 @@ class DAG:
 
     def __init__(self) -> None:
         """Initialize a DAG."""
-        self.vertex_data: Dict[VertexID, Any] = {}
-        self.tags: Dict[VertexID, Any] = {}
+        self.vertex_data: dict[VertexID, Any] = {}
+        self.tags: dict[VertexID, Any] = {}
 
-        self.__vertex_predecessors: Dict[VertexID, FrozenSet[VertexID]] = {}
-        self.__vertex_successors: Dict[VertexID, FrozenSet[VertexID]] = {}
+        self.__vertex_predecessors: dict[VertexID, FrozenSet[VertexID]] = {}
+        self.__vertex_successors: dict[VertexID, FrozenSet[VertexID]] = {}
         self.__has_cycle: Optional[bool] = None
         self.__cached_topological_order: Optional[list[Tuple[VertexID, Any]]] = None
 
@@ -153,7 +152,7 @@ class DAG:
         self.__cached_topological_order = None
 
     @property
-    def vertex_predecessors(self) -> Dict[VertexID, FrozenSet[VertexID]]:
+    def vertex_predecessors(self) -> dict[VertexID, FrozenSet[VertexID]]:
         """Return predecessors.
 
         Meant only for backward compatibility. Use vertex_predecessors_items.
@@ -197,7 +196,7 @@ class DAG:
         computed or if it has been invalidated then recompute it.
         """
         if self.__vertex_successors == {}:
-            successors: Dict[VertexID, Set[VertexID]] = {
+            successors: dict[VertexID, Set[VertexID]] = {
                 k: set() for k in self.__vertex_predecessors
             }
             for pred_k, pred_v in self.__vertex_predecessors.items():
@@ -428,10 +427,10 @@ class DAG:
         infinite = len(self.vertex_data) + 1
 
         # Keep track of minimal distance between vertices and the sources
-        dist: Dict[Optional[VertexID], int] = {k: infinite for k in self.vertex_data}
+        dist: dict[Optional[VertexID], int] = {k: infinite for k in self.vertex_data}
 
         # Keep track of the minimum distance
-        prev: Dict[Optional[VertexID], Optional[VertexID]] = {
+        prev: dict[Optional[VertexID], Optional[VertexID]] = {
             k: None for k in self.vertex_data
         }
 
@@ -653,7 +652,7 @@ class DAG:
         result = DAG()
 
         # Used to maintain the new list of predecessors
-        pruned_node_predecessors: Dict[VertexID, Set[VertexID]] = {}
+        pruned_node_predecessors: dict[VertexID, Set[VertexID]] = {}
 
         for node, data in self:
             # The new list of predecessors is the union of predecessors of

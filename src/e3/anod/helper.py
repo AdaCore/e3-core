@@ -13,7 +13,7 @@ from e3.anod.spec import Anod, parse_command
 from e3.os.fs import unixpath
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional, Tuple
+    from typing import Optional, Tuple
     from e3.os.process import Run
 
 log = e3.log.getLogger("anod.helpers")
@@ -48,7 +48,7 @@ class Make:
         self.jobs = jobs
         if jobs is None:
             self.jobs = anod_instance.jobs
-        self.var_list = {}  # type: Dict[str, str]
+        self.var_list = {}  # type: dict[str, str]
         self.default_target = None  # type: Optional[str]
         self.make_exe = make_exe
 
@@ -99,7 +99,7 @@ class Make:
         jobs: Optional[int] = None,
         exec_dir: Optional[str] = None,
         timeout: Optional[float] = None,
-    ) -> Dict[str, list[str] | dict]:
+    ) -> dict[str, list[str] | dict]:
         """Return the make command line.
 
         :param target: optional target or list of targets to use

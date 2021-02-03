@@ -20,7 +20,7 @@ logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Dict, Optional, Tuple, Type
+    from typing import Any, Callable, Optional, Tuple, Type
 
 
 def unique_id() -> str:
@@ -48,7 +48,7 @@ class Event:
       * end_time: time at which the event was closed
     """
 
-    def __init__(self, name: str, uid: Optional[str] = None, **kwargs: Dict[str, Any]):
+    def __init__(self, name: str, uid: Optional[str] = None, **kwargs: dict[str, Any]):
         """Initialize an Event object.
 
         :param name: name of the event (e.g. e3_test)
@@ -109,7 +109,7 @@ class Event:
         except KeyError as e:
             raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
-    def get_attachments(self) -> Dict[str, Tuple[str, str]]:
+    def get_attachments(self) -> dict[str, Tuple[str, str]]:
         """Return the list of attachments.
 
         :return: a list of tuple (path, sha1(path))
@@ -139,7 +139,7 @@ class Event:
             self.end_time = time.time()
             object.__setattr__(self, "_closed", True)
 
-    def format_date(self, key: str, value: float | str) -> Dict[str, str]:
+    def format_date(self, key: str, value: float | str) -> dict[str, str]:
         """Format timestamp fields.
 
         :param key: the data key
@@ -151,7 +151,7 @@ class Event:
         else:
             return {key: value}
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> dict[str, str]:
         """Convert the event data into a dict that can be serialized as json.
 
         For each key, value of the _data dict by default add them into the
@@ -252,7 +252,7 @@ class EventManager:
 
     def __init__(self) -> None:
         """Initialize a manager."""
-        self.handlers: Dict[str, EventHandler] = {}
+        self.handlers: dict[str, EventHandler] = {}
 
     def send_event(self, event: Event) -> bool:
         """Send an event to using all registered handlers.
@@ -315,7 +315,7 @@ class EventManager:
         :param var_name: the name of the variable
         """
         handler_cfg_str = os.environ.get(var_name, "")
-        handler_cfg_dict: Dict[str, str] = dict(
+        handler_cfg_dict: dict[str, str] = dict(
             [
                 el.split("=", 1)  # type: ignore
                 if "=" in el

@@ -15,7 +15,7 @@ from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, FrozenSet, Literal
+    from typing import Callable, FrozenSet, Literal
     from e3.anod.action import Action
     from e3.anod.sandbox import SandBox
     from e3.anod.loader import AnodSpecRepository
@@ -199,7 +199,7 @@ class ElectrolytJobFactory:
         store: Store,
         dry_run: bool = False,
     ):
-        self.job_status: Dict[str, ReturnValue] = {}
+        self.job_status: dict[str, ReturnValue] = {}
         self.sandbox = sandbox
         self.asr = asr
         self.dry_run = dry_run

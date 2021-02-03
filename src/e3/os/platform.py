@@ -13,7 +13,7 @@ from e3.platform_db import get_knowledge_base
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional, Tuple
+    from typing import Any, Optional, Tuple
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -313,7 +313,7 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
 
     __slots__ = ()
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return self._asdict()
 
     @classmethod
@@ -366,7 +366,7 @@ class OS(
 
     __slots__ = ()
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return self._asdict()
 
     @classmethod

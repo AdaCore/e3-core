@@ -8,7 +8,7 @@ import e3.os.platform
 from e3.platform_db import get_knowledge_base
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional
+    from typing import Any, Optional
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -132,7 +132,7 @@ class Platform(
             is_default,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Export os and cpu variables as os_{var} and cpu_{var}.
 
         :return: a dictionary representing the current Arch instance

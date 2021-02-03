@@ -13,7 +13,7 @@ from e3.os.process import Run
 from e3.sys import python_script
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
+    from typing import Optional
     from e3.event import Event
 
 
@@ -33,7 +33,7 @@ class S3Handler(EventHandler):
         self.sse = sse
 
     @classmethod
-    def decode_config(cls, config_str: str) -> Dict[str, Optional[str]]:
+    def decode_config(cls, config_str: str) -> dict[str, Optional[str]]:
         event_s3_url, log_s3_url, sse, aws_profile = config_str.split(",", 3)
         return {
             "event_s3_url": event_s3_url,

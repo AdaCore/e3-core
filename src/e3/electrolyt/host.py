@@ -6,7 +6,7 @@ import yaml
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional
+    from typing import Any, Optional
 
 
 class Host(BaseEnv):
@@ -44,7 +44,7 @@ class HostDB:
             file. See HostDB.load_yaml_db method for details about the expected
             format
         """
-        self.hosts: Dict[str, Host] = {}
+        self.hosts: dict[str, Host] = {}
 
         if filename is not None:
             self.load_yaml_db(filename)

@@ -5,7 +5,7 @@ import collections
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple
+    from typing import Any, Callable, NamedTuple, Optional, Tuple
     from e3.anod.spec import Anod
     from e3.anod.context import AnodContext
     from e3.anod.package import SourceBuilder
@@ -113,8 +113,8 @@ class SourceClosure:
         self.anod_instance = anod_instance
         self.expand_packages = expand_packages
         self.context = context
-        self.source_list: Dict[SourceKey, Optional[Any]] = {}
-        self.package_list: Dict[PackageKey, Optional[Any]] = {}
+        self.source_list: dict[SourceKey, Optional[Any]] = {}
+        self.package_list: dict[PackageKey, Optional[Any]] = {}
         self.compute_closure(self.anod_instance, publish=True)
         self.data_key = data_key
         if self.data_key is None:
@@ -191,7 +191,7 @@ class SourceClosure:
 
         :return: a list of list (source, publish)
         """
-        result: Dict[str, list[Any]] = {}
+        result: dict[str, list[Any]] = {}
         for src_key, src in list(self.source_list.items()):
             assert src is not None, "missing resolution"
             if TYPE_CHECKING:

@@ -28,7 +28,7 @@ NTSTATUS = LONG
 
 
 class FileAttribute(Structure):
-    """List of file attributes constants."""
+    """list of file attributes constants."""
 
     READONLY = 0x01
     HIDDEN = 0x02

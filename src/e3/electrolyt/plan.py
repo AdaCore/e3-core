@@ -14,7 +14,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Dict, Optional, Type
+    from typing import Any, Callable, Optional, Type
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
 
@@ -34,8 +34,8 @@ class Plan:
 
     def __init__(
         self,
-        data: Dict[str, Any],
-        entry_point_cls: Optional[Dict[str, Callable[..., EntryPoint]]] = None,
+        data: dict[str, Any],
+        entry_point_cls: Optional[dict[str, Callable[..., EntryPoint]]] = None,
         plan_ext: str = ".plan",
     ):
         """Initialize a new plan.
@@ -54,7 +54,7 @@ class Plan:
         for k, v in data.items():
             self.mod.__dict__[k] = v
 
-        self.entry_points: Dict[str, EntryPoint] = {}
+        self.entry_points: dict[str, EntryPoint] = {}
 
         if entry_point_cls is None:
             entry_point_cls = {}
@@ -117,8 +117,8 @@ class PlanActionEnv(BaseEnv):
 
     action: str
     plan_line: str
-    plan_args: Dict[str, Any]
-    plan_call_args: Dict[str, Any]
+    plan_args: dict[str, Any]
+    plan_call_args: dict[str, Any]
     push_to_store: bool
     default_build: bool
     module: Optional[str]
@@ -202,7 +202,7 @@ class PlanContext:
         # scopes. Only initial context use them. The overall scheme
         # works also because all scopes refer to the same stack of env
         # (because the object is mutable).
-        self.actions: Dict[str, Callable] = {}
+        self.actions: dict[str, Callable] = {}
         self.action_list: list[PlanActionEnv] = []
 
     def register_action(self, name: str, fun: Callable) -> None:
@@ -321,7 +321,7 @@ class PlanContext:
         # coming from environment). For the build, host and target arguments
         # a special processing is done to make the corresponding set_env
         # call on the result BaseEnv object
-        platform: Dict[str, Optional[str]] = {
+        platform: dict[str, Optional[str]] = {
             "build": None,
             "host": None,
             "target": None,

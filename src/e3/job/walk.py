@@ -10,7 +10,7 @@ from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, FrozenSet, Optional, Set
+    from typing import Any, Callable, FrozenSet, Optional, Set
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
     from e3.job import Job, ProcessJob
@@ -27,16 +27,16 @@ class Walk:
           such fingerprint.
           (with the job corresponding to a given entry in the DAG of
           actions).
-    :vartype prev_fingerprints: Dict[str, Optional[Fingerprint]]
+    :vartype prev_fingerprints: dict[str, Optional[Fingerprint]]
     :ivar new_fingerprints: A dict of e3.fingerprint.Fingerprint objects,
         indexed by the corresponding job ID. This dictionary contains
         the fingerprints we compute each time we create a new job
         (with the job corresponding to a given entry in the DAG of
         actions).
-    :vartype new_fingerprints: Dict[str, Optional[Fingerprint]]
+    :vartype new_fingerprints: dict[str, Optional[Fingerprint]]
     :ivar job_status: A dictionary of job status (ReturnValue), indexed by
         job unique IDs.
-    :vartype job_status: Dict[str, ReturnValue]
+    :vartype job_status: dict[str, ReturnValue]
     :ivar scheduler: The scheduler used to schedule and execute all
         the actions.
     :vartype scheduler: e3.job.scheduler.Scheduler
@@ -48,14 +48,14 @@ class Walk:
         :param actions: DAG of actions to perform.
         """
         self.actions = actions
-        self.prev_fingerprints: Dict[str, Optional[Fingerprint]] = {}
-        self.new_fingerprints: Dict[str, Optional[Fingerprint]] = {}
-        self.job_status: Dict[str, ReturnValue] = {}
-        self.queues: Dict[str, int] = {}
+        self.prev_fingerprints: dict[str, Optional[Fingerprint]] = {}
+        self.new_fingerprints: dict[str, Optional[Fingerprint]] = {}
+        self.job_status: dict[str, ReturnValue] = {}
+        self.queues: dict[str, int] = {}
         self.tokens = 1
         self.job_timeout = DEFAULT_JOB_MAX_DURATION
         self.set_scheduling_params()
-        self.failure_source: Dict[str, Set[str]] = {}
+        self.failure_source: dict[str, Set[str]] = {}
 
         self.scheduler = Scheduler(
             job_provider=self.get_job,

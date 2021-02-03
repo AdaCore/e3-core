@@ -20,7 +20,7 @@ from e3.platform import Platform
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Iterable, Optional, Type, TypeVar
+    from typing import Any, Iterable, Optional, Type, TypeVar
     from argparse import Namespace
 
 logger = e3.log.getLogger("env")
@@ -566,7 +566,7 @@ class BaseEnv(AbstractBaseEnv):
         :param target: target architecture. If None then it is set to target
         """
         # class variable that holds the current environment
-        self._instance: Dict[str, Any] = {}
+        self._instance: dict[str, Any] = {}
 
         # class variable that holds the stack of saved environments state
         self._context: list[Any] = []
@@ -630,7 +630,7 @@ class Env(AbstractBaseEnv):
     """
 
     # class variable that holds the current environment
-    _instance: Dict[str, Any] = {}
+    _instance: dict[str, Any] = {}
 
     # class variable that holds the stack of saved environments state
     _context: list[Any] = []

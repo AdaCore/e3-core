@@ -35,7 +35,6 @@ if TYPE_CHECKING:
     from typing import (
         cast,
         Callable,
-        Dict,
         FrozenSet,
         NoReturn,
         Optional,
@@ -128,10 +127,10 @@ class AnodContext:
 
         self.tree = DAG()
         self.root = Root()
-        self.dependencies: Dict[str, Dict[str, Tuple[Dependency, Anod]]] = {}
+        self.dependencies: dict[str, dict[str, Tuple[Dependency, Anod]]] = {}
         self.add(self.root)
-        self.cache: Dict[CacheKeyType, Anod] = {}
-        self.sources: Dict[str, Tuple[str, SourceBuilder]] = {}
+        self.cache: dict[CacheKeyType, Anod] = {}
+        self.sources: dict[str, Tuple[str, SourceBuilder]] = {}
 
     def load(
         self,

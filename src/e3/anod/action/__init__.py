@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from e3.anod.spec import Anod
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Final, Literal, Optional, Tuple, Union
+    from typing import Any, Final, Literal, Optional, Tuple, Union
     from e3.anod.package import Source, SourceBuilder
     from e3.collection.dag import DAG
 
@@ -186,7 +186,7 @@ class Checkout(Action):
 
     __slots__ = ("uid", "repo_name", "repo_data")
 
-    def __init__(self, repo_name: str, repo_data: Dict[str, str]):
+    def __init__(self, repo_name: str, repo_data: dict[str, str]):
         """Initialize a Checkout object.
 
         :param repo_name: The name of the repository.

@@ -227,7 +227,7 @@ class SourceBuilder:
         self.repositories = {}  # type: ignore
         self.kind = kind
         self.from_spec = None
-        self.source_query: Optional[Dict[str, Optional[str]]] = None
+        self.source_query: Optional[dict[str, Optional[str]]] = None
         self.__fullname = fullname
         self.__prepare_src = prepare_src
         self.__apply_patch = apply_patch
@@ -259,7 +259,7 @@ class SourceBuilder:
 
         # Set default function (a basic sync_tree call) that ignore
         # .svn, .git, .cvs, .cvsignore and .gitignore files
-        def default_prepare_src(repos: Dict[str, Dict[str, str]], dest: str) -> None:
+        def default_prepare_src(repos: dict[str, dict[str, str]], dest: str) -> None:
             sync_tree(
                 list(repos.values())[0]["working_dir"], dest, ignore=VCS_IGNORE_LIST
             )
