@@ -36,13 +36,13 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         Final,
-        Iterator,
         IO,
         List,
         Literal,
         Optional,
         TextIO,
     )
+    from collections.abc import Iterator
     from e3.os.process import Run, STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
 
     Git_Cmd = List[Optional[str]]

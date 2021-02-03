@@ -12,11 +12,10 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         Hashable,
-        Iterator,
         Optional,
         Sequence,
     )
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
     VertexID = Hashable
 

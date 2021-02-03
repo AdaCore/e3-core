@@ -11,7 +11,7 @@ from itertools import product
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from collections.abc import Iterator
 
 
 class ToggleableBooleanGroup:
