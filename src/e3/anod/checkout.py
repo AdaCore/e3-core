@@ -15,7 +15,7 @@ from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Literal, Optional, Tuple
+    from typing import Callable, Literal, Optional, Tuple
     from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.checkout")
@@ -108,7 +108,7 @@ class CheckoutManager:
             old_commit = get_filetree_state(self.working_dir)
         else:
             old_commit = ""
-        ignore_list: List[str] = []
+        ignore_list: list[str] = []
 
         if os.path.isdir(os.path.join(url, ".git")):
             # It seems that this is a git repository. Get the list of files to

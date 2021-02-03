@@ -17,7 +17,7 @@ from e3.fs import ls
 logger = e3.log.getLogger("anod.loader")
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Optional
+    from typing import Any, Callable, Dict, Optional
     from types import ModuleType
     from e3.anod.spec import Anod
 
@@ -175,7 +175,7 @@ class AnodSpecRepository:
 
 
 class AnodModule:
-    def __init__(self, name: str, path: str, data: List[str]):
+    def __init__(self, name: str, path: str, data: list[str]):
         """Initialize an AnodModule instance.
 
         :param name: module name

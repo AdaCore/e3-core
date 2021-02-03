@@ -6,7 +6,7 @@ import yaml
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional
+    from typing import Any, Dict, Optional
 
 
 class Host(BaseEnv):
@@ -50,7 +50,7 @@ class HostDB:
             self.load_yaml_db(filename)
 
     @property
-    def hostnames(self) -> List[str]:
+    def hostnames(self) -> list[str]:
         """Return the current list of host names.
 
         :return: a list of hostnames

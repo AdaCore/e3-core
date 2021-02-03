@@ -5,7 +5,7 @@ import collections
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
+    from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple
     from e3.anod.spec import Anod
     from e3.anod.context import AnodContext
     from e3.anod.package import SourceBuilder
@@ -155,7 +155,7 @@ class SourceClosure:
                         )
                 self.compute_closure(dep_spec, publish and dep.track)
 
-    def resolve_package(self, spec_uid: str, data: List[Tuple[Any, bool]]) -> None:
+    def resolve_package(self, spec_uid: str, data: list[Tuple[Any, bool]]) -> None:
         """Associate source information to a given package.
 
         :param spec_uid: the anod uid
@@ -180,7 +180,7 @@ class SourceClosure:
             if src_key.src_name == source_name:
                 self.source_list[src_key] = data
 
-    def get_source_list(self) -> List[List[Any]]:
+    def get_source_list(self) -> list[list[Any]]:
         """Get the closure source list.
 
         The function return the list of data for the sources in the closure.
@@ -191,7 +191,7 @@ class SourceClosure:
 
         :return: a list of list (source, publish)
         """
-        result: Dict[str, List[Any]] = {}
+        result: Dict[str, list[Any]] = {}
         for src_key, src in list(self.source_list.items()):
             assert src is not None, "missing resolution"
             if TYPE_CHECKING:

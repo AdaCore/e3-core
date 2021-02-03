@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 
 def process_exit_code(handle: int) -> Optional[int]:
@@ -35,7 +35,7 @@ def process_exit_code(handle: int) -> Optional[int]:
 
 
 def wait_for_objects(
-    object_list: List[int], timeout: int = 0, wait_for_all: bool = False
+    object_list: list[int], timeout: int = 0, wait_for_all: bool = False
 ) -> Optional[int]:
     """Wait until list of object are in signaled state.
 

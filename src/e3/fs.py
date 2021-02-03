@@ -22,7 +22,7 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, List, Optional, Sequence, Tuple
+    from typing import Callable, Iterable, Optional, Sequence, Tuple
 
 
 class FSError(e3.error.E3Error):
@@ -97,7 +97,7 @@ def cp(
 
 def directory_content(
     path: str, include_root_dir: bool = False, unixpath: bool = False
-) -> List[str]:
+) -> list[str]:
     """Return the complete directory content (recusrsively).
 
     :param path: path for the which the content should be returned
@@ -127,7 +127,7 @@ def directory_content(
     return result
 
 
-def echo_to_file(filename: str, content: str | List[str], append: bool = False) -> None:
+def echo_to_file(filename: str, content: str | list[str], append: bool = False) -> None:
     """Output content into a file.
 
     This function is useful when writing few content to a file for which we
@@ -155,7 +155,7 @@ def find(
     include_dirs: bool = False,
     include_files: bool = True,
     follow_symlinks: bool = False,
-) -> List[str]:
+) -> list[str]:
     """Find files or directory recursively.
 
     :param root: directory from which the research start
@@ -229,8 +229,8 @@ def get_filetree_state(path: str, ignore_hidden: bool = True) -> str:
     return result.hexdigest()
 
 
-def ls(path: str | List[str], emit_log_record: bool = True) -> List[str]:
-    """List files.
+def ls(path: str | list[str], emit_log_record: bool = True) -> list[str]:
+    """list files.
 
     :param path: glob pattern or glob pattern list
     :param emit_log_record: if True, emit a log (debug) record
@@ -283,7 +283,7 @@ def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
             ).with_traceback(sys.exc_info()[2])
 
 
-def mv(source: str | List[str], target: str) -> None:
+def mv(source: str | list[str], target: str) -> None:
     """Move files.
 
     :param source: a glob pattern
@@ -386,7 +386,7 @@ def mv(source: str | List[str], target: str) -> None:
         raise FSError(origin="mv", message=str(e)).with_traceback(sys.exc_info()[2])
 
 
-def rm(path: str | List[str], recursive: bool = False, glob: bool = True) -> None:
+def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> None:
     """Remove files.
 
     :param path: a glob pattern, or a list of glob patterns
@@ -491,7 +491,7 @@ def splitall(path: str) -> Tuple[str, ...]:
     :param path: path to split
     :return: a list of path components
     """
-    dirnames = []  # type: List[str]
+    dirnames = []  # type: list[str]
     while 1:
         head, tail = os.path.split(path)
         if head == path:
@@ -538,11 +538,11 @@ def sync_tree(
     source: str,
     target: str,
     ignore: Optional[str | Sequence[str]] = None,
-    file_list: Optional[List[str]] = None,
+    file_list: Optional[list[str]] = None,
     delete: bool = True,
     preserve_timestamps: bool = True,
     delete_ignore: bool = False,
-) -> Tuple[List[str], List[str]]:
+) -> Tuple[list[str], list[str]]:
     """Synchronize the files and directories between two directories.
 
     :param source: the directory from where the files and directories
@@ -946,8 +946,8 @@ def sync_tree(
         raise FSError(origin="sync_tree", message=f"{source} does not exist")
 
     # Keep track of deleted and updated files
-    deleted_list: List[str] = []
-    updated_list: List[str] = []
+    deleted_list: list[str] = []
+    updated_list: list[str] = []
 
     for wf in walk(source_top, target_top):
         if wf.source.stat is None and wf.target.stat is not None:

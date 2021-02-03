@@ -14,7 +14,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Dict, List, Optional, Type
+    from typing import Any, Callable, Dict, Optional, Type
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
 
@@ -122,7 +122,7 @@ class PlanActionEnv(BaseEnv):
     push_to_store: bool
     default_build: bool
     module: Optional[str]
-    source_packages: Optional[List[str]]
+    source_packages: Optional[list[str]]
 
 
 class PlanContext:
@@ -130,7 +130,7 @@ class PlanContext:
 
     def __init__(
         self,
-        stack: Optional[List[PlanActionEnv]] = None,
+        stack: Optional[list[PlanActionEnv]] = None,
         plan: Optional[Plan] = None,
         ignore_disabled: bool = True,
         server: Optional[BaseEnv] = None,
@@ -203,7 +203,7 @@ class PlanContext:
         # works also because all scopes refer to the same stack of env
         # (because the object is mutable).
         self.actions: Dict[str, Callable] = {}
-        self.action_list: List[PlanActionEnv] = []
+        self.action_list: list[PlanActionEnv] = []
 
     def register_action(self, name: str, fun: Callable) -> None:
         """Register a function that correspond to an action.
@@ -234,7 +234,7 @@ class PlanContext:
 
     def execute(
         self, plan: Plan, entry_point_name: str, verify: bool = False
-    ) -> List[PlanActionEnv]:
+    ) -> list[PlanActionEnv]:
         """Execute a plan.
 
         :param plan: the plan to execute

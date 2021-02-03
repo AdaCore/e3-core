@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import List, Optional
+    from typing import Optional
 
 
 class E3Error(Exception):
     """Exception raised by functions defined in E3."""
 
-    def __init__(self, message: str | List[str], origin: Optional[str] = None):
+    def __init__(self, message: str | list[str], origin: Optional[str] = None):
         """Initialize an E3Error.
 
         E3Error can store several messages and thus be used to propagate them.
@@ -27,7 +27,7 @@ class E3Error(Exception):
             else:
                 self.messages.extend(message)
 
-    def __iadd__(self, other: str | List[str] | E3Error) -> E3Error:
+    def __iadd__(self, other: str | list[str] | E3Error) -> E3Error:
         """Add messages to the current instance.
 
         :param other: a message or an E3Error instance

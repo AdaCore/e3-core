@@ -15,7 +15,6 @@ if TYPE_CHECKING:
         Dict,
         FrozenSet,
         Hashable,
-        List,
         Iterator,
         Optional,
         Sequence,
@@ -143,7 +142,7 @@ class DAG:
         self.__vertex_predecessors: Dict[VertexID, FrozenSet[VertexID]] = {}
         self.__vertex_successors: Dict[VertexID, FrozenSet[VertexID]] = {}
         self.__has_cycle: Optional[bool] = None
-        self.__cached_topological_order: Optional[List[Tuple[VertexID, Any]]] = None
+        self.__cached_topological_order: Optional[list[Tuple[VertexID, Any]]] = None
 
     def reset_caches(self) -> None:
         """Reset caches for DAG properties (cycle and cached topological order).
@@ -232,7 +231,7 @@ class DAG:
         max_distance: Optional[int] = None,
         max_element: Optional[int] = None,
         reverse_order: bool = False,
-    ) -> List[Tuple[int, VertexID, Any]]:
+    ) -> list[Tuple[int, VertexID, Any]]:
         r"""Get tag context.
 
         Returns the list of predecessors tags along with their vertex id and
@@ -410,7 +409,7 @@ class DAG:
 
     def shortest_path(
         self, source: VertexID, target: VertexID
-    ) -> Optional[List[VertexID]]:
+    ) -> Optional[list[VertexID]]:
         """Compute the shortest path between two vertices of the DAG.
 
         :param source: vertex id of the source
@@ -481,7 +480,7 @@ class DAG:
             # No path exist between source and target (or no cycle).
             return None
         else:
-            result: List[Optional[VertexID]] = [path_source]
+            result: list[Optional[VertexID]] = [path_source]
             while prev[result[-1]] is not None:
                 result.append(prev[result[-1]])
 

@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import List, Optional
+    from typing import Optional
 
 logger = e3.log.getLogger("e3.sys")
 
@@ -112,7 +112,7 @@ class RewriteImportNodeTransformer(ast.NodeTransformer):
     Currently only the RewriteImportRule are supported.
     """
 
-    def __init__(self, rules: List[RewriteImportRule]):
+    def __init__(self, rules: list[RewriteImportRule]):
         """Load a set of rules.
 
         :param rules: list of rule objects
@@ -259,7 +259,7 @@ def interpreter(prefix: Optional[str] = None) -> str:
             return os.path.join(prefix, "bin", "python")
 
 
-def python_script(name: str, prefix: Optional[str] = None) -> List[str]:
+def python_script(name: str, prefix: Optional[str] = None) -> list[str]:
     """Return path to scripts contained in this Python distribution.
 
     :param name: the script name

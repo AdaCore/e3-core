@@ -32,7 +32,6 @@ if TYPE_CHECKING:
         Callable,
         Dict,
         IO,
-        List,
         Literal,
         Optional,
         Sequence,
@@ -73,7 +72,7 @@ def check_api_version(version: str) -> None:
         )
 
 
-def parse_command(command: Sequence[str], build_space: BuildSpace) -> List[str]:
+def parse_command(command: Sequence[str], build_space: BuildSpace) -> list[str]:
     """Parse a command line formatting each string.
 
     :param command: the command line (a list of string)
@@ -428,7 +427,7 @@ class Anod:
         return self.uid
 
     @property
-    def source_pkg_build(self) -> Optional[List[e3.anod.package.SourceBuilder]]:
+    def source_pkg_build(self) -> Optional[list[e3.anod.package.SourceBuilder]]:
         """Return list of SourceBuilder defined in the specification file."""
         return None
 

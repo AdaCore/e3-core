@@ -24,7 +24,6 @@ if TYPE_CHECKING:
         Iterator,
         Sequence,
         TextIO,
-        List,
         TypeVar,
         Tuple,
         Mapping,
@@ -71,7 +70,7 @@ class JSONFormatter(logging.Formatter):
     # standard attributes that will always be printed
     STD_ATTR = ["asctime", "levelname", "name", "message", "module", "exc_text"]
     # custom attributes
-    _extra_attr: List[str] = ["anod_uui"]
+    _extra_attr: list[str] = ["anod_uui"]
 
     def __init__(
         self,

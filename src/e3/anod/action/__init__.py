@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from e3.anod.spec import Anod
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Final, List, Literal, Optional, Tuple, Union
+    from typing import Any, Dict, Final, Literal, Optional, Tuple, Union
     from e3.anod.package import Source, SourceBuilder
     from e3.collection.dag import DAG
 
@@ -417,7 +417,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         self.expected_choice: Optional[Choice] = None
         self.left_action = left
         self.right_action = right
-        self.triggers: List[Tuple[str, Choice, str]] = []
+        self.triggers: list[Tuple[str, Choice, str]] = []
         self.decision_maker: Optional[str] = None
 
     @property

@@ -11,7 +11,7 @@ from itertools import product
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Iterator, List
+    from typing import Iterator
 
 
 class ToggleableBooleanGroup:
@@ -35,7 +35,7 @@ class ToggleableBooleanGroup:
     """
 
     def __init__(self) -> None:
-        self.series: List[ToggleableBoolean] = []
+        self.series: list[ToggleableBoolean] = []
 
     def __getitem__(self, key: int) -> ToggleableBoolean:
         return self.series[key]
@@ -43,7 +43,7 @@ class ToggleableBooleanGroup:
     def __len__(self) -> int:
         return len(self.series)
 
-    def shuffle(self) -> Iterator[List[ToggleableBoolean]]:
+    def shuffle(self) -> Iterator[list[ToggleableBoolean]]:
         """Generate all other possible set of values for all conditional booleans.
 
         :return: yield a new list of ToggleableBoolean with a different set of value.

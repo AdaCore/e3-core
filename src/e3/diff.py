@@ -10,7 +10,7 @@ import e3.log
 import e3.os.process
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Optional, Tuple
+    from typing import Callable, Optional, Tuple
 
 logger = e3.log.getLogger("diff")
 
@@ -20,8 +20,8 @@ class DiffError(e3.error.E3Error):
 
 
 def diff(
-    a: str | List[str],
-    b: str | List[str],
+    a: str | list[str],
+    b: str | list[str],
     ignore: Optional[str] = None,
     item1name: str = "expected",
     item2name: str = "output",
@@ -41,7 +41,7 @@ def diff(
     :return: A diff string. If the string is equal to '' it means that there
         is no difference
     """
-    contents: List[List[str]] = [[], []]
+    contents: list[list[str]] = [[], []]
 
     # Read first item
     if isinstance(a, list):
@@ -87,7 +87,7 @@ def diff(
 def patch(
     patch_file: str,
     working_dir: str,
-    discarded_files: Optional[List[str] | Callable[[str], bool]] = None,
+    discarded_files: Optional[list[str] | Callable[[str], bool]] = None,
     filtered_patch: Optional[str] = None,
 ) -> None:
     """Apply a patch, ignoring changes in files matching discarded_files.

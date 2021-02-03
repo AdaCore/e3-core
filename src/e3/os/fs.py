@@ -21,7 +21,7 @@ import e3.error
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, List, Literal, Optional, Tuple
+    from typing import Any, Callable, Literal, Optional, Tuple
 
 
 class OSFSError(e3.error.E3Error):
@@ -322,7 +322,7 @@ def which(prog: str, paths: Optional[str] = None, default: Any = "") -> Any:
     def is_exe(file_path: str) -> bool:
         return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
 
-    def possible_names(file_path: str) -> List[str]:
+    def possible_names(file_path: str) -> list[str]:
         names = [file_path]
         if sys.platform == "win32":  # unix: no cover
             names.extend(

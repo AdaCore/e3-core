@@ -23,7 +23,7 @@ from e3.fs import rm
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Type
+    from typing import Any, Callable, Deque, Dict, Optional, Tuple, Type
     from requests.auth import AuthBase
     from requests.models import Response
 
@@ -74,7 +74,7 @@ class HTTPSession:
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 
-    def __init__(self, base_urls: Optional[List[str | BaseURL]] = None):
+    def __init__(self, base_urls: Optional[list[str | BaseURL]] = None):
         """Initialize HTTP session.
 
         :param base_urls: list of urls used as prefix to subsequent requests.

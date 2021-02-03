@@ -20,7 +20,7 @@ from ctypes.wintypes import (
     USHORT,
 )
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from e3.error import E3Error
 
@@ -201,7 +201,7 @@ class FileInfo:
         class_id = 6
 
     class Rename(Structure):
-        _fields_ = []  # type: List
+        _fields_ = []  # type: list
         class_id = 10
 
     class Basic(Structure):
@@ -231,7 +231,7 @@ class ObjectInfo:
     """Declaration of structures returned by QueryObjectInformation."""
 
     class Name(Structure):
-        _fields_: List = []
+        _fields_: list = []
         class_id = 1
 
 

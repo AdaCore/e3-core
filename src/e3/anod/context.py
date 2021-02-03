@@ -37,7 +37,6 @@ if TYPE_CHECKING:
         Callable,
         Dict,
         FrozenSet,
-        List,
         NoReturn,
         Optional,
         Tuple,
@@ -66,10 +65,10 @@ class SchedulingError(E3Error):
 
     def __init__(
         self,
-        message: str | List[str],
+        message: str | list[str],
         origin: Optional[str] = None,
         uid: Optional[VertexID] = None,
-        initiators: Optional[List[VertexID]] = None,
+        initiators: Optional[list[VertexID]] = None,
     ):
         """Scheduling error initialization.
 
@@ -237,7 +236,7 @@ class AnodContext:
         """
         return self.tree[key]
 
-    def predecessors(self, action: Action) -> List[Action]:
+    def predecessors(self, action: Action) -> list[Action]:
         """Retrieve predecessors of a given action.
 
         :param action: the parent action
@@ -310,7 +309,7 @@ class AnodContext:
         env: BaseEnv,
         primitive: PRIMITIVE,
         qualifier: Optional[str] = None,
-        source_packages: Optional[List[str]] = None,
+        source_packages: Optional[list[str]] = None,
         upload: bool = True,
         plan_line: Optional[str] = None,
         plan_args: Optional[dict] = None,
@@ -395,7 +394,7 @@ class AnodContext:
         env: BaseEnv,
         primitive: PRIMITIVE,
         qualifier: Optional[str] = None,
-        source_packages: Optional[List[str]] = None,
+        source_packages: Optional[list[str]] = None,
         expand_build: bool = True,
         source_name: Optional[str] = None,
         plan_line: Optional[str] = None,
@@ -885,7 +884,7 @@ class AnodContext:
             for which a decision should be taken
         """
         rev = self.tree.reverse_graph(enable_checks=False)
-        uploads: List[Tuple[Upload, FrozenSet[VertexID]]] = []
+        uploads: list[Tuple[Upload, FrozenSet[VertexID]]] = []
         dag = DAG()
 
         # Retrieve existing tags

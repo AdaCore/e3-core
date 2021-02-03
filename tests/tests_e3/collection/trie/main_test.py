@@ -2,14 +2,10 @@ from __future__ import annotations
 import os
 import pytest
 import time
-from typing import TYPE_CHECKING
 from e3.collection.trie import Trie
 
-if TYPE_CHECKING:
-    from typing import List
 
-
-def load_words() -> List[str]:
+def load_words() -> list[str]:
     with open(os.path.join(os.path.dirname(__file__), "word_list.txt")) as fd:
         return [word for word in fd.read().splitlines() if word.strip()]
 
