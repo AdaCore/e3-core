@@ -15,7 +15,7 @@ from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, Literal, Optional, Tuple
+    from typing import Callable, Literal, Optional
     from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.checkout")
@@ -70,7 +70,7 @@ class CheckoutManager:
             rm(self.changelog_file)
 
         update: Callable[
-            [str, Optional[str]], Tuple[ReturnValue, Optional[str], Optional[str]]
+            [str, Optional[str]], tuple[ReturnValue, Optional[str], Optional[str]]
         ]
         if vcs == "git":
             update = self.update_git
@@ -98,7 +98,7 @@ class CheckoutManager:
 
     def update_external(
         self, url: str, revision: Optional[str]
-    ) -> Tuple[ReturnValue, str, str]:
+    ) -> tuple[ReturnValue, str, str]:
         """Update working dir using a local directory.
 
         :param url: path to the repository
@@ -158,7 +158,7 @@ class CheckoutManager:
 
     def update_git(
         self, url: str, revision: Optional[str]
-    ) -> Tuple[ReturnValue, Optional[str], Optional[str]]:
+    ) -> tuple[ReturnValue, Optional[str], Optional[str]]:
         """Update working dir using a Git repository.
 
         :param url: git repository url
@@ -235,7 +235,7 @@ class CheckoutManager:
 
     def update_svn(
         self, url: str, revision: Optional[str]
-    ) -> Tuple[ReturnValue, Optional[str], Optional[str]]:
+    ) -> tuple[ReturnValue, Optional[str], Optional[str]]:
         """Update working dir using a SVN repository.
 
         :param url: git repository url

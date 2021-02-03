@@ -25,7 +25,6 @@ if TYPE_CHECKING:
         Sequence,
         TextIO,
         TypeVar,
-        Tuple,
         Mapping,
     )
     from logging import _ExcInfoType
@@ -110,7 +109,7 @@ class JSONFormatter(logging.Formatter):
 class E3LoggerAdapter(logging.LoggerAdapter):
     """LoggerAdapter to add custom keywords."""
 
-    def process(self, msg: Any, kwargs: Any) -> Tuple[Any, Any]:
+    def process(self, msg: Any, kwargs: Any) -> tuple[Any, Any]:
         """Allow to handle extra parameter.
 
         It is called by super method log. It is overwritten here because

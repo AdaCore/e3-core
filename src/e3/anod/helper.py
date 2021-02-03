@@ -13,7 +13,7 @@ from e3.anod.spec import Anod, parse_command
 from e3.os.fs import unixpath
 
 if TYPE_CHECKING:
-    from typing import Optional, Tuple
+    from typing import Optional
     from e3.os.process import Run
 
 log = e3.log.getLogger("anod.helpers")
@@ -258,7 +258,7 @@ class Configure:
 
 
 def text_replace(
-    filename: str, pattern: list[Tuple[bytes | str, bytes | str]]
+    filename: str, pattern: list[tuple[bytes | str, bytes | str]]
 ) -> list[int]:
     """Replace patterns in a file.
 

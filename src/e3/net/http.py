@@ -23,7 +23,7 @@ from e3.fs import rm
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Deque, Optional, Tuple, Type
+    from typing import Any, Callable, Deque, Optional, Type
     from requests.auth import AuthBase
     from requests.models import Response
 
@@ -58,7 +58,7 @@ class BaseURL:
         """
         self.url = url
 
-    def get_auth(self) -> Optional[Tuple[str, str] | AuthBase]:
+    def get_auth(self) -> Optional[tuple[str, str] | AuthBase]:
         """Return auth requests parameter.
 
         :return: authentication associated with the url

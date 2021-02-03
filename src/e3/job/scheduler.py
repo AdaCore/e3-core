@@ -13,7 +13,7 @@ from e3.job import Job
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, FrozenSet, Optional, Tuple, Type
+    from typing import Any, Callable, FrozenSet, Optional, Type
     from e3.collection.dag import DAG
 
     JobProviderCallback = Callable[
@@ -78,7 +78,7 @@ class Scheduler:
         self.max_active_jobs = 0
 
         # Initialize named queues
-        self.queues: dict[str, list[Tuple[int, int, Job]]] = {}
+        self.queues: dict[str, list[tuple[int, int, Job]]] = {}
         self.tokens = {}
         self.n_tokens = 0
 

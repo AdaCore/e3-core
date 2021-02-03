@@ -17,7 +17,6 @@ if TYPE_CHECKING:
         Iterator,
         Optional,
         Sequence,
-        Tuple,
     )
 
     VertexID = Hashable
@@ -56,7 +55,7 @@ class DAGIterator:
     def __iter__(self) -> DAGIterator:
         return self
 
-    def __next__(self) -> Tuple[None, None] | Tuple[VertexID, Any]:
+    def __next__(self) -> tuple[None, None] | tuple[VertexID, Any]:
         """Retrieve next_element with with_predecessors=False.
 
         The intermediate function is needed in Python 3.x
@@ -66,7 +65,7 @@ class DAGIterator:
             return (None, None)
         return (vertex_id, data)
 
-    def next_element(self,) -> Tuple[Optional[VertexID], Any, FrozenSet[VertexID]]:
+    def next_element(self,) -> tuple[Optional[VertexID], Any, FrozenSet[VertexID]]:
         """Retrieve next element in topological order.
 
         :return: a vertex id, data, predecessors. (None, None, frozenset()) is
@@ -140,7 +139,7 @@ class DAG:
         self.__vertex_predecessors: dict[VertexID, FrozenSet[VertexID]] = {}
         self.__vertex_successors: dict[VertexID, FrozenSet[VertexID]] = {}
         self.__has_cycle: Optional[bool] = None
-        self.__cached_topological_order: Optional[list[Tuple[VertexID, Any]]] = None
+        self.__cached_topological_order: Optional[list[tuple[VertexID, Any]]] = None
 
     def reset_caches(self) -> None:
         """Reset caches for DAG properties (cycle and cached topological order).
@@ -165,7 +164,7 @@ class DAG:
 
     def vertex_predecessors_items(
         self,
-    ) -> Iterator[Tuple[VertexID, FrozenSet[VertexID]]]:
+    ) -> Iterator[tuple[VertexID, FrozenSet[VertexID]]]:
         """Return predecessors.
 
         :return: a list of (vertex id, predecessors)
@@ -229,7 +228,7 @@ class DAG:
         max_distance: Optional[int] = None,
         max_element: Optional[int] = None,
         reverse_order: bool = False,
-    ) -> list[Tuple[int, VertexID, Any]]:
+    ) -> list[tuple[int, VertexID, Any]]:
         r"""Get tag context.
 
         Returns the list of predecessors tags along with their vertex id and
@@ -579,7 +578,7 @@ class DAG:
 
         return result
 
-    def __iter__(self) -> Iterator[Tuple[VertexID, Any]]:
+    def __iter__(self) -> Iterator[tuple[VertexID, Any]]:
         return (
             iter(DAGIterator(self))
             if self.__cached_topological_order is None

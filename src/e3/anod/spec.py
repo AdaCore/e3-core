@@ -34,7 +34,6 @@ if TYPE_CHECKING:
         Literal,
         Optional,
         Sequence,
-        Tuple,
         Union,
     )
     from e3.anod.buildspace import BuildSpace
@@ -174,7 +173,7 @@ class Anod:
     sandbox: Optional[SandBox] = None
     name = ""
     api_version = ""
-    data_files: Tuple[str, ...] = ()
+    data_files: tuple[str, ...] = ()
 
     # API
     Dependency = e3.anod.deps.Dependency

@@ -19,7 +19,7 @@ from e3.text import format_with_dict
 if TYPE_CHECKING:
     # Conditonal imports do not work with mypy, unconditionaly use yaml.Loader
     # for type checking
-    from typing import Any, IO, Tuple
+    from typing import Any, IO
     from yaml import Loader
 else:
     try:
@@ -200,7 +200,7 @@ class CaseParser:
 
         return value
 
-    def __update_state(self, key: str, value: Any, cursor: Any, prefix: Tuple) -> None:
+    def __update_state(self, key: str, value: Any, cursor: Any, prefix: tuple) -> None:
         """Update state.
 
         :param key: the key to modify. Leading or trailing '+' in the key name

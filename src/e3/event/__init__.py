@@ -20,7 +20,7 @@ logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Optional, Tuple, Type
+    from typing import Any, Callable, Optional, Type
 
 
 def unique_id() -> str:
@@ -109,7 +109,7 @@ class Event:
         except KeyError as e:
             raise AttributeError(e).with_traceback(sys.exc_info()[2])
 
-    def get_attachments(self) -> dict[str, Tuple[str, str]]:
+    def get_attachments(self) -> dict[str, tuple[str, str]]:
         """Return the list of attachments.
 
         :return: a list of tuple (path, sha1(path))

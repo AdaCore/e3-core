@@ -5,7 +5,7 @@ import collections
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, NamedTuple, Optional, Tuple
+    from typing import Any, Callable, NamedTuple, Optional
     from e3.anod.spec import Anod
     from e3.anod.context import AnodContext
     from e3.anod.package import SourceBuilder
@@ -155,7 +155,7 @@ class SourceClosure:
                         )
                 self.compute_closure(dep_spec, publish and dep.track)
 
-    def resolve_package(self, spec_uid: str, data: list[Tuple[Any, bool]]) -> None:
+    def resolve_package(self, spec_uid: str, data: list[tuple[Any, bool]]) -> None:
         """Associate source information to a given package.
 
         :param spec_uid: the anod uid

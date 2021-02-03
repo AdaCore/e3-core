@@ -10,7 +10,7 @@ import e3.log
 import e3.os.process
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional, Tuple
+    from typing import Callable, Optional
 
 logger = e3.log.getLogger("diff")
 
@@ -175,8 +175,8 @@ def patch(
         ) as fdout:
 
             # Two line headers that mark beginning of patches
-            header1: Tuple | Tuple[str, str] = ()
-            header2: Tuple | Tuple[str, str] = ()
+            header1: tuple | tuple[str, str] = ()
+            header2: tuple | tuple[str, str] = ()
             header2_regexp = None
             # whether the current patch line should discarded
             discard = False

@@ -22,7 +22,7 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, Optional, Sequence, Tuple
+    from typing import Callable, Iterable, Optional, Sequence
 
 
 class FSError(e3.error.E3Error):
@@ -413,7 +413,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
         else:
             file_list = set(path)
 
-    def onerror(func: Callable, error_path: str, exc_info: Tuple) -> None:
+    def onerror(func: Callable, error_path: str, exc_info: tuple) -> None:
         """When shutil.rmtree fail, try again to delete the file.
 
         :param func: function to call on error
@@ -485,7 +485,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             ).with_traceback(sys.exc_info()[2])
 
 
-def splitall(path: str) -> Tuple[str, ...]:
+def splitall(path: str) -> tuple[str, ...]:
     """Split a path into a list of path components.
 
     :param path: path to split
@@ -542,7 +542,7 @@ def sync_tree(
     delete: bool = True,
     preserve_timestamps: bool = True,
     delete_ignore: bool = False,
-) -> Tuple[list[str], list[str]]:
+) -> tuple[list[str], list[str]]:
     """Synchronize the files and directories between two directories.
 
     :param source: the directory from where the files and directories

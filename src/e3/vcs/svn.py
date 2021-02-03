@@ -23,7 +23,7 @@ from e3.fs import mkdir, rm
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import Any, IO, List, Optional, TextIO, Tuple
+    from typing import Any, IO, List, Optional, TextIO
 
     SVNCmd = List[Optional[str]]
 
@@ -225,7 +225,7 @@ class SVNRepository:
         :raise: SVNError
         """
 
-        def is_clean_svn_dir(dir_path: str) -> Tuple[bool, bool]:
+        def is_clean_svn_dir(dir_path: str) -> tuple[bool, bool]:
             """Return a tuple (True if dir is SVN directory, True if clean)."""
             if os.path.exists(os.path.join(dir_path, ".svn")):
                 try:

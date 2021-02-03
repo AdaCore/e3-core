@@ -127,10 +127,10 @@ class AnodContext:
 
         self.tree = DAG()
         self.root = Root()
-        self.dependencies: dict[str, dict[str, Tuple[Dependency, Anod]]] = {}
+        self.dependencies: dict[str, dict[str, tuple[Dependency, Anod]]] = {}
         self.add(self.root)
         self.cache: dict[CacheKeyType, Anod] = {}
-        self.sources: dict[str, Tuple[str, SourceBuilder]] = {}
+        self.sources: dict[str, tuple[str, SourceBuilder]] = {}
 
     def load(
         self,
@@ -883,7 +883,7 @@ class AnodContext:
             for which a decision should be taken
         """
         rev = self.tree.reverse_graph(enable_checks=False)
-        uploads: list[Tuple[Upload, FrozenSet[VertexID]]] = []
+        uploads: list[tuple[Upload, FrozenSet[VertexID]]] = []
         dag = DAG()
 
         # Retrieve existing tags
