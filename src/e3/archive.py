@@ -20,8 +20,8 @@ import e3.os.fs
 
 
 if TYPE_CHECKING:
-    from typing import Literal, Optional, Sequence, Text, Union
-    from collections.abc import Callable
+    from typing import Literal, Optional, Text, Union
+    from collections.abc import Callable, Sequence
     from os import PathLike
     from e3.mypy import assert_never
 

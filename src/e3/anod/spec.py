@@ -32,10 +32,9 @@ if TYPE_CHECKING:
         IO,
         Literal,
         Optional,
-        Sequence,
         Union,
     )
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv

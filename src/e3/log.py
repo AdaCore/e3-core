@@ -21,12 +21,11 @@ if TYPE_CHECKING:
         Any,
         IO,
         Optional,
-        Sequence,
         TextIO,
         TypeVar,
         Mapping,
     )
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Sequence
     from logging import _ExcInfoType
     from argparse import ArgumentParser, _ArgumentGroup, Namespace
 

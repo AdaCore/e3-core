@@ -13,9 +13,8 @@ if TYPE_CHECKING:
         Any,
         Hashable,
         Optional,
-        Sequence,
     )
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
 
     VertexID = Hashable
 
