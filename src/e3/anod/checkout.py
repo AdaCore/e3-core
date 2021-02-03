@@ -62,8 +62,14 @@ class CheckoutManager:
         """Update content of the working directory.
 
         :param vcs: vcs kind
-        :param url: repository url
+        :param url: repository url, when vcs is external the url is the path
+             to the source directory
         :param revision: revision
+
+        Note that when vcs is set to git or svn, the version control ignore
+        setting is taken into account. Additionally, when the vcs is
+        external and the source directory contains a .git subdirectory then
+        git ignore setting is taken into account.
         """
         # Reset changelog file
         if os.path.isfile(self.changelog_file):
@@ -103,6 +109,9 @@ class CheckoutManager:
 
         :param url: path to the repository
         :param revision: ignored
+
+        If <url>/.git is a directory then git ls-files will be called to get
+        the list of files to ignore.
         """
         if os.path.isdir(self.working_dir):
             old_commit = get_filetree_state(self.working_dir)
