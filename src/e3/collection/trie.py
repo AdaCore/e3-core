@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterable, Optional
+    from typing import Any, Iterable, Optional
+    from collections.abc import Callable
 
 
 class Trie:

@@ -29,7 +29,8 @@ from e3.os.windows.native_api import (
 )
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Any, Optional
+    from collections.abc import Callable
 
 
 logger = e3.log.getLogger("os.windows.fs")

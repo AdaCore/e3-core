@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from typing import Callable, Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Optional
+    from collections.abc import Callable
 
 
 def process_exit_code(handle: int) -> Optional[int]:

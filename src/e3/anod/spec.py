@@ -29,13 +29,13 @@ spec_logger = e3.log.getLogger("anod.spec")
 if TYPE_CHECKING:
     from typing import (
         Any,
-        Callable,
         IO,
         Literal,
         Optional,
         Sequence,
         Union,
     )
+    from collections.abc import Callable
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv

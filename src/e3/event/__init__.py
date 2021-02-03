@@ -20,7 +20,8 @@ logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Optional
+    from typing import Any, Optional
+    from collections.abc import Callable
 
 
 def unique_id() -> str:

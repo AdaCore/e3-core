@@ -12,7 +12,8 @@ from typing import TYPE_CHECKING
 from warnings import warn
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from typing import Any
+    from collections.abc import Callable
 
 
 def enabled(func: Callable) -> Callable:

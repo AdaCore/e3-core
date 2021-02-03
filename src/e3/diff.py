@@ -10,7 +10,8 @@ import e3.log
 import e3.os.process
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional
+    from typing import Optional
+    from collections.abc import Callable
 
 logger = e3.log.getLogger("diff")
 

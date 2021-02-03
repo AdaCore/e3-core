@@ -15,7 +15,8 @@ from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, Literal
+    from typing import Literal
+    from collections.abc import Callable
     from e3.anod.action import Action
     from e3.anod.sandbox import SandBox
     from e3.anod.loader import AnodSpecRepository

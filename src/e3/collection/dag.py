@@ -11,12 +11,12 @@ from e3.error import E3Error
 if TYPE_CHECKING:
     from typing import (
         Any,
-        Callable,
         Hashable,
         Iterator,
         Optional,
         Sequence,
     )
+    from collections.abc import Callable
 
     VertexID = Hashable
 

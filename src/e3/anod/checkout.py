@@ -15,7 +15,8 @@ from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Callable, Literal, Optional
+    from typing import Literal, Optional
+    from collections.abc import Callable
     from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.checkout")

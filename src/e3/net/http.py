@@ -23,7 +23,8 @@ from e3.fs import rm
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Deque, Optional
+    from typing import Any, Deque, Optional
+    from collections.abc import Callable
     from requests.auth import AuthBase
     from requests.models import Response
 

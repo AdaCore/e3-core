@@ -10,7 +10,8 @@ from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Any, Optional
+    from collections.abc import Callable
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
     from e3.job import Job, ProcessJob

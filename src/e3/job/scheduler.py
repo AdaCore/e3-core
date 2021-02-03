@@ -13,7 +13,8 @@ from e3.job import Job
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, FrozenSet, Optional
+    from typing import Any, FrozenSet, Optional
+    from collections.abc import Callable
     from e3.collection.dag import DAG
 
     JobProviderCallback = Callable[

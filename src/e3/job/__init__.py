@@ -12,7 +12,8 @@ from e3.os.process import Run
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Any, Optional
+    from collections.abc import Callable
     from e3.job.scheduler import Scheduler
 
     NotifyEndType = Callable[[str], None]

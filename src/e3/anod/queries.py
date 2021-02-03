@@ -5,7 +5,8 @@ import collections
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, NamedTuple, Optional
+    from typing import Any, NamedTuple, Optional
+    from collections.abc import Callable
     from e3.anod.spec import Anod
     from e3.anod.context import AnodContext
     from e3.anod.package import SourceBuilder

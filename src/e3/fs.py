@@ -22,7 +22,8 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, Optional, Sequence
+    from typing import Iterable, Optional, Sequence
+    from collections.abc import Callable
 
 
 class FSError(e3.error.E3Error):

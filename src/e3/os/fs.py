@@ -21,7 +21,8 @@ import e3.error
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Literal, Optional
+    from typing import Any, Literal, Optional
+    from collections.abc import Callable
 
 
 class OSFSError(e3.error.E3Error):

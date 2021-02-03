@@ -34,11 +34,11 @@ from e3.error import E3Error
 if TYPE_CHECKING:
     from typing import (
         cast,
-        Callable,
         NoReturn,
         Optional,
         Tuple,
     )
+    from collections.abc import Callable
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
     from e3.anod.spec import Anod, PRIMITIVE

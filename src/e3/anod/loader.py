@@ -17,7 +17,8 @@ from e3.fs import ls
 logger = e3.log.getLogger("anod.loader")
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Any, Optional
+    from collections.abc import Callable
     from types import ModuleType
     from e3.anod.spec import Anod
 
