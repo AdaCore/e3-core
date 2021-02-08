@@ -13,7 +13,7 @@ logger = e3.log.getLogger("buildspace")
 
 
 if TYPE_CHECKING:
-    from typing import Optional, List
+    from typing import Optional
 
 
 class BuildSpace:
@@ -62,7 +62,7 @@ class BuildSpace:
         return True
 
     @property
-    def dirs(self) -> List[str]:
+    def dirs(self) -> list[str]:
         return list(self.directory_mapping.values())
 
     def subdir(self, name: str) -> str:
@@ -99,7 +99,7 @@ class BuildSpace:
 
         self.initialized = True
 
-    def reset(self, keep: Optional[List[str]] = None) -> None:
+    def reset(self, keep: Optional[list[str]] = None) -> None:
         """Reset build space.
 
         The function delete the complete buildspace. The only elements that

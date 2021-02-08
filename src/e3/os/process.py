@@ -144,7 +144,7 @@ def quote_arg(arg: str) -> str:
     return arg
 
 
-def to_cmd_lines(cmds: AnyCmdLine) -> List[CmdLine]:
+def to_cmd_lines(cmds: AnyCmdLine) -> list[CmdLine]:
     if isinstance(cmds[0], str):
         # Turn the simple command into a special case of
         # the multiple-commands case.  This will allow us
@@ -405,7 +405,7 @@ class Run:
                 self.internal = Popen(self.cmds[0], **popen_args)
 
             else:
-                runs: List[subprocess.Popen] = []
+                runs: list[subprocess.Popen] = []
                 for index, cmd in enumerate(self.cmds):
                     if index == 0:
                         stdin: int | IO[Any] = self.input_file.fd
@@ -496,7 +496,7 @@ class Run:
         self.error_file.close()
         self.input_file.close()
 
-    def __error(self, error: Exception, cmds: List[CmdLine]) -> None:
+    def __error(self, error: Exception, cmds: list[CmdLine]) -> None:
         """Set pid to -1 and status to 127 before closing files."""
         self.close_files()
         logger.error(error)
@@ -599,7 +599,7 @@ class Run:
         else:
             return self.internal.is_running()
 
-    def children(self) -> List[Any]:
+    def children(self) -> list[Any]:
         """Return list of child processes (using psutil)."""
         if psutil is None:  # defensive code
             raise NotImplementedError("Run.children() require psutil")
@@ -663,7 +663,7 @@ class WaitError(Exception):
     pass
 
 
-def wait_for_processes(process_list: List[Run], timeout: float) -> Optional[int]:
+def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]:
     """Wait for several processes spawned with Run.
 
     :param process_list: a list of Run objects

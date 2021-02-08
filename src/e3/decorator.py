@@ -12,7 +12,8 @@ from typing import TYPE_CHECKING
 from warnings import warn
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict
+    from typing import Any
+    from collections.abc import Callable
 
 
 def enabled(func: Callable) -> Callable:
@@ -85,7 +86,7 @@ class memoize:
         :param func: function to decorate
         """
         self.func = func
-        self.cache: Dict[tuple, Any] = {}
+        self.cache: dict[tuple, Any] = {}
         warn(
             "this decorator will be removed in a later version of e3-core, "
             "please use functools.lru_cache instead",

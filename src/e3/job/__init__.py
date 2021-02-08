@@ -12,7 +12,8 @@ from e3.os.process import Run
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, List, Optional
+    from typing import Any, Optional
+    from collections.abc import Callable
     from e3.job.scheduler import Scheduler
 
     NotifyEndType = Callable[[str], None]
@@ -270,7 +271,7 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
                 return ReturnValue.failure
 
     @abc.abstractproperty
-    def cmdline(self) -> List[str]:
+    def cmdline(self) -> list[str]:
         """Return the command line of the process to be spawned.
 
         :return: the command line

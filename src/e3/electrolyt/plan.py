@@ -14,7 +14,8 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Dict, List, Optional, Type
+    from typing import Any, Optional
+    from collections.abc import Callable
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
 
@@ -34,8 +35,8 @@ class Plan:
 
     def __init__(
         self,
-        data: Dict[str, Any],
-        entry_point_cls: Optional[Dict[str, Callable[..., EntryPoint]]] = None,
+        data: dict[str, Any],
+        entry_point_cls: Optional[dict[str, Callable[..., EntryPoint]]] = None,
         plan_ext: str = ".plan",
     ):
         """Initialize a new plan.
@@ -54,7 +55,7 @@ class Plan:
         for k, v in data.items():
             self.mod.__dict__[k] = v
 
-        self.entry_points: Dict[str, EntryPoint] = {}
+        self.entry_points: dict[str, EntryPoint] = {}
 
         if entry_point_cls is None:
             entry_point_cls = {}
@@ -117,12 +118,12 @@ class PlanActionEnv(BaseEnv):
 
     action: str
     plan_line: str
-    plan_args: Dict[str, Any]
-    plan_call_args: Dict[str, Any]
+    plan_args: dict[str, Any]
+    plan_call_args: dict[str, Any]
     push_to_store: bool
     default_build: bool
     module: Optional[str]
-    source_packages: Optional[List[str]]
+    source_packages: Optional[list[str]]
 
 
 class PlanContext:
@@ -130,7 +131,7 @@ class PlanContext:
 
     def __init__(
         self,
-        stack: Optional[List[PlanActionEnv]] = None,
+        stack: Optional[list[PlanActionEnv]] = None,
         plan: Optional[Plan] = None,
         ignore_disabled: bool = True,
         server: Optional[BaseEnv] = None,
@@ -202,8 +203,8 @@ class PlanContext:
         # scopes. Only initial context use them. The overall scheme
         # works also because all scopes refer to the same stack of env
         # (because the object is mutable).
-        self.actions: Dict[str, Callable] = {}
-        self.action_list: List[PlanActionEnv] = []
+        self.actions: dict[str, Callable] = {}
+        self.action_list: list[PlanActionEnv] = []
 
     def register_action(self, name: str, fun: Callable) -> None:
         """Register a function that correspond to an action.
@@ -234,7 +235,7 @@ class PlanContext:
 
     def execute(
         self, plan: Plan, entry_point_name: str, verify: bool = False
-    ) -> List[PlanActionEnv]:
+    ) -> list[PlanActionEnv]:
         """Execute a plan.
 
         :param plan: the plan to execute
@@ -321,7 +322,7 @@ class PlanContext:
         # coming from environment). For the build, host and target arguments
         # a special processing is done to make the corresponding set_env
         # call on the result BaseEnv object
-        platform: Dict[str, Optional[str]] = {
+        platform: dict[str, Optional[str]] = {
             "build": None,
             "host": None,
             "target": None,
@@ -379,7 +380,7 @@ class PlanContext:
 
     def __exit__(
         self,
-        _type: Optional[Type[BaseException]],
+        _type: Optional[type[BaseException]],
         _value: Optional[BaseException],
         _tb: Optional[TracebackType],
     ) -> None:

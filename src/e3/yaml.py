@@ -19,7 +19,7 @@ from e3.text import format_with_dict
 if TYPE_CHECKING:
     # Conditonal imports do not work with mypy, unconditionaly use yaml.Loader
     # for type checking
-    from typing import Any, IO, List, Set, Tuple
+    from typing import Any, IO
     from yaml import Loader
 else:
     try:
@@ -159,7 +159,7 @@ class CaseParser:
         # This contains the list of keys that have been updated. This
         # allow us to remove the keys part of initial_config that are
         # not modified.
-        self.keys: Set[str] = set()
+        self.keys: set[str] = set()
 
     def __parse_case(self, case_key: str, data: dict) -> Any:
         """Parse a case statement.
@@ -200,7 +200,7 @@ class CaseParser:
 
         return value
 
-    def __update_state(self, key: str, value: Any, cursor: Any, prefix: Tuple) -> None:
+    def __update_state(self, key: str, value: Any, cursor: Any, prefix: tuple) -> None:
         """Update state.
 
         :param key: the key to modify. Leading or trailing '+' in the key name
@@ -285,7 +285,7 @@ class CaseParser:
             return cursor
 
 
-def load_with_config(filename: str | List[str], config: dict) -> Any:
+def load_with_config(filename: str | list[str], config: dict) -> Any:
     """Load yaml config files with case statement handling.
 
     :param filename: a path or list of path. When a list of path
@@ -318,7 +318,7 @@ def load_with_config(filename: str | List[str], config: dict) -> Any:
     return result
 
 
-def load_with_regexp_table(filename: str, selectors: List[str], data: dict) -> dict:
+def load_with_regexp_table(filename: str, selectors: list[str], data: dict) -> dict:
     """Load a yaml file using regexp tables.
 
     :param filename: the yaml file to load

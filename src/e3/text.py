@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import re
-from typing import Dict
 
 
-def format_with_dict(pattern: str, values: Dict[str, str]) -> str:
+def format_with_dict(pattern: str, values: dict[str, str]) -> str:
     """Safely format a python string using % and a dictionary for values.
 
     This method is safer than using directly percent as it will escape

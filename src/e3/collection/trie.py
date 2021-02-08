@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterable, Dict, Optional
+    from typing import Any, Iterable, Optional
+    from collections.abc import Callable
 
 
 class Trie:
@@ -34,7 +35,7 @@ class Trie:
         :param use_suffix: use suffix matching rather then prefix matching
         :param match_delimiter: set default value for match function mode delimiter.
         """
-        self.tree: Dict[str, Any] = {}
+        self.tree: dict[str, Any] = {}
         self.match_delimiter = match_delimiter
         self.word_iterator: Callable[[str], Iterable[str]] = lambda x: iter(x)
         if use_suffix:

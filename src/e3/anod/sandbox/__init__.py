@@ -18,7 +18,7 @@ logger = e3.log.getLogger("sandbox")
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional
+    from typing import Any, Optional
 
 
 class SandBox:
@@ -51,7 +51,7 @@ class SandBox:
         self.__specs_dir = os.path.join(self.root_dir, "specs")
 
         # Contains the loaded version of user.yaml if present
-        self.user_config: Optional[Dict[str, Any]] = None
+        self.user_config: Optional[dict[str, Any]] = None
 
         # For each directory create an attribute containing its path
         for d in self.dirs:

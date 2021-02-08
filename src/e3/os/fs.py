@@ -21,7 +21,8 @@ import e3.error
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, List, Literal, Optional, Tuple
+    from typing import Any, Literal, Optional
+    from collections.abc import Callable
 
 
 class OSFSError(e3.error.E3Error):
@@ -142,11 +143,11 @@ def df(path: str) -> int:
 
 
 @overload
-def df(path: str, full: Literal[True]) -> Tuple:
+def df(path: str, full: Literal[True]) -> tuple:
     ...
 
 
-def df(path: str, full: bool = False) -> int | Tuple:
+def df(path: str, full: bool = False) -> int | tuple:
     """Disk space available on the filesystem containing the given path.
 
     :param path: a path
@@ -198,7 +199,7 @@ def df(path: str, full: bool = False) -> int | Tuple:
     return free // (1024 * 1024)
 
 
-def __safe_unlink_func() -> Tuple[Callable[[str], None], Callable[[str], None]]:
+def __safe_unlink_func() -> tuple[Callable[[str], None], Callable[[str], None]]:
     """Provide a safe unlink function on windows.
 
     Note that all this is done to ensure that rm is working fine on Windows 7
@@ -322,7 +323,7 @@ def which(prog: str, paths: Optional[str] = None, default: Any = "") -> Any:
     def is_exe(file_path: str) -> bool:
         return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
 
-    def possible_names(file_path: str) -> List[str]:
+    def possible_names(file_path: str) -> list[str]:
         names = [file_path]
         if sys.platform == "win32":  # unix: no cover
             names.extend(

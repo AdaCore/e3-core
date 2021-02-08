@@ -13,7 +13,8 @@ from e3.job import Job
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, FrozenSet, List, Optional, Tuple, Type
+    from typing import Any, FrozenSet, Optional
+    from collections.abc import Callable
     from e3.collection.dag import DAG
 
     JobProviderCallback = Callable[
@@ -35,7 +36,7 @@ class Scheduler:
         self,
         job_provider: JobProviderCallback,
         collect: Optional[CollectCallback] = None,
-        queues: Optional[Dict[str, int]] = None,
+        queues: Optional[dict[str, int]] = None,
         tokens: int = 1,
         job_timeout: int = DEFAULT_JOB_MAX_DURATION,
     ):
@@ -67,7 +68,7 @@ class Scheduler:
         else:
             self.collect = collect
 
-        self.active_jobs: List[Job] = []
+        self.active_jobs: list[Job] = []
         self.queued_jobs = 0
         self.all_jobs_queued = False
         self.message_queue: Queue[Any] = Queue()
@@ -78,7 +79,7 @@ class Scheduler:
         self.max_active_jobs = 0
 
         # Initialize named queues
-        self.queues: Dict[str, List[Tuple[int, int, Job]]] = {}
+        self.queues: dict[str, list[tuple[int, int, Job]]] = {}
         self.tokens = {}
         self.n_tokens = 0
 
@@ -127,7 +128,7 @@ class Scheduler:
             return self.job_provider(uid, data, predecessors, notify_end)
 
     @classmethod
-    def simple_provider(cls, job_class: Type[Job]) -> JobProviderCallback:
+    def simple_provider(cls, job_class: type[Job]) -> JobProviderCallback:
         """Return a simple provider based on a given Job class.
 
         :param job_class: a subclass of Job

@@ -41,7 +41,7 @@ from e3.env import Env
 
 if TYPE_CHECKING:
     from types import FrameType
-    from typing import Optional, List, NoReturn
+    from typing import Optional, NoReturn
     from argparse import Namespace
 
 
@@ -146,7 +146,7 @@ class Main:
             signal.signal(signal.SIGTERM, sigterm_handler)
 
     def parse_args(
-        self, args: Optional[List[str]] = None, known_args_only: bool = False
+        self, args: Optional[list[str]] = None, known_args_only: bool = False
     ) -> None:
         """Parse options and set console logger.
 

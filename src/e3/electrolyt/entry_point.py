@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Optional
+    from typing import Any, Optional
+    from collections.abc import Callable
 
 
 class EntryPoint:
@@ -15,7 +16,7 @@ class EntryPoint:
 
     def __init__(
         self,
-        db: Dict[str, EntryPoint],
+        db: dict[str, EntryPoint],
         fun: Callable[[], None],
         kind: str,
         name: Optional[str] = None,
@@ -58,7 +59,7 @@ class Machine(EntryPoint):
 
     def __init__(
         self,
-        db: Dict[str, EntryPoint],
+        db: dict[str, EntryPoint],
         fun: Callable[[], None],
         kind: str,
         platform: str,
@@ -84,7 +85,7 @@ class Machine(EntryPoint):
 
 
 def entry_point(
-    db: Dict[str, EntryPoint],
+    db: dict[str, EntryPoint],
     cls: Callable[..., EntryPoint],
     kind: str,
     *args: Any,

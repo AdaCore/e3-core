@@ -20,7 +20,7 @@ from e3.platform import Platform
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
+    from typing import Any, Iterable, Optional, TypeVar
     from argparse import Namespace
 
 logger = e3.log.getLogger("env")
@@ -306,7 +306,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
         :return: a namedtuple suitable for a call to set_env
         """
-        result: List[Optional[str]] = []
+        result: list[Optional[str]] = []
         if not self.build.is_default:
             result.append(",".join([self.build.platform, self.build.os.version]))
         else:
@@ -332,7 +332,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             result.append(None)
         return EnvInfo(*result)
 
-    def cmd_triplet(self) -> List[str]:
+    def cmd_triplet(self) -> list[str]:
         """Return command line parameters corresponding to current env.
 
         :return: a list of command line parameters
@@ -435,7 +435,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         self.add_search_path(self.dll_path_var, path, append)
 
     @property
-    def discriminants(self) -> List[str]:
+    def discriminants(self) -> list[str]:
         """Compute discriminants.
 
         :return: the list of discriminants associated with the current context
@@ -566,10 +566,10 @@ class BaseEnv(AbstractBaseEnv):
         :param target: target architecture. If None then it is set to target
         """
         # class variable that holds the current environment
-        self._instance: Dict[str, Any] = {}
+        self._instance: dict[str, Any] = {}
 
         # class variable that holds the stack of saved environments state
-        self._context: List[Any] = []
+        self._context: list[Any] = []
         super().__init__(build, host, target)
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -608,7 +608,7 @@ class BaseEnv(AbstractBaseEnv):
 
     @classmethod
     def from_env(
-        cls: Type[BaseEnv_T], env: Optional[Env | BaseEnv] = None
+        cls: type[BaseEnv_T], env: Optional[Env | BaseEnv] = None
     ) -> BaseEnv_T:
         """Return a new BaseEnv object from an env.
 
@@ -630,10 +630,10 @@ class Env(AbstractBaseEnv):
     """
 
     # class variable that holds the current environment
-    _instance: Dict[str, Any] = {}
+    _instance: dict[str, Any] = {}
 
     # class variable that holds the stack of saved environments state
-    _context: List[Any] = []
+    _context: list[Any] = []
 
     def __init__(self) -> None:
         """Initialize or reuse an existing Env object (singleton).

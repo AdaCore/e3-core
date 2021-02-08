@@ -23,7 +23,8 @@ from e3.fs import rm
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Type
+    from typing import Any, Deque, Optional
+    from collections.abc import Callable
     from requests.auth import AuthBase
     from requests.models import Response
 
@@ -58,7 +59,7 @@ class BaseURL:
         """
         self.url = url
 
-    def get_auth(self) -> Optional[Tuple[str, str] | AuthBase]:
+    def get_auth(self) -> Optional[tuple[str, str] | AuthBase]:
         """Return auth requests parameter.
 
         :return: authentication associated with the url
@@ -74,7 +75,7 @@ class HTTPSession:
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 
-    def __init__(self, base_urls: Optional[List[str | BaseURL]] = None):
+    def __init__(self, base_urls: Optional[list[str | BaseURL]] = None):
         """Initialize HTTP session.
 
         :param base_urls: list of urls used as prefix to subsequent requests.
@@ -96,7 +97,7 @@ class HTTPSession:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
@@ -134,7 +135,7 @@ class HTTPSession:
         self,
         method: str,
         url: str,
-        data_streams: Optional[Dict[str, Any]] = None,
+        data_streams: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Response:
         """Send a request.
@@ -147,7 +148,7 @@ class HTTPSession:
         For POST requests an additional parameter is supported: data_streams.
         data_streams is a dict associating a string key to either another
         string, a dict, a list or a file descriptor. String value are passed
-        without any modifications. Lists and dicts are automatically encoded
+        without any modifications. lists and dicts are automatically encoded
         in JSON. Finally file objects are streamed during the POST request
         (no complete read is done into memory to fetch file content). When
         using data_streams parameter, data parameter will be ignored and
@@ -171,7 +172,7 @@ class HTTPSession:
             # Handle data_streams. After some tests it seems that we need to
             # redo an instance of the multipart encoder for each attempt.
             if data_streams is not None:
-                data: Dict[str, Any] = {}
+                data: dict[str, Any] = {}
                 for k, v in data_streams.items():
                     if hasattr(v, "seek"):
                         # This is a file. Assume that the key is the filename

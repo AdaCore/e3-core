@@ -35,15 +35,14 @@ from e3.vcs import VCSError
 if TYPE_CHECKING:
     from typing import (
         Any,
-        Dict,
         Final,
-        Iterator,
         IO,
         List,
         Literal,
         Optional,
         TextIO,
     )
+    from collections.abc import Iterator
     from e3.os.process import Run, STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
 
     Git_Cmd = List[Optional[str]]
@@ -283,7 +282,7 @@ class GitRepository:
 
     def parse_log(
         self, stream: IO[str], max_diff_size: int = 0
-    ) -> Iterator[Dict[str, str | dict]]:
+    ) -> Iterator[dict[str, str | dict]]:
         """Parse a log stream generated with `write_log`.
 
         :param stream: stream of text to read

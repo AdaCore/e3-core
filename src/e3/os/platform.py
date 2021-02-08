@@ -13,7 +13,7 @@ from e3.platform_db import get_knowledge_base
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional, Tuple
+    from typing import Any, Optional
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -43,11 +43,11 @@ class SystemInfo:
     _platform: Optional[str] = None
 
     # _os_version is a tuple: os version, kernel version
-    _os_version: Optional[Tuple[str, str]] = None
+    _os_version: Optional[tuple[str, str]] = None
 
     # _hostname is a tuble: hostname, domain. Joining with a dot hostname and domain
     # represent the FQDN
-    _hostname: Optional[Tuple[str, str]] = None
+    _hostname: Optional[tuple[str, str]] = None
 
     @classmethod
     def reset_cache(cls) -> None:
@@ -155,7 +155,7 @@ class SystemInfo:
         return cls._platform
 
     @classmethod
-    def os_version(cls) -> Tuple[str, str]:
+    def os_version(cls) -> tuple[str, str]:
         """Compute OS version information.
 
         :return: a tuple containing os version and kernel version
@@ -221,7 +221,7 @@ class SystemInfo:
                     ("wReserved", ctypes.c_byte),
                 ]
 
-            def get_os_version() -> Tuple[None, None, None] | Tuple[float, int, bool]:
+            def get_os_version() -> tuple[None, None, None] | tuple[float, int, bool]:
                 """Return the real Windows kernel version.
 
                 On recent version, the kernel version returned by the
@@ -272,7 +272,7 @@ class SystemInfo:
         return version, kernel_version
 
     @classmethod
-    def hostname(cls) -> Tuple[str, str]:
+    def hostname(cls) -> tuple[str, str]:
         """Get hostname and associated domain.
 
         :return: a tuple (hostname, domain)
@@ -313,7 +313,7 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
 
     __slots__ = ()
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return self._asdict()
 
     @classmethod
@@ -366,7 +366,7 @@ class OS(
 
     __slots__ = ()
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return self._asdict()
 
     @classmethod

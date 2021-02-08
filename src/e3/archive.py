@@ -20,7 +20,8 @@ import e3.os.fs
 
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Literal, Optional, Sequence, Text, Union
+    from typing import Literal, Optional, Text, Union
+    from collections.abc import Callable, Sequence
     from os import PathLike
     from e3.mypy import assert_never
 
@@ -130,7 +131,7 @@ def unpack_archive(
     unpack_cmd: Optional[Callable[..., None]] = None,
     force_extension: Optional[str] = None,
     delete: bool = False,
-    ignore: Optional[List[str]] = None,
+    ignore: Optional[list[str]] = None,
     preserve_timestamps: bool = True,
 ) -> None:
     """Unpack an archive file (.tgz, .tar.gz, .tar or .zip).
@@ -226,7 +227,7 @@ def unpack_archive(
                                 return True
                         return False
 
-                    dirs: List[str] = []
+                    dirs: list[str] = []
 
                     # IMPORTANT: don't use the method extract. Always use the
                     # extractall function. Indeed extractall will set file

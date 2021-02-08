@@ -12,13 +12,12 @@ import e3.net.smtp
 from e3.event import EventHandler
 
 if TYPE_CHECKING:
-    from typing import Dict, List
     from e3.event import Event
 
 
 class SMTPHandler(EventHandler):
     def __init__(
-        self, subject: str, from_addr: str, to_addr: str, smtp_servers: str | List[str],
+        self, subject: str, from_addr: str, to_addr: str, smtp_servers: str | list[str],
     ):
         """Initialize a SMTP event manager."""
         self.default_subject = subject
@@ -30,7 +29,7 @@ class SMTPHandler(EventHandler):
             self.smtp_servers = smtp_servers
 
     @classmethod
-    def decode_config(cls, config_str: str) -> Dict[str, str | List[str]]:
+    def decode_config(cls, config_str: str) -> dict[str, str | list[str]]:
         subject, from_addr, to_addr, smtp_servers = config_str.split(",", 3)
         return {
             "subject": subject,
@@ -70,7 +69,7 @@ class SMTPHandler(EventHandler):
         event_json.add_header("Content-Disposition", "attachment", filename="event")
         mail.attach(event_json)
 
-        result: Dict[str, Dict[str, dict]] = {"attachments": {}}
+        result: dict[str, dict[str, dict]] = {"attachments": {}}
 
         for name, (filename, _) in list(attachments.items()):
             ctype, encoding = mimetypes.guess_type(filename)

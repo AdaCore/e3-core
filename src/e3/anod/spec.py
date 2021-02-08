@@ -29,16 +29,12 @@ spec_logger = e3.log.getLogger("anod.spec")
 if TYPE_CHECKING:
     from typing import (
         Any,
-        Callable,
-        Dict,
         IO,
-        List,
         Literal,
         Optional,
-        Sequence,
-        Tuple,
         Union,
     )
+    from collections.abc import Callable, Sequence
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
@@ -73,7 +69,7 @@ def check_api_version(version: str) -> None:
         )
 
 
-def parse_command(command: Sequence[str], build_space: BuildSpace) -> List[str]:
+def parse_command(command: Sequence[str], build_space: BuildSpace) -> list[str]:
     """Parse a command line formatting each string.
 
     :param command: the command line (a list of string)
@@ -176,7 +172,7 @@ class Anod:
     sandbox: Optional[SandBox] = None
     name = ""
     api_version = ""
-    data_files: Tuple[str, ...] = ()
+    data_files: tuple[str, ...] = ()
 
     # API
     Dependency = e3.anod.deps.Dependency
@@ -204,7 +200,7 @@ class Anod:
         :param env: alternate platform environment
         :raise: SpecError
         """
-        self.deps: Dict[str, Anod] = {}
+        self.deps: dict[str, Anod] = {}
 
         self.kind = kind
         self.jobs = jobs
@@ -254,7 +250,7 @@ class Anod:
         self._config: Optional[dict] = None
 
         # Hold the result of the pre function
-        self._pre: Optional[Dict[str, Any]] = None
+        self._pre: Optional[dict[str, Any]] = None
 
     @property
     def build_space(self) -> BuildSpace:
@@ -428,7 +424,7 @@ class Anod:
         return self.uid
 
     @property
-    def source_pkg_build(self) -> Optional[List[e3.anod.package.SourceBuilder]]:
+    def source_pkg_build(self) -> Optional[list[e3.anod.package.SourceBuilder]]:
         """Return list of SourceBuilder defined in the specification file."""
         return None
 

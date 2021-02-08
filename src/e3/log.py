@@ -21,14 +21,11 @@ if TYPE_CHECKING:
         Any,
         IO,
         Optional,
-        Iterator,
-        Sequence,
         TextIO,
-        List,
         TypeVar,
-        Tuple,
         Mapping,
     )
+    from collections.abc import Iterator, Sequence
     from logging import _ExcInfoType
     from argparse import ArgumentParser, _ArgumentGroup, Namespace
 
@@ -71,7 +68,7 @@ class JSONFormatter(logging.Formatter):
     # standard attributes that will always be printed
     STD_ATTR = ["asctime", "levelname", "name", "message", "module", "exc_text"]
     # custom attributes
-    _extra_attr: List[str] = ["anod_uui"]
+    _extra_attr: list[str] = ["anod_uui"]
 
     def __init__(
         self,
@@ -111,7 +108,7 @@ class JSONFormatter(logging.Formatter):
 class E3LoggerAdapter(logging.LoggerAdapter):
     """LoggerAdapter to add custom keywords."""
 
-    def process(self, msg: Any, kwargs: Any) -> Tuple[Any, Any]:
+    def process(self, msg: Any, kwargs: Any) -> tuple[Any, Any]:
         """Allow to handle extra parameter.
 
         It is called by super method log. It is overwritten here because

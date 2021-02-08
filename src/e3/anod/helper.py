@@ -13,7 +13,7 @@ from e3.anod.spec import Anod, parse_command
 from e3.os.fs import unixpath
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Tuple
+    from typing import Optional
     from e3.os.process import Run
 
 log = e3.log.getLogger("anod.helpers")
@@ -48,11 +48,11 @@ class Make:
         self.jobs = jobs
         if jobs is None:
             self.jobs = anod_instance.jobs
-        self.var_list = {}  # type: Dict[str, str]
+        self.var_list = {}  # type: dict[str, str]
         self.default_target = None  # type: Optional[str]
         self.make_exe = make_exe
 
-    def set_var(self, name: str, value: str | List[str]) -> None:
+    def set_var(self, name: str, value: str | list[str]) -> None:
         """Set a Make variable.
 
         :param name: name of the variable
@@ -95,11 +95,11 @@ class Make:
 
     def cmdline(
         self,
-        target: Optional[str | List[str]] = None,
+        target: Optional[str | list[str]] = None,
         jobs: Optional[int] = None,
         exec_dir: Optional[str] = None,
         timeout: Optional[float] = None,
-    ) -> Dict[str, List[str] | dict]:
+    ) -> dict[str, list[str] | dict]:
         """Return the make command line.
 
         :param target: optional target or list of targets to use
@@ -170,7 +170,7 @@ class Configure:
         self.exec_dir = exec_dir
         if self.exec_dir is None:
             self.exec_dir = self.anod_instance.build_space.build_dir
-        self.args = []  # type: List[str]
+        self.args = []  # type: list[str]
 
         # Value of the --target, --host and --build arguments
         self.target = None
@@ -258,8 +258,8 @@ class Configure:
 
 
 def text_replace(
-    filename: str, pattern: List[Tuple[bytes | str, bytes | str]]
-) -> List[int]:
+    filename: str, pattern: list[tuple[bytes | str, bytes | str]]
+) -> list[int]:
     """Replace patterns in a file.
 
     :param filename: file path

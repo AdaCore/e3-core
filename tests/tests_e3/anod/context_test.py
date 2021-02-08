@@ -1,6 +1,5 @@
+from __future__ import annotations
 import os
-
-from typing import Dict
 
 import e3.electrolyt.plan as plan
 from e3.anod.context import AnodContext, SchedulingError
@@ -21,7 +20,7 @@ class TestContext:
         :param reject_duplicates: whether to reject duplicates in plan
         """
 
-        def repo_conf(name: str) -> Dict[str, str]:
+        def repo_conf(name: str) -> dict[str, str]:
             return {"vcs": "git", "url": name, "branch": "master"}
 
         # Create a context for a x86-linux machine

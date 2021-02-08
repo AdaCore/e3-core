@@ -29,7 +29,8 @@ from e3.os.windows.native_api import (
 )
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, Tuple
+    from typing import Any, Optional
+    from collections.abc import Callable
 
 
 logger = e3.log.getLogger("os.windows.fs")
@@ -454,7 +455,7 @@ class NTFile:
         :raise: NTException
         """
 
-        def check_file(filename: str, parent: Optional[NTFile]) -> Tuple[bool, bool]:
+        def check_file(filename: str, parent: Optional[NTFile]) -> tuple[bool, bool]:
             f = NTFile(filename, parent)
             try:
                 f.read_attributes_internal()

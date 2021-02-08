@@ -11,17 +11,10 @@ from e3.error import E3Error
 if TYPE_CHECKING:
     from typing import (
         Any,
-        Callable,
-        Dict,
-        FrozenSet,
         Hashable,
-        List,
-        Iterator,
         Optional,
-        Sequence,
-        Set,
-        Tuple,
     )
+    from collections.abc import Callable, Iterator, Sequence
 
     VertexID = Hashable
 
@@ -59,7 +52,7 @@ class DAGIterator:
     def __iter__(self) -> DAGIterator:
         return self
 
-    def __next__(self) -> Tuple[None, None] | Tuple[VertexID, Any]:
+    def __next__(self) -> tuple[None, None] | tuple[VertexID, Any]:
         """Retrieve next_element with with_predecessors=False.
 
         The intermediate function is needed in Python 3.x
@@ -69,7 +62,7 @@ class DAGIterator:
             return (None, None)
         return (vertex_id, data)
 
-    def next_element(self,) -> Tuple[Optional[VertexID], Any, FrozenSet[VertexID]]:
+    def next_element(self,) -> tuple[Optional[VertexID], Any, frozenset[VertexID]]:
         """Retrieve next element in topological order.
 
         :return: a vertex id, data, predecessors. (None, None, frozenset()) is
@@ -137,13 +130,13 @@ class DAG:
 
     def __init__(self) -> None:
         """Initialize a DAG."""
-        self.vertex_data: Dict[VertexID, Any] = {}
-        self.tags: Dict[VertexID, Any] = {}
+        self.vertex_data: dict[VertexID, Any] = {}
+        self.tags: dict[VertexID, Any] = {}
 
-        self.__vertex_predecessors: Dict[VertexID, FrozenSet[VertexID]] = {}
-        self.__vertex_successors: Dict[VertexID, FrozenSet[VertexID]] = {}
+        self.__vertex_predecessors: dict[VertexID, frozenset[VertexID]] = {}
+        self.__vertex_successors: dict[VertexID, frozenset[VertexID]] = {}
         self.__has_cycle: Optional[bool] = None
-        self.__cached_topological_order: Optional[List[Tuple[VertexID, Any]]] = None
+        self.__cached_topological_order: Optional[list[tuple[VertexID, Any]]] = None
 
     def reset_caches(self) -> None:
         """Reset caches for DAG properties (cycle and cached topological order).
@@ -154,7 +147,7 @@ class DAG:
         self.__cached_topological_order = None
 
     @property
-    def vertex_predecessors(self) -> Dict[VertexID, FrozenSet[VertexID]]:
+    def vertex_predecessors(self) -> dict[VertexID, frozenset[VertexID]]:
         """Return predecessors.
 
         Meant only for backward compatibility. Use vertex_predecessors_items.
@@ -168,19 +161,19 @@ class DAG:
 
     def vertex_predecessors_items(
         self,
-    ) -> Iterator[Tuple[VertexID, FrozenSet[VertexID]]]:
+    ) -> Iterator[tuple[VertexID, frozenset[VertexID]]]:
         """Return predecessors.
 
         :return: a list of (vertex id, predecessors)
         """
         return iter(self.__vertex_predecessors.items())
 
-    def get_predecessors(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
+    def get_predecessors(self, vertex_id: VertexID) -> frozenset[VertexID]:
         """Get set of predecessors for a given vertex."""
         return self.__vertex_predecessors.get(vertex_id, frozenset())
 
     def set_predecessors(
-        self, vertex_id: VertexID, predecessors: FrozenSet[VertexID]
+        self, vertex_id: VertexID, predecessors: frozenset[VertexID]
     ) -> None:
         """Set predecessors for a given vertex.
 
@@ -191,14 +184,14 @@ class DAG:
         self.__vertex_successors = {}
         self.reset_caches()
 
-    def get_successors(self, vertex_id: VertexID) -> FrozenSet[VertexID]:
+    def get_successors(self, vertex_id: VertexID) -> frozenset[VertexID]:
         """Get set of successors for a given vertex.
 
         If the global dictionary of vertex successors has not been
         computed or if it has been invalidated then recompute it.
         """
         if self.__vertex_successors == {}:
-            successors: Dict[VertexID, Set[VertexID]] = {
+            successors: dict[VertexID, set[VertexID]] = {
                 k: set() for k in self.__vertex_predecessors
             }
             for pred_k, pred_v in self.__vertex_predecessors.items():
@@ -232,7 +225,7 @@ class DAG:
         max_distance: Optional[int] = None,
         max_element: Optional[int] = None,
         reverse_order: bool = False,
-    ) -> List[Tuple[int, VertexID, Any]]:
+    ) -> list[tuple[int, VertexID, Any]]:
         r"""Get tag context.
 
         Returns the list of predecessors tags along with their vertex id and
@@ -267,7 +260,7 @@ class DAG:
         """
         self.check()
 
-        def get_next(vid: VertexID) -> FrozenSet[VertexID]:
+        def get_next(vid: VertexID) -> frozenset[VertexID]:
             """Get successors or predecessors.
 
             :param vid: vertex id
@@ -278,7 +271,7 @@ class DAG:
                 result = self.get_predecessors(vid)
             return result
 
-        visited: Set[VertexID] = set()
+        visited: set[VertexID] = set()
         tags = []
         distance = 0
         node_tag = self.get_tag(vertex_id)
@@ -340,7 +333,7 @@ class DAG:
         vertex_id: VertexID,
         data: Any = None,
         predecessors: Optional[
-            Sequence[VertexID] | Set[VertexID] | FrozenSet[VertexID]
+            Sequence[VertexID] | set[VertexID] | frozenset[VertexID]
         ] = None,
         enable_checks: bool = True,
     ) -> None:
@@ -357,7 +350,7 @@ class DAG:
         :raise: DAGError if cycle is detected
         """
         if predecessors is None:
-            vertex_predecessors: FrozenSet[VertexID] = frozenset()
+            vertex_predecessors: frozenset[VertexID] = frozenset()
         else:
             vertex_predecessors = frozenset(predecessors)
 
@@ -410,7 +403,7 @@ class DAG:
 
     def shortest_path(
         self, source: VertexID, target: VertexID
-    ) -> Optional[List[VertexID]]:
+    ) -> Optional[list[VertexID]]:
         """Compute the shortest path between two vertices of the DAG.
 
         :param source: vertex id of the source
@@ -429,15 +422,15 @@ class DAG:
         infinite = len(self.vertex_data) + 1
 
         # Keep track of minimal distance between vertices and the sources
-        dist: Dict[Optional[VertexID], int] = {k: infinite for k in self.vertex_data}
+        dist: dict[Optional[VertexID], int] = {k: infinite for k in self.vertex_data}
 
         # Keep track of the minimum distance
-        prev: Dict[Optional[VertexID], Optional[VertexID]] = {
+        prev: dict[Optional[VertexID], Optional[VertexID]] = {
             k: None for k in self.vertex_data
         }
 
         # Set of non visited vertices
-        unvisited: Set[Optional[VertexID]] = set(self.vertex_data)
+        unvisited: set[Optional[VertexID]] = set(self.vertex_data)
 
         # The only known distance at startup
         dist[target] = 0
@@ -481,7 +474,7 @@ class DAG:
             # No path exist between source and target (or no cycle).
             return None
         else:
-            result: List[Optional[VertexID]] = [path_source]
+            result: list[Optional[VertexID]] = [path_source]
             while prev[result[-1]] is not None:
                 result.append(prev[result[-1]])
 
@@ -524,17 +517,17 @@ class DAG:
             self.__has_cycle = False
             self.__cached_topological_order = topological_order
 
-    def get_closure(self, vertex_id: VertexID) -> Set[VertexID]:
+    def get_closure(self, vertex_id: VertexID) -> set[VertexID]:
         """Retrieve closure of predecessors for a vertex.
 
         :param vertex_id: the vertex to inspect
         :return: a set of vertex_id
         """
-        closure: Set[VertexID] = set()
+        closure: set[VertexID] = set()
         to_visit = set(self.get_predecessors(vertex_id))
 
         while len(to_visit) > 0:
-            next_visit: Set[VertexID] = set()
+            next_visit: set[VertexID] = set()
             for n in to_visit:
                 closure.add(n)
                 next_visit |= self.get_predecessors(n)
@@ -582,7 +575,7 @@ class DAG:
 
         return result
 
-    def __iter__(self) -> Iterator[Tuple[VertexID, Any]]:
+    def __iter__(self) -> Iterator[tuple[VertexID, Any]]:
         return (
             iter(DAGIterator(self))
             if self.__cached_topological_order is None
@@ -654,7 +647,7 @@ class DAG:
         result = DAG()
 
         # Used to maintain the new list of predecessors
-        pruned_node_predecessors: Dict[VertexID, Set[VertexID]] = {}
+        pruned_node_predecessors: dict[VertexID, set[VertexID]] = {}
 
         for node, data in self:
             # The new list of predecessors is the union of predecessors of

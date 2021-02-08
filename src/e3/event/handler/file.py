@@ -9,7 +9,6 @@ from e3.event import EventHandler
 from e3.fs import cp, mkdir
 
 if TYPE_CHECKING:
-    from typing import Dict
     from e3.event import Event
 
 
@@ -30,7 +29,7 @@ class FileHandler(EventHandler):
         return True
 
     @classmethod
-    def decode_config(cls, config_str: str) -> Dict[str, str]:
+    def decode_config(cls, config_str: str) -> dict[str, str]:
         return {"log_dir": config_str}
 
     def encode_config(self) -> str:

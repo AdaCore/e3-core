@@ -16,7 +16,6 @@ if TYPE_CHECKING:
         Callable,
         Dict,
         Final,
-        List,
         Literal,
         NoReturn,
         Optional,
@@ -150,18 +149,18 @@ class Source:
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
         self.builder: Optional[SourceBuilder] = None
-        self.other_sources: List[Source] = []
+        self.other_sources: list[Source] = []
 
     def set_builder(self, builder_function: SourceBuilder) -> None:
         """Set the SourceBuilder associated to this Source object."""
         self.builder = builder_function
 
-    def set_other_sources(self, other_sources: List[Source]) -> None:
+    def set_other_sources(self, other_sources: list[Source]) -> None:
         """Get the list of other sources to compute ``ignore`` property."""
         self.other_sources = other_sources
 
     @property
-    def ignore(self) -> List[str]:
+    def ignore(self) -> list[str]:
         """Return list of paths to ignore when installing the source.
 
         By default, a source package is first unpacked and then install
@@ -196,7 +195,7 @@ class SourceBuilder:
         self,
         name: str,
         fullname: Callable[[], str],
-        checkout: Optional[List[str]],
+        checkout: Optional[list[str]],
         prepare_src: Optional[PrepareSrcCB] = None,
         apply_patch: Optional[Literal[1] | ApplyPatchCB] = None,
         kind: str = "source",
@@ -228,7 +227,7 @@ class SourceBuilder:
         self.repositories = {}  # type: ignore
         self.kind = kind
         self.from_spec = None
-        self.source_query: Optional[Dict[str, Optional[str]]] = None
+        self.source_query: Optional[dict[str, Optional[str]]] = None
         self.__fullname = fullname
         self.__prepare_src = prepare_src
         self.__apply_patch = apply_patch
@@ -260,7 +259,7 @@ class SourceBuilder:
 
         # Set default function (a basic sync_tree call) that ignore
         # .svn, .git, .cvs, .cvsignore and .gitignore files
-        def default_prepare_src(repos: Dict[str, Dict[str, str]], dest: str) -> None:
+        def default_prepare_src(repos: dict[str, dict[str, str]], dest: str) -> None:
             sync_tree(
                 list(repos.values())[0]["working_dir"], dest, ignore=VCS_IGNORE_LIST
             )

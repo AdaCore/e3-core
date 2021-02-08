@@ -34,14 +34,11 @@ from e3.error import E3Error
 if TYPE_CHECKING:
     from typing import (
         cast,
-        Callable,
-        Dict,
-        FrozenSet,
-        List,
         NoReturn,
         Optional,
         Tuple,
     )
+    from collections.abc import Callable
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
     from e3.anod.spec import Anod, PRIMITIVE
@@ -66,10 +63,10 @@ class SchedulingError(E3Error):
 
     def __init__(
         self,
-        message: str | List[str],
+        message: str | list[str],
         origin: Optional[str] = None,
         uid: Optional[VertexID] = None,
-        initiators: Optional[List[VertexID]] = None,
+        initiators: Optional[list[VertexID]] = None,
     ):
         """Scheduling error initialization.
 
@@ -129,10 +126,10 @@ class AnodContext:
 
         self.tree = DAG()
         self.root = Root()
-        self.dependencies: Dict[str, Dict[str, Tuple[Dependency, Anod]]] = {}
+        self.dependencies: dict[str, dict[str, tuple[Dependency, Anod]]] = {}
         self.add(self.root)
-        self.cache: Dict[CacheKeyType, Anod] = {}
-        self.sources: Dict[str, Tuple[str, SourceBuilder]] = {}
+        self.cache: dict[CacheKeyType, Anod] = {}
+        self.sources: dict[str, tuple[str, SourceBuilder]] = {}
 
     def load(
         self,
@@ -237,7 +234,7 @@ class AnodContext:
         """
         return self.tree[key]
 
-    def predecessors(self, action: Action) -> List[Action]:
+    def predecessors(self, action: Action) -> list[Action]:
         """Retrieve predecessors of a given action.
 
         :param action: the parent action
@@ -310,7 +307,7 @@ class AnodContext:
         env: BaseEnv,
         primitive: PRIMITIVE,
         qualifier: Optional[str] = None,
-        source_packages: Optional[List[str]] = None,
+        source_packages: Optional[list[str]] = None,
         upload: bool = True,
         plan_line: Optional[str] = None,
         plan_args: Optional[dict] = None,
@@ -395,7 +392,7 @@ class AnodContext:
         env: BaseEnv,
         primitive: PRIMITIVE,
         qualifier: Optional[str] = None,
-        source_packages: Optional[List[str]] = None,
+        source_packages: Optional[list[str]] = None,
         expand_build: bool = True,
         source_name: Optional[str] = None,
         plan_line: Optional[str] = None,
@@ -885,7 +882,7 @@ class AnodContext:
             for which a decision should be taken
         """
         rev = self.tree.reverse_graph(enable_checks=False)
-        uploads: List[Tuple[Upload, FrozenSet[VertexID]]] = []
+        uploads: list[tuple[Upload, frozenset[VertexID]]] = []
         dag = DAG()
 
         # Retrieve existing tags
