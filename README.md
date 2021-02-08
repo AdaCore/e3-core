@@ -19,7 +19,7 @@ Code status
 
 Platform | Status
 ---------|-------
-Linux    | [![Build Status](https://travis-ci.org/AdaCore/e3-core.svg?branch=master)](https://travis-ci.org/AdaCore/e3-core)
+Linux    | [![Build Status](https://github.com/AdaCore/e3-core/workflows/build/badge.svg)](https://github.com/AdaCore/e3-core/actions?query=branch%3Amaster)
 Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0pmg1q89f/branch/master?svg=true)](https://ci.appveyor.com/project/github-integration-adacore/e3-core/branch/master)
 
 
