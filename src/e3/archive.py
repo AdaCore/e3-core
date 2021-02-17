@@ -133,6 +133,7 @@ def unpack_archive(
     delete: bool = False,
     ignore: Optional[list[str]] = None,
     preserve_timestamps: bool = True,
+    tmp_dir_root: Optional[str] = None,
 ) -> None:
     """Unpack an archive file (.tgz, .tar.gz, .tar or .zip).
 
@@ -159,6 +160,10 @@ def unpack_archive(
     :param preserve_timestamps: if False and remove_root_dir is True, and the
         target directory exists, ensure that updated files get their timestamp
         updated to current time.
+    :param tmp_dir_root: If not None the temporary directory used to extract the
+        archive will be created in tmp_dir_root directory. If None the temporary
+        directory is created in the destination directory. This argument only
+        has an effect when remove_root_dir is True.
 
     :raise ArchiveError: in case of error
 
@@ -194,9 +199,9 @@ def unpack_archive(
     # If remove_root_dir is set then extract to a temp directory first.
     # Otherwise extract directly to the final destination
     if remove_root_dir:
-        tmp_dest = tempfile.mkdtemp(
-            prefix="", dir=os.path.dirname(os.path.abspath(dest))
-        )
+        if tmp_dir_root is None:
+            tmp_dir_root = os.path.dirname(os.path.abspath(dest))
+        tmp_dest = tempfile.mkdtemp(prefix="", dir=tmp_dir_root)
     else:
         tmp_dest = dest
 
