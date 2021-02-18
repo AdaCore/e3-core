@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 
 import e3.archive
 import e3.fs
@@ -7,6 +8,7 @@ import e3.log
 import e3.os.fs
 
 import pytest
+from unittest.mock import patch
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar", ".zip"))
@@ -240,6 +242,21 @@ def test_remove_root_dir():
         os.path.join("dest", "pkg.zip"), "result", remove_root_dir="auto"
     )
     assert os.path.exists(os.path.join("result", "from", "a"))
+
+
+@patch("tempfile.mkdtemp", wraps=tempfile.mkdtemp)
+def test_tmp_dir_root(mock_mkdtemp):
+    """Try to unpack an archive with remove_root_dir and a custom tmp_dir root."""
+    e3.fs.mkdir("custom_tmp_dir_root")
+    e3.fs.mkdir("result")
+    e3.archive.unpack_archive(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.zip"),
+        "result",
+        remove_root_dir=True,
+        tmp_dir_root="custom_tmp_dir_root",
+    )
+    mock_mkdtemp.assert_called_once_with(prefix="", dir="custom_tmp_dir_root")
+    assert os.path.exists("result/test.sh")
 
 
 def test_empty():
