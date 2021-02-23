@@ -105,6 +105,9 @@ class NTFile:
         # the user has sufficient rights. It has no effect otherwise
         self.open_options = OpenOptions.BACKUP_INTENT
 
+        # Used by is_dir_empty to store the latest seen file in a given directory
+        self.is_dir_empty_last_seen_file: Optional[str] = None
+
     def __str__(self) -> str:
         result = [
             "{:<20}: {}".format("path", self.path),
@@ -451,16 +454,25 @@ class NTFile:
     def is_dir_empty(self) -> bool:
         """Check if dir is empty.
 
-        :return: True if the directory is empty
+        :return: True if the directory is empty. If not empty return False and set
+            is_dir_empty_last_seen_file attribute to the first file found in the
+            directory.
         :raise: NTException
         """
+        self.is_dir_empty_last_seen_file = None
 
         def check_file(filename: str, parent: Optional[NTFile]) -> tuple[bool, bool]:
+            """Check if file is pending deletion.
+
+            :return: if file is pending deletion return True and continue
+                iteration, otherwise return False and interrupt iterate_on_dir.
+            """
             f = NTFile(filename, parent)
             try:
                 f.read_attributes_internal()
             except NTException:
                 return True, False
+            self.is_dir_empty_last_seen_file = filename
             return False, True
 
         return self.iterate_on_dir(check_file, True)
@@ -536,7 +548,8 @@ class NTFile:
                 if self.is_dir and not self.is_dir_empty:
                     raise NTException(
                         status=1,
-                        message=f"directory not empty: {self.path}",
+                        message=f"directory not empty: {self.path} "
+                        f"(file '{self.is_dir_empty_last_seen_file}' found)",
                         origin="NTFile.unlink",
                     )
 
@@ -564,7 +577,8 @@ class NTFile:
                         if not self.is_dir_empty:
                             raise NTException(
                                 status=e.status,
-                                message=f"dir {self.path} is not empty",
+                                message=f"dir {self.path} is not empty "
+                                f"(file '{self.is_dir_empty_last_seen_file}' found)",
                                 origin="NTFile.unlink",
                             )
                     elif e.status == Status.CANNOT_DELETE:  # defensive code
