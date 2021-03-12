@@ -265,12 +265,7 @@ class Walk:
             k
             for k in predecessors
             if self.job_status[k]
-            not in (
-                ReturnValue.success,
-                ReturnValue.skip,
-                ReturnValue.force_skip,
-                ReturnValue.unchanged,
-            )
+            not in (ReturnValue.success, ReturnValue.skip, ReturnValue.unchanged,)
         ]
         if failed_predecessors:
             force_fail = "Event failed because of prerequisite failure:\n"
@@ -321,7 +316,6 @@ class Walk:
         # to skipping it).
         if job.status in (
             ReturnValue.success,
-            ReturnValue.force_skip,
             ReturnValue.skip,
             ReturnValue.unchanged,
         ):
@@ -331,7 +325,7 @@ class Walk:
         self.job_status[job.uid] = ReturnValue(job.status)
 
         if job.should_skip:
-            if job.status not in (ReturnValue.force_fail, ReturnValue.force_skip):
+            if job.status not in (ReturnValue.force_fail, ReturnValue.skip):
                 logging.info(
                     "[%-10s %-9s %4ds] %s",
                     job.queue_name,

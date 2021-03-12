@@ -184,7 +184,7 @@ class SimpleWalk(Walk):
 
     def create_job(self, uid, data, predecessors, notify_end):
         if self.dry_run_mode:
-            job = DryRunJob(uid, data, notify_end, status=ReturnValue.force_skip)
+            job = DryRunJob(uid, data, notify_end, status=ReturnValue.skip)
         elif uid.endswith("do-nothing"):
             job = DoNothingJob(uid, data, notify_end)
         else:
@@ -681,21 +681,21 @@ def test_dry_run(setup_sbx):
     actions.add_vertex("2", predecessors=["1"])
 
     # First run in dry-run mode. Both actions are turned into
-    # empty jobs with a force_skip status.
+    # empty jobs with a skip status.
 
     r1 = FingerprintWalkDryRun(actions)
 
     job = r1.saved_jobs["1"]
     assert isinstance(job, DryRunJob)
     assert job.should_skip is True
-    assert job.status == ReturnValue.force_skip
+    assert job.status == ReturnValue.skip
 
     job = r1.saved_jobs["2"]
     assert isinstance(job, DryRunJob)
     assert job.should_skip is True
-    assert job.status == ReturnValue.force_skip
+    assert job.status == ReturnValue.skip
 
-    assert r1.job_status == {"1": ReturnValue.force_skip, "2": ReturnValue.force_skip}
+    assert r1.job_status == {"1": ReturnValue.skip, "2": ReturnValue.skip}
     assert r1.requeued == {}
 
     # Try it again in dry-mode; we should get the same result.
@@ -705,14 +705,14 @@ def test_dry_run(setup_sbx):
     job = r2.saved_jobs["1"]
     assert isinstance(job, DryRunJob)
     assert job.should_skip is True
-    assert job.status == ReturnValue.force_skip
+    assert job.status == ReturnValue.skip
 
     job = r2.saved_jobs["2"]
     assert isinstance(job, DryRunJob)
     assert job.should_skip is True
-    assert job.status == ReturnValue.force_skip
+    assert job.status == ReturnValue.skip
 
-    assert r2.job_status == {"1": ReturnValue.force_skip, "2": ReturnValue.force_skip}
+    assert r2.job_status == {"1": ReturnValue.skip, "2": ReturnValue.skip}
     assert r2.requeued == {}
 
     # Now, get action '1' done in normal (non-dry-run) mode.
@@ -746,9 +746,9 @@ def test_dry_run(setup_sbx):
     job = r4.saved_jobs["2"]
     assert isinstance(job, DryRunJob)
     assert job.should_skip is True
-    assert job.status == ReturnValue.force_skip
+    assert job.status == ReturnValue.skip
 
-    assert r4.job_status == {"1": ReturnValue.skip, "2": ReturnValue.force_skip}
+    assert r4.job_status == {"1": ReturnValue.skip, "2": ReturnValue.skip}
     assert r4.requeued == {}
 
     # Run it again, this time in normal (non-dry-run) mode.

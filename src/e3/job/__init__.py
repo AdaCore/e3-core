@@ -187,7 +187,7 @@ class EmptyJob(Job):
         uid: str,
         data: Any,
         notify_end: Callable[[str], None],
-        status: ReturnValue = ReturnValue.force_skip,
+        status: ReturnValue,
     ) -> None:
         """Initialize the EmptyJob.
 

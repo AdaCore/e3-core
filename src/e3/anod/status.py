@@ -9,7 +9,6 @@ class ReturnValue(IntEnum):
     success = 0
     failure = 1
     notready = 75
-    force_skip = 122
     force_fail = 123
     unknown = 124
     skip = 125
