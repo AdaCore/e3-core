@@ -67,7 +67,7 @@ setup(
             "s3 = e3.event.handler.s3:S3Handler",
         ],
         "e3.store": [
-            "http-simple-store = e3.store.backends." "http_simple_store:HTTPSimpleStore"
+            "http-simple-store = e3.store.backends.http_simple_store:HTTPSimpleStore"
         ],
         "e3.store.cache.backend": [
             "file-cache = e3.store.cache.backends.filecache:FileCache"
