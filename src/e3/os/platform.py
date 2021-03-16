@@ -23,6 +23,8 @@ Uname = namedtuple(
     "Uname", ["system", "node", "release", "version", "machine", "processor"]
 )
 
+logger = e3.log.getLogger("os.platform")
+
 
 class SystemInfo:
     """Gather info about the system.
@@ -93,13 +95,13 @@ class SystemInfo:
 
             cls.core_number = multiprocessing.cpu_count()
         except Exception:  # defensive code
-            e3.log.debug("multiprocessing error", exc_info=True)
+            logger.exception("multiprocessing error")
             try:
                 import psutil
 
                 cls.core_number = psutil.cpu_count()
             except Exception:
-                e3.log.debug("psutil error", exc_info=True)
+                logger.exception("psutil error")
 
         cls.nis_domain = UNKNOWN
 
@@ -107,7 +109,7 @@ class SystemInfo:
             try:
                 import nis
             except ImportError:  # defensive code
-                e3.log.debug("cannot import nis", exc_info=True)
+                logger.exception("cannot import nis")
                 nis = None  # type: ignore
 
             if nis is not None:
@@ -115,8 +117,8 @@ class SystemInfo:
                     cls.nis_domain = nis.get_default_domain()
                     if not cls.nis_domain:  # defensive code
                         cls.nis_domain = UNKNOWN
-                except nis.error:  # defensive code
-                    e3.log.debug("nis error", exc_info=True)
+                except nis.error as e:  # defensive code
+                    logger.warning(f"nis error: {e}")
 
     @classmethod
     def platform(cls) -> str:
