@@ -117,8 +117,10 @@ class SystemInfo:
                     cls.nis_domain = nis.get_default_domain()
                     if not cls.nis_domain:  # defensive code
                         cls.nis_domain = UNKNOWN
-                except nis.error as e:  # defensive code
-                    logger.warning(f"nis error: {e}")
+                except nis.error:  # defensive code
+                    # this is not a problem anymore, we do not want
+                    # to log it either, so we just ignore it.
+                    pass
 
     @classmethod
     def platform(cls) -> str:
