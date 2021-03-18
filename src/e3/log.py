@@ -31,6 +31,14 @@ if TYPE_CHECKING:
 
     T = TypeVar("T")
 
+LEVELS = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL,
+}
+
 
 @dataclass
 class LogConfig(ConfigSection):
@@ -334,13 +342,7 @@ def add_logging_argument_group(
         "--loglevel",
         default=default_level,
         help="set the console log level",
-        choices={
-            "DEBUG": logging.DEBUG,
-            "INFO": logging.INFO,
-            "WARNING": logging.WARNING,
-            "ERROR": logging.ERROR,
-            "CRITICAL": logging.CRITICAL,
-        },
+        choices=LEVELS.keys(),
     )
     log_group.add_argument(
         "--nocolor",
@@ -379,7 +381,10 @@ def activate_with_args(args: Namespace, default_level: int = logging.WARNING) ->
     if args.verbose > 0:
         level = default_level - 10 * args.verbose
     else:
-        level = args.loglevel
+        if args.loglevel in LEVELS:
+            level = LEVELS[args.loglevel]
+        else:
+            level = args.loglevel
 
     if args.console_logs:
         console_logs = args.console_logs
