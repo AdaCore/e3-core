@@ -41,6 +41,20 @@ else:
 
 logger = e3.log.getLogger("archive")
 
+if sys.platform == "win32":
+    # On Windows force the executable bit on all files. This ensures that when
+    # using cygwin unziped files get an executable bit set (the executable
+    # does not exist in win32 but is simulated in Cygwin).
+
+    class E3ZipInfo(zipfile.ZipInfo):
+        @classmethod
+        def from_file(cls, *args, **kwargs):
+            result = super().from_file(*args, **kwargs)
+            result.external_attr = (0o555 << 16) | result.external_attr
+            return result
+
+    zipfile.ZipInfo = E3ZipInfo
+
 
 class E3ZipFile(zipfile.ZipFile):
     """Override default ZipFile with attributes preservation."""
