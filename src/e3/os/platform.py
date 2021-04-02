@@ -109,7 +109,6 @@ class SystemInfo:
             try:
                 import nis
             except ImportError:  # defensive code
-                logger.exception("cannot import nis")
                 nis = None  # type: ignore
 
             if nis is not None:
