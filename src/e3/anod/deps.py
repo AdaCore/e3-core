@@ -45,6 +45,7 @@ class Dependency:
         local_name: Optional[str] = None,
         require: Literal["build_tree"]
         | Literal["installation"]
+        | Literal["download"]
         | Literal["source_pkg"] = "build_tree",
         track: bool = False,
         **kwargs: Any,
@@ -68,7 +69,7 @@ class Dependency:
             in deps and makedeps dictionaries. It allows importing twice
             the same anod module with different qualifers or platforms
         :param require: can be 'build_tree' (to force a local build),
-            'installation' or 'source_pkg'
+            'installation', 'download', or 'source_pkg'
         :param track: if True, track all source packages metadata and include
             them in the local metadata.
         :param kwargs: other parameters valid in some API that we ignore now
@@ -81,13 +82,15 @@ class Dependency:
         self.build = build
         self.qualifier = qualifier
         self.local_name = local_name if local_name is not None else name
-        if require not in ("build_tree", "installation", "source_pkg"):
+        if require not in ("build_tree", "download", "installation", "source_pkg",):
             raise e3.anod.error.SpecError(
-                "require should be build_tree, installation or source_pkg"
-                " not %s." % require
+                f"require should be build_tree, download, installation,"
+                f" or source_pkg not {require}."
             )
         if require == "build_tree":
             self.kind = "build"
+        elif require == "download":
+            self.kind = "download"
         elif require == "installation":
             self.kind = "install"
         elif require == "source_pkg":

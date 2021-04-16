@@ -193,7 +193,7 @@ class AnodContext:
         root: Action,
         left: Action,
         right: Action,
-    ) -> None:
+    ) -> Decision:
         """Add a decision node.
 
         This create the following subtree inside the dag::
@@ -209,6 +209,7 @@ class AnodContext:
         decision_action = decision_class(root, left, right)
         self.add(decision_action, left, right)
         self.connect(root, decision_action)
+        return decision_action
 
     def connect(self, action: Action, *args: Action) -> None:
         """Add predecessors to a node.
@@ -399,6 +400,7 @@ class AnodContext:
         plan_args: Optional[dict] = None,
         sandbox: Optional[SandBox] = None,
         upload: bool = False,
+        force_download: bool = False,
     ) -> Build | CreateSources | CreateSource | Install | Test:
         """Expand an anod action into a tree (internal).
 
@@ -419,6 +421,7 @@ class AnodContext:
             the given sandbox
         :param upload: if True consider uploads to the store (sources and
             binaries)
+        :param force_download: if True force a download
         """
 
         def add_action(data: Action, connect_with: Optional[Action] = None) -> None:
@@ -518,10 +521,23 @@ class AnodContext:
                 vertex_id=result.uid, plan_line=plan_line, plan_args=plan_args
             )
 
-        if (
+        if primitive == "install" and force_download:
+            # We have an "download" dependency explicit in the plan
+            # Make sure to record the BuildOrDownload decision
+            if result in self:
+                action_preds = self.predecessors(result)
+                if action_preds:
+                    dec = action_preds[0]
+                    if isinstance(dec, BuildOrDownload):
+                        dec.set_decision(
+                            which=BuildOrDownload.INSTALL, decision_maker=plan_line
+                        )
+
+        elif (
             primitive == "install"
             and not spec.has_package
             and has_primitive(spec, "build")
+            and not force_download
         ):
             if plan_line is not None and plan_args is not None:
                 # We have an explicit call to install() in the plan but the
@@ -594,9 +610,13 @@ class AnodContext:
                     sandbox=sandbox,
                     upload=upload,
                 )
-                self.add_decision(
+                decision = self.add_decision(
                     BuildOrDownload, result, build_action, download_action
                 )
+                if force_download:
+                    decision.set_decision(
+                        which=BuildOrDownload.INSTALL, decision_maker=plan_line
+                    )
             else:
                 self.connect(result, download_action)
 
@@ -662,12 +682,13 @@ class AnodContext:
                 child_action = self.add_spec(
                     name=e.name,
                     env=e.env(spec, self.default_env),
-                    primitive=e.kind,
+                    primitive=e.kind if e.kind != "download" else "install",
                     qualifier=e.qualifier,
                     plan_args=None,
                     plan_line=plan_line,
                     sandbox=sandbox,
                     upload=upload,
+                    force_download=e.kind == "download",
                 )
 
                 add_dep(
