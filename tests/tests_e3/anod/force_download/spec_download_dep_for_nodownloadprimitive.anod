@@ -1,0 +1,10 @@
+from e3.anod.spec import Anod
+
+
+class SpecDownloadDepForNowDownloadPrimitive(Anod):
+
+    build_deps = [Anod.Dependency("spec_nodownloadprimitive", require="download")]
+
+    @Anod.primitive()
+    def build(self):
+        pass

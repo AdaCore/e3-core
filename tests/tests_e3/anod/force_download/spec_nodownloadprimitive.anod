@@ -1,0 +1,15 @@
+from e3.anod.spec import Anod
+
+class SpecNoDownloadPrimitive(Anod):
+    component = 'specnodownloadprimitive'
+
+    package = Anod.Package(prefix='specnodownloadprimitive', version=lambda: '42')
+
+    @Anod.primitive()
+    def build(self):
+        pass
+
+    @Anod.primitive()
+    def install(self):
+        pass
+

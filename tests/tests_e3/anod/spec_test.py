@@ -58,8 +58,8 @@ def test_spec_wrong_dep():
         Anod.Dependency("foo", require="invalid")
 
     assert (
-        "require should be build_tree, installation or source_pkg not "
-        "invalid" in str(err)
+        "require should be build_tree, download, installation,"
+        " or source_pkg not invalid" in str(err)
     )
 
 

@@ -1,0 +1,10 @@
+from e3.anod.spec import Anod
+
+
+class SpecInstallDep(Anod):
+
+    build_deps = [Anod.Dependency("spec_build", require="installation")]
+
+    @Anod.primitive()
+    def build(self):
+        pass

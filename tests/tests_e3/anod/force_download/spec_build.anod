@@ -1,0 +1,18 @@
+from e3.anod.spec import Anod
+
+class SpecBuild(Anod):
+    component = 'specbuild'
+
+    package = Anod.Package(prefix='specbuild', version=lambda: '42')
+
+    @Anod.primitive()
+    def build(self):
+        pass
+
+    @Anod.primitive()
+    def install(self):
+        pass
+
+    @Anod.primitive()
+    def download(self):
+        return {'component': 'specbuild_stable'}

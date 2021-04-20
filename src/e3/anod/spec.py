@@ -50,10 +50,14 @@ if TYPE_CHECKING:
     SOURCE_PRIMITIVE = Literal["source"]
 
     # Anod Dependency can target a build, install, or source
-    DEPENDENCY_PRIMITIVE = Union[BUILD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE]
+    DEPENDENCY_PRIMITIVE = Union[
+        BUILD_PRIMITIVE, DOWNLOAD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE
+    ]
 
     # Supported primitivies are build, install, source, and test
-    PRIMITIVE = Union[DEPENDENCY_PRIMITIVE, TEST_PRIMITIVE]
+    PRIMITIVE = Union[
+        BUILD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE, TEST_PRIMITIVE
+    ]
 
 
 def check_api_version(version: str) -> None:
