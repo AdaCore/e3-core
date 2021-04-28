@@ -505,6 +505,11 @@ class AnodContext:
                     self.connect(result, sub_result)
 
         elif primitive == "build":
+            if not has_primitive(spec, "build"):
+                raise SchedulingError(
+                    f"spec {name} does not support primitive build for"
+                    " platform {env.platform} and qualifier '{qualifier}'"
+                )
             result = Build(spec)
         elif primitive == "test":
             result = Test(spec)

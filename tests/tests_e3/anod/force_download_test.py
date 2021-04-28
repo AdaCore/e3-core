@@ -135,3 +135,42 @@ class TestSourceClosure:
             "mylinux.x86_64-linux.spec_nodownloadprimitive.install",
             "mylinux.x86_64-linux.spec_nodownloadprimitive.download_bin",
         }
+
+    def test_force_download_without_require_condition(self):
+        """Test that the force download can be done thanks to require=xxx.
+
+        A require condition can be added to the build primitive to disable the
+        build primitive for some qualifiers.
+        """
+        env = BaseEnv()
+        env.set_build("x86_64-linux", "rhes8", "mylinux")
+        asr = AnodSpecRepository(self.spec_dir)
+
+        # We start with a dependency on spec_nobuild where build primitive
+        # require condition is True
+        ac = AnodContext(asr, default_env=env)
+        ac.add_anod_action(
+            "spec_nobuild_dep", env=ac.default_env, primitive="build",
+        )
+
+        # If both build and install are allowed the resolver will
+        # complain and ask for an explicit choice
+        with pytest.raises(SchedulingError) as err:
+            ac.schedule(ac.always_create_source_resolver)
+        assert "what to do for resolving" in str(err)
+
+        # Now with a dependency making require return False, and so
+        # disable the build primitive, the resolver will not have any
+        # conflict: the only allowed action will be download.
+        ac2 = AnodContext(asr, default_env=env)
+        ac2.add_anod_action(
+            "spec_nobuild_stable_dep", env=ac.default_env, primitive="build",
+        )
+        result = ac2.schedule(ac.always_create_source_resolver)
+
+        assert set(result.vertex_data.keys()) == {
+            "root",
+            "mylinux.x86_64-linux.spec_nobuild.download_bin",
+            "mylinux.x86_64-linux.spec_nobuild_stable_dep.build",
+            "mylinux.x86_64-linux.spec_nobuild.install",
+        }
