@@ -5,7 +5,43 @@ from e3.anod.checkout import CheckoutManager
 from e3.anod.status import ReturnValue
 from e3.vcs.svn import SVNRepository
 from e3.vcs.git import GitRepository
-from e3.os.fs import touch
+from e3.fs import mkdir
+from e3.os.fs import touch, which
+import uuid
+import time
+
+
+def test_rsync_mode():
+    """Check that rsync mode is faster than default mode."""
+    mkdir("work")
+    mkdir("work2")
+    GitRepository.create("git")
+    for _ in range(1000):
+        name = str(uuid.uuid1(clock_seq=int(1000 * time.time())))
+        touch(os.path.join("git", name + ".py"))
+        touch(os.path.join("git", name + ".pyc"))
+        touch(os.path.join("git", name + ".o"))
+        touch(os.path.join("git", name + ".ali"))
+
+    with open("git/.gitignore", "w") as fd:
+        fd.write("*.pyc\n")
+        fd.write("*.o\n")
+        fd.write("*.ali\n")
+
+    m = CheckoutManager(name="myrepo", working_dir="work")
+    start = time.time()
+    m.update(vcs="external", url=os.path.abspath("git"))
+    total_sync_tree = time.time() - start
+
+    os.environ["E3_ENABLE_FEATURE"] = "use-rsync"
+
+    m = CheckoutManager(name="myrepo", working_dir="work2")
+    start = time.time()
+    m.update(vcs="external", url=os.path.abspath("git"))
+    total_rsync = time.time() - start
+
+    if which("rsync"):
+        assert total_rsync * 5 < total_sync_tree
 
 
 class TestCheckout:
