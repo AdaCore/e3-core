@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING
 
 import e3.log
 from e3.anod.status import ReturnValue
-from e3.os.process import PIPE
+from e3.os.fs import unixpath, which
+from e3.os.process import PIPE, Run
 from e3.fs import VCS_IGNORE_LIST, get_filetree_state, rm, sync_tree
 from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
@@ -120,36 +121,64 @@ class CheckoutManager:
             old_commit = ""
         ignore_list: list[str] = []
 
-        if os.path.isdir(os.path.join(url, ".git")):
-            # It seems that this is a git repository. Get the list of files to
-            # ignore
-            try:
-                g = GitRepository(working_tree=url)
-                ignore_list_lines = g.git_cmd(
-                    [
-                        "ls-files",
-                        "-o",
-                        "--ignored",
-                        "--exclude-standard",
-                        "--directory",
-                    ],
-                    output=PIPE,
-                ).out
-                ignore_list = [
-                    f"/{f.strip().rstrip('/')}" for f in ignore_list_lines.splitlines()
-                ]
-                logger.debug("Ignore in external: %s", ignore_list)
-            except Exception:  # defensive code
-                # don't crash on exception
-                pass
+        if which("rsync") and "use-rsync" in os.environ.get(
+            "E3_ENABLE_FEATURE", ""
+        ).split(","):
+            # Run rsync using -a but without preserving timestamps. --update switch
+            # is also used to skip files that are older in the user directory than
+            # in the checkout itself. This ensure rsync remain efficient event when
+            # timestamps are not preserved (otherwise rsync has to compute checksum
+            # of all file as quick check cannot be used when timestamp is not
+            # preserved).
+            rsync_cmd = [
+                "rsync",
+                "--update",
+                "-rlpgoD",
+                f"{unixpath(url)}/",
+                f"{unixpath(self.working_dir)}",
+                "--delete-excluded",
+            ] + [f"--exclude={el}" for el in VCS_IGNORE_LIST]
 
-        sync_tree(
-            url,
-            self.working_dir,
-            preserve_timestamps=False,
-            delete_ignore=True,
-            ignore=list(VCS_IGNORE_LIST) + ignore_list,
-        )
+            if os.path.isdir(os.path.join(url, ".git")) and os.path.isfile(
+                os.path.join(url, ".gitignore")
+            ):
+                rsync_cmd.append("--filter=:- .gitignore")
+
+            p = Run(rsync_cmd, cwd=url, output=None)
+            if p.status != 0:
+                raise e3.error.E3Error("rsync failed")
+        else:
+            if os.path.isdir(os.path.join(url, ".git")):
+                # It seems that this is a git repository. Get the list of files to
+                # ignore
+                try:
+                    g = GitRepository(working_tree=url)
+                    ignore_list_lines = g.git_cmd(
+                        [
+                            "ls-files",
+                            "-o",
+                            "--ignored",
+                            "--exclude-standard",
+                            "--directory",
+                        ],
+                        output=PIPE,
+                    ).out
+                    ignore_list = [
+                        f"/{f.strip().rstrip('/')}"
+                        for f in ignore_list_lines.splitlines()
+                    ]
+                    logger.debug("Ignore in external: %s", ignore_list)
+                except Exception:  # defensive code
+                    # don't crash on exception
+                    pass
+
+            sync_tree(
+                url,
+                self.working_dir,
+                preserve_timestamps=False,
+                delete_ignore=True,
+                ignore=list(VCS_IGNORE_LIST) + ignore_list,
+            )
 
         new_commit = get_filetree_state(self.working_dir)
         if new_commit == old_commit:
