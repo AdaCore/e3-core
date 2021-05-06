@@ -41,7 +41,7 @@ def test_rsync_mode():
     total_rsync = time.time() - start
 
     if which("rsync"):
-        assert total_rsync * 5 < total_sync_tree
+        assert total_rsync * 4 < total_sync_tree
 
 
 class TestCheckout:
