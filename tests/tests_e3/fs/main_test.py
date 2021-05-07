@@ -98,6 +98,15 @@ def test_find():
     assert os.path.abspath(d) in result
     assert os.path.abspath(__file__) in result
 
+    result = e3.fs.find(parent_d, pattern="__in*py")
+    assert {os.path.basename(f) for f in result} == {"__init__.py"}
+
+    result = e3.fs.find(parent_d, pattern="fs")
+    assert {os.path.basename(f) for f in result} == set()
+
+    result = e3.fs.find(parent_d, pattern="fs", include_dirs=True)
+    assert {os.path.basename(f) for f in result} == {"fs"}
+
 
 def test_ls(caplog):
     e3.os.fs.touch("a")
