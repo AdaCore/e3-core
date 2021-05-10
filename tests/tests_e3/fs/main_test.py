@@ -302,6 +302,27 @@ def test_sync_tree_preserve_timestamps():
         assert f.read() == "content2"
 
 
+def test_sync_tree_no_delete():
+    """Run sync_tree without deleting."""
+    e3.fs.mkdir("a")
+    e3.fs.mkdir("b")
+    with open("a/content", "w") as f:
+        f.write("content")
+    with open("a/content2", "w") as f:
+        f.write("content2")
+    with open("b/content", "w") as f:
+        f.write("content")
+    with open("b/content2", "w") as f:
+        f.write("content1")
+
+    e3.os.fs.touch("b/todelete")
+    e3.fs.sync_tree("a", "b", delete=False)
+    assert os.path.exists("b/todelete")
+
+    e3.fs.sync_tree("a", "b")
+    assert not os.path.exists("b/todelete")
+
+
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
 def test_sync_tree_links():
     """Check handling of symbolink links in sync_tree."""
