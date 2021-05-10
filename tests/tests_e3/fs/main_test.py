@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import shutil
 
@@ -145,6 +146,11 @@ def test_mv():
     for fname in ("a1", "a2", "a3"):
         assert os.path.isfile(os.path.join("b", fname))
 
+    e3.os.fs.touch("a1")
+    with pytest.raises(e3.fs.FSError) as err:
+        e3.fs.mv("a*", "b")
+    assert re.search("Destination path 'b.*a1' already exists", str(err))
+
     e3.fs.mv("1", "b")
     assert os.path.isfile(os.path.join("b", "1"))
 
@@ -158,6 +164,11 @@ def test_mv():
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.mv("d*", "b")
+
+    e3.fs.mv("b/", "B/")
+    with pytest.raises(e3.fs.FSError) as err:
+        e3.fs.mv("B", "B/b")
+    assert "Cannot move a directory 'B' into itself 'B/b" in str(err)
 
 
 def test_tree_state():
