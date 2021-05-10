@@ -57,11 +57,11 @@ def sendmail(
 
     def system_sendmail() -> bool:
         """Run the system sendmail."""
-        if system_sendmail_fallback:
+        if system_sendmail_fallback:  # all: no cover
             for sendmail_bin in (
                 "/usr/lib/sendmail",
                 "/usr/sbin/sendmail",
-            ):  # all: no cover
+            ):
                 if os.path.exists(sendmail_bin):
                     p = e3.os.process.Run(
                         [sendmail_bin] + to_emails,
@@ -85,23 +85,20 @@ def sendmail(
         except (OSError, smtplib.SMTPException) as e:
             logger.debug(e)
             logger.debug("cannot connect to smtp server %s", smtp_server)
-            continue
         else:
             try:
                 if not s.sendmail(from_email, to_emails, mail_as_string):
                     # sendmail returns an empty dictionary if the message
                     # was accepted for delivery to all addresses
                     break
-                continue
             except (OSError, smtplib.SMTPException) as e:
                 logger.debug(e)
                 logger.debug("smtp server error: %s", smtp_server)
-                continue
             finally:
                 try:
                     s.quit()
                     logger.debug("smtp quit")
-                except (OSError, smtplib.SMTPException):
+                except (OSError, smtplib.SMTPException):  # defensive code
                     # The message has already been delivered, ignore all errors
                     # when terminating the session.
                     pass
