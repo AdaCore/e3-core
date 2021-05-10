@@ -1,5 +1,7 @@
 # Version 22.2.0 (2020-??-??) *NOT RELEASED YET*
 
+* Security enhancements:
+  * e3.net.smtp.sendmail uses to ``SMTP_SSL`` by default
 * Minor backward incompatible changes:
   * the discrimiant ``is_virtual`` has been removed
   * e3.anod.sandbox.SandBox now has a mandatory root_dir attribute
