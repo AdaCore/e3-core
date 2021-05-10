@@ -200,6 +200,11 @@ def test_tree_state():
     e3.os.fs.touch(".toto")
     state6 = e3.fs.get_filetree_state(current_dir)
     assert state6 == state5
+
+    # Make sure that ignore_hidden=False returns a different result
+    state6_with_hidden = e3.fs.get_filetree_state(current_dir, ignore_hidden=False)
+    assert state6_with_hidden != state6
+
     state6 = e3.fs.get_filetree_state("toto")
     assert isinstance(state6, str)
 
