@@ -307,11 +307,14 @@ def mv(source: str | list[str], target: str) -> None:
             if hasattr(os.path, "samefile"):
                 try:
                     return os.path.samefile(src, dst)
-                except OSError:
+                except OSError:  # defensive code
+                    # This should never be raised as we called already os.stat
+                    # on both src and dst.
                     return False
-            return os.path.normcase(os.path.abspath(src)) == os.path.normcase(
-                os.path.abspath(dst)
-            )
+            else:  # defensive code (samefile supported on linux and windows)
+                return os.path.normcase(os.path.abspath(src)) == os.path.normcase(
+                    os.path.abspath(dst)
+                )
 
         def basename(path: str) -> str:
             sep = os.path.sep + (os.path.altsep or "")

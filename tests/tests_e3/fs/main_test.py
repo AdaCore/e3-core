@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import shutil
 
@@ -98,6 +99,15 @@ def test_find():
     assert os.path.abspath(d) in result
     assert os.path.abspath(__file__) in result
 
+    result = e3.fs.find(parent_d, pattern="__in*py")
+    assert {os.path.basename(f) for f in result} == {"__init__.py"}
+
+    result = e3.fs.find(parent_d, pattern="fs")
+    assert {os.path.basename(f) for f in result} == set()
+
+    result = e3.fs.find(parent_d, pattern="fs", include_dirs=True)
+    assert {os.path.basename(f) for f in result} == {"fs"}
+
 
 def test_ls(caplog):
     e3.os.fs.touch("a")
@@ -136,6 +146,11 @@ def test_mv():
     for fname in ("a1", "a2", "a3"):
         assert os.path.isfile(os.path.join("b", fname))
 
+    e3.os.fs.touch("a1")
+    with pytest.raises(e3.fs.FSError) as err:
+        e3.fs.mv("a*", "b")
+    assert re.search("Destination path 'b.*a1' already exists", str(err))
+
     e3.fs.mv("1", "b")
     assert os.path.isfile(os.path.join("b", "1"))
 
@@ -149,6 +164,11 @@ def test_mv():
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.mv("d*", "b")
+
+    e3.fs.mv("b/", "B/")
+    with pytest.raises(e3.fs.FSError) as err:
+        e3.fs.mv("B", "B/b")
+    assert "Cannot move a directory 'B' into itself 'B/b" in str(err)
 
 
 def test_tree_state():
@@ -180,6 +200,11 @@ def test_tree_state():
     e3.os.fs.touch(".toto")
     state6 = e3.fs.get_filetree_state(current_dir)
     assert state6 == state5
+
+    # Make sure that ignore_hidden=False returns a different result
+    state6_with_hidden = e3.fs.get_filetree_state(current_dir, ignore_hidden=False)
+    assert state6_with_hidden != state6
+
     state6 = e3.fs.get_filetree_state("toto")
     assert isinstance(state6, str)
 
@@ -275,6 +300,27 @@ def test_sync_tree_preserve_timestamps():
 
     with open("b/content2") as f:
         assert f.read() == "content2"
+
+
+def test_sync_tree_no_delete():
+    """Run sync_tree without deleting."""
+    e3.fs.mkdir("a")
+    e3.fs.mkdir("b")
+    with open("a/content", "w") as f:
+        f.write("content")
+    with open("a/content2", "w") as f:
+        f.write("content2")
+    with open("b/content", "w") as f:
+        f.write("content")
+    with open("b/content2", "w") as f:
+        f.write("content1")
+
+    e3.os.fs.touch("b/todelete")
+    e3.fs.sync_tree("a", "b", delete=False)
+    assert os.path.exists("b/todelete")
+
+    e3.fs.sync_tree("a", "b")
+    assert not os.path.exists("b/todelete")
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")

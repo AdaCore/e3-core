@@ -14,9 +14,27 @@ def test_sendmail():
     msg_as_string = "test mail content"
 
     with mock.patch("smtplib.SMTP_SSL") as mock_smtp:
-        e3.net.smtp.sendmail(from_addr, to_addresses, msg_as_string, ["smtp.localhost"])
-
         smtp_mock = mock_smtp.return_value
+        smtp_mock.sendmail.return_value = {"error": 2}
+
+        assert not e3.net.smtp.sendmail(
+            from_addr,
+            to_addresses,
+            msg_as_string,
+            ["smtp.localhost", "smtp2.localhost"],
+        )
+
+        assert smtp_mock.sendmail.called
+        assert smtp_mock.sendmail.call_count == 2
+        smtp_mock.sendmail.assert_called_with(from_addr, to_addresses, msg_as_string)
+
+    with mock.patch("smtplib.SMTP_SSL") as mock_smtp:
+        smtp_mock = mock_smtp.return_value
+        smtp_mock.sendmail.return_value = ""
+        assert e3.net.smtp.sendmail(
+            from_addr, to_addresses, msg_as_string, ["smtp.localhost"]
+        )
+
         assert smtp_mock.sendmail.called
         assert smtp_mock.sendmail.call_count == 1
         smtp_mock.sendmail.assert_called_once_with(

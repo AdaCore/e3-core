@@ -32,6 +32,8 @@ def main(coverage_rc, omit_list_filename=None):
             for o in ("darwin", "linux", "solaris", "windows", "bsd", "aix")
             if o != os_name
         ]
+        if os_name != "windows":
+            exclude_lines.append('if sys.platform == "win32":')
         # exclude this specific os
         exclude_lines.append("%s: no cover" % os_name)
 

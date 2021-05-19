@@ -17,7 +17,7 @@ def test_make():
         def build(self):
             m1 = Make(self, makefile="/tmp/makefile")
             m1.set_var("prefix", "/foo")
-            m2 = Make(self, jobs=2)
+            m2 = Make(self, exec_dir="/tmp/exec_dir", jobs=2)
             m2.set_default_target("install")
             m2.set_var("profiles", ["dev", "prod"])
             return (
@@ -27,6 +27,7 @@ def test_make():
                 m2.cmdline()["cmd"],
                 m2.cmdline(["clean", "install"])["cmd"],
                 m2.cmdline("all")["cmd"],
+                m2()[1],
             )
 
     Anod.sandbox = SandBox(root_dir=os.getcwd())
@@ -42,6 +43,7 @@ def test_make():
         ["make", "-j", "2", "profiles=dev prod", "install"],
         ["make", "-j", "2", "profiles=dev prod", "clean", "install"],
         ["make", "-j", "2", "profiles=dev prod", "all"],
+        {"cwd": "/tmp/exec_dir", "timeout": None},
     )
 
 
@@ -108,7 +110,11 @@ def test_configure_opts():
             c = Configure(self)
             c.add("--with-opt")
             c.add_env("OPT", "VAL")
-            return [c.cmdline(), c()]
+
+            c2 = Configure(self, src_dir="/src2", exec_dir="/exec", auto_target=False)
+
+            c3 = Configure(self, exec_dir="../src", src_dir="../src")
+            return [c.cmdline(), c(), c2.cmdline(), c3.cmdline()]
 
     os.environ["CONFIG_SHELL"] = "ksh"
 
@@ -127,10 +133,27 @@ def test_configure_opts():
     assert result[1][0][:-1] == tuple(result[0]["cmd"][:-1])
     assert result[1][1]["env"] == result[0]["options"]["env"]
 
+    assert "/src2/configure" in result[2]["cmd"][-1]
+    assert result[2]["options"]["cwd"] == "/exec"
+
+    assert result[3]["cmd"][:-1] == ["ksh", "./configure"]
+
 
 def test_text_replace():
     with open("myfile", "w") as f:
         f.write("what who when")
+
+    # Replace using bytes
     text_replace("myfile", [(b"who", b"replaced")])
     with open("myfile") as f:
         assert f.read() == "what replaced when"
+
+    # Replace using unicode string
+    text_replace("myfile", [("replaced", "who")])
+    with open("myfile") as f:
+        assert f.read() == "what who when"
+
+    # Performing it again should not change anything
+    text_replace("myfile", [(b"replaced", b"who")])
+    with open("myfile") as f:
+        assert f.read() == "what who when"
