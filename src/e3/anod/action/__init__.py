@@ -146,7 +146,8 @@ class CreateSource(Action):
         :param source_name: name of source package to assemble
         """
         super().__init__(
-            uid=f"{anod_instance.uid}.{source_name}", data=(anod_instance, source_name),
+            uid=f"{anod_instance.uid}.{source_name}",
+            data=(anod_instance, source_name),
         )
         self.anod_instance = anod_instance
         self.source_name = source_name
@@ -224,7 +225,9 @@ class AnodAction(Action):
 
     def __str__(self) -> str:
         result = "{} {} for {}".format(
-            self.data.kind, self.data.name, self.data.env.platform,
+            self.data.kind,
+            self.data.name,
+            self.data.env.platform,
         )
         if self.data.qualifier:
             result += f" (qualifier={self.data.qualifier})"
@@ -299,7 +302,8 @@ class UploadComponent(Upload):
 
     def __str__(self) -> str:
         return "upload {} of {}".format(
-            self.str_prefix, self.uid.split(".", 1)[1].rsplit(".", 1)[0],
+            self.str_prefix,
+            self.uid.split(".", 1)[1].rsplit(".", 1)[0],
         )
 
 

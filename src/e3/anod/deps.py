@@ -82,7 +82,12 @@ class Dependency:
         self.build = build
         self.qualifier = qualifier
         self.local_name = local_name if local_name is not None else name
-        if require not in ("build_tree", "download", "installation", "source_pkg",):
+        if require not in (
+            "build_tree",
+            "download",
+            "installation",
+            "source_pkg",
+        ):
             raise e3.anod.error.SpecError(
                 f"require should be build_tree, download, installation,"
                 f" or source_pkg not {require}."

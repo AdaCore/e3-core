@@ -150,7 +150,9 @@ class TestSourceClosure:
         # require condition is True
         ac = AnodContext(asr, default_env=env)
         ac.add_anod_action(
-            "spec_nobuild_dep", env=ac.default_env, primitive="build",
+            "spec_nobuild_dep",
+            env=ac.default_env,
+            primitive="build",
         )
 
         # If both build and install are allowed the resolver will
@@ -164,7 +166,9 @@ class TestSourceClosure:
         # conflict: the only allowed action will be download.
         ac2 = AnodContext(asr, default_env=env)
         ac2.add_anod_action(
-            "spec_nobuild_stable_dep", env=ac.default_env, primitive="build",
+            "spec_nobuild_stable_dep",
+            env=ac.default_env,
+            primitive="build",
         )
         result = ac2.schedule(ac.always_create_source_resolver)
 

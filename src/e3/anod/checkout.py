@@ -290,7 +290,8 @@ class CheckoutManager:
                 old_commit = working_copy.current_revision
             except SVNError:
                 logger.error(
-                    "Unable to get SVN informations form the %s working dir", self.name,
+                    "Unable to get SVN informations form the %s working dir",
+                    self.name,
                 )
         try:
             # Remove local change and update the working copy

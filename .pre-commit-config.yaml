@@ -11,7 +11,7 @@ repos:
         - flake8-rst-docstrings
         - pygments
   - repo: https://github.com/ambv/black
-    rev: 19.10b0
+    rev: 21.5b1
     hooks:
     - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
