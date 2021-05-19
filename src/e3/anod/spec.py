@@ -101,7 +101,14 @@ def has_primitive(anod_instance: Anod, name: Literal["download"] | PRIMITIVE) ->
         is_primitive: bool = func.is_primitive
     except AttributeError:
         return False
-    return is_primitive
+
+    if is_primitive:
+        if func.require is None:
+            return True
+        else:
+            return func.require(anod_instance)
+    else:
+        return False
 
 
 def fetch_attr(instance: Any, name: str, default_value: Any) -> Any:
@@ -346,6 +353,7 @@ class Anod:
         pre: Optional[Callable[[Anod], dict]] = None,
         post: Optional[Callable[..., None]] = None,
         version: Optional[Callable[..., str]] = None,
+        require: Optional[Callable[[Anod], bool]] = None,
     ) -> Callable:
         """Declare an anod primitive.
 
@@ -359,6 +367,9 @@ class Anod:
         :param version: None or a callback function returning the version
             that will be evaluated as a string. This callback is called
             after running the primitive
+        :param require: None or a special function to call before running the
+            primitive. The function takes a unique parameter `self` and
+            returns a boolean
         :raise: AnodError
         """
 
@@ -397,6 +408,7 @@ class Anod:
             primitive_func.pre = pre
             primitive_func.post = post
             primitive_func.version = version
+            primitive_func.require = require
             return primitive_func
 
         return primitive_dec

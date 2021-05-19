@@ -1,0 +1,14 @@
+from e3.anod.spec import Anod
+
+class SpecNoBuild(Anod):
+    component = 'specnobuild'
+
+    package = Anod.Package(prefix='specnobuild', version=lambda: '42')
+
+    @Anod.primitive(require=lambda x: "stable" not in x.parsed_qualifier)
+    def build(self):
+        pass
+
+    @Anod.primitive()
+    def install(self):
+        pass
