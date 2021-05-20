@@ -318,9 +318,7 @@ class EventManager:
         handler_cfg_str = os.environ.get(var_name, "")
         handler_cfg_dict: dict[str, str] = dict(
             [
-                el.split("=", 1)  # type: ignore
-                if "=" in el
-                else (el, "")
+                el.split("=", 1) if "=" in el else (el, "")  # type: ignore
                 for el in handler_cfg_str.split("|")
             ]
         )

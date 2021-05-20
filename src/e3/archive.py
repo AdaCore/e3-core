@@ -277,7 +277,8 @@ def unpack_archive(
 
             except tarfile.TarError as e:
                 raise ArchiveError(
-                    origin="unpack_archive", message=f"Cannot untar {filename} ({e})",
+                    origin="unpack_archive",
+                    message=f"Cannot untar {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
 
         elif ext == "zip":
@@ -288,7 +289,8 @@ def unpack_archive(
                     )
             except zipfile.BadZipfile as e:
                 raise ArchiveError(
-                    origin="unpack_archive", message=f"Cannot unzip {filename} ({e})",
+                    origin="unpack_archive",
+                    message=f"Cannot unzip {filename} ({e})",
                 ).with_traceback(sys.exc_info()[2])
         else:
             assert_never()

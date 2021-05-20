@@ -315,7 +315,8 @@ def add_log_handlers(
 
 
 def add_logging_argument_group(
-    argument_parser: ArgumentParser, default_level: int = logging.WARNING,
+    argument_parser: ArgumentParser,
+    default_level: int = logging.WARNING,
 ) -> _ArgumentGroup:
     """Add an argument group with logging options to the argument parser.
 

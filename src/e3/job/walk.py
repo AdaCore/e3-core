@@ -265,7 +265,11 @@ class Walk:
             k
             for k in predecessors
             if self.job_status[k]
-            not in (ReturnValue.success, ReturnValue.skip, ReturnValue.unchanged,)
+            not in (
+                ReturnValue.success,
+                ReturnValue.skip,
+                ReturnValue.unchanged,
+            )
         ]
         if failed_predecessors:
             force_fail = "Event failed because of prerequisite failure:\n"

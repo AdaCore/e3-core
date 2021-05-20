@@ -17,7 +17,11 @@ if TYPE_CHECKING:
 
 class SMTPHandler(EventHandler):
     def __init__(
-        self, subject: str, from_addr: str, to_addr: str, smtp_servers: str | list[str],
+        self,
+        subject: str,
+        from_addr: str,
+        to_addr: str,
+        smtp_servers: str | list[str],
     ):
         """Initialize a SMTP event manager."""
         self.default_subject = subject
@@ -40,7 +44,10 @@ class SMTPHandler(EventHandler):
 
     def encode_config(self) -> str:
         return "{},{},{},{}".format(
-            self.subject, self.from_addr, self.to_addr, ",".join(self.smtp_servers),
+            self.subject,
+            self.from_addr,
+            self.to_addr,
+            ",".join(self.smtp_servers),
         )
 
     @property

@@ -62,7 +62,9 @@ class DAGIterator:
             return (None, None)
         return (vertex_id, data)
 
-    def next_element(self,) -> tuple[Optional[VertexID], Any, frozenset[VertexID]]:
+    def next_element(
+        self,
+    ) -> tuple[Optional[VertexID], Any, frozenset[VertexID]]:
         """Retrieve next element in topological order.
 
         :return: a vertex id, data, predecessors. (None, None, frozenset()) is

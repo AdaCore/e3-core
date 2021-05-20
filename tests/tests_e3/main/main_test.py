@@ -84,7 +84,8 @@ def test_mainprog_with_console_logs():
 
 
 @pytest.mark.skipif(
-    sys.platform not in ("win32"), reason="This test is only for windows platform",
+    sys.platform not in ("win32"),
+    reason="This test is only for windows platform",
 )
 def test_x86_64_windows_default():
     with open("mymain.py", "w") as f:
