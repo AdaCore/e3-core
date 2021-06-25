@@ -24,7 +24,7 @@ def sendmail(
     to_emails: list[str],
     mail_as_string: str,
     smtp_servers: Sequence[str],
-    max_size: int = 20,
+    max_size: int = 40,
     message_id: Optional[str] = None,
 ) -> bool:
     """Send an email with stmplib.
