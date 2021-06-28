@@ -597,6 +597,7 @@ def sync_tree(
 
     # normalize ignore patterns
     if ignore is not None:
+        ignore = [ignore] if isinstance(ignore, str) else ignore
         norm_ignore_list = [fn.replace("\\", "/") for fn in ignore]
 
         ignore_path_suffixes = Trie(use_suffix=True, match_delimiter="/")

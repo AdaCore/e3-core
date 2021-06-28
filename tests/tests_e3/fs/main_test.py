@@ -473,6 +473,12 @@ def test_sync_tree_with_ignore():
     e3.fs.sync_tree("a", "b", ignore=["/3", "/7"], delete_ignore=True)
     assert not os.path.exists("b/7")
 
+    e3.os.fs.touch("a/test.py")
+    e3.fs.sync_tree("a", "b", ignore="*.py", delete_ignore=True)
+    assert not os.path.exists("b/test.py")
+    for x in range(0, 10):
+        assert os.path.exists("b/" + str(x))
+
 
 def test_extension():
     assert e3.fs.extension("/home/file1.2.txt") == ".txt"
