@@ -6,7 +6,7 @@ from e3.anod.status import ReturnValue
 from e3.vcs.svn import SVNRepository
 from e3.vcs.git import GitRepository
 from e3.fs import mkdir
-from e3.os.fs import touch, which
+from e3.os.fs import touch
 import uuid
 import time
 
@@ -29,19 +29,12 @@ def test_rsync_mode():
         fd.write("*.ali\n")
 
     m = CheckoutManager(name="myrepo", working_dir="work")
-    start = time.time()
     m.update(vcs="external", url=os.path.abspath("git"))
-    total_sync_tree = time.time() - start
 
     os.environ["E3_ENABLE_FEATURE"] = "use-rsync"
 
     m = CheckoutManager(name="myrepo", working_dir="work2")
-    start = time.time()
     m.update(vcs="external", url=os.path.abspath("git"))
-    total_rsync = time.time() - start
-
-    if which("rsync"):
-        assert total_rsync * 4 < total_sync_tree
 
 
 class TestCheckout:
