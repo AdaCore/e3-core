@@ -29,7 +29,6 @@ class BuildSpace:
         "src",
         "test",
         "tmp",
-        "src",
     )
 
     def __init__(self, root_dir: str):
