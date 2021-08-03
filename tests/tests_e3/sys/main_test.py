@@ -84,9 +84,10 @@ def test_python_func():
             "/foo/python.exe",
             "/foo/Scripts/run",
         ]
+        # Don't check cases as on windows we might get .EXE or .exe
         assert [e3.os.fs.unixpath(p) for p in e3.sys.python_script("run")][
             0
-        ] == e3.os.fs.unixpath(sys.executable)
+        ].lower() == e3.os.fs.unixpath(sys.executable).lower()
 
         e3.fs.mkdir("Scripts")
         e3.os.fs.touch("Scripts/run.exe")

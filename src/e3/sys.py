@@ -298,7 +298,7 @@ def python_script(name: str, prefix: Optional[str] = None) -> list[str]:
         # 3- a .exe without a side python script
         script = (
             os.path.join(prefix, name)
-            if os.path.basename(prefix) == "scripts"
+            if os.path.basename(prefix).lower() == "scripts"
             else os.path.join(prefix, "Scripts", name)
         )
 

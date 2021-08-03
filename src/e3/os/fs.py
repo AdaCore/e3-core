@@ -327,7 +327,10 @@ def which(prog: str, paths: Optional[str] = None, default: Any = "") -> Any:
         names = [file_path]
         if sys.platform == "win32":  # unix: no cover
             names.extend(
-                [file_path + ext for ext in os.environ.get("PATHEXT", "").split(";")]
+                [
+                    file_path + ext
+                    for ext in os.environ.get("PATHEXT", ".EXE").split(";")
+                ]
             )
         return names
 
