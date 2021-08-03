@@ -290,7 +290,8 @@ class Run:
             """
             if not parse_shebang:
                 # nothing to do
-                return cmd_line
+                return [which(cmd_line[0], default=cmd_line[0])] + cmd_line[1:]
+
             prog = which(cmd_line[0], default=None)
             if prog is None:
                 # Not found. Do not modify the command line
