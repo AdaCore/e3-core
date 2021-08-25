@@ -447,11 +447,6 @@ class AnodContext:
             spec_instance.deps[dep.local_name] = dep_instance
 
         # Initialize a spec instance
-        e3.log.debug(
-            "add spec: name:{}, qualifier:{}, primitive:{}".format(
-                name, qualifier, primitive
-            )
-        )
         spec = self.load(
             name,
             qualifier=qualifier,
