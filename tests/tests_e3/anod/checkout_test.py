@@ -1,5 +1,6 @@
 import logging
 import os
+import pytest
 
 from e3.anod.checkout import CheckoutManager
 from e3.anod.status import ReturnValue
@@ -41,11 +42,14 @@ class TestCheckout:
     repo_data = os.path.join(os.path.dirname(__file__), "vcs_data")
     repo_data2 = os.path.join(os.path.dirname(__file__), "vcs_data2")
 
-    def test_svn_checkout(self):
+    @pytest.mark.parametrize("compute_changelog", [True, False])
+    @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
+    def test_svn_checkout(self, compute_changelog, e3_feature):
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
         os.environ["GIT_COMMITTER_NAME"] = "e3-core@example.net"
         os.environ["GIT_COMMITTER_EMAIL"] = "e3 core"
+        os.environ["E3_ENABLE_FEATURE"] = e3_feature
 
         url = SVNRepository.create("svn", initial_content_path=self.repo_data)
         url2 = SVNRepository.create("svn2", initial_content_path=self.repo_data2)
@@ -55,7 +59,9 @@ class TestCheckout:
         r = SVNRepository(working_copy=os.path.abspath("svn_checkout"))
         r.update(url=url)
 
-        m = CheckoutManager(name="myrepo", working_dir=".")
+        m = CheckoutManager(
+            name="myrepo", working_dir=".", compute_changelog=compute_changelog
+        )
 
         logging.info("update of non existing url")
         result = m.update(vcs="svn", url=url + "wrong_url")
