@@ -234,7 +234,21 @@ class CheckoutManager:
             old_commit = g.rev_parse()
 
             # Using fetch + checkout ensure caching is effective
-            g.git_cmd(["fetch", "-f", remote_name, f"{revision}:refs/e3-checkout"])
+            shallow = (
+                "git_shallow_fetch"
+                in os.environ.get("E3_ENABLE_FEATURE", "").split(",")
+                and not self.compute_changelog
+            )
+            g.git_cmd(
+                [
+                    "fetch",
+                    "-f",
+                    "--depth=1" if shallow else None,
+                    remote_name,
+                    f"{revision}:refs/e3-checkout",
+                ]
+            )
+
             g.checkout("refs/e3-checkout", force=True)
             new_commit = g.rev_parse()
 
