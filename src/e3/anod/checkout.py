@@ -234,11 +234,9 @@ class CheckoutManager:
             old_commit = g.rev_parse()
 
             # Using fetch + checkout ensure caching is effective
-            shallow = (
-                "git_shallow_fetch"
-                in os.environ.get("E3_ENABLE_FEATURE", "").split(",")
-                and not self.compute_changelog
-            )
+            shallow = "git_shallow_fetch" in os.environ.get(
+                "E3_ENABLE_FEATURE", ""
+            ).split(",") and (not self.compute_changelog or not old_commit)
             g.git_cmd(
                 [
                     "fetch",
