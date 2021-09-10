@@ -357,11 +357,10 @@ def create_archive(
 ) -> None:
     """Create an archive file (.tgz, .tar.gz, .tar or .zip).
 
-    On Windows, if the python tarfile and zipfile modules are available, the
-    python implementation is used to create the archive.  On others system,
-    create_archive spawn tar, gzip or zip as it is twice faster that the python
-    implementation. If the tar, gzip or zip binary is not found, the python
-    implementation is used.
+    The Python implementations (tarfile and zipfile) are used on all platforms.
+    Spawning tar, gzip or zip on Linux could be faster, however it has the
+    disadvantage of not using the same implementation across platforms, hence
+    the choice to only use the Python implementations.
 
     :param filename: archive to create
     :param from_dir: directory to pack (full path)
