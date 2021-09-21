@@ -250,7 +250,6 @@ class Anod:
         # UID of the spec instance
         self.uid = ".".join(
             (
-                self.env.build.machine,
                 self.env.platform,
                 self.build_space_name,
                 self.kind,
