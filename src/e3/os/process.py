@@ -700,8 +700,8 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
                     # Process is exiting so finalize it by calling wait
                     process_list[idx].wait()
                     return idx
-            except OSError:
-                raise WaitError
+            except OSError as err:
+                raise WaitError from err
 
     else:  # windows: no cover
         import select

@@ -279,7 +279,7 @@ def unpack_archive(
                 raise ArchiveError(
                     origin="unpack_archive",
                     message=f"Cannot untar {filename} ({e})",
-                ).with_traceback(sys.exc_info()[2])
+                ) from e
 
         elif ext == "zip":
             try:
@@ -291,7 +291,7 @@ def unpack_archive(
                 raise ArchiveError(
                     origin="unpack_archive",
                     message=f"Cannot unzip {filename} ({e})",
-                ).with_traceback(sys.exc_info()[2])
+                ) from e
         else:
             assert_never()
 

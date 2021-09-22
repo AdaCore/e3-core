@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import inspect
 import os
-import sys
 import types
 import yaml
 
@@ -228,7 +227,7 @@ class AnodModule:
             logger.error("cannot load code of %s", self.name)
             raise SandBoxError(
                 origin="load", message=f"invalid spec code for {self.name}"
-            ).with_traceback(sys.exc_info()[2])
+            ) from e
 
         # At this stage we have loaded completely the module. Now we need to
         # look for a subclass of Anod. Use python inspection features to

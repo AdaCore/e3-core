@@ -400,10 +400,10 @@ class Anod:
 
                     # And return the result
                     return result
-                except Exception:
+                except Exception as err:
                     error_msg = f"{self.name} {f.__name__} fails"
                     self.log.exception(error_msg)
-                    raise AnodError(error_msg) from None
+                    raise AnodError(error_msg) from err
 
             primitive_func.is_primitive = True
             primitive_func.pre = pre
