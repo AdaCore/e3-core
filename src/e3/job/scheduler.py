@@ -204,7 +204,7 @@ class Scheduler:
                 p.interrupt()
                 self.safe_collect(p)
                 p.on_finish(self)
-            raise KeyboardInterrupt
+            raise
         self.stop_time = datetime.now()
 
     def push(self, job: Job) -> None:

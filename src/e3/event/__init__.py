@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import json
 import os
-import sys
 import time
 import uuid
 from typing import TYPE_CHECKING
@@ -108,7 +107,7 @@ class Event:
         try:
             return self._data[name]
         except KeyError as e:
-            raise AttributeError(e).with_traceback(sys.exc_info()[2])
+            raise AttributeError(e) from e
 
     def get_attachments(self) -> dict[str, tuple[str, str]]:
         """Return the list of attachments.

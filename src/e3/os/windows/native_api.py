@@ -177,7 +177,7 @@ class FileTime(Structure):
             return datetime.fromtimestamp(self.filetime // 10000000 - 11644473600)
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
-            raise ValueError(f"filetime '{self.filetime}' failed with {err}")
+            raise ValueError(f"filetime '{self.filetime}' failed with {err}") from err
 
     def __str__(self) -> str:
         try:

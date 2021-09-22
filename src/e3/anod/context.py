@@ -987,7 +987,7 @@ class AnodContext:
                             ]
                             raise SchedulingError(
                                 e.messages, uid=uid, initiators=initiators
-                            )
+                            ) from e
                 else:
                     # An action is scheduled only if one of its successors is
                     # scheduled.

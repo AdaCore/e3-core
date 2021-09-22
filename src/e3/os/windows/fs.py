@@ -580,7 +580,7 @@ class NTFile:
                                 message=f"dir {self.path} is not empty "
                                 f"(file '{self.is_dir_empty_last_seen_file}' found)",
                                 origin="NTFile.unlink",
-                            )
+                            ) from e
                     elif e.status == Status.CANNOT_DELETE:  # defensive code
                         # At this stage we are sure that the file is not
                         # read_only but it seems that we can get this error

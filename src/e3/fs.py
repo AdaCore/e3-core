@@ -93,7 +93,7 @@ def cp(
             logger.error(e, exc_info=True)
             raise FSError(
                 origin="cp", message=f"error occurred while copying {f}"
-            ).with_traceback(sys.exc_info()[2])
+            ) from e
 
 
 def directory_content(
@@ -279,9 +279,7 @@ def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
                 # existence and the call to makedirs
                 return
             logger.error(e)
-            raise FSError(
-                origin="mkdir", message=f"can't create {path}"
-            ).with_traceback(sys.exc_info()[2])
+            raise FSError(origin="mkdir", message=f"can't create {path}") from e
 
 
 def mv(source: str | list[str], target: str) -> None:
@@ -342,7 +340,7 @@ def mv(source: str | list[str], target: str) -> None:
                 raise FSError(f"Destination path '{real_dst}' already exists")
         try:
             os.rename(src, real_dst)
-        except OSError:
+        except OSError as err:
             if os.path.islink(src):
                 linkto = os.readlink(src)
                 os.symlink(linkto, real_dst)
@@ -351,7 +349,7 @@ def mv(source: str | list[str], target: str) -> None:
                 if destinsrc(src, dst):
                     raise FSError(
                         "Cannot move a directory '%s' into itself '%s'." % (src, dst)
-                    )
+                    ) from err
                 shutil.copytree(src, real_dst, symlinks=True)
                 rm(src, recursive=True)
             else:
@@ -387,7 +385,7 @@ def mv(source: str | list[str], target: str) -> None:
                 move_file(f, f_dest)
     except Exception as e:
         logger.error(e)
-        raise FSError(origin="mv", message=str(e)).with_traceback(sys.exc_info()[2])
+        raise FSError(origin="mv", message=str(e)) from e
 
 
 def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> None:
@@ -486,7 +484,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             logger.error(e)
             raise FSError(
                 origin="rm", message=f"error occurred while removing {f}"
-            ).with_traceback(sys.exc_info()[2])
+            ) from e
 
 
 def splitall(path: str) -> tuple[str, ...]:

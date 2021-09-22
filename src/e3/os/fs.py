@@ -42,9 +42,7 @@ def cd(path: str) -> None:
         os.chdir(path)
     except Exception as e:
         logger.error(e, exc_info=True)
-        raise OSFSError(origin="cd", message=f"can't chdir to {path}\n").with_traceback(
-            sys.exc_info()[2]
-        )
+        raise OSFSError(origin="cd", message=f"can't chdir to {path}\n") from e
 
 
 def chmod(mode: str, filename: str) -> int:

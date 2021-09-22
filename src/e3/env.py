@@ -9,7 +9,6 @@ from __future__ import annotations
 import abc
 import os
 import pickle
-import sys
 from collections import namedtuple
 
 from typing import TYPE_CHECKING
@@ -582,7 +581,7 @@ class BaseEnv(AbstractBaseEnv):
         try:
             return self._instance[name]
         except KeyError as e:
-            raise AttributeError(e).with_traceback(sys.exc_info()[2])
+            raise AttributeError(e) from e
 
     def _items(self) -> Iterable[Any]:
         return iter(self._instance.items())
@@ -659,7 +658,7 @@ class Env(AbstractBaseEnv):
         try:
             return self._instance[name]
         except KeyError as e:
-            raise AttributeError(e).with_traceback(sys.exc_info()[2])
+            raise AttributeError(e) from e
 
     def _items(self) -> Iterable[Any]:
         return iter(self._instance.items())
