@@ -91,7 +91,7 @@ HANDLE create_job ()
   return result;
 }
 
-usage ()
+void usage ()
 {
   printf ("Usage:\n");
   printf ("   rlimit [--daemon] [--no-job] seconds command [args]\n");
@@ -102,7 +102,7 @@ usage ()
   exit (1);
 }
 
-main (int argc, char* argv[])
+void main (int argc, char* argv[])
 {
   /* Hold various Win32 API return status */
   BOOL result;
@@ -287,7 +287,19 @@ main (int argc, char* argv[])
        StartupInfo.lpDesktop = DesktopName;
     }
 
-    /* Spawn the process */
+    /* Spawn the process. On former Windows versions such as 2008R2, 7 Jobs
+     * cannot be nested. Thus processe need to breakaway from the parent job
+     * if present. On newer Windows version this is not necessary as jobs can
+     * be nested. Furthermore on github actions processes are launched within
+     * jobs without JOB_OBJECT_LIMIT_BREAKAWAY_OK this causing an access
+     * denied (0x05 error). In order to support both former windows versions
+     * and context in which JOB_OBJECT_LIMIT_BREAKAWAY_OK is not set, do the
+     * following:
+     *     1- Attempt to create the process with BREAKAWAY_FROM_JOB
+     *     2- If fails with an access denied,
+     *        try to create the process without BREAKAWAY_FROM_JOB
+     *
+     */
     result = CreateProcess
       (NULL,
        (char *) CommandLine,
@@ -302,7 +314,22 @@ main (int argc, char* argv[])
        NULL,                  /* Current dir */
        &StartupInfo,          /* Startup info */
        &ProcessInfo);         /* Process Information */
-
+    if (result == 0 && GetLastError() == ERROR_ACCESS_DENIED)
+      {
+        result = CreateProcess
+	      (NULL,
+	       (char *) CommandLine,
+	       &ProcessAttr,          /* Process attributes */
+	       NULL,                  /* Thread attributes */
+	       TRUE,                  /* InheritHandles */
+	       NORMAL_PRIORITY_CLASS |
+		 CREATE_NEW_PROCESS_GROUP |
+		 CREATE_SUSPENDED,
+	       NULL,                  /* Environment */
+	       NULL,                  /* Current dir */
+	       &StartupInfo,          /* Startup info */
+	       &ProcessInfo);         /* Process Information */
+      }
     if (result == 0)
       {
         error_msg ("cannot spawn process");
