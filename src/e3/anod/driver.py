@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from functools import wraps
 from typing import TYPE_CHECKING
 
@@ -92,7 +91,7 @@ class AnodDriver:
             self.anod_instance.log.critical(err)
             raise AnodError(
                 "cannot get resource metadata from store", origin=self.anod_instance.uid
-            ).with_traceback(sys.exc_info()[2])
+            ) from err
         else:
             self.store.download_resource(
                 metadata, self.anod_instance.build_space.binary_dir

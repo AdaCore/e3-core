@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import os
 import re
-import sys
 from collections import OrderedDict
 from typing import TYPE_CHECKING
 
@@ -94,7 +93,7 @@ class OrderedDictYAMLLoader(Loader):
                     context_mark=node.start_mark,
                     problem=f"found unacceptable key ({exc})",
                     problem_mark=key_node.start_mark,
-                )
+                ) from exc
             value = self.construct_object(value_node, deep=deep)
             if key in mapping:
                 raise yaml.constructor.ConstructorError(
@@ -306,14 +305,12 @@ def load_with_config(filename: str | list[str], config: dict) -> Any:
             e3.log.debug("load config file: %s", f)
             conf_data = load_ordered(f)
             result = parser.parse(conf_data)
-        except OSError:
-            raise YamlError(f"cannot read: {f}", "load_with_config").with_traceback(
-                sys.exc_info()[2]
-            )
-        except (yaml.parser.ParserError, yaml.constructor.ConstructorError) as e:
+        except OSError as err:
+            raise YamlError(f"cannot read: {f}", "load_with_config") from err
+        except (yaml.parser.ParserError, yaml.constructor.ConstructorError) as err:
             raise YamlError(
-                f"{f} is an invalid yaml file: {e}", "load_with_config"
-            ).with_traceback(sys.exc_info()[2])
+                f"{f} is an invalid yaml file: {err}", "load_with_config"
+            ) from err
 
     return result
 

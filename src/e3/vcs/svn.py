@@ -199,9 +199,9 @@ class SVNRepository:
         """
         try:
             return self.get_info("Last Changed Rev")
-        except Exception:
+        except Exception as err:
             logger.exception("Cannot fetch last changed rev")
-            raise SVNError("Cannot fetch last changed rev", "svn_cmd")
+            raise SVNError("Cannot fetch last changed rev", "svn_cmd") from err
 
     def update(
         self,
