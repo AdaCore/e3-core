@@ -79,10 +79,10 @@ class TestContext:
         assert len(result) == 5, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec1.source.spec1-src",
-            "mylinux.x86-linux.spec1.source.sources",
+            "x86-linux.spec1.source.spec1-src",
+            "x86-linux.spec1.source.sources",
             "checkout.spec1-git",
-            "mylinux.x86-linux.spec1.upload_src.spec1-src",
+            "x86-linux.spec1.upload_src.spec1-src",
         }
 
     def test_add_anod_action2(self):
@@ -95,9 +95,9 @@ class TestContext:
         assert len(result) == 5, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec2.build",
+            "x86-linux.spec2.build",
             "source_get.spec2-src",
-            "mylinux.x86-linux.spec2.source_install.spec2-src",
+            "x86-linux.spec2.source_install.spec2-src",
             "download.spec2-src",
         }
 
@@ -143,9 +143,9 @@ class TestContext:
         assert len(result) == 4, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec3.build",
-            "mylinux.x86-linux.spec3.install",
-            "mylinux.x86-linux.spec3.upload_bin",
+            "x86-linux.spec3.build",
+            "x86-linux.spec3.install",
+            "x86-linux.spec3.upload_bin",
         }
 
     def test_add_anod_action4(self):
@@ -159,9 +159,9 @@ class TestContext:
         assert len(result) == 4, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec4.build",
-            "mylinux.x86-linux.spec4.install",
-            "mylinux.x86-linux.spec4.upload_bin",
+            "x86-linux.spec4.build",
+            "x86-linux.spec4.install",
+            "x86-linux.spec4.upload_bin",
         }
 
     def test_add_anod_action4_2(self):
@@ -173,8 +173,8 @@ class TestContext:
         assert len(result) == 3, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec4.download_bin",
-            "mylinux.x86-linux.spec4.install",
+            "x86-linux.spec4.download_bin",
+            "x86-linux.spec4.install",
         }
 
     def test_add_anod_action4_3(self):
@@ -186,7 +186,7 @@ class TestContext:
         assert len(result) == 2, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec4.test",
+            "x86-linux.spec4.test",
         }
 
     def test_add_anod_action5(self):
@@ -199,8 +199,8 @@ class TestContext:
         assert len(result) == 3, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec5.build",
-            "mylinux.x86-linux.spec5.upload_bin",
+            "x86-linux.spec5.build",
+            "x86-linux.spec5.upload_bin",
         }
 
     def test_add_anod_action6(self):
@@ -213,7 +213,7 @@ class TestContext:
         assert len(result) == 2, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec6.build",
+            "x86-linux.spec6.build",
         }
 
     def test_add_anod_action6_2(self):
@@ -232,7 +232,7 @@ class TestContext:
         assert len(result) == 2, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec6.build",
+            "x86-linux.spec6.build",
         }
 
     def test_add_anod_action7(self):
@@ -243,7 +243,7 @@ class TestContext:
         assert len(result) == 2, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86-linux.spec7.build",
+            "x86-linux.spec7.build",
         }
 
     def test_add_anod_action8(self):
@@ -363,8 +363,8 @@ class TestContext:
         result = ac.schedule(ac.always_download_source_resolver)
         keys = set(result.vertex_data.keys())
         assert len(keys) == 3, keys
-        assert "mylinux.x86-linux.spec13.download_bin" in keys
-        assert "mylinux.x86-linux.spec13.install" in keys
+        assert "x86-linux.spec13.download_bin" in keys
+        assert "x86-linux.spec13.install" in keys
 
     def test_source_fails_when_missing_source_primitive(self):
         """Source action should fail when the source primitive is undefined.
@@ -392,7 +392,7 @@ class TestContext:
         result = ac.schedule(ac.always_download_source_resolver)
         keys = set(result.vertex_data.keys())
         assert len(keys) == 2, keys
-        assert "mylinux.x86-linux.spec-unmanaged-source.source.wheel.whl" not in keys
+        assert "x86-linux.spec-unmanaged-source.source.wheel.whl" not in keys
 
     def test_add_anod_action_managed_source(self):
         """Check no source creation for thirdparties."""
@@ -404,7 +404,7 @@ class TestContext:
         keys = set(result.vertex_data.keys())
         assert len(keys) == 5, keys
         assert "checkout.a-git" in keys
-        assert "mylinux.x86-linux.spec-managed-source.source.a-src" in keys
+        assert "x86-linux.spec-managed-source.source.a-src" in keys
 
     def test_dag_2_plan(self):
         """Check that we can extract values from plan in final dag.

@@ -271,7 +271,7 @@ class DownloadBinary(Download):
         super().__init__(uid=uid, data=data)
 
     def __str__(self) -> str:
-        return "download binary of %s" % self.uid.split(".", 1)[1].rsplit(".", 1)[0]
+        return "download binary of %s" % self.uid.rsplit(".", 1)[0]
 
 
 class Upload(Action):
@@ -303,7 +303,7 @@ class UploadComponent(Upload):
     def __str__(self) -> str:
         return "upload {} of {}".format(
             self.str_prefix,
-            self.uid.split(".", 1)[1].rsplit(".", 1)[0],
+            self.uid.rsplit(".", 1)[0],
         )
 
 

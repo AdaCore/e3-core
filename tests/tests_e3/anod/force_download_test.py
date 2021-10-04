@@ -32,10 +32,10 @@ class TestSourceClosure:
 
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86_64-linux.spec_install_dep.build",
-            "mylinux.x86_64-linux.spec_download_dep.build",
-            "mylinux.x86_64-linux.spec_build.install",
-            "mylinux.x86_64-linux.spec_build.download_bin",
+            "x86_64-linux.spec_install_dep.build",
+            "x86_64-linux.spec_download_dep.build",
+            "x86_64-linux.spec_build.install",
+            "x86_64-linux.spec_build.download_bin",
         }
 
     def test_force_download_before_install(self):
@@ -53,9 +53,9 @@ class TestSourceClosure:
 
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86_64-linux.spec_download_dep.build",
-            "mylinux.x86_64-linux.spec_build.install",
-            "mylinux.x86_64-linux.spec_build.download_bin",
+            "x86_64-linux.spec_download_dep.build",
+            "x86_64-linux.spec_build.install",
+            "x86_64-linux.spec_build.download_bin",
         }
         ac.add_anod_action("spec_install_dep", env=ac.default_env, primitive="build")
         ac.schedule(ac.always_create_source_resolver)
@@ -63,10 +63,10 @@ class TestSourceClosure:
 
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86_64-linux.spec_install_dep.build",
-            "mylinux.x86_64-linux.spec_download_dep.build",
-            "mylinux.x86_64-linux.spec_build.install",
-            "mylinux.x86_64-linux.spec_build.download_bin",
+            "x86_64-linux.spec_install_dep.build",
+            "x86_64-linux.spec_download_dep.build",
+            "x86_64-linux.spec_build.install",
+            "x86_64-linux.spec_build.download_bin",
         }
 
     def test_force_download_after_build(self):
@@ -131,9 +131,9 @@ class TestSourceClosure:
 
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86_64-linux.spec_download_dep_for_nodownloadprimitive.build",
-            "mylinux.x86_64-linux.spec_nodownloadprimitive.install",
-            "mylinux.x86_64-linux.spec_nodownloadprimitive.download_bin",
+            "x86_64-linux.spec_download_dep_for_nodownloadprimitive.build",
+            "x86_64-linux.spec_nodownloadprimitive.install",
+            "x86_64-linux.spec_nodownloadprimitive.download_bin",
         }
 
     def test_force_download_without_require_condition(self):
@@ -174,7 +174,7 @@ class TestSourceClosure:
 
         assert set(result.vertex_data.keys()) == {
             "root",
-            "mylinux.x86_64-linux.spec_nobuild.download_bin",
-            "mylinux.x86_64-linux.spec_nobuild_stable_dep.build",
-            "mylinux.x86_64-linux.spec_nobuild.install",
+            "x86_64-linux.spec_nobuild.download_bin",
+            "x86_64-linux.spec_nobuild_stable_dep.build",
+            "x86_64-linux.spec_nobuild.install",
         }
