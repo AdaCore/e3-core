@@ -338,7 +338,10 @@ class EventManager:
         for handler_name, handler in list(self.handlers.items()):
             config_str = handler.encode_config()
             assert "|" not in config_str
-            result.append(f"{handler_name}={config_str}")
+            if config_str:
+                result.append(f"{handler_name}={config_str}")
+            else:
+                result.append(handler_name)
         os.environ[var_name] = "|".join(result)
 
 
