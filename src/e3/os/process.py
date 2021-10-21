@@ -343,7 +343,7 @@ class Run:
 
         self.status: Optional[int] = None
         self.raw_out = b""
-        self.raw_err = b""
+        self.raw_err: Optional[bytes] = b""
         self.cmds = []
 
         if env is not None:
@@ -474,13 +474,15 @@ class Run:
         return bytes_as_str(self.raw_out)
 
     @property
-    def err(self) -> str:
+    def err(self) -> Optional[str]:
         """Process error as string.
 
         Attempt is done to decode as utf-8 the output. If the output is not in
         utf-8 a string representation will be returned
         (see e3.text.bytes_as_str).
         """
+        if self.raw_err is None:
+            return None
         return bytes_as_str(self.raw_err)
 
     def command_line_image(self) -> str:
