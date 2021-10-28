@@ -43,7 +43,14 @@ def get_filename(content_disposition: str) -> Optional[str]:
 
 
 class HTTPError(E3Error):
-    pass
+    def __init__(self, msg: str, status: Optional[int] = None) -> None:
+        """Initialize an HTTPError exception.
+
+        :param msg: an error message
+        :param status: an optional HTTP status code
+        """
+        super().__init__(msg)
+        self.status = status
 
 
 class BaseURL:
@@ -155,6 +162,7 @@ class HTTPSession:
         headers one modified.
         """
         error_msgs = []
+        last_status = None
 
         for base_url in list(self.base_urls):
             if self.last_base_url != base_url:
@@ -208,6 +216,7 @@ class HTTPSession:
                 response = self.session.request(method, final_url, **kwargs)
                 if response.status_code != 200:
                     error_msgs.append(f"{message_prefix}{response.text}")
+                    last_status = response.status_code
                     response.raise_for_status()
                 return response
             except (
@@ -221,7 +230,8 @@ class HTTPSession:
                 self.base_urls.append(problematic_url)  # type: ignore
 
         raise HTTPError(
-            "got request error (%d):\n%s" % (len(error_msgs), "\n".join(error_msgs))
+            "got request error (%d):\n%s" % (len(error_msgs), "\n".join(error_msgs)),
+            status=last_status,
         )
 
     def download_file(
@@ -230,6 +240,7 @@ class HTTPSession:
         dest: str,
         filename: Optional[str] = None,
         validate: Optional[Callable[[str], bool]] = None,
+        exception_on_error: bool = False,
     ) -> Optional[str]:
         """Download a file.
 
@@ -241,6 +252,8 @@ class HTTPSession:
         :param validate: function to call once the download is complete for
             detecting invalid / corrupted download. Takes the local path as
             parameter and returns a boolean.
+        :param exception_on_error: if True raise an exception in case download
+            fails instead of returning None.
         :return: the name of the file or None if there is an error
         """
         # When using stream=True, Requests cannot release the connection back
@@ -284,4 +297,6 @@ class HTTPSession:
             logger.debug(e)
             if path is not None:
                 rm(path)
+            if exception_on_error:
+                raise
         return None
