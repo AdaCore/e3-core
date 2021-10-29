@@ -5,7 +5,7 @@ import threading
 import time
 
 import requests_toolbelt.multipart
-from e3.net.http import HTTPSession
+from e3.net.http import HTTPSession, HTTPError
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -151,8 +151,17 @@ class TestHTTP:
     def test_error(self, socket_enabled):
         def func(server, base_url):
             with HTTPSession() as session:
+                # first test with no exception on error
                 result = session.download_file(base_url + "dummy", dest=".")
                 assert result is None
+                # second test with error as exception
+                try:
+                    result = session.download_file(
+                        base_url + "dummy", dest=".", exception_on_error=True
+                    )
+                    raise AssertionError("exception not raised")
+                except HTTPError as e:
+                    assert e.status == 500
 
         run_server(ServerErrorHandler, func)
 
