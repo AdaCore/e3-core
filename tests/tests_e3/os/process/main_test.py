@@ -9,6 +9,8 @@ import e3.os.process
 
 import pytest
 
+from subprocess import STDOUT
+
 try:
     import psutil
 except ImportError:
@@ -408,3 +410,8 @@ def test_shell_override():
         fd.write("#!/bin/bash\nimport sys; print(sys.executable)\n")
     p = e3.os.process.Run([test_file_path], parse_shebang=True)
     assert p.out.strip() == sys.executable
+
+
+def test_error_to_stdout():
+    p = e3.os.process.Run(["echo", "1"], error=STDOUT)
+    assert p.err is None
