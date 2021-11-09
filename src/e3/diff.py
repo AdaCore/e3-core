@@ -116,7 +116,7 @@ def patch(
         :raise DiffError: when the patch command fails
         """
         if is_git_patch:
-            cmd = ["git", "apply", fname]
+            cmd = ["git", "apply", "--reject", fname]
             p = e3.os.process.Run(cmd, cwd=working_dir)
         else:
             cmd = ["patch", "-p0", "-f"]
