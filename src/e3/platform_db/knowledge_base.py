@@ -156,6 +156,7 @@ BUILD_TARGETS: PlatformDBEntry = {
 
 HOST_GUESS: PlatformDBEntry = {
     # platform : OS (uname[0]), machine (uname[1]), proc (uname[4 or 5])
+    "aarch64-linux": {"os": "Linux", "cpu": "aarch64"},
     "ppc-aix": {"os": "AIX", "cpu": None},
     "x86_64-darwin": {"os": "Darwin", "cpu": "i386"},
     "x86-freebsd": {"os": "FreeBSD", "cpu": "i386"},
