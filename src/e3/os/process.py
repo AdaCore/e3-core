@@ -216,9 +216,11 @@ class Run:
         (a command line passed in a list, or a list of command lines passed as
         a list of list).
     :ivar status: The exit status. As the exit status is only meaningful after
-        the process has exited, its initial value is None.  When a problem
-        running the command is detected and a process does not get
-        created, its value gets set to the special value 127.
+        the process has exited, its initial value is None (see __init__'s "bg"
+        parameter for more information about this).
+
+        When a problem running the command is detected and a process does not
+        get created, its value gets set to the special value 127.
     :ivar raw_out: process standard output as bytes (if instanciated with
         output = PIPE). Use self.out to get a decoded string.
     :ivar raw_err: same as raw_out but for standard error.
@@ -256,7 +258,17 @@ class Run:
             stderr data from the applications should be captured into the same
             file handle as for stdout.
         :param input: same as output
-        :param bg: if True then run in background
+        :param bg: if True, then run the program in the background.
+            Running the program in the background means that this method
+            will return immediately after having spawned the process
+            and therefore that our "status" attribute will be unset (None).
+            Users who want to access the process' exit status therefore
+            need to call this object's "wait" method first.
+
+            Conversely, when this parameter is set to False, this object's
+            initialization will take care of the "wait", thus ensuring that
+            the process has terminated and our "status" attriute gets set
+            by the time it returns.
         :param timeout: limit execution time (in seconds), None means
             unlimited
         :param env: dictionary for environment variables (e.g. os.environ)
