@@ -633,6 +633,69 @@ class DAG:
         result.append("}")
         return "\n".join(result)
 
+    def as_tree(self, name_key: Optional[str] = None) -> str:
+        """Return a tree representation of the graph.
+
+        This is similar to the output of the `tree` bash command.
+
+        :param name_key: the data key-value to use as the name of the vertex; if None,
+            the vertex ID is chosen as the name
+        :return: a text tree
+        """
+
+        def get_subtree(
+            root: VertexID, name_key: Optional[str], prefix: str = ""
+        ) -> str:
+            """Get a given subtree starting from a root vertex.
+
+            This is the helper method to help "draw" the text tree.
+            :param root: the root vertex ID.
+            :param name_key: the data key-value to use as the name of the vertex; if
+            None, the vertex ID is chosen as the name
+            :param prefix: the pipe prefix to use for this subtree. This is calculated
+            automatically in the iterations of this method, and should be equal to
+            an empty string for the root vertex.
+            :return: the subtree in text form.
+            """
+            result = f"{root}"
+            if name_key:
+                assert name_key in self[root]
+                result = f"{self[root][name_key]}"
+
+            successors = self.get_successors(root)
+
+            if not successors:
+                # Base case, return node name.
+                return result
+            else:
+                # Recursive case, iterate over children.
+                for i, node in enumerate(sorted(successors)):  # type: ignore
+                    if i == len(successors) - 1:
+                        # If it's the last child, no need to prefix by a pipe.
+                        # Furthermore, the suffix pipe should not continue downwards (we
+                        # need an 'L'-shaped piece instead of a 'T'-shaped one).
+                        new_prefix = "    "
+                        suffix = "\u2514\u2500\u2500 "
+                    else:
+                        # Else, we need to prefix by a pipe.
+                        # Furthermore, we need the suffix pipe to continue downwards
+                        # ('T'-shaped pipe).
+                        new_prefix = "\u2502   "
+                        suffix = "\u251c\u2500\u2500 "
+
+                    node_subtree = get_subtree(
+                        root=node, name_key=name_key, prefix=prefix + new_prefix
+                    )
+                    result += f"\n{prefix}{suffix}{node_subtree}"
+
+                return result
+
+        if not self.__vertex_predecessors:
+            return ""
+        return get_subtree(
+            root=list(self.__vertex_predecessors.keys())[0], name_key=name_key
+        )
+
     def prune(
         self, fun: Callable[[DAG, VertexID], bool], preserve_context: bool = True
     ) -> DAG:
