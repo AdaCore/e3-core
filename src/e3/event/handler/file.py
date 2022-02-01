@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import json
 import os
 
-from e3.event import EventHandler
+from e3.event import EventHandler, unique_id
 from e3.fs import cp, mkdir
 
 if TYPE_CHECKING:
@@ -18,11 +18,11 @@ class FileHandler(EventHandler):
 
     def send_event(self, event: Event) -> bool:
         d = event.as_dict()
-        prefix = "{}-{}".format(d["name"], d["uid"])
-        log_file = os.path.join(self.log_dir, prefix + ".log")
+        prefix = f"{event.name}-{event.uid}"
+        event_file = os.path.join(self.log_dir, f"{prefix}-{unique_id()}.json")
         attach_dir = os.path.join(self.log_dir, prefix)
         mkdir(attach_dir)
-        with open(log_file, "w") as fd:
+        with open(event_file, "w") as fd:
             json.dump(d, fd, indent=2, sort_keys=True)
         for name, attachment in list(event.get_attachments().items()):
             cp(attachment[0], os.path.join(attach_dir, name))
