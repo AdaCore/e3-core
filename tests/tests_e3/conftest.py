@@ -60,6 +60,12 @@ def pytest_configure(config):
         # Option not defined.
         pass
 
+    # Define this attribute to detect errors (not failures!) in tests.
+    # This allows us to return a custom exit code, to differentiate between
+    # test *failures* and actual *errors* (like syntactic errors) in the test
+    # files themselves.
+    pytest.test_errors = False
+
 
 def require_vcs(prog, request):
     """Require svn or git to run the test.
@@ -134,3 +140,21 @@ def pytest_runtest_makereport(item, call):
 
         with open(os.path.join(RESULTS_DIR, "results"), "a") as f:
             f.write(f"{test_name}:{outcome}\n")
+    else:
+        # If we detect a failure in an item that is not a "proper" test call, it's most
+        # likely an error.
+        # For example, this could be a failing assertion or a syntax error in a
+        # setup/teardown context.
+        if rep.outcome == "failed":
+            pytest.test_errors = True
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionfinish(session, exitstatus):
+    """Manage the exit code depending on if errors were detected or not."""
+    if pytest.test_errors:
+        # Return with an exit code of `3` if we encountered errors (not failures).
+        # This is the exit code that corresponds to an "internal error" according to the
+        # pytest docs, which is the closest thing to having an actual Python error in
+        # test code.
+        session.exitstatus = 3
