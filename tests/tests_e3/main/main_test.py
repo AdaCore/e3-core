@@ -55,6 +55,42 @@ def test_mainprog():
     assert "mymain" in p.out
 
 
+def test_modules_logging_limitations():
+    """Ensure that by default DEBUG logging info is not enabled for some modules."""
+    with open("mymain.py", "w") as f:
+        f.write(
+            "\n".join(
+                (
+                    "#!/usr/bin/env python",
+                    "from e3.main import Main",
+                    "import requests",
+                    "import logging",
+                    'm = Main(name="testmain")',
+                    "m.argument_parser.add_argument('--force-debug', "
+                    "action='store_true')",
+                    "m.parse_args()",
+                    "if m.args.force_debug:",
+                    "    logging.getLogger('requests').setLevel(logging.DEBUG)",
+                    "    logging.getLogger('urllib3').setLevel(logging.DEBUG)",
+                    "try:",
+                    "    r = requests.get('https://www.google.com')",
+                    "except Exception:",
+                    "    pass",
+                )
+            )
+        )
+
+    p = e3.os.process.Run(
+        [sys.executable, "mymain.py", "-v", "--nocolor"], error=e3.os.process.STDOUT
+    )
+    p2 = e3.os.process.Run(
+        [sys.executable, "mymain.py", "-v", "--nocolor", "--force-debug"],
+        error=e3.os.process.STDOUT,
+    )
+    assert p2.out != p.out
+    assert "DEBUG" in p2.out
+
+
 def test_mainprog_with_console_logs():
     with open("mymain.py", "w") as f:
         f.write(
