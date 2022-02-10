@@ -39,6 +39,14 @@ LEVELS = {
     "CRITICAL": logging.CRITICAL,
 }
 
+# A list of python modules for which its dangerous to enable logging
+# at DEBUG level as it might leak some sensitive information. For the
+# following modules, by default logging will be limited to INFO when using
+# e3.main. This limitation can be bypassed by explicitely set back the
+# logging level to DEBUG: logging.getLogger(module).setLevel(logging.DEBUG)
+# after parsing the arguments.
+NO_DEBUG_LOGGING_MODULES = ["boto3", "botocore", "requests", "urllib3"]
+
 
 @dataclass
 class LogConfig(ConfigSection):
@@ -422,6 +430,13 @@ def activate(
     # By default do not filter anything. What is effectively logged
     # will be defined by setting/unsetting handlers
     logging.getLogger("").setLevel(logging.DEBUG)
+
+    # Some thirdparties python modules might leak secrets. Ensure that we don't
+    # enable DEBUG level for them
+    if level < logging.INFO:
+        for module in NO_DEBUG_LOGGING_MODULES:
+            logging.getLogger(module).setLevel(logging.INFO)
+
     if console_logs:
         stream_format = f"{console_logs}: {file_format}"
 
