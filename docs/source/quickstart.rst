@@ -37,7 +37,7 @@ Running:
 
 .. code-block:: python
 
-    Run(['python'], output=2)
+    Run(['python'], timeout=2)
 
 will exit the :program:`python` program after 2 seconds whereas
 
