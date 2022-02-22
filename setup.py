@@ -12,7 +12,7 @@ install_requires = [
     "stevedore>1.20.0",
 ]
 
-extras_require = {"config": ["tomlkit", "typeguard"]}
+extras_require = {"config": ["tomlkit", "typeguard"], "test": ["pytest-socket"]}
 
 for p in ("darwin", "linux", "linux2", "win32"):
     platform_string = ":sys_platform=='%s'" % p
