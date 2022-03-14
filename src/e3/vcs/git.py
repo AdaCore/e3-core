@@ -116,7 +116,7 @@ class GitRepository:
         | str
         | IO
         | None = GIT_LOG_STREAM,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Run:
         """Run a git command.
 

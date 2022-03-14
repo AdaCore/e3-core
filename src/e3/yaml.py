@@ -362,7 +362,7 @@ def load_with_regexp_table(filename: str, selectors: list[str], data: dict) -> d
             for index, r in enumerate(line[0:-1]):
                 if len(r) == 0:
                     r = ".*"
-                if not re.search(fr"^{r}$", str(selectors[index])):
+                if not re.search(rf"^{r}$", str(selectors[index])):
                     has_matched = False
 
             if has_matched:

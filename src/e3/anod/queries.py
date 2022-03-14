@@ -21,7 +21,6 @@ if TYPE_CHECKING:
         track: bool
         has_closure: bool
 
-
 else:
     SourceKey = collections.namedtuple("SourceKey", ["anod_uid", "src_name", "publish"])
     PackageKey = collections.namedtuple(
