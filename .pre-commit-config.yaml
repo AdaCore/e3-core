@@ -9,6 +9,7 @@ repos:
         - flake8-comprehensions
         - flake8-docstrings
         - flake8-rst-docstrings
+        - pygments
   - repo: https://github.com/ambv/black
     rev: 22.1.0
     hooks:
