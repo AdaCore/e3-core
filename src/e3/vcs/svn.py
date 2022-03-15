@@ -177,7 +177,7 @@ class SVNRepository:
         :raise: SVNError
         """
         info = self.svn_cmd(["info"], output=PIPE).out
-        m = re.search(fr"^{item}: *(.*)\n", info, flags=re.M)
+        m = re.search(rf"^{item}: *(.*)\n", info, flags=re.M)
         if m is None:
             logger.debug("svn info result:\n%s", info)
             raise SVNError(f"Cannot fetch item {item} from svn_info", origin="get_info")
