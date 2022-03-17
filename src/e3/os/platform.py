@@ -270,6 +270,11 @@ class SystemInfo:
                             version = "2019"
                     else:
                         version = "10"
+                elif effective_version == 11.0:
+                    if is_server:
+                        version = "2022"
+                    else:
+                        version = "11"
 
         cls._os_version = (version, kernel_version)
         return version, kernel_version
