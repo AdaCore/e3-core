@@ -147,3 +147,9 @@ The code needs to be covered as much as possible. We're aiming for 100%
 coverage. If something cannot be tested on a platform add `no cover`
 instruction in the code. This should be done for all platform specific code or for
 defensive code that should never be executed. See the file `tests/coverage_<platform>.rc` for patterns to use in order to exclude some line from the coverage report.
+
+Supported Python version
+------------------------
+
+To simplify our testing and reduce the technical debt, we are only supporting the two
+last versions of Python.

@@ -169,8 +169,8 @@ def find(
     :return: a list of files
     """
     result = []
-    for root, dirs, files in os.walk(root, followlinks=follow_symlinks):
-        root = root.replace("\\", "/")
+    for rt, dirs, files in os.walk(root, followlinks=follow_symlinks):
+        root = rt.replace("\\", "/")
         if include_files:
             for f in files:
                 if pattern is None or fnmatch.fnmatch(f, pattern):

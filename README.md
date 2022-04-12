@@ -71,7 +71,7 @@ more details.
 Install
 =======
 
-requires: Python >=3.7
+requires: Python >=3.9
 
 e3-core releases are available on PyPI and can be installed by running:
 
