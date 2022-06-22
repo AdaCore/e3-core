@@ -70,7 +70,8 @@ def subprocess_setup() -> None:
     """
     # Set sigpipe only when set_sigpipe is True
     # This should fix HC16-020 and could be activated by default
-    signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # all: no cover
+    if sys.platform != "win32":
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # all: no cover
 
 
 def get_rlimit(platform: Optional[str] = None) -> str:
@@ -694,6 +695,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
 
     if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.process import process_exit_code, wait_for_objects
+
         remain = int(timeout)
 
         handles = [int(p.internal._handle) for p in process_list]
@@ -702,7 +704,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
             try:
                 idx = wait_for_objects(handles, remain, False)
                 if idx is None:
-                    return
+                    return None
 
                 if process_exit_code(handles[idx]) is None:
                     # Process is still active so wait after updating timeout
@@ -720,6 +722,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
 
     else:  # windows: no cover
         import select
+
         remain = timeout
 
         # Each time a SIGCHLD signal is received write into pipe. Use
@@ -766,7 +769,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
             signal.signal(signal.SIGCHLD, 0)
             os.close(fd_r)
             os.close(fd_w)
-    return None
+        return None
 
 
 def is_running(pid: int) -> bool:
@@ -778,6 +781,8 @@ def is_running(pid: int) -> bool:
         from e3.os.windows.native_api import Access, NT
         from e3.os.windows.process import process_exit_code
 
+        if TYPE_CHECKING:
+            assert NT.OpenProcess is not None
         handle = NT.OpenProcess(Access.PROCESS_QUERY_INFORMATION, False, pid)
 
         try:
@@ -786,6 +791,8 @@ def is_running(pid: int) -> bool:
             return process_exit_code(handle) is None
 
         finally:
+            if TYPE_CHECKING:
+                assert NT.Close is not None
             NT.Close(handle)
 
     else:  # windows: no cover

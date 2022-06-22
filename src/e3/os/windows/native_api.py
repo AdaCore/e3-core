@@ -301,7 +301,7 @@ class NT:
     QueryObject = None
 
     @classmethod
-    def init_api(cls):
+    def init_api(cls) -> None:
         kernel32 = ctypes.windll.kernel32
         ntdll = ctypes.windll.ntdll
 

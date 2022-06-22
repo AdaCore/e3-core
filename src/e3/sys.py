@@ -336,7 +336,7 @@ def is_console() -> bool:
     # First check using isatty call. On Windows isatty will return True only
     # if in a Win32 console (for example cygwin or msys ptys are not win32
     # consoles).
-    is_tty = os.isatty(stdin_fd)
+    is_tty = os.isatty(stdin_fd)  # type: ignore
     if is_tty:
         return True
 
@@ -345,7 +345,7 @@ def is_console() -> bool:
         from msvcrt import get_osfhandle
         from e3.os.windows.object import object_name
 
-        stdin_name = object_name(get_osfhandle(stdin_fd))
+        stdin_name = object_name(get_osfhandle(stdin_fd))  # type: ignore
         if re.match(r"\\Device\\NamedPipe\\(cygwin|msys).*-pty.*$", stdin_name):
             return True
         else:
