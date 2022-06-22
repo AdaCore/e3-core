@@ -105,6 +105,12 @@ def require_svn(request):
         return require_vcs("svn", request)
 
 
+@pytest.fixture
+def svn(request):
+    """Require svn."""
+    return require_vcs("svn", request)
+
+
 def pytest_itemcollected(item):
     """Keep track of all test linked to a requirement."""
     doc = item.obj.__doc__

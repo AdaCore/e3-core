@@ -44,7 +44,7 @@ class TestCheckout:
 
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
-    def test_svn_checkout(self, compute_changelog, e3_feature):
+    def test_svn_checkout(self, svn, compute_changelog, e3_feature):
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
         os.environ["GIT_COMMITTER_NAME"] = "e3-core@example.net"
