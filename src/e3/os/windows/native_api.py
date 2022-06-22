@@ -378,7 +378,12 @@ class NT:
             ]
             cls.WaitForMultipleObjects = kernel32.WaitForMultipleObjects
             cls.WaitForMultipleObjects.restype = DWORD
-            cls.WaitForMultipleObjects.argtypes = [DWORD, POINTER(HANDLE), BOOLEAN, DWORD]
+            cls.WaitForMultipleObjects.argtypes = [
+                DWORD,
+                POINTER(HANDLE),
+                BOOLEAN,
+                DWORD,
+            ]
             cls.OpenProcess = kernel32.OpenProcess
             cls.OpenProcess.restype = HANDLE
             cls.OpenProcess.argtypes = [DWORD, BOOL, DWORD]
