@@ -733,11 +733,11 @@ def sync_tree(
         if islink(src):  # windows: no cover
             mode = stat.S_IMODE(src.stat.st_mode)
             if hasattr(os, "lchmod"):
-                os.lchmod(dst.path, mode)
+                getattr(os, "lchmod")(dst.path, mode)  # noqa: B009
 
             if hasattr(os, "lchflags") and hasattr(src.stat, "st_flags"):
                 try:
-                    os.lchflags(dst.path, src.stat.st_flags)
+                    getattr(os, "lchflags")(dst.path, src.stat.st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
                     import errno
 
@@ -757,7 +757,7 @@ def sync_tree(
                 os.chmod(dst.path, mode)
             if hasattr(os, "chflags") and hasattr(src.stat, "st_flags"):
                 try:
-                    os.chflags(dst.path, src.stat.st_flags)
+                    getattr(os, "chflags")(dst.path, src.stat.st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
                     import errno
 
