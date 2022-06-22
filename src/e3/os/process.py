@@ -691,10 +691,10 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
         return None
 
     start = time.time()
-    remain = timeout
 
     if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.process import process_exit_code, wait_for_objects
+        remain = int(timeout)
 
         handles = [int(p.internal._handle) for p in process_list]
 
@@ -706,7 +706,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
 
                 if process_exit_code(handles[idx]) is None:
                     # Process is still active so wait after updating timeout
-                    remain = timeout - time.time() + start
+                    remain = int(timeout - time.time() + start)
 
                     if remain <= 0:
                         # No remaining time
@@ -720,6 +720,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]
 
     else:  # windows: no cover
         import select
+        remain = timeout
 
         # Each time a SIGCHLD signal is received write into pipe. Use
         # then select which support timeout arguments to wait.
