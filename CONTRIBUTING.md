@@ -134,6 +134,13 @@ If not already installed, install it via:
 pip install tox
 ```
 
+On Windows, you will need additional tools in your PATH to run the testsuite cleanly.
+If you have installed Git and are using PowerShell, then you can add them by running:
+
+```bash
+$ENV:PATH += ";$ENV:ProgramFiles/Git/usr/bin"
+```
+
 In order to run the public testsuite of `e3-core`, do:
 
 ```bash

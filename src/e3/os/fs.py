@@ -160,8 +160,8 @@ def df(path: str, full: bool = False) -> int | tuple:
     if sys.platform == "win32":  # unix: no cover
         import ctypes
 
-        path = ctypes.c_wchar_p(path)
-        GetDiskFreeSpaceEx = ctypes.WINFUNCTYPE(
+        c_path = ctypes.c_wchar_p(path)
+        GetDiskFreeSpaceEx: Callable = ctypes.WINFUNCTYPE(
             ctypes.c_int,
             ctypes.c_wchar_p,
             ctypes.POINTER(ctypes.c_uint64),
@@ -173,14 +173,14 @@ def df(path: str, full: bool = False) -> int | tuple:
             ((1, "path"), (2, "freeuserspace"), (2, "totalspace"), (2, "freespace")),
         )
 
-        def GetDiskFreeSpaceEx_errcheck(result, func, args):
+        def GetDiskFreeSpaceEx_errcheck(result, func, args):  # type: ignore
             del func
             if not result:  # defensive code
                 raise ctypes.WinError()
             return (args[1].value, args[2].value, args[3].value)
 
-        GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck
-        _, total, free = GetDiskFreeSpaceEx(path)
+        GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck  # type: ignore
+        _, total, free = GetDiskFreeSpaceEx(c_path)
         used = total - free
     else:  # windows: no cover
         # f_frsize = fundamental filesystem block size

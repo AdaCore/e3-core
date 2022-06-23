@@ -301,86 +301,92 @@ class NT:
     QueryObject = None
 
     @classmethod
-    def init_api(cls):
-        kernel32 = ctypes.windll.kernel32
-        ntdll = ctypes.windll.ntdll
+    def init_api(cls) -> None:
+        if sys.platform == "win32":
+            kernel32 = ctypes.windll.kernel32
+            ntdll = ctypes.windll.ntdll
 
-        cls.GetVolumePathName = kernel32.GetVolumePathNameW
-        cls.GetVolumePathName.restype = BOOL
-        cls.GetVolumePathName.argtypes = [c_wchar_p, c_wchar_p, DWORD]
-        cls.Sleep = kernel32.Sleep
-        cls.Sleep.argtypes = [DWORD]
+            cls.GetVolumePathName = kernel32.GetVolumePathNameW
+            cls.GetVolumePathName.restype = BOOL
+            cls.GetVolumePathName.argtypes = [c_wchar_p, c_wchar_p, DWORD]
+            cls.Sleep = kernel32.Sleep
+            cls.Sleep.argtypes = [DWORD]
 
-        cls.SetInformationFile = ntdll.NtSetInformationFile
-        cls.SetInformationFile.restype = NTSTATUS
-        cls.SetInformationFile.argtypes = [
-            HANDLE,
-            POINTER(IOStatusBlock),
-            LPVOID,
-            ULONG,
-            INT,
-        ]
-        cls.QueryInformationFile = ntdll.NtQueryInformationFile
-        cls.QueryInformationFile.restype = NTSTATUS
-        cls.QueryInformationFile.argtypes = [
-            HANDLE,
-            POINTER(IOStatusBlock),
-            LPVOID,
-            ULONG,
-            INT,
-        ]
-        cls.QueryObject = ntdll.NtQueryObject
-        cls.QueryObject.restype = NTSTATUS
-        cls.QueryObject.argtypes = [HANDLE, INT, LPVOID, ULONG, LPVOID]
+            cls.SetInformationFile = ntdll.NtSetInformationFile
+            cls.SetInformationFile.restype = NTSTATUS
+            cls.SetInformationFile.argtypes = [
+                HANDLE,
+                POINTER(IOStatusBlock),
+                LPVOID,
+                ULONG,
+                INT,
+            ]
+            cls.QueryInformationFile = ntdll.NtQueryInformationFile
+            cls.QueryInformationFile.restype = NTSTATUS
+            cls.QueryInformationFile.argtypes = [
+                HANDLE,
+                POINTER(IOStatusBlock),
+                LPVOID,
+                ULONG,
+                INT,
+            ]
+            cls.QueryObject = ntdll.NtQueryObject
+            cls.QueryObject.restype = NTSTATUS
+            cls.QueryObject.argtypes = [HANDLE, INT, LPVOID, ULONG, LPVOID]
 
-        cls.QueryAttributesFile = ntdll.NtQueryAttributesFile
-        cls.QueryAttributesFile.restype = NTSTATUS
-        cls.QueryAttributesFile.argtypes = [
-            POINTER(ObjectAttributes),
-            POINTER(FileInfo.Basic),
-        ]
-        cls.OpenFile = ntdll.NtOpenFile
-        cls.OpenFile.restype = NTSTATUS
-        cls.OpenFile.argtypes = [
-            POINTER(HANDLE),
-            DWORD,
-            POINTER(ObjectAttributes),
-            POINTER(IOStatusBlock),
-            ULONG,
-            ULONG,
-        ]
-        cls.QueryDirectoryFile = ntdll.NtQueryDirectoryFile
-        cls.QueryDirectoryFile.restype = NTSTATUS
-        cls.QueryDirectoryFile.argtypes = [
-            HANDLE,
-            HANDLE,
-            LPVOID,
-            LPVOID,
-            POINTER(IOStatusBlock),
-            LPVOID,
-            ULONG,
-            INT,
-            BOOLEAN,
-            POINTER(UnicodeString),
-            BOOLEAN,
-        ]
-        cls.Close = ntdll.NtClose
-        cls.Close.argtypes = [HANDLE]
-        cls.QueryInformationProcess = ntdll.NtQueryInformationProcess
-        cls.QueryInformationProcess.restype = NTSTATUS
-        cls.QueryInformationProcess.argtypes = [
-            HANDLE,
-            INT,
-            POINTER(ProcessInfo.Basic),
-            ULONG,
-            LPVOID,
-        ]
-        cls.WaitForMultipleObjects = kernel32.WaitForMultipleObjects
-        cls.WaitForMultipleObjects.restype = DWORD
-        cls.WaitForMultipleObjects.argtypes = [DWORD, POINTER(HANDLE), BOOLEAN, DWORD]
-        cls.OpenProcess = kernel32.OpenProcess
-        cls.OpenProcess.restype = HANDLE
-        cls.OpenProcess.argtypes = [DWORD, BOOL, DWORD]
+            cls.QueryAttributesFile = ntdll.NtQueryAttributesFile
+            cls.QueryAttributesFile.restype = NTSTATUS
+            cls.QueryAttributesFile.argtypes = [
+                POINTER(ObjectAttributes),
+                POINTER(FileInfo.Basic),
+            ]
+            cls.OpenFile = ntdll.NtOpenFile
+            cls.OpenFile.restype = NTSTATUS
+            cls.OpenFile.argtypes = [
+                POINTER(HANDLE),
+                DWORD,
+                POINTER(ObjectAttributes),
+                POINTER(IOStatusBlock),
+                ULONG,
+                ULONG,
+            ]
+            cls.QueryDirectoryFile = ntdll.NtQueryDirectoryFile
+            cls.QueryDirectoryFile.restype = NTSTATUS
+            cls.QueryDirectoryFile.argtypes = [
+                HANDLE,
+                HANDLE,
+                LPVOID,
+                LPVOID,
+                POINTER(IOStatusBlock),
+                LPVOID,
+                ULONG,
+                INT,
+                BOOLEAN,
+                POINTER(UnicodeString),
+                BOOLEAN,
+            ]
+            cls.Close = ntdll.NtClose
+            cls.Close.argtypes = [HANDLE]
+            cls.QueryInformationProcess = ntdll.NtQueryInformationProcess
+            cls.QueryInformationProcess.restype = NTSTATUS
+            cls.QueryInformationProcess.argtypes = [
+                HANDLE,
+                INT,
+                POINTER(ProcessInfo.Basic),
+                ULONG,
+                LPVOID,
+            ]
+            cls.WaitForMultipleObjects = kernel32.WaitForMultipleObjects
+            cls.WaitForMultipleObjects.restype = DWORD
+            cls.WaitForMultipleObjects.argtypes = [
+                DWORD,
+                POINTER(HANDLE),
+                BOOLEAN,
+                DWORD,
+            ]
+            cls.OpenProcess = kernel32.OpenProcess
+            cls.OpenProcess.restype = HANDLE
+            cls.OpenProcess.argtypes = [DWORD, BOOL, DWORD]
 
 
 if sys.platform == "win32":
