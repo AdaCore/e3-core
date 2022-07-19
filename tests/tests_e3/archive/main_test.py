@@ -11,7 +11,7 @@ import pytest
 from unittest.mock import patch
 
 
-@pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar", ".zip"))
+@pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
 def test_unpack(ext):
     dir_to_pack = os.path.dirname(__file__)
 
