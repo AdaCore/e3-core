@@ -30,12 +30,14 @@ if TYPE_CHECKING:
 
     TAR_GZ = Literal["tar.gz"]
     TAR_BZ2 = Literal["tar.bz2"]
+    TAR_XZ = Literal["tar.xz"]
     TAR = Literal["tar"]
     ZIP = Literal["zip"]
 
 else:
     TAR_GZ = "tar.gz"
     TAR_BZ = "tar.bz2"
+    TAR_XZ = "tar.xz"
     TAR = "tar"
     ZIP = "zip"
 
@@ -101,7 +103,7 @@ def is_known_archive_format(filename: str) -> bool:
 
 def check_type(
     filename: str, force_extension: Optional[str] = None
-) -> TAR_GZ | TAR_BZ2 | TAR | ZIP:
+) -> TAR_GZ | TAR_BZ2 | TAR_XZ | TAR | ZIP:
     """Return the archive extension.
 
     Internal function used by create_archive and unpack_archive.
@@ -123,6 +125,10 @@ def check_type(
         force_extension is not None and force_extension == ".tar.bz2"
     ):
         return "tar.bz2"
+    elif filename.endswith(".tar.xz") or (
+        force_extension is not None and force_extension == ".tar.xz"
+    ):
+        return "tar.xz"
     elif filename.endswith(".tar") or (
         force_extension is not None and force_extension == ".tar"
     ):
@@ -220,7 +226,7 @@ def unpack_archive(
         tmp_dest = dest
 
     try:
-        if ext == "tar" or ext == "tar.bz2" or ext == "tar.gz":
+        if ext == "tar" or ext == "tar.bz2" or ext == "tar.gz" or ext == "tar.xz":
             try:
                 # Set the right mode
                 mode = "r:"
@@ -228,6 +234,8 @@ def unpack_archive(
                     mode += "bz2"
                 elif ext.endswith("gz"):
                     mode += "gz"
+                elif ext.endswith("xz"):
+                    mode += "xz"
                 # Extract tar files
                 with closing(tarfile.open(filename, mode=mode)) as fd:
                     check_selected = set(selected_files)
@@ -401,6 +409,8 @@ def create_archive(
             tar_format = "w:gz"
         elif ext == "tar.bz2":
             tar_format = "w:bz2"
+        elif ext == "tar.xz":
+            tar_format = "w:xz"
         else:
             assert_never()
         with closing(tarfile.open(filepath, tar_format)) as tar_archive:
