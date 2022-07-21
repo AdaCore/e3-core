@@ -98,7 +98,7 @@ def is_known_archive_format(filename: str) -> bool:
     :return: True if the path corresponding to a supported archive format
     """
     ext = e3.fs.extension(filename)
-    return ext in (".tar.gz", ".tgz", ".tar.bz2", ".tar", ".zip")
+    return ext in (".tar.gz", ".tgz", ".tar.bz2", ".tar.xz", ".tar", ".zip")
 
 
 def check_type(
