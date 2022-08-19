@@ -148,7 +148,7 @@ class CheckoutManager:
             if p.status != 0:
                 raise e3.error.E3Error("rsync failed")
         else:
-            if os.path.isdir(os.path.join(url, ".git")):
+            if os.path.exists(os.path.join(url, ".git")):
                 # It seems that this is a git repository. Get the list of files to
                 # ignore
                 try:
