@@ -148,6 +148,10 @@ class CheckoutManager:
             if p.status != 0:
                 raise e3.error.E3Error("rsync failed")
         else:
+            # Test for a git repository by looking for ".git" in the current
+            # directory - either as a file or as a directory. We check both
+            # because, if a normal git clone, ".git" is a directory; if a
+            # git clone with `git submodule init``, ".git" is a file.
             if os.path.exists(os.path.join(url, ".git")):
                 # It seems that this is a git repository. Get the list of files to
                 # ignore
