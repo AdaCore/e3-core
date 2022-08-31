@@ -1,4 +1,9 @@
-# Version 22.2.0 (2020-??-??) *NOT RELEASED YET*
+
+# Version 22.3.0 (2022-??-??) *NOT RELEASED YET*
+
+* Nothing
+
+# Version 22.2.0 (2022-08-31)
 
 * Minor backward incompatible changes:
   * the discrimiant ``is_virtual`` has been removed
