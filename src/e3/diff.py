@@ -268,7 +268,8 @@ def patch(
         files_to_patch = process_git_patch()
     else:
         files_to_patch = process_regular_patch()
-    if files_to_patch:
-        apply_patch(filtered_patch)
-    else:
-        logger.debug("All %s content has been discarded", patch_file)
+
+    if files_to_patch == 0:
+        raise DiffError(origin="patch", message="No file to patch")
+
+    apply_patch(filtered_patch)
