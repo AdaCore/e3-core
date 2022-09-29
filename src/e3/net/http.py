@@ -11,8 +11,8 @@ from collections import deque
 import requests
 import requests.adapters
 import requests.exceptions
-import requests.packages.urllib3.exceptions
-from requests.packages.urllib3.util import Retry
+import urllib3.exceptions
+from urllib3.util import Retry
 
 from typing import TYPE_CHECKING
 
@@ -221,7 +221,7 @@ class HTTPSession:
             except (
                 socket.timeout,
                 requests.exceptions.RequestException,
-                requests.packages.urllib3.exceptions.HTTPError,
+                urllib3.exceptions.HTTPError,
             ) as e:
                 # got an error with that base url so put it last in our list
                 error_msgs.append(f"{message_prefix}{e}")
