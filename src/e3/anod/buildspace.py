@@ -74,7 +74,7 @@ class BuildSpace:
             return self.subdir(name[:-4])
         raise AttributeError(f"unknown build space attribute: {name}")
 
-    def __getitem__(self, key: str) -> str:
+    def __getitem__(self, key: str) -> str | None:
         if key.isupper() and key.endswith("_DIR"):
             return getattr(self, key.lower(), None)
         raise KeyError(f"invalid build space key: {key}")
