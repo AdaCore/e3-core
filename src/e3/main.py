@@ -27,7 +27,7 @@ will also be provided::
 
 from __future__ import annotations
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 import logging
 import os
 import signal
@@ -42,6 +42,7 @@ from e3.env import Env
 if TYPE_CHECKING:
     from types import FrameType
     from typing import Optional, NoReturn
+    from argparse import Namespace
 
 
 class Main:
@@ -78,8 +79,6 @@ class Main:
         if name is not None:
             self.name = name
         elif hasattr(main, "__file__"):
-            if TYPE_CHECKING:
-                assert isinstance(main.__file__, str)
             self.name = os.path.splitext(os.path.basename(main.__file__))[0]
         else:
             self.name = "unknown"
@@ -127,13 +126,11 @@ class Main:
             if e.build.os.name == "windows" and default_x86_64_on_windows:
                 argument_parser.set_defaults(build="x86_64-windows64")
 
-        self.args: Namespace = Namespace()
+        self.args: Optional[Namespace] = None
         self.argument_parser = argument_parser
         self.__log_handlers_set = False
 
-        def sigterm_handler(
-            sig: int, frame: Optional[FrameType]
-        ) -> NoReturn:  # unix-only
+        def sigterm_handler(sig: int, frame: FrameType) -> NoReturn:  # unix-only
             """Automatically convert SIGTERM to SystemExit exception.
 
             This is done to give enough time to an application killed by
