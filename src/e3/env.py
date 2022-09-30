@@ -9,7 +9,6 @@ from __future__ import annotations
 import abc
 import os
 import pickle
-from argparse import Namespace
 from collections import namedtuple
 
 from typing import TYPE_CHECKING
@@ -21,6 +20,7 @@ from e3.platform import Platform
 
 if TYPE_CHECKING:
     from typing import Any, Iterable, Optional, TypeVar
+    from argparse import Namespace
 
 logger = e3.log.getLogger("env")
 
@@ -64,7 +64,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             self.target = self.host if target is None else target
             self.environ: Optional[dict] = None
             self.cwd: Optional[str] = None
-            self.main_options: Namespace = Namespace()
+            self.main_options: Optional[Namespace] = None
 
     @abc.abstractproperty
     def _initialized(self) -> bool:
