@@ -1,0 +1,4 @@
+# Force patch file to have UNIX end of files otherwise
+# we might have some testsuite errors on Windows, depending
+# on the Git configuration
+*.patch text eol=lf
