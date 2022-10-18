@@ -77,6 +77,7 @@ OS_INFO: PlatformDBEntry = {
 }
 
 PLATFORM_INFO: PlatformDBEntry = {
+    "aarch64-darwin": {"cpu": "aarch64", "os": "darwin", "is_hie": False},
     "aarch64-elf": {"cpu": "aarch64", "os": "none", "is_hie": True},
     "aarch64-ios": {"cpu": "aarch64", "os": "ios", "is_hie": False},
     "aarch64-linux": {"cpu": "aarch64", "os": "linux", "is_hie": False},
@@ -114,6 +115,7 @@ PLATFORM_INFO: PlatformDBEntry = {
 }
 
 BUILD_TARGETS: PlatformDBEntry = {
+    "aarch64-darwin": {"name": "aarch64-apple-darwin%(os_version)s"},
     "aarch64-elf": {"name": "aarch64-elf"},
     "aarch64-ios": {"name": "aarch64-apple-darwin"},
     "aarch64-linux": {"name": "aarch64-linux-gnu"},
@@ -156,6 +158,7 @@ BUILD_TARGETS: PlatformDBEntry = {
 
 HOST_GUESS: PlatformDBEntry = {
     # platform : OS (uname[0]), machine (uname[1]), proc (uname[4 or 5])
+    "aarch64-darwin": {"os": "Darwin", "cpu": "arm64"},
     "aarch64-linux": {"os": "Linux", "cpu": "aarch64"},
     "ppc-aix": {"os": "AIX", "cpu": None},
     "x86_64-darwin": {"os": "Darwin", "cpu": "i386"},
