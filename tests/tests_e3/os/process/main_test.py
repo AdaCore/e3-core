@@ -292,10 +292,7 @@ def test_interrupt():
 
 @pytest.mark.skipif(psutil is None, reason="require psutil")
 def test_kill_process_tree():
-    is_appveyor_test = bool(os.environ.get("APPVEYOR"))
     wait_timeout = 3
-    if is_appveyor_test:
-        wait_timeout *= 3
     p1 = e3.os.process.Run(
         [sys.executable, "-c", "import time; time.sleep(10); import sys; sys.exit(2)"],
         bg=True,
