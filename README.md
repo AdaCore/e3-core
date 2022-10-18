@@ -1,11 +1,12 @@
 The `e3` Project
 ================
 
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/979/badge)](https://bestpractices.coreinfrastructure.org/projects/979)
+[![Build Status](https://github.com/AdaCore/e3-core/workflows/build/badge.svg)](https://github.com/AdaCore/e3-core/actions?query=branch%3Amaster)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Documentation Status](https://readthedocs.org/projects/e3-core/badge/?version=latest)](http://e3-core.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/AdaCore/e3-core/branch/master/graph/badge.svg)](https://codecov.io/gh/AdaCore/e3-core)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/979/badge)](https://bestpractices.coreinfrastructure.org/projects/979)
 
 This present project (`e3`) is a Python framework to ease the development
 of portable automated build systems (compilation, dependencies management,
@@ -13,15 +14,6 @@ binary code packaging, and automated testing).
 
 The `e3` framework is split across multiple Python packages named `e3-<name>`
 and sharing the same namespace: `e3`.
-
-Code status
-===========
-
-Platform | Status
----------|-------
-Linux    | [![Build Status](https://github.com/AdaCore/e3-core/workflows/build/badge.svg)](https://github.com/AdaCore/e3-core/actions?query=branch%3Amaster)
-Windows  | [![Build status](https://ci.appveyor.com/api/projects/status/c8lgr7t0pmg1q89f/branch/master?svg=true)](https://ci.appveyor.com/project/github-integration-adacore/e3-core/branch/master)
-
 
 `e3-core` content
 =================
