@@ -144,7 +144,7 @@ def test_sandbox_rootdir():
     assert (
         os.path.relpath(
             sandbox.get_build_space("bar").root_dir,
-            os.path.join("foo", e3.env.Env().platform),
+            os.path.join(sandbox.root_dir, e3.env.Env().platform),
         )
         == "bar"
     )
