@@ -19,12 +19,10 @@ if sys.platform == "win32":
         FileAttribute,
     )
 
-is_appveyor_test = os.environ.get("APPVEYOR") == "True"
-
 
 @pytest.mark.skipif(
-    sys.platform != "win32" or is_appveyor_test,
-    reason="windows specific test (not working on appveyor)",
+    sys.platform != "win32",
+    reason="windows specific test",
 )
 def test_read_attributes():
     work_dir = os.getcwd()
@@ -35,9 +33,6 @@ def test_read_attributes():
     assert "test_read_attr_file.txt" in str(ntfile)
 
     ntfile.read_attributes()
-    # On appveyor calling as_datetime fails because
-    # ntfile.basic_info.change_time is equal to 0. Ignore this until
-    # we have a real reproducer
     assert datetime.now() - ntfile.basic_info.change_time.as_datetime < timedelta(
         seconds=10
     )
