@@ -224,11 +224,23 @@ class AnodAction(Action):
         self.anod_instance = anod_instance
 
     def __str__(self) -> str:
-        result = "{} {} for {}".format(
-            self.data.kind,
-            self.data.name,
-            self.data.env.platform,
-        )
+        if self.data.env.is_cross:
+            result = "{} {} for {},{},{},{}".format(
+                self.data.kind,
+                self.data.name,
+                self.data.env.platform,
+                self.data.env.target.os.version,
+                self.data.env.target.machine,
+                self.data.env.target.os.mode,
+            )
+            result = result.replace("unknown", "")
+            result = result.rstrip(",")
+        else:
+            result = "{} {} for native {}".format(
+                self.data.kind,
+                self.data.name,
+                self.data.env.platform,
+            )
         if self.data.qualifier:
             result += f" (qualifier={self.data.qualifier})"
         return result
