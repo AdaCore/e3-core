@@ -302,7 +302,7 @@ def test_sandbox_exec_success(git_specs_dir):
             sandbox_dir,
         ]
     )
-    assert "build dummyspec for %s" % platform in p.out
+    assert "build dummyspec for native %s" % platform in p.out
     assert "result: OK" in p.out
 
     with open(os.path.join(sandbox_dir, "test.plan"), "w") as fd:
@@ -320,8 +320,8 @@ def test_sandbox_exec_success(git_specs_dir):
             sandbox_dir,
         ]
     )
-    assert "build dummyspec for %s" % platform in p.out
-    assert "test dummyspec for %s" % platform in p.out
+    assert "build dummyspec for native %s" % platform in p.out
+    assert "test dummyspec for native %s" % platform in p.out
     assert "I am building" in p.out, p.out
     assert "I am testing" in p.out, p.out
     assert p.status == 0
@@ -340,8 +340,8 @@ def test_sandbox_exec_success(git_specs_dir):
             sandbox_dir,
         ]
     )
-    assert "build dummyspec for %s" % platform in p.out
-    assert "test dummyspec for %s" % platform in p.out
+    assert "build dummyspec for native %s" % platform in p.out
+    assert "test dummyspec for native %s" % platform in p.out
 
 
 def test_sandbox_source_auto_ignore(git_specs_dir):
@@ -447,7 +447,7 @@ def test_anod_plan(git_specs_dir):
     ]
     p = e3.os.process.Run(command)
     assert p.status == 0
-    assert "build dummyspec for %s" % platform in p.out
+    assert "build dummyspec for native %s" % platform in p.out
 
     # Install action
     with open(os.path.join(root_dir, "dummy_build.plan"), "w") as fd:
@@ -456,7 +456,7 @@ def test_anod_plan(git_specs_dir):
     assert p.status == 0
     actions = [
         "download binary of %s.dummyspec" % platform,
-        "install dummyspec for %s" % platform,
+        "install dummyspec for native %s" % platform,
     ]
     for action in actions:
         assert action in p.out
@@ -471,7 +471,7 @@ def test_anod_plan(git_specs_dir):
         "create source dummy-src",
         "get source dummy-src",
         "install source dummy-src",
-        "test dummyspec for %s" % platform,
+        "test dummyspec for native %s" % platform,
     ]
     for action in actions:
         assert action in p.out
@@ -493,7 +493,7 @@ def test_anod_plan(git_specs_dir):
         "download source dummy-src",
         "get source dummy-src",
         "install source dummy-src",
-        "test dummyspec for %s" % platform,
+        "test dummyspec for native %s" % platform,
     ]
     for action in actions:
         assert action in p.out
