@@ -164,14 +164,14 @@ class Job(metaclass=abc.ABCMeta):
             self.interrupted = True
         return not previous_state
 
-    def on_start(self, scheduler: Scheduler) -> None:
+    def on_start(self, scheduler: Scheduler) -> None:  # noqa: B027 (empty by design)
         """Call whenever a job is started.
 
         This allow the user to do some logging on job startup
         """
         pass
 
-    def on_finish(self, scheduler: Scheduler) -> None:
+    def on_finish(self, scheduler: Scheduler) -> None:  # noqa: B027 (empty by design)
         """Call whenever a job is finished.
 
         This allow the user to do some logging on job termination
