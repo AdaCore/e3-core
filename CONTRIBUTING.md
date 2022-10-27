@@ -141,6 +141,14 @@ If you have installed Git and are using PowerShell, then you can add them by run
 $ENV:PATH += ";$ENV:ProgramFiles/Git/usr/bin"
 ```
 
+On macOS, it might be required to add some GNU tools in your PATH. At least
+one test does not work with patch `2.0-12u11-Apple`. You can install GNU patch
+by running
+
+```bash
+brew install gpatch
+```
+
 In order to run the public testsuite of `e3-core`, do:
 
 ```bash
