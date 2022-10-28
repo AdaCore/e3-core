@@ -66,7 +66,7 @@ class Cache(metaclass=abc.ABCMeta):
         """Remove *all* values from the cache at once."""
         pass  # all: no cover
 
-    def close(self) -> None:
+    def close(self) -> None:  # noqa: B027 (empty by design)
         """Close the cache connection."""
         pass  # all: no cover
 
