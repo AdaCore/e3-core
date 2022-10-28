@@ -132,7 +132,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """
         return msg, kwargs
 
-    def log(
+    def log(  # type: ignore[override]
         self, level: int, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
     ) -> None:
         """Integrate additional keywords using standard interface.
@@ -148,42 +148,52 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         extra.update(extra_attrs)
         super(E3LoggerAdapter, self).log(level, msg, *args, **kwargs)
 
-    def info(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+    def info(  # type: ignore[override]
+        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+    ) -> None:
         """Wrap standard logger.info method.
 
         It allows adding extra keyword parameters
         """
         self.log(logging.INFO, msg, *args, anod_uui=anod_uui, **kwargs)
 
-    def debug(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+    def debug(  # type: ignore[override]
+        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+    ) -> None:
         """Wrap standard logger.debug method.
 
         It allows adding extra keyword parameters
         """
         self.log(logging.DEBUG, msg, *args, anod_uui=anod_uui, **kwargs)
 
-    def warning(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+    def warning(  # type: ignore[override]
+        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+    ) -> None:
         """Wrap standard logger.warning method.
 
         It allows adding extra keyword parameters
         """
         self.log(logging.WARNING, msg, *args, anod_uui=anod_uui, **kwargs)
 
-    def error(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+    def error(  # type: ignore[override]
+        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+    ) -> None:
         """Wrap standard logger.error method.
 
         It allows adding extra keyword parameters
         """
         self.log(logging.ERROR, msg, *args, anod_uui=anod_uui, **kwargs)
 
-    def critical(self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any) -> None:
+    def critical(  # type: ignore[override]
+        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+    ) -> None:
         """Wrap of standard logger.critical method.
 
         It allows adding extra keyword parameters
         """
         self.log(logging.CRITICAL, msg, *args, anod_uui=anod_uui, **kwargs)
 
-    def exception(
+    def exception(  # type: ignore[override]
         self,
         msg: Any,
         *args: Any,
