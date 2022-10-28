@@ -199,8 +199,14 @@ def patch(
                     else:
                         header1 = (line, m.group(1))
                         if line[0] == "-":
+                            # Format is
+                            #    --- <oldfilename>
+                            #    +++ <newfilename>
                             header2_regexp = r"^\+{3} ([^ \n\t]+)"
                         else:
+                            # Format is
+                            #    *** <oldfilename>
+                            #    --- <newfilename>
                             header2_regexp = r"^-{3} ([^ \n\t]+)"
                 elif not header2:
                     # Check if line next to a header first line confirm that that
