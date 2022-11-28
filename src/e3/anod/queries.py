@@ -143,7 +143,7 @@ class SourceClosure:
         for dep, dep_spec in list(self.context.dependencies[spec.uid].values()):
 
             # Only consider build and install dependency (discard source deps)
-            if dep.kind in ("build", "install"):
+            if dep.kind in ("build", "install", "download"):
                 if dep_spec.kind == "install":
                     # An install dep should be expanded whenever
                     # expand_packages is defined or when there is no component

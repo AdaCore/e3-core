@@ -117,3 +117,19 @@ class TestSourceClosure:
         assert len(published_sources) == 2
         assert published_sources == ["spec2-package-src", "spec5-src"]
         assert len(unpublished_sources) == 2
+
+    def test_recursive_source_closure_with_download(self):
+        sc = self.get_source_closure("spec6")
+
+        for key in sc.source_list:
+            sc.resolve_source(source_name=key.src_name, data=key.src_name)
+
+        sources = sc.get_source_list()
+        published_sources = [src for src, publish in sources if publish]
+        published_sources.sort()
+        unpublished_sources = [src for src, publish in sources if not publish]
+
+        assert len(sources) == 4
+        assert len(published_sources) == 2
+        assert published_sources == ["spec2-src", "spec6-src"]
+        assert len(unpublished_sources) == 2
