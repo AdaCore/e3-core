@@ -1,5 +1,5 @@
 [gerrit]
 host = git.adacore.com
 project = e3-core
-defaultbranch = for-gnatpython-23.1
+defaultbranch = for-gnatpython-23.2
 defaultremote = origin
