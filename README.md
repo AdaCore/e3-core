@@ -50,6 +50,7 @@ and sharing the same namespace: `e3`.
   - *os.timezone*: platform independent interface to get the machine timezone
 - *platform*: generic interface for providing platform information
 - *platform_db*: knowledge base for computing platform information
+- *spdx*: simple interface for generating SPDX files
 - *store*: interface to download and store resources in a store
 - *sys*: `e3` information, sanity check, ...
 - *text*: text formatting and transformation
