@@ -43,7 +43,7 @@ def test_spdx():
     )
 
     doc.add_package(
-        name="my-spdx-test-main-pkg",
+        name="my-spdx-test-main",
         version="2.2.2",
         file_name="main-pkg.zip",
         checksum=[
@@ -139,16 +139,16 @@ def test_spdx():
         "",
         "# Relationships",
         "",
-        "Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-my-spdx-test-main-pkg-2.2.2",
-        "Relationship: SPDXRef-my-spdx-test-main-pkg-2.2.2 CONTAINS SPDXRef-my-dep-1b2",
+        "Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-my-spdx-test-main-2.2.2-pkg",
+        "Relationship: SPDXRef-my-spdx-test-main-2.2.2-pkg CONTAINS SPDXRef-my-dep-1b2",
         "Relationship: SPDXRef-my-dep2-1c3 BUILD_DEPENDENCY_OF "
-        "SPDXRef-my-spdx-test-main-pkg-2.2.2",
+        "SPDXRef-my-spdx-test-main-2.2.2-pkg",
         "",
         "",
         "# Package",
         "",
-        "PackageName: my-spdx-test-main-pkg",
-        "SPDXID: SPDXRef-my-spdx-test-main-pkg-2.2.2",
+        "PackageName: my-spdx-test-main",
+        "SPDXID: SPDXRef-my-spdx-test-main-2.2.2-pkg",
         "PackageVersion: 2.2.2",
         "PackageFileName: main-pkg.zip",
         "PackageChecksum: SHA1: 6476df3aac780622368173fe6e768a2edc3932c8",
@@ -198,7 +198,7 @@ def test_spdx():
         "spdxVersion": "SPDX-1.2",
         "dataLicense": "CC0-1.0",
         "documentNamespace": document_namespace,
-        "documentDescribes": ["SPDXRef-my-spdx-test-main-pkg-2.2.2"],
+        "documentDescribes": ["SPDXRef-my-spdx-test-main-2.2.2-pkg"],
         "name": "my-spdx-test",
         "creationInfo": {
             "licenseListVersion": "3.19",
@@ -211,19 +211,19 @@ def test_spdx():
         },
         "relationships": [
             {
-                "spdxElementId": "SPDXRef-my-spdx-test-main-pkg-2.2.2",
+                "spdxElementId": "SPDXRef-my-spdx-test-main-2.2.2-pkg",
                 "relationshipType": "CONTAINS",
                 "relatedSpdxElement": "SPDXRef-my-dep-1b2",
             },
             {
-                "relatedSpdxElement": "SPDXRef-my-spdx-test-main-pkg-2.2.2",
+                "relatedSpdxElement": "SPDXRef-my-spdx-test-main-2.2.2-pkg",
                 "relationshipType": "BUILD_DEPENDENCY_OF",
                 "spdxElementId": "SPDXRef-my-dep2-1c3",
             },
         ],
         "packages": [
             {
-                "SPDXID": "SPDXRef-my-spdx-test-main-pkg-2.2.2",
+                "SPDXID": "SPDXRef-my-spdx-test-main-2.2.2-pkg",
                 "filesAnalyzed": False,
                 "checksums": [
                     {
@@ -241,7 +241,7 @@ def test_spdx():
                 "packageFileName": "main-pkg.zip",
                 "licenseConcluded": "GPL-3.0-or-later",
                 "licenseDeclared": "GPL-3.0-or-later",
-                "name": "my-spdx-test-main-pkg",
+                "name": "my-spdx-test-main",
                 "originator": "Organization: AdaCore",
                 "supplier": "Organization: AdaCore",
                 "versionInfo": "2.2.2",
@@ -299,7 +299,7 @@ def test_invalid_spdx():
 
     def add_main(is_main_package):
         return doc.add_package(
-            name="my-spdx-test-main-pkg",
+            name="my-spdx-test-main",
             version="2.2.2",
             file_name="main-pkg.zip",
             checksum=[

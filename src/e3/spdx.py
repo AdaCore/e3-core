@@ -549,7 +549,7 @@ class Package(SPDXSection):
     """Describe a package."""
 
     name: PackageName
-    spdx_id: SPDXID = field(init=False)
+    spdx_id: SPDXID
     version: PackageVersion
     file_name: PackageFileName
     checksum: list[PackageChecksum]
@@ -560,15 +560,6 @@ class Package(SPDXSection):
     license_concluded: PackageLicenseConcluded
     license_declared: PackageLicenseDeclared | None
     download_location: PackageDownloadLocation
-
-    def __post_init__(self) -> None:
-        """Generate the package SPDXID."""
-        # Use <name>-<version> for the SPDXID unless name already contains the
-        # version
-        if not str(self.name).endswith(str(self.version)):
-            self.spdx_id = SPDXID(f"{self.name}-{self.version}")
-        else:
-            self.spdx_id = SPDXID(str(self.name))
 
 
 @dataclass
@@ -675,8 +666,20 @@ class Document:
 
         :return: the package SPDX_ID
         """
+        if not name.endswith(version):
+            new_package_spdx_id = f"{name}-{version}"
+        else:
+            new_package_spdx_id = name
+
+        if is_main_package:
+            # This is the main package, given that is often occurs that
+            # a main package depends on a source package of the same name
+            # appends a "-pkg" suffix
+            new_package_spdx_id += "-pkg"
+
         new_package = Package(
             name=PackageName(name),
+            spdx_id=SPDXID(new_package_spdx_id),
             version=PackageVersion(version),
             file_name=PackageFileName(file_name),
             checksum=checksum,
