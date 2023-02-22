@@ -1,5 +1,7 @@
 from e3.spdx import (
     Document,
+    ExternalRef,
+    ExternalRefCategory,
     Creator,
     Organization,
     Tool,
@@ -29,6 +31,25 @@ def test_entities_ref_spdx():
     assert (
         PackageOriginator(NOASSERTION).to_tagvalue() == "PackageOriginator: NOASSERTION"
     )
+
+
+def test_external_ref():
+    value = {
+        "referenceType": "purl",
+        "referenceLocator": "pkg:pypi/wheel@0.36.2",
+        "referenceCategory": "PACKAGE-MANAGER",
+    }
+    assert (
+        ExternalRef.from_dict(value).to_tagvalue()
+        == "ExternalRef: PACKAGE-MANAGER purl pkg:pypi/wheel@0.36.2"
+    )
+    assert ExternalRef.from_dict(value).to_json_dict() == {
+        "external-refs": {
+            "referenceCategory": "PACKAGE-MANAGER",
+            "referenceLocator": "pkg:pypi/wheel@0.36.2",
+            "referenceType": "purl",
+        }
+    }
 
 
 def test_spdx():
@@ -75,6 +96,13 @@ def test_spdx():
         download_location=NOASSERTION,
         files_analyzed=False,
         copyright_text="2023 AdaCore",
+        external_refs=[
+            ExternalRef(
+                reference_category=ExternalRefCategory.package_manager,
+                reference_type="purl",
+                reference_locator="pkg:generic/my-dep@1b2",
+            )
+        ],
     )
     pkg_id = doc.add_package(
         name="my-dep2",
@@ -176,6 +204,7 @@ def test_spdx():
         "FilesAnalyzed: false",
         "PackageLicenseConcluded: GPL-3.0-or-later",
         "PackageDownloadLocation: NOASSERTION",
+        "ExternalRef: PACKAGE-MANAGER purl pkg:generic/my-dep@1b2",
         "",
         "",
         "# Package",
@@ -257,6 +286,13 @@ def test_spdx():
                 ],
                 "copyrightText": "2023 AdaCore",
                 "downloadLocation": "NOASSERTION",
+                "external-refs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceLocator": "pkg:generic/my-dep@1b2",
+                        "referenceType": "purl",
+                    }
+                ],
                 "packageFileName": "my-dep-1b2.tgz",
                 "licenseConcluded": "GPL-3.0-or-later",
                 "name": "my-dep",
