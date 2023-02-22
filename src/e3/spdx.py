@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass, astuple, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime, timezone
 from uuid import uuid4
 import re
@@ -123,7 +123,8 @@ class SPDXSection:
         Return a list of SPDX lines
         """
         output = []
-        for section_field in astuple(self):
+        for fd in fields(self):
+            section_field = self.__dict__[fd.name]
             if section_field is None:
                 continue
             if isinstance(section_field, list):
@@ -136,7 +137,8 @@ class SPDXSection:
 
     def to_json_dict(self) -> dict[str, Any]:
         result = {}
-        for section_field in astuple(self):
+        for fd in fields(self):
+            section_field = self.__dict__[fd.name]
             if section_field is None:
                 continue
             if isinstance(section_field, list):
