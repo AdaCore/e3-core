@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass, astuple, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime, timezone
 from uuid import uuid4
 import re
@@ -123,7 +123,8 @@ class SPDXSection:
         Return a list of SPDX lines
         """
         output = []
-        for section_field in astuple(self):
+        for fd in fields(self):
+            section_field = self.__dict__[fd.name]
             if section_field is None:
                 continue
             if isinstance(section_field, list):
@@ -136,7 +137,8 @@ class SPDXSection:
 
     def to_json_dict(self) -> dict[str, Any]:
         result = {}
-        for section_field in astuple(self):
+        for fd in fields(self):
+            section_field = self.__dict__[fd.name]
             if section_field is None:
                 continue
             if isinstance(section_field, list):
@@ -399,6 +401,71 @@ class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
     json_entry_key = "copyrightText"
 
 
+class ExternalRefCategory(Enum):
+    """Identify the category of an ExternalRef."""
+
+    security = "SECURITY"
+    package_manager = "PACKAGE-MANAGER"
+    persistent_id = "PERSISTENT-ID"
+    other = "OTHER"
+
+
+class ExternalRef(SPDXEntry):
+    """Reference an external source of information relevant to the package.
+
+    See 7.21 External reference field
+    """
+
+    json_entry_key = "external-refs"
+
+    def __init__(
+        self,
+        reference_category: ExternalRefCategory,
+        reference_type: str,
+        reference_locator: str,
+    ) -> None:
+        """Initialize an ExternalRef object.
+
+        :param reference_category: the external reference category
+        :param reference_type: one of the type listed in SPDX spec annex F
+        :param reference_locator: unique string with no space
+        """
+        self.reference_category = reference_category
+        self.reference_type = reference_type
+        self.reference_locator = reference_locator
+
+    def __str__(self) -> str:
+        return " ".join(
+            (self.reference_category.value, self.reference_type, self.reference_locator)
+        )
+
+    def to_json_dict(self) -> dict[str, dict[str, str]]:
+        """Return a chunk of the SPDX JSON document."""
+        return {
+            self.json_entry_key: {
+                "referenceCategory": self.reference_category.value,
+                "referenceType": self.reference_type,
+                "referenceLocator": self.reference_locator,
+            }
+        }
+
+    @classmethod
+    def from_dict(cls, external_ref_dict: dict[str, str]) -> ExternalRef:
+        """Generate an External Ref from a dict compatible with the JSON format.
+
+        :param external_ref_dict: a dict with the referenceCategory, referenceType,
+            and referenceLocator keys
+        :return: a new ExternalRef instance
+        """
+        return ExternalRef(
+            reference_category=ExternalRefCategory(
+                external_ref_dict["referenceCategory"]
+            ),
+            reference_type=external_ref_dict["referenceType"],
+            reference_locator=external_ref_dict["referenceLocator"],
+        )
+
+
 class RelationshipType(Enum):
     #  Is to be used when SPDXRef-DOCUMENT describes SPDXRef-A
     DESCRIBES = auto()
@@ -547,7 +614,7 @@ class Package(SPDXSection):
     """Describe a package."""
 
     name: PackageName
-    spdx_id: SPDXID = field(init=False)
+    spdx_id: SPDXID
     version: PackageVersion
     file_name: PackageFileName
     checksum: list[PackageChecksum]
@@ -558,15 +625,7 @@ class Package(SPDXSection):
     license_concluded: PackageLicenseConcluded
     license_declared: PackageLicenseDeclared | None
     download_location: PackageDownloadLocation
-
-    def __post_init__(self) -> None:
-        """Generate the package SPDXID."""
-        # Use <name>-<version> for the SPDXID unless name already contains the
-        # version
-        if not str(self.name).endswith(str(self.version)):
-            self.spdx_id = SPDXID(f"{self.name}-{self.version}")
-        else:
-            self.spdx_id = SPDXID(str(self.name))
+    external_refs: list[ExternalRef] | None
 
 
 @dataclass
@@ -638,6 +697,7 @@ class Document:
         license_declared: str | None = None,
         is_main_package: bool = False,
         add_relationship: bool = True,
+        external_refs: list[ExternalRef] | None = None,
     ) -> SPDXID:
         """Add a new Package and describe its relationship to other elements.
 
@@ -670,11 +730,24 @@ class Document:
         :param add_relationship: whether to automatically add a relationship
             element - either (DOCUMENT DESCRIBES <main package>) if is_main_package
             is True or (<main package> CONTAINS <package>)
+        :param external_refs: list of ExternalRef to document
 
         :return: the package SPDX_ID
         """
+        if not name.endswith(version):
+            new_package_spdx_id = f"{name}-{version}"
+        else:
+            new_package_spdx_id = name
+
+        if is_main_package:
+            # This is the main package, given that is often occurs that
+            # a main package depends on a source package of the same name
+            # appends a "-pkg" suffix
+            new_package_spdx_id += "-pkg"
+
         new_package = Package(
             name=PackageName(name),
+            spdx_id=SPDXID(new_package_spdx_id),
             version=PackageVersion(version),
             file_name=PackageFileName(file_name),
             checksum=checksum,
@@ -687,6 +760,7 @@ class Document:
             download_location=PackageDownloadLocation(download_location),
             files_analyzed=FilesAnalyzed(files_analyzed),
             copyright_text=PackageCopyrightText(copyright_text),
+            external_refs=external_refs,
         )
         if new_package.spdx_id in self.packages:
             raise InvalidSPDX(
