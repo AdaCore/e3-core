@@ -75,6 +75,7 @@ setup(
         "console_scripts": [
             "e3 = e3.sys:main",
             "e3-sandbox = e3.anod.sandbox.main:main",
+            "e3-pypi-closure = e3.python.pypiscript:main",
         ],
     },
 )
