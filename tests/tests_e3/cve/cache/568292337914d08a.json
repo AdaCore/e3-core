@@ -1,0 +1,1971 @@
+{
+  "created_at": "2023-03-08T11:37:24.952684",
+  "elapsed": 2.630175,
+  "encoding": "utf-8",
+  "headers": {
+    "content-type": "application/json",
+    "content-encoding": "gzip",
+    "vary": "Accept-Encoding",
+    "x-frame-options": "SAMEORIGIN",
+    "access-control-allow-origin": "*",
+    "access-control-allow-headers": "accept, apiKey, content-type, origin, x-requested-with",
+    "access-control-allow-methods": "GET, HEAD, OPTIONS",
+    "access-control-allow-credentials": "false",
+    "date": "Wed, 08 Mar 2023 11:37:23 GMT",
+    "Content-Length": "45943",
+    "apikey": "No",
+    "strict-transport-security": "max-age=31536000"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "deflate, gzip",
+      "Connection": "keep-alive",
+      "User-Agent": "python-requests/2.28.2"
+    },
+    "method": "GET",
+    "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName=cpe:2.3:a:libpng:libpng:1.6.0:-:*:*:*:*:*:*&isVulnerable&noRejected&resultsPerPage=5&startIndex=0"
+  },
+  "status_code": 200,
+  "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName=cpe:2.3:a:libpng:libpng:1.6.0:-:*:*:*:*:*:*&isVulnerable&noRejected&resultsPerPage=5&startIndex=0",
+  "_decoded_content": {
+    "resultsPerPage": 5,
+    "startIndex": 0,
+    "totalResults": 11,
+    "format": "NVD_CVE",
+    "version": "2.0",
+    "timestamp": "2023-03-08T11:37:24.997",
+    "vulnerabilities": [
+      {
+        "cve": {
+          "id": "CVE-2013-6954",
+          "sourceIdentifier": "cret@cert.org",
+          "published": "2014-01-12T18:34:55.893",
+          "lastModified": "2018-01-05T02:29:45.307",
+          "vulnStatus": "Modified",
+          "evaluatorComment": "Per: http://cwe.mitre.org/data/definitions/476.html\n\n\"CWE-476: NULL Pointer Dereference\"",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "The png_do_expand_palette function in libpng before 1.6.8 allows remote attackers to cause a denial of service (NULL pointer dereference and application crash) via (1) a PLTE chunk of zero bytes or (2) a NULL palette, related to pngrtran.c and pngset.c."
+            },
+            {
+              "lang": "es",
+              "value": "La funci\u00f3n png_do_expand_palette en libpng anteriores a 1.6.8 permite a atacantes remotos causar una denegaci\u00f3n de servicio (referencia a puntero NULO y crash de la aplicaci\u00f3n) a trav\u00e9s de (1) un chunk PLTE de cero bytes o (2) una paleta NULL, relacionada con pngrtran.c y pngset.c"
+            }
+          ],
+          "metrics": {
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 5.0
+                },
+                "baseSeverity": "MEDIUM",
+                "exploitabilityScore": 10.0,
+                "impactScore": 2.9,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "NVD-CWE-Other"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:beta:*:*:*:*:*:*",
+                      "versionEndIncluding": "1.6.8",
+                      "matchCriteriaId": "C79F2464-B57E-4A57-9763-6159B24E93D7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7A0D174-F35C-488B-8577-00EFB7741089"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "051989A3-3F72-4223-98DF-54B0488656F9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9EDC5DA5-F2A7-4819-BB9D-258EB9AB7857"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "02FCC235-9564-4B92-B1AB-294EAB110E95"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "27B34D78-C0BC-45DC-AD84-F5F13451ED7E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "40C344C8-812C-4EDE-9AD6-31EF7F0E24C2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3D3A7EC-774C-423F-BDE1-CDCB9433D87B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "B9353E66-56D2-4CD1-BC30-5B2FF0F4E722"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B898B95-CF41-4813-8FE7-776BD59A6A9F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "5D9BF9ED-965A-4BF5-A3EC-FAFCE880F14A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9F5E5899-5A3F-49A1-B18C-4C97566B87BA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7897EEC-DE43-485A-B2CD-E8623A6D2C8A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACC16FE2-E94E-45B9-94F0-B6434B21DD2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "278434CA-DD56-47FC-9C15-4B9D4159786C"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://advisories.mageia.org/MGASA-2014-0075.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2014-February/127947.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2014-February/127952.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128098.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128099.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128114.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2014-01/msg00071.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://marc.info/?l=bugtraq&m=140852886808946&w=2",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://marc.info/?l=bugtraq&m=140852974709252&w=2",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://security.gentoo.org/glsa/glsa-201406-32.xml",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://sourceforge.net/p/libpng/code/ci/1faa6ff32c648acfe3cf30a58d31d7aebc24968c",
+              "source": "cret@cert.org",
+              "tags": [
+                "Exploit",
+                "Patch"
+              ]
+            },
+            {
+              "url": "http://sourceforge.net/projects/libpng/files/libpng16/1.6.8/",
+              "source": "cret@cert.org",
+              "tags": [
+                "Patch"
+              ]
+            },
+            {
+              "url": "http://www-01.ibm.com/support/docview.wss?uid=swg21672080",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://www-01.ibm.com/support/docview.wss?uid=swg21676746",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://www.kb.cert.org/vuls/id/650142",
+              "source": "cret@cert.org",
+              "tags": [
+                "US Government Resource"
+              ]
+            },
+            {
+              "url": "http://www.libpng.org/pub/png/libpng.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://www.mandriva.com/security/advisories?name=MDVSA-2014:035",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/cpuapr2014-1972952.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://www.securityfocus.com/bid/64493",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2014:0413",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2014:0414",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1045561",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "https://www.ibm.com/support/docview.wss?uid=swg21675973",
+              "source": "cret@cert.org"
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2014-0333",
+          "sourceIdentifier": "cret@cert.org",
+          "published": "2014-02-27T20:55:04.850",
+          "lastModified": "2014-03-26T04:56:09.813",
+          "vulnStatus": "Modified",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "The png_push_read_chunk function in pngpread.c in the progressive decoder in libpng 1.6.x through 1.6.9 allows remote attackers to cause a denial of service (infinite loop and CPU consumption) via an IDAT chunk with a length of zero."
+            },
+            {
+              "lang": "es",
+              "value": "La funci\u00f3n png_push_read_chunk en pngpread.c en el decodificador progresivo en libpng 1.6.x hasta 1.6.9 permite a atacantes remotos causar una denegaci\u00f3n de servicio (bucle infinito y consumo de CPU) a trav\u00e9s de un fragmento IDAT con una longitud cero."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 5.0
+                },
+                "baseSeverity": "MEDIUM",
+                "exploitabilityScore": 10.0,
+                "impactScore": 2.9,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-189"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7A0D174-F35C-488B-8577-00EFB7741089"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "051989A3-3F72-4223-98DF-54B0488656F9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9EDC5DA5-F2A7-4819-BB9D-258EB9AB7857"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "02FCC235-9564-4B92-B1AB-294EAB110E95"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "27B34D78-C0BC-45DC-AD84-F5F13451ED7E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "40C344C8-812C-4EDE-9AD6-31EF7F0E24C2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3D3A7EC-774C-423F-BDE1-CDCB9433D87B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "B9353E66-56D2-4CD1-BC30-5B2FF0F4E722"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B898B95-CF41-4813-8FE7-776BD59A6A9F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "5D9BF9ED-965A-4BF5-A3EC-FAFCE880F14A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9F5E5899-5A3F-49A1-B18C-4C97566B87BA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7897EEC-DE43-485A-B2CD-E8623A6D2C8A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACC16FE2-E94E-45B9-94F0-B6434B21DD2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "278434CA-DD56-47FC-9C15-4B9D4159786C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8C8DAE31-CCA9-450D-90E5-B8F0490FB944"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "0C5712AB-1A98-45DB-8384-5CD70D03684C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "52FEB5C9-0C13-4FD6-876C-AAE7ED4E986C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "B2903D2B-A99A-4120-88DC-A1DF59085F59"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "ftp://ftp.simplesystems.org/pub/png/src/libpng16/patch-libpng16-vu684412.diff",
+              "source": "cret@cert.org",
+              "tags": [
+                "Patch"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2014-03/msg00029.html",
+              "source": "cret@cert.org"
+            },
+            {
+              "url": "http://www.kb.cert.org/vuls/id/684412",
+              "source": "cret@cert.org",
+              "tags": [
+                "Patch",
+                "US Government Resource"
+              ]
+            },
+            {
+              "url": "https://sourceforge.net/projects/libpng/files/libpng16/patch-libpng16-vu684412.diff",
+              "source": "cret@cert.org"
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2014-9495",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2015-01-10T19:59:00.047",
+          "lastModified": "2016-10-18T03:45:18.687",
+          "vulnStatus": "Modified",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Heap-based buffer overflow in the png_combine_row function in libpng before 1.5.21 and 1.6.x before 1.6.16, when running on 64-bit systems, might allow context-dependent attackers to execute arbitrary code via a \"very wide interlaced\" PNG image."
+            },
+            {
+              "lang": "es",
+              "value": "Desbordamiento de buffer basado en memoria din\u00e1mica en la funci\u00f3n png_combine_row en libpng en versiones anteriores a 1.5.21 y 1.6.x en versiones anteriores a 1.6.16, cuando se ejecuta en sistemas de 64 bits, podr\u00eda permitir a atacantes dependientes del contexto ejecutar c\u00f3digo arbitrario a trav\u00e9s de una imagen PNG \"entrelazada muy ampliamente\"."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:C/I:C/A:C",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "COMPLETE",
+                  "integrityImpact": "COMPLETE",
+                  "availabilityImpact": "COMPLETE",
+                  "baseScore": 10.0
+                },
+                "baseSeverity": "HIGH",
+                "exploitabilityScore": 10.0,
+                "impactScore": 10.0,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-119"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:apple:mac_os_x:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "10.11.3",
+                      "matchCriteriaId": "D3C6DA6A-9C87-4B7B-A52D-A66276B5DE82"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:beta:*:*:*:*:*:*",
+                      "versionEndIncluding": "1.5.20",
+                      "matchCriteriaId": "4D0BD544-FE2A-4AC6-8402-15A677EFC24C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7A0D174-F35C-488B-8577-00EFB7741089"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "051989A3-3F72-4223-98DF-54B0488656F9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9EDC5DA5-F2A7-4819-BB9D-258EB9AB7857"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "02FCC235-9564-4B92-B1AB-294EAB110E95"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "27B34D78-C0BC-45DC-AD84-F5F13451ED7E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "40C344C8-812C-4EDE-9AD6-31EF7F0E24C2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3D3A7EC-774C-423F-BDE1-CDCB9433D87B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "B9353E66-56D2-4CD1-BC30-5B2FF0F4E722"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B898B95-CF41-4813-8FE7-776BD59A6A9F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "5D9BF9ED-965A-4BF5-A3EC-FAFCE880F14A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9F5E5899-5A3F-49A1-B18C-4C97566B87BA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7897EEC-DE43-485A-B2CD-E8623A6D2C8A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACC16FE2-E94E-45B9-94F0-B6434B21DD2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "278434CA-DD56-47FC-9C15-4B9D4159786C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8C8DAE31-CCA9-450D-90E5-B8F0490FB944"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "0C5712AB-1A98-45DB-8384-5CD70D03684C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "52FEB5C9-0C13-4FD6-876C-AAE7ED4E986C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "B2903D2B-A99A-4120-88DC-A1DF59085F59"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2337F9F3-D26D-4A24-880A-800CD5C16795"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.10:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "D97CC2D1-657A-48D7-8035-89986341B56C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "31F71BA3-5402-448E-9068-EB0DCA1D62EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.11:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "3539DE6A-05BE-47EB-A89F-D3E4D98FC014"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.12:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "4A004603-261B-49DB-B15B-A8EE0F3AB4BF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AD67323A-8463-4B8F-B370-40C2ACFF4D8B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.13:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "6944746B-2032-4088-A7EB-EE004F12274E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2BBA4F43-0FD0-4D7D-84A0-37C8E79B9B29"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.14:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "7AC27CC2-D64C-4AED-A0DF-F6F2920D7AB5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "71E01CC8-1C29-4C46-8213-B48A2364CE8C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.15:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "2A8396AB-D983-4F04-A9F5-FA120A0E0AF6"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://sourceforge.net/p/png-mng/mailman/message/33172831/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://sourceforge.net/p/png-mng/mailman/message/33173461/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2015/01/04/3",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2015/01/10/1",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2015/01/10/3",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/bulletinjul2015-2511963.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.securityfocus.com/bid/71820",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.securitytracker.com/id/1031444",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://support.apple.com/HT206167",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Vendor Advisory"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2015-0973",
+          "sourceIdentifier": "cret@cert.org",
+          "published": "2015-01-18T18:59:03.020",
+          "lastModified": "2016-10-20T18:46:05.357",
+          "vulnStatus": "Analyzed",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Buffer overflow in the png_read_IDAT_data function in pngrutil.c in libpng before 1.5.21 and 1.6.x before 1.6.16 allows context-dependent attackers to execute arbitrary code via IDAT data with a large width, a different vulnerability than CVE-2014-9495."
+            },
+            {
+              "lang": "es",
+              "value": "Desbordamiento de buffer en la funci\u00f3n png_read_IDAT_data en pngrutil.c en libpng anterior a 1.5.21 y 1.6.x anterior a 1.6.16 permite a atacantes dependientes de contexto ejecutar c\u00f3digo arbitrario a trav\u00e9s de datos IDAT con una anchura grande, una vulnerabilidad diferente a CVE-2014-9495."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "PARTIAL",
+                  "integrityImpact": "PARTIAL",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 7.5
+                },
+                "baseSeverity": "HIGH",
+                "exploitabilityScore": 10.0,
+                "impactScore": 6.4,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-119"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:oracle:solaris:11.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B1C288F-326B-497B-B26C-D26E01262DDB"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "1.5.20",
+                      "matchCriteriaId": "83D384F2-90CA-4A6A-82C0-95F572099E78"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7A0D174-F35C-488B-8577-00EFB7741089"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "051989A3-3F72-4223-98DF-54B0488656F9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9EDC5DA5-F2A7-4819-BB9D-258EB9AB7857"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "02FCC235-9564-4B92-B1AB-294EAB110E95"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "27B34D78-C0BC-45DC-AD84-F5F13451ED7E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "40C344C8-812C-4EDE-9AD6-31EF7F0E24C2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3D3A7EC-774C-423F-BDE1-CDCB9433D87B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "B9353E66-56D2-4CD1-BC30-5B2FF0F4E722"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B898B95-CF41-4813-8FE7-776BD59A6A9F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "5D9BF9ED-965A-4BF5-A3EC-FAFCE880F14A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9F5E5899-5A3F-49A1-B18C-4C97566B87BA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7897EEC-DE43-485A-B2CD-E8623A6D2C8A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACC16FE2-E94E-45B9-94F0-B6434B21DD2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "278434CA-DD56-47FC-9C15-4B9D4159786C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8C8DAE31-CCA9-450D-90E5-B8F0490FB944"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "0C5712AB-1A98-45DB-8384-5CD70D03684C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "52FEB5C9-0C13-4FD6-876C-AAE7ED4E986C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "B2903D2B-A99A-4120-88DC-A1DF59085F59"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2337F9F3-D26D-4A24-880A-800CD5C16795"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.10:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "D97CC2D1-657A-48D7-8035-89986341B56C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "31F71BA3-5402-448E-9068-EB0DCA1D62EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.11:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "3539DE6A-05BE-47EB-A89F-D3E4D98FC014"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.12:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "4A004603-261B-49DB-B15B-A8EE0F3AB4BF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AD67323A-8463-4B8F-B370-40C2ACFF4D8B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.13:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "6944746B-2032-4088-A7EB-EE004F12274E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2BBA4F43-0FD0-4D7D-84A0-37C8E79B9B29"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.14:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "7AC27CC2-D64C-4AED-A0DF-F6F2920D7AB5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "71E01CC8-1C29-4C46-8213-B48A2364CE8C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.15:beta:*:*:*:*:*:*",
+                      "matchCriteriaId": "2A8396AB-D983-4F04-A9F5-FA120A0E0AF6"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:apple:mac_os_x:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "10.11.3",
+                      "matchCriteriaId": "D3C6DA6A-9C87-4B7B-A52D-A66276B5DE82"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html",
+              "source": "cret@cert.org",
+              "tags": [
+                "Vendor Advisory"
+              ]
+            },
+            {
+              "url": "http://sourceforge.net/p/png-mng/mailman/message/33173461/",
+              "source": "cret@cert.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://tfpwn.com/files/libpng_heap_overflow_1.6.15.txt",
+              "source": "cret@cert.org",
+              "tags": [
+                "Exploit"
+              ]
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2015/01/10/1",
+              "source": "cret@cert.org",
+              "tags": [
+                "Exploit",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2015/01/10/3",
+              "source": "cret@cert.org",
+              "tags": [
+                "Exploit"
+              ]
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/bulletinjul2015-2511963.html",
+              "source": "cret@cert.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://support.apple.com/HT206167",
+              "source": "cret@cert.org",
+              "tags": [
+                "Vendor Advisory"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2015-8126",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2015-11-13T03:59:05.917",
+          "lastModified": "2022-05-13T14:57:21.083",
+          "vulnStatus": "Analyzed",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Multiple buffer overflows in the (1) png_set_PLTE and (2) png_get_PLTE functions in libpng before 1.0.64, 1.1.x and 1.2.x before 1.2.54, 1.3.x and 1.4.x before 1.4.17, 1.5.x before 1.5.24, and 1.6.x before 1.6.19 allow remote attackers to cause a denial of service (application crash) or possibly have unspecified other impact via a small bit-depth value in an IHDR (aka image header) chunk in a PNG image."
+            },
+            {
+              "lang": "es",
+              "value": "M\u00faltiples desbordamientos de buffer en las funciones (1) png_set_PLTE y (2) png_get_PLTE en libpng en versiones anteriores a 1.0.64, 1.1.x y 1.2.x en versiones anteriores a 1.2.54, 1.3.x y 1.4.x en versiones anteriores a 1.4.17, 1.5.x en versiones anteriores a 1.5.24 y 1.6.x en versiones anteriores a 1.6.19 permiten a atacantes remotos provocar una denegaci\u00f3n de servicio (ca\u00edda de aplicaci\u00f3n) o posiblemente tener otro impacto no especificado a trav\u00e9s de un valor bit-depth peque\u00f1o en un fragmento IHDR (tambi\u00e9n conocido como image header) en una imagen PNG."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "PARTIAL",
+                  "integrityImpact": "PARTIAL",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 7.5
+                },
+                "baseSeverity": "HIGH",
+                "exploitabilityScore": 10.0,
+                "impactScore": 6.4,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-120"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "1.0.64",
+                      "matchCriteriaId": "A81951DF-BEF9-4145-B936-48C031617EA6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionStartIncluding": "1.1.1",
+                      "versionEndExcluding": "1.2.54",
+                      "matchCriteriaId": "9FE022C0-5EB8-4B1B-A378-120518DB4CDD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionStartIncluding": "1.3.0",
+                      "versionEndExcluding": "1.4.17",
+                      "matchCriteriaId": "A38EFE8E-7569-4DEC-B97C-89A2D3A61C38"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionStartIncluding": "1.5.0",
+                      "versionEndExcluding": "1.5.24",
+                      "matchCriteriaId": "DAACE97E-7BF2-485F-A129-1C27B936D392"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionStartIncluding": "1.6.0",
+                      "versionEndExcluding": "1.6.19",
+                      "matchCriteriaId": "88EAB9A2-8A67-4AE7-BA39-73B219BE34CC"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:fedoraproject:fedora:21:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "56BDB5A0-0839-4A20-A003-B8CD56F48171"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:fedoraproject:fedora:22:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "253C303A-E577-4488-93E6-68A8DD942C38"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:fedoraproject:fedora:23:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E79AB8DD-C907-4038-A931-1A5A4CFB6A5B"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:opensuse:leap:42.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4863BE36-D16A-4D75-90D9-FD76DB5B48B7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:opensuse:opensuse:13.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A10BC294-9196-425F-9FB0-B1625465B47F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:opensuse:opensuse:13.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "03117DF1-3BEC-4B8D-AD63-DBBDB2126081"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:suse:linux_enterprise_desktop:11:sp3:*:*:*:*:*:*",
+                      "matchCriteriaId": "3ED68ADD-BBDA-4485-BC76-58F011D72311"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:suse:linux_enterprise_desktop:11:sp4:*:*:*:*:*:*",
+                      "matchCriteriaId": "17D4B6F2-514D-4BC2-B2C5-4E2FCCAC594C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:suse:linux_enterprise_desktop:12:-:*:*:*:*:*:*",
+                      "matchCriteriaId": "D2DF4815-B8CB-4AD3-B91D-2E09A8E318E9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:suse:linux_enterprise_desktop:12:sp1:*:*:*:*:*:*",
+                      "matchCriteriaId": "3A0BA503-3F96-48DA-AF47-FBA37A9D0C48"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:suse:linux_enterprise_server:12:-:*:*:*:*:*:*",
+                      "matchCriteriaId": "15FC9014-BD85-4382-9D04-C0703E901D7A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:suse:linux_enterprise_server:12:sp1:*:*:*:*:*:*",
+                      "matchCriteriaId": "2076747F-A98E-4DD9-9B52-BF1732BCAD3D"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:debian:debian_linux:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "16F59A04-14CF-49E2-9973-645477EA09DA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:debian:debian_linux:8.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C11E6FB0-C8C0-4527-9AA0-CB9B316F8F43"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:debian:debian_linux:9.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DEECE5FC-CACF-4496-A3E7-164736409252"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:redhat:satellite:5.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "85EA16E0-9261-45C4-840F-5366E9EAC5E1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_desktop:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "EE249E1B-A1FD-4E08-AA71-A0E1F10FFE97"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_desktop:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "33C068A4-3780-4EAB-A937-6082DF847564"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_eus:6.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "967EC28A-607F-48F4-AD64-5E3041C768F0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_eus:7.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AE1D81A1-CD24-4B17-8AFD-DC95E90AD7D0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_eus:7.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "807C024A-F8E8-4B48-A349-4C68CD252CA1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_eus:7.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F96E3779-F56A-45FF-BB3D-4980527D721E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_eus:7.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0CF73560-2F5B-4723-A8A1-9AADBB3ADA00"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_eus:7.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5BF3C7A5-9117-42C7-BEA1-4AA378A582EF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_eus:7.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "83737173-E12E-4641-BC49-0BD84A6B29D0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9BBCD86A-E6C7-4444-9D74-F861084090F0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "51EF4996-72F4-4FA4-814F-F5991E7A8318"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_aus:7.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1C8D871B-AEA1-4407-AEE3-47EC782250FF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_aus:7.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "98381E61-F082-4302-B51F-5648884F998B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_aus:7.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D99A687E-EAE6-417E-A88E-D0082BC194CD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_aus:7.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B353CE99-D57C-465B-AAB0-73EF581127D1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_aus:7.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7431ABC1-9252-419E-8CC1-311B41360078"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_tus:7.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6755B6AD-0422-467B-8115-34A60B1D1A40"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_tus:7.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "24C0F4E1-C52C-41E0-9F14-F83ADD5CC7ED"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_tus:7.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B76AA310-FEC7-497F-AF04-C3EC1E76C4CC"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_server_tus:7.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "17F256A9-D3B9-4C72-B013-4EFD878BFEA8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_workstation:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E5ED5807-55B7-47C5-97A6-03233F4FBC3A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_workstation:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "825ECE2D-E232-46E0-A047-074B34DB1E97"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:redhat:satellite:5.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D4840254-CC76-4113-BC61-360BD15582B9"
+                    }
+                  ]
+                },
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": false,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux:5.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1D8B549B-E57B-4DFE-8A13-CAB06B5356B3"
+                    },
+                    {
+                      "vulnerable": false,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2F6AB192-9D7D-4A9A-8995-E53A9DE9EAFC"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jdk:1.6.0:update105:*:*:*:*:*:*",
+                      "matchCriteriaId": "B0AD78A5-E3C8-4CF1-967C-7F934F9DAFE3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jdk:1.7.0:update91:*:*:*:*:*:*",
+                      "matchCriteriaId": "4B0EF44A-833C-4B9D-824A-5E0FFFBA8340"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jdk:1.8.0:update65:*:*:*:*:*:*",
+                      "matchCriteriaId": "05726B2D-17F9-4192-A570-979BA8F6676E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jdk:1.8.0:update66:*:*:*:*:*:*",
+                      "matchCriteriaId": "D6C77242-C6FB-4BED-BA51-E9477D64E311"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jre:1.6.0:update105:*:*:*:*:*:*",
+                      "matchCriteriaId": "7CB263D7-6718-4BE2-8423-B25FD727915E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jre:1.7.0:update91:*:*:*:*:*:*",
+                      "matchCriteriaId": "CB1CAC76-2414-43D0-917D-5C1E60438178"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jre:1.8.0:update65:*:*:*:*:*:*",
+                      "matchCriteriaId": "9D58FCAD-3374-40D1-ADD9-E830FC3B497A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jre:1.8.0:update66:*:*:*:*:*:*",
+                      "matchCriteriaId": "1475C6EC-E2F6-4881-A89E-FB75C1AD1F20"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:oracle:linux:6:-:*:*:*:*:*:*",
+                      "matchCriteriaId": "D7B037A8-72A6-4DFF-94B2-D688A5F6F876"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:oracle:linux:7:-:*:*:*:*:*:*",
+                      "matchCriteriaId": "44B8FEDF-6CB0-46E9-9AD7-4445B001C158"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:oracle:solaris:11.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "79A602C5-61FE-47BA-9786-F045B6C6DBA8"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:apple:mac_os_x:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "10.11.4",
+                      "matchCriteriaId": "7A594A00-699D-4899-AEE5-E6B9B948FB62"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:12.04:*:*:*:esm:*:*:*",
+                      "matchCriteriaId": "8D305F7A-D159-4716-AB26-5E38BB5CD991"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:14.04:*:*:*:esm:*:*:*",
+                      "matchCriteriaId": "815D70A8-47D3-459C-A32C-9FEACA0659D1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:15.04:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F38D3B7E-8429-473F-BB31-FC3583EE5A5B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:15.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E88A537F-F4D0-46B9-9E37-965233C2A355"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://googlechromereleases.blogspot.com/2016/03/stable-channel-update.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172324.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172620.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172647.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172663.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172769.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172797.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172823.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-February/177344.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-February/177382.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174905.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174936.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-January/175073.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2015-11/msg00033.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2015-11/msg00034.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00038.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00041.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00042.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00043.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00044.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00045.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00047.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00048.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00014.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00015.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00018.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00028.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2015-11/msg00159.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2015-11/msg00160.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2015-12/msg00062.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2015-12/msg00063.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2016-01/msg00028.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2016-01/msg00029.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2016-01/msg00030.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2015-2594.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2015-2595.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2015-2596.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2016-0055.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2016-0056.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2016-0057.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.debian.org/security/2015/dsa-3399",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.debian.org/security/2016/dsa-3507",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2015/11/12/2",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/bulletinjul2016-3090568.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/cpujan2016-2367955.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/linuxbulletinoct2015-2719645.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.securityfocus.com/bid/77568",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory",
+                "VDB Entry"
+              ]
+            },
+            {
+              "url": "http://www.securitytracker.com/id/1034142",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory",
+                "VDB Entry"
+              ]
+            },
+            {
+              "url": "http://www.ubuntu.com/usn/USN-2815-1",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2016:1430",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://code.google.com/p/chromium/issues/detail?id=560291",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Issue Tracking",
+                "Patch",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://kc.mcafee.com/corporate/index?page=content&id=SB10148",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://security.gentoo.org/glsa/201603-09",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://security.gentoo.org/glsa/201611-08",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://support.apple.com/HT206167",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

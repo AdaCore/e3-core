@@ -37,7 +37,10 @@ class NVD:
     """Provide access to the NVD API."""
 
     def __init__(
-        self, cache_db_path: str | None = None, nvd_api_key: str | None = None
+        self,
+        cache_db_path: str | None = None,
+        cache_backend: str | None = None,
+        nvd_api_key: str | None = None,
     ) -> None:
         """Initialize a NVD instance.
 
@@ -45,6 +48,8 @@ class NVD:
             if the path is valid but the file does not exist, the database will
             be created when searching for CVE. Note that this requires requests-cache
             package.
+        :param cache_backend: which requests_cache backend to use, default is
+            sqlite
         :param nvd_api_key: the API key to use to avoid drastic rate limits
         """
         self.cache_db_path = cache_db_path
@@ -52,6 +57,7 @@ class NVD:
             logger.warning(
                 "the use of a cache for NVD requests is strongly recommended"
             )
+        self.cache_backend = cache_backend
         self.nvd_api_key = nvd_api_key
         if self.nvd_api_key is None:
             logger.warning(
@@ -116,14 +122,17 @@ class NVD:
 
             session = CachedSession(
                 self.cache_db_path,
+                backend=self.cache_backend,
                 # Use Cache-Control headers for expiration, if available
                 cache_control=True,
                 # Otherwise renew the cache every day
                 expire_after=timedelta(days=1),
                 # Use cache data in case of errors
                 stale_if_error=True,
+                # Ignore headers
+                match_header=False,
             )
-            logger.debug(f"using requests cache from {session.cache.db_path}")
+            logger.debug(f"using requests cache from {self.cache_db_path}")
             return session
         else:
             return Session()
