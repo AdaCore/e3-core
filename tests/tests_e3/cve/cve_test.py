@@ -5,9 +5,16 @@ import os
 
 def test_nvd_cve_search(socket_disabled):
     """Test the CVE DB research using cached data."""
-    cache_db = os.path.join(os.path.dirname(__file__), "cache.db")
+    from requests_cache import NEVER_EXPIRE
 
-    nvd_db = NVD(cache_db_path=cache_db)
+    cache_db = os.path.join(os.path.dirname(__file__), "cache")
+
+    nvd_db = NVD(cache_db_path=cache_db, cache_backend="filesystem")
+
+    # Ensure the cache is still compatible with the requests_cache
+    # version and that the entries never expire
+    nvd_db.session.cache.recreate_keys()
+    nvd_db.session.cache.reset_expiration(NEVER_EXPIRE)
     cve_urls = [
         cve.nvd_url
         for cve in nvd_db.search_by_cpe_name(

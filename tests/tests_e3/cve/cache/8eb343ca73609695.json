@@ -1,0 +1,3490 @@
+{
+  "created_at": "2023-03-08T11:37:27.202948",
+  "elapsed": 2.213113,
+  "encoding": "utf-8",
+  "headers": {
+    "content-type": "application/json",
+    "content-encoding": "gzip",
+    "vary": "Accept-Encoding",
+    "x-frame-options": "SAMEORIGIN",
+    "access-control-allow-origin": "*",
+    "access-control-allow-headers": "accept, apiKey, content-type, origin, x-requested-with",
+    "access-control-allow-methods": "GET, HEAD, OPTIONS",
+    "access-control-allow-credentials": "false",
+    "date": "Wed, 08 Mar 2023 11:37:27 GMT",
+    "Content-Length": "87643",
+    "apikey": "No",
+    "strict-transport-security": "max-age=31536000"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "deflate, gzip",
+      "Connection": "keep-alive",
+      "User-Agent": "python-requests/2.28.2"
+    },
+    "method": "GET",
+    "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName=cpe:2.3:a:libpng:libpng:1.6.0:-:*:*:*:*:*:*&isVulnerable&noRejected&resultsPerPage=5&startIndex=5"
+  },
+  "status_code": 200,
+  "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName=cpe:2.3:a:libpng:libpng:1.6.0:-:*:*:*:*:*:*&isVulnerable&noRejected&resultsPerPage=5&startIndex=5",
+  "_decoded_content": {
+    "resultsPerPage": 5,
+    "startIndex": 5,
+    "totalResults": 11,
+    "format": "NVD_CVE",
+    "version": "2.0",
+    "timestamp": "2023-03-08T11:37:27.153",
+    "vulnerabilities": [
+      {
+        "cve": {
+          "id": "CVE-2015-8472",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2016-01-21T15:59:00.117",
+          "lastModified": "2017-11-04T01:29:12.600",
+          "vulnStatus": "Modified",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Buffer overflow in the png_set_PLTE function in libpng before 1.0.65, 1.1.x and 1.2.x before 1.2.55, 1.3.x, 1.4.x before 1.4.18, 1.5.x before 1.5.25, and 1.6.x before 1.6.20 allows remote attackers to cause a denial of service (application crash) or possibly have unspecified other impact via a small bit-depth value in an IHDR (aka image header) chunk in a PNG image.  NOTE: this vulnerability exists because of an incomplete fix for CVE-2015-8126."
+            },
+            {
+              "lang": "es",
+              "value": "Desbordamiento de buffer en la funci\u00f3n png_set_PLTE en libpng en versiones anteriores a 1.0.65, 1.1.x y 1.2.x en versiones anteriores a 1.2.55, 1.3.x, 1.4.x en versiones anteriores a 1.4.18, 1.5.x en versiones anteriores a 1.5.25 y 1.6.x en versiones anteriores a 1.6.20 permite a atacantes remotos provocar una denegaci\u00f3n de servicio (ca\u00edda de aplicaci\u00f3n) o posiblemente tener otro impacto no especificado a trav\u00e9s de un valor peque\u00f1o de profundidad de bits en un IHDR (tambi\u00e9n conocido como image header) fragmento en una imagen PNG. NOTA: esta vulnerabilidad existe debido a una soluci\u00f3n incorrecta para CVE-2015-8126."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV30": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "3.0",
+                  "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+                  "attackVector": "NETWORK",
+                  "attackComplexity": "LOW",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "NONE",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "LOW",
+                  "integrityImpact": "LOW",
+                  "availabilityImpact": "LOW",
+                  "baseScore": 7.3,
+                  "baseSeverity": "HIGH"
+                },
+                "exploitabilityScore": 3.9,
+                "impactScore": 3.4
+              }
+            ],
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "PARTIAL",
+                  "integrityImpact": "PARTIAL",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 7.5
+                },
+                "baseSeverity": "HIGH",
+                "exploitabilityScore": 10.0,
+                "impactScore": 6.4,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-119"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:apple:mac_os_x:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "10.11.3",
+                      "matchCriteriaId": "D3C6DA6A-9C87-4B7B-A52D-A66276B5DE82"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.64:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BBD67FEF-E6D3-449B-B2E9-14A69AD8E923"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C036011A-9AE1-423C-8B73-188B9BA20FEE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "663C6EE5-5B5E-4C0F-9E7F-D0E1DA9AF9EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8051459E-94D3-4D4A-9D40-CC9475DDB00C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "42056C63-69A7-43CF-828C-0C3E365702D9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5B6A39A3-7F86-4DC3-B248-859630AFB9A3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9A3E3BF3-4376-4692-A515-A7B6593F28F1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AB6AF9D5-CE60-4FC9-91AB-E243F0D429E9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3B1AC712-110D-458F-B650-930C6D45CA53"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7F848FA5-9682-454F-A9DE-671C4401F15F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C4B83678-98A1-440E-950C-4A27995C7294"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FB9EEE31-479A-4370-BF00-C26C1AF502B6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "95EABD7D-1F18-4FA5-BAA9-F8D69129E531"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "65B836CA-3740-48B0-966B-21E65EF3D636"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3988FA1B-18D9-46AA-87BA-A6B01D4F4B25"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.19:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "51A46409-7AC6-45DB-B92D-29988C445BC1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.20:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "09E2B608-6C70-446F-A3A7-369048D99855"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.21:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5AA00AE0-F447-4361-AA37-0C98BDE491E3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.22:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "21DACE94-FBDC-4A3D-8DD6-E62D18F5EE7A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.23:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "220A02AF-6ADA-4B75-BC81-40B2D847029A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.24:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ECEB8F61-195E-41DE-90CE-22854055E9D6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.25:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D0F72B91-1F7F-41EB-ABC8-1B50AFEC70EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.26:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "111091B9-CBAE-4FC7-8B97-7D2345BFCB45"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.27:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "54C6D9D3-50B2-4A63-B3D1-C76C70F4443E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.28:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4110AA74-C69D-45BC-A630-9EE3A2036BD6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.29:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F2DEFD05-10EE-4242-B885-FD1B0DF6CAA1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.30:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1CAA1090-C1C7-43A2-BD44-065572D226B6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.31:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2FD92305-91BF-4984-A029-8FA83CBF1A12"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.32:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F9F9A6DB-19BF-4798-879E-9BD4AD5EFF2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.33:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "31EE280F-D76D-478B-ADD6-D5F2C7574A2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.34:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "747314F7-A515-41FF-8095-62A9F05F0DEA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.35:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C1BE9ED0-685B-41F0-A984-D33E7034AEA7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.36:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E3F6AD99-7697-47E5-8301-723C16535C76"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.37:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "07B00AD3-D13C-45B5-A13A-9092D40F4A63"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.38:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "14222EA8-E8ED-4818-ACB4-C6A13643F210"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.39:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A22C28DD-5C99-4722-9093-A1E82A2C2808"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.40:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "93714B71-6331-4F5A-A12A-B4B80CA2FEC3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.41:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "10CD562E-1F06-4779-A29C-4069E3C86B16"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.42:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4D83D507-64AF-4158-97B9-1353E2F8EE46"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.43:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BC5E39EA-C32E-4E87-9A3F-CCB5144F0E68"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.44:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0DF6249D-5AA8-4EA3-A92A-0E492FE5B811"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.45:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CDE7F259-40A2-4866-8EF8-44A9913EC4EF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.46:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "03C20A42-6A77-43D4-80D7-332BB2DF1B66"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.47:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D4CC5DBB-249B-4EED-9F54-E23CB1919ED0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.48:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "088A1BDB-BB1A-46B5-898B-23311DE27CE2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.49:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6CBAA828-F42A-420F-B17E-6FACF6CD483D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.50:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D20664A4-4816-4F57-82BB-F4116FA33A41"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.51:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "64226521-0723-4259-B214-0D2A35CF5FBA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.52:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6ABEEBFE-A8C8-40D4-97D8-F06676E67478"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.53:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "47831D80-33AC-4A13-B92D-3D2CBF215955"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.54:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7ED428C8-E6AB-4BB1-BE7D-543B2A19410F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "52D5DAA1-3632-48D7-A657-4A4C83A119D5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "EB5AE8E0-3C11-4EE1-A599-4D70C6A13F1B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6AD36C3B-3C02-488B-B480-EA091D702CA3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "59BAD272-D4B6-40CE-B5E9-63145E12B638"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5EEB311C-766D-4070-A0BE-9CE4593C8F49"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C185BF59-68E4-49F8-802F-C06FE840FF3D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5C399B31-B8EC-41C4-B6AB-83BABC474374"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3B00AF5F-D4F5-490C-8BF4-2B33EFBF15A7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BA9AEB1D-0AA7-4842-9CF9-91BFD8B58A4F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "09150152-5DEA-4FA2-9163-63EAF4D83DEF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "45E5068A-42BE-478B-8C00-FE23B7837DC1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "023CCFB0-7995-408E-928A-76C5BD9B4924"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "493F615D-DB81-48B3-9E74-C32544A01372"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D2F12925-44F7-4790-8A06-345EB3DCCB71"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7F5BF226-D62F-4F54-B771-EB108FD256FC"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D2EDBFCB-96DA-4A36-873A-3164975BE997"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACDB15BE-BDD2-4210-B224-A520E8DC7D89"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "70D3AD38-CCE7-47E6-8225-C0BFC3F10E4A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CE8BC209-45B9-44D6-A26D-0B570ED5BB19"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6644ED2F-66F3-469D-8233-72FE7321E850"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5AF0E757-9E9C-4022-B32D-3F0E9C815FAC"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3F34978D-6ABE-463E-AB48-21CC55B7D157"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7A4568BB-F5FF-4BBB-9DA3-E66C2BFA2416"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "246CF13F-FDC1-499E-9FC1-5624D54E9E3F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AC66FD43-421B-4223-BA32-EC47B51E1091"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F0F5664B-5AB9-4DE4-99AA-8FD32DBA4A4A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7712376-D776-4814-A041-FBFEAC70ADC3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "103E5ECE-126B-4C93-A3C8-979DCCA4EB5D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "65DEDF02-9239-497C-94DB-DAF80B6B4F6C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8CAAECD8-0C16-40CC-BA8A-97DF38BAF668"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "84D9B3E6-D32D-4E4B-908A-39FAC3D5F618"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8F2DB1EF-B961-4C56-8519-242419B6AB9C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2BDE2351-2B17-4C1A-A625-6C7DE691039A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5426F3F0-CF21-45D4-9071-F8F7865A7619"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "25147E8F-7385-4393-BE21-E3347610F003"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "19C06F50-7C48-4FD6-B0C9-6C9B643742B2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.19:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DA562433-F6F5-46C1-98DE-8309BD940260"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.20:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CD684587-0D7E-411F-B9E3-14CBE4954499"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.21:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5AB9178D-DEEF-4D2C-9347-F553312129C3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.22:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3157A738-20EB-4BE0-A58B-E21DDA64EDC8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.23:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6D70C6B1-2360-48C9-931D-BAED79151DF0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.24:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "29F79896-3EF0-4F53-8EBC-66D811E2C315"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7A0D174-F35C-488B-8577-00EFB7741089"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9EDC5DA5-F2A7-4819-BB9D-258EB9AB7857"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "27B34D78-C0BC-45DC-AD84-F5F13451ED7E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3D3A7EC-774C-423F-BDE1-CDCB9433D87B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B898B95-CF41-4813-8FE7-776BD59A6A9F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9F5E5899-5A3F-49A1-B18C-4C97566B87BA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7897EEC-DE43-485A-B2CD-E8623A6D2C8A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACC16FE2-E94E-45B9-94F0-B6434B21DD2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8C8DAE31-CCA9-450D-90E5-B8F0490FB944"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "52FEB5C9-0C13-4FD6-876C-AAE7ED4E986C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2337F9F3-D26D-4A24-880A-800CD5C16795"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "31F71BA3-5402-448E-9068-EB0DCA1D62EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5418D311-FC7D-4B46-950B-17094775D9D8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AD67323A-8463-4B8F-B370-40C2ACFF4D8B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2BBA4F43-0FD0-4D7D-84A0-37C8E79B9B29"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "71E01CC8-1C29-4C46-8213-B48A2364CE8C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "89FCEBCA-0AFB-42FB-9BB5-CB4EE7C38336"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "62B29838-8B2F-41AA-A654-58255C4D1EC7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "480007D1-0121-4966-9995-9E491848681A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.19:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "162CF84D-0B1B-4920-B2F8-C812CA3DF18B"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174905.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174936.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.fedoraproject.org/pipermail/package-announce/2016-January/175073.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00038.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00041.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00042.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00043.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00044.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00045.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00047.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00048.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2015-2594.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2015-2595.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2015-2596.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2016-0055.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2016-0056.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://rhn.redhat.com/errata/RHSA-2016-0057.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://sourceforge.net/projects/libpng/files/libpng10/1.0.65/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://sourceforge.net/projects/libpng/files/libpng12/1.2.55/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://sourceforge.net/projects/libpng/files/libpng14/1.4.18/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://sourceforge.net/projects/libpng/files/libpng15/1.5.25/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://sourceforge.net/projects/libpng/files/libpng16/1.6.20/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.debian.org/security/2016/dsa-3443",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2015/12/03/6",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/cpujan2016-2367955.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Vendor Advisory"
+              ]
+            },
+            {
+              "url": "http://www.oracle.com/technetwork/topics/security/linuxbulletinoct2015-2719645.html",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.securityfocus.com/bid/78624",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2016:1430",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://kc.mcafee.com/corporate/index?page=content&id=SB10148",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://support.apple.com/HT206167",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Vendor Advisory"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2016-3751",
+          "sourceIdentifier": "security@android.com",
+          "published": "2016-07-11T01:59:51.870",
+          "lastModified": "2016-07-11T17:52:53.463",
+          "vulnStatus": "Analyzed",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Unspecified vulnerability in libpng before 1.6.20, as used in Android 4.x before 4.4.4, 5.0.x before 5.0.2, 5.1.x before 5.1.1, and 6.x before 2016-07-01, allows attackers to gain privileges via a crafted application, as demonstrated by obtaining Signature or SignatureOrSystem access, aka internal bug 23265085."
+            },
+            {
+              "lang": "es",
+              "value": "Vulnerabilidad no especificada en libpng en versiones anteriores a 1.6.20, como es usado en Android 4.x en versiones anteriores a 4.4.4, 5.0.x en versiones anteriores a 5.0.2, 5.1.x en versiones anteriores a 5.1.1 y 6.x en versiones anteriores a 2016-07-01, permite a atacantes obtener privilegios a trav\u00e9s de una aplicaci\u00f3n manipulada, seg\u00fan lo demostrado por la obtenci\u00f3n de acceso Signature o SignatureOrSystem, tambi\u00e9n conocido como error interno 23265085."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV30": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "3.0",
+                  "vectorString": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                  "attackVector": "LOCAL",
+                  "attackComplexity": "LOW",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "REQUIRED",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "HIGH",
+                  "integrityImpact": "HIGH",
+                  "availabilityImpact": "HIGH",
+                  "baseScore": 7.8,
+                  "baseSeverity": "HIGH"
+                },
+                "exploitabilityScore": 1.8,
+                "impactScore": 5.9
+              }
+            ],
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "PARTIAL",
+                  "integrityImpact": "PARTIAL",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 7.5
+                },
+                "baseSeverity": "HIGH",
+                "exploitabilityScore": 10.0,
+                "impactScore": 6.4,
+                "acInsufInfo": true,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "NVD-CWE-noinfo"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "1.6.19",
+                      "matchCriteriaId": "0F63D199-D477-4807-8A4E-A30C55D1FC48"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A39C31E3-75C0-4E92-A6B5-7D67B22E3449"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.0.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BB318EA4-2908-4B91-8DBB-20008FDF528A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.0.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1F4E46A9-B652-47CE-92E8-01021E57724B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.0.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AB9B53C6-AE84-4A45-B83E-8E5CE44F7B93"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.0.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "36DD8E3F-6308-4680-B932-4CBD8E58A7FB"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1DA9F0F7-D592-481E-884C-B1A94E702825"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.1.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6CD857E7-B878-49F9-BDDA-93DDEBB0B42B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FBDABB6C-FFF9-4E79-9EF1-BDC0BBDEA9F1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.2.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A47AB858-36DE-4330-8CAC-1B46C5C8DA80"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.2.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "49413FF7-7910-4F74-B106-C3170612CB2A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A2467F65-A3B7-4E45-A9A5-E5A6EFD99D7B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.3.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A8882E50-7C49-4A99-91F2-DF979CF8BB2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "98C32982-095C-4628-9958-118A3D3A9CAA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.4.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8FC0FCEA-0B3D-43C1-AB62-4F9C880B4CA1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.4.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "EC75ED04-B8C7-4CC0-AC64-AE2D9E0CDF5D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:4.4.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FC13D3EE-CC89-4883-8E3D-3FE25FB8CF42"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:5.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7C4E6353-B77A-464F-B7DE-932704003B33"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:5.0.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "77125688-2CCA-4990-ABB2-551D47CB0CDD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:5.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E7A8EC00-266C-409B-AD43-18E8DFCD6FE3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:5.1.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B846C63A-7261-481E-B4A4-0D8C79E0D8A7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E70C6D8D-C9C3-4D92-8DFC-71F59E068295"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:google:android:6.0.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "691FA41B-C2CE-413F-ABB1-0B22CB322807"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://source.android.com/security/bulletin/2016-07-01.html",
+              "source": "security@android.com",
+              "tags": [
+                "Vendor Advisory"
+              ]
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/07/09/4",
+              "source": "security@android.com"
+            },
+            {
+              "url": "https://android.googlesource.com/platform/external/libpng/+/9d4853418ab2f754c2b63e091c29c5529b8b86ca",
+              "source": "security@android.com"
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2016-10087",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2017-01-30T22:59:00.280",
+          "lastModified": "2021-06-29T15:15:10.070",
+          "vulnStatus": "Modified",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "The png_set_text_2 function in libpng 0.71 before 1.0.67, 1.2.x before 1.2.57, 1.4.x before 1.4.20, 1.5.x before 1.5.28, and 1.6.x before 1.6.27 allows context-dependent attackers to cause a NULL pointer dereference vectors involving loading a text chunk into a png structure, removing the text, and then adding another text chunk to the structure."
+            },
+            {
+              "lang": "es",
+              "value": "La funci\u00f3n png_set_text_2 en libpng 0.71 en versiones anteriores a 1.0.67, 1.2.x en versiones anteriores a 1.2.57, 1.4.x en versiones anteriores a 1.4.20, 1.5.x en versiones anteriores a 1.5.28 y 1.6.x en versiones anteriores a 1.6.27 permite que los atacantes dependientes de contexto provoquen que los vectores de desreferencia de puntero NULL impliquen la carga de un fragmento de texto en una estructura png, la eliminaci\u00f3n del texto y la adici\u00f3n de otro fragmento de texto a la estructura."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV30": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "3.0",
+                  "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "attackVector": "NETWORK",
+                  "attackComplexity": "LOW",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "NONE",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "HIGH",
+                  "baseScore": 7.5,
+                  "baseSeverity": "HIGH"
+                },
+                "exploitabilityScore": 3.9,
+                "impactScore": 3.6
+              }
+            ],
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 5.0
+                },
+                "baseSeverity": "MEDIUM",
+                "exploitabilityScore": 10.0,
+                "impactScore": 2.9,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-476"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E0D85B75-10B4-435F-9617-71ED6D199183"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.71:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C1A2487D-960A-43F5-AA57-7900DE6B4D16"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.81:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DB2620BB-22B6-45FF-98E2-3F9D553E6A76"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.82:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "83EF4CC5-B649-4D13-B513-1CA0AAE100DD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.85:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5EE3FEA9-4BE7-4229-9649-64DAD4AF7791"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.86:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "14B5F6F6-562C-4D96-9556-E4EC084442D2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.87:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "02562AA2-A140-4380-8769-E4837B4E0952"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.88:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C808CE91-D85B-49C9-8A4E-251F2250A4FE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.89:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8724AE78-9BF9-4882-8596-64A89008A5EE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.89c:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9427E9C7-0B51-4066-9428-BE48D8BAD65E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.90:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4EF125DE-6BD1-4640-9710-6EE69CD8A871"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.95:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DE45B563-07B8-4F4E-80B4-C73216DF7295"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.96:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0303A619-21BE-49DD-8C08-F04DFB31FC73"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.97:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "197C2166-FCB7-467B-ABF1-E30E7DBD8816"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.98:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "663DD631-661D-48FA-A090-A18536BA284A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1AEDED41-716C-4D7F-9D18-FF4672F51C67"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99a:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A15C127E-ED56-42D8-99F2-D07929487431"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99b:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DE555A15-8A1F-4133-9823-F915CE7A9D3D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99c:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "93EDA6FA-A9F0-4007-881A-5C7A5C490739"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99d:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "332E032F-511F-493B-86C4-2AFB0BC18F44"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99e:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "795F6638-88FD-4314-8FCB-D485B455BBEF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99f:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A5C697AC-5E3D-4306-B702-8FAB46DEDB81"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99g:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "82EB41DC-CF89-4847-BF49-A50881490A49"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:0.99h:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "29AA9DB8-F638-4447-A7FC-2F817F23B80D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.00:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DF99202B-9891-4231-B8E3-D82DFC947BBF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6D6B3DAF-DF99-48B2-8E7C-BE8E043D4C24"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.0a:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9C8F61D9-B7CA-40BB-8D7F-7DE0B4B2566F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.0b:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D524E8E7-DAEB-4CC3-907E-8D2E835D57A5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "29050958-EFD8-4A79-9022-EF72AAD4EDB3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.1a:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "584F6704-39E3-4D19-975D-ACD791DA1101"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.1b:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "03F745C8-CCF4-4DBF-B978-BCB710915888"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.1c:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7F91B7DB-91B0-47E5-B1F9-30CD7BFBAE93"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.1d:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4784AFCE-EDA5-4AB1-B66F-441132E0BD9F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.1e:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B72B58C7-78F1-451B-A416-0C4069D1480A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B3CB33B1-71B2-4235-A2C1-FCAEA9844A6A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.2a:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8D7E887E-2D28-441E-A945-EE65375004BC"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "436F8C71-1780-4DC6-937B-8F1F51C7453D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.3a:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "16F93C13-4AF0-4F10-9AAA-CC6BFD5CC11F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.3b:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6DBAABD9-68DA-449F-97D9-2110383C7BF3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.3d:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "73498D20-EAB1-4EAE-9FBA-DD91477D39FE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8CE9F50F-CAE1-49F6-BCF1-0E96155101F7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.4a:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3113D349-2A78-47C7-92A1-F6B161A935F7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.4b:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FF879FFC-E50B-4B63-9ED8-46732DAB1F8F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.4c:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CF6371CA-6A05-41E9-A2F1-57E8776AF977"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.4d:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CF454D5D-F9F4-4145-9D6A-00028079BFBE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.4e:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FE23E138-D40B-41CF-BB15-9DC859343597"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.4f:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DC318698-1D3D-4803-B687-37A993382099"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0BF2C6F3-BFE7-4234-9975-DE7FCDA26A46"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5a:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "77986D51-C39F-49C8-8D19-E785BE048C39"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5b:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D74D2A43-CD5D-4E78-B519-05AF7B43F940"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5c:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5A25230A-01B4-488B-BEE7-FB417D1FA7C7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5d:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "28AAA435-65BC-4D90-BF42-BF07BE4A30A7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5e:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0BCF81F9-9A58-4397-AD5F-DC679391C6D4"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5f:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C288D5D9-D45E-4576-B511-C54F817C0D69"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5g:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "784C3861-491C-4E7C-8B1E-48C3DE55ABBE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5h:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4042A89E-D9F8-415C-A0C2-2D234D3BF1D8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5i:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3EC6238C-0C86-4A90-9835-C1AF42A259AA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5j:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8F135843-9B08-4A6A-A4DA-53A9F4D30D97"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5k:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "13CDBDA0-160E-4407-8668-A73E6B288267"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5l:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "58BE9D06-4384-4E14-B0EE-78FA5884DF32"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5m:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0A13440D-E411-46C9-B965-A8B5E7EC2A0B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5n:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "62ABF3AA-1763-408F-BC8C-F21A2A4D8446"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5o:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7016EE48-2980-4135-A893-3F64484E4DBD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5p:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "15378A0E-B754-46A5-874A-369D903E0DD5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5q:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "96E2002E-180D-4AB9-9575-B117B2E78295"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5r:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "122A09C4-EA58-48D2-ACE6-CEF44B027E9B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5s:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5FCCC376-2DF5-4F09-8DB7-5E9834A42EBE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5t:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1426808E-BEBE-430E-8536-4957AFA338EE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5u:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "50E21EFB-EA8A-47FB-BF1C-85E959827839"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.5v:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "528F26EF-33C7-48D3-AE6A-2B25D1DAB070"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5B79DC5F-5062-4031-BA11-746EE3C8E1CE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6d:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2FEEA93F-6ECE-455C-889A-3C9B960DBB06"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6e:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C22EB70E-CD5D-4ECD-9EC4-483EC8282458"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6f:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C1E85239-F2CD-47D5-BCF4-B351C83424AF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6g:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "07FF0DB3-0A02-43E8-8AC3-19CBCC6908AF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6h:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FC046FEF-14BD-42A0-8EA8-B1A7EAE5A357"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6i:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FB131026-817E-4302-8610-DCE0802956A8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.6j:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B62C2841-737B-4D0A-BD41-C5FF0172CB6D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CAD6DE25-8B2F-4DB9-9969-8AAC23BC0AE5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "35F2B503-1516-465D-A558-9932BDB3457D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BA94EAAA-A4D2-4E36-BC69-BBE9644FE970"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3A7C96C-8FBB-42B4-937E-3321C939CC87"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "94084356-D39B-41B2-AC24-0ADAD0BF5988"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "086C6335-7872-46A7-AEB1-9BE5AE5A788C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FF8233B1-04A0-4E25-97EE-CF466B48A12E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FA714E7E-05EF-4598-9324-887BC66C675E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C5CF3B73-D3B9-4D76-B411-C837BCE0806E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D1752D91-3468-4E22-B60F-6789B3CBD7B4"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F433AA7E-A780-4D45-AD1A-5A4CE1F3FCD1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "93E210A7-489B-4EA7-A840-599523157DD3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.19:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B37565FA-72F5-4063-8D7A-97BC269F020B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.20:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BC8FA821-818E-4BC7-834B-94EB5C042390"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.21:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3FBF3D3-95A6-4869-8A69-F0E5ECA40220"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.22:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D07785D0-E995-4208-AB8C-43B320D291F9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.23:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "152DDD6E-CF56-4E1C-BE4D-C7BC0FD9B08C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.24:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "19BBA666-4473-4C6D-BF48-34EF3F09AD7D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.25:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7DDF6CC-7997-47E7-96D3-8DC10F1D17F0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.26:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A1926DD0-0A9B-4F9D-BB4F-AC7AB0B3F0E4"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.27:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2763A6C7-DBBA-4E2A-917C-B6FF524B9891"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.28:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E7DECDF8-7742-4D58-99FA-100A01748B05"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.29:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CA4FD3B1-3A68-4122-AA50-31BFC6C50408"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.30:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "45790331-CE26-457F-8649-F027703E73EE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.31:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B0BFE2D-5C7B-42E0-B783-8C5907CA8635"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.32:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7CD993C1-70B6-4ACB-B958-94E7EF973A8B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.33:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C085686C-A0AA-4F56-9E7D-B5CB24B890D9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.34:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D02A5197-06B9-469E-9817-45BB23324042"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.35:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5EB6BE37-E564-4E42-BE39-36DD301C37A4"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.37:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "314209F2-E0A0-4045-8108-8E7215312442"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.38:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "11A8ECBB-7E50-4447-88E2-893C1466C251"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.39:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8B8F24A5-F5C3-495F-9AF0-2EE836E0147A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.40:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "46DE2DE3-F081-4B80-A4DA-C5AB27B3CA8C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.41:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "71EF1D77-7838-47DF-B6A2-DBBAC0058FED"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.42:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "76BA4FEA-FEB4-47A9-9DFF-A233CEE03D04"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.43:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "60DB5A63-E89E-48AB-A846-107EBEC71D67"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.44:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2181FEEB-D07E-490C-9953-3490D87B63A9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.45:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "36DC41DD-A291-4ECE-84B9-574828AA2A80"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.46:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "015D1E36-17A1-4413-B1FB-5DF4C36712BD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.47:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F64CE8F2-22B1-43F8-8934-CBCD2EFBA85D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.48:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CEB15BE8-1B88-4117-AF14-3AA2B54DB323"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.50:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A2CB2728-4CC7-46EA-809B-450A9BB9F884"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.51:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "96638963-D264-49AD-9B77-497C3DA23DFA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.52:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "88544BBE-29A1-4622-B3E6-FA4B891A9B5B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.53:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DD658D98-9A4D-4DC2-A935-BB3BF0E0FB2B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.54:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FFF819AF-AC11-4BD9-A070-572836A65FB7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.55:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2EEAC62D-BF2B-40DF-9428-FFBF7CA09471"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.56:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "36327723-F953-4BD3-A525-930DDCF7931D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.57:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7D482811-2EF1-47AE-A41C-7532AC6DEF31"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.58:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2D0EE98D-0596-4147-9EC4-F3616BF2B901"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.59:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "62F15027-0E80-48B7-9ECD-9E7228F0E81B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.60:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "99904D7E-0046-4481-99B6-01710D4FC848"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.61:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8AB33B4E-E69A-4002-816C-24CCD49682F2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.62:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "42A4FAF1-4B81-47C4-BFB7-6052524A2DA8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.63:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "686A50C3-93E1-4C3F-8089-322BE26E6317"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.64:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BBD67FEF-E6D3-449B-B2E9-14A69AD8E923"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.65:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BD8B4549-007C-4572-86D9-F51A7B3FC586"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.0.66:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "27E469B0-BF89-45AD-96BB-C7E2E5D08221"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C036011A-9AE1-423C-8B73-188B9BA20FEE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "663C6EE5-5B5E-4C0F-9E7F-D0E1DA9AF9EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "42056C63-69A7-43CF-828C-0C3E365702D9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5B6A39A3-7F86-4DC3-B248-859630AFB9A3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "005C2DA4-D00E-4206-851E-9226D66B5F2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "857B664A-C6F9-45E3-93EA-C0F53CEF5C46"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9A3E3BF3-4376-4692-A515-A7B6593F28F1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3B1AC712-110D-458F-B650-930C6D45CA53"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7F848FA5-9682-454F-A9DE-671C4401F15F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C4B83678-98A1-440E-950C-4A27995C7294"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "95EABD7D-1F18-4FA5-BAA9-F8D69129E531"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3988FA1B-18D9-46AA-87BA-A6B01D4F4B25"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.20:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "09E2B608-6C70-446F-A3A7-369048D99855"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.21:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5AA00AE0-F447-4361-AA37-0C98BDE491E3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.22:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "21DACE94-FBDC-4A3D-8DD6-E62D18F5EE7A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.24:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ECEB8F61-195E-41DE-90CE-22854055E9D6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.25:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D0F72B91-1F7F-41EB-ABC8-1B50AFEC70EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.26:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "111091B9-CBAE-4FC7-8B97-7D2345BFCB45"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.27:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "54C6D9D3-50B2-4A63-B3D1-C76C70F4443E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.29:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F2DEFD05-10EE-4242-B885-FD1B0DF6CAA1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.32:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F9F9A6DB-19BF-4798-879E-9BD4AD5EFF2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.33:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "31EE280F-D76D-478B-ADD6-D5F2C7574A2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.35:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C1BE9ED0-685B-41F0-A984-D33E7034AEA7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.37:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "07B00AD3-D13C-45B5-A13A-9092D40F4A63"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.38:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "14222EA8-E8ED-4818-ACB4-C6A13643F210"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.39:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A22C28DD-5C99-4722-9093-A1E82A2C2808"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.41:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "10CD562E-1F06-4779-A29C-4069E3C86B16"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.42:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4D83D507-64AF-4158-97B9-1353E2F8EE46"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.44:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0DF6249D-5AA8-4EA3-A92A-0E492FE5B811"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.45:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CDE7F259-40A2-4866-8EF8-44A9913EC4EF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.46:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "03C20A42-6A77-43D4-80D7-332BB2DF1B66"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.47:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D4CC5DBB-249B-4EED-9F54-E23CB1919ED0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.50:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D20664A4-4816-4F57-82BB-F4116FA33A41"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.51:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "64226521-0723-4259-B214-0D2A35CF5FBA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.52:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6ABEEBFE-A8C8-40D4-97D8-F06676E67478"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.53:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "47831D80-33AC-4A13-B92D-3D2CBF215955"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.54:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7ED428C8-E6AB-4BB1-BE7D-543B2A19410F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.55:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "00EFBF77-B771-4A52-B4FF-6346F4B69968"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.56:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7568641-1AB0-4158-A34F-F9A36169C1E4"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "52D5DAA1-3632-48D7-A657-4A4C83A119D5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "EB5AE8E0-3C11-4EE1-A599-4D70C6A13F1B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6AD36C3B-3C02-488B-B480-EA091D702CA3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "59BAD272-D4B6-40CE-B5E9-63145E12B638"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5EEB311C-766D-4070-A0BE-9CE4593C8F49"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C185BF59-68E4-49F8-802F-C06FE840FF3D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5C399B31-B8EC-41C4-B6AB-83BABC474374"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3B00AF5F-D4F5-490C-8BF4-2B33EFBF15A7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "BA9AEB1D-0AA7-4842-9CF9-91BFD8B58A4F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "09150152-5DEA-4FA2-9163-63EAF4D83DEF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "45E5068A-42BE-478B-8C00-FE23B7837DC1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "023CCFB0-7995-408E-928A-76C5BD9B4924"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "493F615D-DB81-48B3-9E74-C32544A01372"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D2F12925-44F7-4790-8A06-345EB3DCCB71"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7F5BF226-D62F-4F54-B771-EB108FD256FC"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D2EDBFCB-96DA-4A36-873A-3164975BE997"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACDB15BE-BDD2-4210-B224-A520E8DC7D89"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "70D3AD38-CCE7-47E6-8225-C0BFC3F10E4A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4D176C8F-C91F-47C8-AEC8-377324944421"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.4.19:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "37BF798D-391A-4207-BBDB-23A7156F66B0"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.55:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "00EFBF77-B771-4A52-B4FF-6346F4B69968"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3E2ECD2B-A847-42FB-B5B3-DAFC40B2E513"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CE8BC209-45B9-44D6-A26D-0B570ED5BB19"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6644ED2F-66F3-469D-8233-72FE7321E850"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5AF0E757-9E9C-4022-B32D-3F0E9C815FAC"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3F34978D-6ABE-463E-AB48-21CC55B7D157"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7A4568BB-F5FF-4BBB-9DA3-E66C2BFA2416"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "246CF13F-FDC1-499E-9FC1-5624D54E9E3F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AC66FD43-421B-4223-BA32-EC47B51E1091"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F0F5664B-5AB9-4DE4-99AA-8FD32DBA4A4A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7712376-D776-4814-A041-FBFEAC70ADC3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "103E5ECE-126B-4C93-A3C8-979DCCA4EB5D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "65DEDF02-9239-497C-94DB-DAF80B6B4F6C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8CAAECD8-0C16-40CC-BA8A-97DF38BAF668"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "84D9B3E6-D32D-4E4B-908A-39FAC3D5F618"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8F2DB1EF-B961-4C56-8519-242419B6AB9C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2BDE2351-2B17-4C1A-A625-6C7DE691039A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5426F3F0-CF21-45D4-9071-F8F7865A7619"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "25147E8F-7385-4393-BE21-E3347610F003"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "19C06F50-7C48-4FD6-B0C9-6C9B643742B2"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.19:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DA562433-F6F5-46C1-98DE-8309BD940260"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.20:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CD684587-0D7E-411F-B9E3-14CBE4954499"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.21:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5AB9178D-DEEF-4D2C-9347-F553312129C3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.22:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3157A738-20EB-4BE0-A58B-E21DDA64EDC8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.23:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6D70C6B1-2360-48C9-931D-BAED79151DF0"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.24:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "29F79896-3EF0-4F53-8EBC-66D811E2C315"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.25:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E2C8AE4F-0473-4B52-8DB4-31022057FD71"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.26:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "19EF6CC6-7C8D-4199-AB4C-416DEFC203C7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.5.27:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "78CD6AD1-5C8E-4AF4-92CC-CC888479B50C"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.2.55:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "00EFBF77-B771-4A52-B4FF-6346F4B69968"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B7A0D174-F35C-488B-8577-00EFB7741089"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9EDC5DA5-F2A7-4819-BB9D-258EB9AB7857"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "27B34D78-C0BC-45DC-AD84-F5F13451ED7E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F3D3A7EC-774C-423F-BDE1-CDCB9433D87B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.4:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0B898B95-CF41-4813-8FE7-776BD59A6A9F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.5:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9F5E5899-5A3F-49A1-B18C-4C97566B87BA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.6:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C7897EEC-DE43-485A-B2CD-E8623A6D2C8A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.7:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "ACC16FE2-E94E-45B9-94F0-B6434B21DD2F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8C8DAE31-CCA9-450D-90E5-B8F0490FB944"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.9:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "52FEB5C9-0C13-4FD6-876C-AAE7ED4E986C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2337F9F3-D26D-4A24-880A-800CD5C16795"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.11:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "31F71BA3-5402-448E-9068-EB0DCA1D62EA"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.12:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5418D311-FC7D-4B46-950B-17094775D9D8"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.13:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "AD67323A-8463-4B8F-B370-40C2ACFF4D8B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.14:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2BBA4F43-0FD0-4D7D-84A0-37C8E79B9B29"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.15:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "71E01CC8-1C29-4C46-8213-B48A2364CE8C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.16:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "89FCEBCA-0AFB-42FB-9BB5-CB4EE7C38336"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.17:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "62B29838-8B2F-41AA-A654-58255C4D1EC7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.18:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "480007D1-0121-4966-9995-9E491848681A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.19:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "162CF84D-0B1B-4920-B2F8-C812CA3DF18B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.20:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "21F23388-AFDC-4D1B-A7C1-54932F756867"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.21:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "323FFAF9-7A94-4210-BB0B-5A4A48AA39F3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.22:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "4BDCAB06-4B2E-4906-8212-C5D96B4973CD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.23:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F6F7BD7C-5A00-4E08-A60B-9D73ECD6BC93"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.24:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2D4073D2-BCC9-45CE-AF91-849E28F8ACEE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.25:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FE88B539-402F-40BB-A3D9-910E551037CD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:1.6.26:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E9413615-7505-451D-989A-36724A38E3F0"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/12/29/2",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/12/30/4",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.securityfocus.com/bid/95157",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory",
+                "VDB Entry"
+              ]
+            },
+            {
+              "url": "https://lists.apache.org/thread.html/r58af02e294bd07f487e2c64ffc0a29b837db5600e33b6e698b9d696b@%3Cissues.bookkeeper.apache.org%3E",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://lists.apache.org/thread.html/rf4c02775860db415b4955778a131c2795223f61cb8c6a450893651e4@%3Cissues.bookkeeper.apache.org%3E",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://security.gentoo.org/glsa/201701-74",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://usn.ubuntu.com/3712-1/",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://usn.ubuntu.com/3712-2/",
+              "source": "cve@mitre.org"
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2019-7317",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2019-02-04T08:29:00.447",
+          "lastModified": "2022-05-23T15:02:40.667",
+          "vulnStatus": "Analyzed",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "png_image_free in png.c in libpng 1.6.x before 1.6.37 has a use-after-free because png_image_free_function is called under png_safe_execute."
+            },
+            {
+              "lang": "es",
+              "value": "La funci\u00f3n png_image_free en el archivo png.c en libpng versiones 1.6.x anteriores a 1.6.37, presenta un uso de la memoria previamente liberada porque la funci\u00f3n png_image_free_function es llamada bajo png_safe_execute."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV31": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "3.1",
+                  "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                  "attackVector": "NETWORK",
+                  "attackComplexity": "HIGH",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "REQUIRED",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "HIGH",
+                  "baseScore": 5.3,
+                  "baseSeverity": "MEDIUM"
+                },
+                "exploitabilityScore": 1.6,
+                "impactScore": 3.6
+              }
+            ],
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:H/Au:N/C:N/I:N/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "HIGH",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 2.6
+                },
+                "baseSeverity": "LOW",
+                "exploitabilityScore": 4.9,
+                "impactScore": 2.9,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": true
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-416"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionStartIncluding": "1.6.0",
+                      "versionEndExcluding": "1.6.37",
+                      "matchCriteriaId": "078AA00A-515F-493E-A53E-FE1937FA8018"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:debian:debian_linux:8.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C11E6FB0-C8C0-4527-9AA0-CB9B316F8F43"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:debian:debian_linux:9.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "DEECE5FC-CACF-4496-A3E7-164736409252"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:16.04:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "712507AC-DAB8-4FFE-9426-08282919411F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:16.04:*:*:*:esm:*:*:*",
+                      "matchCriteriaId": "7A5301BF-1402-4BE0-A0F8-69FBE79BC6D6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:18.04:*:*:*:lts:*:*:*",
+                      "matchCriteriaId": "23A7C53F-B80F-4E6A-AFA9-58EEA84BE11D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:18.10:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "07C312A0-CD2C-4B9C-B064-6409B25C278F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:canonical:ubuntu_linux:19.04:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CD783B0C-9246-47D9-A937-6144FE8BFF0F"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:hyperion_infrastructure_technology:11.2.6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "9C21D62F-F3DD-4E9E-B644-07CCC49F3D53"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:java_se:7u221:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "3999BDC1-BA77-4DBE-8041-D993BA9FF04D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:java_se:8u212:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "C2B2677D-6B48-45A2-8567-AB6DB9FF1B45"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jdk:11.0.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "EAF3DD5E-1A96-4285-84BA-EB5E31EF2516"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:jdk:12.0.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "32318CC6-B8C4-4429-BB8B-134DC202A27E"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:oracle:mysql:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "8.0.23",
+                      "matchCriteriaId": "0185E85D-2C64-4D77-BC1D-A20165D5078E"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:hp:xp7_command_view:*:*:*:*:advanced:*:*:*",
+                      "versionEndExcluding": "8.7.0-00",
+                      "matchCriteriaId": "6B07BDE2-FE50-4C0E-9C73-6AA6C1D6C060"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:hpe:xp7_command_view_advanced_edition_suite:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "8.7.0-00",
+                      "matchCriteriaId": "BE33C1F1-DED8-424C-8942-E1A48A9EBA05"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:mozilla:firefox_esr:-:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5EF0CD8F-9F8A-474E-8A01-298736416711"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:mozilla:thunderbird:-:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FF583CDC-DE9E-45AB-9861-CB203BFA8862"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:opensuse:leap:15.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F1E78106-58E6-4D59-990F-75DA575BFAD9"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:opensuse:leap:15.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B620311B-34A3-48A6-82DF-6F078D7A4493"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:opensuse:leap:42.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5F65DAB0-3DAD-49FF-BC73-3581CC3D5BF3"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:opensuse:package_hub:-:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "7B8B0B75-0DF2-4B5C-BC81-2F8E172AEE4E"
+                    }
+                  ]
+                },
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": false,
+                      "criteria": "cpe:2.3:o:suse:linux_enterprise:12.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "CBC8B78D-1131-4F21-919D-8AC79A410FB9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:active_iq_unified_manager:*:*:*:*:*:vmware_vsphere:*:*",
+                      "versionEndExcluding": "9.6",
+                      "matchCriteriaId": "60429DC5-C403-41D1-9DDF-30782D012DF6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:active_iq_unified_manager:*:*:*:*:*:windows:*:*",
+                      "versionEndExcluding": "9.6",
+                      "matchCriteriaId": "95571D2E-5C83-484C-A44F-AC36972C67D1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:active_iq_unified_manager:9.6:*:*:*:*:vmware_vsphere:*:*",
+                      "matchCriteriaId": "3AF659DD-C4AE-4DDC-B50B-327A717EFC74"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:active_iq_unified_manager:9.6:*:*:*:*:windows:*:*",
+                      "matchCriteriaId": "40E21C6E-AEDF-43E8-AA80-629C77D24DF7"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:cloud_backup:-:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "5C2089EE-5D7F-47EC-8EA5-0F69790564C4"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:e-series_santricity_management:-:*:*:*:*:vcenter:*:*",
+                      "matchCriteriaId": "BADA4949-F766-4092-A6BC-1B85B5FB60FF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:e-series_santricity_storage_manager:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "11.53",
+                      "matchCriteriaId": "1FC01AF8-4A4B-4FC4-B07F-1193FEFF5A47"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:e-series_santricity_unified_manager:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "3.2",
+                      "matchCriteriaId": "8557ED41-5B30-47C8-A556-6C1F6E8E227B"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:e-series_santricity_web_services:*:*:*:*:*:web_services_proxy:*:*",
+                      "versionEndExcluding": "4.0",
+                      "matchCriteriaId": "C7E42333-853D-4938-90EB-2A6653476357"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:oncommand_insight:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "7.3.9",
+                      "matchCriteriaId": "82DC1F62-0DA2-4BB8-9AFE-4BC4366205F5"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:oncommand_workflow_automation:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "5.1",
+                      "matchCriteriaId": "2798786F-A818-4C52-BC20-0A69DB49D16A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:plug-in_for_symantec_netbackup:-:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "FFE0A9D2-9A49-4BF6-BC6F-8249162D8334"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:snapmanager:*:*:*:*:*:oracle:*:*",
+                      "versionEndExcluding": "3.4.2",
+                      "matchCriteriaId": "41436638-0B88-4823-8208-81C01F2CA6A6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:snapmanager:*:*:*:*:*:sap:*:*",
+                      "versionEndExcluding": "3.4.2",
+                      "matchCriteriaId": "910F5303-1F70-44E3-A951-567447BC46FF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:snapmanager:3.4.2:p1:*:*:*:oracle:*:*",
+                      "matchCriteriaId": "1925AC26-45D4-46D5-ACDD-91E5A90977B6"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:snapmanager:3.4.2:p1:*:*:*:sap:*:*",
+                      "matchCriteriaId": "9DC6435A-8369-4D18-A6EE-84E73D6AA84D"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:steelstore:-:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "0DF5449D-22D2-48B4-8F50-57B43DCB15B9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "operator": "AND",
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:redhat:satellite:5.8:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F4F86C3C-B99C-44C6-97D7-163DC3F59687"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "2F6AB192-9D7D-4A9A-8995-E53A9DE9EAFC"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "142AD0DD-4CF3-4D74-9442-459CE3347E3A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux:8.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F4CFF558-3C47-480D-A2F0-BABF26042943"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_desktop:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "EE249E1B-A1FD-4E08-AA71-A0E1F10FFE97"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_desktop:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "33C068A4-3780-4EAB-A937-6082DF847564"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_ibm_z_systems:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D5291B60-AB52-4830-8E1A-8048A471902C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_ibm_z_systems:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "566507B6-AC95-47F7-A3FB-C6F414E45F51"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_ibm_z_systems:8.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "87C21FE1-EA5C-498F-9C6C-D05F91A88217"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_power_big_endian:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "25C8B513-76C1-4184-A253-CB32F04A05BE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_power_big_endian:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "1CDCFF34-6F1D-45A1-BE37-6A0E17B04801"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_power_little_endian:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "B4A684C7-88FD-43C4-9BDB-AE337FCBD0AB"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_power_little_endian:8.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "47811209-5CE5-4375-8391-B0A7F6A0E420"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_scientific_computing:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "634C23AC-AC9C-43F4-BED8-1C720816D5E3"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_for_scientific_computing:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "37CE1DC7-72C5-483C-8921-0B462C8284D1"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_workstation:6.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "E5ED5807-55B7-47C5-97A6-03233F4FBC3A"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:o:redhat:enterprise_linux_workstation:7.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "825ECE2D-E232-46E0-A047-074B34DB1E97"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2019-06/msg00002.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2019-06/msg00029.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2019-06/msg00084.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2019-08/msg00038.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-security-announce/2019-08/msg00044.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://packetstormsecurity.com/files/152561/Slackware-Security-Advisory-libpng-Updates.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "VDB Entry",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "http://www.securityfocus.com/bid/108098",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Not Applicable",
+                "Third Party Advisory",
+                "VDB Entry"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:1265",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:1267",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:1269",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:1308",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:1309",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:1310",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:2494",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:2495",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:2585",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:2590",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:2592",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://access.redhat.com/errata/RHSA-2019:2737",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=12803",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Issue Tracking",
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://github.com/glennrp/libpng/issues/275",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Exploit",
+                "Issue Tracking",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://lists.debian.org/debian-lts-announce/2019/05/msg00032.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://lists.debian.org/debian-lts-announce/2019/05/msg00038.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://seclists.org/bugtraq/2019/Apr/30",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Issue Tracking",
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://seclists.org/bugtraq/2019/Apr/36",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Issue Tracking",
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://seclists.org/bugtraq/2019/May/56",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Issue Tracking",
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://seclists.org/bugtraq/2019/May/59",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Issue Tracking",
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://seclists.org/bugtraq/2019/May/67",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Issue Tracking",
+                "Mailing List",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://security.gentoo.org/glsa/201908-02",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://security.netapp.com/advisory/ntap-20190719-0005/",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://support.hpe.com/hpsc/doc/public/display?docLocale=en_US&docId=emr_na-hpesbst03977en_us",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://usn.ubuntu.com/3962-1/",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://usn.ubuntu.com/3991-1/",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://usn.ubuntu.com/3997-1/",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://usn.ubuntu.com/4080-1/",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://usn.ubuntu.com/4083-1/",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://www.debian.org/security/2019/dsa-4435",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://www.debian.org/security/2019/dsa-4448",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://www.debian.org/security/2019/dsa-4451",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://www.oracle.com/security-alerts/cpuApr2021.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://www.oracle.com/security-alerts/cpuoct2021.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://www.oracle.com/technetwork/security-advisory/cpujul2019-5072835.html",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Patch",
+                "Third Party Advisory"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "cve": {
+          "id": "CVE-2017-12652",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2019-07-10T15:15:10.993",
+          "lastModified": "2022-05-12T20:13:15.280",
+          "vulnStatus": "Analyzed",
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "libpng before 1.6.32 does not properly check the length of chunks against the user limit."
+            },
+            {
+              "lang": "es",
+              "value": "En libpng anterior a versi\u00f3n 1.6.32, no comprueba apropiadamente la longitud de fragmentos en comparaci\u00f3n con el l\u00edmite del usuario."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV31": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "3.1",
+                  "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                  "attackVector": "NETWORK",
+                  "attackComplexity": "LOW",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "NONE",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "HIGH",
+                  "integrityImpact": "HIGH",
+                  "availabilityImpact": "HIGH",
+                  "baseScore": 9.8,
+                  "baseSeverity": "CRITICAL"
+                },
+                "exploitabilityScore": 3.9,
+                "impactScore": 5.9
+              }
+            ],
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "PARTIAL",
+                  "integrityImpact": "PARTIAL",
+                  "availabilityImpact": "PARTIAL",
+                  "baseScore": 7.5
+                },
+                "baseSeverity": "HIGH",
+                "exploitabilityScore": 10.0,
+                "impactScore": 6.4,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-20"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:libpng:libpng:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "1.6.32",
+                      "matchCriteriaId": "E7CB8F9C-2796-478B-898D-74AD09F9EC4F"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:netapp:active_iq_unified_manager:-:*:*:*:*:vsphere:*:*",
+                      "matchCriteriaId": "E8F29E19-3A64-4426-A2AA-F169440267CC"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://www.securityfocus.com/bid/109269",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Broken Link",
+                "Third Party Advisory",
+                "VDB Entry"
+              ]
+            },
+            {
+              "url": "https://github.com/glennrp/libpng/blob/df7e9dae0c4aac63d55361e35709c864fa1b8363/ANNOUNCE",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Release Notes",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://security.netapp.com/advisory/ntap-20220506-0003/",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://support.f5.com/csp/article/K88124225",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://support.f5.com/csp/article/K88124225?utm_source=f5support&amp;utm_medium=RSS",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Third Party Advisory"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
