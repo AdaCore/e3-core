@@ -73,12 +73,6 @@ All entry points must instanciate `e3.main.Main` to parse their options.
 
 Exceptions raised by `e3` should derived from `e3.error.E3Error`.
 
-### hasattr()
-
-Don't use hasattr() - this swallows exceptions and makes debugging much
-harder. Use getattr() instead.
-
-
 The `e3` namespace
 ------------------
 
