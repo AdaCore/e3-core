@@ -3,7 +3,7 @@
 
 * Nothing
 
-# Version 22.3.0 (2023-03-09) *NOT RELEASED YET*
+# Version 22.3.0 (2023-03-09)
 
 * Add support for M1/M2 MacOS (aarch64-darwin platform)
 * e3.diff.patch raise an exception if there is no file to patch
