@@ -26,6 +26,7 @@ and sharing the same namespace: `e3`.
 - *archive*: support for reading and writing tar and zip archives
 - *collection*: generic collections, e.g. an implementation of Direct Acyclic
   Graphs
+- *cve*: small interface to NVD API to query CVE impacting a CPE
 - *decorator*: Python decorators, e.g. a memoize decorator
 - *diff*: functions to compute a diff or apply it
 - *electrolyt*: support for parsing build plans

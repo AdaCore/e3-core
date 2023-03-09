@@ -1,7 +1,15 @@
 
-# Version 22.3.0 (2022-??-??) *NOT RELEASED YET*
+# Version 22.4.0 (2023-??-??) *NOT RELEASED YET*
 
 * Nothing
+
+# Version 22.3.0 (2023-03-09) *NOT RELEASED YET*
+
+* Add support for M1/M2 MacOS (aarch64-darwin platform)
+* e3.diff.patch raise an exception if there is no file to patch
+* Fix issue where anod download deps are not tracked
+* Add a SPDX document generator
+* Add an interface to NVD API
 
 # Version 22.2.0 (2022-08-31)
 
