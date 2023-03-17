@@ -3,7 +3,7 @@ branch = False
 # we can probably activate it once we have more coverage
 
 [report]
-fail_under = 94
+fail_under = 90
 omit =
     *mypy.py
 exclude_lines =

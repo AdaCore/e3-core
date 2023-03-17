@@ -3,6 +3,10 @@
 
 * Nothing
 
+# Version 22.3.1 (2023-03-17)
+
+* Add rlimit binary for aarch64-darwin
+
 # Version 22.3.0 (2023-03-09)
 
 * Add support for M1/M2 MacOS (aarch64-darwin platform)
