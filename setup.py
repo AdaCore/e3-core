@@ -10,6 +10,7 @@ install_requires = [
     "requests_toolbelt",
     "tqdm",
     "stevedore>1.20.0",
+    "setuptools",
 ]
 
 extras_require = {
@@ -18,7 +19,7 @@ extras_require = {
         # There are some backward incompatible checks in typeguard 3.x
         "typeguard<3.0.0",
     ],
-    "test": ["pytest-socket"],
+    "test": ["mock", "pytest-html", "pytest-socket", "ansi2html", "httpretty"],
 }
 
 for p in ("darwin", "linux", "linux2", "win32"):
