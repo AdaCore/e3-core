@@ -350,7 +350,7 @@ class Package:
                     if str(v).startswith(str(target_version) + ".")
                 ]
             else:
-                raise PyPIError("Unknown constraint operator {spec[0]}")
+                raise PyPIError(f"Unknown constraint operator {spec[0]}")
 
         if len(self.versions) != current_length:
             logging.debug(
@@ -358,7 +358,7 @@ class Package:
             )
         if len(self.versions) == 0:
             logger.critical(f"Cannot satisfy constraint {requirement}")
-            raise PyPIError("Cannot satisfy constraint {str(requirement)}")
+            raise PyPIError(f"Cannot satisfy constraint {str(requirement)}")
 
     def __str__(self) -> str:
         return f"{self.name}=={self.latest_version}"
