@@ -187,7 +187,7 @@ class GitRepository:
         :raise: GitError
         """
         p = self.git_cmd(["describe", "--always", commit], output=PIPE)
-        return p.out.strip()
+        return p.out.strip()  # type: ignore
 
     def write_local_diff(self, stream: IO[str]) -> None:
         """Write local changes in the working tree in stream.
@@ -371,4 +371,4 @@ class GitRepository:
         :raise: GitError
         """
         p = self.git_cmd(["rev-parse", "--revs-only", refspec], output=PIPE, error=PIPE)
-        return p.out.strip()
+        return p.out.strip()  # type: ignore

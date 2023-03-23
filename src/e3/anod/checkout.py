@@ -167,11 +167,14 @@ class CheckoutManager:
                         ],
                         output=PIPE,
                     ).out
-                    ignore_list = [
-                        f"/{f.strip().rstrip('/')}"
-                        for f in ignore_list_lines.splitlines()
-                    ]
-                    logger.debug("Ignore in external: %s", ignore_list)
+                    if ignore_list_lines is None:
+                        ignore_list = []
+                    else:
+                        ignore_list = [
+                            f"/{f.strip().rstrip('/')}"
+                            for f in ignore_list_lines.splitlines()
+                        ]
+                        logger.debug("Ignore in external: %s", ignore_list)
                 except Exception:  # defensive code
                     # don't crash on exception
                     pass
@@ -226,7 +229,12 @@ class CheckoutManager:
         # Do the remote addition manually as in that context we can ignore
         # safely any error returned by this command.
         try:
-            remote_list = g.git_cmd(["remote"], output=PIPE).out.splitlines()
+            output_str = g.git_cmd(["remote"], output=PIPE).out
+
+            remote_list = []
+            if output_str:
+                remote_list = output_str.splitlines()
+
             if remote_name not in remote_list:
                 g.git_cmd(["remote", "add", remote_name, url])
         except Exception:  # defensive code

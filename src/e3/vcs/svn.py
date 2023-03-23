@@ -170,21 +170,22 @@ class SVNRepository:
             )
         return p
 
-    def get_info(self, item: str) -> str:
+    def get_info(self, item: str) -> Optional[str]:
         """Return a specific item shown by svn info.
 
         The --show-item option is only available from 1.9.
         :raise: SVNError
         """
         info = self.svn_cmd(["info"], output=PIPE).out
-        m = re.search(rf"^{item}: *(.*)\n", info, flags=re.M)
+        m = re.search(rf"^{item}: *(.*)\n", info, flags=re.M)  # type: ignore
         if m is None:
             logger.debug("svn info result:\n%s", info)
             raise SVNError(f"Cannot fetch item {item} from svn_info", origin="get_info")
-        return m.group(1).strip()
+
+        return m.group(1).strip()  # type: ignore
 
     @property
-    def url(self) -> str:
+    def url(self) -> Optional[str]:
         """Return the last URL used for the checkout.
 
         :raise: SVNError
@@ -192,7 +193,7 @@ class SVNRepository:
         return self.get_info("URL")
 
     @property
-    def current_revision(self) -> str:
+    def current_revision(self) -> Optional[str]:
         """Return the current revision.
 
         :raise: SVNError
@@ -229,7 +230,9 @@ class SVNRepository:
             """Return a tuple (True if dir is SVN directory, True if clean)."""
             if os.path.exists(os.path.join(dir_path, ".svn")):
                 try:
-                    status = self.svn_cmd(["status"], output=PIPE).out.strip()
+                    status = self.svn_cmd(
+                        ["status"], output=PIPE
+                    ).out.strip()  # type: ignore
                 except SVNError:  # defensive code
                     return False, False
                 if "warning: W" in status:
