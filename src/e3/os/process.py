@@ -355,7 +355,7 @@ class Run:
         self.error_file = File(error, "w")
 
         self.status: Optional[int] = None
-        self.raw_out = b""
+        self.raw_out: Optional[bytes] = b""
         self.raw_err: Optional[bytes] = b""
         self.cmds = []
 
@@ -477,13 +477,15 @@ class Run:
             self.wait()
 
     @property
-    def out(self) -> str:
+    def out(self) -> Optional[str]:
         """Process output as string.
 
         Attempt is done to decode as utf-8 the output. If the output is not in
         utf-8 a string representation will be returned
         (see e3.text.bytes_as_str).
         """
+        if self.raw_out is None:
+            return None
         return bytes_as_str(self.raw_out)
 
     @property
