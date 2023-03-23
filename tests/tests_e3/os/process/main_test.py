@@ -1,5 +1,6 @@
 import os
 import sys
+import subprocess
 import textwrap
 import time
 
@@ -15,6 +16,28 @@ try:
     import psutil
 except ImportError:
     psutil = None
+
+
+def test_run_stdout_stderr():
+    """Check Run with partial redirection.
+
+    Verify that Run is working when stdout is redirected to a file and
+    stderr not redirected to stdout.
+    """
+    prog_filename = os.path.join(os.getcwd(), "prog")
+    with open(prog_filename, "wb") as f:
+        f.write(b"import sys\n")
+        f.write(b'print("stdout", file=sys.stdout)\n')
+        f.write(b'print("stderr", file=sys.stderr)\n')
+    e3.os.fs.chmod("a+x", prog_filename)
+    p = e3.os.process.Run([sys.executable, prog_filename], error=subprocess.PIPE)
+    assert p.out.replace("\r", "") == "stdout\n"
+    assert p.err.replace("\r", "") == "stderr\n"
+    p = e3.os.process.Run(
+        [sys.executable, prog_filename], output="text.txt", error=subprocess.PIPE
+    )
+    assert os.path.isfile("text.txt")
+    assert p.err.replace("\r", "") == "stderr\n"
 
 
 def test_run_shebang(caplog):
