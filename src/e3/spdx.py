@@ -384,6 +384,15 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
     json_entry_key = "licenseConcluded"
 
 
+class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
+    """Cecord background information or analysis for the Concluded License.
+
+    See 7.16 Comments on license field
+    """
+
+    json_entry_key = "licenseComments"
+
+
 class PackageLicenseDeclared(SPDXEntryMaybeStr):
     """Contain the license having been declared by the authors of the package.
 
@@ -624,6 +633,7 @@ class Package(SPDXSection):
     copyright_text: PackageCopyrightText
     files_analyzed: FilesAnalyzed
     license_concluded: PackageLicenseConcluded
+    license_comments: PackageLicenseComments | None
     license_declared: PackageLicenseDeclared | None
     download_location: PackageDownloadLocation
     external_refs: list[ExternalRef] | None
@@ -695,6 +705,7 @@ class Document:
         download_location: str,
         files_analyzed: bool,
         copyright_text: str,
+        license_comments: str | None = None,
         license_declared: str | None = None,
         is_main_package: bool = False,
         add_relationship: bool = True,
@@ -707,6 +718,7 @@ class Document:
         :param file_name: the actual file name of the package
         :param checksum: the package checksum (see SHA1, SHA256 classes)
         :param license_concluded: the license concluded as govering the package
+        :param license_comments: comments for the license_concluded field
         :param license_declared: the license declared in the package
         :param supplier: actual distribution source for the package
         :param originator: this field identifies from where or whom the package
@@ -753,6 +765,9 @@ class Document:
             file_name=PackageFileName(file_name),
             checksum=checksum,
             license_concluded=PackageLicenseConcluded(license_concluded),
+            license_comments=PackageLicenseComments(license_comments)
+            if license_comments is not None
+            else None,
             license_declared=PackageLicenseDeclared(license_declared)
             if license_declared is not None
             else None,
