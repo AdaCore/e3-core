@@ -18,7 +18,6 @@ if TYPE_CHECKING:
         Final,
         Literal,
         NoReturn,
-        Optional,
     )
     from e3.anod.spec import Anod
 
@@ -33,7 +32,7 @@ class Package:
         self,
         prefix: str,
         publish: bool = False,
-        version: Optional[Callable[[], str]] = None,
+        version: Callable[[], str] | None = None,
     ):
         """Create a binary package.
 
@@ -115,8 +114,8 @@ class Source:
         self,
         name: str,
         publish: bool,
-        dest: Optional[str] = None,
-        unpack_cmd: Optional[Callable] = None,
+        dest: str | None = None,
+        unpack_cmd: Callable | None = None,
         remove_root_dir: bool = True,
         ignore: None = None,
     ):
@@ -148,7 +147,7 @@ class Source:
         self.dest = dest
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
-        self.builder: Optional[SourceBuilder] = None
+        self.builder: SourceBuilder | None = None
         self.other_sources: list[Source] = []
 
     def set_builder(self, builder_function: SourceBuilder) -> None:
@@ -194,9 +193,9 @@ class SourceBuilder:
         self,
         name: str,
         fullname: Callable[[], str],
-        checkout: Optional[list[str]],
-        prepare_src: Optional[PrepareSrcCB] = None,
-        apply_patch: Optional[Literal[1] | ApplyPatchCB] = None,
+        checkout: list[str] | None,
+        prepare_src: PrepareSrcCB | None = None,
+        apply_patch: Literal[1] | ApplyPatchCB | None = None,
         kind: str = "source",
     ):
         """Define a builder for the source package.
@@ -226,7 +225,7 @@ class SourceBuilder:
         self.repositories = {}  # type: ignore
         self.kind = kind
         self.from_spec = None
-        self.source_query: Optional[dict[str, Optional[str]]] = None
+        self.source_query: dict[str, str | None] | None = None
         self.__fullname = fullname
         self.__prepare_src = prepare_src
         self.__apply_patch = apply_patch
@@ -236,7 +235,7 @@ class SourceBuilder:
         return self.__fullname(*args, **kwargs)  # type: ignore
 
     @property
-    def prepare_src(self) -> Optional[PrepareSrcCB]:
+    def prepare_src(self) -> PrepareSrcCB | None:
         """Return the callback used to prepare the source package.
 
         :return: the callback or None if no prepare_src is defined
@@ -334,10 +333,10 @@ class ExternalSourceBuilder(UnmanagedSourceBuilder):
     def __init__(
         self,
         name: str,
-        bid: Optional[str] = None,
-        setup: Optional[str] = None,
-        date: Optional[str] = None,
-        query_name: Optional[str] = None,
+        bid: str | None = None,
+        setup: str | None = None,
+        date: str | None = None,
+        query_name: str | None = None,
     ):
         """Initialize ExternalSourceBuilder.
 

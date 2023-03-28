@@ -11,7 +11,6 @@ from e3.error import E3Error
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Optional
     from collections.abc import Sequence
 
 logger = e3.log.getLogger("net.smtp")
@@ -25,7 +24,7 @@ def sendmail(
     mail_as_string: str,
     smtp_servers: Sequence[str],
     max_size: int = 40,
-    message_id: Optional[str] = None,
+    message_id: str | None = None,
 ) -> bool:
     """Send an email with stmplib.
 

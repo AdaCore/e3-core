@@ -6,7 +6,7 @@ import yaml
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
 
 
 class Host(BaseEnv):
@@ -37,7 +37,7 @@ class HostDB:
     :ivar hosts: dict indexed by host name
     """
 
-    def __init__(self, filename: Optional[str] = None):
+    def __init__(self, filename: str | None = None):
         """Initialize a host database.
 
         :param filename: if not None, initialize the database from a yaml
@@ -95,7 +95,7 @@ class HostDB:
     def __getitem__(self, key: str) -> Host:
         return self.hosts[key]
 
-    def get(self, key: str, default: Optional[Host] = None) -> Optional[Host]:
+    def get(self, key: str, default: Host | None = None) -> Host | None:
         """Return the Host named ``key`` of ``default``.
 
         :param key: host name

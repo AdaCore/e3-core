@@ -8,7 +8,7 @@ import e3.log
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
     from e3.store.cache.backends.base import Cache
 
 logger = e3.log.getLogger("store")
@@ -68,7 +68,7 @@ class Store(metaclass=abc.ABCMeta):
         """
         pass  # all: no cover
 
-    def download_resource(self, metadata: ResourceInfo, dest: str) -> Optional[str]:
+    def download_resource(self, metadata: ResourceInfo, dest: str) -> str | None:
         """Download a resource identified by its metadata in dest.
 
         :param metadata: resource metadata
@@ -104,7 +104,7 @@ class Store(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def download_resource_content(
         self, metadata: ResourceInfo, dest: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Download a resource identified by its metadata in dest.
 
         The resource is supposed to be validated with metadata.verify

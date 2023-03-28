@@ -14,7 +14,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Optional
+    from typing import Any
     from collections.abc import Callable
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
@@ -36,7 +36,7 @@ class Plan:
     def __init__(
         self,
         data: dict[str, Any],
-        entry_point_cls: Optional[dict[str, Callable[..., EntryPoint]]] = None,
+        entry_point_cls: dict[str, Callable[..., EntryPoint]] | None = None,
         plan_ext: str = ".plan",
     ):
         """Initialize a new plan.
@@ -122,8 +122,8 @@ class PlanActionEnv(BaseEnv):
     plan_call_args: dict[str, Any]
     push_to_store: bool
     default_build: bool
-    module: Optional[str]
-    source_packages: Optional[list[str]]
+    module: str | None
+    source_packages: list[str] | None
 
 
 class PlanContext:
@@ -131,13 +131,13 @@ class PlanContext:
 
     def __init__(
         self,
-        stack: Optional[list[PlanActionEnv]] = None,
-        plan: Optional[Plan] = None,
+        stack: list[PlanActionEnv] | None = None,
+        plan: Plan | None = None,
         ignore_disabled: bool = True,
-        server: Optional[BaseEnv] = None,
-        build: Optional[str] = None,
-        host: Optional[str] = None,
-        target: Optional[str] = None,
+        server: BaseEnv | None = None,
+        build: str | None = None,
+        host: str | None = None,
+        target: str | None = None,
         enabled: bool = True,
         default_push_to_store: bool = False,
         **kwargs: Any,
@@ -322,7 +322,7 @@ class PlanContext:
         # coming from environment). For the build, host and target arguments
         # a special processing is done to make the corresponding set_env
         # call on the result BaseEnv object
-        platform: dict[str, Optional[str]] = {
+        platform: dict[str, str | None] = {
             "build": None,
             "host": None,
             "target": None,
@@ -380,9 +380,9 @@ class PlanContext:
 
     def __exit__(
         self,
-        _type: Optional[type[BaseException]],
-        _value: Optional[BaseException],
-        _tb: Optional[TracebackType],
+        _type: type[BaseException] | None,
+        _value: BaseException | None,
+        _tb: TracebackType | None,
     ) -> None:
         del _type, _value, _tb
         self.stack.pop()

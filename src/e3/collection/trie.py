@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Optional
+    from typing import Any, Iterable
     from collections.abc import Callable
 
 
@@ -25,7 +25,7 @@ class Trie:
 
     def __init__(
         self,
-        word_list: Optional[Iterable[str]] = None,
+        word_list: Iterable[str] | None = None,
         use_suffix: bool = False,
         match_delimiter: str = "",
     ) -> None:
@@ -79,7 +79,7 @@ class Trie:
     def __contains__(self, word: str) -> bool:
         return self.contains(word)
 
-    def match(self, word: str, delimiter: Optional[str] = None) -> bool:
+    def match(self, word: str, delimiter: str | None = None) -> bool:
         """Check if there is word in the trie which is a prefix/suffix of word.
 
         :param word: the word to check

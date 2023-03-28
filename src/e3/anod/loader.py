@@ -16,7 +16,7 @@ from e3.fs import ls
 logger = e3.log.getLogger("anod.loader")
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
     from collections.abc import Callable
     from types import ModuleType
     from e3.anod.spec import Anod
@@ -51,9 +51,9 @@ class AnodSpecRepository:
         self,
         spec_dir: str,
         spec_config: Any = None,
-        # Ideally should be spec_config: Optional[SpecConfig] = None,
+        # Ideally should be spec_config: SpecConfig | None = None,
         # We keep it to Any to avoid mypy issues on other projects
-        extra_repositories_config: Optional[dict] = None,
+        extra_repositories_config: dict | None = None,
     ):
         """Initialize an AnodSpecRepository.
 
@@ -185,8 +185,8 @@ class AnodModule:
         self.name = name
         self.data = data
         self.path = path
-        self.module: Optional[ModuleType] = None
-        self.anod_class: Optional[Callable[..., Anod]] = None
+        self.module: ModuleType | None = None
+        self.anod_class: Callable[..., Anod] | None = None
         self.checksum = e3.hash.sha1(self.path)
 
     @property
@@ -276,7 +276,7 @@ def spec(name: str) -> Callable[..., Anod]:
     key.
     :param name: name of the spec to load
     """
-    spec_repository: Optional[AnodSpecRepository] = None
+    spec_repository: AnodSpecRepository | None = None
     for k in inspect.stack()[1:]:
         if "__spec_repository" in k[0].f_globals:
             spec_repository = k[0].f_globals["__spec_repository"]

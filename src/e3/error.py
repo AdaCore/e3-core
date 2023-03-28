@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Optional
-
 
 class E3Error(Exception):
     """Exception raised by functions defined in E3."""
 
-    def __init__(self, message: str | list[str], origin: Optional[str] = None):
+    def __init__(self, message: str | list[str], origin: str | None = None):
         """Initialize an E3Error.
 
         E3Error can store several messages and thus be used to propagate them.

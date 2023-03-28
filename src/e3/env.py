@@ -19,7 +19,7 @@ from e3.platform import Platform
 
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Optional, TypeVar
+    from typing import Any, Iterable, TypeVar
     from argparse import Namespace
 
 logger = e3.log.getLogger("env")
@@ -54,17 +54,17 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(
         self,
-        build: Optional[Platform] = None,
-        host: Optional[Platform] = None,
-        target: Optional[Platform] = None,
+        build: Platform | None = None,
+        host: Platform | None = None,
+        target: Platform | None = None,
     ):
         if not self._initialized:
             self.build = Platform.get() if build is None else build
             self.host = self.build if host is None else host
             self.target = self.host if target is None else target
-            self.environ: Optional[dict] = None
-            self.cwd: Optional[str] = None
-            self.main_options: Optional[Namespace] = None
+            self.environ: dict | None = None
+            self.cwd: str | None = None
+            self.main_options: Namespace | None = None
 
     @abc.abstractproperty
     def _initialized(self) -> bool:
@@ -119,10 +119,10 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
     def set_build(
         self,
-        name: Optional[str] = None,
-        version: Optional[str] = None,
-        machine: Optional[str] = None,
-        mode: Optional[str] = None,
+        name: str | None = None,
+        version: str | None = None,
+        machine: str | None = None,
+        mode: str | None = None,
     ) -> None:
         """Set build platform.
 
@@ -152,10 +152,10 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
     def set_host(
         self,
-        name: Optional[str] = None,
-        version: Optional[str] = None,
-        machine: Optional[str] = None,
-        mode: Optional[str] = None,
+        name: str | None = None,
+        version: str | None = None,
+        machine: str | None = None,
+        mode: str | None = None,
     ) -> None:
         """Set host platform.
 
@@ -191,10 +191,10 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
     def set_target(
         self,
-        name: Optional[str] = None,
-        version: Optional[str] = None,
-        machine: Optional[str] = None,
-        mode: Optional[str] = None,
+        name: str | None = None,
+        version: str | None = None,
+        machine: str | None = None,
+        mode: str | None = None,
     ) -> None:
         """Set target platform.
 
@@ -229,9 +229,9 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
     def set_env(
         self,
-        build: Optional[str] = None,
-        host: Optional[str] = None,
-        target: Optional[str] = None,
+        build: str | None = None,
+        host: str | None = None,
+        target: str | None = None,
     ) -> None:
         """Set build/host/target.
 
@@ -244,8 +244,8 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         saved_target = self.target
 
         def get_platform(
-            value: Optional[str], propagate_build_info: bool = False
-        ) -> Optional[Platform]:
+            value: str | None, propagate_build_info: bool = False
+        ) -> Platform | None:
             """Platform based on string value.
 
             :param value: a string representing a platform or None
@@ -304,7 +304,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
         :return: a namedtuple suitable for a call to set_env
         """
-        result: list[Optional[str]] = []
+        result: list[str | None] = []
         if not self.build.is_default:
             result.append(",".join([self.build.platform, self.build.os.version]))
         else:
@@ -497,7 +497,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         return result
 
     @classmethod
-    def from_platform_name(cls, platform: str) -> Optional[AbstractBaseEnv]:
+    def from_platform_name(cls, platform: str) -> AbstractBaseEnv | None:
         """Return a BaseEnv object from a platform name.
 
         That's the reverse of platform property
@@ -549,9 +549,9 @@ class BaseEnv(AbstractBaseEnv):
 
     def __init__(
         self,
-        build: Optional[Platform] = None,
-        host: Optional[Platform] = None,
-        target: Optional[Platform] = None,
+        build: Platform | None = None,
+        host: Platform | None = None,
+        target: Platform | None = None,
     ):
         """Initialize a BaseEnv object.
 
@@ -587,9 +587,9 @@ class BaseEnv(AbstractBaseEnv):
 
     def copy(
         self: BaseEnv_T,
-        build: Optional[str] = None,
-        host: Optional[str] = None,
-        target: Optional[str] = None,
+        build: str | None = None,
+        host: str | None = None,
+        target: str | None = None,
     ) -> BaseEnv_T:
         """Copy an env.
 
@@ -605,9 +605,7 @@ class BaseEnv(AbstractBaseEnv):
         return result
 
     @classmethod
-    def from_env(
-        cls: type[BaseEnv_T], env: Optional[Env | BaseEnv] = None
-    ) -> BaseEnv_T:
+    def from_env(cls: type[BaseEnv_T], env: Env | BaseEnv | None = None) -> BaseEnv_T:
         """Return a new BaseEnv object from an env.
 
         :param env: env. If None copy the current Env
@@ -662,7 +660,7 @@ class Env(AbstractBaseEnv):
     def _items(self) -> Iterable[Any]:
         return iter(self._instance.items())
 
-    def store(self, filename: Optional[str] = None) -> None:
+    def store(self, filename: str | None = None) -> None:
         """Save environment into memory or file.
 
         :param filename: a string containing the path of the filename in which
@@ -681,7 +679,7 @@ class Env(AbstractBaseEnv):
             with open(filename, "wb+") as fd:
                 pickle.dump(self._instance, fd)
 
-    def restore(self, filename: Optional[str] = None) -> None:
+    def restore(self, filename: str | None = None) -> None:
         """Restore environment from memory or a file.
 
         :param filename: a string containing the path of the filename from

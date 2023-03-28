@@ -8,7 +8,7 @@ import e3.os.platform
 from e3.platform_db import get_knowledge_base
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -46,7 +46,7 @@ class Platform(
     - is_default: True if the platform is the default one
     """
 
-    default_arch: Optional[Platform] = None
+    default_arch: Platform | None = None
     system_info = e3.os.platform.SystemInfo
 
     __slots__ = ()
@@ -54,10 +54,10 @@ class Platform(
     @classmethod
     def get(
         cls,
-        platform_name: Optional[str] = None,
-        version: Optional[str] = None,
-        machine: Optional[str] = None,
-        mode: Optional[str] = None,
+        platform_name: str | None = None,
+        version: str | None = None,
+        machine: str | None = None,
+        mode: str | None = None,
         compute_default: bool = False,
     ) -> Platform:
         """Return a Platform object.

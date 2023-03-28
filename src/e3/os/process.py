@@ -25,7 +25,7 @@ from e3.text import bytes_as_str
 
 
 if TYPE_CHECKING:
-    from typing import cast, Any, IO, List, Literal, NoReturn, Optional, Union
+    from typing import cast, Any, IO, List, Literal, NoReturn, Union
 
     CmdLine = List[str]
     AnyCmdLine = Union[List[CmdLine], CmdLine]
@@ -76,7 +76,7 @@ def subprocess_setup() -> None:
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # all: no cover
 
 
-def get_rlimit(platform: Optional[str] = None) -> str:
+def get_rlimit(platform: str | None = None) -> str:
     if platform is None:
         platform = e3.env.Env().build.platform
     if platform == "x86_64-windows64":
@@ -233,13 +233,13 @@ class Run:
     def __init__(
         self,
         cmds: AnyCmdLine,
-        cwd: Optional[str] = None,
+        cwd: str | None = None,
         output: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
         error: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = STDOUT,
         input: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = None,  # noqa: A002
         bg: bool = False,
-        timeout: Optional[int] = None,
-        env: Optional[dict] = None,
+        timeout: int | None = None,
+        env: dict | None = None,
         set_sigpipe: bool = True,
         parse_shebang: bool = False,
         ignore_environ: bool = True,
@@ -356,9 +356,9 @@ class Run:
         self.output_file = File(output, "w")
         self.error_file = File(error, "w")
 
-        self.status: Optional[int] = None
-        self.raw_out: Optional[bytes] = b""
-        self.raw_err: Optional[bytes] = b""
+        self.status: int | None = None
+        self.raw_out: bytes | None = b""
+        self.raw_err: bytes | None = b""
         self.cmds = []
 
         if env is not None:
@@ -479,7 +479,7 @@ class Run:
             self.wait()
 
     @property
-    def out(self) -> Optional[str]:
+    def out(self) -> str | None:
         """Process output as string.
 
         Attempt is done to decode as utf-8 the output. If the output is not in
@@ -489,7 +489,7 @@ class Run:
         return bytes_as_str(self.raw_out) if self.raw_out is not None else None
 
     @property
-    def err(self) -> Optional[str]:
+    def err(self) -> str | None:
         """Process error as string.
 
         Attempt is done to decode as utf-8 the output. If the output is not in
@@ -553,7 +553,7 @@ class Run:
         ):
             self.status = self.internal.wait()
         else:
-            tmp_input: Optional[str | bytes] = None
+            tmp_input: str | bytes | None = None
             if self.input_file.fd == subprocess.PIPE:
                 tmp_input = self.input_file.get_command()
 
@@ -566,7 +566,7 @@ class Run:
         self.close_files()
         return self.status
 
-    def poll(self) -> Optional[int]:
+    def poll(self) -> int | None:
         """Check the process status and set self.status if available.
 
         This method checks whether the underlying process has exited
@@ -663,7 +663,7 @@ class File:
             # this is a file descriptor
             self.fd = name
 
-    def get_command(self) -> Optional[str]:
+    def get_command(self) -> str | None:
         """Return the command to run to create the pipe."""
         if self.fd == subprocess.PIPE:
             return self.name[1:]
@@ -681,7 +681,7 @@ class WaitError(Exception):
     pass
 
 
-def wait_for_processes(process_list: list[Run], timeout: float) -> Optional[int]:
+def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
     """Wait for several processes spawned with Run.
 
     :param process_list: a list of Run objects

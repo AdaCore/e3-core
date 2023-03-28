@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         Hashable,
-        Optional,
     )
     from collections.abc import Callable, Iterator, Sequence
 
@@ -63,7 +62,7 @@ class DAGIterator:
 
     def next_element(
         self,
-    ) -> tuple[Optional[VertexID], Any, frozenset[VertexID]]:
+    ) -> tuple[VertexID | None, Any, frozenset[VertexID]]:
         """Retrieve next element in topological order.
 
         :return: a vertex id, data, predecessors. (None, None, frozenset()) is
@@ -136,8 +135,8 @@ class DAG:
 
         self.__vertex_predecessors: dict[VertexID, frozenset[VertexID]] = {}
         self.__vertex_successors: dict[VertexID, frozenset[VertexID]] = {}
-        self.__has_cycle: Optional[bool] = None
-        self.__cached_topological_order: Optional[list[tuple[VertexID, Any]]] = None
+        self.__has_cycle: bool | None = None
+        self.__cached_topological_order: list[tuple[VertexID, Any]] | None = None
 
     def reset_caches(self) -> None:
         """Reset caches for DAG properties (cycle and cached topological order).
@@ -223,8 +222,8 @@ class DAG:
     def get_context(
         self,
         vertex_id: VertexID,
-        max_distance: Optional[int] = None,
-        max_element: Optional[int] = None,
+        max_distance: int | None = None,
+        max_element: int | None = None,
         reverse_order: bool = False,
     ) -> list[tuple[int, VertexID, Any]]:
         r"""Get tag context.
@@ -309,7 +308,7 @@ class DAG:
         self,
         vertex_id: VertexID,
         data: Any = None,
-        predecessors: Optional[Sequence[VertexID]] = None,
+        predecessors: Sequence[VertexID] | None = None,
     ) -> None:
         """Add a new vertex into the DAG.
 
@@ -333,9 +332,10 @@ class DAG:
         self,
         vertex_id: VertexID,
         data: Any = None,
-        predecessors: Optional[
-            Sequence[VertexID] | set[VertexID] | frozenset[VertexID]
-        ] = None,
+        predecessors: Sequence[VertexID]
+        | set[VertexID]
+        | frozenset[VertexID]
+        | None = None,
         enable_checks: bool = True,
     ) -> None:
         """Update a vertex into the DAG.
@@ -404,7 +404,7 @@ class DAG:
 
     def shortest_path(
         self, source: VertexID, target: VertexID
-    ) -> Optional[list[VertexID]]:
+    ) -> list[VertexID] | None:
         """Compute the shortest path between two vertices of the DAG.
 
         :param source: vertex id of the source
@@ -423,20 +423,20 @@ class DAG:
         infinite = len(self.vertex_data) + 1
 
         # Keep track of minimal distance between vertices and the sources
-        dist: dict[Optional[VertexID], int] = {k: infinite for k in self.vertex_data}
+        dist: dict[VertexID | None, int] = {k: infinite for k in self.vertex_data}
 
         # Keep track of the minimum distance
-        prev: dict[Optional[VertexID], Optional[VertexID]] = {
+        prev: dict[VertexID | None, VertexID | None] = {
             k: None for k in self.vertex_data
         }
 
         # Set of non visited vertices
-        unvisited: set[Optional[VertexID]] = set(self.vertex_data)
+        unvisited: set[VertexID | None] = set(self.vertex_data)
 
         # The only known distance at startup
         dist[target] = 0
 
-        path_source: Optional[VertexID] = source
+        path_source: VertexID | None = source
 
         if path_source == target:
             # If source is equal to target, default dikjstra algorithm does
@@ -475,7 +475,7 @@ class DAG:
             # No path exist between source and target (or no cycle).
             return None
         else:
-            result: list[Optional[VertexID]] = [path_source]
+            result: list[VertexID | None] = [path_source]
             while prev[result[-1]] is not None:
                 result.append(prev[result[-1]])
 
@@ -632,7 +632,7 @@ class DAG:
         result.append("}")
         return "\n".join(result)
 
-    def as_tree(self, name_key: Optional[str] = None) -> str:
+    def as_tree(self, name_key: str | None = None) -> str:
         """Return a tree representation of the graph.
 
         This is similar to the output of the `tree` bash command.
@@ -642,9 +642,7 @@ class DAG:
         :return: a text tree
         """
 
-        def get_subtree(
-            root: VertexID, name_key: Optional[str], prefix: str = ""
-        ) -> str:
+        def get_subtree(root: VertexID, name_key: str | None, prefix: str = "") -> str:
             """Get a given subtree starting from a root vertex.
 
             This is the helper method to help "draw" the text tree.

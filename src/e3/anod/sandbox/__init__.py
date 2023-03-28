@@ -18,15 +18,15 @@ logger = e3.log.getLogger("sandbox")
 
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
 
 
 class SandBox:
     def __init__(self, root_dir: str) -> None:
         self.root_dir: str = os.path.realpath(root_dir)
-        self.build_id: Optional[str] = None
-        self.build_date: Optional[str] = None
-        self.build_version: Optional[str] = None
+        self.build_id: str | None = None
+        self.build_date: str | None = None
+        self.build_version: str | None = None
 
         # Required directories for a sandbox
         self.dirs = (
@@ -51,7 +51,7 @@ class SandBox:
         self.__specs_dir = os.path.join(self.root_dir, "specs")
 
         # Contains the loaded version of user.yaml if present
-        self.user_config: Optional[dict[str, Any]] = None
+        self.user_config: dict[str, Any] | None = None
 
         # For each directory create an attribute containing its path
         for d in self.dirs:
@@ -120,7 +120,7 @@ class SandBox:
         for d in self.dirs:
             mkdir(getattr(self, f"{d}_dir".replace(os.path.sep, "_")))
 
-    def get_build_space(self, name: str, platform: Optional[str] = None) -> BuildSpace:
+    def get_build_space(self, name: str, platform: str | None = None) -> BuildSpace:
         """Get build space.
 
         :param name: build space name

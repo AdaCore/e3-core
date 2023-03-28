@@ -19,7 +19,7 @@ logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Optional
+    from typing import Any
     from collections.abc import Callable
 
 
@@ -48,7 +48,7 @@ class Event:
       * end_time: time at which the event was closed
     """
 
-    def __init__(self, name: str, uid: Optional[str] = None, **kwargs: dict[str, Any]):
+    def __init__(self, name: str, uid: str | None = None, **kwargs: dict[str, Any]):
         """Initialize an Event object.
 
         :param name: name of the event (e.g. e3_test)
@@ -67,7 +67,7 @@ class Event:
         self.uid = uid if uid is not None else unique_id()
         self.name = name
         self.begin_time = time.time()
-        self.end_time: Optional[float] = None
+        self.end_time: float | None = None
 
         for key, value in list(kwargs.items()):
             self._data[key] = value
@@ -80,9 +80,9 @@ class Event:
 
     def __exit__(
         self,
-        _type: Optional[type[BaseException]],
-        _val: Optional[BaseException],
-        _tb: Optional[TracebackType],
+        _type: type[BaseException] | None,
+        _val: BaseException | None,
+        _tb: TracebackType | None,
     ) -> None:
         self.close()
 

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import e3.error
 
 if TYPE_CHECKING:
-    from typing import Optional
     from e3.os.process import Run
 
 
@@ -33,8 +32,8 @@ class ShellError(AnodError):
     def __init__(
         self,
         message: str,
-        origin: Optional[str] = None,
-        process: Optional["Run"] = None,
+        origin: str | None = None,
+        process: "Run" | None = None,
     ):
         super().__init__(message, origin)
         self.process = process

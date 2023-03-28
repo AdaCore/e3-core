@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         IO,
-        Optional,
         TextIO,
         TypeVar,
         Mapping,
@@ -71,7 +70,7 @@ if sys.stdout.isatty():  # all: no cover (not used in production!)
 else:
     pretty_cli = False
 
-console_logs: Optional[str] = None
+console_logs: str | None = None
 
 
 class JSONFormatter(logging.Formatter):
@@ -88,8 +87,8 @@ class JSONFormatter(logging.Formatter):
 
     def __init__(
         self,
-        date_fmt: Optional[str] = None,
-        context: Optional[Mapping[str, Any]] = None,
+        date_fmt: str | None = None,
+        context: Mapping[str, Any] | None = None,
     ):
         """Initialize formatter with context.
 
@@ -261,7 +260,7 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
         tqdm.write(msg, file=sys.stderr)
 
 
-def getLogger(name: Optional[str] = None, prefix: str = "e3") -> E3LoggerAdapter:
+def getLogger(name: str | None = None, prefix: str = "e3") -> E3LoggerAdapter:
     """Get a logger with a default handler doing nothing.
 
     Calling this function instead of logging.getLogger will avoid warnings
@@ -292,8 +291,8 @@ def getLogger(name: Optional[str] = None, prefix: str = "e3") -> E3LoggerAdapter
 def add_log_handlers(
     level: int,
     log_format: str,
-    datefmt: Optional[str] = None,
-    filename: Optional[str] = None,
+    datefmt: str | None = None,
+    filename: str | None = None,
     set_default_output: bool = True,
     json_format: bool = False,
 ) -> None:
@@ -422,9 +421,9 @@ def activate_with_args(args: Namespace, default_level: int = logging.WARNING) ->
 def activate(
     stream_format: str = log_config.stream_fmt,
     file_format: str = log_config.file_fmt,
-    datefmt: Optional[str] = None,
+    datefmt: str | None = None,
     level: int = logging.INFO,
-    filename: Optional[str] = None,
+    filename: str | None = None,
     e3_debug: bool = False,
     json_format: bool = False,
 ) -> None:
