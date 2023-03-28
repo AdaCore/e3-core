@@ -114,6 +114,7 @@ class SPDXEntryBool(SPDXEntry):
         return {self.json_entry_key: self.value}
 
 
+@dataclass
 class SPDXSection:
     """Describe a SPDX section."""
 
