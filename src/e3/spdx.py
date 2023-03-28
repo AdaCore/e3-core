@@ -426,7 +426,7 @@ class ExternalRef(SPDXEntry):
     See 7.21 External reference field
     """
 
-    json_entry_key = "external-refs"
+    json_entry_key = "externalRefs"
 
     def __init__(
         self,

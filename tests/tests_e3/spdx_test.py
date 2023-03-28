@@ -44,7 +44,7 @@ def test_external_ref():
         == "ExternalRef: PACKAGE-MANAGER purl pkg:pypi/wheel@0.36.2"
     )
     assert ExternalRef.from_dict(value).to_json_dict() == {
-        "external-refs": {
+        "externalRefs": {
             "referenceCategory": "PACKAGE-MANAGER",
             "referenceLocator": "pkg:pypi/wheel@0.36.2",
             "referenceType": "purl",
@@ -288,7 +288,7 @@ def test_spdx():
                 ],
                 "copyrightText": "2023 AdaCore",
                 "downloadLocation": "NOASSERTION",
-                "external-refs": [
+                "externalRefs": [
                     {
                         "referenceCategory": "PACKAGE-MANAGER",
                         "referenceLocator": "pkg:generic/my-dep@1b2",
