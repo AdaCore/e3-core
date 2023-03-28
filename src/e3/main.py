@@ -79,6 +79,7 @@ class Main:
         if name is not None:
             self.name = name
         elif hasattr(main, "__file__"):
+            assert main.__file__ is not None
             self.name = os.path.splitext(os.path.basename(main.__file__))[0]
         else:
             self.name = "unknown"
@@ -130,7 +131,9 @@ class Main:
         self.argument_parser = argument_parser
         self.__log_handlers_set = False
 
-        def sigterm_handler(sig: int, frame: FrameType) -> NoReturn:  # unix-only
+        def sigterm_handler(
+            sig: int, frame: Optional[FrameType]
+        ) -> NoReturn:  # unix-only
             """Automatically convert SIGTERM to SystemExit exception.
 
             This is done to give enough time to an application killed by
