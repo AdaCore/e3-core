@@ -9,7 +9,6 @@ from e3.os.fs import cd
 
 
 class SandBoxMigrate(SandBoxAction):
-
     name = "migrate"
     help = "Migrate to a newer anod API version"
     require_sandbox = False

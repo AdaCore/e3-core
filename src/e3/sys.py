@@ -66,21 +66,18 @@ class RewriteImportRule:
         check_in_names = None
 
         if isinstance(node, ast.ImportFrom):
-
             # node: ImportFrom(module, names)
             # first check whether the module match our rule
 
             if TYPE_CHECKING:
                 assert node.module is not None
             if re.match("^" + self.module + "$", node.module):
-
                 # then we need to check whether our 'name' is in the
                 # 'from' list (node.names)
 
                 check_in_names = self.name
 
         elif isinstance(node, ast.Import):
-
             # node: Import(names)
             # We need to check whether our 'module' appears in the imported
             # module names
@@ -341,7 +338,6 @@ def is_console() -> bool:
         return True
 
     if sys.platform == "win32":  # unix: no cover
-
         from msvcrt import get_osfhandle
         from e3.os.windows.object import object_name
 

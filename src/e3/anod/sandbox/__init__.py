@@ -147,7 +147,7 @@ class SandBox:
             return yaml.safe_load(f)
 
     def write_scripts(self) -> None:
-        from setuptools.command.easy_install import get_script_args
+        from setuptools.command.easy_install import get_script_args  # type: ignore[attr-defined]
 
         # Retrieve sandbox_scripts entry points
         e3_distrib = get_distribution("e3-core")

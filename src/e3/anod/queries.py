@@ -141,7 +141,6 @@ class SourceClosure:
 
         # Follow dependencies
         for dep, dep_spec in list(self.context.dependencies[spec.uid].values()):
-
             # Only consider build and install dependency (discard source deps)
             if dep.kind in ("build", "install", "download"):
                 if dep_spec.kind == "install":

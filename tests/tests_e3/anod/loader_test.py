@@ -9,7 +9,6 @@ import pytest
 
 
 class TestLoader:
-
     spec_dir = os.path.join(os.path.dirname(__file__), "data")
     spec2_dir = os.path.join(os.path.dirname(__file__), "data2")
 

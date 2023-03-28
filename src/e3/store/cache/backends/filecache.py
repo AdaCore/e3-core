@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 class FileCache(Cache):
-
     cache_suffix = ".cache"
 
     def __init__(self, cache_configuration: Any):

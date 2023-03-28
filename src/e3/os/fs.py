@@ -81,7 +81,7 @@ def chmod(mode: str, filename: str) -> int:
         actions = re.findall(r"(?:([-\+=])?([ugo]|[0-7]+|[rwx]*))", actionlist)
         assert "".join(list(itertools.chain.from_iterable(actions))) == actionlist
 
-        for (op, permlist) in actions:
+        for op, permlist in actions:
             if permlist == "" and op != "=":
                 continue
             else:

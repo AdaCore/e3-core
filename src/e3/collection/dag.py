@@ -24,7 +24,6 @@ class DAGError(E3Error):
 
 
 class DAGIterator:
-
     NOT_VISITED = 0
     BUSY = 1
     VISITED = 2

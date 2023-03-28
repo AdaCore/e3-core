@@ -165,7 +165,6 @@ def test_patch_git_format_ignore():
 
 
 def test_patch_git_with_headers():
-
     test_dir = os.path.dirname(__file__)
     patch_file = os.path.join(test_dir, "git_patch_with_header")
 

@@ -174,7 +174,6 @@ def patch(
         with open(patch_file, newline="") as f, open(
             filtered_patch, "w", newline=""
         ) as fdout:
-
             # Two line headers that mark beginning of patches
             header1: tuple | tuple[str, str] = ()
             header2: tuple | tuple[str, str] = ()

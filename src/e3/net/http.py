@@ -78,7 +78,6 @@ class BaseURL:
 
 
 class HTTPSession:
-
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 

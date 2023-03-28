@@ -188,7 +188,6 @@ class SharedSource(Source):
 
 
 class SourceBuilder:
-
     DEFAULT_PATCH_CMD: Final = 1
 
     def __init__(

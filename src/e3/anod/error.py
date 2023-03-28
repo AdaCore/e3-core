@@ -8,8 +8,6 @@ if TYPE_CHECKING:
     from typing import Optional
     from e3.os.process import Run
 
-    assert Run  # Make pyflakes happy?
-
 
 class AnodError(e3.error.E3Error):
     """Base Anod error."""

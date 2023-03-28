@@ -205,7 +205,6 @@ def test_iterate_on_dir():
     touch(test_file)
     ntfile = NTFile(test_file)
     try:
-
         with pytest.raises(NTException):
             status = ntfile.iterate_on_dir(fun, default_result=False)
     finally:
@@ -225,7 +224,6 @@ def test_is_dir_empty():
     ntfile2 = NTFile(deleted_file_path)
 
     try:
-
         assert ntfile.is_dir_empty
         touch(deleted_file_path)
         touch(deleted_file2_path)
