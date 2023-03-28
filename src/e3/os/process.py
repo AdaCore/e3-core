@@ -484,9 +484,7 @@ class Run:
         utf-8 a string representation will be returned
         (see e3.text.bytes_as_str).
         """
-        if self.raw_out is None:
-            return None
-        return bytes_as_str(self.raw_out)
+        return bytes_as_str(self.raw_out) if self.raw_out is not None else None
 
     @property
     def err(self) -> Optional[str]:
