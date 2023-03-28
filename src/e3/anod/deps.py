@@ -31,7 +31,6 @@ class BuildVar:
 
 
 class Dependency:
-
     kind: DEPENDENCY_PRIMITIVE
 
     def __init__(

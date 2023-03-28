@@ -5,7 +5,6 @@ import os
 
 
 class TestSourceClosure:
-
     spec_dir = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "source_closure_specs")
     )

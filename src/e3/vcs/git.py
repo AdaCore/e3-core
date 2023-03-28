@@ -321,7 +321,6 @@ class GitRepository:
             result["message"] = body
 
             if max_diff_size > 0:
-
                 tempfile_name = None
                 try:
                     with closing(

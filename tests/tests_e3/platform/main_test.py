@@ -5,7 +5,6 @@ import pytest
 
 
 def test_platform():
-
     a = e3.platform.Platform.get()
     b = e3.platform.Platform.get()
 
@@ -26,7 +25,6 @@ def test_is_host():
 
 
 def test_immutable():
-
     a = e3.platform.Platform.get()
 
     with pytest.raises(AttributeError):

@@ -19,3 +19,8 @@ repos:
     - id: mypy
       files: '\.py$'
       exclude: '^tests/.+$'
+      additional_dependencies:
+        - types-python-dateutil
+        - types-PyYAML
+        - types-requests
+        - types-setuptools

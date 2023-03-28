@@ -12,7 +12,6 @@ import pytest
 
 def test_simple_spec():
     class Simple(Anod):
-
         test_qualifier_format = (("with_bar", False),)
 
         build_source_list = [
@@ -41,7 +40,6 @@ def test_spec_buildvars():
     """Build vars are used by the driver and not visible in deps."""
 
     class MySpec(Anod):
-
         build_deps = [Anod.BuildVar("key", "value")]
 
         @Anod.primitive()
@@ -72,7 +70,6 @@ def test_primitive():
     assert has_primitive(no_primitive, "build") is False
 
     class WithPrimitive(Anod):
-
         build_qualifier_format = (("error", False),)
 
         package = Anod.Package(prefix="mypackage", version=lambda: "42")

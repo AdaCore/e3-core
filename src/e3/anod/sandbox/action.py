@@ -24,7 +24,6 @@ logger = e3.log.getLogger("e3.anod.SandBox")
 
 
 class SandBoxAction(metaclass=abc.ABCMeta):
-
     require_sandbox = True
 
     def __init__(self, subparsers):
@@ -61,7 +60,6 @@ class SandBoxAction(metaclass=abc.ABCMeta):
 
 
 class SandBoxCreate(SandBoxAction):
-
     name = "create"
     help = "Create a new sandbox"
 
@@ -96,7 +94,6 @@ class SandBoxCreate(SandBoxAction):
 
 
 class SandBoxShowConfiguration(SandBoxAction):
-
     name = "show-config"
     help = "Display sandbox configuration"
 
@@ -140,7 +137,6 @@ class SandBoxShowConfiguration(SandBoxAction):
 
 
 class SandBoxExec(SandBoxCreate):
-
     name = "exec"
     help = "Execute anod action in an sandbox"
 

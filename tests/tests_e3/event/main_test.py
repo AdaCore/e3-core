@@ -11,7 +11,6 @@ import mock
 
 
 def test_smtp_event():
-
     e3.event.add_handler(
         "smtp",
         subject="test subject",

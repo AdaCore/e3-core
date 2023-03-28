@@ -269,7 +269,6 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             elif not propagate_build_info:
                 return Platform.get(*split_value)  # type: ignore
             else:
-
                 # Propagate machine name and OS version if necessary
                 if split_value[2] is None:
                     # No new machine name specified, reuse the current one
@@ -487,7 +486,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             can be used to format string. For example ``Env().target.os.name``
             will appear with the key ``target_os_name``, ...
         """
-        result = {k: v for k, v in self._items()}
+        result = dict(self._items())
         result["is_canadian"] = self.is_canadian
         result["is_cross"] = self.is_cross
         result["platform"] = self.platform

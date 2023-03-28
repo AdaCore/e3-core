@@ -804,7 +804,6 @@ class AnodContext:
             Decision.LEFT,
             Decision.RIGHT,
         ):
-
             if decision.expected_choice == BuildOrDownload.BUILD:
                 msg = (
                     "A spec in the plan has a build_tree dependency"

@@ -11,7 +11,6 @@ import pytest
 
 
 class TestContext:
-
     spec_dir = os.path.join(os.path.dirname(__file__), "context_data")
 
     def create_context(self, reject_duplicates: bool = True) -> AnodContext:
@@ -647,7 +646,6 @@ class TestContext:
                 if uid.endswith("build"):
                     assert ac.tree.get_tag(uid)["plan_args"]["weathers"] == "B"
         else:
-
             with pytest.raises(SchedulingError):
                 for action in cm.execute(myplan, "myserver"):
                     ac.add_plan_action(action)
