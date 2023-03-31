@@ -56,10 +56,12 @@ cmdlogger = e3.log.getLogger(CMD_LOGGER_NAME)
 try:
     import psutil
     from psutil import Popen
-except ImportError:  # defensive code
-    from subprocess import Popen
 
-    psutil = None
+    has_psutil = True
+except ImportError:  # defensive code
+    from subprocess import Popen  # type: ignore
+
+    has_psutil = False
 
 
 def subprocess_setup() -> None:
@@ -419,7 +421,7 @@ class Run:
                 self.internal = Popen(self.cmds[0], **popen_args)
 
             else:
-                runs: list[subprocess.Popen] = []
+                runs: list[Popen] = []
                 for index, cmd in enumerate(self.cmds):
                     if index == 0:
                         stdin: int | IO[Any] = self.input_file.fd
@@ -609,7 +611,7 @@ class Run:
 
     def is_running(self) -> bool:
         """Check whether the process is running."""
-        if psutil is None:  # defensive code
+        if not has_psutil:  # defensive code
             # psutil not imported, use our is_running function
             return is_running(self.pid)
         else:
@@ -617,7 +619,7 @@ class Run:
 
     def children(self) -> list[Any]:
         """Return list of child processes (using psutil)."""
-        if psutil is None:  # defensive code
+        if not has_psutil:  # defensive code
             raise NotImplementedError("Run.children() require psutil")
         return self.internal.children()
 
@@ -838,7 +840,7 @@ def kill_process_tree(pid: int | Any, timeout: int = 3) -> bool:
         except psutil.NoSuchProcess:  # defensive code
             pass
 
-    def on_terminate(p: str) -> None:
+    def on_terminate(p: psutil.Process) -> None:
         """Log info when a process terminate."""
         logger.debug("process %s killed", p)
 
