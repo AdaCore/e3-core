@@ -173,13 +173,13 @@ def df(path: str, full: bool = False) -> int | tuple:
             ((1, "path"), (2, "freeuserspace"), (2, "totalspace"), (2, "freespace")),
         )
 
-        def GetDiskFreeSpaceEx_errcheck(result, func, args):  # type: ignore
+        def GetDiskFreeSpaceEx_errcheck(result, func, args):
             del func
             if not result:  # defensive code
                 raise ctypes.WinError()
             return (args[1].value, args[2].value, args[3].value)
 
-        GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck  # type: ignore
+        GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck
         _, total, free = GetDiskFreeSpaceEx(c_path)
         used = total - free
     else:  # windows: no cover

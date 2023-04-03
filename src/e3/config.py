@@ -69,7 +69,7 @@ class ConfigSection:
                 else:
                     kwargs[k] = v
 
-        return cls(**kwargs)  # type: ignore
+        return cls(**kwargs)
 
 
 class Config:

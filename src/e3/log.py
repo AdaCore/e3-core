@@ -325,7 +325,7 @@ def add_log_handlers(
     else:
         fmt = logging.Formatter(log_format, datefmt)
 
-    fmt.converter = time.gmtime  # type: ignore
+    fmt.converter = time.gmtime
     handler.setFormatter(fmt)
 
     handler.setLevel(level)
