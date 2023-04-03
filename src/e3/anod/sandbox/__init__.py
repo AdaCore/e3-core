@@ -147,7 +147,7 @@ class SandBox:
             return yaml.safe_load(f)
 
     def write_scripts(self) -> None:
-        from setuptools.command.easy_install import get_script_args  # type: ignore[attr-defined]
+        from setuptools.command.easy_install import ScriptWriter
 
         # Retrieve sandbox_scripts entry points
         e3_distrib = get_distribution("e3-core")
@@ -161,7 +161,7 @@ class SandBox:
             def as_requirement(self):  # type: ignore
                 return e3_distrib.as_requirement()
 
-        for script in get_script_args(dist=SandboxDist()):
+        for script in ScriptWriter.best().get_args(dist=SandboxDist()):
             script_name = script[0]
             script_content = script[1]
             target = os.path.join(self.bin_dir, script_name)
@@ -171,8 +171,8 @@ class SandBox:
                     "console_scripts", "sandbox_scripts"
                 )
             with open(target, "wb") as f:
-                if isinstance(script_content, str):
-                    f.write(script_content.encode("utf-8"))
+                if isinstance(script_content, bytes):  # type: ignore[unreachable]
+                    f.write(script_content)  # type: ignore[unreachable]
                 else:
-                    f.write(script_content)
+                    f.write(script_content.encode("utf-8"))
             chmod("a+x", target)
