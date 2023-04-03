@@ -44,7 +44,7 @@ def test_external_ref():
         == "ExternalRef: PACKAGE-MANAGER purl pkg:pypi/wheel@0.36.2"
     )
     assert ExternalRef.from_dict(value).to_json_dict() == {
-        "external-refs": {
+        "externalRefs": {
             "referenceCategory": "PACKAGE-MANAGER",
             "referenceLocator": "pkg:pypi/wheel@0.36.2",
             "referenceType": "purl",
@@ -91,6 +91,7 @@ def test_spdx():
             SHA1("6876df3aa8780622368173fe6e868a2edc3932c8"),
         ],
         license_concluded="GPL-3.0-or-later",
+        license_comments="Pretty sure this is GPL v3",
         supplier=Organization("AdaCore"),
         originator=Organization("AdaCore"),
         download_location=NOASSERTION,
@@ -203,6 +204,7 @@ def test_spdx():
         "PackageCopyrightText: <text>2023 AdaCore</text>",
         "FilesAnalyzed: false",
         "PackageLicenseConcluded: GPL-3.0-or-later",
+        "PackageLicenseComments: <text>Pretty sure this is GPL v3</text>",
         "PackageDownloadLocation: NOASSERTION",
         "ExternalRef: PACKAGE-MANAGER purl pkg:generic/my-dep@1b2",
         "",
@@ -286,7 +288,7 @@ def test_spdx():
                 ],
                 "copyrightText": "2023 AdaCore",
                 "downloadLocation": "NOASSERTION",
-                "external-refs": [
+                "externalRefs": [
                     {
                         "referenceCategory": "PACKAGE-MANAGER",
                         "referenceLocator": "pkg:generic/my-dep@1b2",
@@ -295,6 +297,7 @@ def test_spdx():
                 ],
                 "packageFileName": "my-dep-1b2.tgz",
                 "licenseConcluded": "GPL-3.0-or-later",
+                "licenseComments": "Pretty sure this is GPL v3",
                 "name": "my-dep",
                 "originator": "Organization: AdaCore",
                 "supplier": "Organization: AdaCore",
