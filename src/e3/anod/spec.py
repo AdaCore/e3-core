@@ -13,6 +13,7 @@ import e3.log
 import e3.os.process
 import e3.text
 from e3.anod.error import AnodError, ShellError
+from e3.anod.qualifiers_manager import QualifiersManager
 from e3.yaml import load_with_config
 
 # CURRENT API version
@@ -241,10 +242,14 @@ class Anod:
             self.parsed_qualifier[k[0]] = k[1]
         self.qualifier = qualifier
 
-        # Default build space name is the spec name
-        build_space_name = fetch_attr(self, "build_space_name", None)
-        if build_space_name is None:
-            self.build_space_name = self.name
+        # Create the QualifiersManager.
+        # Skip if the name generator is disabled.
+        if self.enable_name_generator:
+            self.qualifiers_manager = QualifiersManager(self)
+            self.declare_qualifiers_and_components(self.qualifiers_manager)
+            self.qualifiers_manager.parse(self.parsed_qualifier)
+        else:
+            self.qualifier_manager = None
 
         # UID of the spec instance
         self.uid = ".".join(
@@ -260,6 +265,61 @@ class Anod:
 
         # Hold the result of the pre function
         self._pre: dict[str, Any] | None = None
+
+    # Temporary flag used to disable the name generator during the
+    # transition (U625-013).
+    @property
+    def enable_name_generator(self) -> bool:
+        """State if the name generation must be enabled.
+
+        If true, then both the 'component' and the 'build_space_name' are generated.
+        """
+        return False
+
+    def declare_qualifiers_and_components(
+        self, qualifiers_manager: QualifiersManager
+    ) -> None:
+        """Configure all the qualifiers and components.
+
+        This method must be overridden in the user spec to actually configure
+        the QualifiersManager.
+
+        All the qualifiers must be declared using the declare_tag_qualifier and
+        declare_key_value_qualifier spec_parameter_manager method.
+
+        All the components must be declared using the declare_component
+        method of QualifiersManager class.
+
+        :param qualifiers_manager: the QualifiersManager instance to be configured.
+        """
+        pass
+
+    @property
+    def base_name(self) -> str:
+        """Set the base name used for the name generation.
+
+        This method is used to provide the base name to be used by the name generator.
+        By default, this base name is 'self.name' (the spec name without .anod).
+
+        It can be overloaded in the user spec.
+        """
+        return self.name
+
+    @property
+    def build_space_name(self) -> str:
+        """Return an automatic build_space_name.
+
+        If the component name is not None (from the component method), it will return
+        the component name for consistency reasons.
+
+        :return: self.name if the name generator is disabled and the generated
+            build_space name otherwise.
+        :rtype: str | None
+        """
+        if self.enable_name_generator:
+            return self.qualifiers_manager.build_space_name
+        else:
+            return self.name
 
     @property
     def build_space(self) -> BuildSpace:
@@ -346,6 +406,22 @@ class Anod:
         elif key.isupper():
             return getattr(self.build_space, key.lower(), None)
 
+    def get_qualifier(self, qualifier_name: str) -> str | None:
+        """Return a qualifier value.
+
+        Requires that qualifiers_manager attribute has been initialized and its parse
+        method called.
+
+        :return: The qualifier value. Its a string for key value qualifiers and a bool
+            for tag qualifiers.
+            Return None if the name_generator is disabled.
+        """
+        if self.enable_name_generator:
+            assert self.qualifiers_manager is not None
+            return self.qualifiers_manager[qualifier_name]
+        else:
+            return None
+
     @classmethod
     def primitive(
         cls,
@@ -425,7 +501,11 @@ class Anod:
         """Return component name.
 
         If None, don't created a component (nor a binary package).
+        :return: None if the name generator is disabled and the generated name
+        otherwise (possibly None if no component is required)
         """
+        if self.enable_name_generator:
+            return self.qualifiers_manager.component
         return None
 
     @property
