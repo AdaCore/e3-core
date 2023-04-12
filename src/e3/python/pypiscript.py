@@ -5,6 +5,7 @@ from e3.anod.checkout import CheckoutManager
 from pkg_resources import Requirement
 from e3.main import Main
 from e3.fs import mkdir, cp
+from datetime import date
 import argparse
 import os
 import re
@@ -21,20 +22,28 @@ Config file has the following format:
     wheels:
         name1: url1#branch1
         name2: url2
+    update_wheel_version_file: true
     requirements:
         - "req1"
         - "req2"
         - "req3"
     discard_from_closure: "regexp"
     frozen_requirement_file: "requirements.txt"
+
     platforms:
         - x86_64-linux
         - x86_64-windows
         - aarch64-linux
 
-wheels contains the list of wheel that should be locally built
+wheels contains the optional list of wheel that should be locally built
 from source located at a git repository url (branch is specified after
 a #, if no branch is specified master is assumed
+
+update_wheel_verison_file is an optional parameter to force version
+update during generation of the wheels based on sources. The update
+works only if the version is stored in a file called VERSION and the
+version in this file has MAJOR.MINOR format. In that case during
+generation the version is updated to MAJOR.MINOR.YYYYMMDD
 
 requirements are additional python requirements as string
 
@@ -87,6 +96,9 @@ def main() -> None:
     # First build the local wheels
     local_wheels = []
 
+    # Should we attempt to update VERSION files for wheels
+    update_version_file = config.get("update_wheel_version_file", False)
+
     for name, url in config.get("wheels", {}).items():
         logging.info(f"Fetch {name} sources")
         if "#" in url:
@@ -106,6 +118,24 @@ def main() -> None:
         else:
             if not m.args.skip_repo_updates:
                 checkout_manager.update(vcs="git", url=url, revision=rev)
+
+        if update_version_file:
+            # Try to update the version file for the given repository. Update
+            # is one only if there is file called VERSION and that the version
+            # has the format MAJOR.MINOR
+            version_file = os.path.join(checkout_manager.working_dir, "VERSION")
+            if os.path.isfile(version_file):
+                with open(version_file) as fd:
+                    version = fd.read().strip()
+                logging.info(f"Wheel {name} has version {version}")
+                split_version = version.split(".")
+                if len(split_version) == 2:
+                    # We have a major and minor but no patch so add it automatically
+                    version = f"{version}.{date.today().strftime('%Y%m%d')}"
+                    with open(version_file, "w") as fd:
+                        fd.write(version)
+
+                    logging.info(f"Wheel {name} version updated to {version}")
 
         local_wheels.append(
             Wheel.build(
