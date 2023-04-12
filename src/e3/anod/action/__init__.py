@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from e3.anod.spec import Anod
 
 if TYPE_CHECKING:
-    from typing import Any, Final, Literal, Optional, Union
+    from typing import Any, Final, Literal, Union
     from e3.anod.package import Source, SourceBuilder
     from e3.collection.dag import DAG
 
@@ -418,7 +418,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
     BOTH: Final = 2
 
     def __init__(
-        self, root: Action, left: Action, right: Action, choice: Optional[Choice] = None
+        self, root: Action, left: Action, right: Action, choice: Choice | None = None
     ):
         """Initialize a Decision instance.
 
@@ -430,11 +430,11 @@ class Decision(Action, metaclass=abc.ABCMeta):
         super().__init__(uid=root.uid + ".decision", data=None)
         self.initiator = root.uid
         self.choice = choice
-        self.expected_choice: Optional[Choice] = None
+        self.expected_choice: Choice | None = None
         self.left_action = left
         self.right_action = right
         self.triggers: list[tuple[str, Choice, str]] = []
-        self.decision_maker: Optional[str] = None
+        self.decision_maker: str | None = None
 
     @property
     def left(self) -> str:
@@ -474,7 +474,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
                 elif self.expected_choice != decision:
                     self.expected_choice = Decision.BOTH
 
-    def get_decision(self) -> Optional[str]:
+    def get_decision(self) -> str | None:
         """Return uid of the choice made by the plan, or None.
 
         This function returns the choice made by the plan, if any.
@@ -501,7 +501,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
             else:
                 return self.right
 
-    def get_expected_decision(self) -> Optional[str]:
+    def get_expected_decision(self) -> str | None:
         """Get expected decision.
 
         :return: uid of the expected action or None if no specific decision
@@ -514,7 +514,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         else:
             return None
 
-    def set_decision(self, which: Choice, decision_maker: Optional[str]) -> None:
+    def set_decision(self, which: Choice, decision_maker: str | None) -> None:
         """Record a choice made by an action in a plan.
 
         This method should be caused when an entry in our plan
@@ -544,7 +544,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
         """
         pass  # all: no cover
 
-    def suggest_plan_fix(self, choice: Choice) -> Optional[str]:
+    def suggest_plan_fix(self, choice: Choice) -> str | None:
         """Suggest a plan line that would fix the conflict.
 
         :param choice: Decision.LEFT or Decision.RIGHT

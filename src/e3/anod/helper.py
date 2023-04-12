@@ -13,7 +13,6 @@ from e3.anod.spec import Anod, parse_command
 from e3.os.fs import unixpath
 
 if TYPE_CHECKING:
-    from typing import Optional
     from e3.os.process import Run
 
 log = e3.log.getLogger("anod.helpers")
@@ -25,9 +24,9 @@ class Make:
     def __init__(
         self,
         anod_instance: Anod,
-        makefile: Optional[str] = None,
-        exec_dir: Optional[str] = None,
-        jobs: Optional[int] = None,
+        makefile: str | None = None,
+        exec_dir: str | None = None,
+        jobs: int | None = None,
         make_exe: str = "make",
     ):
         """Initialize a Make object.
@@ -49,7 +48,7 @@ class Make:
         if jobs is None:
             self.jobs = anod_instance.jobs
         self.var_list = {}  # type: dict[str, str]
-        self.default_target = None  # type: Optional[str]
+        self.default_target = None  # type: str | None
         self.make_exe = make_exe
 
     def set_var(self, name: str, value: str | list[str]) -> None:
@@ -76,10 +75,10 @@ class Make:
 
     def __call__(
         self,
-        target: Optional[str] = None,
-        jobs: Optional[int] = None,
-        exec_dir: Optional[str] = None,
-        timeout: Optional[float] = None,
+        target: str | None = None,
+        jobs: int | None = None,
+        exec_dir: str | None = None,
+        timeout: float | None = None,
     ) -> Run:
         """Call a make target.
 
@@ -95,10 +94,10 @@ class Make:
 
     def cmdline(
         self,
-        target: Optional[str | list[str]] = None,
-        jobs: Optional[int] = None,
-        exec_dir: Optional[str] = None,
-        timeout: Optional[float] = None,
+        target: str | list[str] | None = None,
+        jobs: int | None = None,
+        exec_dir: str | None = None,
+        timeout: float | None = None,
     ) -> dict[str, list[str] | dict]:
         """Return the make command line.
 
@@ -147,8 +146,8 @@ class Configure:
     def __init__(
         self,
         anod_instance: Anod,
-        src_dir: Optional[str] = None,
-        exec_dir: Optional[str] = None,
+        src_dir: str | None = None,
+        exec_dir: str | None = None,
         auto_target: bool = True,
     ):
         """Initialize a Configure object.

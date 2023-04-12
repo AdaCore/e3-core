@@ -10,7 +10,7 @@ from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
     from collections.abc import Callable
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
@@ -28,13 +28,13 @@ class Walk:
           such fingerprint.
           (with the job corresponding to a given entry in the DAG of
           actions).
-    :vartype prev_fingerprints: dict[str, Optional[Fingerprint]]
+    :vartype prev_fingerprints: dict[str, Fingerprint | None]
     :ivar new_fingerprints: A dict of e3.fingerprint.Fingerprint objects,
         indexed by the corresponding job ID. This dictionary contains
         the fingerprints we compute each time we create a new job
         (with the job corresponding to a given entry in the DAG of
         actions).
-    :vartype new_fingerprints: dict[str, Optional[Fingerprint]]
+    :vartype new_fingerprints: dict[str, Fingerprint | None]
     :ivar job_status: A dictionary of job status (ReturnValue), indexed by
         job unique IDs.
     :vartype job_status: dict[str, ReturnValue]
@@ -49,8 +49,8 @@ class Walk:
         :param actions: DAG of actions to perform.
         """
         self.actions = actions
-        self.prev_fingerprints: dict[str, Optional[Fingerprint]] = {}
-        self.new_fingerprints: dict[str, Optional[Fingerprint]] = {}
+        self.prev_fingerprints: dict[str, Fingerprint | None] = {}
+        self.new_fingerprints: dict[str, Fingerprint | None] = {}
         self.job_status: dict[str, ReturnValue] = {}
         self.queues: dict[str, int] = {}
         self.tokens = 1
@@ -86,7 +86,7 @@ class Walk:
 
     def compute_fingerprint(
         self, uid: str, data: Any, is_prediction: bool = False
-    ) -> Optional[Fingerprint]:
+    ) -> Fingerprint | None:
         """Compute the given action's Fingerprint.
 
         This method is expected to return a Fingerprint corresponding
@@ -108,7 +108,7 @@ class Walk:
         """
         return None
 
-    def save_fingerprint(self, uid: str, fingerprint: Optional[Fingerprint]) -> None:
+    def save_fingerprint(self, uid: str, fingerprint: Fingerprint | None) -> None:
         """Save the given fingerprint.
 
         For systems that require fingerprint persistence, this method
@@ -128,7 +128,7 @@ class Walk:
         """
         pass
 
-    def load_previous_fingerprint(self, uid: str) -> Optional[Fingerprint]:
+    def load_previous_fingerprint(self, uid: str) -> Fingerprint | None:
         """Get the fingerprint from the given action's previous execution.
 
         This method is expected to have the following behavior:
@@ -149,8 +149,8 @@ class Walk:
     def should_execute_action(
         self,
         uid: str,
-        previous_fingerprint: Optional[Fingerprint],
-        new_fingerprint: Optional[Fingerprint],
+        previous_fingerprint: Fingerprint | None,
+        new_fingerprint: Fingerprint | None,
     ) -> bool:
         """Return True if the given action should be performed.
 
@@ -191,7 +191,7 @@ class Walk:
         uid: str,
         data: Any,
         predecessors: frozenset[str],
-        reason: Optional[str],
+        reason: str | None,
         notify_end: Callable[[str], None],
         status: ReturnValue = ReturnValue.failure,
     ) -> Job:

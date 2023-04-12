@@ -12,7 +12,7 @@ from e3.os.process import Run
 
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
     from collections.abc import Callable
     from e3.job.scheduler import Scheduler
 
@@ -71,10 +71,10 @@ class Job(metaclass=abc.ABCMeta):
         self.data = data
         self.notify_end = notify_end
         self.slot = 1
-        self.handle: Optional[threading.Thread] = None
+        self.handle: threading.Thread | None = None
         self.thread = None
-        self.__start_time: Optional[datetime] = None
-        self.__stop_time: Optional[datetime] = None
+        self.__start_time: datetime | None = None
+        self.__stop_time: datetime | None = None
         self.should_skip = False
         self.interrupted = False
         self.queue_name = "default"
@@ -216,7 +216,7 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
 
     def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]):
         super().__init__(uid, data, notify_end)
-        self.proc_handle: Optional[Run] = None
+        self.proc_handle: Run | None = None
 
         # Detect spawn issue to avoid returning "notready"
         # and creating a loop

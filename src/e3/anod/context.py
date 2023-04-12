@@ -32,12 +32,7 @@ from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import (
-        cast,
-        NoReturn,
-        Optional,
-        Tuple,
-    )
+    from typing import cast, NoReturn, Optional, Tuple
     from collections.abc import Callable
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
@@ -64,9 +59,9 @@ class SchedulingError(E3Error):
     def __init__(
         self,
         message: str | list[str],
-        origin: Optional[str] = None,
-        uid: Optional[VertexID] = None,
-        initiators: Optional[list[VertexID]] = None,
+        origin: str | None = None,
+        uid: VertexID | None = None,
+        initiators: list[VertexID] | None = None,
     ):
         """Scheduling error initialization.
 
@@ -104,7 +99,7 @@ class AnodContext:
     def __init__(
         self,
         spec_repository: AnodSpecRepository,
-        default_env: Optional[BaseEnv] = None,
+        default_env: BaseEnv | None = None,
         reject_duplicates: bool = False,
     ):
         """Initialize a new context.
@@ -134,11 +129,11 @@ class AnodContext:
     def load(
         self,
         name: str,
-        env: Optional[BaseEnv],
-        qualifier: Optional[str],
+        env: BaseEnv | None,
+        qualifier: str | None,
         kind: PRIMITIVE,
-        sandbox: Optional[SandBox] = None,
-        source_name: Optional[str] = None,
+        sandbox: SandBox | None = None,
+        source_name: str | None = None,
     ) -> Anod:
         """Load a spec instance.
 
@@ -264,8 +259,8 @@ class AnodContext:
         self.tree.add_tag(vertex_id, {"plan_line": plan_line, "plan_args": plan_args})
 
     def add_plan_action(
-        self, plan_action_env: PlanActionEnv, sandbox: Optional[SandBox] = None
-    ) -> Optional[Action]:
+        self, plan_action_env: PlanActionEnv, sandbox: SandBox | None = None
+    ) -> Action | None:
         """Add an Anod action to the context.
 
         :param plan_action_env: the PlanActionEnv object as returned by PlanContext
@@ -307,12 +302,12 @@ class AnodContext:
         name: str,
         env: BaseEnv,
         primitive: PRIMITIVE,
-        qualifier: Optional[str] = None,
-        source_packages: Optional[list[str]] = None,
+        qualifier: str | None = None,
+        source_packages: list[str] | None = None,
         upload: bool = True,
-        plan_line: Optional[str] = None,
-        plan_args: Optional[dict] = None,
-        sandbox: Optional[SandBox] = None,
+        plan_line: str | None = None,
+        plan_args: dict | None = None,
+        sandbox: SandBox | None = None,
     ) -> Action:
         """Add an Anod action to the context (internal function).
 
@@ -392,13 +387,13 @@ class AnodContext:
         name: str,
         env: BaseEnv,
         primitive: PRIMITIVE,
-        qualifier: Optional[str] = None,
-        source_packages: Optional[list[str]] = None,
+        qualifier: str | None = None,
+        source_packages: list[str] | None = None,
         expand_build: bool = True,
-        source_name: Optional[str] = None,
-        plan_line: Optional[str] = None,
-        plan_args: Optional[dict] = None,
-        sandbox: Optional[SandBox] = None,
+        source_name: str | None = None,
+        plan_line: str | None = None,
+        plan_args: dict | None = None,
+        sandbox: SandBox | None = None,
         upload: bool = False,
         force_download: bool = False,
     ) -> Build | CreateSources | CreateSource | Install | Test:
@@ -424,7 +419,7 @@ class AnodContext:
         :param force_download: if True force a download
         """
 
-        def add_action(data: Action, connect_with: Optional[Action] = None) -> None:
+        def add_action(data: Action, connect_with: Action | None = None) -> None:
             self.add(data)
             if connect_with is not None:
                 self.connect(connect_with, data)

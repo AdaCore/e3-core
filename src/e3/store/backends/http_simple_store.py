@@ -6,8 +6,6 @@ import e3.log
 from e3.net.http import HTTPSession
 from e3.store.backends.base import ResourceInfo, Store, StoreError
 
-if TYPE_CHECKING:
-    from typing import Optional
 
 logger = e3.log.getLogger("store.httpsimplestore")
 
@@ -52,7 +50,7 @@ class HTTPSimpleStore(Store):
 
     def download_resource_content(
         self, metadata: ResourceInfo, dest: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Download a resource.
 
         :param metadata: metadata associated with the resource to download

@@ -13,7 +13,7 @@ from e3.platform_db import get_knowledge_base
 
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
 
 KNOWLEDGE_BASE = get_knowledge_base()
 
@@ -42,14 +42,14 @@ class SystemInfo:
     ld_info = None
 
     # Cache for SystemInfo methods
-    _platform: Optional[str] = None
+    _platform: str | None = None
 
     # _os_version is a tuple: os version, kernel version
-    _os_version: Optional[tuple[str, str]] = None
+    _os_version: tuple[str, str] | None = None
 
     # _hostname is a tuble: hostname, domain. Joining with a dot hostname and domain
     # represent the FQDN
-    _hostname: Optional[tuple[str, str]] = None
+    _hostname: tuple[str, str] | None = None
 
     @classmethod
     def reset_cache(cls) -> None:
@@ -323,7 +323,7 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
 
     @classmethod
     def get(
-        cls, name: str, endian: Optional[str] = None, compute_cores: bool = False
+        cls, name: str, endian: str | None = None, compute_cores: bool = False
     ) -> CPU:
         """Initialize CPU instance.
 

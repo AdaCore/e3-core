@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
 
 import e3.error
 import e3.log
@@ -10,10 +9,6 @@ from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 logger = e3.log.getLogger("buildspace")
-
-
-if TYPE_CHECKING:
-    from typing import Optional
 
 
 class BuildSpace:
@@ -98,7 +93,7 @@ class BuildSpace:
 
         self.initialized = True
 
-    def reset(self, keep: Optional[list[str]] = None) -> None:
+    def reset(self, keep: list[str] | None = None) -> None:
         """Reset build space.
 
         The function delete the complete buildspace. The only elements that

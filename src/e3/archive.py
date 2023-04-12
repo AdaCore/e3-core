@@ -20,7 +20,7 @@ import e3.os.fs
 
 
 if TYPE_CHECKING:
-    from typing import Literal, Optional, Text, Union
+    from typing import Literal, Text, Union
     from collections.abc import Callable, Sequence
     from os import PathLike
     from e3.mypy import assert_never
@@ -64,8 +64,8 @@ class E3ZipFile(zipfile.ZipFile):
     def _extract_member(
         self,
         member: Text | zipfile.ZipInfo,
-        path: Optional[str | PathLike[str]],
-        pwd: Optional[bytes],
+        path: str | PathLike[str] | None,
+        pwd: bytes | None,
     ) -> str:
         result = super()._extract_member(member, path, pwd)  # type: ignore
 
@@ -102,7 +102,7 @@ def is_known_archive_format(filename: str) -> bool:
 
 
 def check_type(
-    filename: str, force_extension: Optional[str] = None
+    filename: str, force_extension: str | None = None
 ) -> TAR_GZ | TAR_BZ2 | TAR_XZ | TAR | ZIP:
     """Return the archive extension.
 
@@ -146,14 +146,14 @@ def check_type(
 def unpack_archive(
     filename: str,
     dest: str,
-    selected_files: Optional[Sequence[str]] = None,
+    selected_files: Sequence[str] | None = None,
     remove_root_dir: RemoveRootDirType = False,
-    unpack_cmd: Optional[Callable[..., None]] = None,
-    force_extension: Optional[str] = None,
+    unpack_cmd: Callable[..., None] | None = None,
+    force_extension: str | None = None,
     delete: bool = False,
-    ignore: Optional[list[str]] = None,
+    ignore: list[str] | None = None,
     preserve_timestamps: bool = True,
-    tmp_dir_root: Optional[str] = None,
+    tmp_dir_root: str | None = None,
 ) -> None:
     """Unpack an archive file (.tgz, .tar.gz, .tar or .zip).
 
@@ -359,8 +359,8 @@ def create_archive(
     filename: str,
     from_dir: str,
     dest: str,
-    force_extension: Optional[str] = None,
-    from_dir_rename: Optional[str] = None,
+    force_extension: str | None = None,
+    from_dir_rename: str | None = None,
     no_root_dir: bool = False,
 ) -> None:
     """Create an archive file (.tgz, .tar.gz, .tar or .zip).

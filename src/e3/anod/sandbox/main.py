@@ -10,7 +10,7 @@ from e3.main import Main
 
 
 if TYPE_CHECKING:
-    from typing import Literal, Optional
+    from typing import Literal
     from argparse import ArgumentParser
 
 logger = e3.log.getLogger("sandbox.main")
@@ -26,7 +26,7 @@ def main(get_argument_parser: Literal[False] = False) -> None:
     ...
 
 
-def main(get_argument_parser: bool = False) -> Optional[ArgumentParser]:
+def main(get_argument_parser: bool = False) -> ArgumentParser | None:
     """Manipulate an Anod sandbox.
 
     This function creates the main code for the entry-point e3-sandbox. To

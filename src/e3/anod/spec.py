@@ -31,7 +31,6 @@ if TYPE_CHECKING:
         Any,
         IO,
         Literal,
-        Optional,
         Union,
     )
     from collections.abc import Callable, Sequence
@@ -180,7 +179,7 @@ class Anod:
     # set when loading the spec
     spec_checksum = ""
     spec_dir = ""
-    sandbox: Optional[SandBox] = None
+    sandbox: SandBox | None = None
     name = ""
     api_version = ""
     data_files: tuple[str, ...] = ()
@@ -200,7 +199,7 @@ class Anod:
         qualifier: str,
         kind: PRIMITIVE,
         jobs: int = 1,
-        env: Optional[BaseEnv] = None,
+        env: BaseEnv | None = None,
     ):
         """Initialize an Anod instance.
 
@@ -217,7 +216,7 @@ class Anod:
         self.jobs = jobs
 
         # Set when self.bind_to_sandbox is called
-        self.__build_space: Optional[BuildSpace] = None
+        self.__build_space: BuildSpace | None = None
 
         # Default spec logger
         self.log = spec_logger
@@ -257,10 +256,10 @@ class Anod:
         )
 
         # Hold the config dictionary-like object
-        self._config: Optional[dict] = None
+        self._config: dict | None = None
 
         # Hold the result of the pre function
-        self._pre: Optional[dict[str, Any]] = None
+        self._pre: dict[str, Any] | None = None
 
     @property
     def build_space(self) -> BuildSpace:
@@ -286,8 +285,8 @@ class Anod:
     def load_config_file(
         self,
         extended: bool = False,
-        suffix: Optional[str] = None,
-        selectors: Optional[dict] = None,
+        suffix: str | None = None,
+        selectors: dict | None = None,
     ) -> Any:
         """Load a YAML config file associated with the current module.
 
@@ -350,10 +349,10 @@ class Anod:
     @classmethod
     def primitive(
         cls,
-        pre: Optional[Callable[[Anod], dict]] = None,
-        post: Optional[Callable[..., None]] = None,
-        version: Optional[Callable[..., str]] = None,
-        require: Optional[Callable[[Anod], bool]] = None,
+        pre: Callable[[Anod], dict] | None = None,
+        post: Callable[..., None] | None = None,
+        version: Callable[..., str] | None = None,
+        require: Callable[[Anod], bool] | None = None,
     ) -> Callable:
         """Declare an anod primitive.
 
@@ -414,7 +413,7 @@ class Anod:
         return primitive_dec
 
     @property
-    def package(self) -> Optional[e3.anod.package.Package]:
+    def package(self) -> e3.anod.package.Package | None:
         """Return binary package creation recipe.
 
         If None don't create a binary package, needs a component name set.
@@ -422,7 +421,7 @@ class Anod:
         return None
 
     @property
-    def component(self) -> Optional[str]:
+    def component(self) -> str | None:
         """Return component name.
 
         If None, don't created a component (nor a binary package).
@@ -440,7 +439,7 @@ class Anod:
         return self.uid
 
     @property
-    def source_pkg_build(self) -> Optional[list[e3.anod.package.SourceBuilder]]:
+    def source_pkg_build(self) -> list[e3.anod.package.SourceBuilder] | None:
         """Return list of SourceBuilder defined in the specification file."""
         return None
 

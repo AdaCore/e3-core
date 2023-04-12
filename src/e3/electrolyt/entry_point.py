@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
     from collections.abc import Callable
 
 
@@ -19,8 +19,8 @@ class EntryPoint:
         db: dict[str, EntryPoint],
         fun: Callable[[], None],
         kind: str,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
+        name: str | None = None,
+        description: str | None = None,
     ):
         """Initialize an entry point.
 
@@ -64,9 +64,9 @@ class Machine(EntryPoint):
         kind: str,
         platform: str,
         version: str,
-        site: Optional[str] = None,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
+        site: str | None = None,
+        name: str | None = None,
+        description: str | None = None,
     ):
         """Initialize a Machine entry point.
 

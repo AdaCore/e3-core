@@ -37,8 +37,8 @@ if TYPE_CHECKING:
         Any,
         Final,
         IO,
-        List,
         Literal,
+        List,
         Optional,
         TextIO,
     )
@@ -76,7 +76,7 @@ class GitRepository:
     :ivar working_tree: path to the git working tree
     """
 
-    git: Optional[str] = None
+    git: str | None = None
     log_stream: TextIO | IO[str] = sys.stdout
 
     def __init__(self, working_tree: str):
@@ -87,7 +87,7 @@ class GitRepository:
         self.working_tree = working_tree
 
     @classmethod
-    def create(cls, repo_path: str, initial_content_path: Optional[str] = None) -> str:
+    def create(cls, repo_path: str, initial_content_path: str | None = None) -> str:
         """Create a local Git repository.
 
         :param repo_path: a local directory where to create the repository
@@ -148,7 +148,7 @@ class GitRepository:
             )
         return p
 
-    def init(self, url: Optional[str] = None, remote: Optional[str] = "origin") -> None:
+    def init(self, url: str | None = None, remote: str | None = "origin") -> None:
         """Initialize a new Git repository and configure the remote.
 
         :param url: url of the remote repository, if None create a local git
@@ -216,7 +216,7 @@ class GitRepository:
         ]
         self.git_cmd(cmd, output=stream, error=self.log_stream)
 
-    def fetch(self, url: str, refspec: Optional[str] = None) -> None:
+    def fetch(self, url: str, refspec: str | None = None) -> None:
         """Fetch remote changes.
 
         :param url: url of the remote repository
@@ -249,7 +249,7 @@ class GitRepository:
         self,
         stream: IO[str],
         max_count: int = 50,
-        rev_range: Optional[str] = None,
+        rev_range: str | None = None,
         with_gerrit_notes: bool = False,
     ) -> None:
         """Write formatted log to a stream.

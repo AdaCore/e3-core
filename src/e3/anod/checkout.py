@@ -16,7 +16,7 @@ from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Literal, Optional
+    from typing import Literal
     from collections.abc import Callable
     from e3.mypy import assert_never
 
@@ -59,7 +59,7 @@ class CheckoutManager:
         self,
         vcs: Literal["git"] | Literal["svn"] | Literal["external"],
         url: str,
-        revision: Optional[str] = None,
+        revision: str | None = None,
     ) -> ReturnValue:
         """Update content of the working directory.
 
@@ -77,9 +77,7 @@ class CheckoutManager:
         if os.path.isfile(self.changelog_file):
             rm(self.changelog_file)
 
-        update: Callable[
-            [str, Optional[str]], tuple[ReturnValue, Optional[str], Optional[str]]
-        ]
+        update: Callable[[str, str | None], tuple[ReturnValue, str | None, str | None]]
         if vcs == "git":
             update = self.update_git
         elif vcs == "svn":
@@ -105,7 +103,7 @@ class CheckoutManager:
         return result
 
     def update_external(
-        self, url: str, revision: Optional[str]
+        self, url: str, revision: str | None
     ) -> tuple[ReturnValue, str, str]:
         """Update working dir using a local directory.
 
@@ -205,8 +203,8 @@ class CheckoutManager:
         return hashlib.sha256(url.encode("utf-8")).hexdigest()
 
     def update_git(
-        self, url: str, revision: Optional[str]
-    ) -> tuple[ReturnValue, Optional[str], Optional[str]]:
+        self, url: str, revision: str | None
+    ) -> tuple[ReturnValue, str | None, str | None]:
         """Update working dir using a Git repository.
 
         :param url: git repository url
@@ -297,8 +295,8 @@ class CheckoutManager:
         return result, old_commit, new_commit
 
     def update_svn(
-        self, url: str, revision: Optional[str]
-    ) -> tuple[ReturnValue, Optional[str], Optional[str]]:
+        self, url: str, revision: str | None
+    ) -> tuple[ReturnValue, str | None, str | None]:
         """Update working dir using a SVN repository.
 
         :param url: git repository url

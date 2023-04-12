@@ -3,10 +3,7 @@ from __future__ import annotations
 import calendar
 from datetime import datetime
 import time
-from typing import TYPE_CHECKING, overload
-
-if TYPE_CHECKING:
-    from typing import Optional
+from typing import overload
 
 
 @overload
@@ -19,7 +16,7 @@ def timestamp_as_string(value: float) -> str:
     ...
 
 
-def timestamp_as_string(value: Optional[float]) -> Optional[str]:
+def timestamp_as_string(value: float | None) -> str | None:
     """Convert a timestamp into a human readable date/time.
 
     :param value: a timestamp or None

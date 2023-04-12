@@ -20,7 +20,6 @@ from ctypes.wintypes import (
     USHORT,
 )
 from datetime import datetime
-from typing import Optional
 
 from e3.error import E3Error
 
@@ -142,7 +141,7 @@ class UnicodeString(Structure):
 
     _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]
 
-    def __init__(self, value: Optional[str] = None, max_length: int = 0):
+    def __init__(self, value: str | None = None, max_length: int = 0):
         strbuf = None
         length = 0
         if value is not None or max_length > 0:
@@ -267,7 +266,7 @@ class ObjectAttributes(Structure):
         ("security_quality_of_service", LPVOID),
     ]
 
-    def __init__(self, name: UnicodeString, parent: Optional[HANDLE] = None):
+    def __init__(self, name: UnicodeString, parent: HANDLE | None = None):
         """Initialize ObjectAttributes.
 
         :param name: full path to the file if parent is None else filename
@@ -394,7 +393,7 @@ if sys.platform == "win32":
 
 
 class NTException(E3Error):
-    def __init__(self, status: int, message: str, origin: Optional[str] = None):
+    def __init__(self, status: int, message: str, origin: str | None = None):
         self.status = status
         if self.status < 0:
             self.status += 2**32

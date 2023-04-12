@@ -5,7 +5,7 @@ import collections
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, NamedTuple, Optional
+    from typing import Any, NamedTuple
     from collections.abc import Callable
     from e3.anod.spec import Anod
     from e3.anod.context import AnodContext
@@ -31,7 +31,7 @@ else:
 @overload
 def get_build_node(
     anod_instance: Anod, context: AnodContext, default: None = None
-) -> Optional[Anod]:
+) -> Anod | None:
     ...
 
 
@@ -41,8 +41,8 @@ def get_build_node(anod_instance: Anod, context: AnodContext, default: Anod) -> 
 
 
 def get_build_node(
-    anod_instance: Anod, context: AnodContext, default: Optional[Anod] = None
-) -> Optional[Anod]:
+    anod_instance: Anod, context: AnodContext, default: Anod | None = None
+) -> Anod | None:
     """Return the build anod instance corresponding to an install.
 
     :param anod_instance: an Anod instance
@@ -62,7 +62,7 @@ def get_build_node(
 
 def get_source_builder(
     anod_instance: Anod, source_name: str, local_sources_only: bool = False
-) -> Optional[SourceBuilder]:
+) -> SourceBuilder | None:
     """Given a source name return the associated builder.
 
     :param anod_instance: an Anod instance
@@ -99,7 +99,7 @@ class SourceClosure:
         anod_instance: Anod,
         context: AnodContext,
         expand_packages: bool = False,
-        data_key: Optional[Callable[[Any], str]] = None,
+        data_key: Callable[[Any], str] | None = None,
     ):
         """Initialize a SourceClosure.
 
@@ -113,8 +113,8 @@ class SourceClosure:
         self.anod_instance = anod_instance
         self.expand_packages = expand_packages
         self.context = context
-        self.source_list: dict[SourceKey, Optional[Any]] = {}
-        self.package_list: dict[PackageKey, Optional[Any]] = {}
+        self.source_list: dict[SourceKey, Any | None] = {}
+        self.package_list: dict[PackageKey, Any | None] = {}
         self.compute_closure(self.anod_instance, publish=True)
         self.data_key = data_key
         if self.data_key is None:

@@ -22,7 +22,7 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Iterable, Optional
+    from typing import Iterable
     from collections.abc import Callable, Sequence
 
 
@@ -152,7 +152,7 @@ def echo_to_file(filename: str, content: str | list[str], append: bool = False) 
 
 def find(
     root: str,
-    pattern: Optional[str] = None,
+    pattern: str | None = None,
     include_dirs: bool = False,
     include_files: bool = True,
     follow_symlinks: bool = False,
@@ -539,8 +539,8 @@ VCS_IGNORE_LIST = (
 def sync_tree(
     source: str,
     target: str,
-    ignore: Optional[str | Sequence[str]] = None,
-    file_list: Optional[list[str]] = None,
+    ignore: str | Sequence[str] | None = None,
+    file_list: list[str] | None = None,
     delete: bool = True,
     preserve_timestamps: bool = True,
     delete_ignore: bool = False,
@@ -602,7 +602,7 @@ def sync_tree(
         ignore_path_prefixes = Trie(match_delimiter="/")
 
         ignore_base_regexp_list = []
-        ignore_base_regexp: Optional[re.Pattern[str]] = None
+        ignore_base_regexp: re.Pattern[str] | None = None
 
         for pattern in norm_ignore_list:
             pk = path_key(pattern)
@@ -845,7 +845,7 @@ def sync_tree(
                 os.makedirs(dest_dir)
 
     def walk(
-        root_dir: str, target_root_dir: str, entry: Optional[FilesInfo] = None
+        root_dir: str, target_root_dir: str, entry: FilesInfo | None = None
     ) -> Iterable[FilesInfo]:
         """Walk through source and target file trees.
 

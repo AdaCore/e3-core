@@ -21,7 +21,7 @@ import e3.error
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, Optional
+    from typing import Any, Literal
     from collections.abc import Callable
 
 
@@ -305,7 +305,7 @@ def unixpath(path: str) -> str:
         return path
 
 
-def which(prog: str, paths: Optional[str] = None, default: Any = "") -> Any:
+def which(prog: str, paths: str | None = None, default: Any = "") -> Any:
     """Locate executable.
 
     :param prog: program to find

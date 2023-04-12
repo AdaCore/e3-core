@@ -7,7 +7,7 @@ import e3.anod.error
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, Hashable, Literal, Optional
+    from typing import Any, Hashable, Literal
     from e3.anod.spec import Anod, DEPENDENCY_PRIMITIVE
     from e3.mypy import assert_never
 
@@ -36,12 +36,12 @@ class Dependency:
     def __init__(
         self,
         name: str,
-        product_version: Optional[str] = None,
-        host: Optional[str] = None,
-        target: Optional[str] = None,
-        build: Optional[str] = None,
-        qualifier: Optional[str] = None,
-        local_name: Optional[str] = None,
+        product_version: str | None = None,
+        host: str | None = None,
+        target: str | None = None,
+        build: str | None = None,
+        qualifier: str | None = None,
+        local_name: str | None = None,
         require: Literal["build_tree"]
         | Literal["installation"]
         | Literal["download"]

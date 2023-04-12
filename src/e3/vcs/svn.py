@@ -85,7 +85,7 @@ class SVNRepository:
             return "file://" + e3.os.fs.unixpath(repo_path)
 
     @classmethod
-    def create(cls, repo_path: str, initial_content_path: Optional[str] = None) -> str:
+    def create(cls, repo_path: str, initial_content_path: str | None = None) -> str:
         """Create a local subversion repository.
 
         This creates a local repository (not a working copy) that can be
@@ -170,7 +170,7 @@ class SVNRepository:
             )
         return p
 
-    def get_info(self, item: str) -> Optional[str]:
+    def get_info(self, item: str) -> str | None:
         """Return a specific item shown by svn info.
 
         The --show-item option is only available from 1.9.
@@ -185,7 +185,7 @@ class SVNRepository:
         return m.group(1).strip()  # type: ignore
 
     @property
-    def url(self) -> Optional[str]:
+    def url(self) -> str | None:
         """Return the last URL used for the checkout.
 
         :raise: SVNError
@@ -193,7 +193,7 @@ class SVNRepository:
         return self.get_info("URL")
 
     @property
-    def current_revision(self) -> Optional[str]:
+    def current_revision(self) -> str | None:
         """Return the current revision.
 
         :raise: SVNError
@@ -206,8 +206,8 @@ class SVNRepository:
 
     def update(
         self,
-        url: Optional[str] = None,
-        revision: Optional[str] = None,
+        url: str | None = None,
+        revision: str | None = None,
         force_and_clean: bool = False,
     ) -> bool:
         """Update a working copy or checkout a new one.

@@ -29,7 +29,7 @@ from e3.os.windows.native_api import (
 )
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
     from collections.abc import Callable
 
 
@@ -39,9 +39,9 @@ logger = e3.log.getLogger("os.windows.fs")
 class WithOpenFile:
     def __init__(
         self,
-        desired_access: Optional[int] = None,
-        shared_access: Optional[int] = None,
-        open_options: Optional[int] = None,
+        desired_access: int | None = None,
+        shared_access: int | None = None,
+        open_options: int | None = None,
     ):
         self.desired_access = desired_access
         self.shared_access = shared_access
@@ -74,13 +74,13 @@ class NTFile:
     :ivar basic_info: ObjectAttributes object associated with the file
     """
 
-    def __init__(self, filename: str, parent: Optional[NTFile] = None):
+    def __init__(self, filename: str, parent: NTFile | None = None):
         """Initialize a NTFile object.
 
         :param filename: path to the file or basename if parent is not None
         :param parent: the parent NTFile object
         """
-        self.handle: Optional[HANDLE] = None
+        self.handle: HANDLE | None = None
         if parent is None:
             self.path = os.path.abspath(filename)
             self.nt_filename = UnicodeString(f"\\??\\{self.path}")
@@ -106,7 +106,7 @@ class NTFile:
         self.open_options = OpenOptions.BACKUP_INTENT
 
         # Used by is_dir_empty to store the latest seen file in a given directory
-        self.is_dir_empty_last_seen_file: Optional[str] = None
+        self.is_dir_empty_last_seen_file: str | None = None
 
     def __str__(self) -> str:
         result = [
@@ -117,9 +117,9 @@ class NTFile:
 
     def open(
         self,
-        desired_access: Optional[int] = None,
-        shared_access: Optional[int] = None,
-        open_options: Optional[int] = None,
+        desired_access: int | None = None,
+        shared_access: int | None = None,
+        open_options: int | None = None,
     ) -> None:
         """Open file.
 
@@ -461,7 +461,7 @@ class NTFile:
         """
         self.is_dir_empty_last_seen_file = None
 
-        def check_file(filename: str, parent: Optional[NTFile]) -> tuple[bool, bool]:
+        def check_file(filename: str, parent: NTFile | None) -> tuple[bool, bool]:
             """Check if file is pending deletion.
 
             :return: if file is pending deletion return True and continue
