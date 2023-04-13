@@ -236,7 +236,12 @@ class Run:
         cwd: str | None = None,
         output: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
         error: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = STDOUT,
-        input: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = None,  # noqa: A002
+        input: DEVNULL_VALUE  # noqa: A002
+        | PIPE_VALUE
+        | str
+        | bytes
+        | IO
+        | None = None,  # noqa: A002
         bg: bool = False,
         timeout: int | None = None,
         env: dict | None = None,
@@ -630,8 +635,9 @@ class File:
     def __init__(self, name: Any, mode: str = "r"):
         """Create a new File.
 
-        :param name: can be PIPE, STDOUT, a filename string, an opened fd, a
-            python file object, or a command to pipe (if starts with ``|``)
+        :param name: can be PIPE, STDOUT, a filename string, bytes, an opened
+            fd, a python file object, or a command to pipe
+            (if starts with ``|``)
         :param mode: can be 'r' or 'w' if name starts with + the mode will be
             a+
         """
@@ -640,7 +646,9 @@ class File:
 
         self.name = name
         self.to_close = False
-        if isinstance(name, str):
+        if isinstance(name, bytes) and mode == "r" and name.startswith(b"|"):
+            self.fd = subprocess.PIPE
+        elif isinstance(name, str):
             # can be a pipe or a filename
             if mode == "r" and name.startswith("|"):
                 self.fd = subprocess.PIPE
