@@ -80,7 +80,12 @@ PLATFORM_INFO: PlatformDBEntry = {
     "aarch64-darwin": {"cpu": "aarch64", "os": "darwin", "is_hie": False},
     "aarch64-elf": {"cpu": "aarch64", "os": "none", "is_hie": True},
     "aarch64-ios": {"cpu": "aarch64", "os": "ios", "is_hie": False},
-    "aarch64-linux": {"cpu": "aarch64", "os": "linux", "is_hie": False},
+    "aarch64-linux": {
+        "cpu": "aarch64",
+        "os": "linux",
+        "is_hie": False,
+        "endian": "little",
+    },
     "arm-android": {"cpu": "arm", "os": "android", "is_hie": False},
     "arm-elf": {"cpu": "arm", "os": "none", "is_hie": True},
     "arm-ios": {"cpu": "arm", "os": "ios", "is_hie": False},
