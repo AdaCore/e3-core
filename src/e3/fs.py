@@ -792,7 +792,12 @@ def sync_tree(
 
             try:
                 if dst.basename != src.basename:
-                    rm(dst.path, glob=False)
+                    if dst.stat is not None:
+                        # Case in which the destination file exists but does
+                        # not have the same casing. In that case we delete the
+                        # target file and redo a copy. This occurs for example
+                        # on Windos with NTFS.
+                        rm(dst.path, glob=False)
                     dst = FileInfo(
                         os.path.join(os.path.dirname(dst.path), src.basename),
                         None,
@@ -803,7 +808,8 @@ def sync_tree(
                     with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
             except OSError:
-                rm(dst.path, glob=False)
+                if dst.stat is not None:
+                    rm(dst.path, glob=False)
                 with open(src.path, "rb") as fsrc:
                     with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
