@@ -153,6 +153,21 @@ main (int argc, char **argv)
   sigaddset(&block_cld, SIGCHLD);
   sigprocmask(SIG_BLOCK, &block_cld, NULL);
 
+  /* In some cases rlimit might be launched with stdin and/or stdout being
+   * a terminal. In that case at process startup, the rlimit process is
+   * the foreground process group. This means that the following actions
+   * will cause the child process to block:
+   *     - read input from the terminal (SIGTTIN signal)
+   *     - write output to the terminal
+   *       (SIGTTOU signal if terminal mode TOSTOP enabled)
+   *     - change terminal settings     (SIGTTOU signal)
+   *
+   * As rlimit is not supposed to read input the following is done:
+   *
+   * 1- make the child process the foreground process group
+   * 2- allow the parent process to write in parallel to the terminal
+   */
+
   pid = fork ();
   switch (pid) {
     case -1:
@@ -184,6 +199,23 @@ main (int argc, char **argv)
         }
       #endif /* __APPLE__ */
 
+      /* ignore SIGTTOU so that tcsetpgrp call does not block. */
+      signal (SIGTTOU, SIG_IGN);
+
+      /* Set child process as foreground process group so that
+       * children can read from the terminal if needed. Note that
+       * we ignore any error here because stdin might not be a terminal.
+       * If only stdout is a terminal there are no issues with not
+       * being the foreground process as most terminals are configured
+       * with TOSTOP off (so SIGTTOU is only emited in case of terminal
+       * settings change.
+       */
+      tcsetpgrp(0, getpgid(getpid()));
+
+      /* Restore SIGTTIN and SIGTTOU signal to their original value
+       * in order not to impact children processes behaviour. */
+      signal (SIGTTIN, SIG_DFL);
+      signal (SIGTTOU, SIG_DFL);
       execvp ((const char *) argv[2], (char *const *) &argv[2]);
       fprintf (stderr, "rlimit: could not run \"%s\": ", argv[2]);
       perror ("execvp");
@@ -195,6 +227,13 @@ main (int argc, char **argv)
          SIGCHLD is received */
       int timeout = atoi (argv[1]);
       int seconds = timeout;
+
+      /* At this stage rlimit might not be anymore the foreground process.
+       * Ignore SIGTTOU in order to able to write and SIGTTIN for safety
+       * (though no input is attempted from the rlimit itself).
+       */
+      signal (SIGTTOU, SIG_IGN);
+      signal (SIGTTIN, SIG_IGN);
 
       /* pid variable is now set correctly so unblock SIGCHLD */
       sigprocmask(SIG_UNBLOCK, &block_cld, NULL);
