@@ -420,6 +420,30 @@ class ExternalRefCategory(Enum):
     other = "OTHER"
 
 
+# Create some constants to make writing easier
+SECURITY = ExternalRefCategory.security
+PACKAGE_MANAGER = ExternalRefCategory.package_manager
+PERSISTENT_ID = ExternalRefCategory.persistent_id
+OTHER = ExternalRefCategory.other
+
+# List of valid external reference types when Category is not OTHER
+SPDX_EXTERNAL_REF_TYPES = (
+    (SECURITY, "cpe22Type"),
+    (SECURITY, "cpe23Type"),
+    (SECURITY, "advisory"),
+    (SECURITY, "fix"),
+    (SECURITY, "url"),
+    (SECURITY, "swid"),
+    (PACKAGE_MANAGER, "maven-central"),
+    (PACKAGE_MANAGER, "npm"),
+    (PACKAGE_MANAGER, "nuget"),
+    (PACKAGE_MANAGER, "bower"),
+    (PACKAGE_MANAGER, "purl"),
+    (PERSISTENT_ID, "swh"),
+    (PERSISTENT_ID, "gitoid"),
+)
+
+
 class ExternalRef(SPDXEntry):
     """Reference an external source of information relevant to the package.
 
