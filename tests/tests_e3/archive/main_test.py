@@ -1,6 +1,7 @@
 import os
 import sys
 import tempfile
+import io
 
 import e3.archive
 import e3.fs
@@ -91,6 +92,43 @@ def test_unpack(ext):
         e3.fs.rm(dest, True)
 
 
+@pytest.mark.parametrize("ext", (".tar.gz", ".zip"))
+def test_unpack_fileobj(ext):
+    dir_to_pack = os.path.dirname(__file__)
+
+    test_dir = os.path.basename(dir_to_pack)
+
+    dest = "dest"
+    e3.fs.mkdir(dest)
+
+    archive_name = "e3-core" + ext
+
+    try:
+        fo = io.BytesIO()
+        e3.archive.create_archive(
+            filename=archive_name,
+            from_dir=os.path.abspath(dir_to_pack),
+            fileobj=fo,
+        )
+
+        fo.seek(0)
+        e3.fs.mkdir(os.path.join(dest, "dest2"))
+        e3.archive.unpack_archive(
+            filename=archive_name,
+            dest=os.path.join(dest, "dest2"),
+            fileobj=fo,
+            selected_files=(
+                e3.os.fs.unixpath(os.path.join(test_dir, os.path.basename(__file__))),
+            ),
+            remove_root_dir=True,
+        )
+
+        assert os.path.exists(os.path.join(dest, "dest2", os.path.basename(__file__)))
+
+    finally:
+        e3.fs.rm(dest, True)
+
+
 def test_unsupported():
     """Test unsupported archive format."""
     with pytest.raises(e3.archive.ArchiveError) as err:
@@ -145,6 +183,48 @@ def test_unpack_cmd():
     assert os.path.basename(t.kwargs["f"]) == archive_name
     assert t.kwargs["d"] == all_dest
     assert t.kwargs["s"] == ["bar"]
+
+
+def test_unpack_cmd_fileobj():
+    """Test custom unpack_cmd with fileobj."""
+    dir_to_pack = os.path.dirname(__file__)
+
+    dest = "dest"
+    e3.fs.mkdir(dest)
+
+    archive_name = "e3-core.tar"
+
+    fo = io.BytesIO()
+    e3.archive.create_archive(
+        filename=archive_name,
+        from_dir=os.path.abspath(dir_to_pack),
+        fileobj=fo,
+    )
+
+    all_dest = "all_dest"
+    e3.fs.mkdir(all_dest)
+
+    # Use a custom unpack function and verify that it is called with
+    # the expected arguments
+    class TestResult:
+        def store_result(self, **kwargs):
+            self.kwargs = kwargs
+
+    t = TestResult()
+
+    def custom_unpack(filename, dest, fileobj):
+        t.store_result(f=filename, d=dest, fo=fileobj)
+
+    fo.seek(0)
+    e3.archive.unpack_archive(
+        filename=archive_name,
+        fileobj=fo,
+        dest=all_dest,
+        unpack_cmd=custom_unpack,
+    )
+    assert t.kwargs["f"] == archive_name
+    assert t.kwargs["d"] == all_dest
+    assert t.kwargs["fo"] == fo
 
 
 def test_unpack_files():
