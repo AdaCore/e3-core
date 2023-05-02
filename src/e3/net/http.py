@@ -23,10 +23,14 @@ from e3.fs import rm
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Deque
+    from typing import Any, Deque, Protocol
     from collections.abc import Callable
     from requests.auth import AuthBase
     from requests.models import Response
+
+    class _Fileobj(Protocol):
+        def write(self, __b: bytes) -> object:
+            ...
 
 
 logger = e3.log.getLogger("net.http")
@@ -236,8 +240,9 @@ class HTTPSession:
     def download_file(
         self,
         url: str,
-        dest: str,
+        dest: str | None = None,
         filename: str | None = None,
+        fileobj: _Fileobj | None = None,
         validate: Callable[[str], bool] | None = None,
         exception_on_error: bool = False,
         **kwargs: Any,
@@ -245,21 +250,31 @@ class HTTPSession:
         """Download a file.
 
         :param url: the url to GET
-        :param dest: local directory path for the downloaded file
-        :param filename: the local path where to store this resource, by
-            default uses the name provided in the ``Content-Disposition``
+        :param dest: local directory path for the downloaded file. If
+            None, a file object must be specified.
+        :param filename: the local path whether to store this resource, by
+            default use the name provided  in the ``Content-Disposition``
             header.
+        :param fileobj: if specified, the downloaded file is written to this
+            file object instead of opening a file. The file object must be
+            opened in binary mode.
         :param validate: function to call once the download is complete for
             detecting invalid / corrupted download. Takes the local path as
-            parameter and returns a boolean.
+            parameter and returns a boolean. The function is not called
+            when a file object is specified.
         :param exception_on_error: if True raises an exception in case download
             fails instead of returning None.
         :param kwargs: additional parameters for the request
-        :return: the name of the file or None if there is an error
+        :return: the name of the file, or None if there is an error or a file
+            object is passed and the filename could not be deduced from the
+            request.
+        :raises ValueError: if neither dest nor fileobj is provided
         """
         # When using stream=True, Requests cannot release the connection back
         # to the pool unless all the data is consumed or Response.close called.
         # Force Response.close by wrapping the code with contextlib.closing
+        if dest is None and fileobj is None:
+            raise ValueError("no destination provided")
 
         path = None
         try:
@@ -271,6 +286,24 @@ class HTTPSession:
                 if filename is None:
                     if "content-disposition" in response.headers:
                         filename = get_filename(response.headers["content-disposition"])
+
+                expected_size = content_length // self.CHUNK_SIZE
+
+                chunks = e3.log.progress_bar(
+                    response.iter_content(self.CHUNK_SIZE), total=expected_size
+                )
+
+                if fileobj is not None:
+                    # Write to file object if provided
+                    logger.info("downloading %s size=%s", path, content_length)
+                    for chunk in chunks:
+                        fileobj.write(chunk)
+                    return filename
+                else:
+                    # Dest can't be None here according to condition at the top
+                    assert dest is not None
+
+                    # Fallback to local file otherwise
                     if filename is None:
                         # Generate a temporary name
                         tmpf = tempfile.NamedTemporaryFile(
@@ -279,19 +312,18 @@ class HTTPSession:
                         tmpf.close()
                         filename = tmpf.name
 
-                path = os.path.join(dest, filename)
-                logger.info("downloading %s size=%s", path, content_length)
+                    path = os.path.join(dest, filename)
 
-                expected_size = content_length // self.CHUNK_SIZE
-                with open(path, "wb") as fd:
-                    for chunk in e3.log.progress_bar(
-                        response.iter_content(self.CHUNK_SIZE), total=expected_size
-                    ):
-                        fd.write(chunk)
-                if validate is None or validate(path):
-                    return path
-                else:
-                    rm(path)
+                    logger.info("downloading %s size=%s", path, content_length)
+
+                    with open(path, "wb") as fd:
+                        for chunk in chunks:
+                            fd.write(chunk)
+
+                    if validate is None or validate(path):
+                        return path
+                    else:
+                        rm(path)
         except (requests.exceptions.RequestException, HTTPError) as e:
             # An error (timeout?) occurred while downloading the file
             logger.warning("download failed")
