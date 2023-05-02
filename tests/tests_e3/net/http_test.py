@@ -3,6 +3,7 @@ import logging
 import os
 import threading
 import time
+from io import BytesIO
 
 import requests_toolbelt.multipart
 from e3.net.http import HTTPSession, HTTPError
@@ -142,6 +143,16 @@ class TestHTTP:
                 with open(result, "rb") as fd:
                     content = fd.read()
                 assert content == b"Dummy!"
+                assert os.path.basename(result) == "dummy.txt"
+
+        run_server(ContentDispoHandler, func)
+
+    def test_content_dispo_fileobj(self, socket_enabled):
+        def func(server, base_url):
+            with HTTPSession() as session:
+                fo = BytesIO()
+                result = session.download_file(base_url + "dummy", fileobj=fo)
+                assert fo.getvalue() == b"Dummy!"
                 assert os.path.basename(result) == "dummy.txt"
 
         run_server(ContentDispoHandler, func)
