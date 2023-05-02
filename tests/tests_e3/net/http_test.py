@@ -93,6 +93,17 @@ class MultiPartPostHandler(BaseHTTPRequestHandler):
         logging.debug("POST finish")
 
 
+class AuthorizationHeaderHandler(ContentDispoHandler):
+    def do_GET(self):
+        if self.headers.get("Authorization") != "Bearer toto":
+            self.send_response(403)
+            self.end_headers()
+            self.wfile.close()
+            return
+
+        super(AuthorizationHeaderHandler, self).do_GET()
+
+
 def run_server(handler, func):
     server = HTTPServer(("localhost", 0), handler)
     try:
@@ -220,3 +231,28 @@ class TestHTTP:
             run_server(MultiPartPostHandler, func)
 
         run_server(ServerErrorHandler, outter_func)
+
+    def test_authorization_header(self, socket_enabled):
+        def func(server, base_url):
+            with HTTPSession() as session:
+                # first test with no authorization header
+                try:
+                    result = session.download_file(
+                        base_url + "dummy", dest=".", exception_on_error=True
+                    )
+                    raise AssertionError("exception not raised")
+                except HTTPError as e:
+                    assert e.status == 403
+                # second test with authorization header
+                result = session.download_file(
+                    base_url + "dummy",
+                    dest=".",
+                    exception_on_error=True,
+                    headers={"Authorization": "Bearer toto"},
+                )
+                with open(result, "rb") as fd:
+                    content = fd.read()
+                assert content == b"Dummy!"
+                assert os.path.basename(result) == "dummy.txt"
+
+        run_server(AuthorizationHeaderHandler, func)
