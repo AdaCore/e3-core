@@ -240,6 +240,7 @@ class HTTPSession:
         filename: str | None = None,
         validate: Callable[[str], bool] | None = None,
         exception_on_error: bool = False,
+        **kwargs: Any,
     ) -> str | None:
         """Download a file.
 
@@ -253,6 +254,7 @@ class HTTPSession:
             parameter and returns a boolean.
         :param exception_on_error: if True raises an exception in case download
             fails instead of returning None.
+        :param kwargs: additional parameters for the request
         :return: the name of the file or None if there is an error
         """
         # When using stream=True, Requests cannot release the connection back
@@ -262,7 +264,7 @@ class HTTPSession:
         path = None
         try:
             with contextlib.closing(
-                self.request(method="GET", url=url, stream=True)
+                self.request(method="GET", url=url, stream=True, **kwargs)
             ) as response:
                 content_length = int(response.headers.get("content-length", 0))
                 e3.log.debug(response.headers)
