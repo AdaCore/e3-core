@@ -245,13 +245,13 @@ class HTTPSession:
 
         :param url: the url to GET
         :param dest: local directory path for the downloaded file
-        :param filename: the local path whether to store this resource, by
-            default use the name provided  in the ``Content-Disposition``
+        :param filename: the local path where to store this resource, by
+            default uses the name provided in the ``Content-Disposition``
             header.
         :param validate: function to call once the download is complete for
             detecting invalid / corrupted download. Takes the local path as
             parameter and returns a boolean.
-        :param exception_on_error: if True raise an exception in case download
+        :param exception_on_error: if True raises an exception in case download
             fails instead of returning None.
         :return: the name of the file or None if there is an error
         """
