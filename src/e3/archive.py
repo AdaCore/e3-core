@@ -10,7 +10,7 @@ import tarfile
 import tempfile
 import zipfile
 from contextlib import closing
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import e3
 import e3.error
@@ -20,7 +20,7 @@ import e3.os.fs
 
 
 if TYPE_CHECKING:
-    from typing import Literal, Text, Union
+    from typing import Literal, Text, Union, IO, Any
     from collections.abc import Callable, Sequence
     from os import PathLike
     from e3.mypy import assert_never
@@ -146,6 +146,7 @@ def check_type(
 def unpack_archive(
     filename: str,
     dest: str,
+    fileobj: IO[bytes] | None = None,
     selected_files: Sequence[str] | None = None,
     remove_root_dir: RemoveRootDirType = False,
     unpack_cmd: Callable[..., None] | None = None,
@@ -159,6 +160,10 @@ def unpack_archive(
 
     :param filename: archive to unpack
     :param dest: destination directory (should exist)
+    :param fileobj: if specified, the archive is read from this file object
+        instead of opening a file. The file object must be opened in binary
+        mode. In this case filename is the name of the archive contained
+        in the file object.
     :param selected_files: list of files to unpack (partial extraction). If
         None all files are unpacked
     :param remove_root_dir: if True then the root dir of the archive is
@@ -192,7 +197,7 @@ def unpack_archive(
     logger.debug("unpack %s in %s", filename, dest)
     # First do some checks such as archive existence or destination directory
     # existence.
-    if not os.path.isfile(filename):
+    if fileobj is None and not os.path.isfile(filename):
         raise ArchiveError(origin="unpack_archive", message=f"cannot find {filename}")
 
     if not os.path.isdir(dest):
@@ -205,14 +210,19 @@ def unpack_archive(
 
     # We need to resolve to an absolute path as the extraction related
     # processes will be run in the destination directory
-    filename = os.path.abspath(filename)
+    if fileobj is None:
+        filename = os.path.abspath(filename)
 
     if unpack_cmd is not None:
         # Use user defined unpack command
-        if not selected_files:
-            return unpack_cmd(filename, dest)
-        else:
-            return unpack_cmd(filename, dest, selected_files=selected_files)
+        kwargs: dict[str, Any] = {}
+        if selected_files:
+            kwargs["selected_files"] = selected_files
+
+        if fileobj is not None:
+            kwargs["fileobj"] = fileobj
+
+        return unpack_cmd(filename, dest, **kwargs)
 
     ext = check_type(filename, force_extension=force_extension)
 
@@ -237,7 +247,13 @@ def unpack_archive(
                 elif ext.endswith("xz"):
                     mode += "xz"
                 # Extract tar files
-                with closing(tarfile.open(filename, mode=mode)) as fd:
+                with closing(
+                    tarfile.open(
+                        filename if fileobj is None else None,
+                        fileobj=fileobj,
+                        mode=mode,
+                    )
+                ) as fd:
                     check_selected = set(selected_files)
 
                     def is_match(name: str, files: Sequence[str]) -> bool:
@@ -291,7 +307,9 @@ def unpack_archive(
 
         elif ext == "zip":
             try:
-                with closing(E3ZipFile(filename, mode="r")) as zip_fd:
+                with closing(
+                    E3ZipFile(fileobj if fileobj is not None else filename, mode="r")
+                ) as zip_fd:
                     zip_fd.extractall(
                         tmp_dest, selected_files if selected_files else None
                     )
@@ -358,7 +376,8 @@ def unpack_archive(
 def create_archive(
     filename: str,
     from_dir: str,
-    dest: str,
+    dest: str | None = None,
+    fileobj: IO[bytes] | None = None,
     force_extension: str | None = None,
     from_dir_rename: str | None = None,
     no_root_dir: bool = False,
@@ -372,18 +391,33 @@ def create_archive(
 
     :param filename: archive to create
     :param from_dir: directory to pack (full path)
-    :param dest: destination directory (should exist)
+    :param dest: destination directory (should exist). If not specified,
+        the archive is written to the file object passed with fileobj.
+    :param fileobj: if specified, the archive is written to this file object
+        instead of opening a file. The file object must be opened in binary
+        mode. In this case filename is the name of the archive contained
+        in the file object.
     :param force_extension: specify the archive extension if not in the
         filename. If filename has no extension and force_extension is None
         create_archive will fail.
     :param from_dir_rename: name of root directory in the archive.
     :param no_root_dir: create archive without the root dir (zip only)
 
+    :raise ValueError: neither dest nor fileobj is provided
     :raise ArchiveError: if an error occurs
     """
+    if dest is None and fileobj is None:
+        raise ValueError("no destination provided")
+
     # Check extension
     from_dir = from_dir.rstrip("/")
-    filepath = os.path.abspath(os.path.join(dest, filename))
+
+    # If fileobj is None, dest is not None
+    filepath = (
+        os.path.abspath(os.path.join(cast(str, dest), filename))
+        if fileobj is None
+        else None
+    )
 
     ext = check_type(filename, force_extension=force_extension)
 
@@ -391,7 +425,11 @@ def create_archive(
         from_dir_rename = os.path.basename(from_dir)
 
     if ext == "zip":
-        zip_archive = zipfile.ZipFile(filepath, "w", zipfile.ZIP_DEFLATED)
+        zip_archive = zipfile.ZipFile(
+            cast(str, filepath) if fileobj is None else fileobj,
+            "w",
+            zipfile.ZIP_DEFLATED,
+        )
         for root, _, files in os.walk(from_dir):
             relative_root = os.path.relpath(
                 os.path.abspath(root), os.path.abspath(from_dir)
@@ -413,5 +451,7 @@ def create_archive(
             tar_format = "w:xz"
         else:
             assert_never()
-        with closing(tarfile.open(filepath, tar_format)) as tar_archive:
+        with closing(
+            tarfile.open(filepath, fileobj=fileobj, mode=tar_format)
+        ) as tar_archive:
             tar_archive.add(name=from_dir, arcname=from_dir_rename, recursive=True)
