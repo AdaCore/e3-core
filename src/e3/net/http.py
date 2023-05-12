@@ -295,7 +295,7 @@ class HTTPSession:
 
                 if fileobj is not None:
                     # Write to file object if provided
-                    logger.info("downloading %s size=%s", path, content_length)
+                    logger.info("downloading %s size=%s", filename, content_length)
                     for chunk in chunks:
                         fileobj.write(chunk)
                     return filename
