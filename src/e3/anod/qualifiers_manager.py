@@ -743,7 +743,7 @@ class QualifiersManager:
     def __error(self, msg: str) -> None:
         """Raise an error and print the helper."""
         print(self.__get_helper())
-        raise AnodError(msg)
+        raise AnodError(self.anod_instance.name + ": " + msg)
 
     def __get_helper(self) -> str:
         """Return an helper for the current state of Qualifiers.
