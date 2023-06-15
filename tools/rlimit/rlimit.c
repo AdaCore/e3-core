@@ -24,11 +24,13 @@
    Usage:
       rlimit seconds command [args]   */
 
+#define _XOPEN_SOURCE 500 /* For setpgid */
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
@@ -37,11 +39,11 @@ void
 usage (void)
 {
   printf ("Usage:\n");
-  printf ("   rlimit seconds command [args]\n");
+  printf ("   rlimit [--foreground] seconds command [args]\n");
   exit (1);
 }
 
-
+static int foreground = 0;
 static int pid    = 0;
 /* pid of child (controlled) process */
 
@@ -71,6 +73,8 @@ void
 reapchild (int nsig)
 {
   int delay;
+
+  (void)nsig;
 
   if (pid > 0) {
     int rc;
@@ -125,16 +129,26 @@ reapchild (int nsig)
 int
 main (int argc, char **argv)
 {
+  int begin;
   sigset_t block_cld;
 
   /* we need at least 3 args */
   if (argc < 3)
     usage ();
 
+  begin = 2;
+
+  if (strcmp(argv[1], "--foreground") == 0) {
+    ++foreground;
+    ++begin;
+  }
+  else if (*argv[1] == '-')
+      usage();
+
   /* argv[0] = .../rlimit
-     argv[1] = seconds
-     argv[2] = command
-     argv[3] = args */
+     argv[begin - 1] = seconds
+     argv[begin] = command
+     argv[begin + 1] = args */
 
   signal (SIGTERM, terminate_group);
   signal (SIGINT, terminate_group);
@@ -179,9 +193,9 @@ main (int argc, char **argv)
       sigprocmask(SIG_UNBLOCK, &block_cld, NULL);
 
       /* child exec the command in a new process group */
-      if (setpgid (0, 0)) {
-        perror ("setpgid");
-        exit (4);
+      if (setpgid (0, 0) == -1) {
+        perror("setpgid");
+        exit(4);
       }
 
       #if defined (__APPLE__)
@@ -202,22 +216,29 @@ main (int argc, char **argv)
       /* ignore SIGTTOU so that tcsetpgrp call does not block. */
       signal (SIGTTOU, SIG_IGN);
 
-      /* Set child process as foreground process group so that
-       * children can read from the terminal if needed. Note that
-       * we ignore any error here because stdin might not be a terminal.
+      /* If run with --foreground process group, rlimit must be able to
+       * read and write from a tty (not only read => STDIN is a tty).
+       *
        * If only stdout is a terminal there are no issues with not
        * being the foreground process as most terminals are configured
        * with TOSTOP off (so SIGTTOU is only emited in case of terminal
        * settings change.
        */
-      tcsetpgrp(0, getpgid(getpid()));
+      if (foreground && tcsetpgrp(0, getpgid(getpid())) == -1) {
+        perror("tcsetpgrp");
+	    exit(4);
+      }
 
       /* Restore SIGTTIN and SIGTTOU signal to their original value
        * in order not to impact children processes behaviour. */
       signal (SIGTTIN, SIG_DFL);
-      signal (SIGTTOU, SIG_DFL);
-      execvp ((const char *) argv[2], (char *const *) &argv[2]);
-      fprintf (stderr, "rlimit: could not run \"%s\": ", argv[2]);
+
+      /* When we are not in the foreground, we ignore SIGTTOU so that child process can
+       * write. */
+      if (foreground)
+        signal (SIGTTOU, SIG_DFL);
+      execvp ((const char *) argv[begin], (char *const *) &argv[begin]);
+      fprintf (stderr, "rlimit: could not run \"%s\": ", argv[begin]);
       perror ("execvp");
       exit (5);
 
@@ -225,7 +246,7 @@ main (int argc, char **argv)
       /* parent sleeps
          wake up when the sleep call returns or when
          SIGCHLD is received */
-      int timeout = atoi (argv[1]);
+      int timeout = atoi (argv[begin - 1]);
       int seconds = timeout;
 
       /* At this stage rlimit might not be anymore the foreground process.
