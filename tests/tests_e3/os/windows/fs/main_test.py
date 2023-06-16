@@ -113,9 +113,9 @@ def test_volume_path():
     ntfile = NTFile(test_file_path)
     assert ntfile.volume_path
 
+    ntfile = NTFile("0:/dummy")
     with pytest.raises(NTException):
         # Choose a volume name that is unlikely to exist 0:/
-        ntfile = NTFile("0:/dummy")
         print(ntfile.volume_path)
 
 
