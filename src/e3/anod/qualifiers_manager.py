@@ -710,7 +710,7 @@ class QualifiersManager:
 
         component_name = self.component
 
-        if component_name is not None:
+        if component_name is not None and self.anod_instance.kind != "test":
             # A component name has been defined and must be used.
             return component_name
 
