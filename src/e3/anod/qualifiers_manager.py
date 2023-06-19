@@ -736,7 +736,7 @@ class QualifiersManager:
 
         # Compute hash_suffix
         if self.hash_pool:
-            hash_suffix = f"_{sha1(self.hash_pool.encode()).hexdigest()}"
+            hash_suffix = f"_{sha1(self.hash_pool.encode()).hexdigest()[:8]}"
 
         return self.base_name + qualifier_suffix + hash_suffix + kind_suffix
 
