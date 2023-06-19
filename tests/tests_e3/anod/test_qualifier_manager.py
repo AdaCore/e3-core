@@ -406,28 +406,19 @@ def test_qualifiers_manager():
     anod_no_component_1 = AnodNoComponent(
         "debug,version=1.2,path=/some/path,path_bis=/other/path", kind="build"
     )
-    assert (
-        anod_no_component_1.build_space_name
-        == "my_spec_debug_1.2_ca656cbada5f82b1063b10f1e1adaeb11c98e6fe"
-    )
+    assert anod_no_component_1.build_space_name == "my_spec_debug_1.2_ca656cba"
     assert anod_no_component_1.component is None
 
     anod_no_component_2 = AnodNoComponent(
         "version=1.2,path=/some/path,path_bis=/other/path", kind="build"
     )
-    assert (
-        anod_no_component_2.build_space_name
-        == "my_spec_1.2_ca656cbada5f82b1063b10f1e1adaeb11c98e6fe"
-    )
+    assert anod_no_component_2.build_space_name == "my_spec_1.2_ca656cba"
     assert anod_no_component_2.component is None
 
     anod_no_component_3 = AnodNoComponent(
         "debug,version=1.2,path=/different/path,path_bis=/path", kind="build"
     )
-    assert (
-        anod_no_component_3.build_space_name
-        == "my_spec_debug_1.2_7a7d1e2193d81f68693fe880de86a1c54bfcbb2c"
-    )
+    assert anod_no_component_3.build_space_name == "my_spec_debug_1.2_7a7d1e21"
     assert anod_no_component_3.component is None
 
     class AnodComponent(Anod):
