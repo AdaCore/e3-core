@@ -32,12 +32,12 @@ def test_anod_name_generator():
     simple = Simple("", kind="build")
     assert simple.build_space_name == "simple"
     assert simple.component is None
-    assert simple.get_qualifier("debug") == "False"
+    assert not simple.get_qualifier("debug")
 
     simple_debug = Simple("debug", kind="build")
     assert simple_debug.build_space_name == "simple_debug"
     assert simple_debug.component is None
-    assert simple_debug.get_qualifier("debug") == "True"
+    assert simple_debug.get_qualifier("debug")
 
     # Disable the name generator
     class Base(Anod):
@@ -45,6 +45,9 @@ def test_anod_name_generator():
 
     base = Base("", kind="build")
     assert base.get_qualifier("debug") is None
+
+    base = Base("debug=bar", kind="build")
+    assert base.get_qualifier("debug") == "bar"
 
 
 def test_qualifiers_manager_errors():

@@ -406,7 +406,7 @@ class Anod:
         elif key.isupper():
             return getattr(self.build_space, key.lower(), None)
 
-    def get_qualifier(self, qualifier_name: str) -> str | None:
+    def get_qualifier(self, qualifier_name: str) -> str | bool | None:
         """Return a qualifier value.
 
         Requires that qualifiers_manager attribute has been initialized and its parse
@@ -420,7 +420,7 @@ class Anod:
             assert self.qualifiers_manager is not None
             return self.qualifiers_manager[qualifier_name]
         else:
-            return None
+            return self.parsed_qualifier.get(qualifier_name, None)
 
     @classmethod
     def primitive(
