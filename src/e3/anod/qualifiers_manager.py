@@ -783,9 +783,9 @@ class QualifiersManager:
 
         return "\n".join(helper_list)
 
-    def __getitem__(self, key: str) -> str:
+    def __getitem__(self, key: str) -> str | bool:
         """Return the parsed value of the requested qualifier.
 
         :return: The qualifier value after the parsing.
         """
-        return str(self.__get_parsed_qualifiers()[key])
+        return self.__get_parsed_qualifiers()[key]
