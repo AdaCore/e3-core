@@ -351,7 +351,9 @@ class QualifiersManager:
         self.raw_component_decls[name] = required_qualifier_configuration
 
     def __force_default_values(
-        self, qualifier_dict: dict[str, str]
+        self,
+        qualifier_dict: dict[str, str],
+        ignore_test_only: bool = False,
     ) -> dict[str, str | bool]:
         """Force the default value of the qualifiers.
 
@@ -366,6 +368,8 @@ class QualifiersManager:
 
         :param qualifier_dict: The dictionary of qualifiers for which the default
             values are required.
+        :param ignore_test_only: If set to True, the qualifier marked as test_only are
+            completely ignored
         """
         if not self.is_declaration_phase_finished:
             raise AnodError(
@@ -379,6 +383,10 @@ class QualifiersManager:
 
         # Add the required default values
         for qualifier_name, qualifier in self.qualifier_decls.items():
+            # Ignore test_only qualifier if needed
+            if qualifier["test_only"] and ignore_test_only:
+                continue
+
             if qualifier["type"] == self.__KEY_VALUE_QUALIFIER:
                 if qualifier_name not in qualifier_dict:
                     # The qualifier must have a default. This is checked by
@@ -398,7 +406,9 @@ class QualifiersManager:
         return qualifier_dict_with_default
 
     def __check_qualifier_consistency(
-        self, qualifier_configuration: dict[str, str]
+        self,
+        qualifier_configuration: dict[str, str],
+        ignore_test_only: bool = False,
     ) -> None:
         """Check that the qualifiers are compliant with their declarations.
 
@@ -409,6 +419,8 @@ class QualifiersManager:
 
         :param qualifier_configuration: A dictionary of qualifiers to be checked.
             The key are the qualifiers names and the values the qualifier values.
+        :param ignore_test_only: If set to True, the qualifier marked as test_only are
+            completely ignored
         """
         # The declaration phase must be finished to ensure the consistency of the result
         if not self.is_declaration_phase_finished:
@@ -426,6 +438,10 @@ class QualifiersManager:
                 )
 
             qualifier = self.qualifier_decls[qualifier_name]
+
+            # Ignore the test_only qualifier if needed
+            if ignore_test_only and qualifier["test_only"]:
+                continue
 
             # If the qualifier is test_only and the current anod kind is not test,
             # raise an error.
@@ -465,6 +481,12 @@ class QualifiersManager:
 
         # Make sure all the declared qualifiers are stated
         for qualifier_name, qualifier in self.qualifier_decls.items():
+            # Ignore test_only qualifier if needed
+            if qualifier["test_only"] and (
+                ignore_test_only or self.anod_instance.kind != "test"
+            ):
+                continue
+
             if qualifier["type"] == self.__KEY_VALUE_QUALIFIER:
                 if qualifier_name not in qualifier_configuration:
                     # The qualifier must have a default otherwise it would not have
@@ -530,12 +552,24 @@ class QualifiersManager:
                 # Add some context informations to the errors raised by
                 # __check_qualifier_consistency to ease the debugging process.
                 try:
-                    self.__check_qualifier_consistency(qualifier_dict)
+                    self.__check_qualifier_consistency(
+                        qualifier_dict,
+                        ignore_test_only=True,
+                    )
                 except AnodError as e:
                     raise AnodError(f'In component "{component}": {str(e)}') from e
 
+                # Make sure no test_only qualifier is used in a component definition
+                for q in qualifier_dict:
+                    if self.qualifier_decls[q]["test_only"]:
+                        raise AnodError(
+                            f'In component "{component}": The qualifier "{q}" is'
+                            " test_only and cannot be used to define a component"
+                        )
+
                 qualifier_dict_with_default_values = self.__force_default_values(
-                    qualifier_dict
+                    qualifier_dict,
+                    ignore_test_only=True,
                 )
 
                 qualifier_configuration = self.__qualifier_config_repr(
@@ -577,7 +611,9 @@ class QualifiersManager:
         self.__check_qualifier_consistency(user_qualifiers)
 
         # Add the default values
-        self.qualifier_values = self.__force_default_values(user_qualifiers)
+        self.qualifier_values = self.__force_default_values(
+            user_qualifiers, ignore_test_only=self.anod_instance.kind != "test"
+        )
 
     def __get_parsed_qualifiers(self) -> dict[str, str | bool]:
         """Return the parsed qualifier dictionary.
@@ -619,6 +655,12 @@ class QualifiersManager:
         # Assuming that the qualifier has been declared.
         # In practice, this is checked by build_space_name before it call this function.
         qualifier = self.qualifier_decls[qualifier_name]
+
+        # If the qualifier is test_only and the anod kind is not test then the
+        # qualifier is ignored.
+        if qualifier["test_only"] and self.anod_instance.kind != "test":
+            return ""
+
         qualifier_value = parsed_qualifiers[qualifier_name]
 
         # Hold the part of the suffix induced by the qualifier.
@@ -675,10 +717,17 @@ class QualifiersManager:
                 "declaration phase"
             )
 
+        # Remove the test_only qualifier as they are not used for the component
+        qualifier_configuration = {
+            q: v
+            for q, v in self.__get_parsed_qualifiers().items()
+            if not self.qualifier_decls[q]["test_only"]
+        }
+
         # This ensured by __end_declaration_phase
         assert self.component_names is not None
         return self.component_names.get(
-            self.__qualifier_config_repr(self.__get_parsed_qualifiers())
+            self.__qualifier_config_repr(qualifier_configuration)
         )
 
     @property

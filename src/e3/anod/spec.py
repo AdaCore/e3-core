@@ -248,8 +248,6 @@ class Anod:
             self.qualifiers_manager = QualifiersManager(self)
             self.declare_qualifiers_and_components(self.qualifiers_manager)
             self.qualifiers_manager.parse(self.parsed_qualifier)
-        else:
-            self.qualifier_manager = None
 
         # UID of the spec instance
         self.uid = ".".join(
