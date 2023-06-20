@@ -345,6 +345,30 @@ def test_qualifiers_manager_errors():
         "The parse method must be called first to generate qualifiers values"
     )
 
+    # Use a test_only qualifier in a component
+    class TestInComp(Anod):
+        enable_name_generator = True
+        base_name = "dummy"
+
+        def declare_qualifiers_and_components(self, qm):
+            qm.declare_tag_qualifier(
+                name="foo",
+                description="foo",
+                test_only=True,
+            )
+
+            qm.declare_component(
+                "bar",
+                {"foo": ""},
+            )
+
+    with pytest.raises(AnodError) as err:
+        TestInComp(qualifier="", kind="build")
+    assert str(err.value) == (
+        'In component "bar": The qualifier "foo" is test_only and cannot be used to '
+        "define a component"
+    )
+
 
 def test_qualifiers_manager():
     class Simple(Anod):
@@ -471,6 +495,42 @@ def test_qualifiers_manager():
     assert str(err.value) == (
         'The key-value qualifier "version" must be passed with a value'
     )
+
+    # test_only qualifier
+    class AnodTestOnly(Anod):
+        enable_name_generator = True
+        base_name = "my_spec"
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            qualifiers_manager.declare_key_value_qualifier(
+                name="foo",
+                description="foo",
+                test_only=True,
+            )
+
+            qualifiers_manager.declare_tag_qualifier(
+                name="bar",
+                description="foo",
+            )
+
+            qualifiers_manager.declare_component(
+                "baz",
+                {},
+            )
+
+    anod_component_4 = AnodTestOnly(qualifier="", kind="build")
+    assert anod_component_4.build_space_name == "baz"
+    assert anod_component_4.component == "baz"
+
+    anod_component_5 = AnodTestOnly(qualifier="bar", kind="build")
+    assert anod_component_5.build_space_name == "my_spec_bar"
+    assert anod_component_5.component is None
+    assert anod_component_5.get_qualifier("bar")
+
+    anod_component_6 = AnodTestOnly(qualifier="foo=bar", kind="test")
+    assert anod_component_6.build_space_name == "my_spec_foo-bar_test"
+    assert anod_component_6.component == "baz"
+    assert not anod_component_6.get_qualifier("bar")
 
     # Unit test
 
