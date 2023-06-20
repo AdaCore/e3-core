@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 import e3.log
 import requests_toolbelt.multipart
 from e3.error import E3Error
-from e3.fs import rm
+from e3.fs import rm, mkdir
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -313,6 +313,11 @@ class HTTPSession:
                         filename = tmpf.name
 
                     path = os.path.join(dest, filename)
+
+                    # create dest subdir if they do not exist
+                    dest_dir = os.path.dirname(path)
+                    if not os.path.exists(dest_dir):
+                        mkdir(dest_dir)
 
                     logger.info("downloading %s size=%s", path, content_length)
 
