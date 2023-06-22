@@ -426,8 +426,8 @@ class Anod:
     @classmethod
     def primitive(
         cls,
-        pre: Callable[[Anod], dict] | None = None,
-        post: Callable[..., None] | None = None,
+        pre: Callable[[Anod], dict] | str | None = None,
+        post: Callable[..., None] | str | None = None,
         version: Callable[..., str] | None = None,
         require: Callable[[Anod], bool] | None = None,
     ) -> Callable:
@@ -464,12 +464,27 @@ class Anod:
 
                 try:
                     # If there is a pre function call it
-                    if pre is not None:
-                        self._pre = getattr(self, pre)()
+                    # Update inner `_pre` callables dict depending on the
+                    # variable type.
+                    if isinstance(pre, str):
+                        # Assume this is the name of a method in this Anod
+                        # spec.
+                        self._pre = getattr(self, pre)(self)
+                    elif callable(pre):
+                        # Assume a callable Anod primitive ?
+                        self._pre = pre(self)
 
                     # Run the primitive
                     result = f(self, *args, **kwargs)
                     self.log.debug("%s %s ends", self.name, f.__name__)
+
+                    # If there is a post function call it
+                    if isinstance(post, str):
+                        # Assume this is the name of a method in this Anod
+                        # spec.
+                        getattr(self, post)(self)
+                    elif callable(post):
+                        post(self)
 
                     # And return the result
                     return result
