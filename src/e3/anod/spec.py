@@ -131,6 +131,7 @@ def fetch_attr(instance: Any, name: str, default_value: Any) -> Any:
     )
 
 
+# noinspection PyShadowingNames
 class Anod:
     """Anod base class.
 
@@ -244,6 +245,8 @@ class Anod:
 
         # Create the QualifiersManager.
         # Skip if the name generator is disabled.
+        self.qualifier_manager = None
+
         if self.enable_name_generator:
             self.qualifiers_manager = QualifiersManager(self)
             self.declare_qualifiers_and_components(self.qualifiers_manager)
@@ -352,7 +355,7 @@ class Anod:
         list of available file is set by the data_files parameter when
         initializing the spec.
 
-        :param suffix: suffix of the configuration file (default is '')
+        :param suffix: suffix of the configuration file (default is "")
         :param extended: if True then a special yaml parser is used with
             ability to use case statement
         :param selectors: additional selectors for extended mode
@@ -407,8 +410,8 @@ class Anod:
     def get_qualifier(self, qualifier_name: str) -> str | bool | None:
         """Return a qualifier value.
 
-        Requires that qualifiers_manager attribute has been initialized and its parse
-        method called.
+        Requires that qualifiers_manager attribute has been initialized and its
+        parse method called.
 
         :return: The qualifier value. Its a string for key value qualifiers and a bool
             for tag qualifiers.
@@ -449,8 +452,6 @@ class Anod:
         def primitive_dec(f, pre=pre, post=post, version=version):  # type: ignore
             def primitive_func(self, *args, **kwargs):  # type: ignore
                 self.log.debug("%s %s starts", self.name, f.__name__)
-
-                result = False
 
                 # Ensure temporary directory is set to a directory local to
                 # the current sandbox. This avoid mainly to loose track of

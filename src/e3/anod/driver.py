@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import wraps
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import e3.log
 import e3.store
@@ -38,7 +38,7 @@ def primitive_check() -> Callable[[F], F]:
 
 
 class AnodDriver:
-    def __init__(self, anod_instance: Anod, store: Store):
+    def __init__(self, anod_instance: Anod, store: Optional[Store]):
         """Initialize the Anod driver for a given Anod instance.
 
         :param anod_instance: an Anod instance
@@ -48,13 +48,17 @@ class AnodDriver:
         self.anod_instance = anod_instance
         self.store = store
 
-    def activate(self, sandbox: SandBox, spec_repository: AnodSpecRepository) -> None:
+    def activate(
+        self, sandbox: SandBox, spec_repository: Optional[AnodSpecRepository]
+    ) -> None:
         self.anod_instance.bind_to_sandbox(sandbox)
 
         self.anod_instance.log = e3.log.getLogger("spec." + self.anod_instance.uid)
 
         for e in getattr(self.anod_instance, f"{self.anod_instance.kind}_deps", ()):
-            if isinstance(e, self.anod_instance.Dependency):
+            if spec_repository is not None and isinstance(
+                e, self.anod_instance.Dependency
+            ):
                 dep_class = spec_repository.load(e.name)
                 dep_instance = dep_class(
                     qualifier=e.qualifier,
@@ -82,7 +86,11 @@ class AnodDriver:
         # First check whether there is a download primitive implemented by
         # the Anod spec.
         self.anod_instance.build_space.create(quiet=True)
-        download_data = self.anod_instance.download()
+        # Avoid an "Unresolved attribute reference 'download' for class 'Anod'"
+        # warning by using the hasattr() function.
+        download_data = None
+        if hasattr(self.anod_instance, "download"):
+            download_data = self.anod_instance.download()
         if download_data is None:
             raise AnodError("no download metadata returned by the download primitive")
         try:

@@ -19,7 +19,14 @@ extras_require = {
         # There are some backward incompatible checks in typeguard 3.x
         "typeguard<3.0.0",
     ],
-    "test": ["mock", "pytest-html", "pytest-socket", "ansi2html", "httpretty"],
+    "test": [
+        "mock",
+        "pytest",
+        "pytest-html",
+        "pytest-socket",
+        "ansi2html",
+        "httpretty",
+    ],
 }
 
 for p in ("darwin", "linux", "linux2", "win32"):
