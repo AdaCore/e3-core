@@ -159,7 +159,7 @@ class Anod:
     :cvar sandbox: e3.anod.sandbox.SandBox object shared by all Anod instances
     :vartype sandbox: e3.anod.sandbox.SandBox | None
 
-    Some attributes are meant the be overwritten in the specification file:
+    Some attributes are meant to be overwritten in the specification file:
 
     :cvar source_pkg_build: a dictionary associating Anod.SourceBuilder to the
         Anod.Source names
@@ -390,7 +390,7 @@ class Anod:
         __getitem__, e.g. self['PKG_DIR'] to access
         self.build_space.pkg_dir values.
 
-        Also directly access items returned by the ``pre`` callback.
+        Also, directly accesses items returned by the ``pre`` callback.
         """
         if self.__build_space is None:
             return "unknown"
@@ -413,8 +413,8 @@ class Anod:
         Requires that qualifiers_manager attribute has been initialized and its
         parse method called.
 
-        :return: The qualifier value. Its a string for key value qualifiers and a bool
-            for tag qualifiers.
+        :return: The qualifier value. It's a string for key value qualifiers
+            and a bool for tag qualifiers.
             Return None if the name_generator is disabled.
         """
         if self.enable_name_generator:
@@ -454,7 +454,7 @@ class Anod:
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
                 # Ensure temporary directory is set to a directory local to
-                # the current sandbox. This avoid mainly to loose track of
+                # the current sandbox. This mainly avoids losing track of
                 # temporary files that are then accumulating on the
                 # filesystems.
                 # ??? Temporary fix for T409-012 ???
