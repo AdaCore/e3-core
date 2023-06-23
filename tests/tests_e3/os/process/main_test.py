@@ -3,6 +3,7 @@ import sys
 import subprocess
 import textwrap
 import time
+import signal
 
 import e3.fs
 import e3.os.fs
@@ -113,6 +114,123 @@ def test_rlimit():
         e.set_build("x86_64-windows64")
         run_test()
         e.restore()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="A linux test")
+def test_rlimit_ctrl_c():
+    """Test rlimit CTRL-C.
+
+    When a parent process launched two or more child processes using rlimit, the CTRL-C
+    command no longer worked.
+
+    This was because when an rlimit process was launched, it became the foreground
+    process.
+
+    However, when the foreground process was killed, it left the parent process without
+    a foreground, so CTRL-C was ignored.
+
+    Examples:
+       Example 1: Spawn 1 rlimit child process:
+            python (Parent process)
+            |
+            -> rlimit (Child process / foreground process)
+
+            A CTRL-C appear:
+                The child process in the foreground was killed, leaving the parent
+                process alone with no foreground process but no child. Due to our
+                usage, this posed no known problems. However, leaving the parent
+                process without a foreground can cause unexpected results.
+
+       Example 2: Spawn 2 rlimit child process:
+            python (Parent process)
+            |
+            -> rlimit (Child process) ==> This process was the foreground process as
+            |                             long as no other rlimit process was running.
+            |                             In this example, we have 2 rlimit processes,
+            |                             so this process is not in the foreground.
+            |
+            -> rlimit (Child process / foreground process)
+
+            A CTRL-C appear:
+                The foreground process has been killed, leaving no foreground process.
+                Signals were no longer propagated, so CTRL-C did nothing.
+    """
+    try:
+        from ptyprocess import PtyProcess
+    except ImportError:
+        raise ImportError("ptyprocess is needed to run this tests") from None
+
+    # Only a linux test
+    assert sys.platform.startswith("linux"), "This test make sens only on linux"
+
+    script_to_run = """
+from __future__ import annotations
+
+import sys
+from e3.os.process import Run
+
+p2 = Run(["sleep", "100"], timeout=30, bg=True)
+p1 = Run(["sleep", "10"], timeout=1)
+# CTRL-C is now blocking
+p2.wait()
+"""
+
+    with open("tmp-test_rlimic_ctrl_c.py", "w") as f:
+        f.write(script_to_run)
+
+    start = time.perf_counter()
+    p = PtyProcess.spawn([sys.executable, "tmp-test_rlimic_ctrl_c.py"])
+    time.sleep(5)
+    p.sendintr()
+    # !!! Warning:
+    #   if the script_to_run write something on stdout, this will wait forever.
+    p.wait()
+    end = time.perf_counter()
+    assert int(end - start) < 30, f"CTRL-C failed: take {int(end - start)} seconds"
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="A linux test")
+def test_rlimit_foreground_option():
+    """Test rlimit --foreground.
+
+    Test if we can read/write from an interactive terminal using rlimit --foreground.
+    """
+    try:
+        from ptyprocess import PtyProcess
+    except ImportError:
+        raise ImportError("ptyprocess is needed to run this tests") from None
+
+    # Only a linux test
+    assert sys.platform.startswith("linux"), "This test make sens only on linux"
+
+    # Test with --foreground
+    os.environ["PS1"] = "$ "
+    p = PtyProcess.spawn(
+        [e3.os.process.get_rlimit(), "--foreground", "30", "bash", "--norc", "-i"],
+        env=os.environ,
+        echo=False,
+    )
+    p.write(b"echo 'test rlimit --foreground'\n", flush=True)
+    time.sleep(2)
+    assert p.read() == b"$ test rlimit --foreground\r\n$ "
+    # Ensure that the process is killed
+    p.kill(signal.SIGKILL)
+
+    # Test without foreground (Should failed)
+    p = PtyProcess.spawn(
+        [e3.os.process.get_rlimit(), "30", "bash", "--norc", "-i"],
+        env=os.environ,
+        echo=False,
+    )
+    p.write(b"echo 'test rlimit (no --foreground)'\n", flush=True)
+    time.sleep(2)
+    with pytest.raises(EOFError):
+        # The echo command should not be executed by bash. So p.read() will raise an
+        # EOFError. And if not, we will raise an Exception because this is not
+        # what we want.
+        p.read()
+        # Ensure that the process is killed
+    p.kill(signal.SIGKILL)
 
 
 def test_not_found():
