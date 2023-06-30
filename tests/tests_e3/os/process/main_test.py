@@ -120,7 +120,10 @@ def test_rlimit():
         e.restore()
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="A linux test")
+@pytest.mark.skipif(
+    sys.platform == "win32" or "TOX_ENV_NAME" not in os.environ,
+    reason="This test only works on limit and needs tox to manage these dependencies.",
+)
 def test_rlimit_ctrl_c():
     """Test rlimit CTRL-C.
 
@@ -199,6 +202,9 @@ def test_rlimit_foreground_option():
 
     Test if we can read/write from an interactive terminal using rlimit --foreground.
     """
+    if "TOX_ENV_NAME" not in os.environ:
+        return
+
     try:
         from ptyprocess import PtyProcess
     except ImportError:
