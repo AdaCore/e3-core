@@ -23,7 +23,7 @@ from e3.anod.action import (
     UploadSourceComponent,
 )
 from e3.anod.deps import Dependency
-from e3.anod.error import AnodError
+from e3.anod.error import AnodError, QualifierError
 from e3.anod.package import UnmanagedSourceBuilder
 from e3.anod.spec import has_primitive, fetch_attr
 from e3.collection.dag import DAG
@@ -673,18 +673,26 @@ class AnodContext:
                     )
 
                     continue
-
-                child_action = self.add_spec(
-                    name=e.name,
-                    env=e.env(spec, self.default_env),
-                    primitive=e.kind if e.kind != "download" else "install",
-                    qualifier=e.qualifier,
-                    plan_args=None,
-                    plan_line=plan_line,
-                    sandbox=sandbox,
-                    upload=upload,
-                    force_download=e.kind == "download",
-                )
+                # Catch QualifierError to add some context informations about the caller
+                try:
+                    child_action = self.add_spec(
+                        name=e.name,
+                        env=e.env(spec, self.default_env),
+                        primitive=e.kind if e.kind != "download" else "install",
+                        qualifier=e.qualifier,
+                        plan_args=None,
+                        plan_line=plan_line,
+                        sandbox=sandbox,
+                        upload=upload,
+                        force_download=e.kind == "download",
+                    )
+                except QualifierError as err:
+                    # Add the caller name and the qualifiers that were used
+                    err.messages[-1] = (
+                        f"\nIn {e.name} ({e.qualifier if e.qualifier else ''}), "
+                        f"dependency of {name} ({qualifier}){err}"
+                    )
+                    raise err
 
                 add_dep(
                     spec_instance=spec, dep=e, dep_instance=child_action.anod_instance

@@ -37,3 +37,7 @@ class ShellError(AnodError):
     ):
         super().__init__(message, origin)
         self.process = process
+
+
+class QualifierError(AnodError):
+    pass

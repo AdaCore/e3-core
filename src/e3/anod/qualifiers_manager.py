@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 from hashlib import sha1
 
-from e3.anod.error import AnodError
+from e3.anod.error import AnodError, QualifierError
 
 import string
 
@@ -67,6 +67,10 @@ class QualifiersManager:
     computed using all the declared qualifiers and their values (at runtime).
     This allow the build_space names to be different for each different builds
     (assuming that different build <=> different set of qualifier values).
+
+    The QualifiersManager can raise:
+     * AnodError: when the error is related to the usage of the class
+     * QualifierError: when the error is related to the qualifiers parsed by the class
     """
 
     # Declare the qualifier types
@@ -399,7 +403,7 @@ class QualifiersManager:
                 )
             else:
                 raise AnodError(
-                    "An expected qualifier type was encountered during parsing "
+                    "An unexpected qualifier type was encountered during parsing "
                     f'Got "{qualifier["type"]}"'
                 )
 
@@ -475,7 +479,7 @@ class QualifiersManager:
                     )
             else:
                 raise AnodError(
-                    "An expected qualifier type was encountered during parsing "
+                    "An unexpected qualifier type was encountered during parsing "
                     f'Got "{qualifier["type"]}"'
                 )
 
@@ -498,7 +502,7 @@ class QualifiersManager:
                         )
             elif qualifier["type"] != self.__TAG_QUALIFIER:
                 raise AnodError(
-                    "An expected qualifier type was encountered during parsing "
+                    "An unexpected qualifier type was encountered during parsing "
                     f'Got "{qualifier["type"]}"'
                 )
 
@@ -557,7 +561,8 @@ class QualifiersManager:
                         ignore_test_only=True,
                     )
                 except AnodError as e:
-                    raise AnodError(f'In component "{component}": {str(e)}') from e
+                    e.messages[-1] = f'In component "{component}": {str(e)}'
+                    raise e
 
                 # Make sure no test_only qualifier is used in a component definition
                 for q in qualifier_dict:
@@ -695,7 +700,7 @@ class QualifiersManager:
                 return "_" + qualifier_name + "-" + qualifier_value
         else:
             raise AnodError(
-                "An expected qualifier type was encountered during parsing "
+                "An unexpected qualifier type was encountered during parsing "
                 f'Got "{qualifier["type"]}"'
             )
 
@@ -791,8 +796,7 @@ class QualifiersManager:
 
     def __error(self, msg: str) -> None:
         """Raise an error and print the helper."""
-        print(self.__get_helper())
-        raise AnodError(msg)
+        raise QualifierError("\n" + msg + "\n" + self.__get_helper())
 
     def __get_helper(self) -> str:
         """Return an helper for the current state of Qualifiers.

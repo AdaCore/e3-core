@@ -1,4 +1,4 @@
-from e3.anod.error import AnodError
+from e3.anod.error import AnodError, QualifierError
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.anod.spec import Anod
 
@@ -54,6 +54,7 @@ def test_qualifiers_manager_errors():
     class AnodDummy(Anod):
         enable_name_generator = True
         base_name = "dummy"
+        name = "dummy"
 
     anod_dummy = AnodDummy("", kind="build")
 
@@ -168,16 +169,23 @@ def test_qualifiers_manager_errors():
         name="foo",
         description="bar",
     )
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         qualifiers_manager.parse({})
     assert str(err.value) == (
-        "The foo qualifier was declared without a default value but not passed"
+        """
+The foo qualifier was declared without a default value but not passed
+dummy accept the following qualifiers:
+    * foo=<value> : bar"""
     )
 
     # Use of undeclared qualifier
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         AnodDummy("foo", kind="build")
-    assert str(err.value) == ('The qualifier "foo" is used but has not been declared')
+    assert str(err.value) == (
+        """
+The qualifier "foo" is used but has not been declared
+dummy does not accept any qualifiers."""
+    )
 
     # Pass a key_value qualifier with no value
     qualifiers_manager = QualifiersManager(Anod("", kind="build"))
@@ -185,9 +193,15 @@ def test_qualifiers_manager_errors():
         name="foo",
         description="foo",
     )
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         qualifiers_manager.parse({"foo": ""})
-    assert str(err.value) == 'The key-value qualifier "foo" must be passed with a value'
+    assert (
+        str(err.value)
+        == """
+The key-value qualifier "foo" must be passed with a value
+ accept the following qualifiers:
+    * foo=<value> : foo"""
+    )
 
     # Pass a key_value qualifier with a value not in choices
     qualifiers_manager = QualifiersManager(Anod("", kind="build"))
@@ -196,10 +210,15 @@ def test_qualifiers_manager_errors():
         description="foo",
         choices=["bar", "baz"],
     )
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         qualifiers_manager.parse({"foo": "foo"})
     assert (
-        str(err.value) == "The foo qualifier value must be in ['bar', 'baz']. Got foo"
+        str(err.value)
+        == """
+The foo qualifier value must be in ['bar', 'baz']. Got foo
+ accept the following qualifiers:
+    * foo=<value> : foo
+       * choices: ['bar', 'baz']"""
     )
 
     # Pass a tag qualifier with a value
@@ -208,10 +227,13 @@ def test_qualifiers_manager_errors():
         name="foo",
         description="foo",
     )
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         qualifiers_manager.parse({"foo": "bar"})
     assert str(err.value) == (
-        'The foo qualifier is a tag and does not expect any values. Got "bar"'
+        """
+The foo qualifier is a tag and does not expect any values. Got "bar"
+dummy accept the following qualifiers:
+    * foo : foo"""
     )
 
     # Try to build a component
@@ -223,10 +245,13 @@ def test_qualifiers_manager_errors():
         description="bar",
         test_only=True,
     )
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         qualifiers_manager.parse({"foo": "bar"})
     assert str(err.value) == (
-        "The qualifier foo is test_only but the current anod kind is build"
+        """
+The qualifier foo is test_only but the current anod kind is build
+dummy accept the following qualifiers:
+    * foo=<value> (test only) : bar"""
     )
 
     # use a not declared qualifier in component
@@ -235,10 +260,12 @@ def test_qualifiers_manager_errors():
         "foo",
         {"bar": "baz"},
     )
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         qualifiers_manager.parse({})
     assert str(err.value) == (
-        'In component "foo": The qualifier "bar" is used but has not been declared'
+        'In component "foo": \n'
+        'The qualifier "bar" is used but has not been declared\n'
+        "dummy does not accept any qualifiers."
     )
 
     # Incomplete use of a qualifier without default value
@@ -251,10 +278,13 @@ def test_qualifiers_manager_errors():
         "bar",
         {"foo": ""},
     )
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         qualifiers_manager.parse({"foo": "baz"})
     assert str(err.value) == (
-        'In component "bar": The key-value qualifier "foo" must be passed with a value'
+        'In component "bar": \n'
+        'The key-value qualifier "foo" must be passed with a value\n'
+        "dummy accept the following qualifiers:\n"
+        "    * foo=<value> : foo"
     )
 
     # Reuse a qualifier configuration in a component
@@ -314,26 +344,26 @@ def test_qualifiers_manager_errors():
     with pytest.raises(AnodError) as err:
         qualifiers_manager._QualifiersManager__check_qualifier_consistency({})
     assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
+        'An unexpected qualifier type was encountered during parsing Got "baz"'
     )
     with pytest.raises(AnodError) as err:
         qualifiers_manager._QualifiersManager__check_qualifier_consistency(
             {"foo": "foo"}
         )
     assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
+        'An unexpected qualifier type was encountered during parsing Got "baz"'
     )
     with pytest.raises(AnodError) as err:
         qualifiers_manager._QualifiersManager__generate_qualifier_part(
             "foo", {"foo": "foo"}
         )
     assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
+        'An unexpected qualifier type was encountered during parsing Got "baz"'
     )
     with pytest.raises(AnodError) as err:
         qualifiers_manager._QualifiersManager__force_default_values({})
     assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
+        'An unexpected qualifier type was encountered during parsing Got "baz"'
     )
 
     # Call end declaration phase but don't parse it
@@ -490,10 +520,15 @@ def test_qualifiers_manager():
     assert anod_component_3.component == "my_spec"
 
     # raise an error using version with no value
-    with pytest.raises(AnodError) as err:
+    with pytest.raises(QualifierError) as err:
         anod_component_3 = AnodComponent("version=", kind="build")
     assert str(err.value) == (
-        'The key-value qualifier "version" must be passed with a value'
+        """
+The key-value qualifier "version" must be passed with a value
+ accept the following qualifiers:
+    * debug : State if the build must be done in debug mode.
+    * version=<value> : State the version of the component to be build
+       * default: 1.2"""
     )
 
     # test_only qualifier
