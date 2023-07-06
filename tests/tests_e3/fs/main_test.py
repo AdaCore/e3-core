@@ -191,6 +191,7 @@ def test_tree_state():
     time.sleep(2)
 
     e3.os.fs.touch("toto")
+    e3.os.fs.touch("toto2")
     state4 = e3.fs.get_filetree_state(current_dir)
     assert state4 != state3
     hidden = os.path.join(current_dir, ".h")
@@ -208,9 +209,28 @@ def test_tree_state():
     state6 = e3.fs.get_filetree_state("toto")
     assert isinstance(state6, str)
 
+    with open("toto", "wb") as f:
+        f.write(b"hello world.")
+
     # check that get_filetree_state accept unicode
     state7 = e3.fs.get_filetree_state("toto")
     assert isinstance(state7, str)
+    assert state7 != state6
+
+    # check that get_filetree_state with hash_content is different that the
+    # previous state
+    state8 = e3.fs.get_filetree_state("toto", hash_content=True)
+    assert isinstance(state8, str)
+    assert state8 != state7
+
+    # check that get_filetree_state with hash_content is working with directory
+    # and is different that the previous call without hash_content to true
+    with open("toto2", "wb") as f:
+        f.write(b"hello world 2.")
+
+    state9 = e3.fs.get_filetree_state(current_dir, hash_content=True)
+    assert isinstance(state9, str)
+    assert state9 != state4
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
