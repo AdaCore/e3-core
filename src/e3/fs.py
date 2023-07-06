@@ -182,16 +182,21 @@ def find(
     return result
 
 
-def get_filetree_state(path: str, ignore_hidden: bool = True) -> str:
+def get_filetree_state(
+    path: str, ignore_hidden: bool = True, hash_content: bool = False
+) -> str:
     """Compute a hash on a filetree to reflect its current state.
 
     :param path: root path of the file tree to be checked
     :param ignore_hidden: if True (default) then files and directories
         tarting with a dot are ignored.
+    :param hash_content: if True, include the content in the hash.
+
     :return: a hash as a string
 
-    The function will not report changes in the hash if a file is modified
-    and its attributes (size, modification time and mode) are not changed.
+    By default, the function will not report changes in the hash if a file is
+    modified and its attributes (size, modification time and mode) are not
+    changed.
     This case is quite uncommon. By ignoring it we can compute efficiently a
     hash representing the state of the file tree without having to read the
     content of all files.
@@ -204,6 +209,10 @@ def get_filetree_state(path: str, ignore_hidden: bool = True) -> str:
             [file_path, str(f_stat.st_mode), str(f_stat.st_size), str(f_stat.st_mtime)]
         )
         return state.encode("utf-8")
+
+    def get_content(file_path: str) -> bytes:
+        with open(file_path, "rb") as f:
+            return f.read()
 
     path = os.path.abspath(path)
     result = hashlib.sha1()
@@ -225,8 +234,15 @@ def get_filetree_state(path: str, ignore_hidden: bool = True) -> str:
                 full_path = os.path.join(root, path)
                 result.update(compute_state(full_path))
 
+                if hash_content:
+                    result.update(get_content(full_path))
+
     else:
         result.update(compute_state(path))
+
+        if hash_content:
+            result.update(get_content(path))
+
     return result.hexdigest()
 
 
