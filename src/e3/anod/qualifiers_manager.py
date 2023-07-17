@@ -767,7 +767,30 @@ class QualifiersManager:
 
         qualifier_suffix = ""
         hash_suffix = ""
-        kind_suffix = "_test" if self.anod_instance.kind == "test" else ""
+        kind_suffix = ""
+        cross_suffix = ""
+        if self.anod_instance.kind == "test":
+            kind_suffix = "_test"
+            if self.anod_instance.env.is_cross:
+                # We can run test on many different cross OS version
+                # from the same host machine, make sure that we have a
+                # different build space each time
+                os_version = self.anod_instance.env.target.os.version
+                if os_version and os_version != "unknown":
+                    cross_suffix += "-%s" % os_version
+                # We also can test on different machines, so add it as well
+                machine = self.anod_instance.env.target.machine
+                if machine and machine != "unknown":
+                    # and make sure the machine name is compatible with
+                    # file paths: only keep letters
+                    machine = "".join([c for c in machine if c.isalpha()])
+                    cross_suffix += "-%s" % machine
+
+            # ??? adding the target machine name in each build space name
+            # would create path too long, try to just handle possible
+            # conflicts here
+            if self.anod_instance.env.target.machine == "qemu-monocore":
+                cross_suffix += "-mono"
 
         qualifier_names_list = list(self.qualifier_decls)
 
@@ -787,7 +810,10 @@ class QualifiersManager:
         if self.hash_pool:
             hash_suffix = f"_{sha1(self.hash_pool.encode()).hexdigest()[:8]}"
 
-        return self.base_name + qualifier_suffix + hash_suffix + kind_suffix
+        return (
+            f"{self.base_name}{qualifier_suffix}{hash_suffix}{cross_suffix}"
+            f"{kind_suffix}"
+        )
 
     def __error(self, msg: str) -> None:
         """Raise an error and print the helper."""

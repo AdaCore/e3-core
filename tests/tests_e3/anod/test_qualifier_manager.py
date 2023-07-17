@@ -1,6 +1,8 @@
 from e3.anod.error import AnodError
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.anod.spec import Anod
+from e3.os.platform import OS
+from e3.platform import Platform
 
 import pytest
 
@@ -368,6 +370,93 @@ def test_qualifiers_manager_errors():
         'In component "bar": The qualifier "foo" is test_only and cannot be used to '
         "define a component"
     )
+
+    # Test cross suffix:
+    class AnodCross(Anod):
+        enable_name_generator = True
+        base_name = "dummy"
+        name = "dummy"
+
+        def __init__(self, target=None, host=None, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.env.target = target
+            self.env.host = host
+
+        def declare_qualifiers_and_components(self, qm):
+            qm.declare_key_value_qualifier(
+                name="rts",
+                description="foo",
+                default="no-rts",
+            )
+
+    os = OS(
+        version="os-version",
+        name="",
+        kernel_version="",
+        exeext="",
+        dllext="",
+        is_bareboard="",
+        mode="",
+    )
+    target = Platform(
+        os=os,
+        is_hie="",
+        platform="",
+        triplet="",
+        machine="machine",
+        domain="",
+        is_host="",
+        is_default="",
+        cpu="",
+    )
+    anod_cross = AnodCross(target=target, kind="test", qualifier="rts=rts")
+    assert anod_cross.build_space_name == "dummy_rts-rts-os-version-machine_test"
+
+    os_unknown = OS(
+        version="unknown",
+        name="",
+        kernel_version="",
+        exeext="",
+        dllext="",
+        is_bareboard="",
+        mode="",
+    )
+    target = Platform(
+        os=os_unknown,
+        is_hie="",
+        platform="",
+        triplet="",
+        machine="unknown",
+        domain="",
+        is_host="",
+        is_default="",
+        cpu="",
+    )
+    anod_cross_unknown = AnodCross(target=target, kind="test", qualifier="")
+    assert anod_cross_unknown.build_space_name == "dummy_rts-no-rts_test"
+
+    os_mono = OS(
+        version="unknown",
+        name="",
+        kernel_version="",
+        exeext="",
+        dllext="",
+        is_bareboard="",
+        mode="",
+    )
+    target = Platform(
+        os=os_mono,
+        is_hie="",
+        platform="",
+        triplet="",
+        machine="qemu-monocore",
+        domain="",
+        is_host="",
+        is_default="",
+        cpu="",
+    )
+    anod_cross_mono = AnodCross(target=target, host=target, kind="test", qualifier="")
+    assert anod_cross_mono.build_space_name == "dummy_rts-no-rts-mono_test"
 
 
 def test_qualifiers_manager():
