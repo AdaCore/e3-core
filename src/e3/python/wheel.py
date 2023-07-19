@@ -1,6 +1,5 @@
 from __future__ import annotations
 import os
-import sys
 import zipfile
 import tempfile
 from pkg_resources import Requirement
@@ -54,23 +53,26 @@ class Wheel:
         """
         with tempfile.TemporaryDirectory() as build_dir:
             p = Run(
-                [
-                    sys.executable,
-                    "./setup.py",
+                python_script("pip")
+                + [
+                    "wheel",
+                    ".",
                     "-q",
-                    "bdist_wheel",
-                    f"--python-tag={python_tag}",
-                    "-d",
+                    "--no-deps",
+                    f"-C--python-tag={python_tag}",
+                    "-w",
                     build_dir,
                 ],
                 cwd=source_dir,
             )
+
             if p.status != 0:
                 raise WheelError(f"Error during wheel creation:\n{p.out}")
 
             tmp_whl_path = ls(os.path.join(build_dir, "*.whl"))[0]
             dest_whl_path = os.path.join(dest_dir, os.path.basename(tmp_whl_path))
             mv(tmp_whl_path, dest_whl_path)
+
         return Wheel(path=dest_whl_path)
 
     def install(self) -> None:
