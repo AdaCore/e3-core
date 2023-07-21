@@ -61,7 +61,17 @@ class AnodDriver:
                     kind=e.kind,
                     env=e.env(self.anod_instance, BaseEnv.from_env()),
                 )
-                self.anod_instance.deps[e.local_name] = dep_instance
+                if e.kind != "source":
+                    self.anod_instance.deps[e.local_name] = dep_instance
+                else:
+                    srcbuild_list = dep_instance.source_pkg_build
+                    if not srcbuild_list:
+                        dep_instance.deps_source_list[e.local_name] = set()
+                    else:
+                        dep_instance.deps_source_list[e.local_name] = {
+                            srcbuild.name for srcbuild in srcbuild_list
+                        }
+
         e3.log.debug("activating spec %s", self.anod_instance.uid)
 
     def call(self, action: str) -> Any:

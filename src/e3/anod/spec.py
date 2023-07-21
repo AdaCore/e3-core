@@ -34,7 +34,7 @@ if TYPE_CHECKING:
         Literal,
         Union,
     )
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Sequence, Iterable
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
@@ -212,6 +212,7 @@ class Anod:
         :raise: SpecError
         """
         self.deps: dict[str, Anod] = {}
+        self.deps_source_list: dict[str, Iterable[str]] = {}
 
         self.kind = kind
         self.jobs = jobs
