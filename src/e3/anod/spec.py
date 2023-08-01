@@ -293,6 +293,14 @@ class Anod:
         pass
 
     @property
+    def args(self) -> dict[str, str | bool]:
+        """Access to final qualifier values (with defaults set)."""
+        if self.enable_name_generator:
+            return self.qualifiers_manager.qualifier_values
+        else:
+            return self.parsed_qualifier  # type: ignore
+
+    @property
     def base_name(self) -> str:
         """Set the base name used for the name generation.
 
