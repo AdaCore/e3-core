@@ -1,40 +1,218 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from hashlib import sha1
-
 from e3.anod.error import AnodError
+import abc
+import re
 
-import string
 
 if TYPE_CHECKING:
-    from typing import (
-        Literal,
-        TypedDict,
-    )
     from e3.anod.spec import Anod
 
-    # Declare types
-    TAG_QUALIFIER_TYPE = Literal["tag"]
-    KEY_VALUE_QUALIFIER_TYPE = Literal["key-value"]
 
-    class QualifierDeclaration(TypedDict):
-        # Fields common to all qualifiers
-        description: str
-        test_only: bool
-        repr_in_hash: bool
-        repr_alias: str
+VALID_NAME = re.compile(r"^[a-zA-Z0-9_.-]+$")
 
-    class QualifierTagDeclaration(QualifierDeclaration):
-        type: Literal["tag"]
 
-    class QualifierKeyValueDeclaration(QualifierDeclaration):
-        type: Literal["key-value"]
+def check_valid_name(name: str, value_kind: str, origin: str) -> str:
+    """Check if a value is a valid qualifier name or component name.
 
-        # Fields specific to key-value qualifiers
-        default: str | None
-        choices: list[str] | None
-        repr_omit_key: bool
+    A valid name is any non empty string containg alphanumeric character, dot,
+    dashes and underscores.
+
+    :param name: the name to check
+    :param value_kind: a name to describe the kind of value (used in error message)
+    :param origin: a string giving the origin of the check
+    :return: name if name is valid otherwise raise AnodError
+    """
+    if not isinstance(name, str) or not re.search(VALID_NAME, name):
+        raise AnodError(f"{origin}: Invalid {value_kind} '{name}'")
+    return name
+
+
+class QualifierDeclaration(metaclass=abc.ABCMeta):
+    """Root class for qualifiers declaration."""
+
+    def __init__(
+        self,
+        origin: str,
+        name: str,
+        description: str,
+        repr_in_hash: bool = False,
+        repr_name: str | None = None,
+    ) -> None:
+        """Initialize a qualifier declaration.
+
+        :param origin: a string giving the origin of the declaration
+            (used in error messages)
+        :param name: qualifier name
+        :param description: help message
+        :param repr_in_hash: if True the qualifier representation is hidden
+            into a common hash
+        :param repr_name: an alias for name used to compute string representation
+        """
+        self.origin = origin
+        self.name = check_valid_name(
+            name, value_kind="qualifier declaration name", origin=self.origin
+        )
+        self.description = description
+        self.repr_in_hash = repr_in_hash
+        self.repr_name = (
+            check_valid_name(
+                repr_name,
+                value_kind="qualifier declaration alias",
+                origin=self.origin,
+            )
+            if repr_name is not None
+            else self.name
+        )
+
+    @property
+    def default(self) -> str | bool | None:
+        """Return default value for qualifier.
+
+        :return: if None is returned it means the qualifier has not
+            default Value. Otherwise the default value is returned.
+        """
+        return None  # all: no cover
+
+    @abc.abstractmethod
+    def value(self, value: str | bool) -> str | bool:
+        """Validate qualifier value and return the effective one."""
+
+    @abc.abstractmethod
+    def repr(self, value: str | bool, hash_pool: list[str] | None) -> str:
+        """Compute a string representation of a qualifier.
+
+        :param value: the effective value associated with the qualifier
+        :param hash_pool: if not None and repr_in_hash is True, the represantion
+            is added to that list. The list is used then to compute a hash and
+            thus reduce the build space length.
+        :return: the qualifier representation if self.repr_in_hash is False
+            or hash_pool is None. if hash_pool is not None and self.repr_in_hash
+            is True, the string representation is appended to hash_pool and the
+            method returns the empty string.
+        """
+
+
+class KeyValueDeclaration(QualifierDeclaration):
+    def __init__(
+        self,
+        origin: str,
+        name: str,
+        description: str,
+        repr_in_hash: bool = False,
+        repr_name: str | None = None,
+        repr_omit_key: bool = False,
+        default: str | None = None,
+        choices: list[str] | None = None,
+    ) -> None:
+        """Initialize a key-value qualifier declaration.
+
+        :param origin: a string giving the origin of the declaration
+            (used in error messages)
+        :param name: see QualifierDeclaration.__init__
+        :param description: see QualifierDeclaration.__init__
+        :param repr_in_hash: see QualifierDeclaration.__init__
+        :param repr_name: see QualifierDeclaration.__init__
+        :param repr_omit_key: if True discard qualifier name in string representation
+        :param default: default value for the qualifier
+        :param choices: list of valid value for the qualifier
+        """
+        super().__init__(
+            origin=origin,
+            name=name,
+            description=description,
+            repr_in_hash=repr_in_hash,
+            repr_name=repr_name,
+        )
+        self.repr_omit_key = repr_omit_key
+
+        # Check that default value is valid
+        if default is not None and choices is not None and default not in choices:
+            choices_str = ", ".join((f"'{choice}'" for choice in choices))
+            raise AnodError(
+                f"{self.origin}: default value '{default}' "
+                f"should be in ({choices_str})."
+            )
+
+        self.choices = choices
+        self._default = default
+
+    @property
+    def default(self) -> str | bool | None:
+        """See QualifierDeclaration.default."""
+        return self._default
+
+    def value(self, value: str | bool) -> str | bool:
+        """See QualifierDeclaration.value."""
+        if self.choices is not None and value not in self.choices:
+            choices_str = ", ".join((f"'{choice}'" for choice in self.choices))
+            raise AnodError(
+                f"{self.origin}: Invalid value for qualifier {self.name}: '{value}' "
+                f"not in ({choices_str})"
+            )
+        return value
+
+    def repr(self, value: str | bool, hash_pool: list[str] | None) -> str:
+        """See QualifierDeclaration.repr."""
+        list_repr = []
+        if not self.repr_omit_key:
+            list_repr.append(self.repr_name)
+        if value:
+            list_repr.append(str(value))
+
+        str_repr = "-".join(list_repr)
+
+        if hash_pool is not None and self.repr_in_hash:
+            if str_repr:
+                hash_pool.append(str_repr)
+            return ""
+        else:
+            if (
+                value != ""
+                and value == self.default
+                and self.choices is not None
+                and "" not in self.choices
+            ):
+                # In the case the value of qualifier is a finite set and
+                # that "" is not in that set, if value is the default value then
+                # just return an empty representation.
+                return ""
+            else:
+                return str_repr
+
+
+class TagDeclaration(QualifierDeclaration):
+    """Tag qualifier declaration."""
+
+    @property
+    def default(self) -> bool:
+        """See QualifierDeclaration.value."""
+        return False
+
+    def value(self, value: str | bool) -> bool:
+        """See QualifierDeclaration.value."""
+        # The presence of a tag in input is defined by the existence
+        # of the key (the value has no meaning). The value set by the
+        # user might be None or "". The False value can only come from
+        # the defaults initialization. Thus do not change following
+        # condition into if not value.
+        if value is False:
+            return False
+        else:
+            return True
+
+    def repr(self, value: str | bool, hash_pool: list[str] | None) -> str:
+        """See QualifierDeclaration.repr."""
+        if hash_pool is not None and self.repr_in_hash:
+            if value:
+                hash_pool.append(self.repr_name)
+            return ""
+        elif value:
+            return self.repr_name
+        else:
+            return ""
 
 
 class QualifiersManager:
@@ -69,10 +247,6 @@ class QualifiersManager:
     (assuming that different build <=> different set of qualifier values).
     """
 
-    # Declare the qualifier types
-    __TAG_QUALIFIER: TAG_QUALIFIER_TYPE = "tag"
-    __KEY_VALUE_QUALIFIER: KEY_VALUE_QUALIFIER_TYPE = "key-value"
-
     def __init__(
         self,
         anod_instance: Anod,
@@ -82,140 +256,37 @@ class QualifiersManager:
         :param anod_instance: the current anod instance.
         """
         self.anod_instance = anod_instance
+        self.origin = f"{anod_instance.kind}(name={anod_instance.name})"
 
         # Hold all the declared qualifiers. The keys are the qualifier names and the
         # values the qualifier properties.
-        self.qualifier_decls: dict[
-            str,
-            QualifierTagDeclaration | QualifierKeyValueDeclaration,
-        ] = {}
+        self.qualifier_decls: dict[str, QualifierDeclaration] = {}
 
-        # Hold all the declared components as stated by the user. They still needs
+        # Hold all the declared components as stated by the user. They still need
         # to be checked and prepared (add the default values...) before being actually
         # usable. The keys are the components names and the values are the dictionary
         # representing the corresponding qualifier configuration.
-        self.raw_component_decls: dict[str, dict[str, str]] = {}
+        self.component_decls: dict[str, tuple[dict[str, str], bool]] = {}
 
         # Hold the declared components. The keys are the qualifier configurations
         # (tuples) and the value are the component names.
         # It is construct by end_declaration_phase using raw_component_decls.
-        self.component_names: None | dict[
-            tuple[tuple[str, str | bool], ...], str
-        ] = None
+        self.component_names: dict[tuple[tuple[str, str | bool], ...], str] = {}
+        self.build_space_names: dict[tuple[tuple[str, str | bool], ...], str] = {}
 
-        # Hold the current (i.e. parsed) qualifier's values.
-        self.qualifier_values: None | dict[str, str | bool] = None
+        # Hold the final qualifier values for anod_instance.
+        self.qualifier_values: dict[str, str | bool] = {}
 
         # When the first name has been generated it is no longer possible to add
         # neither new qualifiers nor new components.
         self.is_declaration_phase_finished: bool = False
 
-        # Hold all the qualifiers suffixes to be added in the final hash
-        self.hash_pool = ""
-
         # The base name to be used by the name generator
         self.base_name: str = self.anod_instance.base_name
 
-    def __init_qualifier(
-        self,
-        name: str,
-        description: str,
-        qualifier_type: TAG_QUALIFIER_TYPE | KEY_VALUE_QUALIFIER_TYPE,
-        test_only: bool = False,
-        default: str | None = None,
-        choices: list[str] | None = None,
-        repr_alias: str | None = None,
-        repr_in_hash: bool = False,
-        repr_omit_key: bool = False,
-    ) -> QualifierTagDeclaration | QualifierKeyValueDeclaration:
-        """Initialize a new qualifier.
-
-        This function is for internal use only and initialize a qualifier.
-
-        Return a valid qualifier whose type depends on the type parameter.
-
-        :param name: The name of the qualifier. It used to identify it and pass it to
-            the spec.
-        :param description: A description of the qualifier purposes. It is used to
-            make the help/error clearer.
-        :param qualifier_type: The type of the qualifier. Either tag or key value.
-        :param test_only: By default the qualifier are used by all anod actions
-            (install, build, test...). If test_only is True, then this qualifier is
-            only available for test.
-        :param default: The default value given to the qualifier if no value was
-            provided by the user. If no default value is set, then the user must
-            provide a qualifier value at runtime.
-        :param choices: The list of all authorized values for the qualifier.
-        :param repr_alias: An alias for the qualifier name used by the name generation.
-            By default, the repr_alias is the qualifier name itself.
-        :param repr_in_hash: False by default. If True, the qualifier is included in
-            the hash at the end of the generated name. The result is less readable but
-            shorter.
-        :param repr_omit_key: If True, then the name generation don't display the
-            qualifier name/alias. It only use its value.
-        :return: A valid qualifier.
-        """
-        if self.is_declaration_phase_finished:
-            raise AnodError(
-                "The qualifier declaration is finished. It is not possible to declare a"
-                " new qualifier after a component has been declared or a name generated"
-            )
-
-        # Check all the inputs.
-
-        # Check name:
-        name = name.strip()
-        if not name:
-            raise AnodError("The qualifier name cannot be empty")
-        elif name in self.qualifier_decls:
-            raise AnodError(f"The {name} qualifier has already been declared")
-
-        # Check description:
-        description = description.strip()
-        if not description:
-            raise AnodError(f"The {name} qualifier description cannot be empty")
-
-        # Check repr_alias:
-        alias: str = name if repr_alias is None else repr_alias.strip()
-        if not alias:
-            raise AnodError(f"The {name} qualifier repr_alias cannot be empty")
-
-        if qualifier_type == self.__KEY_VALUE_QUALIFIER:
-            new_key_value_qualifier: QualifierKeyValueDeclaration = {
-                "description": description,
-                "test_only": test_only,
-                "repr_alias": alias,
-                "repr_in_hash": repr_in_hash,
-                "type": self.__KEY_VALUE_QUALIFIER,
-                "default": default,
-                "choices": choices,
-                "repr_omit_key": repr_omit_key,
-            }
-
-            # Make sure the default value is valid (is in choices)
-            if (
-                new_key_value_qualifier["default"] is not None
-                and new_key_value_qualifier["choices"] is not None
-                and new_key_value_qualifier["default"]
-                not in new_key_value_qualifier["choices"]
-            ):
-                raise AnodError(
-                    f"The {name} qualifier default value "
-                    f'"{new_key_value_qualifier["default"]}" not in '
-                    f'{new_key_value_qualifier["choices"]}'
-                )
-
-            return new_key_value_qualifier
-        else:
-            new_tag_qualifier: QualifierTagDeclaration = {
-                "description": description,
-                "test_only": test_only,
-                "repr_alias": alias,
-                "repr_in_hash": repr_in_hash,
-                "type": self.__TAG_QUALIFIER,
-            }
-
-        return new_tag_qualifier
+        # By default component and build_space_name are None
+        self.component: str | None = None
+        self.build_space_name: str = ""
 
     def declare_tag_qualifier(
         self,
@@ -248,16 +319,20 @@ class QualifiersManager:
          the hash at the end of the generated name. The result is less readable but
          shorter.
         """
-        new_tag_qualifier = self.__init_qualifier(
-            name=name,
-            description=description,
-            qualifier_type=self.__TAG_QUALIFIER,
-            test_only=test_only,
-            repr_alias=repr_alias,
-            repr_in_hash=repr_in_hash,
-        )
+        if self.is_declaration_phase_finished:
+            raise AnodError(
+                f"{self.origin}: qualifier can only be declared in "
+                "declare_qualifiers_and_components"
+            )
 
-        self.qualifier_decls[name] = new_tag_qualifier
+        if not test_only or self.anod_instance.kind == "test":
+            self.qualifier_decls[name] = TagDeclaration(
+                origin=self.origin,
+                name=name,
+                description=description,
+                repr_name=repr_alias,
+                repr_in_hash=repr_in_hash,
+            )
 
     def declare_key_value_qualifier(
         self,
@@ -299,19 +374,22 @@ class QualifiersManager:
         :param repr_omit_key: If True, then the name generation don't display the
             qualifier name/alias. It only use its value.
         """
-        new_key_value_qualifier = self.__init_qualifier(
-            name=name,
-            description=description,
-            qualifier_type=self.__KEY_VALUE_QUALIFIER,
-            test_only=test_only,
-            repr_alias=repr_alias,
-            repr_in_hash=repr_in_hash,
-            default=default,
-            choices=choices,
-            repr_omit_key=repr_omit_key,
-        )
-
-        self.qualifier_decls[name] = new_key_value_qualifier
+        if self.is_declaration_phase_finished:
+            raise AnodError(
+                f"{self.origin}: qualifier can only be declared in "
+                " declare_qualifiers_and_components"
+            )
+        if not test_only or self.anod_instance.kind == "test":
+            self.qualifier_decls[name] = KeyValueDeclaration(
+                origin=self.origin,
+                name=name,
+                description=description,
+                repr_name=repr_alias,
+                repr_in_hash=repr_in_hash,
+                default=default,
+                choices=choices,
+                repr_omit_key=repr_omit_key,
+            )
 
     def declare_component(
         self,
@@ -331,259 +409,96 @@ class QualifiersManager:
         :param required_qualifier_configuration: The dictionary of qualifiers
             value corresponding to the build linked to the component.
         """
+        if self.anod_instance.kind != "test":
+            # Components have meaning only for build and install
+            return self.declare_build_space_name(
+                name=name,
+                required_qualifier_configuration=required_qualifier_configuration,
+                has_component=True,
+            )
+
+    def declare_build_space_name(
+        self,
+        name: str,
+        required_qualifier_configuration: dict[str, str],
+        has_component: bool = False,
+    ) -> None:
+        """Declare a new component.
+
+        A component is bound to a qualifier configuration (i.e. a dictionary mapping
+        the qualifiers to their values as provided by the user at runtime). The
+        provided component name is used if the qualifier meet the provided qualifier
+        values.
+
+        This method cannot be called after the end of the declaration phase.
+
+        :param name: A string representing the component name.
+        :param required_qualifier_configuration: The dictionary of qualifiers
+            value corresponding to the build linked to the component.
+        """
         if self.is_declaration_phase_finished:
             raise AnodError(
-                "The component declaration is finished. It is not possible to declare a"
-                " new component after a name has been generated"
+                f"{self.origin}: component/build space can only be declared in "
+                "declare_qualifiers_and_components"
             )
 
-        # Check name
-        valid_char = string.ascii_letters + string.digits + "-_."
-        if any(c not in valid_char for c in name):
-            raise AnodError(
-                f'The component name "{name}" contains an invalid character'
+        self.component_decls[
+            check_valid_name(
+                name, value_kind="component declaration name", origin=self.origin
             )
+        ] = (
+            required_qualifier_configuration,
+            has_component,
+        )
 
-        # Make sure the name has not been used yet
-        if name in self.raw_component_decls:
-            raise AnodError(f'The "{name}" component names is already used')
-
-        self.raw_component_decls[name] = required_qualifier_configuration
-
-    def __force_default_values(
+    def compute_qualifier_values(
         self,
         qualifier_dict: dict[str, str],
-        ignore_test_only: bool = False,
     ) -> dict[str, str | bool]:
-        """Force the default value of the qualifiers.
+        """Given a user qualifier dict compute and validate final values.
 
-        If a key_value qualifier with a default value is not in the qualifier_dict
-        dictionary. Then, the qualifier will be added to qualifier_dict with its
-        default value as value.
-
-        The tag qualifier values are set to True is the qualifier is present and False
-        else.
-
-        This function cannot be called before the end of the declaration phase.
-
-        :param qualifier_dict: The dictionary of qualifiers for which the default
-            values are required.
-        :param ignore_test_only: If set to True, the qualifier marked as test_only are
-            completely ignored
+        :param qualifier_dict: User qualifiers
+        :return: the computed qualifier values (applying default and validity checks).
         """
-        if not self.is_declaration_phase_finished:
-            raise AnodError(
-                "The default values cannot be added before the end of the declaration "
-                "phase"
-            )
+        # Initialize the result with the default values
+        result = {
+            qual.name: qual.default
+            for qual in self.qualifier_decls.values()
+            if qual.default is not None
+        }
 
-        qualifier_dict_with_default: dict[str, str | bool] = cast(
-            "dict[str, str | bool]", qualifier_dict.copy()
+        # Check that all qualifiers passed by the user are declared
+        invalid_keys = set(qualifier_dict.keys()) - set(self.qualifier_decls.keys())
+        if invalid_keys:
+            invalid_keys_str = ", ".join(invalid_keys)
+            raise AnodError(f"{self.origin}: Invalid qualifier(s): {invalid_keys_str}")
+
+        # Update default dict with user values
+        result.update(
+            {
+                name: self.qualifier_decls[name].value(value)
+                for name, value in qualifier_dict.items()
+            }
         )
 
-        # Add the required default values
-        for qualifier_name, qualifier in self.qualifier_decls.items():
-            # Ignore test_only qualifier if needed
-            if qualifier["test_only"] and ignore_test_only:
-                continue
+        # Check that all values are defined
+        missing_keys = set(self.qualifier_decls.keys()) - set(result.keys())
+        if missing_keys:
+            missing_keys_str = ", ".join(missing_keys)
+            raise AnodError(f"{self.origin}: Missing qualifier(s): {missing_keys_str}")
 
-            if qualifier["type"] == self.__KEY_VALUE_QUALIFIER:
-                if qualifier_name not in qualifier_dict:
-                    # The qualifier must have a default. This is checked by
-                    # __check_qualifier_consistency
-                    assert qualifier["default"] is not None
-                    qualifier_dict_with_default[qualifier_name] = qualifier["default"]
-            elif qualifier["type"] == self.__TAG_QUALIFIER:
-                qualifier_dict_with_default[qualifier_name] = (
-                    qualifier_name in qualifier_dict
-                )
-            else:
-                raise AnodError(
-                    "An expected qualifier type was encountered during parsing "
-                    f'Got "{qualifier["type"]}"'
-                )
+        return result
 
-        return qualifier_dict_with_default
-
-    def __check_qualifier_consistency(
-        self,
-        qualifier_configuration: dict[str, str],
-        ignore_test_only: bool = False,
-    ) -> None:
-        """Check that the qualifiers are compliant with their declarations.
-
-        Ensure that all the qualifiers follow the rules:
-         * Have been declared.
-         * Set a value if they don't have a default one.
-         * Have a value which respect the choices attribute.
-
-        :param qualifier_configuration: A dictionary of qualifiers to be checked.
-            The key are the qualifiers names and the values the qualifier values.
-        :param ignore_test_only: If set to True, the qualifier marked as test_only are
-            completely ignored
-        """
-        # The declaration phase must be finished to ensure the consistency of the result
-        if not self.is_declaration_phase_finished:
-            raise AnodError(
-                "The qualifier consistency cannot be checked before the end of the "
-                "declaration phase"
-            )
-
-        for qualifier_name, qualifier_value in qualifier_configuration.items():
-            # The qualifier has been declared
-            if qualifier_name not in self.qualifier_decls:
-                self.__error(
-                    f'The qualifier "{qualifier_name}" is used but has '
-                    "not been declared"
-                )
-
-            qualifier = self.qualifier_decls[qualifier_name]
-
-            # Ignore the test_only qualifier if needed
-            if ignore_test_only and qualifier["test_only"]:
-                continue
-
-            # If the qualifier is test_only and the current anod kind is not test,
-            # raise an error.
-            if qualifier["test_only"] and self.anod_instance.kind != "test":
-                self.__error(
-                    f"The qualifier {qualifier_name} is test_only but the current anod "
-                    f"kind is {self.anod_instance.kind}"
-                )
-
-            if qualifier["type"] == self.__KEY_VALUE_QUALIFIER:
-                # A key-value qualifier cannot be passed without a value.
-                if not qualifier_value:
-                    self.__error(
-                        f'The key-value qualifier "{qualifier_name}" must be passed '
-                        "with a value"
-                    )
-
-                # If choices exist then the qualifier value is constrained.
-                if qualifier["choices"] is not None:
-                    if qualifier_value not in qualifier["choices"]:
-                        self.__error(
-                            f"The {qualifier_name} qualifier value must be in "
-                            f'{qualifier["choices"]}. Got {qualifier_value}'
-                        )
-            elif qualifier["type"] == self.__TAG_QUALIFIER:
-                # The tag qualifier cannot be passed with a value
-                if qualifier_value:
-                    self.__error(
-                        f"The {qualifier_name} qualifier is a tag and does not expect "
-                        f'any values. Got "{qualifier_value}"'
-                    )
-            else:
-                raise AnodError(
-                    "An expected qualifier type was encountered during parsing "
-                    f'Got "{qualifier["type"]}"'
-                )
-
-        # Make sure all the declared qualifiers are stated
-        for qualifier_name, qualifier in self.qualifier_decls.items():
-            # Ignore test_only qualifier if needed
-            if qualifier["test_only"] and (
-                ignore_test_only or self.anod_instance.kind != "test"
-            ):
-                continue
-
-            if qualifier["type"] == self.__KEY_VALUE_QUALIFIER:
-                if qualifier_name not in qualifier_configuration:
-                    # The qualifier must have a default otherwise it would not have
-                    # any values.
-                    if qualifier["default"] is None:
-                        self.__error(
-                            f"The {qualifier_name} qualifier was declared without a "
-                            "default value but not passed"
-                        )
-            elif qualifier["type"] != self.__TAG_QUALIFIER:
-                raise AnodError(
-                    "An expected qualifier type was encountered during parsing "
-                    f'Got "{qualifier["type"]}"'
-                )
-
-    def __qualifier_config_repr(
-        self, qualifier_configuration: dict[str, str | bool]
+    def serialize_qualifier_values(
+        self, qualifier_values: dict[str, str | bool]
     ) -> tuple[tuple[str, str | bool], ...]:
-        """Transform a parsed qualifier dict into a hashable object.
+        """Return a hashable and deterministic representation of qualifier values.
 
-        Ensure the returned key is unique and thus add the default
-        value of the qualifiers. This theoretically adds no information but
-        makes sure that implicit and explicit default values are handled the same way.
-
-        Cannot be called before the end of the declaration phase.
-
-        :param qualifier_configuration: A dictionary of qualifier. The keys are the
-            qualifier names and the values are the corresponding qualifier values.
-        :return: A tuple containing the same information as qualifier_configuration.
+        :param qualifier_values: qualifier values as returned by
+            compute_qualifier_values
+        :return: a tuple of couple (key, value) sorted by key
         """
-        if not self.is_declaration_phase_finished:
-            raise AnodError(
-                "The function 'key' cannot be used before the end of the declaration "
-                "phase"
-            )
-
-        return tuple(
-            (k, qualifier_configuration[k]) for k in sorted(qualifier_configuration)
-        )
-
-    def __end_declaration_phase(self) -> None:
-        """End the declaration of qualifiers and components.
-
-        After the call to this function, it will no longer be possible to declare
-        either new qualifiers nor new components.
-
-        Check that all the declared components (the ones stored in raw_component_decls)
-        are consistent with the declared qualifiers. Then, build the final list of
-        components (component_names).
-        """
-        if self.is_declaration_phase_finished:
-            # The declaration has already been ended
-            pass
-        else:
-            # State that the declaration phase is finished
-            self.is_declaration_phase_finished = True
-
-            # Initialize component_names
-            self.component_names = {}
-
-            # Build component_names
-            for component, qualifier_dict in self.raw_component_decls.items():
-                # Add some context informations to the errors raised by
-                # __check_qualifier_consistency to ease the debugging process.
-                try:
-                    self.__check_qualifier_consistency(
-                        qualifier_dict,
-                        ignore_test_only=True,
-                    )
-                except AnodError as e:
-                    raise AnodError(f'In component "{component}": {str(e)}') from e
-
-                # Make sure no test_only qualifier is used in a component definition
-                for q in qualifier_dict:
-                    if self.qualifier_decls[q]["test_only"]:
-                        raise AnodError(
-                            f'In component "{component}": The qualifier "{q}" is'
-                            " test_only and cannot be used to define a component"
-                        )
-
-                qualifier_dict_with_default_values = self.__force_default_values(
-                    qualifier_dict,
-                    ignore_test_only=True,
-                )
-
-                qualifier_configuration = self.__qualifier_config_repr(
-                    qualifier_dict_with_default_values
-                )
-
-                # Make sure the configuration has not been used yet
-                if qualifier_configuration in self.component_names:
-                    raise AnodError(
-                        f"The qualifier configuration of {component} is already "
-                        f"used by {self.component_names[qualifier_configuration]}"
-                    )
-
-                self.component_names[qualifier_configuration] = component
+        return tuple(sorted(qualifier_values.items()))
 
     def parse(self, user_qualifiers: dict[str, str]) -> None:
         """Parse the provided qualifiers.
@@ -604,135 +519,48 @@ class QualifiersManager:
             values.
         """
         # End the declaration phase to guaranty the consistency of the result
-        self.__end_declaration_phase()
-
-        # Check that the received user_qualifiers are valid according to the
-        # declared qualifiers.
-        self.__check_qualifier_consistency(user_qualifiers)
-
-        # Add the default values
-        self.qualifier_values = self.__force_default_values(
-            user_qualifiers, ignore_test_only=self.anod_instance.kind != "test"
+        self.is_declaration_phase_finished = True
+        self.origin = (
+            f"{self.anod_instance.kind}"
+            f"(name={self.anod_instance.name}, qual={user_qualifiers})"
+        )
+        # Compute and validate final qualifier values
+        self.qualifier_values = self.compute_qualifier_values(user_qualifiers)
+        self.serialized_qualifier_values = self.serialize_qualifier_values(
+            self.qualifier_values
         )
 
-    def __get_parsed_qualifiers(self) -> dict[str, str | bool]:
-        """Return the parsed qualifier dictionary.
+        # Compute component and build space names
+        for component_name, component_decl in self.component_decls.items():
+            qualifiers, has_component = component_decl
+            try:
+                qualifier_values = self.serialize_qualifier_values(
+                    self.compute_qualifier_values(qualifiers)
+                )
+            except AnodError as e:
+                raise AnodError(
+                    f"{self.origin}: Invalid qualifier state {qualifiers} "
+                    f"for build space/component {component_name}"
+                ) from e
 
-        Return the qualifier_values attribute. The keys of the dictionary are the
-        qualifier names and the values are the qualifier values.
+            if qualifier_values in self.component_names:
+                raise AnodError(
+                    f"{self.origin}: state {qualifiers} reused for "
+                    "several build spaces/components"
+                )
 
-        This function cannot be called before the end of the declaration phase
-        (i.e. before the call to parse)
+            if has_component:
+                self.component_names[qualifier_values] = component_name
+            self.build_space_names[qualifier_values] = component_name
 
-        :return: A dictionary containing all the qualifier values once the parse
-            procedure has been applied.
-        """
-        if not self.is_declaration_phase_finished:
-            raise AnodError(
-                "It is not possible to get the parsed passed qualifiers before the end "
-                "of the declaration phase"
-            )
+        # Compute the final build space name
+        self.compute_build_space_name()
 
-        if self.qualifier_values is None:
-            raise AnodError(
-                "The parse method must be called first to generate qualifiers values"
-            )
+        # Compute the final component name
+        self.component = self.component_names.get(self.serialized_qualifier_values)
 
-        return self.qualifier_values
-
-    def __generate_qualifier_part(
-        self,
-        qualifier_name: str,
-        parsed_qualifiers: dict[str, str | bool],
-    ) -> str | None:
-        """Return a string representing the qualifier for the name suffix.
-
-        :return: A string or None:
-            * str: The part of the name suffix due to the qualifier.
-            * None: The qualifier is part of the final hash, its alias and values
-            have been added to the has_pool attribute.
-        """
-        # Assuming that the qualifier has been declared.
-        # In practice, this is checked by build_space_name before it call this function.
-        qualifier = self.qualifier_decls[qualifier_name]
-
-        # If the qualifier is test_only and the anod kind is not test then the
-        # qualifier is ignored.
-        if qualifier["test_only"] and self.anod_instance.kind != "test":
-            return ""
-
-        qualifier_value = parsed_qualifiers[qualifier_name]
-
-        # Hold the part of the suffix induced by the qualifier.
-        generated_suffix = ""
-
-        alias = qualifier["repr_alias"]
-
-        # Handle the hash.
-        if qualifier["repr_in_hash"]:
-            generated_suffix = f"_{alias}-{parsed_qualifiers[qualifier_name]}"
-            self.hash_pool += generated_suffix
-            return None
-
-        # Handle tag qualifiers.
-        if qualifier["type"] == self.__TAG_QUALIFIER:
-            # The qualifier value is a boolean. True if the qualifier is used and
-            # False else.
-            if qualifier_value:
-                return "_" + alias
-            else:
-                return ""
-        elif qualifier["type"] == self.__KEY_VALUE_QUALIFIER:
-            # Hint for mypy. It is a string for sure since the qualifier is key_value
-            assert isinstance(qualifier_value, str)
-
-            # Key-Value qualifiers has one more parameter:
-            # * repr_omit_key
-
-            if qualifier["repr_omit_key"]:
-                return "_" + qualifier_value
-            else:
-                return "_" + qualifier_name + "-" + qualifier_value
-        else:
-            raise AnodError(
-                "An expected qualifier type was encountered during parsing "
-                f'Got "{qualifier["type"]}"'
-            )
-
-    @property
-    def component(self) -> str | None:
-        """Return the component name.
-
-        If the current qualifier configuration correspond to a component name,
-        then return this name, else return None.
-
-        This function cannot be called before the end of the declaration phase
-        (i.e. before the call to parse)
-
-        :return: The component name.
-        """
-        if not self.is_declaration_phase_finished:
-            raise AnodError(
-                "It is not possible to build a component before the end of the "
-                "declaration phase"
-            )
-
-        # Remove the test_only qualifier as they are not used for the component
-        qualifier_configuration = {
-            q: v
-            for q, v in self.__get_parsed_qualifiers().items()
-            if not self.qualifier_decls[q]["test_only"]
-        }
-
-        # This ensured by __end_declaration_phase
-        assert self.component_names is not None
-        return self.component_names.get(
-            self.__qualifier_config_repr(qualifier_configuration)
-        )
-
-    @property
-    def build_space_name(self) -> str:
-        """Return the build_space name.
+    def compute_build_space_name(self) -> None:
+        """Compute the final build_space_name.
 
         Aggregate the build_space name. It is made of four parts:
         base + qualifier_suffix + hash + test
@@ -742,99 +570,38 @@ class QualifiersManager:
             all qualifiers.
          * hash: The hash of the aggregation of all qualifiers marked with
             'repr_in_hash'.
-         * test: '_test' if the current anod primitive is test.
+         * test: '-test' if the current anod primitive is test.
 
         If the generated component is not None, then use it for consistency reason.
-
-        This function cannot be called before the end of the declaration phase
-        (i.e. before the call to parse)
-
-        :return: The build_space name.
         """
-        if not self.is_declaration_phase_finished:
-            raise AnodError(
-                "It is not possible to build a build_space name before the end of the "
-                "declaration phase"
-            )
-
-        component_name = self.component
-
-        if component_name is not None and self.anod_instance.kind != "test":
-            # A component name has been defined and must be used.
-            return component_name
-
-        parsed_qualifiers = self.__get_parsed_qualifiers()
-
-        qualifier_suffix = ""
-        hash_suffix = ""
-        kind_suffix = "_test" if self.anod_instance.kind == "test" else ""
-
-        qualifier_names_list = list(self.qualifier_decls)
-
-        # Reset the hash_pool to let __generate_qualifier_part populates it
-        self.hash_pool = ""
-
-        # Aggregate qualifier_suffix
-        # Ensure reproducibility sorting the qualifiers
-        for qualifier_name in sorted(qualifier_names_list):
-            suffix = self.__generate_qualifier_part(qualifier_name, parsed_qualifiers)
-
-            if suffix is not None:
-                # The qualifier part was not sent to the hash part
-                qualifier_suffix += suffix
-
-        # Compute hash_suffix
-        if self.hash_pool:
-            hash_suffix = f"_{sha1(self.hash_pool.encode()).hexdigest()[:8]}"
-
-        return self.base_name + qualifier_suffix + hash_suffix + kind_suffix
-
-    def __error(self, msg: str) -> None:
-        """Raise an error and print the helper."""
-        print(self.__get_helper())
-        raise AnodError(msg)
-
-    def __get_helper(self) -> str:
-        """Return an helper for the current state of Qualifiers.
-
-        :return: a string containing the helper.
-        """
-        helper_list = []
-        if self.qualifier_decls == {}:
-            return f"{self.anod_instance.name} does not accept any qualifiers."
-
-        helper_list.append(
-            f"{self.anod_instance.name} accept the following qualifiers:"
+        # Check if we have manual build space
+        manual_build_space_name = self.build_space_names.get(
+            self.serialized_qualifier_values
         )
+        if manual_build_space_name is not None:
+            self.build_space_name = manual_build_space_name
+            return
 
-        qualifier_part = []
-        for qualifier_name, qualifier in self.qualifier_decls.items():
-            test_only = "(test only) " if qualifier["test_only"] else ""
-            key_value = (
-                "=<value>" if qualifier["type"] == self.__KEY_VALUE_QUALIFIER else ""
-            )
+        # This is an automatic build space name
+        hash_pool: list[str] = []
+        bs = [self.base_name]
+        bs += [
+            self.qualifier_decls[el[0]].repr(el[1], hash_pool=hash_pool)
+            for el in self.serialized_qualifier_values
+        ]
+        if hash_pool:
+            hash_obj = sha1()
+            hash_obj.update("_".join(hash_pool).encode("utf-8"))
+            bs.append(hash_obj.hexdigest()[:8])
 
-            qualifier_part.append(
-                f'* {qualifier_name}{key_value} {test_only}: {qualifier["description"]}'
-            )
+        if self.anod_instance.kind == "test":
+            bs.append("test")
 
-            if qualifier["type"] == self.__KEY_VALUE_QUALIFIER:
-                # Add informations about the default
-                if qualifier["default"] is not None:
-                    qualifier_part.append(f'   * default: {qualifier["default"]}')
-
-                # Add informations about the choices
-                if qualifier["choices"] is not None:
-                    qualifier_part.append(f'   * choices: {qualifier["choices"]}')
-
-        for line in qualifier_part:
-            helper_list.append("    " + line)
-
-        return "\n".join(helper_list)
+        self.build_space_name = "_".join([el for el in bs if el])
 
     def __getitem__(self, key: str) -> str | bool:
         """Return the parsed value of the requested qualifier.
 
         :return: The qualifier value after the parsing.
         """
-        return self.__get_parsed_qualifiers()[key]
+        return self.qualifier_values[key]

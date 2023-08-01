@@ -28,16 +28,24 @@ def test_anod_name_generator():
                 name="debug",
                 description="simple description",
             )
+            qualifiers_manager.declare_key_value_qualifier(
+                name="optional_qual",
+                description="This is an option qual",
+                default="default_value",
+            )
 
-    simple = Simple("", kind="build")
-    assert simple.build_space_name == "simple"
+    simple = Simple(qualifier="", kind="build")
+    assert simple.build_space_name == "simple_optional_qual-default_value"
     assert simple.component is None
     assert not simple.get_qualifier("debug")
 
-    simple_debug = Simple("debug", kind="build")
-    assert simple_debug.build_space_name == "simple_debug"
+    simple_debug = Simple(qualifier="debug", kind="build")
+    assert simple_debug.build_space_name == "simple_debug_optional_qual-default_value"
     assert simple_debug.component is None
     assert simple_debug.get_qualifier("debug")
+
+    simple_empty = Simple(qualifier="optional_qual", kind="build")
+    assert simple_empty.build_space_name == "simple_optional_qual"
 
     # Disable the name generator
     class Base(Anod):
@@ -52,8 +60,8 @@ def test_anod_name_generator():
 
 def test_qualifiers_manager_errors():
     class AnodDummy(Anod):
+        name = "dummy_spec"
         enable_name_generator = True
-        base_name = "dummy"
 
     anod_dummy = AnodDummy("", kind="build")
 
@@ -66,8 +74,8 @@ def test_qualifiers_manager_errors():
             description="bar",
         )
     assert str(err.value) == (
-        "The qualifier declaration is finished. It is not possible to declare a new "
-        "qualifier after a component has been declared or a name generated"
+        "build(name=dummy_spec, qual={}): "
+        "qualifier can only be declared in declare_qualifiers_and_components"
     )
 
     # Declare a new component after parse
@@ -79,30 +87,25 @@ def test_qualifiers_manager_errors():
             {},
         )
     assert str(err.value) == (
-        "The component declaration is finished. It is not possible to declare a"
-        " new component after a name has been generated"
+        "build(name=dummy_spec, qual={}): component/build space can only be "
+        "declared in declare_qualifiers_and_components"
     )
 
     # Add a qualifier with an invalid name
     qualifiers_manager = QualifiersManager(anod_dummy)
     with pytest.raises(AnodError) as err:
         qualifiers_manager.declare_tag_qualifier(name="", description="foo")
-    assert str(err.value) == "The qualifier name cannot be empty"
+    assert (
+        str(err.value)
+        == "build(name=dummy_spec): Invalid qualifier declaration name ''"
+    )
 
     # Qualifier redeclaration
     qualifiers_manager = QualifiersManager(anod_dummy)
     qualifiers_manager.declare_tag_qualifier(name="foo", description="bar")
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.declare_tag_qualifier(name="foo", description="baz")
-    assert str(err.value) == "The foo qualifier has already been declared"
 
     # Qualifier with empty description
     qualifiers_manager = QualifiersManager(anod_dummy)
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.declare_tag_qualifier(
-            name="foo", description="", repr_alias=""
-        )
-    assert str(err.value) == "The foo qualifier description cannot be empty"
 
     # Qualifier with empty repr_alias
     qualifiers_manager = QualifiersManager(anod_dummy)
@@ -110,19 +113,23 @@ def test_qualifiers_manager_errors():
         qualifiers_manager.declare_tag_qualifier(
             name="foo", description="bar", repr_alias=""
         )
-    assert str(err.value) == "The foo qualifier repr_alias cannot be empty"
+    assert (
+        str(err.value)
+        == "build(name=dummy_spec): Invalid qualifier declaration alias ''"
+    )
 
     # The default value is not in the choices
     qualifiers_manager = QualifiersManager(anod_dummy)
     with pytest.raises(AnodError) as err:
         qualifiers_manager.declare_key_value_qualifier(
-            name="foo",
-            description="bar",
-            choices=["baz"],
-            default="dummy",
+            name="qual1",
+            description="qual help",
+            choices=["val1", "val2"],
+            default="invalid_value",
         )
     assert str(err.value) == (
-        'The foo qualifier default value "dummy" not in ' "['baz']"
+        "build(name=dummy_spec): default value 'invalid_value' "
+        "should be in ('val1', 'val2')."
     )
 
     # Add a component with an invalid name
@@ -132,7 +139,10 @@ def test_qualifiers_manager_errors():
             "foo@",
             {},
         )
-    assert str(err.value) == 'The component name "foo@" contains an invalid character'
+    assert (
+        str(err.value)
+        == "build(name=dummy_spec): Invalid component declaration name 'foo@'"
+    )
 
     # Component duplication
     qualifiers_manager = QualifiersManager(anod_dummy)
@@ -140,78 +150,39 @@ def test_qualifiers_manager_errors():
         "foo",
         {},
     )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.declare_component(
-            "foo",
-            {},
-        )
-    assert str(err.value) == 'The "foo" component names is already used'
-
-    # Try to build a component and a build_space before calling parse
-    qualifiers_manager = QualifiersManager(anod_dummy)
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.component
-    assert str(err.value) == (
-        "It is not possible to build a component before the end of the declaration "
-        "phase"
-    )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.build_space_name
-    assert str(err.value) == (
-        "It is not possible to build a build_space name before the end of the "
-        "declaration phase"
-    )
 
     # Forget to use a qualifier without a default value
     qualifiers_manager = QualifiersManager(anod_dummy)
     qualifiers_manager.declare_key_value_qualifier(
-        name="foo",
-        description="bar",
+        name="mandatory_qual",
+        description="some manadatory qualifier",
     )
     with pytest.raises(AnodError) as err:
         qualifiers_manager.parse({})
     assert str(err.value) == (
-        "The foo qualifier was declared without a default value but not passed"
+        "build(name=dummy_spec, qual={}): " "Missing qualifier(s): mandatory_qual"
     )
 
     # Use of undeclared qualifier
     with pytest.raises(AnodError) as err:
-        AnodDummy("foo", kind="build")
-    assert str(err.value) == ('The qualifier "foo" is used but has not been declared')
-
-    # Pass a key_value qualifier with no value
-    qualifiers_manager = QualifiersManager(Anod("", kind="build"))
-    qualifiers_manager.declare_key_value_qualifier(
-        name="foo",
-        description="foo",
+        AnodDummy("invalid_qual", kind="build")
+    assert str(err.value) == (
+        "build(name=dummy_spec, qual={'invalid_qual': ''}): "
+        "Invalid qualifier(s): invalid_qual"
     )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.parse({"foo": ""})
-    assert str(err.value) == 'The key-value qualifier "foo" must be passed with a value'
 
     # Pass a key_value qualifier with a value not in choices
-    qualifiers_manager = QualifiersManager(Anod("", kind="build"))
+    qualifiers_manager = QualifiersManager(AnodDummy("", kind="build"))
     qualifiers_manager.declare_key_value_qualifier(
-        name="foo",
-        description="foo",
-        choices=["bar", "baz"],
+        name="qual1",
+        description="some qual",
+        choices=["val1", "val2"],
     )
     with pytest.raises(AnodError) as err:
-        qualifiers_manager.parse({"foo": "foo"})
-    assert (
-        str(err.value) == "The foo qualifier value must be in ['bar', 'baz']. Got foo"
-    )
-
-    # Pass a tag qualifier with a value
-    qualifiers_manager = QualifiersManager(anod_dummy)
-    qualifiers_manager.declare_tag_qualifier(
-        name="foo",
-        description="foo",
-    )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.parse({"foo": "bar"})
+        qualifiers_manager.parse({"qual1": "invalid_value1"})
     assert str(err.value) == (
-        'The foo qualifier is a tag and does not expect any values. Got "bar"'
+        "build(name=dummy_spec): Invalid value for qualifier "
+        "qual1: 'invalid_value1' not in ('val1', 'val2')"
     )
 
     # Try to build a component
@@ -219,42 +190,28 @@ def test_qualifiers_manager_errors():
     # Invalid use of test_only qualifier
     qualifiers_manager = QualifiersManager(anod_dummy)
     qualifiers_manager.declare_key_value_qualifier(
-        name="foo",
-        description="bar",
+        name="test_qual",
+        description="test_qual help",
         test_only=True,
     )
     with pytest.raises(AnodError) as err:
-        qualifiers_manager.parse({"foo": "bar"})
+        qualifiers_manager.parse({"test_qual": "val1"})
     assert str(err.value) == (
-        "The qualifier foo is test_only but the current anod kind is build"
+        "build(name=dummy_spec, qual={'test_qual': 'val1'}): "
+        "Invalid qualifier(s): test_qual"
     )
 
     # use a not declared qualifier in component
     qualifiers_manager = QualifiersManager(anod_dummy)
     qualifiers_manager.declare_component(
-        "foo",
-        {"bar": "baz"},
+        "comp1",
+        {"invalid_qual1": "val1"},
     )
     with pytest.raises(AnodError) as err:
         qualifiers_manager.parse({})
     assert str(err.value) == (
-        'In component "foo": The qualifier "bar" is used but has not been declared'
-    )
-
-    # Incomplete use of a qualifier without default value
-    qualifiers_manager = QualifiersManager(anod_dummy)
-    qualifiers_manager.declare_key_value_qualifier(
-        name="foo",
-        description="foo",
-    )
-    qualifiers_manager.declare_component(
-        "bar",
-        {"foo": ""},
-    )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager.parse({"foo": "baz"})
-    assert str(err.value) == (
-        'In component "bar": The key-value qualifier "foo" must be passed with a value'
+        "build(name=dummy_spec, qual={}): Invalid qualifier state "
+        "{'invalid_qual1': 'val1'} for build space/component comp1"
     )
 
     # Reuse a qualifier configuration in a component
@@ -268,105 +225,34 @@ def test_qualifiers_manager_errors():
         {},
     )
     with pytest.raises(AnodError) as err:
-        qualifiers_manager.parse({"foo": "baz"})
+        qualifiers_manager.parse({})
     assert str(err.value) == (
-        "The qualifier configuration of baz is already " "used by bar"
-    ) or str(err.value) == (
-        "The qualifier configuration of bar is already " "used by baz"
-    )
-
-    # invalid call to inner method
-    qualifiers_manager = QualifiersManager(anod_dummy)
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__qualifier_config_repr({})
-    assert str(err.value) == (
-        "The function 'key' cannot be used before the end of the declaration phase"
-    )
-
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__check_qualifier_consistency({})
-    assert str(err.value) == (
-        "The qualifier consistency cannot be checked before the end of the "
-        "declaration phase"
-    )
-
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__get_parsed_qualifiers()
-    assert str(err.value) == (
-        "It is not possible to get the parsed passed qualifiers before the end "
-        "of the declaration phase"
-    )
-
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__force_default_values({})
-    assert str(err.value) == (
-        "The default values cannot be added before the end of the declaration phase"
-    )
-
-    # Check when the qualifier type is wrong
-    qualifiers_manager = QualifiersManager(anod_dummy)
-    qualifiers_manager.declare_tag_qualifier(
-        name="foo",
-        description="bar",
-    )
-    qualifiers_manager.qualifier_decls["foo"]["type"] = "baz"
-    qualifiers_manager._QualifiersManager__end_declaration_phase()
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__check_qualifier_consistency({})
-    assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
-    )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__check_qualifier_consistency(
-            {"foo": "foo"}
-        )
-    assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
-    )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__generate_qualifier_part(
-            "foo", {"foo": "foo"}
-        )
-    assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
-    )
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__force_default_values({})
-    assert str(err.value) == (
-        'An expected qualifier type was encountered during parsing Got "baz"'
-    )
-
-    # Call end declaration phase but don't parse it
-    qualifiers_manager = QualifiersManager(anod_dummy)
-    qualifiers_manager._QualifiersManager__end_declaration_phase()
-    with pytest.raises(AnodError) as err:
-        qualifiers_manager._QualifiersManager__get_parsed_qualifiers()
-    assert str(err.value) == (
-        "The parse method must be called first to generate qualifiers values"
+        "build(name=dummy_spec, qual={}): state {} reused for "
+        "several build spaces/components"
     )
 
     # Use a test_only qualifier in a component
     class TestInComp(Anod):
         enable_name_generator = True
-        base_name = "dummy"
+        name = "dummy_spec"
 
         def declare_qualifiers_and_components(self, qm):
             qm.declare_tag_qualifier(
-                name="foo",
-                description="foo",
+                name="test_qual1",
+                description="desc",
                 test_only=True,
             )
 
             qm.declare_component(
-                "bar",
-                {"foo": ""},
+                "comp1",
+                {"test_qual1": ""},
             )
 
     with pytest.raises(AnodError) as err:
         TestInComp(qualifier="", kind="build")
     assert str(err.value) == (
-        'In component "bar": The qualifier "foo" is test_only and cannot be used to '
-        "define a component"
+        "build(name=dummy_spec, qual={}): Invalid qualifier state "
+        "{'test_qual1': ''} for build space/component comp1"
     )
 
 
@@ -430,19 +316,19 @@ def test_qualifiers_manager():
     anod_no_component_1 = AnodNoComponent(
         "debug,version=1.2,path=/some/path,path_bis=/other/path", kind="build"
     )
-    assert anod_no_component_1.build_space_name == "my_spec_debug_1.2_ca656cba"
+    assert anod_no_component_1.build_space_name == "my_spec_debug_1.2_79765908"
     assert anod_no_component_1.component is None
 
     anod_no_component_2 = AnodNoComponent(
         "version=1.2,path=/some/path,path_bis=/other/path", kind="build"
     )
-    assert anod_no_component_2.build_space_name == "my_spec_1.2_ca656cba"
+    assert anod_no_component_2.build_space_name == "my_spec_1.2_79765908"
     assert anod_no_component_2.component is None
 
     anod_no_component_3 = AnodNoComponent(
         "debug,version=1.2,path=/different/path,path_bis=/path", kind="build"
     )
-    assert anod_no_component_3.build_space_name == "my_spec_debug_1.2_7a7d1e21"
+    assert anod_no_component_3.build_space_name == "my_spec_debug_1.2_a2aaba2e"
     assert anod_no_component_3.component is None
 
     class AnodComponent(Anod):
@@ -489,13 +375,6 @@ def test_qualifiers_manager():
     assert anod_component_3.build_space_name == "my_spec"
     assert anod_component_3.component == "my_spec"
 
-    # raise an error using version with no value
-    with pytest.raises(AnodError) as err:
-        anod_component_3 = AnodComponent("version=", kind="build")
-    assert str(err.value) == (
-        'The key-value qualifier "version" must be passed with a value'
-    )
-
     # test_only qualifier
     class AnodTestOnly(Anod):
         enable_name_generator = True
@@ -529,7 +408,7 @@ def test_qualifiers_manager():
 
     anod_component_6 = AnodTestOnly(qualifier="foo=bar", kind="test")
     assert anod_component_6.build_space_name == "my_spec_foo-bar_test"
-    assert anod_component_6.component == "baz"
+    assert anod_component_6.component is None
     assert not anod_component_6.get_qualifier("bar")
 
     # Unit test
