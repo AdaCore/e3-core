@@ -417,3 +417,13 @@ def test_qualifiers_manager():
     qualifiers_manager = QualifiersManager(Anod("", kind="build"))
     qualifiers_manager.parse({})
     qualifiers_manager.parse({})
+
+
+def test_qualifiers_with_source_primitive():
+    class SimpleAnod(Anod):
+        enable_name_generator = True
+        base_name = "simple"
+        name = "simple_anod"
+
+    simple_anod = SimpleAnod(kind="source", qualifier="")
+    assert simple_anod.build_space_name == "simple_anod"

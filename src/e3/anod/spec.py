@@ -244,7 +244,7 @@ class Anod:
 
         # Create the QualifiersManager.
         # Skip if the name generator is disabled.
-        if self.enable_name_generator:
+        if self.enable_name_generator and self.kind != "source":
             self.qualifiers_manager = QualifiersManager(self)
             self.declare_qualifiers_and_components(self.qualifiers_manager)
             self.qualifiers_manager.parse(self.parsed_qualifier)
@@ -322,7 +322,7 @@ class Anod:
             build_space name otherwise.
         :rtype: str | None
         """
-        if self.enable_name_generator:
+        if self.enable_name_generator and self.kind != "source":
             return self.qualifiers_manager.build_space_name
         else:
             return self.name
