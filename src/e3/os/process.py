@@ -82,9 +82,21 @@ def get_rlimit(platform: str | None = None) -> str:
     if platform == "x86_64-windows64":
         platform = "x86_64-windows"
 
-    from pkg_resources import resource_filename
+    from atexit import register
+    from contextlib import ExitStack
 
-    return resource_filename(__name__, os.path.join("data", f"rlimit-{platform}"))
+    try:
+        from importlib.resources import files, as_file
+    except ImportError:  # For compatibily with older version
+        from importlib_resources import files, as_file  # type: ignore[no-redef]
+
+    file_manager = ExitStack()
+    register(file_manager.close)
+    return str(
+        file_manager.enter_context(
+            as_file(files("e3.os") / "data" / f"rlimit-{platform}")
+        )
+    )
 
 
 def quote_arg(arg: str) -> str:

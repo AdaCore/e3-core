@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "e3-core"
+description = "E3 core. Tools and library for building and testing software"
+requires-python = ">=3.9"
+license = {text = "GPLv3"}
+authors = [{name = "AdaCore", email = "info@adacore.com"}]
+keywords = ["AdaCore", "Production", "SSC", "Supply chain", "Build"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License ::  AdaCore internal",
+    "Topic :: Software Development :: Build Tool",
+]
+dependencies = [
+    "colorama",
+    "pyyaml",
+    "python-dateutil",
+    "requests",
+    "requests_toolbelt",
+    "tqdm",
+    "stevedore>1.20.0",
+    "setuptools",
+    "ld; platform_system=='Linux'",
+    "psutil; sys_platform=='darwin' or sys_platform=='linux' or sys_platform=='linux2' or sys_platform=='win32'"
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION" }
+
+[project.optional-dependencies]
+config = ["tomlkit", "typeguard<3.0.0"]
+test = ["mock", "pytest-html", "pytest-socket", "ansi2html", "httpretty"]
+
+[project.urls]
+repository = "https://github.com/AdaCore/e3-core"
+
+[tools.setuptools.package-data]
+e3 = ["py.typed", "rlimit-*"]
+
+[project.entry-points."e3.anod.sandbox.sandbox_action"]
+exec = "e3.anod.sandbox.action:SandBoxExec"
+create = "e3.anod.sandbox.action:SandBoxCreate"
+show-config = "e3.anod.sandbox.action:SandBoxShowConfiguration"
+migrate = "e3.anod.sandbox.migrate:SandBoxMigrate"
+
+[project.entry-points."e3.event.handler"]
+smtp = "e3.event.handler.smtp:SMTPHandler"
+logging = "e3.event.handler.logging:LoggingHandler"
+file = "e3.event.handler.file:FileHandler"
+s3 = "e3.event.handler.s3:S3Handler"
+
+[project.entry-points."e3.store"]
+http-simple-store = "e3.store.backends.http_simple_store:HTTPSimpleStore"
+
+[project.entry-points."e3.store.cache.backend"]
+file-cache = "e3.store.cache.backends.filecache:FileCache"
+
+[project.entry-points.sandbox_scripts]
+anod = "e3.anod.sandbox.scripts:anod"
+
+[project.entry-points.console_scripts]
+e3 = "e3.sys:main"
+e3-sandbox = "e3.anod.sandbox.main:main"
+e3-pypi-closure = "e3.python.pypiscript:main"
