@@ -156,31 +156,35 @@ class KeyValueDeclaration(QualifierDeclaration):
 
     def repr(self, value: str | bool, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
-        list_repr = []
-        if not self.repr_omit_key:
-            list_repr.append(self.repr_name)
-        if value:
-            list_repr.append(str(value))
+        if not value:
+            # An empty value for tag value should lead to an empty representation
+            str_repr = ""
+        elif (
+            value == self.default
+            and self.choices is not None
+            and "" not in self.choices
+        ):
+            # In the case the value of qualifier is a finite set and
+            # that "" is not in that set, if value is the default value then
+            # just return an empty representation.
+            str_repr = ""
+        else:
+            # Otherwise compute components of the representation.
+            list_repr = []
+            if not self.repr_omit_key:
+                list_repr.append(self.repr_name)
+            if value:
+                list_repr.append(str(value))
 
-        str_repr = "-".join(list_repr)
+            # And join them with a dash.
+            str_repr = "-".join(list_repr)
 
         if hash_pool is not None and self.repr_in_hash:
             if str_repr:
                 hash_pool.append(str_repr)
             return ""
         else:
-            if (
-                value != ""
-                and value == self.default
-                and self.choices is not None
-                and "" not in self.choices
-            ):
-                # In the case the value of qualifier is a finite set and
-                # that "" is not in that set, if value is the default value then
-                # just return an empty representation.
-                return ""
-            else:
-                return str_repr
+            return str_repr
 
 
 class TagDeclaration(QualifierDeclaration):

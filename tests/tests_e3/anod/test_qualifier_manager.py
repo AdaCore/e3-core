@@ -45,7 +45,7 @@ def test_anod_name_generator():
     assert simple_debug.get_qualifier("debug")
 
     simple_empty = Simple(qualifier="optional_qual", kind="build")
-    assert simple_empty.build_space_name == "simple_optional_qual"
+    assert simple_empty.build_space_name == "simple"
 
     # Disable the name generator
     class Base(Anod):
@@ -304,6 +304,7 @@ def test_qualifiers_manager():
                 name="path",
                 description="The first path.",
                 repr_in_hash=True,
+                default="",
             )
 
             # Add the "path_bis" qualifier
@@ -311,6 +312,7 @@ def test_qualifiers_manager():
                 name="path_bis",
                 description="A second path.",
                 repr_in_hash=True,
+                default="",
             )
 
     anod_no_component_1 = AnodNoComponent(
@@ -330,6 +332,10 @@ def test_qualifiers_manager():
     )
     assert anod_no_component_3.build_space_name == "my_spec_debug_1.2_a2aaba2e"
     assert anod_no_component_3.component is None
+
+    anod_no_component_4 = AnodNoComponent(qualifier="debug,version=1.2", kind="build")
+    assert anod_no_component_4.build_space_name == "my_spec_debug_1.2"
+    assert anod_no_component_4.component is None
 
     class AnodComponent(Anod):
         enable_name_generator = True
