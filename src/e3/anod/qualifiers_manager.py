@@ -292,6 +292,47 @@ class QualifiersManager:
         self.component: str | None = None
         self.build_space_name: str = ""
 
+        # The call back function to handle aliases of os_versions and machines
+        self.machine_aliases: dict[str, str] = {}
+        self.os_version_aliases: dict[str, str] = {}
+        self.add_target_info_to_bs = False
+
+    def add_target_info(
+        self,
+        machine_aliases: dict[str, str] | None = None,
+        os_version_aliases: dict[str, str] | None = None,
+    ) -> None:
+        """Enable target os information in build space name computation.
+
+        Note that target information is added only if in a cross context.
+
+        :param machine_aliases: aliases for server name. Can be used to shorten
+            build space name
+        :param os_version_aliases: aliases for OS versions. Can be used to shorten
+            build space name
+        """
+        if self.is_declaration_phase_finished:
+            raise AnodError(
+                f"{self.origin}: build space name computation settings can only "
+                "be changed in 'declare_qualifiers_and_components'"
+            )
+
+        self.add_target_info_to_bs = True
+        if os_version_aliases:
+            self.os_version_aliases.update(os_version_aliases)
+        if machine_aliases:
+            self.machine_aliases.update(machine_aliases)
+
+    def remove_target_info(self) -> None:
+        """Disable target os information in build space name computation."""
+        if self.is_declaration_phase_finished:
+            raise AnodError(
+                f"{self.origin}: build space name computation settings can only "
+                "be changed in 'declare_qualifiers_and_components'"
+            )
+
+        self.add_target_info_to_bs = False
+
     def declare_tag_qualifier(
         self,
         name: str,
@@ -597,6 +638,21 @@ class QualifiersManager:
             hash_obj = sha1()
             hash_obj.update("_".join(hash_pool).encode("utf-8"))
             bs.append(hash_obj.hexdigest()[:8])
+
+        if self.add_target_info_to_bs and self.anod_instance.env.is_cross:
+            # We can run test on many different cross OS version
+            # from the same host machine, make sure that we have a
+            # different build space each time
+            os_version = self.anod_instance.env.target.os.version
+            if os_version and os_version != "unknown":
+                bs.append(self.os_version_aliases.get(os_version, os_version))
+            # We also can test on different machines, so add it as well
+            machine = self.anod_instance.env.target.machine
+            if machine and machine != "unknown":
+                # and make sure the machine name is compatible with
+                # file paths: only keep letters
+                machine_str = "".join([c for c in machine if c.isalpha()])
+                bs.append(self.machine_aliases.get(machine, machine_str))
 
         if self.anod_instance.kind == "test":
             bs.append("test")

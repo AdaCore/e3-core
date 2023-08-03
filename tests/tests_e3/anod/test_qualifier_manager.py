@@ -1,6 +1,7 @@
 from e3.anod.error import AnodError
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.anod.spec import Anod
+from e3.env import BaseEnv
 
 import pytest
 
@@ -433,3 +434,36 @@ def test_qualifiers_with_source_primitive():
 
     simple_anod = SimpleAnod(kind="source", qualifier="")
     assert simple_anod.build_space_name == "simple_anod"
+
+
+def test_add_target_info_to_build_space():
+    class ParentAnod(Anod):
+        enable_name_generator = True
+        name = "parent"
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            qualifiers_manager.add_target_info()
+
+    class ChildAnod(ParentAnod):
+        name = "child"
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            qualifiers_manager.add_target_info(
+                machine_aliases={"myboard": "m"}, os_version_aliases={"2.0": "2"}
+            )
+
+    class GrandChildAnod(ChildAnod):
+        name = "grandchild"
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            qualifiers_manager.remove_target_info()
+
+    env = BaseEnv()
+    env.set_target(name="arm-elf", version="2.0", machine="myboard")
+    anod = ParentAnod(kind="build", qualifier="", env=env)
+    assert anod.build_space_name == "parent_2.0_myboard"
+    anod = ChildAnod(kind="build", qualifier="", env=env)
+    assert anod.build_space_name == "child_2_m"
+
+    anod = GrandChildAnod(kind="build", qualifier="", env=env)
+    assert anod.build_space_name == "grandchild"
