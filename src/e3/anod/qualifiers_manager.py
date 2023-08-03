@@ -650,8 +650,8 @@ class QualifiersManager:
             machine = self.anod_instance.env.target.machine
             if machine and machine != "unknown":
                 # and make sure the machine name is compatible with
-                # file paths: only keep letters
-                machine_str = "".join([c for c in machine if c.isalpha()])
+                # file paths: only keep letters, numbers and dashes
+                machine_str = "".join([c for c in machine if c.isalnum() or c == "-"])
                 bs.append(self.machine_aliases.get(machine, machine_str))
 
         if self.anod_instance.kind == "test":
