@@ -41,8 +41,13 @@ test = ["mock", "pytest-html", "pytest-socket", "ansi2html", "httpretty"]
 [project.urls]
 repository = "https://github.com/AdaCore/e3-core"
 
+[tools.setuptools.packages.find]
+namespace = true
+where = ["src"]
+
 [tools.setuptools.package-data]
-e3 = ["py.typed", "rlimit-*"]
+e3 = ["py.typed"]
+"e3.os.data" = ["rlimit-*"]
 
 [project.entry-points."e3.anod.sandbox.sandbox_action"]
 exec = "e3.anod.sandbox.action:SandBoxExec"

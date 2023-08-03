@@ -85,18 +85,31 @@ def get_rlimit(platform: str | None = None) -> str:
     from atexit import register
     from contextlib import ExitStack
 
-    try:
-        from importlib.resources import files, as_file
-    except ImportError:  # For compatibily with older version
-        from importlib_resources import files, as_file  # type: ignore[no-redef]
+    # try:
+    #    from importlib.resources import files, as_file
+    # except ImportError:  # For compatibily with older version
+    from importlib_resources import files, as_file  # type: ignore[no-redef]
 
     file_manager = ExitStack()
     register(file_manager.close)
-    return str(
+    rlimit_path = str(
         file_manager.enter_context(
             as_file(files("e3.os") / "data" / f"rlimit-{platform}")
         )
     )
+    old_path = os.environ.get("PATH", "")
+    if old_path:
+        os.environ["PATH"] = "{}:{}".format(os.path.dirname(rlimit_path), old_path)
+    else:
+        os.environ["PATH"] = os.path.dirname(rlimit_path)
+
+    print(os.path.dirname(rlimit_path))
+    print(os.environ["PATH"])
+    from shutil import which as shutil_which
+
+    print("shutil.which = {}".format(shutil_which(f"rlimit-{platform}")))
+    print("e3.os.fs.which = {}".format(which(f"rlimit-{platform}")))
+    return rlimit_path
 
 
 def quote_arg(arg: str) -> str:
