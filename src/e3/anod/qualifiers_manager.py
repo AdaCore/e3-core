@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from e3.anod.spec import Anod
 
 
-VALID_NAME = re.compile(r"^[a-zA-Z0-9_.-]+$")
+VALID_NAME = re.compile(r"^[a-zA-Z0-9_.+-]+$")
 
 
 def check_valid_name(name: str, value_kind: str, origin: str) -> str:
