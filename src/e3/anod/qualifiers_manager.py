@@ -512,8 +512,12 @@ class QualifiersManager:
             if qual.default is not None
         }
 
-        # Check that all qualifiers passed by the user are declared
-        invalid_keys = set(qualifier_dict.keys()) - set(self.qualifier_decls.keys())
+        # Check that all qualifiers passed by the user are declared. Note that if we
+        # have in qualifier_dict an entry with key is the null string we ignore it.
+        # This case can occurs when the qualifier string contains additionals commas.
+        invalid_keys = {k for k in qualifier_dict if k} - set(
+            self.qualifier_decls.keys()
+        )
         if invalid_keys:
             invalid_keys_str = ", ".join(invalid_keys)
             raise AnodError(f"{self.origin}: Invalid qualifier(s): {invalid_keys_str}")
@@ -523,6 +527,7 @@ class QualifiersManager:
             {
                 name: self.qualifier_decls[name].value(value)
                 for name, value in qualifier_dict.items()
+                if name
             }
         )
 
