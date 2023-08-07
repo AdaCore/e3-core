@@ -74,7 +74,7 @@ def sendmail(
 
     smtp_class = (
         smtplib.SMTP_SSL
-        if "smtp_ssl" in os.environ.get("E3_ENABLE_FEATURE", "").split(",")
+        if "smtp_nossl" not in os.environ.get("E3_ENABLE_FEATURE", "").split(",")
         else smtplib.SMTP
     )
 

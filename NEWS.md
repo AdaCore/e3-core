@@ -1,7 +1,8 @@
 
 # Version 22.4.0 (2023-??-??) *NOT RELEASED YET*
 
-* Nothing
+* Security enhancements:
+  * e3.net.smtp.sendmail uses to ``SMTP_SSL`` by default
 
 # Version 22.3.1 (2023-03-17)
 
