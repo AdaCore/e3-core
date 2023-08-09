@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from hashlib import sha1
 from e3.anod.error import AnodError
 import abc
@@ -270,7 +270,7 @@ class QualifiersManager:
         # to be checked and prepared (add the default values...) before being actually
         # usable. The keys are the components names and the values are the dictionary
         # representing the corresponding qualifier configuration.
-        self.component_decls: dict[str, tuple[dict[str, str], bool]] = {}
+        self.component_decls: dict[Any, tuple[dict[str, str], str, bool]] = {}
 
         # Hold the declared components. The keys are the qualifier configurations
         # (tuples) and the value are the component names.
@@ -480,6 +480,7 @@ class QualifiersManager:
         :param name: A string representing the component name.
         :param required_qualifier_configuration: The dictionary of qualifiers
             value corresponding to the build linked to the component.
+        :param has_component: A boolean that indicates we are declaring a component
         """
         if self.is_declaration_phase_finished:
             raise AnodError(
@@ -488,11 +489,12 @@ class QualifiersManager:
             )
 
         self.component_decls[
-            check_valid_name(
-                name, value_kind="component declaration name", origin=self.origin
-            )
+            hash(tuple(sorted(required_qualifier_configuration.items())))
         ] = (
             required_qualifier_configuration,
+            check_valid_name(
+                name, value_kind="component declaration name", origin=self.origin
+            ),
             has_component,
         )
 
@@ -581,8 +583,8 @@ class QualifiersManager:
         )
 
         # Compute component and build space names
-        for component_name, component_decl in self.component_decls.items():
-            qualifiers, has_component = component_decl
+        for _, component_decl in self.component_decls.items():
+            qualifiers, component_name, has_component = component_decl
             try:
                 qualifier_values = self.serialize_qualifier_values(
                     self.compute_qualifier_values(qualifiers)
