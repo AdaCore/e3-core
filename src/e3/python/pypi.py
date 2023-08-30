@@ -190,7 +190,9 @@ class Package:
         for version in self.data.get("releases", {}):
             try:
                 v = packaging.version.parse(version)
-                if not v.is_prerelease and not v.is_devrelease:
+                if (not v.is_prerelease and not v.is_devrelease) or (
+                    v.is_prerelease and self.name in pypi.allowed_prerelease
+                ):
                     self.versions.append(v)
             except Exception:
                 logger.warning(f"Cannot parse version {version} of {self.name}")
@@ -375,6 +377,7 @@ class PyPIClosure:
         cache_dir: str,
         cache_file: str | None = None,
         pypi_url: str = "https://pypi.org/pypi",
+        allowed_prerelease: list[str] | None = None,
     ) -> None:
         """Initialize a PyPI session.
 
@@ -394,6 +397,7 @@ class PyPIClosure:
         self.load_cache_file()
         self.requirements: set[Requirement] = set()
         self.explicit_requirements: set[Requirement] = set()
+        self.allowed_prerelease = allowed_prerelease or []
 
         self.platforms = platforms
         self.sys_platforms = set()

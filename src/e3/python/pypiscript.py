@@ -80,6 +80,14 @@ def main() -> None:
         help="Use local clones. When set look for git clones in a directory",
         default=None,
     )
+    m.argument_parser.add_argument(
+        "--allow-prerelease",
+        dest="allowed_prerelease",
+        metavar="REQUIREMENT",
+        nargs="*",
+        default=None,
+        help="Allow to use pre-release version for some requirements",
+    )
     m.parse_args()
     assert m.args is not None
 
@@ -153,6 +161,7 @@ def main() -> None:
         cache_dir=wheel_cache_dir,
         python3_version=m.args.python3_version,
         platforms=config["platforms"],
+        allowed_prerelease=m.args.allowed_prerelease,
     ) as pypi:
         for wheel in local_wheels:
             logging.info(f"Register wheel {wheel.path}")
