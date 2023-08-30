@@ -168,12 +168,10 @@ class Walk:
         to implement alternative strategies.
 
         :param uid: A unique Job ID.
-        :param previous_fingerprint: The fingerprint from the previous
-            from the action's previous run.  None if the action has not
-            been previously executed.
-        :param new_fingerprint: The fingerprint from the previous
-            from the action's previous run.  None if the action has not
-            been previously executed.
+        :param previous_fingerprint: The fingerprint of the previous execution of the
+            action. None if the action has not been previously executed.
+        :param new_fingerprint: The fingerprint of the new action to be performed. None
+            if fingerprints are not used
         """
         if previous_fingerprint is None or new_fingerprint is None:
             return True
