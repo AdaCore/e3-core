@@ -3,9 +3,11 @@ from e3.python.wheel import Wheel
 from e3.os.process import Run
 from e3.sys import python_script
 from e3.fs import mkdir
-from e3.python.pypi import PyPIClosure
+from e3.python.pypi import PyPIClosure, PyPIError
+
 import yaml
 import os
+import pytest
 
 
 def generate_py_pkg_source(
@@ -103,3 +105,46 @@ def test_pypi_closure_tool():
         "src1-1.0.0-py3-none-any.whl",
         "src2-1.0.0-py3-none-any.whl",
     }
+
+
+def test_star_requirements():
+    """Test package requirements ending with * with != operator."""
+    wheel1 = generate_py_pkg_source("src1", version="1.0.4")
+    assert os.path.isfile(wheel1.path)
+    assert not wheel1.requirements
+
+    wheel2 = generate_py_pkg_source("src2", requires=["src1!=1.0.*"])
+    assert os.path.isfile(wheel2.path)
+    assert len(wheel2.requirements) == 1
+
+    wheel3 = generate_py_pkg_source("src1", version="1.1.4")
+    assert os.path.isfile(wheel3.path)
+    assert not wheel3.requirements
+
+    mkdir(".cache")
+
+    with PyPIClosure(
+        python3_version=10,
+        platforms=[
+            "x86_64-linux",
+        ],
+        cache_dir=".cache",
+        cache_file=".pypi.cache",
+    ) as pypi:
+        pypi.add_wheel(wheel1.path)
+        pypi.add_wheel(wheel2.path)
+        with pytest.raises(PyPIError, match="Cannot satisfy constraint src1!=1.0.*"):
+            pypi.add_requirement("src2==1.0.0")
+
+    with PyPIClosure(
+        python3_version=10,
+        platforms=[
+            "x86_64-linux",
+        ],
+        cache_dir=".cache",
+        cache_file=".pypi.cache",
+    ) as pypi:
+        pypi.add_wheel(wheel2.path)
+        pypi.add_wheel(wheel3.path)
+        pypi.add_requirement("src2==1.0.0")
+        assert len(pypi.closure()) == 2
