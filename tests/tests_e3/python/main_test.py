@@ -59,6 +59,7 @@ def test_wheel():
         pypi.add_requirement("src1>0.5.0")
         pypi.add_requirement("src1>=0.6.0")
         pypi.add_requirement("src1!=0.4.2")
+        pypi.add_requirement("src1~=1.0.0")
         assert len(pypi.file_closure()) == 2
         assert len(pypi.closure_as_requirements()) == 2
         assert len(pypi.closure()) == 2

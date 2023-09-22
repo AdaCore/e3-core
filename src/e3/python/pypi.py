@@ -7,6 +7,7 @@ import os
 import time
 import packaging.version
 import packaging.tags
+import packaging.specifiers
 from typing import TYPE_CHECKING
 from e3.error import E3Error
 from e3.python.wheel import Wheel
@@ -332,34 +333,13 @@ class Package:
 
         # Apply version constraints
         for spec in requirement.specs:
-            if spec[1].endswith(".*") and spec[0] == "!=":
-                # Handle requirements ending with * apart as it is not covered by
-                # packaging.version
-                self.versions = [
-                    v for v in self.versions if not str(v).startswith(spec[1][:-2])
-                ]
-            else:
-                target_version = packaging.version.parse(spec[1])
-                if spec[0] == ">=":
-                    self.versions = [v for v in self.versions if v >= target_version]
-                elif spec[0] == ">":
-                    self.versions = [v for v in self.versions if v > target_version]
-                elif spec[0] == "!=":
-                    self.versions = [v for v in self.versions if v != target_version]
-                elif spec[0] == "<":
-                    self.versions = [v for v in self.versions if v < target_version]
-                elif spec[0] == "<=":
-                    self.versions = [v for v in self.versions if v <= target_version]
-                elif spec[0] == "==":
-                    self.versions = [v for v in self.versions if v == target_version]
-                elif spec[0] == "~=":
-                    self.versions = [
-                        v
-                        for v in self.versions
-                        if str(v).startswith(str(target_version) + ".")
-                    ]
-                else:
-                    raise PyPIError(f"Unknown constraint operator {spec[0]}")
+            self.versions = [
+                v
+                for v in self.versions
+                if packaging.specifiers.Specifier(f"{spec[0]}{spec[1]}").contains(
+                    str(v)
+                )
+            ]
 
         if len(self.versions) != current_length:
             logging.debug(
