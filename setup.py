@@ -11,6 +11,7 @@ install_requires = [
     "tqdm",
     "stevedore>1.20.0",
     "setuptools",
+    "packaging",
 ]
 
 extras_require = {
