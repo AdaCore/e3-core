@@ -16,6 +16,17 @@ logger = e3.log.getLogger("diff")
 
 
 class DiffError(e3.error.E3Error):
+    """Error returned when the patch command fails."""
+
+    pass
+
+
+class EmptyDiffError(DiffError):
+    """Error returned when the patch is empty.
+
+    These situation can occur when all the patched files are discarded.
+    """
+
     pass
 
 
@@ -268,6 +279,6 @@ def patch(
         files_to_patch = process_regular_patch()
 
     if files_to_patch == 0:
-        raise DiffError(origin="patch", message="No file to patch")
+        raise EmptyDiffError(origin="patch", message="No file to patch")
 
     apply_patch(filtered_patch)

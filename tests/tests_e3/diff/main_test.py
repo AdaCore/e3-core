@@ -58,7 +58,7 @@ def test_patch_ignore_all(caplog):
 
     e3.fs.cp(file_to_patch, current_dir)
     e3.fs.cp(file_patch2, current_dir)
-    with pytest.raises(e3.diff.DiffError):
+    with pytest.raises(e3.diff.EmptyDiffError):
         e3.diff.patch("patch2.txt", current_dir, discarded_files=lambda x: True)
 
 
@@ -144,7 +144,7 @@ def test_patch_git_format_ignore():
     assert "That's nice it's working !" in content
 
     e3.fs.cp(file_to_patch, cwd)
-    with pytest.raises(e3.diff.DiffError):
+    with pytest.raises(e3.diff.EmptyDiffError):
         e3.diff.patch("git_diff.patch", cwd, discarded_files=["git_file.txt"])
 
     with open(os.path.join(cwd, "git_file.txt")) as fd:
@@ -190,7 +190,7 @@ def test_patch_git_with_headers():
 
     e3.fs.rm("file1")
     e3.fs.rm("file2")
-    with pytest.raises(e3.diff.DiffError):
+    with pytest.raises(e3.diff.EmptyDiffError):
         e3.diff.patch("git_patch_with_header", cwd, discarded_files=["file*"])
 
     assert not os.path.isfile("file1")
