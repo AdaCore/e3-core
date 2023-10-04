@@ -68,7 +68,7 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
         )
 
     @property
-    def default(self) -> str | bool | None:
+    def default(self) -> str | bool | frozenset[str] | None:
         """Return default value for qualifier.
 
         :return: if None is returned it means the qualifier has not
@@ -77,11 +77,13 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
         return None  # all: no cover
 
     @abc.abstractmethod
-    def value(self, value: str | bool) -> str | bool:
-        """Validate qualifier value and return the effective one."""
+    def value(self, value: str) -> str | bool | frozenset[str]:
+        """Compute the value of qualifier given the use input."""
 
     @abc.abstractmethod
-    def repr(self, value: str | bool, hash_pool: list[str] | None) -> str:
+    def repr(
+        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
+    ) -> str:
         """Compute a string representation of a qualifier.
 
         :param value: the effective value associated with the qualifier
@@ -140,12 +142,14 @@ class KeyValueDeclaration(QualifierDeclaration):
         self._default = default
 
     @property
-    def default(self) -> str | bool | None:
+    def default(self) -> str | bool | frozenset[str] | None:
         """See QualifierDeclaration.default."""
         return self._default
 
-    def value(self, value: str | bool) -> str | bool:
+    def value(self, value: str) -> str | bool | frozenset[str]:
         """See QualifierDeclaration.value."""
+        if not isinstance(value, str):
+            raise AnodError("Key value qualifiers can only parse a string value.")
         if self.choices is not None and value not in self.choices:
             choices_str = ", ".join((f"'{choice}'" for choice in self.choices))
             raise AnodError(
@@ -154,10 +158,13 @@ class KeyValueDeclaration(QualifierDeclaration):
             )
         return value
 
-    def repr(self, value: str | bool, hash_pool: list[str] | None) -> str:
+    def repr(
+        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
+    ) -> str:
         """See QualifierDeclaration.repr."""
         if not value:
-            # An empty value for tag value should lead to an empty representation
+            # An empty value for a key_value qualifier should lead to an empty
+            # representation
             str_repr = ""
         elif (
             value == self.default
@@ -173,8 +180,9 @@ class KeyValueDeclaration(QualifierDeclaration):
             list_repr = []
             if not self.repr_omit_key:
                 list_repr.append(self.repr_name)
-            if value:
-                list_repr.append(str(value))
+
+            # value as been checked early on
+            list_repr.append(str(value))
 
             # And join them with a dash.
             str_repr = "-".join(list_repr)
@@ -191,23 +199,18 @@ class TagDeclaration(QualifierDeclaration):
     """Tag qualifier declaration."""
 
     @property
-    def default(self) -> bool:
+    def default(self) -> str | bool | frozenset[str] | None:
         """See QualifierDeclaration.value."""
         return False
 
-    def value(self, value: str | bool) -> bool:
+    def value(self, value: str) -> str | bool | frozenset[str]:
         """See QualifierDeclaration.value."""
-        # The presence of a tag in input is defined by the existence
-        # of the key (the value has no meaning). The value set by the
-        # user might be None or "". The False value can only come from
-        # the defaults initialization. Thus do not change following
-        # condition into if not value.
-        if value is False:
-            return False
-        else:
-            return True
+        # As soon as a tag qualifier is passed, its value is True
+        return True
 
-    def repr(self, value: str | bool, hash_pool: list[str] | None) -> str:
+    def repr(
+        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
+    ) -> str:
         """See QualifierDeclaration.repr."""
         if hash_pool is not None and self.repr_in_hash:
             if value:
@@ -217,6 +220,118 @@ class TagDeclaration(QualifierDeclaration):
             return self.repr_name
         else:
             return ""
+
+
+class KeySetDeclaration(QualifierDeclaration):
+    # The separator use to distinguish all the element of the list
+    LIST_SEPARATOR = ";"
+
+    def __init__(
+        self,
+        origin: str,
+        name: str,
+        description: str,
+        repr_in_hash: bool = False,
+        repr_name: str | None = None,
+        repr_omit_key: bool = False,
+        default: set[str] | None = None,
+        choices: list[str] | None = None,
+    ) -> None:
+        """Initialize a key-set qualifier declaration.
+
+        :param origin: a string giving the origin of the declaration
+            (used in error messages)
+        :param name: see QualifierDeclaration.__init__
+        :param description: see QualifierDeclaration.__init__
+        :param repr_in_hash: see QualifierDeclaration.__init__
+        :param repr_name: see QualifierDeclaration.__init__
+        :param repr_omit_key: if True discard qualifier name in string representation
+        :param default: default value for the qualifier
+        :param choices: list of valid value for the qualifier
+        """
+        super().__init__(
+            origin=origin,
+            name=name,
+            description=description,
+            repr_in_hash=repr_in_hash,
+            repr_name=repr_name,
+        )
+        self.repr_omit_key = repr_omit_key
+
+        # Check if the default is valid
+        if default is not None and choices is not None:
+            wrong_values = default - set(choices)
+            if wrong_values:
+                choices_str = ", ".join((f"'{choice}'" for choice in choices))
+                wrong_values_str = ", ".join(
+                    (f"'{value}'" for value in sorted(wrong_values))
+                )
+                raise AnodError(
+                    f"{self.origin}: In '{self.name}', default value(s) "
+                    f"({wrong_values_str}) should be in ({choices_str})"
+                )
+
+        self.choices = choices
+        self._default: frozenset[str] | None = (
+            frozenset(default) if default is not None else None
+        )
+
+    @property
+    def default(self) -> str | bool | frozenset[str] | None:
+        """See QualifierDeclaration.default."""
+        return self._default
+
+    def value(self, value: str) -> str | bool | frozenset[str]:
+        """See QualifierDeclaration.value."""
+        if not isinstance(value, str):
+            raise AnodError("Key set qualifiers can only parse a string value.")
+
+        # Make sure '' value is the empty set
+        value_set = (
+            frozenset(value.split(self.LIST_SEPARATOR)) if value else frozenset({})
+        )
+
+        # Check if the values are in choices
+        if self.choices:
+            wrong_values = value_set - set(self.choices)
+
+            if wrong_values:
+                choices_str = ", ".join((f"'{choice}'" for choice in self.choices))
+                wrong_values_str = ", ".join(
+                    (f"'{value}'" for value in sorted(wrong_values))
+                )
+                raise AnodError(
+                    f"{self.origin}: Invalid value(s) for qualifier {self.name}: "
+                    f"({wrong_values_str}) not in ({choices_str})"
+                )
+
+        return value_set
+
+    def repr(
+        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
+    ) -> str:
+        """See QualifierDeclaration.repr."""
+        assert isinstance(value, frozenset)
+        if not value:
+            # An empty value for key_set qualifier should lead to an empty
+            # representation
+            str_repr = ""
+        else:
+            # Otherwise compute components of the representation.
+            list_repr = []
+            if not self.repr_omit_key:
+                list_repr.append(self.repr_name)
+            list_repr.extend((str(v) for v in sorted(value)))
+
+            # And join them with a dash.
+            str_repr = "-".join(list_repr)
+
+        if hash_pool is not None and self.repr_in_hash:
+            if str_repr:
+                hash_pool.append(str_repr)
+            return ""
+        else:
+            return str_repr
 
 
 class QualifiersManager:
@@ -275,11 +390,15 @@ class QualifiersManager:
         # Hold the declared components. The keys are the qualifier configurations
         # (tuples) and the value are the component names.
         # It is construct by end_declaration_phase using raw_component_decls.
-        self.component_names: dict[tuple[tuple[str, str | bool], ...], str] = {}
-        self.build_space_names: dict[tuple[tuple[str, str | bool], ...], str] = {}
+        self.component_names: dict[
+            tuple[tuple[str, str | bool | frozenset[str]], ...], str
+        ] = {}
+        self.build_space_names: dict[
+            tuple[tuple[str, str | bool | frozenset[str]], ...], str
+        ] = {}
 
         # Hold the final qualifier values for anod_instance.
-        self.qualifier_values: dict[str, str | bool] = {}
+        self.qualifier_values: dict[str, str | bool | frozenset[str]] = {}
 
         # When the first name has been generated it is no longer possible to add
         # neither new qualifiers nor new components.
@@ -436,6 +555,75 @@ class QualifiersManager:
                 repr_omit_key=repr_omit_key,
             )
 
+    def declare_key_set_qualifier(
+        self,
+        name: str,
+        description: str,
+        test_only: bool = False,
+        default: set[str] | None = None,
+        choices: list[str] | None = None,
+        repr_alias: str | None = None,
+        repr_in_hash: bool = False,
+        repr_omit_key: bool = False,
+    ) -> None:
+        """Declare a new key set qualifier.
+
+        Declare a key set qualifier to allow it use in the spec. It will have an
+        impact on the build_space and component names.
+
+        A key set qualifier is a 'list' qualifier. They require the user to
+        provide their values as a semi-colon separated list.
+
+        This method cannot be called after the end of the declaration phase.
+
+        :param name: The name of the qualifier. It used to identify it and pass it to
+            the spec.
+        :param description: A description of the qualifier purposes. It is used to
+            make the help/error clearer.
+        :param test_only: By default the qualifier are used by all anod actions
+            (install, build, test...). If test_only is True, then this qualifier is
+            only available for test.
+        :param default: The default value given to the qualifier if no value was
+            provided by the user. If no default value is set, then the user must
+            provide a qualifier value at runtime.
+        :param choices: The list of all authorized values for the qualifier.
+        :param repr_alias: An alias for the qualifier name used by the name generation.
+            By default, the repr_alias is the qualifier name itself.
+        :param repr_in_hash: False by default. If True, the qualifier is included in
+            the hash at the end of the generated name. The result is less readable but
+            shorter.
+        :param repr_omit_key: If True, then the name generation don't display the
+            qualifier name/alias. It only use its value.
+        """
+        if self.is_declaration_phase_finished:
+            raise AnodError(
+                f"{self.origin}: qualifier can only be declared in "
+                " declare_qualifiers_and_components"
+            )
+
+        # Make sure {} is read as the empty set
+        if default == {}:
+            default = set({})
+
+        # Make sure the default is None or a set as key_set qualifier are not used the
+        # same way as the more standard key_value qualifier
+        if default is not None and not isinstance(default, set):
+            raise AnodError(
+                "The default of key_set qualifier must be either None or a set"
+            )
+
+        if not test_only or self.anod_instance.kind == "test":
+            self.qualifier_decls[name] = KeySetDeclaration(
+                origin=self.origin,
+                name=name,
+                description=description,
+                repr_name=repr_alias,
+                repr_in_hash=repr_in_hash,
+                default=default,
+                choices=choices,
+                repr_omit_key=repr_omit_key,
+            )
+
     def declare_component(
         self,
         name: str,
@@ -499,7 +687,7 @@ class QualifiersManager:
     def compute_qualifier_values(
         self,
         qualifier_dict: dict[str, str],
-    ) -> dict[str, str | bool]:
+    ) -> dict[str, str | bool | frozenset[str]]:
         """Given a user qualifier dict compute and validate final values.
 
         :param qualifier_dict: User qualifiers
@@ -540,8 +728,8 @@ class QualifiersManager:
         return result
 
     def serialize_qualifier_values(
-        self, qualifier_values: dict[str, str | bool]
-    ) -> tuple[tuple[str, str | bool], ...]:
+        self, qualifier_values: dict[str, str | bool | frozenset[str]]
+    ) -> tuple[tuple[str, str | bool | frozenset[str]], ...]:
         """Return a hashable and deterministic representation of qualifier values.
 
         :param qualifier_values: qualifier values as returned by
@@ -664,7 +852,7 @@ class QualifiersManager:
 
         self.build_space_name = "_".join([el for el in bs if el])
 
-    def __getitem__(self, key: str) -> str | bool:
+    def __getitem__(self, key: str) -> str | bool | frozenset[str]:
         """Return the parsed value of the requested qualifier.
 
         :return: The qualifier value after the parsing.

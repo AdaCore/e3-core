@@ -293,7 +293,7 @@ class Anod:
         pass
 
     @property
-    def args(self) -> dict[str, str | bool]:
+    def args(self) -> dict[str, str | bool | frozenset[str]]:
         """Access to final qualifier values (with defaults set)."""
         if self.enable_name_generator:
             return self.qualifiers_manager.qualifier_values
@@ -412,7 +412,7 @@ class Anod:
         elif key.isupper():
             return getattr(self.build_space, key.lower(), None)
 
-    def get_qualifier(self, qualifier_name: str) -> str | bool | None:
+    def get_qualifier(self, qualifier_name: str) -> str | bool | frozenset[str] | None:
         """Return a qualifier value.
 
         Requires that qualifiers_manager attribute has been initialized and its parse

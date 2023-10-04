@@ -1,5 +1,9 @@
 from e3.anod.error import AnodError
-from e3.anod.qualifiers_manager import QualifiersManager
+from e3.anod.qualifiers_manager import (
+    QualifiersManager,
+    KeyValueDeclaration,
+    KeySetDeclaration,
+)
 from e3.anod.spec import Anod
 from e3.env import BaseEnv
 
@@ -256,6 +260,31 @@ def test_qualifiers_manager_errors():
         "{'test_qual1': ''} for build space/component comp1"
     )
 
+    # Call value with something else that a str
+    qualifiers_manager = QualifiersManager(Anod("", kind="build"))
+    with pytest.raises(AnodError) as err:
+        qualifiers_manager.declare_key_set_qualifier(
+            name="q1",
+            description="???",
+            default="v1",
+        )
+    assert (
+        str(err.value)
+        == "The default of key_set qualifier must be either None or a set"
+    )
+
+    # Call value with something else that a str
+    key_set = KeySetDeclaration(origin="origin", name="q1", description="???")
+    key_value = KeyValueDeclaration(origin="origin", name="q1", description="???")
+
+    with pytest.raises(AnodError) as err:
+        key_set.value(1)
+    assert str(err.value) == "Key set qualifiers can only parse a string value."
+
+    with pytest.raises(AnodError) as err:
+        key_value.value(1)
+    assert str(err.value) == "Key value qualifiers can only parse a string value."
+
 
 def test_qualifiers_manager():
     class Simple(Anod):
@@ -467,3 +496,218 @@ def test_add_target_info_to_build_space():
 
     anod = GrandChildAnod(kind="build", qualifier="", env=env)
     assert anod.build_space_name == "grandchild"
+
+    # Change add_target_info after parse
+    with pytest.raises(AnodError) as err:
+        anod.qualifiers_manager.add_target_info()
+    assert str(err.value) == (
+        "build(name=grandchild, qual={}): build space name computation settings can "
+        "only be changed in 'declare_qualifiers_and_components'"
+    )
+
+    with pytest.raises(AnodError) as err:
+        anod.qualifiers_manager.remove_target_info()
+    assert str(err.value) == (
+        "build(name=grandchild, qual={}): build space name computation settings can "
+        "only be changed in 'declare_qualifiers_and_components'"
+    )
+
+
+def test_key_value_qualifier():
+    class Spec(Anod):
+        name = "spec"
+        enable_name_generator = True
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            super().declare_qualifiers_and_components(qualifiers_manager)
+
+            qualifiers_manager.declare_key_value_qualifier(
+                name="q1",
+                description="???",
+                default="default",
+                choices=["default", "val"],
+            )
+
+    spec1 = Spec(qualifier="q1=default", kind="build")
+    spec2 = Spec(qualifier="q1=val", kind="build")
+
+    assert spec1.build_space_name == "spec"
+    assert spec2.build_space_name == "spec_q1-val"
+
+    # Declare a key value after the end of the declaration phase
+    with pytest.raises(AnodError) as err:
+        spec1.qualifiers_manager.declare_key_value_qualifier(
+            name="name",
+            description="???",
+        )
+    assert str(err.value) == (
+        "build(name=spec, qual={'q1': 'default'}): qualifier can "
+        "only be declared in  declare_qualifiers_and_components"
+    )
+
+
+def test_tag_qualifier():
+    class Spec(Anod):
+        name = "spec"
+        enable_name_generator = True
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            super().declare_qualifiers_and_components(qualifiers_manager)
+
+            qualifiers_manager.declare_tag_qualifier(
+                name="q1",
+                description="???",
+            )
+            qualifiers_manager.declare_tag_qualifier(
+                name="q2",
+                description="???",
+                repr_in_hash=True,
+            )
+
+    spec1 = Spec(qualifier="", kind="build")
+    spec2 = Spec(qualifier="q2", kind="build")
+
+    assert spec1.build_space_name == "spec"
+    assert spec2.build_space_name == "spec_f237cb03"
+
+    # Explicitly test value
+    from e3.anod.qualifiers_manager import TagDeclaration
+
+    tag = TagDeclaration(
+        origin="origin",
+        name="tag",
+        description="???",
+    )
+
+    assert tag.value("") is True
+    assert tag.value(None) is True
+
+
+def test_key_set_qualifier():
+    class Spec(Anod):
+        name = "spec"
+        enable_name_generator = True
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            super().declare_qualifiers_and_components(qualifiers_manager)
+
+            qualifiers_manager.declare_key_set_qualifier(
+                name="q1",
+                description="???",
+            )
+
+            qualifiers_manager.declare_key_set_qualifier(
+                name="q2",
+                description="???",
+                default={"1", "2"},
+                choices=["1", "2", "3"],
+            )
+
+            qualifiers_manager.declare_key_set_qualifier(
+                name="q3",
+                description="???",
+                repr_omit_key=True,
+                default={"1"},
+            )
+
+            qualifiers_manager.declare_key_set_qualifier(
+                name="q4",
+                description="???",
+                default={"1"},
+                repr_in_hash=True,
+                choices=["1", "2"],
+            )
+
+            qualifiers_manager.declare_key_set_qualifier(
+                name="q5",
+                description="???",
+                default={},
+                repr_in_hash=True,
+                choices=["1", "2"],
+            )
+
+    spec1 = Spec(qualifier="q1=a;b,q2=3;2,q4=2", kind="build")
+    spec2 = Spec(qualifier="q1=a", kind="build")
+    spec3 = Spec(qualifier="q1=", kind="build")
+
+    assert spec1.build_space_name == "spec_q1-a-b_q2-2-3_1_29c6909d"
+    assert spec2.build_space_name == "spec_q1-a_q2-1-2_1_733c1a4a"
+    assert spec3.build_space_name == "spec_q2-1-2_1_733c1a4a"
+
+    # Use wrong value
+    with pytest.raises(AnodError) as err:
+        Spec(qualifier="q1=a,q2=1;2;5;3;4", kind="build")
+    assert str(err.value) == (
+        "build(name=spec): Invalid value(s) for qualifier q2: "
+        "('4', '5') not in ('1', '2', '3')"
+    )
+
+    class BadSpec(Spec):
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            super().declare_qualifiers_and_components(qualifiers_manager)
+
+            qualifiers_manager.declare_key_set_qualifier(
+                "q3",
+                description="???",
+                default={"5"},
+                choices=["1", "2"],
+            )
+
+    with pytest.raises(AnodError) as err:
+        BadSpec(qualifier="q1=a", kind="build")
+    assert str(err.value) == (
+        "build(name=spec): In 'q3', default value(s) ('5') should be in ('1', '2')"
+    )
+
+    # Declare a key value after the end of the declaration phase
+    with pytest.raises(AnodError) as err:
+        spec1.qualifiers_manager.declare_key_set_qualifier(
+            name="name",
+            description="???",
+        )
+    assert str(err.value) == (
+        "build(name=spec, qual={'q1': 'a;b', 'q2': '3;2', 'q4': '2'}): qualifier can "
+        "only be declared in  declare_qualifiers_and_components"
+    )
+
+    class SpecTest(Anod):
+        name = "spec"
+        enable_name_generator = True
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            super().declare_qualifiers_and_components(qualifiers_manager)
+
+            qualifiers_manager.declare_key_set_qualifier(
+                name="q1",
+                description="???",
+                test_only=True,
+            )
+
+    spec1 = SpecTest(qualifier="", kind="build")
+    spec2 = SpecTest(qualifier="q1=1;2;3", kind="test")
+
+    assert spec1.build_space_name == "spec"
+    assert spec2.build_space_name == "spec_q1-1-2-3_test"
+
+
+def test_declare_build_space():
+    class Spec(Anod):
+        name = "spec"
+        enable_name_generator = True
+
+        def declare_qualifiers_and_components(self, qualifiers_manager):
+            qualifiers_manager.declare_tag_qualifier(
+                name="q1",
+                description="???",
+            )
+
+            qualifiers_manager.declare_build_space_name(
+                "my_spec",
+                {"q1": ""},
+            )
+
+    spec1 = Spec(qualifier="", kind="build")
+    spec2 = Spec(qualifier="q1", kind="build")
+
+    assert spec1.build_space_name == "spec"
+    assert spec2.build_space_name == "my_spec"

@@ -127,3 +127,23 @@ def test_api_version():
 
     with pytest.raises(AnodError):
         check_api_version("0.0")
+
+
+def test_spec_qualifier():
+    class GeneratorEnabled(Anod):
+        enable_name_generator = True
+
+        def declare_qualifiers_and_components(self, qm):
+            qm.declare_tag_qualifier(
+                "q1",
+                description="???",
+            )
+
+    class GeneratorDisabled(Anod):
+        enable_name_generator = False
+
+    spec_enable = GeneratorEnabled(qualifier="q1", kind="build")
+    spec_disable = GeneratorDisabled(qualifier="q1", kind="build")
+
+    assert spec_enable.args == {"q1": True}
+    assert spec_disable.args == {"q1": ""}
