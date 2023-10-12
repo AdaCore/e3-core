@@ -40,7 +40,7 @@ class Dependency:
         host: str | None = None,
         target: str | None = None,
         build: str | None = None,
-        qualifier: str | None = None,
+        qualifier: str | None | dict[str, str | bool | frozenset] = None,
         local_name: str | None = None,
         require: Literal["build_tree"]
         | Literal["installation"]
@@ -79,8 +79,28 @@ class Dependency:
         self.host = host
         self.target = target
         self.build = build
-        self.qualifier = qualifier
         self.local_name = local_name if local_name is not None else name
+
+        self.qualifier: str | None
+        if isinstance(qualifier, dict):
+            for q in set(qualifier.keys()):
+                v = qualifier[q]
+                if isinstance(v, bool):
+                    # It's a tag qualifier
+                    if v:
+                        qualifier[q] = ""
+                    else:
+                        qualifier.pop(q)
+
+                # Compute a sorted representation for list, set and frozenset
+                elif not isinstance(v, str):
+                    qualifier[q] = ";".join(sorted(v))
+            self.qualifier = ",".join(
+                [f"{key}{'=' if val else ''}{val}" for key, val in qualifier.items()]
+            )
+        else:
+            self.qualifier = qualifier
+
         if require not in (
             "build_tree",
             "download",
