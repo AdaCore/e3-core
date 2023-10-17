@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 class Walk:
     """An abstract class scheduling and executing a DAG of actions.
 
+    .. |ReturnValue| replace:: :class:`~e3.anod.status.ReturnValue`
+
     :ivar actions: DAG of actions to perform.
     :vartype actions: DAG
     :ivar prev_fingerprints: A dict of e3.fingerprint.Fingerprint objects,
@@ -35,13 +37,13 @@ class Walk:
         (with the job corresponding to a given entry in the DAG of
         actions).
     :vartype new_fingerprints: dict[str, Fingerprint | None]
-    :ivar job_status: A dictionary of job status (ReturnValue), indexed by
+    :ivar job_status: A dictionary of job status (|ReturnValue|), indexed by
         job unique IDs.
-    :vartype job_status: dict[str, ReturnValue]
+    :vartype job_status: dict[str, |ReturnValue|]
     :ivar scheduler: The scheduler used to schedule and execute all
         the actions.
     :vartype scheduler: e3.job.scheduler.Scheduler
-    """
+    """  # noqa RST304
 
     def __init__(self, actions: DAG):
         """Object initializer.

@@ -1,0 +1,105 @@
+{
+    "comment": "Taken out of the Schema on https://slsa.dev/spec/v1.0/provenance",
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "file1.txt",
+        "digest": {"sha256":  "123456789abcdef"}
+      },
+      {
+        "name": "file2.o",
+        "digest": {"sha512":  "123456789abcdeffedcba987654321"}
+      },
+      {
+        "name": "out.exe",
+        "digest": {"md5":  "123456789"}
+      }
+    ],
+
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "predicate": {
+        "buildDefinition": {
+            "buildType": "https://www.myproduct.org/build",
+            "externalParameters": [
+              {
+                "option": "-xxx"
+              },
+              {
+                "out_format": "exe"
+              }
+            ],
+            "internalParameters": [
+              {
+                "env": {"MY_VAR": "my_value"}
+              }
+            ],
+            "resolvedDependencies": [
+              {
+                "uri": "https://github.com/AdaCore/e3-core",
+                "digest": {
+                    "gitCommit": "f9c158d"
+                },
+                "name": "e3-core",
+                "downloadLocation": null,
+                "mediaType": "git",
+                "content": null,
+                "annotations": {
+                  "branch": "master"
+                }
+              },
+              {
+                "uri": null,
+                "digest": null,
+                "name": "config",
+                "downloadLocation": null,
+                "mediaType": null,
+                "content": "eydjb25maWcnOiAnaGVsbG8nfQ==",
+                "annotations": null
+              }
+            ]
+        },
+        "runDetails": {
+            "builder": {
+                "id": "https://www.myproduct.org/build/647eda74f5cd7dc1cf55d12b",
+                "builderDependencies": [
+                  {
+                    "uri": "https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tgz",
+                    "digest": {
+                      "md5":  "d6eda3e1399cef5dfde7c4f319b0596c"
+                    },
+                    "name": "Python",
+                    "downloadLocation": "https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tgz",
+                    "mediaType": "application/gzip",
+                    "content": null,
+                    "annotations": {
+                      "version": "3.12.0"
+                    }
+                  }
+                ],
+                "version": {
+                  "3.12.0": "2023/10/02"
+                }
+            },
+            "metadata": {
+                "invocationId": "c47eda74f5cd7dc1cf55d12b",
+                "startedOn": "2023-10-02T13:39:53Z",
+                "finishedOn": "2023-10-02T14:59:22Z"
+            },
+            "byproducts": [
+                  {
+                    "uri": "https://www.myproduct.org",
+                    "digest": {
+                      "md5":  "d6eda3e1399caf5dfde7c4f319b0596c"
+                    },
+                    "name": "My Product",
+                    "downloadLocation": "https://www.myproduct.org/download/my-product.tgz",
+                    "mediaType": "application/gzip",
+                    "content": null,
+                    "annotations": {
+                      "version": "1.7.1"
+                    }
+                  }
+            ]
+        }
+    }
+}

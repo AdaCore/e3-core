@@ -54,7 +54,7 @@ class DSSE:
         The current algorithm is to check that at least one signature correspond
         to the certificate given as parameter. This part should be improved
 
-        :param certifciate: path to the certificate containing the public key
+        :param certificate: path to the certificate containing the public key
         :return: True if one of the signature can be checked with the certificate
         """
         # First get the public key
