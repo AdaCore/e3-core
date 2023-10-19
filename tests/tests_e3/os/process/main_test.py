@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import sys
 import subprocess
@@ -8,6 +10,8 @@ import signal
 import e3.fs
 import e3.os.fs
 import e3.os.process
+
+from e3.env import Env
 
 import pytest
 
@@ -107,7 +111,7 @@ def test_rlimit():
     if sys.platform == "win32":
         # On Windows make sure that rlimit works when
         # setting the build environment to 64bit windows
-        e = e3.env.Env()
+        e = Env()
         e.store()
         e.set_build("x86_64-windows")
         run_test()
@@ -205,6 +209,9 @@ def test_rlimit_foreground_option():
 
     # Test with --foreground
     os.environ["PS1"] = "$ "
+    # Use TERM=dummy to avoid prompt coloring to interfere with the result
+    # string.
+    os.environ["TERM"] = "dummy"
     p = PtyProcess.spawn(
         [e3.os.process.get_rlimit(), "--foreground", "30", "bash", "--norc", "-i"],
         env=os.environ,
@@ -216,7 +223,7 @@ def test_rlimit_foreground_option():
     # Ensure that the process is killed
     p.kill(signal.SIGKILL)
 
-    # Test without foreground (Should failed)
+    # Test without foreground (Should fail)
     p = PtyProcess.spawn(
         [e3.os.process.get_rlimit(), "30", "bash", "--norc", "-i"],
         env=os.environ,
@@ -391,7 +398,7 @@ def test_is_running():
     assert e3.os.process.is_running(p.pid)
     p.kill(recursive=False)
 
-    # On windows we don't want to wait as otherwise pid will be reused
+    # On windows, we don't want to wait as otherwise pid will be reused
     # Note also that the semantic is slightly different between Unix
     # and Windows. is_running will report false on Windows once the
     # process is in a waitable state.
@@ -408,7 +415,9 @@ def test_is_running_non_existant():
     pid_list = psutil.pids()
     pid_list.sort()
 
-    # Try to found a non existing process
+    running: bool = True
+
+    # Try to found a non-existing process
     for a in range(1, 1000):
         running = e3.os.process.is_running(pid_list[-1] + a)
         if not running:
@@ -506,14 +515,12 @@ def test_kill_process_tree():
 
 def test_run_with_env():
     os.environ["EXT_VAR"] = "bar"
-    cmd = (
-        [
-            sys.executable,
-            "-c",
-            'import os; print(os.environ.get("TEST_RUN_VAR")'
-            ' + os.environ.get("EXT_VAR", "world"))',
-        ],
-    )
+    cmd = [
+        sys.executable,
+        "-c",
+        'import os; print(os.environ.get("TEST_RUN_VAR")'
+        ' + os.environ.get("EXT_VAR", "world"))',
+    ]
     p1 = e3.os.process.Run(cmd, env={"TEST_RUN_VAR": "foo"}, ignore_environ=False)
     assert p1.out.strip() == "foobar"
 
@@ -538,7 +545,7 @@ def test_no_rlimit(caplog):
 def test_shell_override():
     """Unix shell shebang handling.
 
-    On windows we ensure that /bin/bash /bin/sh shebangs are replaced by
+    On windows, we ensure that /bin/bash /bin/sh shebangs are replaced by
     SHELL env var.
     """
     work_dir = os.getcwd()
