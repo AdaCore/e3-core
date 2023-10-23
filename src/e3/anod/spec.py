@@ -274,6 +274,17 @@ class Anod:
         """
         return False
 
+    @property
+    def readme_info(self) -> tuple[str, str] | None:
+        """Return readme location and final filename.
+
+        .. note:: This property make sens only if a component is declared.
+
+        :return: A tuple with a relative path to spec directory where the find the
+            content and the final basename for the readme.
+        """
+        return None
+
     def declare_qualifiers_and_components(
         self, qualifiers_manager: QualifiersManager
     ) -> None:
