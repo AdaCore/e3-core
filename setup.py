@@ -1,3 +1,5 @@
+import sys
+
 from setuptools import setup, find_packages
 
 import os
@@ -20,8 +22,23 @@ extras_require = {
         # There are some backward incompatible checks in typeguard 3.x
         "typeguard<3.0.0",
     ],
-    "test": ["mock", "pytest-html", "pytest-socket", "ansi2html", "httpretty"],
+    "test": [
+        "mock",
+        "pytest",
+        "pytest-html",
+        "pytest-socket",
+        "ansi2html",
+        "httpretty",
+        "ptyprocess",
+        "psutil",
+    ],
 }
+
+# Some IDEs are able to detect that packages are not in the setup.py. Still
+# adding the package afterward does not work. Better set it in the default
+# list, and remove it if needed.
+if sys.platform == "win32":
+    extras_require["test"].remove("ptyprocess")
 
 for p in ("darwin", "linux", "linux2", "win32"):
     platform_string = ":sys_platform=='%s'" % p
