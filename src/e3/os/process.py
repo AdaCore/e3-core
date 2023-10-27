@@ -234,7 +234,7 @@ class Run:
         self,
         cmds: AnyCmdLine,
         cwd: str | None = None,
-        output: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
+        output: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
         error: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = STDOUT,
         input: DEVNULL_VALUE  # noqa: A002
         | PIPE_VALUE
