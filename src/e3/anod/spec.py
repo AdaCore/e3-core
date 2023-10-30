@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
-    from e3.os.process import STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
+    from e3.os.process import DEVNULL_VALUE, PIPE_VALUE
 
     import e3.anod.package
     import e3.anod.sandbox
@@ -544,7 +544,7 @@ class Anod:
         self,
         *command: str,
         parse_shebang: bool = True,
-        output: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = None,
+        output: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = None,
         python_executable: None = None,
         **kwargs: Any,
     ) -> e3.os.process.Run:

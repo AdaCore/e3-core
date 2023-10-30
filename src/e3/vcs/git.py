@@ -43,7 +43,7 @@ if TYPE_CHECKING:
         TextIO,
     )
     from collections.abc import Iterator
-    from e3.os.process import Run, STDOUT_VALUE, DEVNULL_VALUE, PIPE_VALUE
+    from e3.os.process import Run, DEVNULL_VALUE, PIPE_VALUE
 
     Git_Cmd = List[Optional[str]]
     GIT_LOG_STREAM_VALUE = Literal[-4]
@@ -109,8 +109,7 @@ class GitRepository:
     def git_cmd(
         self,
         cmd: Git_Cmd,
-        output: STDOUT_VALUE
-        | DEVNULL_VALUE
+        output: DEVNULL_VALUE
         | PIPE_VALUE
         | GIT_LOG_STREAM_VALUE
         | str
