@@ -100,8 +100,10 @@ class Trie:
             if self.END_MARKER in cursor and (not delimiter or letter in delimiter):
                 return True
             else:
-                cursor = cursor.get(letter, None)
-                if cursor is None:
+                new_cursor = cursor.get(letter, None)
+                if new_cursor is None:
                     return False
+                else:
+                    cursor = new_cursor
 
         return self.END_MARKER in cursor
