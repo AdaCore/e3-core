@@ -41,6 +41,9 @@ autoapi_dirs = ["../../src/e3"]
 templates_path = ["_templates"]
 autoapi_template_dir = "source/autoapi_templates"
 
+# Remove warnings for auto API template.
+exclude_patterns = ["autoapi_templates/index.rst"]
+
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
@@ -52,7 +55,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "e3-core"
-copyright = "2017, AdaCore"  # noqa: A001
+project_copyright = "2017, AdaCore"
 author = "AdaCore"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -60,9 +63,9 @@ author = "AdaCore"
 # built documents.
 #
 # The short X.Y version.
-version = "21.0"
+version = "24.0"
 # The full version, including alpha/beta/rc tags.
-release = "21.0"
+release = "24.0"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -75,11 +78,11 @@ pygments_style = "sphinx"
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
+html_static_path = []
 
 
 # -- Options for HTMLHelp output ------------------------------------------
