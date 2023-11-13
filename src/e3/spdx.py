@@ -30,6 +30,22 @@ SPDXID_R = re.compile("[^a-zA-Z0-9.-]")
 class InvalidSPDX(Exception):
     """Raise an exception when the SPDX document cannot be generated."""
 
+    pass
+
+
+class SPDXPackageSupplier(Enum):
+    """Used by the SPDX originator field.
+
+    This field is composed of a package supplier type (organization, person, tool)
+    and a name.
+
+    This enum represents the package suppplier type.
+    """
+
+    ORGANIZATION = "Organization"
+    PERSON = "Person"
+    TOOL = "Tool"
+
 
 class SPDXEntry(metaclass=ABCMeta):
     """Describe a SPDX Entry."""
