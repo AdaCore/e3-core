@@ -549,6 +549,10 @@ VCS_IGNORE_LIST = (
     ".gitreview",
     ".mailmap",
     ".idea",
+    ".python-version",
+    ".gitlab-ci",
+    ".vscode",
+    ".github",
 )
 
 
