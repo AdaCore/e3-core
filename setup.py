@@ -9,6 +9,7 @@ install_requires = [
     "pyyaml",
     "python-dateutil",
     "requests",
+    "requests-cache",
     "requests_toolbelt",
     "tqdm",
     "stevedore>1.20.0",
