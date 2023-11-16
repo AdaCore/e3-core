@@ -9,6 +9,7 @@ omit =
 exclude_lines =
     all: no cover
     if TYPE_CHECKING:
+    @abstractmethod
     # os-specific
     defensive code
     assert_never()
