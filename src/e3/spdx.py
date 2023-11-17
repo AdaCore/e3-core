@@ -199,7 +199,7 @@ class SPDXID(SPDXEntryStr):
         # The format of the SPDXID should be "SPDXRef-"[idstring]
         # where [idstring] is a unique string containing letters, numbers, .,
         # and/or -.
-        self.value = re.sub(SPDXID_R, "", value)
+        super().__init__(re.sub(SPDXID_R, "", value))
 
     def __str__(self) -> str:
         return f"SPDXRef-{self.value}"
@@ -400,6 +400,16 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
     json_entry_key = "licenseConcluded"
 
 
+class PackageHomePage(SPDXEntryMaybeStr):
+    """Identifies the download location of the package.
+
+    See 7.11 `Package home page field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#711-package-home-page-field>`_
+    """
+
+    json_entry_key = "homePage"
+
+
 class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
     """Cecord background information or analysis for the Concluded License.
 
@@ -538,7 +548,7 @@ class RelationshipType(Enum):
     DEV_DEPENDENCY_OF = auto()
     #  Is to be used when SPDXRef-A is an optional dependency of SPDXRef-B
     OPTIONAL_DEPENDENCY_OF = auto()
-    #  Is to be used when SPDXRef-A is a to be provided dependency of SPDXRef-B
+    #  Is to be used when SPDXRef-A is to be a provided dependency of SPDXRef-B
     PROVIDED_DEPENDENCY_OF = auto()
     #  Is to be used when SPDXRef-A is a test dependency of SPDXRef-B
     TEST_DEPENDENCY_OF = auto()
@@ -635,11 +645,11 @@ class Relationship(SPDXEntry):
     ) -> None:
         """Initialize a Relationship object.
 
-        :param left: the left side of the relationship, should be the SPDXID
-            of an element
+        :param spdx_element_id: the left side of the relationship, should be the
+            SPDXID of an element
         :param relationship_type: the type of the relationship
-        :param right: the right side of the relationship, should be the SPDXID
-            of an element
+        :param related_spdx_element: the right side of the relationship, should
+            be the SPDXID of an element
         """
         self.spdx_element_id = spdx_element_id
         self.relationship_type = relationship_type
@@ -675,6 +685,7 @@ class Package(SPDXSection):
     license_concluded: PackageLicenseConcluded
     license_comments: PackageLicenseComments | None
     license_declared: PackageLicenseDeclared | None
+    homepage: PackageHomePage | None
     download_location: PackageDownloadLocation
     external_refs: list[ExternalRef] | None
 
@@ -695,7 +706,7 @@ class DocumentInformation(SPDXSection):
 
 @dataclass
 class CreationInformation(SPDXSection):
-    """Document where and by who the SPDX document has been created."""
+    """Document where and by whom the SPDX document has been created."""
 
     creators: list[Creator]
     created_now: Created = field(init=False)
@@ -717,8 +728,9 @@ class Document:
     ) -> None:
         """Initialize the SPDX Document.
 
-        :param doc_info: A DocumentInformation instance
-        :param creation_info: A CreationInformation instance
+        :param document_name: The name of this document.
+        :param creators: A list of Entity objects, considered as the creators
+            of this document.
         """
         self.doc_info = DocumentInformation(document_name=DocumentName(document_name))
         self.creation_info = CreationInformation(
@@ -750,12 +762,13 @@ class Document:
         is_main_package: bool = False,
         add_relationship: bool = True,
         external_refs: list[ExternalRef] | None = None,
+        homepage: str | None = None,
     ) -> SPDXID:
         """Add a new Package and describe its relationship to other elements.
 
-        :param name: the full name of the package
+        :param name: the full name of this package
         :param version: the package version
-        :param file_name: the actual file name of the package
+        :param file_name: the actual file name of this package
         :param checksum: the package checksum (see SHA1, SHA256 classes)
         :param license_concluded: the license concluded as govering the package
         :param license_comments: comments for the license_concluded field
@@ -763,6 +776,7 @@ class Document:
         :param supplier: actual distribution source for the package
         :param originator: this field identifies from where or whom the package
             originally came
+        :param homepage: The website that serves as the package's home page.
         :param download_location: download URL for the package at the time that
             the SPDX document was created
         :param files_analyzed: whether the file content of this package has
@@ -770,11 +784,6 @@ class Document:
             SPDX document
         :param copyright_text: identify the copyright holders of the package,
             as well as any dates present
-        :param relationship_spdx_element_id: the element SPDXID with which the
-            package has a relationship, note that the relationship will be written as
-            <related_elemnent> <relationship_type> <the new package>
-        :param relationship_type: describe the relation of this package to
-            the related element
         :param is_main_package: whether the package is the main package, in
             which case a relationship will automatically be added to record
             that the document DESCRIBES this package. If false, it is assumed
@@ -783,7 +792,10 @@ class Document:
         :param add_relationship: whether to automatically add a relationship
             element - either (DOCUMENT DESCRIBES <main package>) if is_main_package
             is True or (<main package> CONTAINS <package>)
-        :param external_refs: list of ExternalRef to document
+        :param external_refs: A list of `ExternalRef` object representing the
+            list of reference to external source of additional information,
+            metadata, enumerations, asset identifiers, or downloadable content
+            believed to be relevant to the Package.
 
         :return: the package SPDX_ID
         """
@@ -813,6 +825,7 @@ class Document:
             else None,
             supplier=PackageSupplier(supplier),
             originator=PackageOriginator(originator),
+            homepage=PackageHomePage(homepage) if homepage is not None else None,
             download_location=PackageDownloadLocation(download_location),
             files_analyzed=FilesAnalyzed(files_analyzed),
             copyright_text=PackageCopyrightText(copyright_text),
