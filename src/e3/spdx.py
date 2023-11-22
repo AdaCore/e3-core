@@ -301,7 +301,8 @@ class Tool(Entity):
 class PackageName(SPDXEntryStr):
     """Identify the full name of the package.
 
-    See 7.1 Package name field
+    See 7.1 `Package name field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#71-package-name-field>`_
     """
 
     json_entry_key = "name"
@@ -310,7 +311,8 @@ class PackageName(SPDXEntryStr):
 class PackageVersion(SPDXEntryStr):
     """Identify the version of the package.
 
-    See 7.3 Package version field
+    See 7.3 `Package version field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#73-package-version-field>`_
     """
 
     json_entry_key = "versionInfo"
@@ -319,14 +321,16 @@ class PackageVersion(SPDXEntryStr):
 class PackageFileName(SPDXEntryStr):
     """Provide the actual file name of the package.
 
-    See 7.4 Package file name field
+    See 7.4 `Package file name field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#74-package-file-name-field>`_
     """
 
 
 class PackageSupplier(EntityRef):
     """Identify the actual distribution source for the package.
 
-    See 7.5 Package supplier field
+    See 7.5 `Package supplier field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#75-package-supplier-field>`_
     """
 
     json_entry_key = "supplier"
@@ -335,7 +339,8 @@ class PackageSupplier(EntityRef):
 class PackageOriginator(EntityRef):
     """Identify from where the package originally came.
 
-    See 7.6 Package originator field
+    See 7.6 `Package originator field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#76-package-originator-field>`_
     """
 
     json_entry_key = "originator"
@@ -344,7 +349,8 @@ class PackageOriginator(EntityRef):
 class PackageDownloadLocation(SPDXEntryMaybeStr):
     """Identifies the download location of the package.
 
-    See 7.7 Package download location field
+    See 7.7 `Package download location field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#77-package-download-location-field>`_
     """
 
     json_entry_key = "downloadLocation"
@@ -353,14 +359,16 @@ class PackageDownloadLocation(SPDXEntryMaybeStr):
 class FilesAnalyzed(SPDXEntryBool):
     """Indicates whether the file content of this package have been analyzed.
 
-    See 7.8 Files analyzed field
+    See 7.8 `Files analyzed field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#78-files-analyzed-field>`_
     """
 
 
 class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
     """Provide a mechanism that permits unique identification of the package.
 
-    See 7.10 Package checksum field
+    See 7.10 `Package checksum field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#710-package-checksum-field>`_
     """
 
     entry_key = "PackageChecksum"
@@ -383,6 +391,16 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
         }
 
 
+class PackageHomePage(SPDXEntryMaybeStr):
+    """Identifies the homepage location of the package.
+
+    See 7.11 `Package home page field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#711-package-home-page-field>`_
+    """
+
+    json_entry_key = "homePage"
+
+
 class SHA1(PackageChecksum):
     algorithm = "SHA1"
 
@@ -394,47 +412,51 @@ class SHA256(PackageChecksum):
 class PackageLicenseConcluded(SPDXEntryMaybeStr):
     """Contain the license concluded as governing the package.
 
-    See 7.13 Concluded license field
+    See 7.13 `Concluded license field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#713-concluded-license-field>`_
     """
 
     json_entry_key = "licenseConcluded"
 
 
-class PackageHomePage(SPDXEntryMaybeStr):
-    """Identifies the download location of the package.
-
-    See 7.11 `Package home page field
-    <https://spdx.github.io/spdx-spec/v2.3/package-information/#711-package-home-page-field>`_
-    """
-
-    json_entry_key = "homePage"
-
-
-class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
-    """Cecord background information or analysis for the Concluded License.
-
-    See 7.16 Comments on license field
-    """
-
-    json_entry_key = "licenseComments"
-
-
 class PackageLicenseDeclared(SPDXEntryMaybeStr):
     """Contain the license having been declared by the authors of the package.
 
-    See 7.15 Declared license field
+    See 7.15 `Declared license field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#715-declared-license-field>`_
     """
 
     json_entry_key = "licenseDeclared"
 
 
+class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
+    """Record background information or analysis for the Concluded License.
+
+    See 7.16 `Comments on license field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#716-comments-on-license-field>`_
+    """
+
+    json_entry_key = "licenseComments"
+
+
 class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
     """Identify the copyright holders of the package.
 
-    See 7.17 Copyright text field
+    See 7.17 `Copyright text field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#717-copyright-text-field>`_
     """
 
     json_entry_key = "copyrightText"
+
+
+class PackageComment(SPDXEntryMaybeStrMultilines):
+    """Record background information or analysis for the Concluded License.
+
+    See 7.20 `Package comment field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#720-package-comment-field>`_
+    """
+
+    json_entry_key = "comments"
 
 
 class ExternalRefCategory(Enum):
@@ -473,7 +495,8 @@ SPDX_EXTERNAL_REF_TYPES = (
 class ExternalRef(SPDXEntry):
     """Reference an external source of information relevant to the package.
 
-    See 7.21 External reference field
+    See 7.21 `External reference field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#721-external-reference-field>`_
     """
 
     json_entry_key = "externalRefs"
@@ -674,20 +697,72 @@ class Package(SPDXSection):
     """Describe a package."""
 
     name: PackageName
+    """Name of this package. See :class:`PackageName`."""
     spdx_id: SPDXID
+    """Unique ID of this package. Generally made of ``f"{name}-{version}"``."""
     version: PackageVersion
+    """Version of this package. See :class:`PackageVersion`."""
     file_name: PackageFileName
+    """Package file name. See :class:`PackageFileName`."""
     checksum: list[PackageChecksum]
+    """A list of package checksums. See :class:`PackageChecksum`.
+
+    The only supported checksum algorithms (for now) are :class:`SHA1` and
+    :class:`SHA256`.
+    """
     supplier: PackageSupplier
+    """The package supplier. See :class:`PackageSupplier`"""
     originator: PackageOriginator
+    """The package originator (if any). See :class:`PackageOriginator`."""
     copyright_text: PackageCopyrightText
+    """The package copyright text (if any). See :class:`PackageCopyrightTest`."""
     files_analyzed: FilesAnalyzed
+    """Whether the files of this package have been analyzed.
+
+    See :class:`FilesAnalyzed`.
+    """
     license_concluded: PackageLicenseConcluded
+    """The license concluded for this package.
+
+    See :class:`PackageLicenseConcluded`.
+    """
     license_comments: PackageLicenseComments | None
+    """The license comments for this package.
+
+    See :class:`PackageLicenseComments`.
+    """
     license_declared: PackageLicenseDeclared | None
+    """The license declared for this package.
+
+    See :class:`PackageLicenseDeclared`.
+    """
     homepage: PackageHomePage | None
+    """The home page of this package (if any). See :class:`PackageHomePage`."""
     download_location: PackageDownloadLocation
+    """The package download location (URL) of this package (if any).
+
+    See :class:`PackageDownloadLocation`.
+    """
     external_refs: list[ExternalRef] | None
+    """A list of external references for this package.
+
+    For instance:
+
+    .. code-block:: python
+
+            ExternalRef(
+                reference_category=ExternalRefCategory.package_manager,
+                reference_type="purl",
+                reference_locator="pkg:generic/my-dep@1b2",
+            )
+
+    .. seealso:: :class:`PackageLicenseConcluded`.
+    """
+    comment: PackageComment | None = field(default=None)
+    """Any useful comment associated to this package.
+
+    .. seealso:: :class:`PackageComment`
+    """
 
 
 @dataclass
@@ -747,43 +822,14 @@ class Document:
 
     def add_package(
         self,
-        name: str,
-        version: str,
-        file_name: str,
-        checksum: list[PackageChecksum],
-        license_concluded: str,
-        supplier: Entity | Literal["NOASSERTION"],
-        originator: Entity | Literal["NOASSERTION"],
-        download_location: str,
-        files_analyzed: bool,
-        copyright_text: str,
-        license_comments: str | None = None,
-        license_declared: str | None = None,
+        package: Package,
         is_main_package: bool = False,
         add_relationship: bool = True,
-        external_refs: list[ExternalRef] | None = None,
-        homepage: str | None = None,
     ) -> SPDXID:
         """Add a new Package and describe its relationship to other elements.
 
-        :param name: the full name of this package
-        :param version: the package version
-        :param file_name: the actual file name of this package
-        :param checksum: the package checksum (see SHA1, SHA256 classes)
-        :param license_concluded: the license concluded as govering the package
-        :param license_comments: comments for the license_concluded field
-        :param license_declared: the license declared in the package
-        :param supplier: actual distribution source for the package
-        :param originator: this field identifies from where or whom the package
-            originally came
-        :param homepage: The website that serves as the package's home page.
-        :param download_location: download URL for the package at the time that
-            the SPDX document was created
-        :param files_analyzed: whether the file content of this package has
-            been available for or subjected to analysis when creating the
+        :param package: An already created :class:`Package` to be added to this
             SPDX document
-        :param copyright_text: identify the copyright holders of the package,
-            as well as any dates present
         :param is_main_package: whether the package is the main package, in
             which case a relationship will automatically be added to record
             that the document DESCRIBES this package. If false, it is assumed
@@ -792,59 +838,26 @@ class Document:
         :param add_relationship: whether to automatically add a relationship
             element - either (DOCUMENT DESCRIBES <main package>) if is_main_package
             is True or (<main package> CONTAINS <package>)
-        :param external_refs: A list of `ExternalRef` object representing the
-            list of reference to external source of additional information,
-            metadata, enumerations, asset identifiers, or downloadable content
-            believed to be relevant to the Package.
 
         :return: the package SPDX_ID
-        """
-        if not name.endswith(version):
-            new_package_spdx_id = f"{name}-{version}"
-        else:
-            new_package_spdx_id = name
+        """  # noqa RST304
+        if is_main_package and not package.spdx_id.value.endswith("-pkg"):
+            package.spdx_id = SPDXID(f"{package.spdx_id.value}-pkg")
 
-        if is_main_package:
-            # This is the main package, given that is often occurs that
-            # a main package depends on a source package of the same name
-            # appends a "-pkg" suffix
-            new_package_spdx_id += "-pkg"
-
-        new_package = Package(
-            name=PackageName(name),
-            spdx_id=SPDXID(new_package_spdx_id),
-            version=PackageVersion(version),
-            file_name=PackageFileName(file_name),
-            checksum=checksum,
-            license_concluded=PackageLicenseConcluded(license_concluded),
-            license_comments=PackageLicenseComments(license_comments)
-            if license_comments is not None
-            else None,
-            license_declared=PackageLicenseDeclared(license_declared)
-            if license_declared is not None
-            else None,
-            supplier=PackageSupplier(supplier),
-            originator=PackageOriginator(originator),
-            homepage=PackageHomePage(homepage) if homepage is not None else None,
-            download_location=PackageDownloadLocation(download_location),
-            files_analyzed=FilesAnalyzed(files_analyzed),
-            copyright_text=PackageCopyrightText(copyright_text),
-            external_refs=external_refs,
-        )
-        if new_package.spdx_id in self.packages:
+        if package.spdx_id in self.packages:
             raise InvalidSPDX(
-                f"A package with the same SPDXID {new_package.spdx_id}"
+                f"A package with the same SPDXID {package.spdx_id}"
                 " has already been added"
             )
         if is_main_package:
-            self.main_package_spdx_id = new_package.spdx_id
+            self.main_package_spdx_id = package.spdx_id
 
         if add_relationship:
             if is_main_package:
                 relationship = Relationship(
                     spdx_element_id=self.spdx_id,
                     relationship_type=RelationshipType.DESCRIBES,
-                    related_spdx_element=new_package.spdx_id,
+                    related_spdx_element=package.spdx_id,
                 )
             else:
                 if self.main_package_spdx_id is None:
@@ -852,12 +865,12 @@ class Document:
                 relationship = Relationship(
                     spdx_element_id=self.main_package_spdx_id,
                     relationship_type=RelationshipType.CONTAINS,
-                    related_spdx_element=new_package.spdx_id,
+                    related_spdx_element=package.spdx_id,
                 )
 
             self.relationships.append(relationship)
-        self.packages[new_package.spdx_id] = new_package
-        return new_package.spdx_id
+        self.packages[package.spdx_id] = package
+        return package.spdx_id
 
     def add_relationship(self, relationship: Relationship) -> None:
         """Add a new relationship to the document.
