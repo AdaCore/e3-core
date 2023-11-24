@@ -334,7 +334,7 @@ def test_spdx():
                         "checksumValue": "6876df3aa8780622368173fe6e868a2edc3932c8",
                     }
                 ],
-                "comments": "A very useful comment on that package !",
+                "comment": "A very useful comment on that package !",
                 "copyrightText": "2023 AdaCore",
                 "downloadLocation": "NOASSERTION",
                 "externalRefs": [
