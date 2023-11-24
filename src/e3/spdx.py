@@ -1,4 +1,4 @@
-"""Generate a SPDX file.
+"""Generate an SPDX file.
 
 This is following the specification from https://spdx.github.io/spdx-spec/v2.3/
 a simple example can be found at ./tests/tests_e3/spdx_test.py
@@ -19,7 +19,14 @@ if TYPE_CHECKING:
     from typing import Literal, Union, Any
 
 NOASSERTION: Literal["NOASSERTION"] = "NOASSERTION"
+"""Indicates that the preparer of the SPDX document is not making any assertion
+regarding the value of this field.
+"""
 NONE_VALUE: Literal["NONE"] = "NONE"
+"""When this value is used as the object of a property it indicates that the
+preparer of the SpdxDocument believes that there is no value for the property.
+This value should only be used if there is sufficient evidence to support this
+assertion."""
 
 if TYPE_CHECKING:
     MAYBE_STR = Union[str, Literal["NOASSERTION"], Literal["NONE"]]
@@ -48,7 +55,7 @@ class SPDXPackageSupplier(Enum):
 
 
 class SPDXEntry(metaclass=ABCMeta):
-    """Describe a SPDX Entry."""
+    """Describe an SPDX Entry."""
 
     @property
     def entry_key(self) -> str:
@@ -78,7 +85,7 @@ class SPDXEntry(metaclass=ABCMeta):
 
 
 class SPDXEntryStr(SPDXEntry):
-    """Describe a SPDX Entry accepting a string."""
+    """Describe an SPDX Entry accepting a string."""
 
     def __init__(self, value: str) -> None:
         self.value = value
@@ -93,7 +100,7 @@ class SPDXEntryStr(SPDXEntry):
 
 
 class SPDXEntryMaybeStr(SPDXEntry):
-    """Describe a SPDX Entry accepting a string, NOASSERTION, or NONE."""
+    """Describe an SPDX Entry accepting a string, NOASSERTION, or NONE."""
 
     def __init__(self, value: MAYBE_STR) -> None:
         self.value = value
@@ -118,7 +125,7 @@ class SPDXEntryMaybeStrMultilines(SPDXEntryMaybeStr):
 
 
 class SPDXEntryBool(SPDXEntry):
-    """Describe a SPDX Entry accepting a boolean."""
+    """Describe an SPDX Entry accepting a boolean."""
 
     def __init__(self, value: bool) -> None:
         self.value: bool = value
@@ -132,10 +139,10 @@ class SPDXEntryBool(SPDXEntry):
 
 @dataclass
 class SPDXSection:
-    """Describe a SPDX section."""
+    """Describe an SPDX section."""
 
     def to_tagvalue(self) -> list[str]:
-        """Generate a chunk of a SPDX tag:value document.
+        """Generate a chunk of an SPDX tag:value document.
 
         Return a list of SPDX lines
         """
@@ -173,7 +180,8 @@ class SPDXSection:
 class SPDXVersion(SPDXEntryStr):
     """Provide the SPDX version used to generate the document.
 
-    See 6.1 SPDX version field
+    See 6.1 `SPDX version field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#61-spdx-version-field>`_.
     """
 
     json_entry_key = "spdxVersion"
@@ -182,14 +190,19 @@ class SPDXVersion(SPDXEntryStr):
 class DataLicense(SPDXEntryStr):
     """License of the SPDX Metadata.
 
-    See 6.2 Data license field
+    See 6.2 `Data license field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#62-data-license-field>`_.
     """
 
 
 class SPDXID(SPDXEntryStr):
-    """Identify a SPDX Document, or Package.
+    """Identify an SPDX Document, or Package.
 
-    See 6.3 SPDX identifier field and 7.2 Package SPDX identifier field
+    See 6.3 `SPDX identifier field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#63-spdx-identifier-field>`_
+    and 7.2 `Package SPDX identifier field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#72-package-spdx-identifier-field>`_.
+
     The value is a unique string containing letters, numbers, ., and/or -.
     """
 
@@ -214,7 +227,8 @@ class SPDXID(SPDXEntryStr):
 class DocumentName(SPDXEntryStr):
     """Identify name of this document.
 
-    See 6.4 Document name field
+    See 6.4 `Document name field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#64-document-name-field>`_.
     """
 
     json_entry_key = "name"
@@ -223,14 +237,16 @@ class DocumentName(SPDXEntryStr):
 class DocumentNamespace(SPDXEntryStr):
     """Provide a unique URI for this document.
 
-    See 6.5 SPDX document namespace field
+    See 6.5 `SPDX document namespace field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#65-spdx-document-namespace-field>`_.
     """
 
 
 class LicenseListVersion(SPDXEntryStr):
     """Provide the version of the SPDX License List used.
 
-    See 6.7 License list version field
+    See 6.7 `License list version field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#67-license-list-version-field>`_.
     """
 
 
@@ -273,7 +289,8 @@ class EntityRef(SPDXEntry):
 class Creator(EntityRef):
     """Identify who (or what, in the case of a tool) created the SPDX document.
 
-    See 6.8 Creator field
+    See 6.8 `Creator field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#68-creator-field>`_.
     """
 
     json_entry_key = "creators"
@@ -282,7 +299,8 @@ class Creator(EntityRef):
 class Created(SPDXEntryStr):
     """Identify when the SPDX document was originally created.
 
-    See 6.9 Created field
+    See 6.9 `Created field
+    <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#69-created-field>`_.
     """
 
 
@@ -657,7 +675,8 @@ class RelationshipType(Enum):
 class Relationship(SPDXEntry):
     """Provides information about the relationship between two SPDX elements.
 
-    See 11.1 Relationship field
+    See 11.1 `Relationship field
+    <https://spdx.github.io/spdx-spec/v2.3/relationships-between-SPDX-elements/#111-relationship-field>`_.
     """
 
     def __init__(
@@ -694,75 +713,112 @@ class Relationship(SPDXEntry):
 
 @dataclass
 class Package(SPDXSection):
-    """Describe a package."""
+    """Describe a package.
+
+    If the SPDX information describes a package, the following fields shall be
+    included per package. See `7 Package information section
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/>`_
+
+    :ivar PackageName name: A mandatory single line of text identifying the full
+        name of the package as given by the Package Originator
+        (:class:`PackageOriginator`).
+    :ivar SPDXID spdx_id: Uniquely identify any element in an SPDX document
+        which may be referenced by other elements. These may be referenced
+        internally and externally with the addition of the SPDX document
+        identifier. Generally made of ``f"{name}-{version}"``.
+    :ivar PackageVersion version: Identify the version of the package.
+    :ivar PackageFileName file_name: Provide the actual file name of the
+        package, or path of the directory being treated as a package. This may
+        include the packaging and compression methods used as part of the file
+        name, if appropriate.
+    :ivar list[PackageChecksum] checksum: Provide an independently reproducible
+        mechanism that permits unique identification of a specific package that
+        correlates to the data in this SPDX document. This identifier enables a
+        recipient to determine if any file in the original package has been
+        changed. If the SPDX document is to be included in a package, this value
+        should not be calculated. The SHA1 algorithm shall be used to provide
+        the checksum by default. The only supported checksum algorithms (for
+        now) are :class:`SHA1` and :class:`SHA256`.
+    :ivar PackageSupplier supplier: Identify the actual distribution source for
+        the package/directory identified in the SPDX document. This might or
+        might not be different from the originating distribution source for the
+        package. The name of the Package Supplier shall be an organization or
+        recognized author and not a website. For example, SourceForge is a host
+        website, not a supplier, the supplier for
+        https://sourceforge.net/projects/bridge/ is *The Linux Foundation*.
+    :ivar PackageOriginator originator: If the package identified in the SPDX
+        document originated from a different person or organization than
+        identified as Package Supplier (see *supplier* above), this field
+        identifies from where or whom the package originally came. In some
+        cases, a package may be created and originally distributed by a
+        different third party than the Package Supplier of the package. For
+        example, the SPDX document identifies the package as ``glibc`` and the
+        Package Supplier as *Red Hat*, but the *Free Software Foundation* is the
+        Package Originator.
+    :ivar PackageCopyrightText copyright_text: Identify the copyright holders of
+        the package, as well as any dates present. This will be a free form text
+        field extracted from package information files.
+    :ivar FilesAnalyzed files_analyzed: Indicates whether the file content of
+        this package has been available for or subjected to analysis when
+        creating the SPDX document. If false, indicates packages that represent
+        metadata or URI references to a project, product, artifact, distribution
+        or a component. If ``False``, the package shall not contain any files.
+    :ivar PackageLicenseConcluded license_concluded: Contain the license the
+        SPDX document creator has concluded as governing the package or
+        alternative values, if the governing license cannot be determined.
+    :ivar PackageLicenseComments | None license_comments: This field provides a
+        place for the SPDX document creator to record any relevant background
+        information or analysis that went in to arriving at the Concluded
+        License for a package. If the Concluded License does not match the
+        Declared License or License Information from Files, this should be
+        explained by the SPDX document creator. It is also preferable to include
+        an explanation here when the Concluded License is :attr:`NOASSERTION`.
+    :ivar PackageLicenseDeclared license_declared: List the licenses that have
+        been declared by the authors of the package. Any license information
+        that does not originate from the package authors, e.g. license
+        information from a third-party repository, should not be included in
+        this field.
+    :ivar PackageHomePage | None homepage: Provide a place for the SPDX document
+        creator to record a website that serves as the package's home page. This
+        link can also be used to reference further information about the package
+        referenced by the SPDX document creator.
+    :ivar PackageDownloadLocation download_location: This section identifies the
+        download Uniform Resource Locator (URL), or a specific location within a
+        version control system (VCS) for the package at the time that the SPDX
+        document was created.
+    :ivar list[ExternalRef] | None external_refs: An External Reference allows a
+        Package to reference an external source of additional information,
+        metadata, enumerations, asset identifiers, or downloadable content
+        believed to be relevant to the Package. For instance:
+
+        .. code-block:: python
+
+                ExternalRef(
+                    reference_category=ExternalRefCategory.package_manager,
+                    reference_type="purl",
+                    reference_locator="pkg:generic/my-dep@1b2"
+                )
+    :ivar PackageComment | None comment: This field provides a place for the
+        SPDX document creator to record any general comments about the package
+        being described.
+    """  # noqa RST304
 
     name: PackageName
-    """Name of this package. See :class:`PackageName`."""
     spdx_id: SPDXID
-    """Unique ID of this package. Generally made of ``f"{name}-{version}"``."""
     version: PackageVersion
-    """Version of this package. See :class:`PackageVersion`."""
     file_name: PackageFileName
-    """Package file name. See :class:`PackageFileName`."""
     checksum: list[PackageChecksum]
-    """A list of package checksums. See :class:`PackageChecksum`.
-
-    The only supported checksum algorithms (for now) are :class:`SHA1` and
-    :class:`SHA256`.
-    """
     supplier: PackageSupplier
-    """The package supplier. See :class:`PackageSupplier`"""
     originator: PackageOriginator
-    """The package originator (if any). See :class:`PackageOriginator`."""
     copyright_text: PackageCopyrightText
-    """The package copyright text (if any). See :class:`PackageCopyrightTest`."""
     files_analyzed: FilesAnalyzed
-    """Whether the files of this package have been analyzed.
-
-    See :class:`FilesAnalyzed`.
-    """
     license_concluded: PackageLicenseConcluded
-    """The license concluded for this package.
-
-    See :class:`PackageLicenseConcluded`.
-    """
     license_comments: PackageLicenseComments | None
-    """The license comments for this package.
-
-    See :class:`PackageLicenseComments`.
-    """
     license_declared: PackageLicenseDeclared | None
-    """The license declared for this package.
-
-    See :class:`PackageLicenseDeclared`.
-    """
     homepage: PackageHomePage | None
-    """The home page of this package (if any). See :class:`PackageHomePage`."""
     download_location: PackageDownloadLocation
-    """The package download location (URL) of this package (if any).
-
-    See :class:`PackageDownloadLocation`.
-    """
     external_refs: list[ExternalRef] | None
-    """A list of external references for this package.
-
-    For instance:
-
-    .. code-block:: python
-
-            ExternalRef(
-                reference_category=ExternalRefCategory.package_manager,
-                reference_type="purl",
-                reference_locator="pkg:generic/my-dep@1b2",
-            )
-
-    .. seealso:: :class:`PackageLicenseConcluded`.
-    """
     comment: PackageComment | None = field(default=None)
-    """Any useful comment associated to this package.
-
-    .. seealso:: :class:`PackageComment`
-    """
 
 
 @dataclass
@@ -842,6 +898,9 @@ class Document:
         :return: the package SPDX_ID
         """  # noqa RST304
         if is_main_package and not package.spdx_id.value.endswith("-pkg"):
+            # This is the main package, given that is often occurs that
+            # a main package depends on a source package of the same name
+            # appends a "-pkg" suffix
             package.spdx_id = SPDXID(f"{package.spdx_id.value}-pkg")
 
         if package.spdx_id in self.packages:
@@ -907,7 +966,7 @@ class Document:
         return output
 
     def to_json_dict(self) -> dict[str, Any]:
-        """Generate a representation of a SPDX following the JSON schema.
+        """Generate a representation of an SPDX following the JSON schema.
 
         Generate a dictionary that can be dumped into a JSON.
         """
