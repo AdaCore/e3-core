@@ -416,7 +416,7 @@ class PackageHomePage(SPDXEntryMaybeStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#711-package-home-page-field>`_
     """
 
-    json_entry_key = "homePage"
+    json_entry_key = "homepage"
 
 
 class SHA1(PackageChecksum):
@@ -474,7 +474,7 @@ class PackageComment(SPDXEntryMaybeStrMultilines):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#720-package-comment-field>`_
     """
 
-    json_entry_key = "comments"
+    json_entry_key = "comment"
 
 
 class ExternalRefCategory(Enum):
