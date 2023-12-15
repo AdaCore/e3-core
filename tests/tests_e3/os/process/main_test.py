@@ -120,7 +120,7 @@ def test_rlimit():
         e.restore()
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="A linux test")
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="A linux test")
 def test_rlimit_ctrl_c():
     """Test rlimit CTRL-C.
 
@@ -193,7 +193,7 @@ p2.wait()
     assert int(end - start) < 30, f"CTRL-C failed: take {int(end - start)} seconds"
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="A linux test")
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="A linux test")
 def test_rlimit_foreground_option():
     """Test rlimit --foreground.
 
