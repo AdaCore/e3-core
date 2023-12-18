@@ -147,22 +147,16 @@ class GitRepository:
             )
         return p
 
-    def init(
-        self,
-        url: str | None = None,
-        remote: str | None = "origin",
-        initial_branch: str = "master",
-    ) -> None:
+    def init(self, url: str | None = None, remote: str | None = "origin") -> None:
         """Initialize a new Git repository and configure the remote.
 
         :param url: url of the remote repository, if None create a local git
             repository
         :param remote: name of the remote to create
-        :param initial_branch: name of the initial branch (default is master)
         :raise: GitError
         """
         e3.fs.mkdir(self.working_tree)
-        self.git_cmd(["init", "-q", f"--initial-branch={initial_branch}"])
+        self.git_cmd(["init", "-q"])
 
         # Git version 1.8.3.1 might crash when calling "git stash" when
         # .git/logs/refs is not created. Recent versions of git do not
