@@ -37,6 +37,7 @@ def diff(
     item1name: str = "expected",
     item2name: str = "output",
     ignore_white_chars: bool = True,
+    context: int = 1,
 ) -> str:
     """Compute diff between two files or list of strings.
 
@@ -48,10 +49,12 @@ def diff(
     :param item2name: name to display for b in the diff
     :param ignore_white_chars: if True (default) then empty lines,
         trailing and leading white chars on each line are ignored
+    :param context: positive number of context lines to add to the diff
 
     :return: A diff string. If the string is equal to '' it means that there
         is no difference
     """
+    assert context >= 0
     contents: list[list[str]] = [[], []]
 
     # Read first item
@@ -92,7 +95,15 @@ def diff(
                 line for line in contents[k] if re.search(ignore, line) is None
             ]
 
-    return "".join(unified_diff(contents[0], contents[1], item1name, item2name, n=1))
+    return "".join(
+        unified_diff(
+            contents[0],
+            contents[1],
+            fromfile=item1name,
+            tofile=item2name,
+            n=context,
+        )
+    )
 
 
 def patch(
