@@ -133,7 +133,7 @@ class GitRepository:
         if output == GIT_LOG_STREAM:
             output = self.log_stream
 
-        p_cmd = [arg for arg in cmd if arg is not None]
+        p_cmd = ["-c", "fetch.prune=false"] + [arg for arg in cmd if arg is not None]
         p_cmd.insert(0, self.__class__.git)
 
         p = e3.os.process.Run(p_cmd, cwd=self.working_tree, output=output, **kwargs)
