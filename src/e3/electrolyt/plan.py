@@ -292,7 +292,12 @@ class PlanContext:
         plan_line = "unknown filename:unknown lineno"
         # Retrieve the plan line
         try:
-            caller_frames = inspect.getouterframes(frame=inspect.currentframe())
+            # Implementation note: context=0 means that the no source context is
+            # computed for each frame. This improves drastically the performance
+            # as it avoids reading the source file for each frame.
+            caller_frames = inspect.getouterframes(
+                frame=inspect.currentframe(), context=0
+            )
             caller_frames_in_plan = []
             for frame in caller_frames:
                 frame_filename = frame.filename

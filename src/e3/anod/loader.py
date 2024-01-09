@@ -277,9 +277,13 @@ def spec(name: str) -> Callable[..., Anod]:
     :param name: name of the spec to load
     """
     spec_repository: AnodSpecRepository | None = None
-    for k in inspect.stack()[1:]:
-        if "__spec_repository" in k[0].f_globals:
-            spec_repository = k[0].f_globals["__spec_repository"]
+
+    # Implementation note: context=0 means that the no source context is
+    # computed for each frame. This improves drastically the performance
+    # as it avoids reading the source file for each frame.
+    for k in inspect.stack(context=0)[1:]:
+        spec_repository = k[0].f_globals.get("__spec_repository")
+        if spec_repository is not None:
             break
 
     assert spec_repository is not None
