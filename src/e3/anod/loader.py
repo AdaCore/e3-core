@@ -268,24 +268,6 @@ class AnodModule:
         raise SandBoxError(f"cannot find Anod subclass in {self.path}", "load")
 
 
-fixed_spec_repository: AnodSpecRepository | None = None
-# A local cache for the spec_repository.
-# This is set by set_spec_repository(), and used by spec().
-
-
-def set_spec_repository(spec_repository: AnodSpecRepository) -> None:
-    """Set the spec repository to use within the lifetime of this process.
-
-    This can be used to set the spec repository to use when calling spec()
-    below, without having to inspect the stack every time, which can be
-    expensive.
-
-    :param spec_repository: the spec repository to set
-    """
-    global fixed_spec_repository
-    fixed_spec_repository = spec_repository
-
-
 def spec(name: str) -> Callable[..., Anod]:
     """Load an Anod spec class.
 
@@ -294,9 +276,7 @@ def spec(name: str) -> Callable[..., Anod]:
     key.
     :param name: name of the spec to load
     """
-    if fixed_spec_repository is not None:
-        return fixed_spec_repository.load(name)
-
+    spec_repository: AnodSpecRepository | None = None
     for k in inspect.stack()[1:]:
         if "__spec_repository" in k[0].f_globals:
             spec_repository = k[0].f_globals["__spec_repository"]
