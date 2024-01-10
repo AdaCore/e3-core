@@ -141,7 +141,12 @@ class AnodSpecRepository:
 
         # Declare spec prolog
         prolog_file = os.path.join(spec_dir, "prolog.py")
-        self.prolog_dict = {"spec_config": spec_config, "__spec_repository": self}
+        self.prolog_dict = {
+            "spec_config": spec_config,
+            "__spec_repository": self,
+            "spec": self.load,
+        }
+
         if os.path.exists(prolog_file):
             with open(prolog_file) as f:
                 exec(compile(f.read(), prolog_file, "exec"), self.prolog_dict)
@@ -270,6 +275,9 @@ class AnodModule:
 
 def spec(name: str) -> Callable[..., Anod]:
     """Load an Anod spec class.
+
+    Obsolete: keep until all from e3.anod.loader import spec are removed from the
+    specs.
 
     Note that two spec having the same name cannot be loaded in the same
     process as e3 keeps a cache of loaded spec using the spec basename as a
