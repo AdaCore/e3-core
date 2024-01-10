@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import e3.hash
 import e3.log
 from e3.anod.error import SandBoxError
-from e3.anod.spec import __version__
+from e3.anod.spec import __version__, check_api_version
 from e3.fs import ls
 
 logger = e3.log.getLogger("anod.loader")
@@ -69,7 +69,22 @@ class AnodSpecRepository:
         if not os.path.isdir(spec_dir):
             raise SandBoxError(f"spec directory {spec_dir} does not exist")
         self.spec_dir = spec_dir
-        self.api_version = __version__
+
+        # Read the API version file
+        version_file = os.path.join(self.spec_dir, "VERSION")
+        if os.path.isfile(version_file):
+            with open(version_file) as f:
+                content = f.read().strip()
+                if ":" not in content:
+                    raise SandBoxError(
+                        f"invalid VERSION file in spec dir {self.spec_dir}"
+                    )
+                self.api_version = content.split(":")[1].strip()
+            check_api_version(self.api_version)
+        else:
+            # If no VERSION file is found use the default API VERSION
+            self.api_version = __version__
+
         self.specs = {}
         self.repos: dict[str, dict[str, str]] = {}
 
@@ -295,4 +310,10 @@ def spec(name: str) -> Callable[..., Anod]:
             break
 
     assert spec_repository is not None
+
+    if spec_repository.api_version not in ("1.4", "1.5"):
+        logger.error("e3.anod.loader.spec is only valid for API VERSION 1.4 and 1.5")
+        raise SandBoxError(
+            "e3.anod.loader.spec is only valid for API VERSION 1.4 and 1.5", "spec"
+        )
     return spec_repository.load(name)

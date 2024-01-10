@@ -16,12 +16,19 @@ from e3.anod.error import AnodError, ShellError
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.yaml import load_with_config
 
-# CURRENT API version
+# Default API version
 __version__ = "1.4"
 
-SUPPORTED_API = (__version__, "1.5")
-# The driver can support multiple version of the spec API, we currently support
-# only the version 1.4 and 1.5. Default is still 1.4
+SUPPORTED_API = (__version__, "1.5", "1.6")
+# API VERSIONS
+#
+# Version 1.4 (initial version)
+# Version 1.5
+#    NEW: YAML files are also searched in subdirectories whose basename is the
+#    the associated spec basename.
+# Version 1.6
+#    NEW: Add support for spec function automatically declared inside each spec
+#    DEPRECATED: remove support of e3.anod.loader.spec
 
 logger = e3.log.getLogger("anod")
 spec_logger = e3.log.getLogger("anod.spec")
