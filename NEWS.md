@@ -4,6 +4,11 @@
 * Security enhancements:
   * e3.net.smtp.sendmail uses to ``SMTP_SSL`` by default
 
+* New Anod API Version 1.6:
+  * For performance issues declare dynamically "spec" function in the
+    Anod spec context rather than using e3.anod.loader.spec function
+    that relies on inspect module
+
 # Version 22.3.1 (2023-03-17)
 
 * Add rlimit binary for aarch64-darwin

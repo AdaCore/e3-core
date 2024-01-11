@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from distutils.version import StrictVersion
+from packaging.version import Version
 from typing import TYPE_CHECKING
 
 import yaml
@@ -16,12 +16,20 @@ from e3.anod.error import AnodError, ShellError
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.yaml import load_with_config
 
-# CURRENT API version
+# Default API version
 __version__ = "1.4"
 
-SUPPORTED_API = (__version__, "1.5")
-# The driver can support multiple version of the spec API, we currently support
-# only the version 1.4 and 1.5. Default is still 1.4
+SUPPORTED_API = (__version__, "1.5", "1.6")
+# API VERSIONS
+#
+# Version 1.4 (initial version)
+# Version 1.5
+#    NEW: YAML files are searched in subdirectories whose basename is the
+#    the associated spec basename.
+#    DEPRECATED: YAML files in same directory as the spec
+# Version 1.6
+#    NEW: Add support for spec function automatically declared inside each spec
+#    DEPRECATED: remove support of e3.anod.loader.spec
 
 logger = e3.log.getLogger("anod")
 spec_logger = e3.log.getLogger("anod.spec")
@@ -377,7 +385,7 @@ class Anod:
         :param selectors: additional selectors for extended mode
         """
         # Compute data file location and check for existence
-        if StrictVersion(self.api_version) >= StrictVersion("1.5"):
+        if Version(self.api_version) >= Version("1.5"):
             filename = os.path.join(self.name, suffix if suffix else "config")
         else:
             filename = "{}{}".format(self.name, "-" + suffix if suffix else "")

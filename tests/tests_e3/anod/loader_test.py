@@ -125,8 +125,9 @@ class TestLoader:
     def test_load_config_api_1_5(self):
         sync_tree(self.spec_dir, "new_spec_dir")
         Run(["e3-sandbox", "migrate", "1.5", "new_spec_dir"], output=None)
+        with open("new_spec_dir/VERSION", "w") as fd:
+            fd.write("API VERSION:1.5")
         spec_repo = AnodSpecRepository("new_spec_dir")
-        spec_repo.api_version = "1.5"
         anod_class = spec_repo.load("withconfig")
         anod_instance = anod_class("", "build")
         assert anod_instance.test1() == 9

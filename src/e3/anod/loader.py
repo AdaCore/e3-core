@@ -5,12 +5,13 @@ import os
 import types
 import yaml
 
+from packaging.version import Version
 from typing import TYPE_CHECKING
 
 import e3.hash
 import e3.log
 from e3.anod.error import SandBoxError
-from e3.anod.spec import __version__
+from e3.anod.spec import __version__, check_api_version
 from e3.fs import ls
 
 logger = e3.log.getLogger("anod.loader")
@@ -69,7 +70,22 @@ class AnodSpecRepository:
         if not os.path.isdir(spec_dir):
             raise SandBoxError(f"spec directory {spec_dir} does not exist")
         self.spec_dir = spec_dir
-        self.api_version = __version__
+
+        # Read the API version file
+        version_file = os.path.join(self.spec_dir, "VERSION")
+        if os.path.isfile(version_file):
+            with open(version_file) as f:
+                content = f.read().strip()
+                if ":" not in content:
+                    raise SandBoxError(
+                        f"invalid VERSION file in spec dir {self.spec_dir}"
+                    )
+                self.api_version = content.split(":")[1].strip()
+            check_api_version(self.api_version)
+        else:
+            # If no VERSION file is found use the default API VERSION
+            self.api_version = __version__
+
         self.specs = {}
         self.repos: dict[str, dict[str, str]] = {}
 
@@ -81,36 +97,40 @@ class AnodSpecRepository:
         logger.debug("found %s specs", len(spec_list))
 
         # API == 1.4
-        yaml_files = ls(os.path.join(self.spec_dir, "*.yaml"), emit_log_record=False)
-        data_list = [os.path.basename(k)[:-5] for k in yaml_files]
-        logger.debug("found %s yaml files API 1.4 compatible", len(data_list))
+        if Version(self.api_version) < Version("1.5"):
+            yaml_files = ls(
+                os.path.join(self.spec_dir, "*.yaml"), emit_log_record=False
+            )
+            data_list = [os.path.basename(k)[:-5] for k in yaml_files]
+            logger.debug("found %s yaml files API 1.4 compatible", len(data_list))
 
-        # Match yaml files with associated specifications
-        for data in data_list:
-            candidate_specs = [
-                spec_file for spec_file in spec_list if data.startswith(spec_file)
-            ]
-            # We pick the longuest spec name
-            candidate_specs.sort(key=len)
-            if candidate_specs:
-                spec_list[candidate_specs[-1]]["data"].append(data)  # type: ignore
+            # Match yaml files with associated specifications
+            for data in data_list:
+                candidate_specs = [
+                    spec_file for spec_file in spec_list if data.startswith(spec_file)
+                ]
+                # We pick the longuest spec name
+                candidate_specs.sort(key=len)
+                if candidate_specs:
+                    spec_list[candidate_specs[-1]]["data"].append(data)  # type: ignore
 
         # Find yaml files that are API >= 1.5 compatible
-        new_yaml_files = ls(
-            os.path.join(self.spec_dir, "*", "*.yaml"), emit_log_record=False
-        )
+        if Version(self.api_version) >= Version("1.5"):
+            new_yaml_files = ls(
+                os.path.join(self.spec_dir, "*", "*.yaml"), emit_log_record=False
+            )
+            logger.info(new_yaml_files)
+            for yml_f in new_yaml_files:
+                associated_spec = os.path.basename(os.path.dirname(yml_f))
 
-        for yml_f in new_yaml_files:
-            associated_spec = os.path.basename(os.path.dirname(yml_f))
+                # Keep only the yaml files associated with an .anod file
+                if associated_spec in spec_list:
+                    # We're recording the relative path without the extension
+                    suffix, _ = os.path.splitext(os.path.basename(yml_f))
 
-            # Keep only the yaml files associated with an .anod file
-            if associated_spec in spec_list:
-                # We're recording the relative path without the extension
-                suffix, _ = os.path.splitext(os.path.basename(yml_f))
-
-                spec_list[associated_spec]["data"].append(  # type: ignore
-                    os.path.join(associated_spec, suffix)
-                )
+                    spec_list[associated_spec]["data"].append(  # type: ignore
+                        os.path.join(associated_spec, suffix)
+                    )
 
         # Create AnodModule objects
         for name, value in spec_list.items():
@@ -141,7 +161,12 @@ class AnodSpecRepository:
 
         # Declare spec prolog
         prolog_file = os.path.join(spec_dir, "prolog.py")
-        self.prolog_dict = {"spec_config": spec_config, "__spec_repository": self}
+        self.prolog_dict = {
+            "spec_config": spec_config,
+            "__spec_repository": self,
+            "spec": self.load,
+        }
+
         if os.path.exists(prolog_file):
             with open(prolog_file) as f:
                 exec(compile(f.read(), prolog_file, "exec"), self.prolog_dict)
@@ -268,39 +293,32 @@ class AnodModule:
         raise SandBoxError(f"cannot find Anod subclass in {self.path}", "load")
 
 
-fixed_spec_repository: AnodSpecRepository | None = None
-# A local cache for the spec_repository.
-# This is set by set_spec_repository(), and used by spec().
-
-
-def set_spec_repository(spec_repository: AnodSpecRepository) -> None:
-    """Set the spec repository to use within the lifetime of this process.
-
-    This can be used to set the spec repository to use when calling spec()
-    below, without having to inspect the stack every time, which can be
-    expensive.
-
-    :param spec_repository: the spec repository to set
-    """
-    global fixed_spec_repository
-    fixed_spec_repository = spec_repository
-
-
 def spec(name: str) -> Callable[..., Anod]:
     """Load an Anod spec class.
+
+    Obsolete: keep until all from e3.anod.loader import spec are removed from the
+    specs.
 
     Note that two spec having the same name cannot be loaded in the same
     process as e3 keeps a cache of loaded spec using the spec basename as a
     key.
     :param name: name of the spec to load
     """
-    if fixed_spec_repository is not None:
-        return fixed_spec_repository.load(name)
+    spec_repository: AnodSpecRepository | None = None
 
-    for k in inspect.stack()[1:]:
-        if "__spec_repository" in k[0].f_globals:
-            spec_repository = k[0].f_globals["__spec_repository"]
+    # Implementation note: context=0 means that the no source context is
+    # computed for each frame. This improves drastically the performance
+    # as it avoids reading the source file for each frame.
+    for k in inspect.stack(context=0)[1:]:
+        spec_repository = k[0].f_globals.get("__spec_repository")
+        if spec_repository is not None:
             break
 
     assert spec_repository is not None
+
+    if Version(spec_repository.api_version) >= Version("1.6"):
+        logger.error("e3.anod.loader.spec is only valid for API VERSION < 1.6")
+        raise SandBoxError(
+            "e3.anod.loader.spec is only valid for API VERSION < 1.6", "spec"
+        )
     return spec_repository.load(name)
