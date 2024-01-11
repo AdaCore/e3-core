@@ -5,6 +5,7 @@ import os
 import types
 import yaml
 
+from packaging.version import Version
 from typing import TYPE_CHECKING
 
 import e3.hash
@@ -96,36 +97,40 @@ class AnodSpecRepository:
         logger.debug("found %s specs", len(spec_list))
 
         # API == 1.4
-        yaml_files = ls(os.path.join(self.spec_dir, "*.yaml"), emit_log_record=False)
-        data_list = [os.path.basename(k)[:-5] for k in yaml_files]
-        logger.debug("found %s yaml files API 1.4 compatible", len(data_list))
+        if Version(self.api_version) < Version("1.5"):
+            yaml_files = ls(
+                os.path.join(self.spec_dir, "*.yaml"), emit_log_record=False
+            )
+            data_list = [os.path.basename(k)[:-5] for k in yaml_files]
+            logger.debug("found %s yaml files API 1.4 compatible", len(data_list))
 
-        # Match yaml files with associated specifications
-        for data in data_list:
-            candidate_specs = [
-                spec_file for spec_file in spec_list if data.startswith(spec_file)
-            ]
-            # We pick the longuest spec name
-            candidate_specs.sort(key=len)
-            if candidate_specs:
-                spec_list[candidate_specs[-1]]["data"].append(data)  # type: ignore
+            # Match yaml files with associated specifications
+            for data in data_list:
+                candidate_specs = [
+                    spec_file for spec_file in spec_list if data.startswith(spec_file)
+                ]
+                # We pick the longuest spec name
+                candidate_specs.sort(key=len)
+                if candidate_specs:
+                    spec_list[candidate_specs[-1]]["data"].append(data)  # type: ignore
 
         # Find yaml files that are API >= 1.5 compatible
-        new_yaml_files = ls(
-            os.path.join(self.spec_dir, "*", "*.yaml"), emit_log_record=False
-        )
+        if Version(self.api_version) >= Version("1.5"):
+            new_yaml_files = ls(
+                os.path.join(self.spec_dir, "*", "*.yaml"), emit_log_record=False
+            )
+            logger.info(new_yaml_files)
+            for yml_f in new_yaml_files:
+                associated_spec = os.path.basename(os.path.dirname(yml_f))
 
-        for yml_f in new_yaml_files:
-            associated_spec = os.path.basename(os.path.dirname(yml_f))
+                # Keep only the yaml files associated with an .anod file
+                if associated_spec in spec_list:
+                    # We're recording the relative path without the extension
+                    suffix, _ = os.path.splitext(os.path.basename(yml_f))
 
-            # Keep only the yaml files associated with an .anod file
-            if associated_spec in spec_list:
-                # We're recording the relative path without the extension
-                suffix, _ = os.path.splitext(os.path.basename(yml_f))
-
-                spec_list[associated_spec]["data"].append(  # type: ignore
-                    os.path.join(associated_spec, suffix)
-                )
+                    spec_list[associated_spec]["data"].append(  # type: ignore
+                        os.path.join(associated_spec, suffix)
+                    )
 
         # Create AnodModule objects
         for name, value in spec_list.items():
@@ -311,9 +316,9 @@ def spec(name: str) -> Callable[..., Anod]:
 
     assert spec_repository is not None
 
-    if spec_repository.api_version not in ("1.4", "1.5"):
-        logger.error("e3.anod.loader.spec is only valid for API VERSION 1.4 and 1.5")
+    if Version(spec_repository.api_version) >= Version("1.6"):
+        logger.error("e3.anod.loader.spec is only valid for API VERSION < 1.6")
         raise SandBoxError(
-            "e3.anod.loader.spec is only valid for API VERSION 1.4 and 1.5", "spec"
+            "e3.anod.loader.spec is only valid for API VERSION < 1.6", "spec"
         )
     return spec_repository.load(name)
