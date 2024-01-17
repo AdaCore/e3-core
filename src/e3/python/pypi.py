@@ -388,6 +388,10 @@ class PyPIClosure:
             data is cached a maximum of 24h. The cache contains results of requests to
             PyPI.
         :param pypi_url: set Python package registry URL. Default is PyPI
+        :param allowed_prerelease: list of package names authorized to be into
+            pre-release.
+        :param allowed_yanked: list of package names authorized to have yanked flags set
+            to true (see: PEP_592).
         """
         self.cache_file = cache_file
         self.cache_dir = cache_dir
