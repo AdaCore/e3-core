@@ -386,9 +386,7 @@ class BuildMetadata(object):
         if isinstance(timestamp, datetime):
             # When converting to JSON representation, the microseconds
             # are lost. Just remove them.
-            valid_timestamp = timestamp.utcnow().replace(
-                microsecond=0, tzinfo=timezone.utc
-            )
+            valid_timestamp = timestamp.astimezone(timezone.utc).replace(microsecond=0)
         else:
             raise TypeError(f"Invalid timestamp type {type(timestamp)}")
 
@@ -866,7 +864,7 @@ class ResourceDescriptor(object):
         """Add a new digest to the digest set.
 
         :param algorithm: The algorithm the new digest has been computed with.
-        :param digest: The new digest to add to the diest set.
+        :param digest: The new digest to add to the digest set.
 
         :raise KeyError: if *algorithm* already defines a digest in the current
             digest set.
@@ -1378,7 +1376,7 @@ class Predicate(object):
             return self.__by_products
 
         @property
-        def metatdata(self) -> BuildMetadata:
+        def metadata(self) -> BuildMetadata:
             """Run details build metadata.
 
             Metadata about this particular execution of the build.
@@ -1395,7 +1393,7 @@ class Predicate(object):
             """  # noqa RST304
             return {
                 self.ATTR_BUILDER: self.builder.as_dict(),
-                self.ATTR_METADATA: self.metatdata.as_dict(),
+                self.ATTR_METADATA: self.metadata.as_dict(),
                 self.ATTR_BY_PRODUCTS: [rd.as_dict() for rd in self.by_products],
             }
 
