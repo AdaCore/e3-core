@@ -419,7 +419,7 @@ class PyPIClosure:
         :return: a Package object
         """
         # Normalize the package name
-        pkg = pkg.lower().replace("_", "-")
+        pkg = pkg.lower().replace("_", "-").replace(".", "-")
 
         pkg_extras = [""]
         if extras is not None:
@@ -463,7 +463,7 @@ class PyPIClosure:
         ) = base.split("-")
         project_name = project_name.lower().replace("_", "-")
 
-        pkg = project_name.lower().replace("_", "-")
+        pkg = project_name.replace(".", "-")
         logging.debug(f"Add metadata for {pkg}")
         self.db[pkg] = {
             "timestamp": time.time(),
