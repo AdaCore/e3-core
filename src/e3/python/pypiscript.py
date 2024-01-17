@@ -88,6 +88,14 @@ def main() -> None:
         default=None,
         help="Allow to use pre-release version for some requirements",
     )
+    m.argument_parser.add_argument(
+        "--allow-yanked",
+        dest="allowed_yanked",
+        metavar="REQUIREMENT",
+        nargs="*",
+        default=None,
+        help="Allow to use yanked version for some requirements",
+    )
     m.parse_args()
     assert m.args is not None
 
@@ -162,6 +170,7 @@ def main() -> None:
         python3_version=m.args.python3_version,
         platforms=config["platforms"],
         allowed_prerelease=m.args.allowed_prerelease,
+        allowed_yanked=m.args.allowed_yanked,
     ) as pypi:
         for wheel in local_wheels:
             logging.info(f"Register wheel {wheel.path}")
