@@ -221,7 +221,7 @@ class Package:
     @property
     def name(self) -> str:
         """Name of the package."""
-        return self.data["info"]["name"]
+        return self.data["info"]["name"].replace(".", "-")
 
     @property
     def latest_release(self) -> list[PackageFile]:
