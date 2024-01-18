@@ -64,29 +64,40 @@ def main() -> None:
     m.argument_parser.description = DESCRIPTION.strip()
     m.argument_parser.add_argument("config_file", help="configuration files")
     m.argument_parser.add_argument(
-        "--python3-version", help="Python 3 version (default:10)", type=int, default=10
+        "--python3-version",
+        type=int,
+        default=10,
+        help="python 3 version (default: %(default)s)",
     )
     m.argument_parser.add_argument("target_dir", help="target directory")
     m.argument_parser.add_argument(
-        "--cache-dir", help="cache directory (default ./cache)", default="./cache"
+        "--cache-dir", help="cache directory (default: %(default)s)", default="./cache"
     )
     m.argument_parser.add_argument(
         "--skip-repo-updates",
         action="store_true",
-        help="Don't update clones in the cache",
+        help="don't update clones in the cache",
     )
     m.argument_parser.add_argument(
         "--local-clones",
-        help="Use local clones. When set look for git clones in a directory",
+        help="use local clones. When set look for git clones in a directory",
         default=None,
     )
     m.argument_parser.add_argument(
         "--allow-prerelease",
         dest="allowed_prerelease",
-        metavar="REQUIREMENT",
+        metavar="PACKAGE",
         nargs="*",
         default=None,
-        help="Allow to use pre-release version for some requirements",
+        help="allow to use pre-release version for some requirements",
+    )
+    m.argument_parser.add_argument(
+        "--allow-yanked",
+        dest="allowed_yanked",
+        metavar="PACKAGE",
+        nargs="*",
+        default=None,
+        help="allow to use yanked version for some requirements (See: PEP_592)",
     )
     m.parse_args()
     assert m.args is not None
@@ -162,6 +173,7 @@ def main() -> None:
         python3_version=m.args.python3_version,
         platforms=config["platforms"],
         allowed_prerelease=m.args.allowed_prerelease,
+        allowed_yanked=m.args.allowed_yanked,
     ) as pypi:
         for wheel in local_wheels:
             logging.info(f"Register wheel {wheel.path}")

@@ -67,6 +67,11 @@ class PackageFile:
         return self.data["url"]
 
     @property
+    def is_yanked(self) -> bool:
+        """Return whether the package is yanked."""
+        return self.data.get("yanked", False)
+
+    @property
     def is_wheel(self) -> bool:
         """Return whether the package is a wheel."""
         return self.kind == "bdist_wheel"
@@ -191,6 +196,7 @@ class Package:
         for version in self.data.get("releases", {}):
             try:
                 v = packaging.version.parse(version)
+
                 if (not v.is_prerelease and not v.is_devrelease) or (
                     v.is_prerelease and self.name in pypi.allowed_prerelease
                 ):
@@ -236,9 +242,15 @@ class Package:
                 for f in all_files
                 if f.is_compatible_with_cpython3(self.pypi.python3_version)
                 and f.is_compatible_with_platforms(self.pypi.platforms)
+                and (not f.is_yanked or self.name in self.pypi.allowed_yanked)
             ]
             if any((f.is_generic_wheel for f in all_files)):
                 all_files = [f for f in all_files if f.is_wheel]
+
+            if not all_files:
+                self.versions.remove(packaging.version.parse(self.latest_version))
+                return self.latest_release
+
             self.releases[self.latest_version] = all_files
 
         return self.releases[self.latest_version]
@@ -365,6 +377,7 @@ class PyPIClosure:
         cache_file: str | None = None,
         pypi_url: str = "https://pypi.org/pypi",
         allowed_prerelease: list[str] | None = None,
+        allowed_yanked: list[str] | None = None,
     ) -> None:
         """Initialize a PyPI session.
 
@@ -375,6 +388,10 @@ class PyPIClosure:
             data is cached a maximum of 24h. The cache contains results of requests to
             PyPI.
         :param pypi_url: set Python package registry URL. Default is PyPI
+        :param allowed_prerelease: list of package names authorized to be into
+            pre-release.
+        :param allowed_yanked: list of package names authorized to have yanked flags set
+            to true (see: PEP_592).
         """
         self.cache_file = cache_file
         self.cache_dir = cache_dir
@@ -385,6 +402,7 @@ class PyPIClosure:
         self.requirements: set[Requirement] = set()
         self.explicit_requirements: set[Requirement] = set()
         self.allowed_prerelease = allowed_prerelease or []
+        self.allowed_yanked = allowed_yanked or []
 
         self.platforms = platforms
         self.sys_platforms = set()
