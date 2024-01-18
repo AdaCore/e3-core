@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import tempfile
 from contextlib import closing
 from typing import TYPE_CHECKING
@@ -19,6 +20,8 @@ if TYPE_CHECKING:
     from typing import Literal
     from collections.abc import Callable
     from e3.mypy import assert_never
+
+    SupportedVCS = Literal["git"] | Literal["svn"] | Literal["external"] | Literal["s3"]
 
 logger = e3.log.getLogger("e3.anod.checkout")
 
@@ -57,7 +60,7 @@ class CheckoutManager:
 
     def update(
         self,
-        vcs: Literal["git"] | Literal["svn"] | Literal["external"],
+        vcs: SupportedVCS,
         url: str,
         revision: str | None = None,
     ) -> ReturnValue:
@@ -84,6 +87,8 @@ class CheckoutManager:
             update = self.update_svn
         elif vcs == "external":
             update = self.update_external
+        elif vcs == "s3":
+            update = self.update_s3
         else:
             assert_never()
 
@@ -101,6 +106,50 @@ class CheckoutManager:
                 fd,
             )
         return result
+
+    def update_s3(
+        self, url: str, revision: str | None
+    ) -> tuple[ReturnValue, str, str]:  # all: no cover
+        """Update working dir using a S3 bucket as source.
+
+        :param url: s3 url to a s3 directory. s3://[profile@]bucket/suffix
+        :param revision: ignored
+        """
+        if os.path.isdir(self.working_dir):
+            old_commit = get_filetree_state(self.working_dir)
+        else:
+            old_commit = ""
+
+        # Extract profile from the url and perform basic
+        # url validation
+        m = re.match("s3://([a-zA-Z0-9_-]+@)?(.+)$", url)
+        if m is None:
+            raise e3.error.E3Error("invalid s3 url: {url}")
+
+        if m.group(1) is not None:
+            profile = m.group(1)[:-1]
+        else:
+            profile = None
+
+        s3_url = f"s3://{m.group(2)}"
+
+        if not which("aws"):
+            raise e3.error.E3Error("aws cli is needed")
+
+        s3_command = ["aws", "s3", "sync", "--delete"]
+        if profile is not None:
+            s3_command += ["--profile", profile]
+        s3_command += [s3_url, self.working_dir]
+
+        p = Run(s3_command, output=None)
+        if p.status != 0:
+            raise e3.error.E3Error(f"aws sync failed with status {p.status}")
+
+        new_commit = get_filetree_state(self.working_dir)
+        if new_commit == old_commit:
+            return ReturnValue.unchanged, old_commit, new_commit
+        else:
+            return ReturnValue.success, old_commit, new_commit
 
     def update_external(
         self, url: str, revision: str | None
