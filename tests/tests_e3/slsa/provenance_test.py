@@ -9,6 +9,7 @@ import pytest
 from datetime import datetime, timezone
 from dateutil import parser as date_parser
 from pathlib import Path
+from time import sleep
 from typing import Any
 
 from e3.slsa.provenance import (
@@ -33,6 +34,7 @@ INTERNAL_PARAMETERS: dict = {"internal": "parameters"}
 # find . -type f | cut -c3- | LC_ALL=C sort | xargs -r sha256sum \\
 #                       | sha256sum | cut -f1 -d' '
 
+# noinspection SpellCheckingInspection
 VALID_DIGESTS: dict[str, str] = {
     "blake2b": (
         "0a2293c1133aa5b2bdc84a0c8793db9cc60e8af7bb41acb661dc9c7264d35c8a0"
@@ -425,6 +427,10 @@ def test_predicate_load_json() -> None:
     bd: Predicate.BuildDefinition = create_valid_build_definition()[-1]
     rd: Predicate.RunDetails = create_valid_run_details()[-1]
     predicate: Predicate = Predicate(build_definition=bd, run_details=rd)
+    # Make sure the issue https://github.com/AdaCore/e3-core/issues/668 is
+    # fixed, add an (at least) one-second delay to make sure the timestamps are
+    # really copied from predicate, and not regenerated.
+    sleep(2.0)
     json_repr: str = predicate.as_json()
     # Create a second predicate with that dict representation.
     predicate2: Predicate = Predicate.load_json(json_repr)
@@ -433,7 +439,7 @@ def test_predicate_load_json() -> None:
     assert predicate.run_details == predicate2.run_details
 
 
-def test_resource_desciptor_add_digest() -> None:
+def test_resource_descriptor_add_digest() -> None:
     (
         uri,
         digest,
@@ -516,7 +522,7 @@ def test_resource_descriptor_digest() -> None:
     assert "Invalid resource descriptor digest" in invalid_digest.value.args[0]
 
 
-def test_resource_desciptor_dir_hash() -> None:
+def test_resource_descriptor_dir_hash() -> None:
     # Create a simple tree and try all algorithms on that tree.
     # The awaited checksum is the same as::
     #
@@ -663,7 +669,7 @@ def test_resource_descriptor_load_json() -> None:
 
 
 def test_resource_descriptor_media_type() -> None:
-    """Test setting a resource descriptor madiaType."""
+    """Test setting a resource descriptor mediaType."""
     desc = ResourceDescriptor()
     # Set a valid mediaType.
     desc.media_type = "media type"
@@ -758,7 +764,7 @@ def test_run_details_init() -> None:
     """Test the initialization of a predicate run details object."""
     builder, metadata, by_products, rd = create_valid_run_details()
     assert rd.builder == builder
-    assert rd.metatdata == metadata
+    assert rd.metadata == metadata
     assert rd.by_products == by_products
     # Test the __eq__ method with a wrong type.
     assert rd != {}
@@ -771,7 +777,7 @@ def test_run_details_load_dict() -> None:
     rd2: Predicate.RunDetails = Predicate.RunDetails.load_dict(dict_repr)
     # Check that all fields match.
     assert rd.builder == rd2.builder
-    assert rd.metatdata == rd2.metatdata
+    assert rd.metadata == rd2.metadata
     assert rd.by_products == rd2.by_products
 
     # Set an invalid metadata for the run details.
@@ -793,7 +799,7 @@ def test_run_details_load_json() -> None:
     rd2: Predicate.RunDetails = Predicate.RunDetails.load_json(rd.as_json())
     # Check that all fields match.
     assert rd.builder == rd2.builder
-    assert rd.metatdata == rd2.metatdata
+    assert rd.metadata == rd2.metadata
     assert rd.by_products == rd2.by_products
 
 
