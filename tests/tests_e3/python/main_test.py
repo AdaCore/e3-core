@@ -149,3 +149,9 @@ def test_star_requirements():
         pypi.add_wheel(wheel3.path)
         pypi.add_requirement("src2==1.0.0")
         assert len(pypi.closure()) == 2
+
+
+def test_yanked(pypi_server):
+    with pypi_server:
+        print("OK")
+    raise AssertionError("Expected")
