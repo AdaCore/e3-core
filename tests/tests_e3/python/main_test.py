@@ -6,7 +6,8 @@ from e3.fs import mkdir
 from e3.python.pypi import PyPIClosure, PyPIError
 
 import yaml
-import os
+from os import listdir
+from os.path import join as path_join, isfile, basename
 import pytest
 
 
@@ -16,26 +17,26 @@ def generate_py_pkg_source(
     mkdir(name)
     if requires:
         requires_str = ",".join([f'"{el}"' for el in requires])
-    with open(os.path.join(name, "setup.py"), "w") as fd:
+    with open(path_join(name, "setup.py"), "w") as fd:
         fd.write("from setuptools import setup, find_packages\n")
         fd.write(f"setup(name='{name}',\n")
         fd.write(f"      version='{version}',\n")
         if requires:
             fd.write(f"    install_requires=[{requires_str}],\n")
         fd.write("       packages=find_packages())\n")
-    mkdir(os.path.join(name, name))
-    with open(os.path.join(name, name, "__init__.py"), "w") as fd:
+    mkdir(path_join(name, name))
+    with open(path_join(name, name, "__init__.py"), "w") as fd:
         fd.write(f"# This is package {name}")
     return Wheel.build(source_dir=name, dest_dir=".")
 
 
 def test_wheel():
     wheel1 = generate_py_pkg_source("src1")
-    assert os.path.isfile(wheel1.path)
+    assert isfile(wheel1.path)
     assert not wheel1.requirements
 
     wheel2 = generate_py_pkg_source("src2", requires=["src1<=2.0.0"])
-    assert os.path.isfile(wheel2.path)
+    assert isfile(wheel2.path)
     assert len(wheel2.requirements) == 1
 
     mkdir(".cache")
@@ -100,7 +101,7 @@ def test_pypi_closure_tool():
         + ["--python3-version=10", "--local-clones=.", "config.yml", "dist"]
     )
     assert p.status == 0, p.out
-    file_list = set(os.listdir("dist"))
+    file_list = set(listdir("dist"))
     assert file_list == {
         "requirements.txt",
         "src1-1.0.0-py3-none-any.whl",
@@ -111,15 +112,15 @@ def test_pypi_closure_tool():
 def test_star_requirements():
     """Test package requirements ending with * with != operator."""
     wheel1 = generate_py_pkg_source("src1", version="1.0.4")
-    assert os.path.isfile(wheel1.path)
+    assert isfile(wheel1.path)
     assert not wheel1.requirements
 
     wheel2 = generate_py_pkg_source("src2", requires=["src1!=1.0.*"])
-    assert os.path.isfile(wheel2.path)
+    assert isfile(wheel2.path)
     assert len(wheel2.requirements) == 1
 
     wheel3 = generate_py_pkg_source("src1", version="1.1.4")
-    assert os.path.isfile(wheel3.path)
+    assert isfile(wheel3.path)
     assert not wheel3.requirements
 
     mkdir(".cache")
@@ -151,7 +152,41 @@ def test_star_requirements():
         assert len(pypi.closure()) == 2
 
 
-def test_yanked(pypi_server):
+@pytest.mark.parametrize(
+    "arguments,expected",
+    [
+        ((None, None), "setuptools_scm-7.1.0-py3-none-any.whl"),
+        ((["setuptools-scm"], None), "setuptools_scm-8.0.0-py3-none-any.whl"),
+        ((["setuptools_scm"], None), "setuptools_scm-8.0.0-py3-none-any.whl"),
+        ((None, "setuptools_scm==8"), None),
+    ],
+)
+def test_yanked(pypi_server, arguments, expected):
+    allowed_yanked, invalid_wheel = arguments
+    expected_wheel = expected
+
+    mkdir("cache")
+
     with pypi_server:
-        print("OK")
-    raise AssertionError("Expected")
+        with PyPIClosure(
+            python3_version=11,
+            platforms=[
+                "x86_64-linux",
+            ],
+            cache_dir="cache",
+            cache_file="pypi.cache",
+            allowed_yanked=allowed_yanked,
+        ) as pypi:
+            if invalid_wheel:
+                with pytest.raises(
+                    PyPIError,
+                    match=(
+                        "Cannot find latest version for 'setuptools-scm': "
+                        "No more suitable version"
+                    ),
+                ):
+                    pypi.add_requirement(invalid_wheel)
+            else:
+                pypi.add_requirement("setuptools_scm >= 6.2, <= 8")
+                all_filenames = [basename(f) for f in pypi.file_closure()]
+                assert expected_wheel in all_filenames
