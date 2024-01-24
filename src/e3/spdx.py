@@ -46,7 +46,7 @@ class SPDXPackageSupplier(Enum):
     This field is composed of a package supplier type (organization, person, tool)
     and a name.
 
-    This enum represents the package suppplier type.
+    This enum represents the package supplier type.
     """
 
     ORGANIZATION = "Organization"
@@ -92,6 +92,11 @@ class SPDXEntryStr(SPDXEntry):
 
     def __str__(self) -> str:
         return self.value
+
+    def __gt__(self, other: object) -> bool:
+        if isinstance(other, self.__class__):
+            return self.value > other.value
+        return False
 
     def to_json_dict(self) -> dict[str, Any]:
         # Force calling __str__ method to simplify overloading
@@ -957,12 +962,37 @@ class Document:
         add_section("Creation Info")
         output += self.creation_info.to_tagvalue()
 
+        # Keep track of the packages which should appear first.
+        pkg_ids: list[SPDXID] = []
         add_section("Relationships")
-        for rel in self.relationships:
-            output.append(rel.to_tagvalue())
-        for pkg in self.packages.values():
-            add_section("Package")
-            output += pkg.to_tagvalue()
+        relas: list[str] = []
+        rel_ix: int = 0
+        for rel in sorted(
+            self.relationships, key=lambda rela: rela.related_spdx_element
+        ):
+            if (
+                rel.spdx_element_id == self.spdx_id
+                and rel.relationship_type == RelationshipType.DESCRIBES
+            ):
+                # Make the described packages appear first in list.
+                relas.insert(rel_ix, rel.to_tagvalue())
+                rel_ix += 1
+                # Keep track of those leading packages IDs.
+                pkg_ids.append(rel.related_spdx_element)
+            else:
+                relas.append(rel.to_tagvalue())
+
+        output += relas
+
+        packages: list[str] = ["", ""]
+
+        for pkg in sorted(self.packages.values(), key=lambda package: package.name):
+            if pkg.spdx_id in pkg_ids:
+                packages = ["", "", "# Package", ""] + pkg.to_tagvalue() + packages
+            else:
+                packages += ["# Package", ""] + pkg.to_tagvalue() + ["", ""]
+
+        output += packages
         return output
 
     def to_json_dict(self) -> dict[str, Any]:
@@ -974,7 +1004,9 @@ class Document:
         output["creationInfo"] = self.creation_info.to_json_dict()
         output["documentDescribes"] = []
         output["relationships"] = []
-        for rel in self.relationships:
+        for rel in sorted(
+            self.relationships, key=lambda rela: rela.related_spdx_element
+        ):
             if (
                 rel.spdx_element_id == self.spdx_id
                 and rel.relationship_type == RelationshipType.DESCRIBES
@@ -983,6 +1015,18 @@ class Document:
             else:
                 output["relationships"].append(rel.to_json_dict())
 
-        output["packages"] = [p.to_json_dict() for p in self.packages.values()]
+        packages: list[dict] = []
+        described_ix: int = 0
+        for p in sorted(self.packages.values(), key=lambda package: package.name):
+            if str(p.spdx_id) in output["documentDescribes"]:
+                # Make the described packages appear first in list.
+                packages.insert(described_ix, p.to_json_dict())
+                described_ix += 1
+            else:
+                # Other packages are already sorted by name, append them as
+                # they come.
+                packages.append(p.to_json_dict())
+
+        output["packages"] = packages
 
         return output
