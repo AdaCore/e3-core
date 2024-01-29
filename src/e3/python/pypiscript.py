@@ -87,7 +87,7 @@ def main() -> None:
         "--allow-prerelease",
         dest="allowed_prerelease",
         metavar="PACKAGE",
-        nargs="*",
+        nargs="+",
         default=None,
         help="allow to use pre-release version for some requirements",
     )
@@ -95,7 +95,7 @@ def main() -> None:
         "--allow-yanked",
         dest="allowed_yanked",
         metavar="PACKAGE",
-        nargs="*",
+        nargs="+",
         default=None,
         help="allow to use yanked version for some requirements (See: PEP_592)",
     )

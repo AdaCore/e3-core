@@ -242,7 +242,11 @@ class Package:
                 for f in all_files
                 if f.is_compatible_with_cpython3(self.pypi.python3_version)
                 and f.is_compatible_with_platforms(self.pypi.platforms)
-                and (not f.is_yanked or self.name in self.pypi.allowed_yanked)
+                and (
+                    not f.is_yanked
+                    or self.name in self.pypi.allowed_yanked
+                    or self.name.replace("-", "_") in self.pypi.allowed_yanked
+                )
             ]
             if any((f.is_generic_wheel for f in all_files)):
                 all_files = [f for f in all_files if f.is_wheel]
@@ -316,6 +320,11 @@ class Package:
     @property
     def latest_version(self) -> str:
         """Return the latest version as str."""
+        if not self.versions:
+            raise PyPIError(
+                f"Cannot find latest version for {self.name!r}: "
+                "No more suitable version"
+            )
         return str(max(self.versions))
 
     def add_constraint(self, requirement: Requirement) -> None:

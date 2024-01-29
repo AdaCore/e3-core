@@ -32,6 +32,7 @@ extras_require = {
         "httpretty",
         "ptyprocess",
         "psutil",
+        "requests-mock",
     ],
 }
 
