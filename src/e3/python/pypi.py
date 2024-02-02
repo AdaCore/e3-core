@@ -7,7 +7,7 @@ import os
 import time
 import packaging.version
 import packaging.tags
-import packaging.specifiers
+from packaging.specifiers import Specifier
 from typing import TYPE_CHECKING
 from e3.error import E3Error
 from e3.python.wheel import Wheel
@@ -198,7 +198,7 @@ class Package:
                 v = packaging.version.parse(version)
 
                 if (not v.is_prerelease and not v.is_devrelease) or (
-                    v.is_prerelease and self.name in pypi.allowed_prerelease
+                    v.is_prerelease and self.name in self.pypi.allowed_prerelease
                 ):
                     self.versions.append(v)
             except Exception:
@@ -357,9 +357,10 @@ class Package:
             self.versions = [
                 v
                 for v in self.versions
-                if packaging.specifiers.Specifier(f"{spec[0]}{spec[1]}").contains(
-                    str(v)
-                )
+                if Specifier(
+                    f"{spec[0]}{spec[1]}",
+                    prereleases=self.name in self.pypi.allowed_prerelease,
+                ).contains(str(v))
             ]
 
         if len(self.versions) != current_length:
