@@ -67,6 +67,7 @@ class Machine(EntryPoint):
         site: str | None = None,
         name: str | None = None,
         description: str | None = None,
+        secure_control_plane: bool = False,
     ):
         """Initialize a Machine entry point.
 
@@ -77,11 +78,15 @@ class Machine(EntryPoint):
         :param site: site indication
         :param name: see EntryPoint
         :param description: see EntryPoint
+        :param secure_control_plane: If true, this indicates the user requires
+            separation between the control plane and the build plane, which can
+            be implemented using containers.
         """
         super().__init__(db, fun, kind, name, description)
         self.platform = platform
         self.version = version
         self.site = site
+        self.secure_control_plane = secure_control_plane
 
 
 def entry_point(
