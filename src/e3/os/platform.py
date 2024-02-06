@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import os
 import re
-import sys
 from collections import namedtuple
 from platform import uname as platform_uname
 from typing import TYPE_CHECKING
@@ -33,12 +32,10 @@ class SystemInfo:
         ``uname`` system call.
     :cvar core_number: integer containing the number of processor cores on the
         machine
-    :cvar nis_domain: host nis domain
     """
 
     uname = None
     core_number = 1
-    nis_domain = None
     ld_info = None
 
     # Cache for SystemInfo methods
@@ -102,24 +99,6 @@ class SystemInfo:
                 cls.core_number = psutil.cpu_count()
             except Exception:
                 logger.exception("psutil error")
-
-        cls.nis_domain = UNKNOWN
-
-        if sys.platform != "win32":  # windows: no cover
-            try:
-                import nis
-            except ImportError:  # defensive code
-                nis = None  # type: ignore
-
-            if nis is not None:
-                try:
-                    cls.nis_domain = nis.get_default_domain()
-                    if not cls.nis_domain:  # defensive code
-                        cls.nis_domain = UNKNOWN
-                except nis.error:  # defensive code
-                    # this is not a problem anymore, we do not want
-                    # to log it either, so we just ignore it.
-                    pass
 
     @classmethod
     def platform(cls) -> str:
@@ -297,7 +276,7 @@ class SystemInfo:
         if len(tmp) > 1:
             domain = tmp[1]
         else:
-            domain = cls.nis_domain
+            domain = UNKNOWN
 
         # Hostname can be overriden by E3_HOSTNAME env variable
         hostname = os.environ.get("E3_HOSTNAME", hostname)
