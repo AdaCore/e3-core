@@ -23,6 +23,7 @@ from e3.spdx import (
     SHA1,
     SHA256,
     SPDXID,
+    SPDXEntryStr,
     SPDXEntryMaybeStrMultilines,
     NOASSERTION,
     Relationship,
@@ -51,7 +52,7 @@ def test_entities_ref_spdx():
 
 
 def test_entity_ref() -> None:
-    """Tests for the EntiryRef class which are not covered by the other tests."""
+    """Tests for the EntityRef class which are not covered by the other tests."""
     org: EntityRef = EntityRef(Organization("AdaCore"))
     no_assertion: EntityRef = EntityRef(NOASSERTION)
 
@@ -179,7 +180,7 @@ def test_spdx():
     tagvalue_content = doc.to_tagvalue()
     json_content = doc.to_json_dict()
 
-    # Change fields that are not stable: DocumentNamespace containing an UUID
+    # Change fields that are not stable: DocumentNamespace containing a UUID
     # and Created timestamp
     document_namespace = "my-spdx-test-c5c1e261-fb57-474a-b3c3-dc2adf3a4e06"
     created = "2023-02-10T14:54:01Z"
@@ -270,6 +271,8 @@ def test_spdx():
         "FilesAnalyzed: false",
         "PackageLicenseConcluded: GPL-3.0-or-later",
         "PackageDownloadLocation: NOASSERTION",
+        "",
+        "",
     ]
 
     assert json_content == {
@@ -460,3 +463,13 @@ def test_spdx_entry_maybe_str_multilines() -> None:
 
     assert ml.to_tagvalue() == "SPDXEntryMaybeStrMultilines: <text>value</text>"
     assert no_assertion.to_tagvalue() == "SPDXEntryMaybeStrMultilines: NOASSERTION"
+
+
+def test_spdx_entry_str_gt() -> None:
+    """Check SPDXEntryStr class's __gt__() method."""
+    e1 = SPDXEntryStr("One")
+    e2 = SPDXEntryStr("Two")
+
+    assert e2 > e1
+    # Check the branch where two different objects are compared.
+    assert e2.__gt__("One") is False
