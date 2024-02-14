@@ -32,6 +32,8 @@ class RewriteImportRule:
     """
 
     class RuleAction(Enum):
+        """Possible rule actions when rewriting an import rule."""
+
         reject = 0
         skip = 1
 
