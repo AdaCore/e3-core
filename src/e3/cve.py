@@ -64,6 +64,7 @@ class NVD:
                 "the use of an API key for the NVD API is strongly recommended"
                 " to avoid rate limits"
             )
+        self._session: Session | None = None
 
     def search_by_cpe_name(
         self,
@@ -110,17 +111,19 @@ class NVD:
             else:
                 break
 
-    @cached_property
-    def session(self) -> Session:
+    def __enter__(self) -> Any:
         """Return an http requests Session supporting cache.
 
         Use requests_cache CachedSession when cache is requested.
         """
+        if self._session is not None:
+            return self
+
         if self.cache_db_path:
             from requests_cache import CachedSession
             from datetime import timedelta
 
-            session = CachedSession(
+            self._session = CachedSession(
                 self.cache_db_path,
                 backend=self.cache_backend,
                 # Use Cache-Control headers for expiration, if available
@@ -133,6 +136,27 @@ class NVD:
                 match_header=False,
             )
             logger.debug(f"using requests cache from {self.cache_db_path}")
-            return session
         else:
-            return Session()
+            self._session = Session()
+        return self
+
+    def __exit__(self, _type: Any, _value: Any, _tb: Any) -> None:
+        self.close()
+
+    def close(self) -> None:
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    @property
+    def session(self) -> Session:
+        if self._session is None:
+            from warnings import warn
+
+            warn(
+                "Using NVD.session without using `with` statement is deprecated",
+                DeprecationWarning,
+            )
+            self.__enter__()
+
+        return self._session  # type: ignore[return-value]
