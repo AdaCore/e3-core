@@ -573,6 +573,8 @@ class ExternalRef(SPDXEntry):
 
 
 class RelationshipType(Enum):
+    """Describes the type of relationship between two SPDX elements."""
+
     #  Is to be used when SPDXRef-DOCUMENT describes SPDXRef-A
     DESCRIBES = auto()
     #  Is to be used when SPDXRef-A is described by SPDXREF-Document
