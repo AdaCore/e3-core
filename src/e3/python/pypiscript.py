@@ -11,6 +11,7 @@ import os
 import re
 import yaml
 import logging
+from sys import version_info as python_version_info
 
 
 DESCRIPTION = """
@@ -66,7 +67,7 @@ def main() -> None:
     m.argument_parser.add_argument(
         "--python3-version",
         type=int,
-        default=10,
+        default=python_version_info.minor,
         help="python 3 version (default: %(default)s)",
     )
     m.argument_parser.add_argument("target_dir", help="target directory")
