@@ -3,7 +3,6 @@
 to enable/disable a function, to memoize a function results...
 """
 
-
 from __future__ import annotations
 
 from functools import partial

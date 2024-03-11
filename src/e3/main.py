@@ -24,7 +24,6 @@ will also be provided::
     --target     to set the target
 """
 
-
 from __future__ import annotations
 
 from argparse import ArgumentParser

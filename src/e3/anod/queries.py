@@ -1,4 +1,5 @@
 """Provides high level queries on Anod specs."""
+
 from __future__ import annotations
 
 import collections
@@ -31,13 +32,13 @@ else:
 @overload
 def get_build_node(
     anod_instance: Anod, context: AnodContext, default: None = None
-) -> Anod | None:
-    ...
+) -> Anod | None: ...
 
 
 @overload
-def get_build_node(anod_instance: Anod, context: AnodContext, default: Anod) -> Anod:
-    ...
+def get_build_node(
+    anod_instance: Anod, context: AnodContext, default: Anod
+) -> Anod: ...
 
 
 def get_build_node(

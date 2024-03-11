@@ -4,7 +4,6 @@ All function here should be platform indepenent, should not involve globbing or
 logging (unless in case of unexpected failure).
 """
 
-
 from __future__ import annotations
 
 import collections
@@ -136,13 +135,11 @@ def chmod(mode: str, filename: str) -> int:
 
 
 @overload
-def df(path: str) -> int:
-    ...
+def df(path: str) -> int: ...
 
 
 @overload
-def df(path: str, full: Literal[True]) -> tuple:
-    ...
+def df(path: str, full: Literal[True]) -> tuple: ...
 
 
 def df(path: str, full: bool = False) -> int | tuple:

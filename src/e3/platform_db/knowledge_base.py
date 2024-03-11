@@ -4,6 +4,7 @@ Note that even if this is pure data this is not stored as a yaml. This
 knowledge base is very often read and the cost of parsing the data can
 be significant in some context.
 """
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
 

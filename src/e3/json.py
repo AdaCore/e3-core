@@ -1,4 +1,5 @@
 """Utility functions related to json."""
+
 from __future__ import annotations
 
 import json

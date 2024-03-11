@@ -29,8 +29,7 @@ if TYPE_CHECKING:
     from requests.models import Response
 
     class _Fileobj(Protocol):
-        def write(self, __b: bytes) -> object:
-            ...
+        def write(self, __b: bytes) -> object: ...
 
 
 logger = e3.log.getLogger("net.http")

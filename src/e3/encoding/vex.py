@@ -75,9 +75,11 @@ class ActionOrImpact(JsonData):
     def as_dict(self) -> dict[str, Any]:
         return {
             "statement": self.statement,
-            "timestamp": None
-            if self.timestamp is None
-            else self.timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "timestamp": (
+                None
+                if self.timestamp is None
+                else self.timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+            ),
         }
 
     @classmethod
@@ -501,9 +503,11 @@ class Product(JsonData):
         return cls(
             products=[ProductId.from_dict(product) for product in obj["products"]],
             supplier=obj["supplier"],
-            subcomponents=[SubProductId.from_dict(sc) for sc in obj["subcomponents"]]
-            if "subcomponents" in obj and obj["subcomponents"]
-            else None,
+            subcomponents=(
+                [SubProductId.from_dict(sc) for sc in obj["subcomponents"]]
+                if "subcomponents" in obj and obj["subcomponents"]
+                else None
+            ),
         )
 
     def subcomponent(self, _id: str, version: str) -> SubProductId | None:
@@ -752,12 +756,12 @@ class StatementMetadata(JsonData):
         return cls(
             _id=obj["_id"],
             version=obj["version"],
-            first_issued_on=date_parse(obj["first_issued_on"])
-            if obj["first_issued_on"]
-            else None,
-            last_updated_on=date_parse(obj["last_updated_on"])
-            if obj["last_updated_on"]
-            else None,
+            first_issued_on=(
+                date_parse(obj["first_issued_on"]) if obj["first_issued_on"] else None
+            ),
+            last_updated_on=(
+                date_parse(obj["last_updated_on"]) if obj["last_updated_on"] else None
+            ),
         )
 
 

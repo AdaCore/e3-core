@@ -17,7 +17,6 @@ but updated to the current situation, and compare it with the one
 we previously computed. If different, we should rebuild.
 """
 
-
 from __future__ import annotations
 
 import hashlib

@@ -1,4 +1,5 @@
 """High-Level file manipulation."""
+
 from __future__ import annotations
 
 import fnmatch
@@ -117,9 +118,11 @@ def directory_content(
             result.append(os.path.join(root, d) + os.sep)
     if not include_root_dir:
         result = [
-            os.path.relpath(e, path) + os.sep
-            if e.endswith(os.sep)
-            else os.path.relpath(e, path)
+            (
+                os.path.relpath(e, path) + os.sep
+                if e.endswith(os.sep)
+                else os.path.relpath(e, path)
+            )
             for e in result
         ]
     if unixpath:

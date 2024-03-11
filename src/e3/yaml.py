@@ -1,6 +1,5 @@
 """Modification of the yaml loader for E3."""
 
-
 from __future__ import annotations
 
 import os

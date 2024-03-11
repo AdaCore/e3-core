@@ -14,7 +14,6 @@ Example::
             authors.append(commit['email'])
 """
 
-
 from __future__ import annotations
 
 import itertools
@@ -109,12 +108,9 @@ class GitRepository:
     def git_cmd(
         self,
         cmd: Git_Cmd,
-        output: DEVNULL_VALUE
-        | PIPE_VALUE
-        | GIT_LOG_STREAM_VALUE
-        | str
-        | IO
-        | None = GIT_LOG_STREAM,
+        output: (
+            DEVNULL_VALUE | PIPE_VALUE | GIT_LOG_STREAM_VALUE | str | IO | None
+        ) = GIT_LOG_STREAM,
         **kwargs: Any,
     ) -> Run:
         """Run a git command.
