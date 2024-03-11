@@ -6,7 +6,6 @@ stderr and stdin. It also provides some helpers to check the process
 status
 """
 
-
 from __future__ import annotations
 
 import errno
@@ -235,12 +234,9 @@ class Run:
         cwd: str | None = None,
         output: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
         error: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = STDOUT,
-        input: DEVNULL_VALUE  # noqa: A002
-        | PIPE_VALUE
-        | str
-        | bytes
-        | IO
-        | None = None,  # noqa: A002
+        input: (
+            DEVNULL_VALUE | PIPE_VALUE | str | bytes | IO | None  # noqa: A002
+        ) = None,  # noqa: A002
         bg: bool = False,
         timeout: int | None = None,
         env: dict | None = None,
@@ -457,9 +453,9 @@ class Run:
                         popen_args["preexec_fn"] = subprocess_setup  # type: ignore
 
                     if sys.platform == "win32":
-                        popen_args[
-                            "creationflags"
-                        ] = subprocess.CREATE_NEW_PROCESS_GROUP
+                        popen_args["creationflags"] = (
+                            subprocess.CREATE_NEW_PROCESS_GROUP
+                        )
 
                     try:
                         runs.append(Popen(cmd, **popen_args))

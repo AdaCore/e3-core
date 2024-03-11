@@ -7,13 +7,11 @@ from typing import overload
 
 
 @overload
-def timestamp_as_string(value: None) -> None:
-    ...
+def timestamp_as_string(value: None) -> None: ...
 
 
 @overload
-def timestamp_as_string(value: float) -> str:
-    ...
+def timestamp_as_string(value: float) -> str: ...
 
 
 def timestamp_as_string(value: float | None) -> str | None:

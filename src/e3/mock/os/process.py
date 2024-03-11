@@ -39,13 +39,11 @@ class UnexpectedCommandError(MockRunError):
 
 
 @overload
-def mock_run(func: Callable[P, T]) -> Callable[P, T]:
-    ...
+def mock_run(func: Callable[P, T]) -> Callable[P, T]: ...
 
 
 @overload
-def mock_run(func: None = None, config: MockRunConfig | None = None) -> RunPatcher:
-    ...
+def mock_run(func: None = None, config: MockRunConfig | None = None) -> RunPatcher: ...
 
 
 def mock_run(

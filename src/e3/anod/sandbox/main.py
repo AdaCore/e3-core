@@ -17,13 +17,11 @@ logger = e3.log.getLogger("sandbox.main")
 
 
 @overload
-def main(get_argument_parser: Literal[True]) -> ArgumentParser:
-    ...
+def main(get_argument_parser: Literal[True]) -> ArgumentParser: ...
 
 
 @overload
-def main(get_argument_parser: Literal[False] = False) -> None:
-    ...
+def main(get_argument_parser: Literal[False] = False) -> None: ...
 
 
 def main(get_argument_parser: bool = False) -> ArgumentParser | None:

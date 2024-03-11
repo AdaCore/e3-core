@@ -1,6 +1,5 @@
 """Implementation of Direct Acyclic Graphs."""
 
-
 from __future__ import annotations
 
 from itertools import chain
@@ -332,10 +331,9 @@ class DAG:
         self,
         vertex_id: VertexID,
         data: Any = None,
-        predecessors: Sequence[VertexID]
-        | set[VertexID]
-        | frozenset[VertexID]
-        | None = None,
+        predecessors: (
+            Sequence[VertexID] | set[VertexID] | frozenset[VertexID] | None
+        ) = None,
         enable_checks: bool = True,
     ) -> None:
         """Update a vertex into the DAG.

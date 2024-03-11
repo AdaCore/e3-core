@@ -5,6 +5,7 @@ explore all possible combinations. This can be useful when there is an expressio
 depending on external values that you want to evaluate without knowing in advance
 the external environment.
 """
+
 from __future__ import annotations
 
 from itertools import product

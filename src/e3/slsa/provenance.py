@@ -898,13 +898,17 @@ class ResourceDescriptor(object):
             self.ATTR_URI: str(self.uri) if self.uri is not None else None,
             self.ATTR_DIGEST: self.digest,
             self.ATTR_NAME: self.name,
-            self.ATTR_DOWNLOAD_LOCATION: str(self.download_location)
-            if self.download_location is not None
-            else None,
+            self.ATTR_DOWNLOAD_LOCATION: (
+                str(self.download_location)
+                if self.download_location is not None
+                else None
+            ),
             self.ATTR_MEDIA_TYPE: self.media_type,
-            self.ATTR_CONTENT: None
-            if self.content is None
-            else base64.b64encode(self.content).decode("utf-8"),
+            self.ATTR_CONTENT: (
+                None
+                if self.content is None
+                else base64.b64encode(self.content).decode("utf-8")
+            ),
             self.ATTR_ANNOTATIONS: self.annotations,
         }
 
@@ -1147,9 +1151,9 @@ class Predicate(object):
             )
             self.__external_parameters: object = external_parameters
             self.__internal_parameters: object = internal_parameters
-            self.__resolved_dependencies: list[
-                ResourceDescriptor
-            ] = resolved_dependencies
+            self.__resolved_dependencies: list[ResourceDescriptor] = (
+                resolved_dependencies
+            )
 
         def __eq__(self, other: object) -> bool:
             """Check if this build definition is equal to *other*.

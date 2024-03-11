@@ -1,6 +1,5 @@
 """Return the current timezone offset."""
 
-
 from __future__ import annotations
 
 import sys

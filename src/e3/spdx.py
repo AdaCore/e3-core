@@ -3,6 +3,7 @@
 This is following the specification from https://spdx.github.io/spdx-spec/v2.3/
 a simple example can be found at ./tests/tests_e3/spdx_test.py
 """
+
 from __future__ import annotations
 
 from enum import Enum, auto

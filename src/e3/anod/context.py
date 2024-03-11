@@ -285,9 +285,11 @@ class AnodContext:
 
         return self.add_anod_action(
             name=plan_action_env.module,
-            env=self.default_env
-            if plan_action_env.default_build
-            else BaseEnv.from_env(plan_action_env),
+            env=(
+                self.default_env
+                if plan_action_env.default_build
+                else BaseEnv.from_env(plan_action_env)
+            ),
             primitive=primitive,
             qualifier=plan_action_env.qualifier,
             source_packages=plan_action_env.source_packages,
@@ -829,9 +831,11 @@ class AnodContext:
         else:
             trigger_decisions = "\n".join(
                 "{} made by {} initiated by {}".format(
-                    decision.left
-                    if trigger_decision == Decision.LEFT
-                    else decision.right,
+                    (
+                        decision.left
+                        if trigger_decision == Decision.LEFT
+                        else decision.right
+                    ),
                     trigger_action,
                     trigger_plan_line,
                 )

@@ -1,4 +1,5 @@
 """Provides function to detect platform specific information."""
+
 from __future__ import annotations
 
 import os

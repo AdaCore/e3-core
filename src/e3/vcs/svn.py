@@ -7,7 +7,6 @@ Example::
                force_and_clean=True)
 """
 
-
 from __future__ import annotations
 
 import os.path

@@ -1,6 +1,5 @@
 """Support for reading and writing tar and zip archives."""
 
-
 from __future__ import annotations
 
 import fnmatch

@@ -1,4 +1,5 @@
 """Read e3 config file."""
+
 from __future__ import annotations
 from dataclasses import fields, dataclass
 

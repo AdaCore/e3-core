@@ -51,9 +51,9 @@ def test_os():
     os = e3.os.platform.OS.get("linux")
     assert os.as_dict()["dllext"] == ".so"
 
-    e3.os.platform.KNOWLEDGE_BASE.os_info[
-        "vxworks"
-    ] = e3.os.platform.KNOWLEDGE_BASE.os_info["linux"]
+    e3.os.platform.KNOWLEDGE_BASE.os_info["vxworks"] = (
+        e3.os.platform.KNOWLEDGE_BASE.os_info["linux"]
+    )
 
     os = e3.os.platform.OS.get("vxworks", mode="rtp")
     assert os.as_dict()["exeext"] == ".vxe"
