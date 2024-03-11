@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+    rev: 7.0.0
     hooks:
       - id: flake8
         additional_dependencies:
@@ -10,6 +10,6 @@ repos:
           - flake8-docstrings
           - flake8-rst-docstrings
   - repo: https://github.com/ambv/black
-    rev: 23.1.0
+    rev: 24.2.0
     hooks:
       - id: black
