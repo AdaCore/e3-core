@@ -46,7 +46,7 @@ for p in ("darwin", "linux", "linux2", "win32"):
     platform_string = ":sys_platform=='%s'" % p
     extras_require[platform_string] = ["psutil"]
     if p in ("linux", "linux2"):
-        extras_require[platform_string].append("ld")
+        extras_require[platform_string].append("distro")
 
 # Get e3 version from the VERSION file.
 version_file = os.path.join(os.path.dirname(__file__), "VERSION")
