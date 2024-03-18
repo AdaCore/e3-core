@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import zipfile
 import tempfile
-from pkg_resources import Requirement
+from packaging.requirements import Requirement
 from e3.os.process import Run
 from e3.fs import ls, mv
 from e3.error import E3Error
@@ -37,7 +37,7 @@ class Wheel:
         with zipfile.ZipFile(self.path) as zipfd:
             with zipfd.open(self.metadata_path) as fd:
                 return {
-                    Requirement.parse(line.split(":", 1)[1].strip().replace('"', "'"))
+                    Requirement(line.split(":", 1)[1].strip().replace('"', "'"))
                     for line in fd.read().decode("utf-8").splitlines()
                     if line.startswith("Requires-Dist:")
                 }

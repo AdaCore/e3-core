@@ -8,6 +8,7 @@ import time
 import packaging.version
 import packaging.tags
 from packaging.specifiers import Specifier
+from packaging.utils import canonicalize_name
 from typing import TYPE_CHECKING
 from e3.error import E3Error
 from e3.python.wheel import Wheel
@@ -280,7 +281,7 @@ class Package:
                                 "extra": extra,
                             }
                         ):
-                            self.pypi.pkg(r.project_name).sys_platforms.add(
+                            self.pypi.pkg(canonicalize_name(r.name)).sys_platforms.add(
                                 sys_platform
                             )
                             result.add(r)
@@ -337,7 +338,7 @@ class Package:
         """
         logging.debug(f"Apply constraint: {str(requirement)}")
         # Check if requirement applies to that package
-        if requirement.project_name != self.name:
+        if canonicalize_name(requirement.name) != self.name:
             return
 
         # Check platforms
@@ -353,12 +354,12 @@ class Package:
         current_length = len(self.versions)
 
         # Apply version constraints
-        for spec in requirement.specs:
+        for spec in requirement.specifier:
             self.versions = [
                 v
                 for v in self.versions
                 if Specifier(
-                    f"{spec[0]}{spec[1]}",
+                    f"{spec.operator}{spec.version}",
                     prereleases=self.name in self.pypi.allowed_prerelease,
                 ).contains(str(v))
             ]
@@ -517,8 +518,9 @@ class PyPIClosure:
         """
         result = set()
         for r in self.explicit_requirements:
-            result.add(self.pkg(r.project_name))
-            result |= self.pkg(r.project_name).closure()
+            project_name = canonicalize_name(r.name)
+            result.add(self.pkg(project_name))
+            result |= self.pkg(project_name).closure()
         return result
 
     def file_closure(self) -> set[str]:
@@ -528,7 +530,7 @@ class PyPIClosure:
         """
         result = set()
         for r in self.explicit_requirements:
-            result |= self.pkg(r.project_name).file_closure()
+            result |= self.pkg(canonicalize_name(r.name)).file_closure()
         return result
 
     def closure_as_requirements(self) -> list[Requirement]:
@@ -539,7 +541,7 @@ class PyPIClosure:
         req_lines = set()
         for p in self.closure():
             req_lines |= set(p.as_requirement)
-        return sorted(req_lines, key=lambda x: x.project_name)
+        return sorted(req_lines, key=lambda x: canonicalize_name(x.name))
 
     def add_requirement(self, req: Requirement | str, explicit: bool = True) -> Package:
         """Add a requirement to the closure.
@@ -557,13 +559,15 @@ class PyPIClosure:
 
         if req not in self.requirements:
             self.requirements.add(req)
-            logger.info(f"Add requirement {req.project_name} extras={req.extras}")
-            pkg = self.pkg(req.project_name, extras=list(req.extras))
+            logger.info(
+                f"Add requirement {canonicalize_name(req.name)} " f"extras={req.extras}"
+            )
+            pkg = self.pkg(canonicalize_name(req.name), extras=list(req.extras))
             pkg.add_constraint(req)
             pkg.closure()
             return pkg
         else:
-            return self.pkg(req.project_name, extras=list(req.extras))
+            return self.pkg(canonicalize_name(req.name), extras=list(req.extras))
 
     def load_cache_file(self) -> None:
         """Load cache information."""
