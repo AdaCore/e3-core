@@ -436,11 +436,10 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
 
         :param func: function to call on error
         :param error_path: file or directory to remove
-        :param exc_info: exception raised when the first delete attempt was
-             made
+        :param exc_info: exception raised when the first delete attempt was made
         """
         del exc_info
-        e3.log.debug("error when running %s on %s", func, error_path)
+        e3.log.debug(f"error when running {func.__name__!r} on {error_path}")
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
@@ -477,6 +476,9 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
 
             # And continue to delete the subdir
             shutil.rmtree(error_path, onerror=onerror)
+
+        else:
+            raise FSError(origin="rm", message=f"unknown function: {func.__name__!r}")
 
     for f in file_list:
         try:
@@ -750,8 +752,9 @@ def sync_tree(
         :param src: the source FileInfo object
         :param dst: the target FileInfo object
         """
+        mode = stat.S_IMODE(src.stat.st_mode)
+
         if islink(src):  # windows: no cover
-            mode = stat.S_IMODE(src.stat.st_mode)
             if hasattr(os, "lchmod"):
                 getattr(os, "lchmod")(dst.path, mode)  # noqa: B009
 
@@ -766,8 +769,9 @@ def sync_tree(
                         or why.errno != errno.EOPNOTSUPP
                     ):
                         raise
+
+                    logger.debug("lchflags: operation not supported [EOPNOTSUPP]")
         else:
-            mode = stat.S_IMODE(src.stat.st_mode)
             if hasattr(os, "utime"):
                 if preserve_timestamps:
                     os.utime(dst.path, (src.stat.st_atime, src.stat.st_mtime))
@@ -786,6 +790,8 @@ def sync_tree(
                         or why.errno != errno.EOPNOTSUPP
                     ):
                         raise
+
+                    logger.debug("chflags: operation not supported [EOPNOTSUPP]")
 
     def safe_copy(src: FileInfo, dst: FileInfo) -> None:
         """Copy src file into dst preserving all attributes.
@@ -807,7 +813,7 @@ def sync_tree(
                 rm(dst.path, recursive=True, glob=False)
             elif islink(dst):
                 # dst symlink will be replaced by a file having the same
-                #  content as 'src'
+                # content as 'src'
                 rm(dst.path, recursive=False, glob=False)
 
             try:
