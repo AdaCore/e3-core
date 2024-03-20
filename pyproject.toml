@@ -1,0 +1,129 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "e3-core"
+authors = [{name="AdaCore's IT Team"}]
+dynamic = ["version"]
+description = "E3 core. Tools and library for building and testing software"
+readme = "README.md"
+license = {text = "GPLv3"}
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Build Tools"
+]
+
+dependencies = [
+  "colorama",
+  "pyyaml",
+  "python-dateutil",
+  "requests",
+  "requests-cache",
+  "requests_toolbelt",
+  "tqdm",
+  "stevedore>1.20.0",
+  "setuptools",
+  "packaging",
+  "psutil; sys_platform=='win32'",
+  "psutil; sys_platform=='linux'",
+  "psutil; sys_platform=='linux2'",
+  "psutil; sys_platform=='darwin'",
+  "ld; sys_platform=='linux'",
+  "ld; sys_platform=='linux2'",
+]
+
+[project.urls]
+Repository = "https://github.com/AdaCore/e3-core"
+
+[project.optional-dependencies]
+config = [
+  "tomlkit",
+  # There are some backward incompatible checks in typeguard 3.x
+  "typeguard<3.0.0"
+]
+test = [
+  "mock",
+  "pytest",
+  "pytest-html",
+  "pytest-socket",
+  "ansi2html",
+  "httpretty",
+  "ptyprocess; sys_platform!='win32'",
+  "requests-mock"
+]
+
+[project.scripts]
+e3 = "e3.sys:main"
+e3-sandbox = "e3.anod.sandbox.main:main"
+e3-pypi-closure = "e3.python.pypiscript:main"
+
+[project.entry-points."e3.anod.sandbox.sandbox_action"]
+exec = "e3.anod.sandbox.action:SandBoxExec"
+create = "e3.anod.sandbox.action:SandBoxCreate"
+show-config = "e3.anod.sandbox.action:SandBoxShowConfiguration"
+migrate = "e3.anod.sandbox.migrate:SandBoxMigrate"
+
+[project.entry-points."e3.event.handler"]
+smtp = "e3.event.handler.smtp:SMTPHandler"
+logging = "e3.event.handler.logging:LoggingHandler"
+file = "e3.event.handler.file:FileHandler"
+s3 = "e3.event.handler.s3:S3Handler"
+
+[project.entry-points."e3.store"]
+http-simple-store = "e3.store.backends.http_simple_store:HTTPSimpleStore"
+          
+[project.entry-points."e3.store.cache.backend"]
+file-cache = "e3.store.cache.backends.filecache:FileCache"
+
+[project.entry-points."sandbox_scripts"]
+anod = "e3.anod.sandbox.scripts:anod"
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
+
+[tool.mypy]
+# Ensure mypy works with namespace in which there is no toplevel
+# __init__.py. Explicit_package_bases means that that mypy_path
+# will define which directory is the toplevel directory of the
+# namespace.
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+
+warn_redundant_casts = true
+# do not warn when there are unused ignores, it is currently too difficult
+# to have this setting working and mypy running on Linux, macOS, and Windows
+#warn_unused_ignores = True
+warn_unused_configs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+warn_unreachable = true
+disallow_incomplete_defs = true
+disallow_any_unimported = true
+disallow_subclassing_any = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "coverage.*"
+]
+ignore_missing_imports = true
+
+[[too.mypy.overrides]]
+module = [
+  "tests.tests_e3.*",
+  "e3.anod.sandbox.action.*",
+  "e3.anod.sandbox.migrate.*",
+  "e3.anod.sandbox.scripts.*",
+  "e3.anod.driver.*",
+  "e3.os.windows.native_api.*",
+  "e3.yaml.*"
+]
+disallow_untyped_defs = false
