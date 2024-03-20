@@ -828,7 +828,7 @@ class QualifiersManager:
             for el in self.serialized_qualifier_values
         ]
         if hash_pool:
-            hash_obj = sha1()
+            hash_obj = sha1()  # nosec
             hash_obj.update("_".join(hash_pool).encode("utf-8"))
             bs.append(hash_obj.hexdigest()[:8])
 

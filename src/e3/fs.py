@@ -215,7 +215,7 @@ def get_filetree_state(
             return f.read()
 
     path = os.path.abspath(path)
-    result = hashlib.sha1()
+    result = hashlib.sha1()  # nosec
     if os.path.isdir(path):
         for root, dirs, files in os.walk(path):
             if ignore_hidden:
