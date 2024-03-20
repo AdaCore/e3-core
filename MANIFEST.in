@@ -6,6 +6,8 @@ include tox.ini
 include VERSION COPYING3
 include *.yaml
 include *.yml
+include src/e3/os/data/rlimit-*
+include src/e3/py.typed
 recursive-include docs *.bat
 recursive-include docs Makefile
 recursive-include docs *.py
