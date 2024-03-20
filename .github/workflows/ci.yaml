@@ -47,7 +47,7 @@ jobs:
       - name: Run Tox
         run: tox
         env:
-            TOXENV: security
+            TOXENV: check
 
   pre-commit:
     runs-on: ubuntu-latest

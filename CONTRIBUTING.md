@@ -34,7 +34,7 @@ Note that the pre-commit check configuration can be found in ``.pre-commit-confi
 $ pre-commit run --all-files
 ```
 
-The pre-commit checks will format the code with Black, run flake8 and mypy.
+The pre-commit checks will format the code with Black and run flake8.
 
 ### Flake8, mypy, and Black
 

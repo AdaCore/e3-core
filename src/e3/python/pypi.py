@@ -172,7 +172,7 @@ class PackageFile:
             return set()
 
         wheel_path = self.download()
-        return Wheel(path=wheel_path).requirements
+        return Wheel(path=wheel_path).requirements  # type: ignore
 
 
 class Package:
