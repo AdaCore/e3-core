@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import cgi
 import contextlib
 import json
 import os
 import socket
 import tempfile
 from collections import deque
+from email.message import Message
 
 import requests
 import requests.adapters
@@ -42,8 +42,11 @@ def get_filename(content_disposition: str) -> str | None:
     :param content_disposition: a Content-Disposition header string
     :return: the filename or None
     """
-    _, value = cgi.parse_header(content_disposition)
-    return value.get("filename")
+    m = Message()
+    m["content-type"] = content_disposition
+    filename = m.get_param("filename")
+    assert filename is None or isinstance(filename, str)
+    return filename
 
 
 class HTTPError(E3Error):

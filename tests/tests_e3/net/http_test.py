@@ -1,8 +1,8 @@
-import cgi
 import logging
 import os
 import threading
 import time
+from email.message import Message
 from io import BytesIO
 
 import requests_toolbelt.multipart
@@ -82,10 +82,9 @@ class MultiPartPostHandler(BaseHTTPRequestHandler):
         for part in decoder.parts:
             logging.debug(list(part.headers.keys()))
             # With python 3.x requests_toolbelt returns bytes
-            _, value = cgi.parse_header(
-                part.headers[b"Content-Disposition"].decode("utf-8")
-            )
-            self.server.test_payloads[value["name"]] = part.text
+            m = Message()
+            m["content-type"] = part.headers[b"Content-Disposition"].decode("utf-8")
+            self.server.test_payloads[m.get_param("name")] = part.text
 
         self.send_response(200)
         self.send_header("Content-type", "text/html")
