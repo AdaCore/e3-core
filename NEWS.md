@@ -1,7 +1,7 @@
 
 # Version 22.5.0 (2023-??-??) *NOT RELEASED YET*
 
-* Nothing
+* Add e3.pytest plugin to reuse fixtures in other projects
 
 # Version 22.4.0 (2023-01-18)
 

@@ -10,8 +10,7 @@ import tempfile
 from contextlib import closing
 
 
-@pytest.mark.git
-def test_git_non_utf8():
+def test_git_non_utf8(git):
     """Test with non utf-8 encoding in changelog."""
     working_tree = os.path.join(os.getcwd(), "working_tree")
     repo = GitRepository(working_tree)
@@ -43,8 +42,7 @@ def test_git_non_utf8():
     assert "\\x03\\xff" in commits[0]["diff"]
 
 
-@pytest.mark.git
-def test_git_repo():
+def test_git_repo(git):
     working_tree = os.path.join(os.getcwd(), "working_tree")
     working_tree2 = os.path.join(os.getcwd(), "working_tree2")
     repo = GitRepository(working_tree)
