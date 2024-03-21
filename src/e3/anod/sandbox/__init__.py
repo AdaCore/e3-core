@@ -4,15 +4,13 @@ import os
 import sys
 
 import yaml
-from pkg_resources import get_distribution
 from typing import TYPE_CHECKING
 
 import e3.log
 import e3.os.process
 from e3.anod.buildspace import BuildSpace
 from e3.env import Env
-from e3.fs import mkdir, rm
-from e3.os.fs import chmod
+from e3.fs import mkdir
 
 logger = e3.log.getLogger("sandbox")
 
@@ -145,34 +143,3 @@ class SandBox:
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
         with open(sandbox_conf) as f:
             return yaml.safe_load(f)
-
-    def write_scripts(self) -> None:
-        from setuptools.command.easy_install import ScriptWriter
-
-        # Retrieve sandbox_scripts entry points
-        e3_distrib = get_distribution("e3-core")
-
-        class SandboxDist:
-            def get_entry_map(self, group):  # type: ignore
-                if group != "console_scripts":
-                    return {}
-                return e3_distrib.get_entry_map("sandbox_scripts")
-
-            def as_requirement(self):  # type: ignore
-                return e3_distrib.as_requirement()
-
-        for script in ScriptWriter.best().get_args(dist=SandboxDist()):
-            script_name = script[0]
-            script_content = script[1]
-            target = os.path.join(self.bin_dir, script_name)
-            rm(target)
-            if not script_name.endswith(".exe"):
-                script_content = script_content.replace(
-                    "console_scripts", "sandbox_scripts"
-                )
-            with open(target, "wb") as f:
-                if isinstance(script_content, bytes):  # type: ignore[unreachable]
-                    f.write(script_content)  # type: ignore[unreachable]
-                else:
-                    f.write(script_content.encode("utf-8"))
-            chmod("a+x", target)

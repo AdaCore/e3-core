@@ -3,7 +3,6 @@ import os
 from e3.anod.error import SandBoxError
 from e3.anod.loader import AnodSpecRepository, SpecConfig
 from e3.fs import cp, sync_tree
-from e3.os.process import Run
 
 import pytest
 
@@ -121,21 +120,6 @@ class TestLoader:
         assert "foo" in str(err.value)
 
         assert list(anod_instance.test3()) == ["case_foo"]
-
-    def test_load_config_api_1_5(self):
-        sync_tree(self.spec_dir, "new_spec_dir")
-        Run(["e3-sandbox", "migrate", "1.5", "new_spec_dir"], output=None)
-        with open("new_spec_dir/VERSION", "w") as fd:
-            fd.write("API VERSION:1.5")
-        spec_repo = AnodSpecRepository("new_spec_dir")
-        anod_class = spec_repo.load("withconfig")
-        anod_instance = anod_class("", "build")
-        assert anod_instance.test1() == 9
-        assert anod_instance.test_suffix() == 42
-
-    def test_sandbox_migrate_unknown_api(self):
-        p = Run(["e3-sandbox", "migrate", "0.2", "foo"])
-        assert "Only 1.5 is supported" in p.out
 
     def test_getitem_without_buildspace(self):
         """Without a build space PKG_DIR returns 'unknown'."""

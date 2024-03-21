@@ -135,9 +135,6 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = [
   "tests.tests_e3.*",
-  "e3.anod.sandbox.action.*",
-  "e3.anod.sandbox.migrate.*",
-  "e3.anod.sandbox.scripts.*",
   "e3.anod.driver.*",
   "e3.os.windows.native_api.*",
   "e3.yaml.*"
