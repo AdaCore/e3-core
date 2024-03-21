@@ -23,12 +23,11 @@ import e3.log
 from e3.os.fs import which
 from e3.text import bytes_as_str
 
-
 if TYPE_CHECKING:
-    from typing import cast, Any, IO, List, Literal, NoReturn, Union
+    from typing import cast, Any, IO, Literal, NoReturn, Union
 
-    CmdLine = List[str]
-    AnyCmdLine = Union[List[CmdLine], CmdLine]
+    CmdLine = list[str]
+    AnyCmdLine = Union[list[CmdLine], CmdLine]
     STDOUT_VALUE = Literal[-1]
     PIPE_VALUE = Literal[-2]
     DEVNULL_VALUE = Literal[-3]
@@ -671,12 +670,11 @@ class File:
             # this is a file descriptor
             self.fd = name
 
-    def get_command(self) -> str | None:
+    def get_command(self) -> str | bytes | None:
         """Return the command to run to create the pipe."""
-        if self.fd == subprocess.PIPE:
+        if self.fd == subprocess.PIPE and isinstance(self.name, (str, bytes)):
             return self.name[1:]
-        else:
-            return None
+        return None
 
     def close(self) -> None:
         """Close the file if needed."""
