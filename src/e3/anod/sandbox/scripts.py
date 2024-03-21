@@ -3,8 +3,15 @@ from __future__ import annotations
 from e3.anod.error import AnodError
 from e3.main import Main
 
+from typing import TYPE_CHECKING
 
-def anod_cmdline(subparsers, action_name: str, action_help: str) -> None:  # type: ignore
+if TYPE_CHECKING:
+    from argparse import _SubParsersAction
+
+
+def anod_cmdline(
+    subparsers: _SubParsersAction, action_name: str, action_help: str
+) -> None:
     parser = subparsers.add_parser(action_name, help=action_help)
     parser.set_defaults(action_name=action_name)
     parser.add_argument("spec", metavar="SPEC", help="The specification file name")
@@ -29,7 +36,7 @@ def anod() -> None:
     assert sys.modules["__main__"].__file__ is not None
 
     sandbox_dir = os.path.abspath(
-        os.path.join(os.path.dirname(sys.modules["__main__"].__file__), os.pardir)
+        os.path.join(os.path.dirname(sys.modules["__main__"].__file__), os.pardir)  # type: ignore
     )
 
     sandbox = e3.anod.sandbox.SandBox(root_dir=sandbox_dir)
