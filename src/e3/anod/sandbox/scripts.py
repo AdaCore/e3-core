@@ -4,14 +4,14 @@ from e3.anod.error import AnodError
 from e3.main import Main
 
 
-def anod_cmdline(subparsers, action_name, action_help):
+def anod_cmdline(subparsers, action_name: str, action_help: str) -> None:  # type: ignore
     parser = subparsers.add_parser(action_name, help=action_help)
     parser.set_defaults(action_name=action_name)
     parser.add_argument("spec", metavar="SPEC", help="The specification file name")
     parser.add_argument("--qualifier")
 
 
-def anod():
+def anod() -> None:
     """bin/anod script entry point.
 
     This script is installed in the sandbox.
@@ -25,6 +25,8 @@ def anod():
     import e3.env
     import e3.store
     import e3.store.cache
+
+    assert sys.modules["__main__"].__file__ is not None
 
     sandbox_dir = os.path.abspath(
         os.path.join(os.path.dirname(sys.modules["__main__"].__file__), os.pardir)
@@ -46,6 +48,7 @@ def anod():
     subparsers = m.argument_parser.add_subparsers()
     anod_cmdline(subparsers, "download", "download a binary package")
     m.parse_args()
+    assert m.args is not None
 
     action = m.args.action_name
     spec = m.args.spec
