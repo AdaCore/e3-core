@@ -76,7 +76,9 @@ class Fingerprint:
         :param path: a path to a directory
         """
         if os.path.isdir(path):
-            self.elements[os.path.abspath(path)] = get_filetree_state(path)
+            self.elements[os.path.abspath(path)] = get_filetree_state(
+                path, ignore_hidden=False
+            )
         else:
             self.elements[os.path.abspath(path)] = ""
 
