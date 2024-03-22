@@ -125,6 +125,12 @@ class MockRun(Run):
         :param config: MockRun configuration
         """
         self.config: MockRunConfig = copy.deepcopy(config) if config is not None else {}
+        self.call_count = 0
+
+    @property
+    def all_called(self) -> bool:
+        """Check all expected commands have been run."""
+        return not self.config.get("results", [])
 
     def add_result(self, result: CommandResult) -> None:
         """Queue a command result.
@@ -166,6 +172,7 @@ class MockRun(Run):
             self.status = result.status
             self.raw_out += result.raw_out
             self.raw_err += result.raw_err
+            self.call_count += 1
 
         return self
 

@@ -62,6 +62,9 @@ def echo_world() -> None:
     """Run echo "world" with e3.os.process.Run."""
     echo("world")
 
+    assert e3.os.process.Run.all_called
+    assert e3.os.process.Run.call_count == 2
+
 
 @mock_run()
 def test_mock_run_decorator() -> None:
@@ -98,6 +101,8 @@ def test_mock_run_initial_add_result() -> None:
 
         # Run both commands
         echo_hello()
+        assert not e3.os.process.Run.all_called
+        assert e3.os.process.Run.call_count == 1
         echo_world()
 
 
@@ -109,6 +114,8 @@ def test_mock_run_sequential_add_result() -> None:
 
         # Run first command
         echo_hello()
+        assert e3.os.process.Run.all_called
+        assert e3.os.process.Run.call_count == 1
 
         # Add the result for second command
         e3.os.process.Run.add_result(ECHO_WORLD_RESULT)
