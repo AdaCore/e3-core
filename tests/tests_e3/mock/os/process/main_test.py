@@ -13,6 +13,8 @@ import e3.os.process
 from e3.mock.os.process import mock_run, CommandResult, MockRun, UnexpectedCommandError
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from e3.mock.os.process import MockRunConfig
 
 # Mock the result of echo "hello"
@@ -36,7 +38,7 @@ class SleepCommandResult(CommandResult):
         self.seconds = seconds
         super().__init__(["sleep", str(seconds)])
 
-    def __call__(self) -> None:
+    def __call__(self, *args: Any, **kwargs: Any) -> None:
         """Sleep x seconds."""
         time.sleep(self.seconds)
 

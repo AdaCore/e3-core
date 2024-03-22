@@ -87,8 +87,32 @@ class CommandResult:
         self.raw_out = raw_out if raw_out is not None else b""
         self.raw_err = raw_err if raw_err is not None else b""
 
-    def __call__(self) -> None:
-        """Allow to run code to emulate the command."""
+    def check(self, cmd: list[str]) -> None:
+        """Check that cmd matches the expected arguments.
+
+        :param cmd: actual command
+        """
+        if len(cmd) != len(self.cmd):
+            raise UnexpectedCommandError(
+                f"wrong number of arguments {cmd}, expected {self.cmd}"
+            )
+
+        for i, arg in enumerate(cmd):
+            if arg != self.cmd[i] and self.cmd[i] != "*":
+                raise UnexpectedCommandError(
+                    f"unexpected arguments {cmd}, expected {self.cmd}"
+                )
+
+    def __call__(self, cmd: list[str], *args: Any, **kwargs: Any) -> None:
+        """Allow to run code to emulate the command.
+
+        This function is called when a command is supposed to be run by Run. It
+        takes the same arguments as Run.__init__.
+
+        :param cmd: actual arguments of the command
+        :param args: additional arguments for Run
+        :param kwargs: additional keyword arguments for Run
+        """
         pass
 
 
@@ -132,21 +156,11 @@ class MockRun(Run):
             if result is None:
                 raise UnexpectedCommandError(f"unexpected command {cmd}")
 
-            # Check arguments of the command
-            expected_cmd = result.cmd
-            if len(cmd) != len(expected_cmd):
-                raise UnexpectedCommandError(
-                    f"wrong number of arguments {cmd}, expected {expected_cmd}"
-                )
+            # Check received command
+            result.check(cmd)
 
-            for i, arg in enumerate(cmd):
-                if arg != expected_cmd[i] and expected_cmd[i] != "*":
-                    raise UnexpectedCommandError(
-                        f"unexpected arguments {cmd}, expected {expected_cmd}"
-                    )
-
-            # Call the result
-            result()
+            # Call the result, forwarding arguments
+            result(cmd, *args, **kwargs)
 
             # Update the output
             self.status = result.status
