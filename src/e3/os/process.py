@@ -234,7 +234,7 @@ class Run:
         cwd: str | None = None,
         output: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
         error: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = STDOUT,
-        input: (
+        input: (  # noqa: A002
             DEVNULL_VALUE | PIPE_VALUE | str | bytes | IO | None  # noqa: A002
         ) = None,  # noqa: A002
         bg: bool = False,
