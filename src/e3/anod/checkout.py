@@ -114,7 +114,7 @@ class CheckoutManager:
         the list of files to ignore.
         """
         if os.path.isdir(self.working_dir):
-            old_commit = get_filetree_state(self.working_dir)
+            old_commit = get_filetree_state(self.working_dir, ignore_hidden=False)
         else:
             old_commit = ""
         ignore_list: list[str] = []
@@ -187,7 +187,7 @@ class CheckoutManager:
                 ignore=list(VCS_IGNORE_LIST) + ignore_list,
             )
 
-        new_commit = get_filetree_state(self.working_dir)
+        new_commit = get_filetree_state(self.working_dir, ignore_hidden=False)
         if new_commit == old_commit:
             return ReturnValue.unchanged, old_commit, new_commit
         else:
