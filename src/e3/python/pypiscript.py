@@ -5,7 +5,7 @@ from e3.anod.checkout import CheckoutManager
 from pkg_resources import Requirement
 from e3.main import Main
 from e3.fs import mkdir, cp
-from datetime import date
+from datetime import datetime
 import argparse
 import os
 import re
@@ -151,7 +151,7 @@ def main() -> None:
                 split_version = version.split(".")
                 if len(split_version) == 2:
                     # We have a major and minor but no patch so add it automatically
-                    version = f"{version}.{date.today().strftime('%Y%m%d')}"
+                    version = f"{version}.{datetime.today().strftime('%Y%m%d%H%M')}"
                     with open(version_file, "w") as fd:
                         fd.write(version)
 
