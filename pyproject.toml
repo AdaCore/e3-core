@@ -61,6 +61,7 @@ test = [
 ]
 check = [
   "mypy==1.8.0",
+  "pytest",  # for the pytest plugin
   "bandit",
   "pip-audit",
   "types-colorama",
@@ -97,8 +98,27 @@ file-cache = "e3.store.cache.backends.filecache:FileCache"
 [project.entry-points."sandbox_scripts"]
 anod = "e3.anod.sandbox.scripts:anod"
 
+[project.entry-points."pytest11"]
+pytest = "e3.pytest"
+
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
+
+[tool.coverage.report]
+fail_under = 90
+
+[tool.coverage.run]
+branch = true
+omit = [
+   "*mypy.py"
+]
+
+[tool.coverage.html]
+title = "e3 coverage report"
+
+[tool.pytest.ini_options]
+addopts = "--failed-first --disable-socket --e3"
+
 
 [tool.mypy]
 # Ensure mypy works with namespace in which there is no toplevel

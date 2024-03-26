@@ -22,8 +22,7 @@ def file_url(path, unix=False):
         return "file://" + path
 
 
-@pytest.mark.svn
-def test_svn_repo():
+def test_svn_repo(svn):
     cwd = os.getcwd()
 
     # --- create local project

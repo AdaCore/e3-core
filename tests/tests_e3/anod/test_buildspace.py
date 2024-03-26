@@ -32,10 +32,7 @@ def test_subdir():
 
 
 def test_reset_tmp_dir():
-    """Check that the tmp_dir is reset when the build space is created.
-
-    REQ-EC19.
-    """
+    """Check that the tmp_dir is reset when the build space is created."""
     bs = BuildSpace(root_dir=os.getcwd())
     marker = os.path.join(bs.subdir(name="tmp"), "deleteme")
     mkdir(bs.tmp_dir)

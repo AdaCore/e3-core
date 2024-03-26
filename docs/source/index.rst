@@ -14,7 +14,7 @@ Welcome to e3-core's documentation!
    quickstart
    decision_graph
    plugins
-   requirements
+   pytest
 
 
 

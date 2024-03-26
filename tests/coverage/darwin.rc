@@ -1,4 +1,0 @@
-[run]
-omit =
-    */os/windows/*
-    */os/unix/constant.py
