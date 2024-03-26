@@ -203,6 +203,26 @@ class Anod:
     ExternalSourceBuilder = e3.anod.package.ExternalSourceBuilder
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        """Replace `method` by property when decorator is missing."""
+        should_be_property = (
+            "enable_name_generator",
+            "readme_info",
+            "base_name",
+            "build_space_name",
+            "has_package",
+            "package",
+            "component",
+            "source_pkg_build",
+        )
+
+        for prop in should_be_property:
+            class_property = getattr(cls, prop)
+            if callable(class_property):
+                setattr(cls, prop, property(fget=class_property))
+
+        return super().__new__(cls)
+
     def __init__(
         self,
         qualifier: str,

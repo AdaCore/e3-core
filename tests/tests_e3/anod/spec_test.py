@@ -147,3 +147,12 @@ def test_spec_qualifier():
 
     assert spec_enable.args == {"q1": True}
     assert spec_disable.args == {"q1": ""}
+
+
+def test_missing_property():
+    class NoProperty(Anod):
+        def source_pkg_build(self) -> list:
+            return []
+
+    noproperty = NoProperty(qualifier="", kind="source")
+    assert noproperty.source_pkg_build == []
