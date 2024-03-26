@@ -60,7 +60,7 @@ test = [
   "requests-mock"
 ]
 check = [
-  "mypy==1.1.1",
+  "mypy==1.8.0",
   "bandit",
   "pip-audit",
   "types-colorama",
