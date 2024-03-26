@@ -140,6 +140,31 @@ def test_x86_64_windows_default():
     assert "x86_64-windows64" in p.out
 
 
+def test_default_env_callback():
+    with open("mymain.py", "w") as f:
+        f.write(
+            "\n".join(
+                (
+                    "#!/usr/bin/env python",
+                    "from e3.main import Main",
+                    "from e3.env import Env",
+                    "def cb(args):",
+                    "   Env().set_build('ppc-linux')",
+                    "m = Main(platform_args=True)",
+                    "m.parse_args(pre_platform_args_callback=cb)",
+                    "print(Env().build)",
+                )
+            )
+        )
+    p = e3.os.process.Run([sys.executable, "mymain.py", "--nocolor"], timeout=10)
+    assert "ppc-linux" in p.out
+
+    p = e3.os.process.Run(
+        [sys.executable, "mymain.py", "--nocolor", "--build=x86_64-linux"], timeout=10
+    )
+    assert "x86_64-linux" in p.out
+
+
 @pytest.mark.skipif(
     sys.platform in ("win32", "sunos5"),
     reason="Signal handler not set on windows. Bug in signal handling in solaris",
