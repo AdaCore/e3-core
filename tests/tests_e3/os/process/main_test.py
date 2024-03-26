@@ -120,7 +120,7 @@ def test_rlimit():
         e.restore()
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="A linux test")
+@pytest.mark.skipif(sys.platform == "win32", reason="A linux/macOS test")
 def test_rlimit_ctrl_c():
     """Test rlimit CTRL-C.
 
@@ -164,9 +164,6 @@ def test_rlimit_ctrl_c():
     except ImportError:
         raise ImportError("ptyprocess is needed to run this tests") from None
 
-    # Only a linux test
-    assert sys.platform.startswith("linux"), "This test make sens only on linux"
-
     script_to_run = """
 from __future__ import annotations
 
@@ -193,7 +190,7 @@ p2.wait()
     assert int(end - start) < 30, f"CTRL-C failed: take {int(end - start)} seconds"
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="A linux test")
+@pytest.mark.skipif(sys.platform != "linux", reason="A linux test")
 def test_rlimit_foreground_option():
     """Test rlimit --foreground.
 
@@ -203,9 +200,6 @@ def test_rlimit_foreground_option():
         from ptyprocess import PtyProcess
     except ImportError:
         raise ImportError("ptyprocess is needed to run this tests") from None
-
-    # Only a linux test
-    assert sys.platform.startswith("linux"), "This test make sens only on linux"
 
     # Test with --foreground
     os.environ["PS1"] = "$ "
