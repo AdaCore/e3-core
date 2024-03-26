@@ -69,6 +69,9 @@ def test_git_repo():
     repo.git_cmd(["config", "user.email", "e3-core@example.net"])
     repo.git_cmd(["config", "user.name", "e3 core"])
     repo.git_cmd(["commit", "-m", "new file"])
+
+    main_branch = repo.git_cmd(["branch", "--show-current"]).out
+
     repo.git_cmd(["tag", "-a", "-m", "new tag", "20.0855369232"])
     repo.git_cmd(["notes", "--ref", "review", "add", "HEAD", "-F", commit_note])
 
@@ -130,7 +133,7 @@ def test_git_repo():
     repo2 = GitRepository(working_tree2)
     giturl = "file://%s" % working_tree.replace("\\", "/")
     repo2.init(url=giturl, remote="tree1")
-    repo2.update(url=giturl, refspec="master")
+    repo2.update(url=giturl, refspec=main_branch)
     assert repo2.rev_parse() == repo.rev_parse()
 
     repo2.fetch_gerrit_notes(url=giturl)
