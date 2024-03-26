@@ -56,6 +56,10 @@ class TestCheckout:
         url3 = GitRepository.create("git", initial_content_path=self.repo_data)
         url4 = GitRepository.create("git2", initial_content_path=self.repo_data2)
 
+        # Get the default branch for a Git repository (all subsequent
+        # repositories will have the same)
+        main_branch = GitRepository(url4).git_cmd(["branch", "--show-current"]).out
+
         r = SVNRepository(working_copy=os.path.abspath("svn_checkout"))
         r.update(url=url)
 
@@ -103,17 +107,17 @@ class TestCheckout:
         assert os.path.isfile(os.path.join("myrepo", "file1.txt", "data2.txt"))
 
         logging.info("Check that we can switch from one svn url to a git repo")
-        result = m.update(vcs="git", url=url3, revision="master")
+        result = m.update(vcs="git", url=url3, revision=main_branch)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file1.txt"))
 
         logging.info("Check that we can switch from one git url to another one")
-        result = m.update(vcs="git", url=url4, revision="master")
+        result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file1.txt", "data2.txt"))
 
         logging.info("Check that in case of no changes unchanged is returned")
-        result = m.update(vcs="git", url=url4, revision="master")
+        result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.unchanged
 
         logging.info("Check that changes are detected in git reposotories")
@@ -122,19 +126,19 @@ class TestCheckout:
         r = GitRepository(os.path.abspath("git2"))
         r.git_cmd(["add", "file3.txt"])
         r.git_cmd(["commit", "-m", "new file"])
-        result = m.update(vcs="git", url=url4, revision="master")
+        result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
 
         logging.info("Check that local modifications are discarded")
         with open(os.path.join("myrepo", "file3.txt"), "w") as fd:
             fd.write("new file modified!")
-        result = m.update(vcs="git", url=url4, revision="master")
+        result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.unchanged
         with open(os.path.join("myrepo", "file3.txt")) as fd:
             assert fd.read().strip() == "new file!"
 
-        result = m.update(vcs="git", url=url4 + "non-existing", revision="master")
+        result = m.update(vcs="git", url=url4 + "non-existing", revision=main_branch)
         assert result == ReturnValue.failure
 
         result = m.update(vcs="git", url=url4)
@@ -173,6 +177,7 @@ class TestCheckout:
         m = CheckoutManager(name="myrepo", working_dir=".")
 
         r = GitRepository(os.path.abspath("git3"))
+        main_branch = r.git_cmd(["branch", "--show-current"]).out
 
         r.git_cmd(["add", "file3.txt"])
         r.git_cmd(["commit", "-m", "first commit", "--date", "2020-08-01T22:13:13"])
@@ -181,7 +186,7 @@ class TestCheckout:
         r.git_cmd(["add", "file4.txt"])
         r.git_cmd(["commit", "-m", "second commit", "--date", "2020-08-05T22:13:13"])
 
-        result = m.update(vcs="git", url=url, revision="master")
+        result = m.update(vcs="git", url=url, revision=main_branch)
 
         myrepo = GitRepository(os.path.abspath("myrepo"))
         myrepo.git_cmd(["log", "--pretty=format:%s"], output="log.txt")
