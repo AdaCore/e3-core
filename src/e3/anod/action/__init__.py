@@ -187,14 +187,17 @@ class Checkout(Action):
 
     __slots__ = ("uid", "repo_name", "repo_data")
 
-    def __init__(self, repo_name: str, repo_data: dict[str, str]):
+    def __init__(self, repo_name: str, repo_data: dict[str, Any]):
         """Initialize a Checkout object.
 
         :param repo_name: The name of the repository.
         :param repo_data: A dictionary with the following keys:
             - 'url': The repository URL;
             - 'revision': The revision to checkout;
-            - 'vcs': The Version Control System kind (a string).
+            - 'vcs': The Version Control System kind (a string);
+            - 'license': the license for the files contained in the repository;
+            - 'release_branching_info': a dictionary containing information
+            on how to branch the repository when a release is branched.
 
         At present, only 'git' is supported.
         """
