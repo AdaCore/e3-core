@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from types import FrameType
     from typing import NoReturn
     from argparse import Namespace
+    from collections.abc import Callable
 
 
 class Main:
@@ -146,7 +147,10 @@ class Main:
             signal.signal(signal.SIGTERM, sigterm_handler)
 
     def parse_args(
-        self, args: list[str] | None = None, known_args_only: bool = False
+        self,
+        args: list[str] | None = None,
+        known_args_only: bool = False,
+        pre_platform_args_callback: Callable[[Namespace], None] | None = None,
     ) -> None:
         """Parse options and set console logger.
 
@@ -154,6 +158,9 @@ class Main:
             ``sys.argv[1:]`` is used
         :param known_args_only: does not produce an error when extra
             arguments are present
+        :param pre_platform_args_callback: function called after argument parsing
+            but before applying the --build, --host and --target to env. The callback
+            maybe use to adjust for example the default platform.
         """
         if known_args_only:
             self.args, _ = self.argument_parser.parse_known_args(args)
@@ -167,6 +174,10 @@ class Main:
         # Export options to env
         e = Env()
         e.main_options = self.args
+
+        # Call adjust_env_callback before applying --build, --host and --target
+        if pre_platform_args_callback is not None:
+            pre_platform_args_callback(self.args)
 
         if hasattr(self.args, "e3_main_platform_args_supported"):
             e3.log.debug("parsing --build/--host/--target")
