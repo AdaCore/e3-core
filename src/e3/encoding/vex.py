@@ -957,9 +957,9 @@ class SubProductId(ProductId):
             _id=obj["_id"],
             version=obj["version"],
             platforms=obj["platforms"],
-            status=StatementStatus.from_dict(obj["status"])
-            if "status" in obj
-            else None,
+            status=(
+                StatementStatus.from_dict(obj["status"]) if "status" in obj else None
+            ),
         )
 
 
