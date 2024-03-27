@@ -10,10 +10,14 @@ has also been used for a better understanding of some VEX implementations.
 
 from __future__ import annotations
 
+import json
+import yaml
+
 from datetime import datetime, timezone
 from dateutil.parser import parse as date_parse
 from enum import Enum
 from packaging.version import Version
+from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -47,11 +51,11 @@ class ActionOrImpact(JsonData):
         """Initialize an action or impact object.
 
         :param str | None statement: The action or impact statement. If
-            **None**, it means that this object has no impact (or no action).
+            :const:`None`, it means that this object has no impact (or no action).
         :param datetime | None timestamp: The time this action or impact has
-            been defined. If **None** and *statement* is defined, the timestamp
+            been defined. If :const:`None` and *statement* is defined, the timestamp
             is set to the current time.
-        """
+        """  # noqa RST304
         self.timestamp: datetime | None
         self.statement: str | None = statement
         if self.statement and not timestamp:
@@ -68,7 +72,7 @@ class ActionOrImpact(JsonData):
         An action or impact without a statement is considered as False.
 
         :return: **True** if this action or impact has a statement defined to
-            something else that **None**, **False** else.
+            something else that :const:`None`, **False** else.
         """  # noqa RST304
         return self.statement is not None
 
@@ -136,7 +140,7 @@ class AuthorRole(Enum):
 
         :raise: :exc:`python:ValueError` If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
-            **and** *value* is **None**.
+            **and** *value* is :const:`None`.
         """  # noqa RST304
         if isinstance(value, str) and value:
             return cls(value)
@@ -164,6 +168,10 @@ class Document(JsonData):
         this VEX document.
     """
 
+    FORMAT_JSON: str = "json"
+    FORMAT_YAML: str = "yaml"
+    FORMATS: tuple = (FORMAT_JSON, FORMAT_YAML)
+
     def __init__(
         self,
         metadata: Metadata,
@@ -184,11 +192,11 @@ class Document(JsonData):
     def add_statement(self, new_statement: Statement) -> None:
         """Add a new statement to this VEX document.
 
-        If *statement* has an *_id* set to **None**, the value of the statement
+        If *statement* has an *_id* set to :const:`None`, the value of the statement
         *_id* is updated to ``<document id>/<statement vuln id>``.
 
         :param new_statement: The statement to add to this VEX document.
-        """
+        """  # noqa RST304
         # Check if the statement has an ID. If not, add the statement's
         # vulnerability ID to the document's ID.
         # noinspection PyProtectedMember
@@ -213,17 +221,55 @@ class Document(JsonData):
             statements=[Statement.from_dict(s) for s in obj["statements"]],
         )
 
+    @classmethod
+    def from_file(cls, path: Path) -> Document:
+        """Create a VEX document from a file content.
+
+        The function :func:`yaml.safe_load()` is used to read the file. If the
+        file content is JSON, the YAML loader handles it safely and extracts
+        data anyway.
+
+        :param path: The path of a VEX document to initialise this document
+            with.
+        """  # noqa RST304
+        with path.open() as f:
+            vex_dict: dict = yaml.safe_load(f)
+
+        return cls.from_dict(vex_dict)
+
+    def save(self, path: Path, output_format: str = FORMAT_JSON) -> None:
+        """Save this document to a file with the given format.
+
+        :param path: The path of the saved file.
+        :param output_format: The file format. May be any of :attr:`FORMATS`.
+
+        :raise: :exc:`python:ValueError` If *output_format* is not one of the
+            possible :attr:`FORMATS`.
+        """  # noqa RST304
+        if output_format not in self.FORMATS:
+            raise ValueError(
+                f"Invalid output format {output_format}. Accepted output "
+                f"formats are: {', '.join(self.FORMATS)}"
+            )
+
+        path.parent.mkdir(exist_ok=True, parents=True)
+        with path.open("w") as f:
+            if output_format == self.FORMAT_JSON:
+                json.dump(self.as_dict(), f)
+            else:
+                yaml.dump(self.as_dict(), f, default_flow_style=False, sort_keys=False)
+
     def statement(self, cve_id: str) -> Statement | None:
         """Get the statement for given CVE ID.
 
         If this document does not contain any statement defining a vulnerability
-        which ID is *cve_id*, **None** is returned.
+        which ID is *cve_id*, :const:`None` is returned.
 
         :param cve_id: The ID of the CVE to retrieve in the statements of this
             document.
 
         :return: A :class:`Statement` object which defines the vulnerability
-            *cve_id*, or **None** if such a statement does not exist in this
+            *cve_id*, or :const:`None` if such a statement does not exist in this
             document.
         """  # noqa RST304
         for statement in self.statements:
@@ -294,7 +340,7 @@ class Justification(Enum):
 
         :raise: :exc:`python:ValueError` If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
-            **and** *value* is **None**.
+            **and** *value* is :const:`None`.
         """  # noqa RST304
         if isinstance(value, str) and value:
             return cls(value)
@@ -516,9 +562,9 @@ class Product(JsonData):
         :param _id: The ID of the subcomponent to look for.
         :param version: The version of the subcomponent to look for.
 
-        :return: A matching subcomponent ID, or **None** if no such subcomponent
+        :return: A matching subcomponent ID, or :const:`None` if no such subcomponent
             could be found.
-        """
+        """  # noqa RST304
         if self.subcomponents is not None:
             for subcomponent in self.subcomponents:
                 # noinspection PyProtectedMember
@@ -599,7 +645,7 @@ class ProductStatus(Enum):
 
         :raise: :exc:`python:ValueError` If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
-            **and** *value* is **None**.
+            **and** *value* is :const:`None`.
         """  # noqa RST304
         if isinstance(value, str) and value:
             return cls(value)
@@ -724,12 +770,12 @@ class StatementMetadata(JsonData):
 
         :param version: The version of this statement.
         :param _id: The ID of this VEX metadata statement. It may be set to
-            **None** to be set later on, according to the document metadata.
+            :const:`None` to be set later on, according to the document metadata.
         :param first_issued_on: The time this statement was first issued. If
-            **None**, current time is used.
+            :const:`None`, current time is used.
         :param last_updated_on: The time this statement was last updated. If
-            **None**, current time is used.
-        """
+            :const:`None`, current time is used.
+        """  # noqa RST304
         self._id: str | None = _id
         self.version: int = version if isinstance(version, int) else 1
         self.first_issued_on: datetime = (
@@ -868,7 +914,7 @@ class SubProductId(ProductId):
     :ivar str _id: see :class:`ProductId`
     :ivar str version: see :class:`ProductId`
     :ivar list[str] platforms: The list of platform for this sub-product ID.
-    :ivar ProductStatus status: The status of the sub product.
+    :ivar StatementStatus status: The status of the sub product.
     """  # noqa RST304
 
     def __init__(
@@ -876,27 +922,33 @@ class SubProductId(ProductId):
         _id: str,
         version: str,
         platforms: list[str],
-        status: StatementStatus,
+        status: StatementStatus | None,
     ):
         """Initialize a Sub-product ID.
 
         :ivar str _id: see :class:`ProductId`
         :ivar str version: see :class:`ProductId`
         :ivar list[str] platforms: The list of platform for this sub-product ID.
-        :ivar ProductStatus status: The status of the sub product.
+        :ivar StatementStatus | None status: The status of the sub product. If
+            :const:`None`, the status of the parent statement is assumed.
         """  # noqa RST304
         super().__init__(_id=_id, version=version)
         self.platforms: list[str] = platforms or []
-        self.status: StatementStatus = status
+        self.status: StatementStatus | None = status
 
     def as_dict(self) -> dict[str, Any]:
         dict_repr: dict = super().as_dict()
         dict_repr.update(
             {
                 "platforms": self.platforms,
-                "status": self.status.as_dict(),
             }
         )
+        if self.status is not None:
+            dict_repr.update(
+                {
+                    "status": self.status.as_dict(),
+                }
+            )
         return dict_repr
 
     @classmethod
@@ -905,7 +957,9 @@ class SubProductId(ProductId):
             _id=obj["_id"],
             version=obj["version"],
             platforms=obj["platforms"],
-            status=StatementStatus.from_dict(obj["status"]),
+            status=StatementStatus.from_dict(obj["status"])
+            if "status" in obj
+            else None,
         )
 
 
@@ -933,16 +987,17 @@ class Vulnerability(JsonData):
     :ivar str component: The name of the component this vulnerability applies to.
     :ivar float | None score: The base score for this vulnerability as defined
         by https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator and the CVE
-        vector. Set to **None** if there is no such computed metric for this
+        vector. Set to :const:`None` if there is no such computed metric for this
         vulnerability.
     :ivar str | None vector: The CVE score vector are defined by
-        https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator. Set to **None** if
+        https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator. Set to :const:`None` if
         no such vector is defined.
     :ivar str | None version: The version(s) of *component* for which this
         vulnerability is defined.
     :ivar str | None source: The emitter of the above *score* and *vector* if
         any.
-    """
+    :ivar str | None url: An url to get details on this vulnerability.
+    """  # noqa RST304
 
     def __init__(
         self,
@@ -953,6 +1008,7 @@ class Vulnerability(JsonData):
         vector: str | None = None,
         version: str | None = None,
         source: str | None = None,
+        url: str | None = None,
     ):
         """Initialize a VEX vulnerability object.
 
@@ -967,6 +1023,7 @@ class Vulnerability(JsonData):
         :param version: The version(s) of *component* for which this
             vulnerability is defined.
         :param source: The emitter of the above *score* and *vector* if any.
+        :param url: An url to get details on this vulnerability.
         """
         self._id: str = _id
         self.component: str = component
@@ -975,6 +1032,7 @@ class Vulnerability(JsonData):
         self.vector: str | None = vector
         self.version: str | None = version
         self.source: str | None = source
+        self.url: str | None = url
 
     def as_dict(self) -> dict[str, Any]:
         dict_repr: dict = {
@@ -984,6 +1042,8 @@ class Vulnerability(JsonData):
         if self.version is not None:
             dict_repr["version"] = self.version
         dict_repr["description"] = self.description
+        if self.url is not None:
+            dict_repr["url"] = self.url
         if self.source is not None:
             dict_repr["source"] = self.source
         if self.score is not None:

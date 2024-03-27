@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 import pytest
+import yaml
 
 from datetime import datetime, timezone
 from dateutil.parser import parse as date_parse
+from pathlib import Path
 
 from e3.encoding.vex import (
     AuthorRole,
@@ -68,7 +70,7 @@ STATEMENT_METADATA_ARGUMENTS = [
 STATEMENT_PRODUCT_DETAILS_ARGUMENTS = [
     (
         (False,),
-        (2,),
+        (3,),
     ),
     (
         (True,),
@@ -126,20 +128,23 @@ STATEMENT_VULN_PARAMETERS = [
         "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
         "Up to (including) 2.39",
         "nvd@nist.gov",
+        "https://nvd.nist.gov/vuln/detail/CVE-2022-38533",
     ),
     (
         None,
         "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
         "Up to (including) 2.39",
         "nvd@nist.gov",
+        None,
     ),
-    (5.5, None, "Up to (including) 2.39", "nvd@nist.gov"),
-    (5.5, "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H", None, "nvd@nist.gov"),
+    (5.5, None, "Up to (including) 2.39", "nvd@nist.gov", None),
+    (5.5, "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H", None, "nvd@nist.gov", None),
     (
         5.5,
         "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
         "Up to (including) 2.39",
         None,
+        "https://nvd.nist.gov/vuln/detail/CVE-2022-38533",
     ),
 ]
 
@@ -171,10 +176,15 @@ def create_product_id(_id: str = "Product ID") -> tuple[str, str, ProductId]:
     return _id, version, pid
 
 
-def create_sub_product_id(_id: str = "Sub Product ID") -> tuple[str, str, SubProductId]:
+def create_sub_product_id(
+    _id: str = "Sub Product ID", no_status: bool = False
+) -> tuple[str, str, SubProductId]:
     version: str = "23.2"
     spid: SubProductId = SubProductId(
-        _id=_id, version=version, platforms=["a", "b"], status=StatementStatus()
+        _id=_id,
+        version=version,
+        platforms=["a", "b"],
+        status=None if no_status else StatementStatus(),
     )
     return _id, version, spid
 
@@ -186,7 +196,10 @@ def create_product(no_subcomps: bool = False) -> Product:
     if not no_subcomps:
         sc1: SubProductId = create_sub_product_id(_id="gprbuild-23.2")[-1]
         sc2: SubProductId = create_sub_product_id(_id="gnatstack-23.2")[-1]
-        subcomponents = [sc1, sc2]
+        sc3: SubProductId = create_sub_product_id(
+            _id="gnatcoll-core-23.2", no_status=True
+        )[-1]
+        subcomponents = [sc1, sc2, sc3]
     supplier = "AdaCore"
 
     pd: Product = Product(
@@ -238,6 +251,7 @@ def create_vulnerability(
     vector: str | None = "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
     version: str | None = "Up to (including) 2.39",
     source: str | None = "nvd@nist.gov",
+    url: str | None = "https://nvd.nist.gov/vuln/detail/CVE-2022-38533",
 ) -> tuple[str, str, Vulnerability]:
     return (
         _id,
@@ -250,6 +264,7 @@ def create_vulnerability(
             vector=vector,
             version=version,
             source=source,
+            url=url,
         ),
     )
 
@@ -322,6 +337,48 @@ def test_document(arguments: tuple, expected: tuple) -> None:
             doc3.add_statement(new_statement=statement)
 
         assert doc == doc3
+
+        # Save the document to a JSON and YAML file.
+        doc4: Document
+        out_file: Path
+
+        for output_format in Document.FORMATS:
+            out_file = Path.cwd() / output_format / f"vex.{output_format}"
+            doc.save(path=out_file, output_format=output_format)
+            # Read it, and make sure it returns the same document
+            doc4 = Document.from_file(out_file)
+            assert doc == doc4
+
+        # Try with an unsupported format.
+        out_file: Path = Path.cwd() / "unknown" / "vex.unknown"
+        with pytest.raises(ValueError) as format_error:
+            doc.save(path=out_file, output_format="unknown")
+        assert "Invalid output format" in format_error.value.args[0]
+
+        # Save a document with a "manually" updated timestamp, then reload
+        # it. This is to simulate a VEX file updated manually, with a timestamp
+        # change.
+        timestamps = (
+            ("2024/03/03", datetime(2024, 3, 3)),
+            ("2024-03-04", datetime(2024, 3, 4)),
+            ("5th of March 2024", datetime(2024, 3, 5)),
+        )
+        for timestamp_str, timestamp_datetime in timestamps:
+            dict_repr: dict = doc.as_dict()
+            dict_repr["statements"][0]["status"]["impact"]["timestamp"] = timestamp_str
+            for output_format in Document.FORMATS:
+                out_file = Path.cwd() / output_format / f"vex.{output_format}"
+                with out_file.open("w") as f:
+                    if output_format == Document.FORMAT_JSON:
+                        json.dump(dict_repr, f)
+                    else:
+                        yaml.dump(
+                            dict_repr, f, default_flow_style=False, sort_keys=False
+                        )
+                # Now re-open it, and simply make sure it does not raise an error.
+                doc4 = Document.from_file(out_file)
+                assert doc4.statements[0].status.impact.timestamp == timestamp_datetime
+
     else:
         with pytest.raises(ValueError) as ve:
             create_metadata(
@@ -553,9 +610,13 @@ def test_statement_status(arguments: tuple) -> None:
 
 @pytest.mark.parametrize("arguments", STATEMENT_VULN_PARAMETERS)
 def test_statement_vulnerability(arguments: tuple) -> None:
-    score, vector, version, source = arguments
+    score, vector, version, source, url = arguments
     _id, description, vuln = create_vulnerability(
-        score=score, vector=vector, version=version, source=source
+        score=score,
+        vector=vector,
+        version=version,
+        source=source,
+        url=url,
     )
     vuln_dict: dict = vuln.as_dict()
 
@@ -583,6 +644,10 @@ def test_statement_vulnerability(arguments: tuple) -> None:
         assert vuln_dict["source"] == source
     else:
         assert "source" not in vuln_dict
+    if url is not None:
+        assert vuln_dict["url"] == url
+    else:
+        assert "url" not in vuln_dict
 
     # Create a vulnerability from another, and check they are equal.
 
