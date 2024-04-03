@@ -1,7 +1,13 @@
+# Version 22.6.0 (2024-??-??) *NOT RELEASED YET*
 
-# Version 22.5.0 (2024-??-??) *NOT RELEASED YET*
+# Version 22.5.0 (2024-04-07)
 
 * Add e3.pytest plugin to reuse fixtures in other projects
+* Add support for VEX documents
+* Update e3-pypi-closure to generate more precise version
+* Enable Anod class to use methods instead of properties
+* Ensure e3 is handled as a PEP 420 namespace
+* Add secure_control_plane to anod
 
 # Version 22.4.0 (2024-01-18)
 
