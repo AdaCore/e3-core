@@ -31,6 +31,7 @@ import logging
 import os
 import signal
 import sys
+import threading
 
 from typing import TYPE_CHECKING
 
@@ -144,7 +145,9 @@ class Main:
             raise SystemExit("SIGTERM received")
 
         if sys.platform != "win32":  # unix-only
-            signal.signal(signal.SIGTERM, sigterm_handler)
+            if threading.current_thread() is threading.main_thread():
+                # Signal can only be used in the main thread
+                signal.signal(signal.SIGTERM, sigterm_handler)
 
     def parse_args(
         self,
