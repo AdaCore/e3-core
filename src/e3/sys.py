@@ -125,9 +125,9 @@ class RewriteImportNodeTransformer(ast.NodeTransformer):
 
 
 def version() -> str:
-    import pkg_resources
+    import importlib.metadata
 
-    return pkg_resources.get_distribution("e3-core").version
+    return importlib.metadata.version("e3-core")
 
 
 def sanity_check() -> int:
