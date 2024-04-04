@@ -33,6 +33,7 @@ class Package:
         prefix: str,
         publish: bool = False,
         version: Callable[[], str] | None = None,
+        sbom_from_source: str | None = None,
     ):
         """Create a binary package.
 
@@ -49,6 +50,7 @@ class Package:
         self.name = prefix + "-{version}-{platform}-bin"
         self.publish = publish
         self.version = version
+        self.sbom_from_source = sbom_from_source
 
     @property
     def is_simple_archive(self) -> bool:
