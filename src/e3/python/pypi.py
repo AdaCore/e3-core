@@ -182,7 +182,7 @@ class Package:
         *,
         data: dict["str", Any],
     ) -> None:
-        """Initialize a pakage metadata object.
+        """Initialize a package metadata object.
 
         :param pypi: a PyPIClosure session
         :param data: the data as fetched on pypi
