@@ -203,7 +203,10 @@ class Package:
                 ):
                     self.versions.append(v)
             except Exception:
-                logger.warning(f"Cannot parse version {version} of {self.name}")
+                # Many packages uploaded before pip 1.4 had versions that are
+                # rejected by packaging.version. Do not warn but just log
+                # the error.
+                logger.debug(f"Cannot parse version {version} of {self.name}")
         logger.debug(f"Load package {self.name}")
 
     def __eq__(self, other: Any) -> bool:
