@@ -793,26 +793,52 @@ def sync_tree(
         :param src: the source FileInfo object
         :param dst: the target FileInfo object
         """
+        e3.log.debug(f"safe_copy - debug : src={src} -> dst={dst}", exc_info=True)
         if islink(src):  # windows: no cover
+            e3.log.debug(f"safe_copy - debug : islink : {src}", exc_info=True)
             linkto = os.readlink(src.path)
             if not islink(dst) or os.readlink(dst.path) != linkto:
                 if dst.stat is not None:
                     rm(dst.path, recursive=True, glob=False)
                 os.symlink(linkto, dst.path)
+            e3.log.debug(
+                f"safe_copy - debug copy: islink : src={src} -> dst={dst}",
+                exc_info=True,
+            )
             copystat(src, dst)
         else:
+            e3.log.debug(
+                f"safe_copy - debug copy: NOT islink : src={src} -> dst={dst}",
+                exc_info=True,
+            )
             if isdir(dst):
                 # dst directory will be replaced by a file having the same
                 # content as 'src'
+                e3.log.debug(
+                    f"safe_copy - debug : NOT islink : src={src}, isdir: dst ={dst}",
+                    exc_info=True,
+                )
                 rm(dst.path, recursive=True, glob=False)
             elif islink(dst):
+                e3.log.debug(
+                    f"safe_copy - debug : NOT islink : src={src}, islink: dst ={dst}",
+                    exc_info=True,
+                )
                 # dst symlink will be replaced by a file having the same
                 #  content as 'src'
                 rm(dst.path, recursive=False, glob=False)
 
             try:
                 if dst.basename != src.basename:
+                    e3.log.debug(
+                        f"safe_copy - debug : src:{src} file != dst:{dst} file",
+                        exc_info=True,
+                    )
                     if dst.stat is not None:
+                        e3.log.debug(
+                            f"safe_copy - debug: dst.stat is not None. dst={dst}",
+                            exc_info=True,
+                        )
                         # Case in which the destination file exists but does
                         # not have the same casing. In that case we delete the
                         # target file and redo a copy. This occurs for example
@@ -828,11 +854,24 @@ def sync_tree(
                     with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
             except OSError:
+                e3.log.debug(
+                    f"safe_copy - debug: Got OSError!! src={src}, dst={dst}",
+                    exc_info=True,
+                )
                 if dst.stat is not None:
+                    e3.log.debug(
+                        f"safe_copy - debug: OSError: dst.stat != None. dst={dst}",
+                        exc_info=True,
+                    )
                     rm(dst.path, glob=False)
                 with open(src.path, "rb") as fsrc:
                     with open(dst.path, "wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
+
+            e3.log.debug(
+                f"safe_copy - debug copy: copystat src={src} -> dst={dst}",
+                exc_info=True,
+            )
             copystat(src, dst)
 
     def safe_mkdir(src: FileInfo, dst: FileInfo) -> None:
