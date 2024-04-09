@@ -556,6 +556,7 @@ VCS_IGNORE_LIST = (
     ".idea",
     ".python-version",
     ".gitlab-ci",
+    ".gitlab-ci.yml",
     ".vscode",
     ".github",
 )
