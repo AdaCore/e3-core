@@ -87,6 +87,14 @@ def test_cycle_detection():
     with pytest.raises(DAGError):
         d.check()
 
+    with pytest.raises(DAGError):
+        it = DAGIterator(d)
+        [k for k, _ in it]
+
+    with pytest.raises(DAGError):
+        it = DAGIterator(d, enable_busy_state=True)
+        [k for k, _ in it]
+
     # Verify that some functions do not hang when a cycle is present
     assert len(d.get_closure("b")) == 2
     assert str(d)

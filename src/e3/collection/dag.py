@@ -75,19 +75,18 @@ class DAGIterator:
         result = next((k for k in self.non_visited if self.pred_number[k] == 0), None)
 
         if result is None:
+            for node in self.non_visited:
+                minimal_cycle = self.dag.shortest_path(node, node)
+                if minimal_cycle is not None:
+                    raise DAGError(
+                        "cycle detected: %s"
+                        % " -> ".join([str(vertex_id) for vertex_id in minimal_cycle])
+                    )
+
             if not self.enable_busy_state:
-                for node in self.non_visited:
-                    minimal_cycle = self.dag.shortest_path(node, node)
-                    if minimal_cycle is not None:
-                        raise DAGError(
-                            "cycle detected: %s"
-                            % " -> ".join(
-                                [str(vertex_id) for vertex_id in minimal_cycle]
-                            )
-                        )
                 raise DAGError("cycle detected (unknown error)")
 
-            # No vertex is ready to be visited
+            # Wait for busy vertices to finish
             return None, None, frozenset()
 
         # Remove the vertex from the "non_visited_list" and when
