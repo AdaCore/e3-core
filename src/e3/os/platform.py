@@ -76,12 +76,12 @@ class SystemInfo:
 
         # Fetch linux distribution info on linux OS
         if cls.uname.system == "Linux":  # linux-only
-            import ld
+            import distro
 
             cls.ld_info = {
-                "name": ld.name(),
-                "major_version": ld.major_version(),
-                "version": ld.version(),
+                "name": distro.name(),
+                "major_version": distro.major_version(),
+                "version": distro.version(),
             }
 
         # Fetch core numbers. Note that the methods does not work

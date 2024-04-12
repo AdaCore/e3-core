@@ -35,8 +35,8 @@ dependencies = [
   "psutil; sys_platform=='linux'",
   "psutil; sys_platform=='linux2'",
   "psutil; sys_platform=='darwin'",
-  "ld; sys_platform=='linux'",
-  "ld; sys_platform=='linux2'",
+  "distro; sys_platform=='linux'",
+  "distro; sys_platform=='linux2'",
 ]
 
 [project.urls]
