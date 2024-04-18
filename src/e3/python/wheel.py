@@ -58,6 +58,7 @@ class Wheel:
                     "wheel",
                     ".",
                     "-q",
+                    "--no-build-isolation",
                     "--no-deps",
                     f"-C--python-tag={python_tag}",
                     "-w",
