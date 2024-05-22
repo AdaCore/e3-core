@@ -20,6 +20,9 @@ classifiers = [
   "Topic :: Software Development :: Build Tools"
 ]
 
+# Even if they are used by the pytest driver, the pytest and coverage
+# dependencies are not installed by default. This is on purpose to avoid
+# importing test/coverage packages in a release install.
 dependencies = [
   "colorama",
   "pyyaml",
@@ -49,6 +52,7 @@ config = [
   "typeguard<3.0.0"
 ]
 test = [
+  "coverage",
   "mock",
   "requests-mock",
   "pytest",
