@@ -69,6 +69,7 @@ check = [
   "bandit",
   "pip-audit",
   "types-colorama",
+  "types-mock",
   "types-psutil",
   "types-python-dateutil",
   "types-PyYAML",
