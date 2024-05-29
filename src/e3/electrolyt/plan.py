@@ -234,7 +234,11 @@ class PlanContext:
         return self.stack[0]
 
     def execute(
-        self, plan: Plan, entry_point_name: str, verify: bool = False
+        self,
+        plan: Plan,
+        entry_point_name: str,
+        verify: bool = False,
+        entry_point_parameters: dict | None = None,
     ) -> list[PlanActionEnv]:
         """Execute a plan.
 
@@ -243,6 +247,8 @@ class PlanContext:
             either a function name in the plan or an entry_point function
         :param verify: verify whether the entry point name is a
             electrolyt entry point
+        :param entry_point_parameters: parameters passed as keyword arguments
+            to the entry point
         :raise: PlanError
         :return: a list of plan actions
         """
@@ -262,12 +268,15 @@ class PlanContext:
         self.action_list = []
         self.plan = plan
 
+        if entry_point_parameters is None:
+            entry_point_parameters = {}
+
         if entry_point_name in plan.entry_points:
-            plan.entry_points[entry_point_name].execute()
+            plan.entry_points[entry_point_name].execute(**entry_point_parameters)
         else:
             # ??? An error should be raised as soon as entry points are
             # used everywhere
-            plan.mod.__dict__[entry_point_name]()
+            plan.mod.__dict__[entry_point_name](**entry_point_parameters)
 
         return self.action_list
 
