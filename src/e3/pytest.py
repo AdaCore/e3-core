@@ -209,7 +209,20 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
         old_coverage_data = CoverageData(old_cov_file.name)
         old_coverage_data.read()
         new_coverage_data = CoverageData(cov_db)
-        new_coverage_data.update(old_coverage_data, aliases=paths)
+
+        # Before 7.5.3, the map_path argument (of type Callable[[str], str])
+        # was named aliases (of type PathAliases). Try to handle the two
+        # possible APIs.
+        try:
+            # noinspection PyArgumentList
+            new_coverage_data.update(old_coverage_data, map_path=paths.map)
+        except TypeError as te:
+            if "got an unexpected keyword argument 'map_path'" in str(te):
+                # Try with the old API ...
+                # noinspection PyArgumentList
+                new_coverage_data.update(old_coverage_data, aliases=paths)
+            else:
+                raise te
         new_coverage_data.write()
     finally:
         os.unlink(old_cov_file.name)
