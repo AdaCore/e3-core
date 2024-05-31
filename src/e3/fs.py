@@ -559,6 +559,7 @@ VCS_IGNORE_LIST = (
     ".gitlab-ci.yml",
     ".vscode",
     ".github",
+    "comment",
 )
 
 
