@@ -341,7 +341,7 @@ class Package:
         """
         logging.debug(f"Apply constraint: {str(requirement)}")
         # Check if requirement applies to that package
-        if canonicalize_name(requirement.name) != self.name:
+        if canonicalize_name(requirement.name) != canonicalize_name(self.name):
             return
 
         # Check platforms
