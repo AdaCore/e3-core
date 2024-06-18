@@ -69,13 +69,14 @@ class Platform(
             automatically (native case only). Otherwise should be a valid
             version string.
         :param machine: name of the machine
+        :param mode: an os mode (ex: rtp for vxworks)
         :param compute_default: if True compute the default Arch for the
             current machine (this parameter is for internal purpose only).
-        :param mode: an os mode (ex: rtp for vxworks)
         """
         # normalize arguments
         if not version:
             version = e3.os.platform.UNKNOWN
+
         if machine is None or machine == e3.os.platform.UNKNOWN:
             machine = ""
         if not mode:
@@ -132,7 +133,7 @@ class Platform(
             is_default,
         )
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, full_os_version: bool = False) -> dict[str, Any]:
         """Export os and cpu variables as os_{var} and cpu_{var}.
 
         :return: a dictionary representing the current Arch instance
@@ -141,6 +142,11 @@ class Platform(
 
         for key, var in self.os.as_dict().items():
             str_dict["os_" + key] = var
+
+        if full_os_version:
+            # Replace the default OS version
+            str_dict["os_version"] = self.system_info.full_os_version()
+
         for key, var in self.cpu.as_dict().items():
             str_dict["cpu_" + key] = var
         del str_dict["os"]
@@ -166,6 +172,6 @@ class Platform(
             "   name:   %(cpu_name)s\n"
             "   bits:   %(cpu_bits)s\n"
             "   endian: %(cpu_endian)s\n"
-            "   cores:  %(cpu_cores)s" % self.to_dict()
+            "   cores:  %(cpu_cores)s" % self.to_dict(full_os_version=True)
         )
         return result

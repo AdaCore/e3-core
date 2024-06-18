@@ -372,10 +372,10 @@ class PlanContext:
         # If necessary adjust target machine name
         if board is not None:
             result.set_target(
-                result.target.platform,
-                result.target.os.version,
-                board,
-                result.target.os.mode,
+                name=result.target.platform,
+                version=result.target.os.version,
+                machine=board,
+                mode=result.target.os.mode,
             )
 
         # Set action attribute (with action name)

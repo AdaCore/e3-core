@@ -43,7 +43,7 @@ class SystemInfo:
     _platform: str | None = None
 
     # _os_version is a tuple: os version, kernel version
-    _os_version: tuple[str, str] | None = None
+    _os_version: tuple[str, str, str] | None = None
 
     # _hostname is a tuble: hostname, domain. Joining with a dot hostname and domain
     # represent the FQDN
@@ -138,10 +138,11 @@ class SystemInfo:
         return cls._platform
 
     @classmethod
-    def os_version(cls) -> tuple[str, str]:
-        """Compute OS version information.
+    def _get_os_version(cls) -> tuple[str, str, str]:
+        """Compute all OS version information.
 
-        :return: a tuple containing os version and kernel version
+        :return: a tuple containing os version (maybe partial), kernel version and
+            a full os version.
         """
         if cls._os_version is not None:
             return cls._os_version
@@ -157,6 +158,8 @@ class SystemInfo:
         kernel_version = UNKNOWN
         system = cls.uname.system
 
+        full_version = None
+
         if system == "Darwin":  # darwin-only
             version = cls.uname.release
         elif system == "FreeBSD":  # bsd-only
@@ -167,15 +170,20 @@ class SystemInfo:
             if "redhat" in name or "red hat" in name:  # os-specific
                 name = "rhES"
                 version_number = cls.ld_info["major_version"]
+                full_version_number = cls.ld_info["version"]
             elif "suse" in name or "sles" in name:  # os-specific
                 name = "suse"
                 version_number = cls.ld_info["major_version"]
+                full_version_number = cls.ld_info["version"]
             elif "debian" in name:  # os-specific
                 name = "debian"
                 version_number = cls.ld_info["major_version"]
+                full_version_number = cls.ld_info["version"]
             else:  # os-specific
                 version_number = cls.ld_info["version"]
+                full_version_number = cls.ld_info["version"]
             version = name + version_number
+            full_version = name + full_version_number
         elif system == "AIX":  # aix-only
             version = cls.uname.version + "." + cls.uname.release
         elif system == "SunOS":  # solaris-only
@@ -252,9 +260,23 @@ class SystemInfo:
                             version = "2022"
                     else:
                         version = "10"
+                        full_version = "10.0"
 
-        cls._os_version = (version, kernel_version)
+        if full_version is None:
+            full_version = version
+
+        cls._os_version = (version, kernel_version, full_version)
+        return version, kernel_version, full_version
+
+    @classmethod
+    def os_version(cls) -> tuple[str, str]:
+        version, kernel_version, _ = cls._get_os_version()
         return version, kernel_version
+
+    @classmethod
+    def full_os_version(cls) -> str:
+        _, _, version = cls._get_os_version()
+        return version
 
     @classmethod
     def hostname(cls) -> tuple[str, str]:
@@ -387,4 +409,5 @@ class OS(
                 kernel_version = UNKNOWN
         else:
             kernel_version = UNKNOWN
-        return OS(name, version, kernel_version, exeext, dllext, is_bareboard, mode)
+
+        return cls(name, version, kernel_version, exeext, dllext, is_bareboard, mode)
