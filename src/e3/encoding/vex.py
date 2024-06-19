@@ -882,9 +882,9 @@ class StatementStatus(JsonData):
                     f"When status is {self.status.value}, either an impact "
                     "statement or a justification must be provided."
                 )
-        elif self.status == ProductStatus.AFFECTED and not self.impact:
+        elif self.status == ProductStatus.AFFECTED and not self.action:
             raise ValueError(
-                f"When status is {self.status.value}, an impact statement "
+                f"When status is {self.status.value}, an action statement "
                 "must be provided."
             )
 
