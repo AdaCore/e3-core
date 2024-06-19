@@ -1,4 +1,9 @@
-# Version 22.6.0 (2024-??-??) *NOT RELEASED YET*
+# Version 22.7.0 (2024-??-??) *NOT RELEASED YET*
+
+# Version 22.6.0 (2024-06-19)
+
+* Handle `pycoverage` backward incompatibility of the `CoverageData.update()`
+  method. 
 
 # Version 22.5.0 (2024-04-07)
 
