@@ -2,8 +2,18 @@
 
 # Version 22.6.0 (2024-06-19)
 
+* Fix encoding/vex action statement for affected products
+* Add ability to pass parameters to a plan entry point on execution
+* Fix e3-pypi-closure name comparison
+* Add 'comment' file to list of file to ignore
 * Handle `pycoverage` backward incompatibility of the `CoverageData.update()`
-  method. 
+  method.
+* Add types-mock as check dependency
+* Fix pytest when source coverage is not used
+* deps: exchange ld for distro
+* Add .gitlab-ci.yaml to VCS_IGNORE_LIST
+* Silence "cannot parse version" warning by default
+* e3.sys: Replace pkg_resources by importlib.metadata
 
 # Version 22.5.0 (2024-04-07)
 
