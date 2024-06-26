@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import os
+import re
+import sys
+
 from packaging.version import Version
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import yaml
@@ -14,6 +18,9 @@ import e3.os.process
 import e3.text
 from e3.anod.error import AnodError, ShellError
 from e3.anod.qualifiers_manager import QualifiersManager
+from e3.fs import find
+from e3.os.fs import which
+from e3.platform_db.knowledge_base import OS_INFO
 from e3.yaml import load_with_config
 
 # Default API version
@@ -25,7 +32,7 @@ SUPPORTED_API = (__version__, "1.5", "1.6")
 # Version 1.4 (initial version)
 # Version 1.5
 #    NEW: YAML files are searched in subdirectories whose basename is the
-#    the associated spec basename.
+#    associated spec basename.
 #    DEPRECATED: YAML files in same directory as the spec
 # Version 1.6
 #    NEW: Add support for spec function automatically declared inside each spec
@@ -62,7 +69,7 @@ if TYPE_CHECKING:
         BUILD_PRIMITIVE, DOWNLOAD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE
     ]
 
-    # Supported primitivies are build, install, source, and test
+    # Supported primitives are build, install, source, and test
     PRIMITIVE = Union[
         BUILD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE, TEST_PRIMITIVE
     ]
@@ -127,9 +134,9 @@ def fetch_attr(instance: Any, name: str, default_value: Any) -> Any:
     this does not hide AttributeError exceptions that getting an existing
     attribute might raise.
     """
-    # Singleton used to determine whether call to gettattr returns the default
-    # value (i.e. attribute is missing) or just returns the attribute value (it
-    # could be None).
+    # Singleton used to determine whether call to ``gettattr()`` returns the
+    # default value (i.e. attribute is missing) or just returns the attribute
+    # value (it could be ``None``).
     sentinel = object()
 
     return (
@@ -166,7 +173,7 @@ class Anod:
     :cvar sandbox: e3.anod.sandbox.SandBox object shared by all Anod instances
     :vartype sandbox: e3.anod.sandbox.SandBox | None
 
-    Some attributes are meant the be overwritten in the specification file:
+    Some attributes are meant to be overwritten in the specification file:
 
     :cvar source_pkg_build: a dictionary associating Anod.SourceBuilder to the
         Anod.Source names
@@ -387,6 +394,128 @@ class Anod:
             name=self.build_space_name, platform=self.env.platform
         )
 
+    def check_shared_libraries_closure(
+        self,
+        prefix: str | None = None,
+        ignored_libs: list[str] | None = None,
+        ldd_output: str | None = None,
+        case_sensitive: bool | None = None,
+    ) -> None:
+        """Sanity check the shared library closure.
+
+        Make sure that the libraries only depend on authorized system shared
+        libraries.
+
+        Raise an error when a problem is detected.
+
+        It is possible to use the *ldd_output* parameter to mimic the ``ldd``
+        call. In that case, the *ldd_output* should look like::
+
+            /a/b/c.so:
+                    d.so => /e/f/d.so
+                    g.so => /a/b/g.so
+            /a/b/h.so:
+                    g.so => /a/b/g.so
+
+        .. note::
+            Indented lines above use the TAB character.
+
+        .. note::
+            This method may be used only on hosts with an ``ldd`` tool in the
+            ``PATH``. If the tool may not be found with :func:`~e3.os.fs.which`,
+            and *ldd_output* is not provided, a :exc:`FileNotFoundError`
+            exception is raised.
+
+        :param prefix: The path where to find the library to be checked.
+        :param ignored_libs: The list of additional system libraries authorized
+            in the closure.
+        :param ldd_output: An ``ldd`` command output.
+        :param case_sensitive: State if the comparison of a library name and the
+            value in *ignored_libs* should be case-sensitive or not. If
+            ``None``, the comparison is case-sensitive, but on Windows hosts.
+
+        :raise AnodError: if some of the shared libraries in *prefix* (or in
+            *ldd_output*) is not in the same directory as the analysed element.
+        :raise FileNotFoundError: if *ldd_output* is not provided and ``ldd``
+            application cannot be found in the ``PATH``.
+        """  # noqa RST304
+        ignored: list[str] = ignored_libs or []
+        errors: dict[str, list[str]] = {}
+        lib_file: str = ""
+
+        if case_sensitive is None:
+            case_sensitive = False if sys.platform == "win32" else True
+
+        if ldd_output is None:
+            # If ldd is not in the path, return and issue a warning.
+            if not which("ldd"):
+                raise FileNotFoundError(
+                    "Shared Libraries closure check skipped: ldd could not be found."
+                )
+
+            if prefix is None:
+                prefix = self.build_space.install_dir
+
+            # Get all files matching the OS shared lib extension.
+            lib_files = find(
+                root=prefix, pattern=f"*{OS_INFO[e3.env.Env().build.os.name]['dllext']}"
+            )
+            ldd_output = e3.os.process.Run(["ldd"] + lib_files).out or ""
+        else:
+            # An ldd output has been provided.
+            lib_files = re.findall(r"^([^\t].*):$", ldd_output, flags=re.M)
+
+        if self.sandbox and hasattr(self.sandbox, "root_dir"):
+            root_dir = self.sandbox.root_dir
+        else:
+            root_dir = str(Path(self.build_space.install_dir).parent)
+
+        # Retrieve list of shared lib dependencies for sanity checking
+
+        self.log.info("Running Shared Libraries closure check")
+        # Build up a list of linked libraries. Dict key is the library
+        # name/path, value is the list of linked libraries.
+        for line in ldd_output.splitlines():
+            if line[:-1] in lib_files:
+                # Line is like ``/mypath/mydll.so:``, it's the result of
+                # ldd for ``mydll.so``.
+                lib_file = line[:-1]
+            elif lib_file and " => " in line:
+                # Line looks like:
+                # ``        otherdll.so => /other/otherdll.so (0xabcd)``
+                name, path = line.strip().split(" => ", 1)
+                path = re.sub(" (.*)", "", path)
+
+                # Make sure a path is defined, we may have lines like::
+                #
+                # myprojects.so:
+                #       linux-vdso.so.1 =>  (0x00007ffdd6d55000)
+                #
+                if not path.strip() or not Path(path).exists():
+                    continue
+
+                if case_sensitive:
+                    in_ignored = len([k for k in ignored if name.startswith(k)]) > 0
+                else:
+                    in_ignored = (
+                        len([k for k in ignored if name.lower().startswith(k.lower())])
+                        > 0
+                    )
+                if os.path.relpath(path, root_dir).startswith("..") and not in_ignored:
+                    if lib_file not in errors:
+                        errors[lib_file] = []
+                    errors[lib_file].append(f"\n\t- {name}: {path}")
+
+        if errors:
+            # Build up error message
+            err_msg: str = "Dependencies on external libraries:"
+            for shared_lib, dependencies in errors.items():
+                err_msg = (
+                    f"{err_msg}\n    Shared lib {shared_lib} has external shared "
+                    f"dependencies:{''.join(sorted(dependencies))}"
+                )
+            raise AnodError(err_msg)
+
     def load_config_file(
         self,
         extended: bool = False,
@@ -399,7 +528,7 @@ class Anod:
         list of available file is set by the data_files parameter when
         initializing the spec.
 
-        :param suffix: suffix of the configuration file (default is '')
+        :param suffix: suffix of the configuration file (default is None)
         :param extended: if True then a special yaml parser is used with
             ability to use case statement
         :param selectors: additional selectors for extended mode
@@ -434,7 +563,7 @@ class Anod:
         __getitem__, e.g. self['PKG_DIR'] to access
         self.build_space.pkg_dir values.
 
-        Also directly access items returned by the ``pre`` callback.
+        Also, directly access items returned by the ``pre`` callback.
         """
         if self.__build_space is None:
             return "unknown"
@@ -457,9 +586,10 @@ class Anod:
         Requires that qualifiers_manager attribute has been initialized and its parse
         method called.
 
-        :return: The qualifier value. Its a string for key value qualifiers and a bool
-            for tag qualifiers.
-            Return None if the name_generator is disabled.
+        :return: The qualifier value:
+            - A string for key value qualifiers
+            - A bool for tag qualifiers
+            - ``None`` if the name_generator is disabled
         """
         if self.enable_name_generator:
             assert self.qualifiers_manager is not None
@@ -497,10 +627,8 @@ class Anod:
             def primitive_func(self, *args, **kwargs):  # type: ignore
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
-                result = False
-
                 # Ensure temporary directory is set to a directory local to
-                # the current sandbox. This avoid mainly to loose track of
+                # the current sandbox. This avoids mainly to lose track of
                 # temporary files that are then accumulating on the
                 # filesystems.
                 # ??? Temporary fix for T409-012 ???
@@ -560,7 +688,7 @@ class Anod:
 
     @property
     def anod_id(self) -> str:
-        """For backward compativility purpose."""
+        """For backward compatibility purpose."""
         return self.uid
 
     @property
