@@ -2,12 +2,115 @@ import os
 import subprocess
 import sys
 
+from pathlib import Path
+
 from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError, SpecError
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 
 import pytest
+
+CHECK_DLL_CLOSURE_ARGUMENTS = [
+    (
+        (
+            (
+                "/usr/bin/ls:\n"
+                "\tlinux-vdso.so.1 (0xxxx)\n"
+                "\tlibselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0xxxx)\n"
+                "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0xxxx)\n"
+                "\tlibpcre2-8.so.0 => /lib/x86_64-linux-gnu/libpcre2-8.so.0 (0xxxx)\n"
+                "\t/lib64/ld-linux-x86-64.so.2 (0xxxx)\n"
+                "/usr/bin/gcc:\n"
+                "\tlinux-vdso.so.1 (0xxxx)\n"
+                "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0xxxx)\n"
+                "\t/lib64/ld-linux-x86-64.so.2 (0xxxx)\n"
+            ),
+            ["libc.so.6"],
+        ),
+        (
+            (
+                "- libpcre2-8.so.0: /lib/x86_64-linux-gnu/libpcre2-8.so.0"
+                if sys.platform != "win32"
+                else None
+            ),
+        ),
+    ),
+    (
+        (
+            None,
+            [
+                "libc.so.6",
+                "libstdc++.so.6",
+                "libstdc++.so.6",
+                "libgcc_s.so.1",
+                "libpthread.so.0",
+                "libdl.so.2",
+                "libm.so.6",
+                # Windows ignored Dlls.
+                "ADVAPI32.dll",
+                "CRYPTBASE.DLL",
+                "Comctl32.dll",
+                "FreeImage.dll",
+                "FreeImagePlus.dll",
+                "GDI32.dll",
+                "IMM32.DLL",
+                "IMM32.dll",
+                "IMM32.dll",
+                "KERNEL32.DLL",
+                "KERNELBASE.dll",
+                "Msimg32.DLL",
+                "OLEAUT32.dll",
+                "RPCRT4.dll",
+                "SHLWAPI.dll",
+                "USER32.dll",
+                "UxTheme.dll",
+                "VCRUNTIME140.dll",
+                "VCRUNTIME140_1.dll",
+                "VERSION.dll",
+                "WS2_32.dll",
+                "apphelp.dll",
+                "bcrypt.dll",
+                "combase.dll",
+                "gdi32full.dll",
+                "libcrypto-3.dll",
+                "libiconv2.dll",
+                "libintl3.dll",
+                "msvcp_win.dll",
+                "msvcrt.dll",
+                "ntdll.dll",
+                "ole32.dll",
+                "pcre3.dll",
+                "python311.dll",
+                "pywintypes311.dll",
+                "regex2.dll",
+                "sechost.dll",
+                "ucrtbase.dll",
+                "win32u.dll",
+            ],
+        ),
+        (None,),
+    ),
+    (
+        (
+            (
+                "python3.dll:\n"
+                "\tntdll.dll => /Windows/SYSTEM32/ntdll.dll (0xxxx)\n"
+                "\tKERNEL32.DLL => /Windows/System32/KERNEL32.DLL (0xxxx)\n"
+                "\tKERNELBASE.dll => /Windows/System32/KERNELBASE.dll (0xxxx)\n"
+                "\tmsvcrt.dll => /Windows/System32/msvcrt.dll (0xxxx)\n"
+            ),
+            [],
+        ),
+        (
+            (
+                "- KERNEL32.DLL: /Windows/System32/KERNEL32.DLL"
+                if sys.platform == "win32"
+                else None
+            ),
+        ),
+    ),
+]
 
 
 def test_simple_spec():
@@ -50,6 +153,36 @@ def test_spec_buildvars():
     assert len(ms.deps) == 0
 
 
+# noinspection PyUnusedLocal
+@pytest.mark.parametrize("arguments,expected", CHECK_DLL_CLOSURE_ARGUMENTS)
+def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
+    """Create a simple spec with dependency to python and run dll closure."""
+    ldd_output, ignored = arguments
+    (errors,) = expected
+    test_spec: Anod = Anod("", kind="install")
+    test_spec.sandbox = SandBox(root_dir=os.getcwd())
+    if ldd_output is None:
+        # Use the current executable lib directory.
+        exe_path: Path = Path(sys.executable)
+        lib_path: Path = Path(
+            exe_path.parent.parent, "lib" if sys.platform != "win32" else ""
+        )
+        test_spec.check_shared_libraries_closure(
+            prefix=str(lib_path), ignored_libs=ignored, ldd_output=None
+        )
+    elif errors:
+        with pytest.raises(AnodError) as ae:
+            test_spec.check_shared_libraries_closure(
+                prefix=None, ignored_libs=None, ldd_output=ldd_output
+            )
+        assert errors in ae.value.args[0]
+    else:
+        # There is an ldd_output, but no errors may be raised on unix hosts.
+        test_spec.check_shared_libraries_closure(
+            prefix=None, ignored_libs=None, ldd_output=ldd_output
+        )
+
+
 def test_spec_wrong_dep():
     """Check exception message when wrong dependency is set."""
     with pytest.raises(SpecError) as err:
@@ -63,7 +196,8 @@ def test_spec_wrong_dep():
 
 def test_primitive():
     class NoPrimitive(Anod):
-        def build(self):
+        @staticmethod
+        def build():
             return 2
 
     no_primitive = NoPrimitive("", "build")
