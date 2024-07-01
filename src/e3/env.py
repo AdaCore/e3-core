@@ -267,7 +267,12 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             elif split_value[0] == "target":
                 return saved_target
             elif not propagate_build_info:
-                return Platform.get(*split_value)  # type: ignore
+                return Platform.get(
+                    platform_name=split_value[0],
+                    version=split_value[1],
+                    machine=split_value[2],
+                    mode=split_value[3],
+                )
             else:
                 # Propagate machine name and OS version if necessary
                 if split_value[2] is None:
@@ -279,7 +284,12 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
                     # Linux machine should not change the OS version
                     if split_value[1] is None:
                         split_value[1] = saved_build.os.version
-                return Platform.get(*split_value)  # type: ignore
+                return Platform.get(
+                    platform_name=split_value[0],
+                    version=split_value[1],
+                    machine=split_value[2],
+                    mode=split_value[3],
+                )
 
         # Retrieve final values for build, host and target
         build_opts = get_platform(build, propagate_build_info=True)
