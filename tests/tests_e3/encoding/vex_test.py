@@ -114,10 +114,10 @@ STATEMENT_STATUS_PARAMETERS = [
     (
         ProductStatus.AFFECTED,
         None,
-        "Action to take",
+        None,
         None,
         "notes",
-        "an impact statement must be provided",
+        "an action statement must be provided",
     ),
 ]
 
