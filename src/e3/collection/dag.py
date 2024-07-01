@@ -424,9 +424,9 @@ class DAG:
         dist: dict[VertexID | None, int] = {k: infinite for k in self.vertex_data}
 
         # Keep track of the minimum distance
-        prev: dict[VertexID | None, VertexID | None] = {
-            k: None for k in self.vertex_data
-        }
+        prev: dict[VertexID | None, VertexID | None] = dict.fromkeys(
+            self.vertex_data, None
+        )
 
         # Set of non visited vertices
         unvisited: set[VertexID | None] = set(self.vertex_data)
