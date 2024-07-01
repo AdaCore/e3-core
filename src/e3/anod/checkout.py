@@ -243,15 +243,26 @@ class CheckoutManager:
         try:
             old_commit = g.rev_parse()
 
+            shallow_cmd: str | None = None
+
             # Using fetch + checkout ensure caching is effective
-            shallow = "git_shallow_fetch" in os.environ.get(
+            shallow_fetch = "git_shallow_fetch" in os.environ.get(
                 "E3_ENABLE_FEATURE", ""
-            ).split(",") and (not self.compute_changelog or not old_commit)
+            ).split(",")
+
+            for feature in os.environ.get("E3_ENABLE_FEATURE", "").split(","):
+                if "git_fetch_shallow_since" in feature:
+                    date = feature.removeprefix("git_fetch_shallow_since=")
+                    shallow_cmd = f"--shallow-since={date}"
+
+            if shallow_fetch and (not self.compute_changelog or not old_commit):
+                shallow_cmd = "--depth=1"
+
             g.git_cmd(
                 [
                     "fetch",
                     "-f",
-                    "--depth=1" if shallow else None,
+                    shallow_cmd,
                     remote_name,
                     f"{revision}:refs/e3-checkout",
                 ]
