@@ -1,4 +1,5 @@
 # Version 22.7.0 (2024-??-??) *NOT RELEASED YET*
+* Add DLL closure check to Anod class
 
 # Version 22.6.0 (2024-06-19)
 
