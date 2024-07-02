@@ -32,7 +32,7 @@ from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import cast, NoReturn, Optional, Tuple
+    from typing import cast, NoReturn, Optional
     from collections.abc import Callable
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from e3.mypy import assert_never
 
     # spec name, build env, target env, host env, qualifier, kind, source name
-    CacheKeyType = Tuple[
+    CacheKeyType = tuple[
         str, Platform, Platform, Platform, Optional[str], Optional[str], Optional[str]
     ]
     ResolverType = Callable[[Action, Decision], bool]
@@ -441,7 +441,16 @@ class AnodContext:
                         spec_instance.name, dep.local_name
                     ),
                 )
-            spec_instance.deps[dep.local_name] = dep_instance
+            if dep.kind != "source":
+                spec_instance.deps[dep.local_name] = dep_instance
+            else:
+                srcbuild_list = dep_instance.source_pkg_build
+                if not srcbuild_list:
+                    spec_instance.deps_source_list[dep.local_name] = set()
+                else:
+                    spec_instance.deps_source_list[dep.local_name] = {
+                        srcbuild.name for srcbuild in srcbuild_list
+                    }
 
         # Initialize a spec instance
         spec = self.load(
@@ -671,7 +680,7 @@ class AnodContext:
                     add_dep(spec_instance=spec, dep=e, dep_instance=child_instance)
                     self.dependencies[spec.uid][e.local_name] = (
                         e,
-                        spec.deps[e.local_name],
+                        child_instance,
                     )
 
                     continue

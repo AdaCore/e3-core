@@ -498,8 +498,12 @@ class TestContext:
                 assert ctag["plan_line"] == "plan.txt:4"
 
                 # Also verify that the instance deps is properly loaded
-                assert set(action.anod_instance.deps.keys()) == {"spec1"}
-                assert action.anod_instance.deps["spec1"].__class__.__name__ == "Spec1"
+                assert not set(action.anod_instance.deps.keys())
+                # Also verify that the instance source list is properly loaded
+                assert set(action.anod_instance.deps_source_list.keys()) == {"spec1"}
+                assert set(action.anod_instance.deps_source_list["spec1"]) == {
+                    "spec1-src"
+                }
 
         # Also test that we are still able to extract the values
         # after having scheduled the action graph.
@@ -522,11 +526,14 @@ class TestContext:
                 assert sched_dag.get_tag(uid)
 
                 # Also verify that the instance deps is properly loaded
-                assert set(action.anod_instance.deps.keys()) == {"spec1", "spec11"}
+                assert set(action.anod_instance.deps.keys()) == {"spec11"}
+                assert set(action.anod_instance.deps_source_list.keys()) == {"spec1"}
                 assert (
                     action.anod_instance.deps["spec11"].__class__.__name__ == "Spec11"
                 )
-                assert action.anod_instance.deps["spec1"].__class__.__name__ == "Spec1"
+                assert set(action.anod_instance.deps_source_list["spec1"]) == {
+                    "spec1-src"
+                }
 
             elif uid.endswith("spec3.build"):
                 assert sched_dag.get_tag(uid)
