@@ -154,3 +154,42 @@ class TestCheckout:
 
         result = m.update(vcs="external", url=os.path.abspath("git2"))
         assert result == ReturnValue.unchanged
+
+    def test_shallow_since_checkout(self):
+        os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
+        os.environ["GIT_AUTHOR_NAME"] = "e3 core"
+        os.environ["GIT_COMMITTER_NAME"] = "e3 core"
+        os.environ["GIT_COMMITTER_EMAIL"] = "e3-core@example.net"
+        os.environ["E3_ENABLE_FEATURE"] = "git_fetch_shallow_since=2020-08-04"
+        os.environ["GIT_COMMITTER_DATE"] = "2020-08-01T22:13:13"
+
+        url = GitRepository.create("git3")
+
+        with open(os.path.join("git3", "file3.txt"), "w") as fd:
+            fd.write("first file!")
+        with open(os.path.join("git3", "file4.txt"), "w") as fd:
+            fd.write("second file!")
+
+        m = CheckoutManager(name="myrepo", working_dir=".")
+
+        r = GitRepository(os.path.abspath("git3"))
+
+        r.git_cmd(["add", "file3.txt"])
+        r.git_cmd(["commit", "-m", "first commit", "--date", "2020-08-01T22:13:13"])
+
+        os.environ["GIT_COMMITTER_DATE"] = "2020-08-05T22:13:13"
+        r.git_cmd(["add", "file4.txt"])
+        r.git_cmd(["commit", "-m", "second commit", "--date", "2020-08-05T22:13:13"])
+
+        result = m.update(vcs="git", url=url, revision="master")
+
+        myrepo = GitRepository(os.path.abspath("myrepo"))
+        myrepo.git_cmd(["log", "--pretty=format:%s"], output="log.txt")
+
+        with open("log.txt", "r") as fd:
+            log = fd.readlines()
+
+        assert result == ReturnValue.success
+        assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
+        assert os.path.isfile(os.path.join("myrepo", "file4.txt"))
+        assert log == ["second commit"]

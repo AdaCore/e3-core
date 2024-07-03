@@ -1,5 +1,7 @@
 # Version 22.7.0 (2024-??-??) *NOT RELEASED YET*
 
+* Add git_shallow_fetch_since to checkout.py
+
 # Version 22.6.0 (2024-06-19)
 
 * Fix encoding/vex action statement for affected products
