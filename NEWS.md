@@ -1,4 +1,5 @@
 # Version 22.7.0 (2024-??-??) *NOT RELEASED YET*
+* Add DLL closure check to Anod class
 
 * Add git_shallow_fetch_since to checkout.py
 

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 from e3.pytest import require_tool
 
 git = require_tool("git")
+ldd = require_tool("ldd")
 svn = require_tool("svn")
 
 
