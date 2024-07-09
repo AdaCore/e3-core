@@ -119,7 +119,6 @@ class AnodSpecRepository:
             new_yaml_files = ls(
                 os.path.join(self.spec_dir, "*", "*.yaml"), emit_log_record=False
             )
-            logger.info(new_yaml_files)
             for yml_f in new_yaml_files:
                 associated_spec = os.path.basename(os.path.dirname(yml_f))
 
