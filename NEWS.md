@@ -1,6 +1,6 @@
 # Version 22.7.0 (2024-??-??) *NOT RELEASED YET*
+* Take `main.Main` name's argument as the arguments parser's prog name
 * Add DLL closure check to Anod class
-
 * Add git_shallow_fetch_since to checkout.py
 
 # Version 22.6.0 (2024-06-19)

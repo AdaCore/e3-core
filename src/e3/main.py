@@ -86,7 +86,7 @@ class Main:
             self.name = "unknown"
 
         if argument_parser is None:
-            argument_parser = ArgumentParser()
+            argument_parser = ArgumentParser(prog=self.name)
 
         e3.log.add_logging_argument_group(argument_parser, default_level=logging.INFO)
 

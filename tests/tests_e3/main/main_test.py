@@ -52,7 +52,7 @@ def test_mainprog():
             )
         )
     p = e3.os.process.Run([sys.executable, "mymain.py", "--nocolor"])
-    assert "mymain" in p.out
+    assert "testmain" in p.out
 
 
 def test_modules_logging_limitations():
