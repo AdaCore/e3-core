@@ -112,15 +112,15 @@ def test_mainprog_with_console_logs():
     )
 
     assert re.search(
-        r"^mymain:.*:.*: DEBUG    this is an info line\r?\n"
-        "mymain:.*:.* DEBUG    this is a debug line",
+        r"^mymain:.*:.*: DEBUG +this is an info line\r?\n"
+        "mymain:.*:.* DEBUG +this is a debug line",
         p.out,
         re.MULTILINE,
     )
 
 
 @pytest.mark.skipif(
-    sys.platform not in ("win32"),
+    sys.platform not in ("win32",),
     reason="This test is only for windows platform",
 )
 def test_x86_64_windows_default():
