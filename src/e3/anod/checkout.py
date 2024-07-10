@@ -255,6 +255,11 @@ class CheckoutManager:
                     date = feature.removeprefix("git_fetch_shallow_since=")
                     shallow_cmd = f"--shallow-since={date}"
 
+            for feature in os.environ.get("E3_ENABLE_FEATURE", "").split(","):
+                if "git_fetch_max_depth" in feature:
+                    depth = feature.removeprefix("git_fetch_max_depth=")
+                    shallow_cmd = f"--depth={depth}"
+
             if shallow_fetch and (not self.compute_changelog or not old_commit):
                 shallow_cmd = "--depth=1"
 
