@@ -1,0 +1,195 @@
+### GENERAL ###
+
+# Defaults
+
+variables:
+  GITLAB_REMOTE: "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/"
+  LATEST_PYTHON: py312
+
+stages:
+  - Checkstyle
+  - Linux
+  - Windows
+  - Security
+  - Documentations
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+default:
+  services:
+    - run_as_root:false
+  interruptible: true
+
+
+# Images
+
+.linux-image:
+  services:
+    - image:all-pythons
+    - cpu:4
+  before_script:
+    - source /it/activate-${PYTHON_VERSION}
+    - python -m pip install -U pip
+
+.windows-image:
+  services:
+    - image:e3-windows-core-2022
+    - platform:x86_64-windows-2022
+    - cpu:2
+    - mem:4
+  before_script:
+    - export CI_WIN_PYTHON=${PYTHON_VERSION:2:1}.${PYTHON_VERSION:3:2}
+    - mkdir -p /it/python/$CI_WIN_PYTHON
+    - cd /it/python/$CI_WIN_PYTHON
+    - e3-cathod components --component=python$CI_WIN_PYTHON --platform=x86_64-windows64 --setup=thirdparties --build-date=all --as-name=python$CI_WIN_PYTHON --download
+    - tar -xzf python$CI_WIN_PYTHON.tar.gz --strip-components=1
+    - rm -f python$CI_WIN_PYTHON.tar.gz
+    - cd -
+    - export PATH="/it/python/$CI_WIN_PYTHON:/it/python/$CI_WIN_PYTHON/Scripts:$PATH"
+    - unset CI_WIN_PYTHON
+    - mkdir -p "C:/tmp/Trash"
+    - python -m pip install -U pip
+
+
+# Common
+
+.tox-common:
+  before_script:
+    - python -m pip install --force tox
+  script:
+    - python -m tox --colored yes -e ${CI_TOX_ENV}
+
+.linux-common:
+  extends:
+    - .linux-image
+    - .tox-common
+  before_script:
+    - !reference [.linux-image, before_script]
+    - !reference [.tox-common, before_script]
+
+.windows-common:
+  extends:
+    - .windows-image
+    - .tox-common
+  before_script:
+    - !reference [.windows-image, before_script]
+    - !reference [.tox-common, before_script]
+
+
+### CHECKSTYLE ###
+
+Checkstyle:
+  stage: Checkstyle
+  extends: .linux-common
+  before_script:
+    - !reference [.linux-common, before_script]
+    - git config --global --add
+        url."${GITLAB_REMOTE}/it/black.git".insteadOf
+        https://github.com/ambv/black
+    - git config --global --add
+        url."${GITLAB_REMOTE}/it/flake8.git".insteadOf
+        https://github.com/pycqa/flake8
+    - python -m pip install pre-commit
+    - pre-commit install
+  script:
+    - pre-commit run -a --show-diff-on-failure
+    - !reference [.linux-common, script]
+  variables:
+    PYTHON_VERSION: ${LATEST_PYTHON}
+    CI_TOX_ENV: mypy
+
+
+### LINUX TESTS ###
+
+.test-linux:
+  stage: Linux
+  extends: .linux-common
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    when: always
+    paths:
+      - pytest-report.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: pytest-report.xml
+  variables:
+    CI_TOX_ENV: ${PYTHON_VERSION}-cov-xdist
+
+Test linux py3.9:
+  extends: .test-linux
+  variables:
+    PYTHON_VERSION: py39
+
+Test linux py3.10:
+  extends: .test-linux
+  variables:
+    PYTHON_VERSION: py310
+
+Test linux py3.11:
+  extends: .test-linux
+  variables:
+    PYTHON_VERSION: py311
+
+Test linux py3.12:
+  extends: .test-linux
+  variables:
+    PYTHON_VERSION: py312
+
+
+### WINDOWS TESTS ###
+
+.test-windows:
+  stage: Windows
+  extends: .windows-common
+  variables:
+    CI_TOX_ENV: ${PYTHON_VERSION}-cov-xdist
+
+Test windows py3.9:
+  extends: .test-windows
+  variables:
+    PYTHON_VERSION: py39
+
+Test windows py3.10:
+  extends: .test-windows
+  variables:
+    PYTHON_VERSION: py310
+
+Test windows py3.11:
+  extends: .test-windows
+  variables:
+    PYTHON_VERSION: py311
+
+Test windows py3.12:
+  extends: .test-windows
+  variables:
+    PYTHON_VERSION: py312
+
+
+### OTHERS ###
+
+Security:
+  stage: Security
+  extends: .linux-common
+  variables:
+    PYTHON_VERSION: ${LATEST_PYTHON}
+    CI_TOX_ENV: security
+
+Documentations:
+  stage: Documentations
+  extends: .linux-common
+  variables:
+    PYTHON_VERSION: ${LATEST_PYTHON}
+    CI_TOX_ENV: security
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - docs/**/*
+      - pyproject.toml
+      - setup.cfg
+      - tox.ini
+      - .gitlab-ci.yml

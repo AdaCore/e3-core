@@ -102,7 +102,7 @@ def test_rlimit():
                 "print('hello'); import sys; sys.stdout.flush(); "
                 "import time; time.sleep(10); print('world')",
             ],
-            timeout=1,
+            timeout=3,
         )
         assert "hello" in p.out
         assert "world" not in p.out

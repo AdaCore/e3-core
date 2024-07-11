@@ -22,6 +22,10 @@ def file_url(path, unix=False):
         return "file://" + path
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="test using SVN: not available in our windows CI image at the moment.",
+)
 def test_svn_repo(svn):
     cwd = os.getcwd()
 

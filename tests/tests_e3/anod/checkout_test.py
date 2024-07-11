@@ -1,3 +1,4 @@
+import sys
 import logging
 import os
 import pytest
@@ -42,6 +43,10 @@ class TestCheckout:
     repo_data = os.path.join(os.path.dirname(__file__), "vcs_data")
     repo_data2 = os.path.join(os.path.dirname(__file__), "vcs_data2")
 
+    @pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="test using SVN: not available in our windows CI image at the moment.",
+    )
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
     def test_svn_checkout(self, svn, compute_changelog, e3_feature):
