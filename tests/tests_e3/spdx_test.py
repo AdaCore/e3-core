@@ -200,7 +200,7 @@ def test_spdx():
         "",
         "DocumentName: my-spdx-test",
         f"DocumentNamespace: {document_namespace}",
-        "SPDXVersion: SPDX-1.2",
+        "SPDXVersion: SPDX-2.3",
         "DataLicense: CC0-1.0",
         "SPDXID: SPDXRef-DOCUMENT",
         "",
@@ -277,7 +277,7 @@ def test_spdx():
 
     assert json_content == {
         "SPDXID": "SPDXRef-DOCUMENT",
-        "spdxVersion": "SPDX-1.2",
+        "spdxVersion": "SPDX-2.3",
         "dataLicense": "CC0-1.0",
         "documentNamespace": document_namespace,
         "documentDescribes": ["SPDXRef-my-spdx-test-main-2.2.2-pkg"],
