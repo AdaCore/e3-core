@@ -21,7 +21,6 @@ default:
     - run_as_root:false
   interruptible: true
 
-
 # Images
 
 .linux-image:
@@ -39,18 +38,9 @@ default:
     - cpu:2
     - mem:4
   before_script:
-    - export CI_WIN_PYTHON=${PYTHON_VERSION:2:1}.${PYTHON_VERSION:3:2}
-    - mkdir -p /it/python/$CI_WIN_PYTHON
-    - cd /it/python/$CI_WIN_PYTHON
-    - e3-cathod components --component=python$CI_WIN_PYTHON --platform=x86_64-windows64 --setup=thirdparties --build-date=all --as-name=python$CI_WIN_PYTHON --download
-    - tar -xzf python$CI_WIN_PYTHON.tar.gz --strip-components=1
-    - rm -f python$CI_WIN_PYTHON.tar.gz
-    - cd -
-    - export PATH="/it/python/$CI_WIN_PYTHON:/it/python/$CI_WIN_PYTHON/Scripts:$PATH"
-    - unset CI_WIN_PYTHON
+    - source /it/activate-python ${PYTHON_VERSION:2:1}.${PYTHON_VERSION:3:2}
     - mkdir -p "C:/tmp/Trash"
     - python -m pip install -U pip
-
 
 # Common
 
@@ -76,7 +66,6 @@ default:
     - !reference [.windows-image, before_script]
     - !reference [.tox-common, before_script]
 
-
 ### CHECKSTYLE ###
 
 Checkstyle:
@@ -85,11 +74,11 @@ Checkstyle:
   before_script:
     - !reference [.linux-common, before_script]
     - git config --global --add
-        url."${GITLAB_REMOTE}/it/black.git".insteadOf
-        https://github.com/ambv/black
+      url."${GITLAB_REMOTE}/it/black.git".insteadOf
+      https://github.com/ambv/black
     - git config --global --add
-        url."${GITLAB_REMOTE}/it/flake8.git".insteadOf
-        https://github.com/pycqa/flake8
+      url."${GITLAB_REMOTE}/it/flake8.git".insteadOf
+      https://github.com/pycqa/flake8
     - python -m pip install pre-commit
     - pre-commit install
   script:
@@ -98,7 +87,6 @@ Checkstyle:
   variables:
     PYTHON_VERSION: ${LATEST_PYTHON}
     CI_TOX_ENV: mypy
-
 
 ### LINUX TESTS ###
 
@@ -138,7 +126,6 @@ Test linux py3.12:
   variables:
     PYTHON_VERSION: py312
 
-
 ### WINDOWS TESTS ###
 
 .test-windows:
@@ -166,7 +153,6 @@ Test windows py3.12:
   extends: .test-windows
   variables:
     PYTHON_VERSION: py312
-
 
 ### OTHERS ###
 
