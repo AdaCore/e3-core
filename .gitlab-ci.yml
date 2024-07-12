@@ -8,8 +8,7 @@ variables:
 
 stages:
   - Checkstyle
-  - Linux
-  - Windows
+  - Tests
   - Security
   - Documentations
 
@@ -104,7 +103,7 @@ Checkstyle:
 ### LINUX TESTS ###
 
 .test-linux:
-  stage: Linux
+  stage: Tests
   extends: .linux-common
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
@@ -143,7 +142,7 @@ Test linux py3.12:
 ### WINDOWS TESTS ###
 
 .test-windows:
-  stage: Windows
+  stage: Tests
   extends: .windows-common
   variables:
     CI_TOX_ENV: ${PYTHON_VERSION}-cov-xdist
