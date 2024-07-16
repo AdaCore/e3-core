@@ -798,7 +798,7 @@ def sync_tree(
 
                     logger.debug("chflags: operation not supported [EOPNOTSUPP]")
 
-    def safe_copy(src: FileInfo, dst: FileInfo) -> None:
+    def safe_copy(src: FileInfo, dst: FileInfo, is_directory: bool = False) -> None:
         """Copy src file into dst preserving all attributes.
 
         :param src: the source FileInfo object
@@ -809,7 +809,7 @@ def sync_tree(
             if not islink(dst) or os.readlink(dst.path) != linkto:
                 if dst.stat is not None:
                     rm(dst.path, recursive=True, glob=False)
-                os.symlink(linkto, dst.path)
+                os.symlink(linkto, dst.path, target_is_directory=is_directory)
             copystat(src, dst)
         else:
             if isdir(dst):
@@ -1001,7 +1001,9 @@ def sync_tree(
             # the source tree.
             if need_update(wf.source, wf.target):
                 if isfile(wf.source) or islink(wf.source):
-                    safe_copy(wf.source, wf.target)
+                    safe_copy(
+                        wf.source, wf.target, is_directory=os.path.isdir(wf.source.path)
+                    )
                     updated_list.append(wf.target.path)
                 elif isdir(wf.source):
                     safe_mkdir(wf.source, wf.target)
