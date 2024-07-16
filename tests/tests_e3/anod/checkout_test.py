@@ -209,3 +209,46 @@ class TestCheckout:
         assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
         assert os.path.isfile(os.path.join("myrepo", "file4.txt"))
         assert log == ["second commit"]
+
+    def test_max_depth_checkout(self):
+        os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
+        os.environ["GIT_AUTHOR_NAME"] = "e3 core"
+        os.environ["GIT_COMMITTER_NAME"] = "e3 core"
+        os.environ["GIT_COMMITTER_EMAIL"] = "e3-core@example.net"
+        os.environ["E3_ENABLE_FEATURE"] = "git_fetch_max_depth=2"
+
+        url = GitRepository.create("git4")
+
+        with open(os.path.join("git4", "file3.txt"), "w") as fd:
+            fd.write("first file!")
+        with open(os.path.join("git4", "file4.txt"), "w") as fd:
+            fd.write("second file!")
+        with open(os.path.join("git4", "file5.txt"), "w") as fd:
+            fd.write("third file!")
+
+        m = CheckoutManager(name="myrepo", working_dir=".")
+
+        r = GitRepository(os.path.abspath("git4"))
+
+        r.git_cmd(["add", "file3.txt"])
+        r.git_cmd(["commit", "-m", "first commit"])
+
+        r.git_cmd(["add", "file4.txt"])
+        r.git_cmd(["commit", "-m", "second commit"])
+
+        r.git_cmd(["add", "file5.txt"])
+        r.git_cmd(["commit", "-m", "third commit"])
+
+        result = m.update(vcs="git", url=url, revision="master")
+
+        myrepo = GitRepository(os.path.abspath("myrepo"))
+        myrepo.git_cmd(["log", "--pretty=format:%s"], output="log.txt")
+
+        with open("log.txt", "r") as fd:
+            log = fd.read().splitlines()
+
+        assert result == ReturnValue.success
+        assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
+        assert os.path.isfile(os.path.join("myrepo", "file4.txt"))
+        assert os.path.isfile(os.path.join("myrepo", "file5.txt"))
+        assert log == ["third commit", "second commit"]
