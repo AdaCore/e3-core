@@ -1,7 +1,7 @@
 """Main program initialization.
 
 This package provides a class called Main used to initialize a python script
-invoked from command line. The main goal is to ensure consistency in term of
+invoked from command line. The main goal is to ensure consistency in terms of
 interface, documentation and logging activities for all scripts using e3.
 
 The script will support by default the following switches::
@@ -9,8 +9,8 @@ The script will support by default the following switches::
     -v|--verbose to enable verbose mode (a console logger is added)
     -h|--help    display command line help
     --log-file FILE
-                 to redirect logs to a given file (this is independent from
-                 verbose option
+                 to redirect logs to a given file (this is independent of
+                 verbose option)
     --console-logs
                  disable color, progress bars, and redirect as much as
                  possible to stdout, starting lines with the given prefix
@@ -86,7 +86,7 @@ class Main:
             self.name = "unknown"
 
         if argument_parser is None:
-            argument_parser = ArgumentParser()
+            argument_parser = ArgumentParser(prog=self.name)
 
         e3.log.add_logging_argument_group(argument_parser, default_level=logging.INFO)
 
