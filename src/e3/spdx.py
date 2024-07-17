@@ -835,7 +835,7 @@ class DocumentInformation(SPDXSection):
 
     document_name: DocumentName
     document_namespace: DocumentNamespace = field(init=False)
-    version: SPDXVersion = SPDXVersion("SPDX-1.2")
+    version: SPDXVersion = SPDXVersion("SPDX-2.3")
     data_license: DataLicense = DataLicense("CC0-1.0")
     spdx_id: SPDXID = SPDXID("DOCUMENT")
 
