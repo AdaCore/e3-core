@@ -184,7 +184,7 @@ class CheckoutManager:
                 self.working_dir,
                 preserve_timestamps=False,
                 delete_ignore=True,
-                ignore=list(VCS_IGNORE_LIST) + ignore_list,
+                ignore=[".git", ".svn"] + ignore_list,
             )
 
         new_commit = get_filetree_state(self.working_dir, ignore_hidden=False)
