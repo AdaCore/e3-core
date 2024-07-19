@@ -96,6 +96,15 @@ def env_protect(request: pytest.FixtureRequest) -> None:
         if "E3_HOSTNAME" in os.environ:
             del os.environ["E3_HOSTNAME"]
 
+        # Set environment variables for the default Git branch to
+        # ensure that we do not assume that the default branch is
+        # named master. The best practice when writing test is
+        # to either explicitely name the branch or to get the
+        # value with `git branch --show-current`
+        os.environ["GIT_CONFIG_COUNT"] = "1"
+        os.environ["GIT_CONFIG_KEY_0"] = "init.defaultbranch"
+        os.environ["GIT_CONFIG_VALUE_0"] = "default_branch"
+
         def restore_env() -> None:
             Env().restore()
             rm(tempd, True)
