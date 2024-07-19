@@ -239,7 +239,8 @@ class TestCheckout:
         r.git_cmd(["add", "file5.txt"])
         r.git_cmd(["commit", "-m", "third commit"])
 
-        result = m.update(vcs="git", url=url, revision="master")
+        main_branch = r.git_cmd(["branch", "--show-current"]).out
+        result = m.update(vcs="git", url=url, revision=main_branch)
 
         myrepo = GitRepository(os.path.abspath("myrepo"))
         myrepo.git_cmd(["log", "--pretty=format:%s"], output="log.txt")
