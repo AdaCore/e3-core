@@ -46,11 +46,6 @@ dependencies = [
 Repository = "https://github.com/AdaCore/e3-core"
 
 [project.optional-dependencies]
-config = [
-  "tomlkit",
-  # There are some backward incompatible checks in typeguard 3.x
-  "typeguard<3.0.0"
-]
 test = [
   "coverage",
   "mock",

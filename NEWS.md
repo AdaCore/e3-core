@@ -4,6 +4,10 @@
 * Add DLL closure check to Anod class
 * Add git_shallow_fetch_since to checkout.py
 
+* Backward incompatible change:
+  * Remove e3.config and typeguard dependency. This removes the possibility
+    to configure the default e3.log formatting using `e3.toml`
+
 # Version 22.6.0 (2024-06-19)
 
 * Fix encoding/vex action statement for affected products
