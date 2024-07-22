@@ -110,6 +110,34 @@ CHECK_DLL_CLOSURE_ARGUMENTS = [
             ),
         ),
     ),
+    (
+        (
+            (
+                "/usr/bin/ls:\n"
+                "\tlinux-vdso.so.1 (0xxxx)\n"
+                "\tlibselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0xxxx)\n"
+                "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0xxxx)\n"
+                "\tlibpcre2-8.so.0 => not found\n"
+                "\t/lib64/ld-linux-x86-64.so.2 (0xxxx)\n"
+            ),
+            ["libc.so.6", "libselinux.so.1"],
+        ),
+        (("- libpcre2-8.so.0: not found"),),
+    ),
+    (
+        (
+            (
+                "/usr/bin/ls:\n"
+                "\tlinux-vdso.so.1 (0xxxx)\n"
+                "\tlibselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0xxxx)\n"
+                "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0xxxx)\n"
+                "\tlibpcre2-8.so.0 => not found\n"
+                "\t/lib64/ld-linux-x86-64.so.2 (0xxxx)\n"
+            ),
+            ["libc.so.6", "libselinux.so.1", "libpcre2-8.so.0"],
+        ),
+        (None,),
+    ),
 ]
 
 
@@ -173,13 +201,13 @@ def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
     elif errors:
         with pytest.raises(AnodError) as ae:
             test_spec.check_shared_libraries_closure(
-                prefix=None, ignored_libs=None, ldd_output=ldd_output
+                prefix=None, ignored_libs=ignored, ldd_output=ldd_output
             )
         assert errors in ae.value.args[0]
     else:
         # There is an ldd_output, but no errors may be raised on unix hosts.
         test_spec.check_shared_libraries_closure(
-            prefix=None, ignored_libs=None, ldd_output=ldd_output
+            prefix=None, ignored_libs=ignored, ldd_output=ldd_output
         )
 
 

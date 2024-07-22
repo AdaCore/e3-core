@@ -484,6 +484,23 @@ class Anod:
                 # Line looks like:
                 # ``        otherdll.so => /other/otherdll.so (0xabcd)``
                 name, path = line.strip().split(" => ", 1)
+
+                if case_sensitive:
+                    in_ignored = len([k for k in ignored if name.startswith(k)]) > 0
+                else:
+                    in_ignored = (
+                        len([k for k in ignored if name.lower().startswith(k.lower())])
+                        > 0
+                    )
+
+                # Make sure there are no "not found" errors
+                if "not found" in line.lower():
+                    if not in_ignored:
+                        if lib_file not in errors:
+                            errors[lib_file] = []
+                        errors[lib_file].append(f"\n\t- {name}: {path}")
+                    continue
+
                 path = re.sub(" (.*)", "", path)
 
                 # Make sure a path is defined, we may have lines like::
@@ -494,13 +511,6 @@ class Anod:
                 if not path.strip() or not Path(path).exists():
                     continue
 
-                if case_sensitive:
-                    in_ignored = len([k for k in ignored if name.startswith(k)]) > 0
-                else:
-                    in_ignored = (
-                        len([k for k in ignored if name.lower().startswith(k.lower())])
-                        > 0
-                    )
                 if os.path.relpath(path, root_dir).startswith("..") and not in_ignored:
                     if lib_file not in errors:
                         errors[lib_file] = []
