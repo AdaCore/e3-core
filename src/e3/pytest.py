@@ -5,7 +5,6 @@ from tempfile import mkdtemp, NamedTemporaryFile
 import logging
 import os
 
-from e3.config import Config
 from e3.env import Env
 from e3.fs import rm
 from e3.os.fs import cd, mv, which
@@ -88,7 +87,6 @@ def env_protect(request: pytest.FixtureRequest) -> None:
         Env().store()
         tempd = mkdtemp()
         cd(tempd)
-        Config.data = {}
 
         os.environ["TZ"] = "UTC"
         os.environ["E3_ENABLE_FEATURE"] = ""

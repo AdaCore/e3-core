@@ -1,7 +1,6 @@
 """Extensions to the standard Python logging system."""
 
 from __future__ import annotations
-from dataclasses import dataclass
 
 import logging
 import os
@@ -9,12 +8,10 @@ import re
 import sys
 import time
 import json
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from colorama import Fore, Style
 from tqdm import tqdm
-
-from e3.config import ConfigSection
 
 if TYPE_CHECKING:
     from typing import (
@@ -47,28 +44,13 @@ LEVELS = {
 NO_DEBUG_LOGGING_MODULES = ["boto3", "botocore", "requests", "urllib3"]
 
 
-@dataclass
-class LogConfig(ConfigSection):
-    title: ClassVar[str] = "log"
-
-    pretty: bool = True
-    stream_fmt: str = "%(levelname)-8s %(message)s"
-    file_fmt: str = "%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s"
-
-
-log_config = LogConfig.load()
-
-
 # Default output stream (sys.stdout by default, or a file descriptor if
 # activate() is called with a filename.
 default_output_stream: TextIO | IO[str] = sys.stdout
 
 # If sys.stdout is a terminal then enable "pretty" output for user
 # This includes progress bars and colors
-if sys.stdout.isatty():  # all: no cover (not used in production!)
-    pretty_cli = log_config.pretty
-else:
-    pretty_cli = False
+pretty_cli = sys.stdout.isatty()
 
 console_logs: str | None = None
 
@@ -419,8 +401,8 @@ def activate_with_args(args: Namespace, default_level: int = logging.WARNING) ->
 
 
 def activate(
-    stream_format: str = log_config.stream_fmt,
-    file_format: str = log_config.file_fmt,
+    stream_format: str = "%(levelname)-8s %(message)s",
+    file_format: str = "%(asctime)s: %(name)-24s: %(levelname)-8s %(message)s",
     datefmt: str | None = None,
     level: int = logging.INFO,
     filename: str | None = None,

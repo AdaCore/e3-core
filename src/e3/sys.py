@@ -7,8 +7,6 @@ import struct
 import sys
 from typing import TYPE_CHECKING
 from enum import Enum
-from dataclasses import asdict
-from pprint import pformat
 
 import e3.log
 
@@ -178,9 +176,6 @@ def main() -> None:
     m.argument_parser.add_argument(
         "--check", help="Run e3 sanity checking", action="store_true"
     )
-    m.argument_parser.add_argument(
-        "--show-config", action="store_true", help="Show e3 config"
-    )
     m.parse_args()
 
     if TYPE_CHECKING:
@@ -199,11 +194,6 @@ def main() -> None:
             return
     elif m.args.platform_info:
         print(getattr(Env(), m.args.platform_info))
-
-    if m.args.show_config:
-        print("[log]")
-        for k, v in asdict(e3.log.log_config).items():
-            print("{}: {}".format(k, pformat(v)))
 
 
 def set_python_env(prefix: str) -> None:
