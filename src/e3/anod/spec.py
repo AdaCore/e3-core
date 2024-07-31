@@ -236,6 +236,8 @@ class Anod:
         kind: PRIMITIVE,
         jobs: int = 1,
         env: BaseEnv | None = None,
+        *,
+        parse_qualifiers: bool = True,
     ):
         """Initialize an Anod instance.
 
@@ -244,6 +246,10 @@ class Anod:
         :param jobs: max parallelism level allowed for jobs spawned by this
             instance
         :param env: alternate platform environment
+        :param parse_qualifiers: if True AND Anod.enable_name_generator, parse the
+            qualifiers, otherwise do nothing. This is useful to be able to load a spec
+            and retrieve qualifiers information without raising any qualifier related
+            exception.
         :raise: SpecError
         """
         self.deps: dict[str, Anod] = {}
@@ -282,7 +288,8 @@ class Anod:
         if self.enable_name_generator and self.kind != "source":
             self.qualifiers_manager = QualifiersManager(self)
             self.declare_qualifiers_and_components(self.qualifiers_manager)
-            self.qualifiers_manager.parse(self.parsed_qualifier)
+            if parse_qualifiers:
+                self.qualifiers_manager.parse(self.parsed_qualifier)
 
         # UID of the spec instance
         self.uid = ".".join(
