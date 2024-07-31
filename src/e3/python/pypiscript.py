@@ -2,7 +2,7 @@ from __future__ import annotations
 from e3.python.pypi import PyPIClosure
 from e3.python.wheel import Wheel
 from e3.anod.checkout import CheckoutManager
-from pkg_resources import Requirement
+from packaging.requirements import Requirement
 from e3.main import Main
 from e3.fs import mkdir, cp
 from datetime import datetime
@@ -164,14 +164,14 @@ def main() -> None:
         )
 
     # Compute the list of toplevel requirements
-    toplevel_reqs = {Requirement.parse(wheel) for wheel in config.get("wheels", {})} | {
-        Requirement.parse(r) for r in config.get("requirements", [])
+    toplevel_reqs = {Requirement(wheel) for wheel in config.get("wheels", {})} | {
+        Requirement(r) for r in config.get("requirements", [])
     }
 
     with PyPIClosure(
         cache_file=os.path.join(m.args.cache_dir, "pip.cache"),
         cache_dir=wheel_cache_dir,
-        python3_version=m.args.python3_version,
+        python3_version=f"3.{m.args.python3_version}",
         platforms=config["platforms"],
         allowed_prerelease=m.args.allowed_prerelease,
         allowed_yanked=m.args.allowed_yanked,
@@ -198,8 +198,8 @@ def main() -> None:
             ),
             "w",
         ) as fd:
-            for req in pypi.closure_as_requirements():
+            for req in pypi.requirements_closure():
                 if "discard_from_closure" not in config or not re.search(
-                    config["discard_from_closure"], req.project_name
+                    config["discard_from_closure"], req.name
                 ):
                     fd.write(f"{str(req)}\n")

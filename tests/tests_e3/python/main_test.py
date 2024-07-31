@@ -42,7 +42,7 @@ def test_wheel():
     mkdir(".cache")
 
     with PyPIClosure(
-        python3_version=10,
+        python3_version="3.10",
         platforms=[
             "x86_64-linux",
             "aarch64-linux",
@@ -62,11 +62,10 @@ def test_wheel():
         pypi.add_requirement("src1!=0.4.2")
         pypi.add_requirement("src1~=1.0.0")
         assert len(pypi.file_closure()) == 2
-        assert len(pypi.closure_as_requirements()) == 2
-        assert len(pypi.closure()) == 2
+        assert len(pypi.requirements_closure()) == 2
 
     with PyPIClosure(
-        python3_version=10,
+        python3_version="3.10",
         platforms=[
             "x86_64-linux",
             "aarch64-linux",
@@ -80,8 +79,7 @@ def test_wheel():
         pypi.add_requirement("src2==1.0.0")
         pypi.add_requirement("src1")
         assert len(pypi.file_closure()) == 2
-        assert len(pypi.closure_as_requirements()) == 2
-        assert len(pypi.closure()) == 2
+        assert len(pypi.requirements_closure()) == 2
 
 
 def test_pypi_closure_tool():
@@ -126,7 +124,7 @@ def test_star_requirements():
     mkdir(".cache")
 
     with PyPIClosure(
-        python3_version=10,
+        python3_version="3.10",
         platforms=[
             "x86_64-linux",
         ],
@@ -135,11 +133,12 @@ def test_star_requirements():
     ) as pypi:
         pypi.add_wheel(wheel1.path)
         pypi.add_wheel(wheel2.path)
-        with pytest.raises(PyPIError, match="Cannot satisfy constraint src1!=1.0.*"):
-            pypi.add_requirement("src2==1.0.0")
+        pypi.add_requirement("src2==1.0.0")
+        with pytest.raises(PyPIError, match="Impossible resolution"):
+            pypi.requirements_closure()
 
     with PyPIClosure(
-        python3_version=10,
+        python3_version="3.10",
         platforms=[
             "x86_64-linux",
         ],
@@ -149,7 +148,7 @@ def test_star_requirements():
         pypi.add_wheel(wheel2.path)
         pypi.add_wheel(wheel3.path)
         pypi.add_requirement("src2==1.0.0")
-        assert len(pypi.closure()) == 2
+        assert len(pypi.requirements_closure()) == 2
 
 
 @pytest.mark.parametrize(
@@ -169,7 +168,7 @@ def test_yanked(pypi_server, arguments, expected):
 
     with pypi_server:
         with PyPIClosure(
-            python3_version=11,
+            python3_version="3.11",
             platforms=[
                 "x86_64-linux",
             ],
@@ -178,14 +177,13 @@ def test_yanked(pypi_server, arguments, expected):
             allowed_yanked=allowed_yanked,
         ) as pypi:
             if invalid_wheel:
+                pypi.add_requirement(invalid_wheel)
+
                 with pytest.raises(
                     PyPIError,
-                    match=(
-                        "Cannot find latest version for 'setuptools-scm': "
-                        "No more suitable version"
-                    ),
+                    match=("Impossible resolution"),
                 ):
-                    pypi.add_requirement(invalid_wheel)
+                    pypi.requirements_closure()
             else:
                 pypi.add_requirement("setuptools_scm >= 6.2, <= 8")
                 all_filenames = [basename(f) for f in pypi.file_closure()]

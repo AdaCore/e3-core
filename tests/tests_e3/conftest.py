@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from os.path import abspath, dirname, join as path_join, isfile, isdir
-from functools import partial
-from json import loads as json_loads
 from typing import TYPE_CHECKING
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
-
-from e3.fs import mkdir
+import json
+import shutil
+import os
+from e3.fs import mkdir, cp
+from e3.os.fs import touch
 from e3.python.wheel import Wheel
 
 import pytest
@@ -25,7 +26,9 @@ svn = require_tool("svn")
 
 class PypiSimulator:
     PYPI_URL = "https://pypi.org"
-    MATCHER = regex_compile(f"{PYPI_URL}/pypi/(?P<package>.*)/json")
+    PYPIHOSTED_URL = "https://files.pythonhosted.org"
+    SIMPLE_MATCHER = regex_compile(f"{PYPI_URL}/simple/(?P<package>.*)/")
+    DOWNLOAD_MATCHER = regex_compile(f"{PYPIHOSTED_URL}/(?P<path>.*)")
     DATA_DIR = path_join(dirname(abspath(__file__)), "pypi_data")
 
     def __init__(self, requests_mock: Any) -> None:
@@ -61,64 +64,73 @@ class PypiSimulator:
         return result
 
     def get_metadata(self, request: Any, context: Any) -> dict:
-        m = self.MATCHER.match(request.url)
+        m = self.SIMPLE_MATCHER.match(request.url)
         if not m:
             context.status_code = 400
-            return {
-                "message": "Bad Request",
-                "exception": "Mocked pypi received an unexpected request",
-                "url": request.url,
-                "traceback": [tmp.strip() for tmp in traceback_format_stack()],
-            }
+            return json.dumps(
+                {
+                    "message": "Bad Request",
+                    "exception": "Mocked pypi received an unexpected request",
+                    "url": request.url,
+                    "traceback": [tmp.strip() for tmp in traceback_format_stack()],
+                }
+            )
 
         package = m.group("package")
 
-        path = path_join(self.DATA_DIR, "json", f"{package}.json")
+        path = path_join(self.DATA_DIR, "simple", f"{package}.html")
         if not isfile(path):
             context.status_code = 404
-            return {
-                "message": "Not Found",
-                "exception": f"'{package}.json' file not found",
-                "url": request.url,
-                "package": package,
-                "traceback": [tmp.strip() for tmp in traceback_format_stack()],
-            }
+            return json.dumps(
+                {
+                    "message": "Not Found",
+                    "exception": f"'{package}.html' file not found",
+                    "url": request.url,
+                    "package": package,
+                    "traceback": [tmp.strip() for tmp in traceback_format_stack()],
+                }
+            )
 
         try:
-            with open(path) as json_file:
-                result = json_loads(json_file.read())
+            with open(path) as html_file:
+                result = html_file.read()
 
-            if "releases" not in result:
-                raise Exception("Bad json metadata: 'releases' key not found")
         except Exception as e:
             context.status_code = 500
-            return {
-                "message": "Internal Server Error",
-                "exception": str(e),
-                "url": request.url,
-                "package": package,
-                "traceback": [tmp.strip() for tmp in traceback_format_stack()],
-            }
+            return json.dumps(
+                {
+                    "message": "Internal Server Error",
+                    "exception": str(e),
+                    "url": request.url,
+                    "package": package,
+                    "traceback": [tmp.strip() for tmp in traceback_format_stack()],
+                }
+            )
 
-        for version, data in result["releases"].items():
-            for elm in data:
-                # Only wheel are supported
-                if elm["url"] not in self.mocked_download_urls or not elm[
-                    "url"
-                ].endswith(".whl"):
-                    self.mocked_download_urls.add(elm["url"])
-                    self.requests_mock.get(
-                        elm["url"],
-                        content=partial(
-                            self.download_file, result["info"]["name"], version
-                        ),
-                    )
+        context.status_code = 200
+        return result
+
+    def get_resource(self, request: Any, context: Any) -> str:
+        m = self.DOWNLOAD_MATCHER.match(request.url)
+        package = m.group("path").split("/")[-1].split("#")[0]
+        package_name = "-".join(package.split("-", 2)[0:2])
+        metadata_file = os.path.join(self.DATA_DIR, "metadata", package_name)
+        mkdir(f"{package_name}/{package_name}.dist-info")
+        if os.path.isfile(metadata_file):
+            cp(metadata_file, f"{package_name}/{package_name}.dist-info/METADATA")
+        else:
+            touch(f"{package_name}/{package_name}.dist-info/METADATA")
+        shutil.make_archive(package, format="zip", root_dir=package_name, base_dir=".")
+        with open(f"{package}.zip", "rb") as fd:
+            result = fd.read()
+        cp(f"{package}.zip", "/tmp")
         context.status_code = 200
         return result
 
     def __enter__(self):
         self.requests_mock.start()
-        self.requests_mock.get(self.MATCHER, json=self.get_metadata)
+        self.requests_mock.get(self.SIMPLE_MATCHER, text=self.get_metadata)
+        self.requests_mock.get(self.DOWNLOAD_MATCHER, content=self.get_resource)
         return self
 
     def __exit__(self, type_t: Any, value: Any, traceback: Any) -> None:
