@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from difflib import get_close_matches
 from typing import TYPE_CHECKING
 from hashlib import sha1
 from e3.anod.error import AnodError
@@ -708,7 +709,31 @@ class QualifiersManager:
         )
         if invalid_keys:
             invalid_keys_str = ", ".join(invalid_keys)
-            raise AnodError(f"{self.origin}: Invalid qualifier(s): {invalid_keys_str}")
+            error_msg = f"{self.origin}: Invalid qualifier(s): {invalid_keys_str}\n"
+
+            if self.qualifier_decls:
+                probable_qualifiers = [
+                    repr(
+                        get_close_matches(
+                            key, self.qualifier_decls.keys(), n=1, cutoff=0
+                        )[0]
+                    )
+                    for key in invalid_keys
+                ]
+                if len(probable_qualifiers) == 1:
+                    error_msg += f"Did you mean {probable_qualifiers[0]}?\n"
+                else:
+                    error_msg += (
+                        f"Did you mean {', '.join(probable_qualifiers[:-1])} or "
+                        f"{probable_qualifiers[-1]}?\n"
+                    )
+
+            error_msg += (
+                f"Use `anod help {self.anod_instance.name}` to get a list of valid "
+                "qualifiers"
+            )
+
+            raise AnodError(error_msg)
 
         # Update default dict with user values
         result.update(

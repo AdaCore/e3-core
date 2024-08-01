@@ -68,6 +68,16 @@ def test_qualifiers_manager_errors():
         name = "dummy_spec"
         enable_name_generator = True
 
+    class AnodDummyWithQual(Anod):
+        name = "dummy_spec"
+        enable_name_generator = True
+
+        def declare_qualifiers_and_components(self, qm: QualifiersManager) -> None:
+            qm.declare_tag_qualifier(
+                name="test",
+                description="test",
+            )
+
     anod_dummy = AnodDummy("", kind="build")
 
     # Add a qualifier after parse
@@ -165,7 +175,7 @@ def test_qualifiers_manager_errors():
     with pytest.raises(AnodError) as err:
         qualifiers_manager.parse({})
     assert str(err.value) == (
-        "build(name=dummy_spec, qual={}): " "Missing qualifier(s): mandatory_qual"
+        "build(name=dummy_spec, qual={}): Missing qualifier(s): mandatory_qual"
     )
 
     # Use of undeclared qualifier
@@ -173,7 +183,16 @@ def test_qualifiers_manager_errors():
         AnodDummy("invalid_qual", kind="build")
     assert str(err.value) == (
         "build(name=dummy_spec, qual={'invalid_qual': ''}): "
-        "Invalid qualifier(s): invalid_qual"
+        "Invalid qualifier(s): invalid_qual\n"
+        "Use `anod help dummy_spec` to get a list of valid qualifiers"
+    )
+    with pytest.raises(AnodError) as err:
+        AnodDummyWithQual("tst", kind="build")
+    assert str(err.value) == (
+        "build(name=dummy_spec, qual={'tst': ''}): "
+        "Invalid qualifier(s): tst\n"
+        "Did you mean 'test'?\n"
+        "Use `anod help dummy_spec` to get a list of valid qualifiers"
     )
 
     # Pass a key_value qualifier with a value not in choices
@@ -203,7 +222,8 @@ def test_qualifiers_manager_errors():
         qualifiers_manager.parse({"test_qual": "val1"})
     assert str(err.value) == (
         "build(name=dummy_spec, qual={'test_qual': 'val1'}): "
-        "Invalid qualifier(s): test_qual"
+        "Invalid qualifier(s): test_qual\n"
+        "Use `anod help dummy_spec` to get a list of valid qualifiers"
     )
 
     # use a not declared qualifier in component
