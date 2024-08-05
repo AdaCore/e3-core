@@ -218,7 +218,6 @@ class PyPI:
                 try:
                     c = PyPICandidate(
                         link=link,
-                        env=env,
                         extras=extras,
                         cache_dir=os.path.join(self.cache_dir, "resources"),
                     )
@@ -263,14 +262,12 @@ class PyPICandidate:
     def __init__(
         self,
         link: PyPILink,
-        env: dict[str, str],
         extras: set[str],
         cache_dir: str,
     ) -> None:
         """Initialize a Candidate.
 
         :param link: data return by PyPI simple API
-        :param env: the environment used to evaluate requirements markers
         :param extras: list of extras that should be included
         :param cache_dir: cache location in which resources are downloaded
         """
@@ -308,9 +305,6 @@ class PyPICandidate:
         # Requirements cache
         self._reqs: None | set[Requirement] = None
 
-        # Copy of the environment used to evaluate markers
-        self.env = dict(env)
-
     @property
     def is_wheel(self) -> bool:
         """Check if resource is a wheel."""
@@ -332,74 +326,80 @@ class PyPICandidate:
                     fd.write(answer.content)
         return download_path
 
-    @property
-    def requirements(self) -> set[Requirement]:
+    def requirements(self, env: dict[str, str]) -> set[Requirement]:
         """Return the list of requirements for the package.
 
+        :param env: the environment used to evaluate requirements markers
         :return: a set of Requirement
         """
+        # Make a copy of the env as the function modifies it on the fly
+        env = dict(env)
+
         # Check if the requirements have already been computed
-        if self._reqs is not None:
-            return self._reqs
+        if self._reqs is None:
+            self._reqs = set()
 
-        reqs: set[Requirement] = set()
+            if self.is_wheel:
+                # This is a wheel so there is a formal way to get the metadata.
+                wheel_path = self.download()
+                self._reqs |= Wheel(path=wheel_path).requirements
 
-        if self.is_wheel:
-            # This is a wheel so there is a formal way to get the metadata.
-            wheel_path = self.download()
-            reqs |= Wheel(path=wheel_path).requirements
+            elif self.filename.endswith(".tar.gz"):
+                # This is a .tar.gz archive so we might find some info about the
+                # requirements either in the egg-info data for older packages or
+                # as fallback in a requirements.txt file.
+                path = self.download()
+                with tarfile.open(name=path, mode="r:gz") as fd:
+                    egg_info = f"{self.filename[:-7]}/{self.name}.egg-info"
+                    egg_info_requires = f"{egg_info}/requires.txt"
+                    requirements_txt = f"{self.filename[:-7]}/requirements.txt"
+                    archive_members = fd.getnames()
 
-        elif self.filename.endswith(".tar.gz"):
-            # This is a .tar.gz archive so we might find some info about the
-            # requirements either in the egg-info data for older packages or
-            # as fallback in a requirements.txt file.
-            path = self.download()
-            with tarfile.open(name=path, mode="r:gz") as fd:
-                egg_info = f"{self.filename[:-7]}/{self.name}.egg-info"
-                egg_info_requires = f"{egg_info}/requires.txt"
-                requirements_txt = f"{self.filename[:-7]}/requirements.txt"
-                archive_members = fd.getnames()
+                    if egg_info in archive_members:
+                        # If we have egg-info data without requires.txt it means the
+                        # package has no dependencies.
+                        if egg_info_requires in archive_members:
+                            file_fd = fd.extractfile(egg_info_requires)
+                            assert file_fd is not None
+                            requires = file_fd.read().decode("utf-8")
+                            self._reqs |= {
+                                Requirement(line.strip())
+                                for line in requires.splitlines()
+                            }
 
-                if egg_info in archive_members:
-                    # If we egg-info data without requires.txt it means the package
-                    # has no dependencies.
-                    if egg_info_requires in archive_members:
-                        file_fd = fd.extractfile(egg_info_requires)
+                    elif requirements_txt in archive_members:
+                        # Check if there is a requirements.txt (this is a fallback)
+                        file_fd = fd.extractfile(requirements_txt)
                         assert file_fd is not None
                         requires = file_fd.read().decode("utf-8")
-                        reqs |= {
+                        self._reqs |= {
                             Requirement(line.strip()) for line in requires.splitlines()
                         }
 
-                elif requirements_txt in archive_members:
-                    # Check if there is a requirements.txt (this is a fallback)
-                    file_fd = fd.extractfile(requirements_txt)
-                    assert file_fd is not None
-                    requires = file_fd.read().decode("utf-8")
-                    reqs |= {
-                        Requirement(line.strip()) for line in requires.splitlines()
-                    }
-
-                else:
-                    logger.warning(f"Cannot follow dependencies of package {self.name}")
+                    else:
+                        logger.warning(
+                            f"Cannot follow dependencies of package {self.name}"
+                        )
 
         # Once we have the complete list of requirements, use the env to filter
-        # out requirements not needed for the current configuration.
-        self._reqs = set()
+        # out requirements not needed for the current configuration. Don't cache that
+        # result as it depends on the current environment.
+        reqs: set[Requirement] = set()
+
         if self.extras:
             # Special handling for extras. An additional dependencies is added
             # to the package itself without extras
             for extra in self.extras:
-                self.env["extra"] = extra
-                for r in reqs:
-                    if r.marker is not None and r.marker.evaluate(self.env):
-                        self._reqs.add(r)
-            self._reqs.add(Requirement(f"{self.name} == {self.version}"))
+                env["extra"] = extra
+                for r in self._reqs:
+                    if r.marker is not None and r.marker.evaluate(env):
+                        reqs.add(r)
+            reqs.add(Requirement(f"{self.name} == {self.version}"))
         else:
-            for r in reqs:
-                if r.marker is None or r.marker.evaluate(self.env):
-                    self._reqs.add(r)
-        return self._reqs
+            for r in self._reqs:
+                if r.marker is None or r.marker.evaluate(env):
+                    reqs.add(r)
+        return reqs
 
     def is_compatible_with_platforms(self, platform_list: list[str]) -> bool:
         """Check if the package is compatible with a list of platform.
@@ -486,7 +486,6 @@ class PyPIProvider(AbstractProvider):
         super().__init__()
         self.pypi = pypi
         self.env = env
-        self.candidate_cache: dict[str, PyPICandidate] = {}
 
     def identify(self, requirement_or_candidate: Requirement | PyPICandidate) -> str:
         """See resolvelib documentation."""
@@ -565,7 +564,7 @@ class PyPIProvider(AbstractProvider):
 
     def get_dependencies(self, candidate: PyPICandidate) -> Iterable[Requirement]:
         """See resolvelib documentation."""
-        return candidate.requirements
+        return candidate.requirements(env=self.env)
 
 
 class PyPIClosure:
@@ -678,14 +677,15 @@ class PyPIClosure:
         :return: return a list of requirement that can be used as a lock file
         """
         all_reqs = self._requirements_closure()
-        reqs = []
+        reqs = set()
         for k, v in all_reqs.items():
             if len(v) == len(self.platforms):
-                reqs.append(k)
+                reqs.add(k)
             else:
                 for p in v:
-                    reqs.append(Requirement(f'{v}; sys_platform == "{p}"'))
-        return reqs
+                    sys_platform = get_pip_env(p, self.python3_version)["sys_platform"]
+                    reqs.add(Requirement(f'{k}; sys_platform == "{sys_platform}"'))
+        return sorted(reqs, key=lambda r: r.name)
 
     def __enter__(self) -> PyPIClosure:
         return self
