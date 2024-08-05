@@ -610,7 +610,7 @@ class PyPIClosure:
         name = os.path.basename(filename)[:-4].split("-")[0]
         self.pypi.cache[canonicalize_name(name)] = [
             PyPILink(
-                url=f"file://{os.path.abspath(filename)}",
+                url=f"file://{os.path.abspath(filename)}".replace("\\", "/"),
                 yanked=None,
                 has_metadata=False,
             )
