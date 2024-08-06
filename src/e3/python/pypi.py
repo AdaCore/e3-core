@@ -624,12 +624,16 @@ class PyPIClosure:
     def file_closure(self) -> list[str]:
         reqs = self._requirements_closure()
         result = set()
+
         for req in reqs:
+
+            # First check if there is a generic wheel present or no. If there is
+            # one then there is no need to package the sources.
             has_generic_wheel = any(
                 (
                     c
                     for c in self.pypi.candidate_cache[canonicalize_name(req.name)]
-                    if c.is_generic_wheel
+                    if c.is_generic_wheel and c.version in req.specifier
                 )
             )
 
