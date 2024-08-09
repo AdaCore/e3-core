@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 import e3.log
+from e3.anod import qualifier_str_to_dict, qualifier_dict_to_str
 from e3.anod.action import (
     Build,
     BuildOrDownload,
@@ -32,7 +33,7 @@ from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import cast, NoReturn, Optional, Tuple
+    from typing import cast, NoReturn, Optional, Tuple, Iterable
     from collections.abc import Callable
     from e3.anod.action import Action
     from e3.anod.package import SourceBuilder
@@ -130,7 +131,7 @@ class AnodContext:
         self,
         name: str,
         env: BaseEnv | None,
-        qualifier: str | None,
+        qualifier: str | dict[str, str | bool | Iterable[str]] | None,
         kind: PRIMITIVE,
         sandbox: SandBox | None = None,
         source_name: str | None = None,
@@ -150,7 +151,11 @@ class AnodContext:
             env = self.default_env
 
         # Key used for the spec instance cache
-        key = (name, env.build, env.host, env.target, qualifier, kind, source_name)
+        if isinstance(qualifier, str) or qualifier is None:
+            qualifier_key = qualifier
+        else:
+            qualifier_key = qualifier_dict_to_str(qualifier)
+        key = (name, env.build, env.host, env.target, qualifier_key, kind, source_name)
 
         if key not in self.cache:
             # Spec is not in cache so create a new instance
@@ -283,6 +288,14 @@ class AnodContext:
         elif TYPE_CHECKING:
             primitive = cast(PRIMITIVE, primitive)
 
+        qual_dict: dict[str, str | bool | Iterable[str]]
+        if isinstance(plan_action_env.qualifier, str):
+            qual_dict = qualifier_str_to_dict(plan_action_env.qualifier)
+        elif plan_action_env.qualifier is None:
+            qual_dict = {}
+        else:
+            qual_dict = plan_action_env.qualifier
+
         return self.add_anod_action(
             name=plan_action_env.module,
             env=(
@@ -291,7 +304,7 @@ class AnodContext:
                 else BaseEnv.from_env(plan_action_env)
             ),
             primitive=primitive,
-            qualifier=plan_action_env.qualifier,
+            qualifier=qual_dict,
             source_packages=plan_action_env.source_packages,
             upload=plan_action_env.push_to_store,
             plan_line=plan_action_env.plan_line,
@@ -304,7 +317,7 @@ class AnodContext:
         name: str,
         env: BaseEnv,
         primitive: PRIMITIVE,
-        qualifier: str | None = None,
+        qualifier: dict[str, str | bool | Iterable[str]] | None = None,
         source_packages: list[str] | None = None,
         upload: bool = True,
         plan_line: str | None = None,
@@ -330,6 +343,9 @@ class AnodContext:
         :param sandbox: the SandBox object that will be used to run commands
         :return: the root added action
         """
+        if qualifier is None:
+            qualifier = {}
+
         # First create the subtree for the spec
         result = self.add_spec(
             name,
@@ -389,7 +405,7 @@ class AnodContext:
         name: str,
         env: BaseEnv,
         primitive: PRIMITIVE,
-        qualifier: str | None = None,
+        qualifier: str | dict[str, str | bool | Iterable[str]] | None = None,
         source_packages: list[str] | None = None,
         expand_build: bool = True,
         source_name: str | None = None,
@@ -680,7 +696,7 @@ class AnodContext:
                     name=e.name,
                     env=e.env(spec, self.default_env),
                     primitive=e.kind if e.kind != "download" else "install",
-                    qualifier=e.qualifier,
+                    qualifier=e.parsed_qualifier,
                     plan_args=None,
                     plan_line=plan_line,
                     sandbox=sandbox,

@@ -17,6 +17,7 @@ import e3.log
 import e3.os.process
 import e3.text
 from e3.anod.error import AnodError, ShellError
+from e3.anod import qualifier_dict_to_str, qualifier_str_to_dict
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.fs import find
 from e3.os.fs import which
@@ -26,7 +27,7 @@ from e3.yaml import load_with_config
 # Default API version
 __version__ = "1.4"
 
-SUPPORTED_API = (__version__, "1.5", "1.6")
+SUPPORTED_API = (__version__, "1.5", "1.6", "1.7")
 # API VERSIONS
 #
 # Version 1.4 (initial version)
@@ -37,18 +38,15 @@ SUPPORTED_API = (__version__, "1.5", "1.6")
 # Version 1.6
 #    NEW: Add support for spec function automatically declared inside each spec
 #    DEPRECATED: remove support of e3.anod.loader.spec
+# Version 1.7
+#    DEPRECATED: use of qualifier as string emits deprecation warning
 
 logger = e3.log.getLogger("anod")
 spec_logger = e3.log.getLogger("anod.spec")
 
 
 if TYPE_CHECKING:
-    from typing import (
-        Any,
-        IO,
-        Literal,
-        Union,
-    )
+    from typing import Any, IO, Literal, Union, Iterable
     from collections.abc import Callable, Sequence
     from e3.anod.buildspace import BuildSpace
     from e3.anod.sandbox import SandBox
@@ -197,7 +195,7 @@ class Anod:
     spec_dir = ""
     sandbox: SandBox | None = None
     name = ""
-    api_version = ""
+    api_version = __version__
     data_files: tuple[str, ...] = ()
 
     # API
@@ -232,7 +230,7 @@ class Anod:
 
     def __init__(
         self,
-        qualifier: str,
+        qualifier: str | dict[str, str | bool | Iterable[str]] | None,
         kind: PRIMITIVE,
         jobs: int = 1,
         env: BaseEnv | None = None,
@@ -268,20 +266,20 @@ class Anod:
 
         # Create the parsed qualifier (dict version). In the future
         # self.parsed_qualifier should be replaced by self.qualifier
-        self.parsed_qualifier = {}
-        if qualifier:
-            qual_dict = [
-                (key, value)
-                for key, _, value in (
-                    item.partition("=") for item in qualifier.split(",")
+        if isinstance(qualifier, str):
+            if Version(self.api_version) >= Version("1.7"):
+                logger.error(
+                    f"Use dict for qualifiers when declaring specs (spec {self.name})"
                 )
-            ]
-        else:
-            qual_dict = []
+                raise e3.anod.error.SpecError("Use of str qualifiers is deprecated")
 
-        for k in qual_dict:
-            self.parsed_qualifier[k[0]] = k[1]
-        self.qualifier = qualifier
+            self.parsed_qualifier = qualifier_str_to_dict(qualifier)
+        elif isinstance(qualifier, dict):
+            self.parsed_qualifier = dict(qualifier)
+        elif qualifier is None:
+            self.parsed_qualifier = {}
+        else:
+            raise e3.anod.error.SpecError("invalid qualifier")
 
         # Create the QualifiersManager.
         # Skip if the name generator is disabled.
@@ -305,6 +303,12 @@ class Anod:
 
         # Hold the result of the pre function
         self._pre: dict[str, Any] | None = None
+
+    @property
+    def qualifier(self) -> str:
+        if Version(self.api_version) >= Version("1.7"):
+            logger.warning(f"qualifier attribute is obsolete (spec: {self.name})")
+        return qualifier_dict_to_str(self.parsed_qualifier)
 
     # Temporary flag used to disable the name generator during the
     # transition (U625-013).

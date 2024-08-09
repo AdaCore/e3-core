@@ -4,12 +4,17 @@ import collections.abc
 from typing import TYPE_CHECKING
 
 import e3.anod.error
+import e3.log
+from e3.anod import qualifier_str_to_dict
 from e3.env import BaseEnv
+
 
 if TYPE_CHECKING:
     from typing import Any, Hashable, Literal
     from e3.anod.spec import Anod, DEPENDENCY_PRIMITIVE
     from e3.mypy import assert_never
+
+logger = e3.log.getLogger("e3.anod.deps")
 
 
 class BuildVar:
@@ -83,25 +88,20 @@ class Dependency:
         self.build = build
         self.local_name = local_name if local_name is not None else name
 
-        self.qualifier: str | None
-        if isinstance(qualifier, dict):
-            for q in set(qualifier.keys()):
-                v = qualifier[q]
-                if isinstance(v, bool):
-                    # It's a tag qualifier
-                    if v:
-                        qualifier[q] = ""
-                    else:
-                        qualifier.pop(q)
+        self.parsed_qualifier: dict
 
-                # Compute a sorted representation for list, set and frozenset
-                elif not isinstance(v, str):
-                    qualifier[q] = ";".join(sorted(v))
-            self.qualifier = ",".join(
-                [f"{key}{'=' if val else ''}{val}" for key, val in qualifier.items()]
-            )
+        if isinstance(qualifier, str):
+            self.parsed_qualifier = qualifier_str_to_dict(qualifier)
+
+        elif isinstance(qualifier, dict):
+            # Ensure we get a copy as in that case qualifier is mutable
+            self.parsed_qualifier = dict(qualifier)
+
+        elif qualifier is None:
+            self.parsed_qualifier = {}
+
         else:
-            self.qualifier = qualifier
+            raise e3.anod.error.SpecError(f"invalid qualifier type: {qualifier}")
 
         if require not in (
             "build_tree",

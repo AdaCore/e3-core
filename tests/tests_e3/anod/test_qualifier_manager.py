@@ -299,11 +299,11 @@ def test_qualifiers_manager_errors():
 
     with pytest.raises(AnodError) as err:
         key_set.value(1)
-    assert str(err.value) == "Key set qualifiers can only parse a string value."
+    assert "origin: Invalid value for qualifier q1" in str(err.value)
 
     with pytest.raises(AnodError) as err:
         key_value.value(1)
-    assert str(err.value) == "Key value qualifiers can only parse a string value."
+    assert "origin: Invalid value for qualifier q1" in str(err.value)
 
 
 def test_qualifiers_manager():
@@ -600,7 +600,6 @@ def test_tag_qualifier():
     )
 
     assert tag.value("") is True
-    assert tag.value(None) is True
 
 
 def test_key_set_qualifier():

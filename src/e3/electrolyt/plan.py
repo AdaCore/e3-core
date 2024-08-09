@@ -14,7 +14,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any
+    from typing import Any, Iterable
     from collections.abc import Callable
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint
@@ -124,6 +124,7 @@ class PlanActionEnv(BaseEnv):
     default_build: bool
     module: str | None
     source_packages: list[str] | None
+    qualifier: str | dict[str, str | bool | Iterable[str]] | None
 
 
 class PlanContext:

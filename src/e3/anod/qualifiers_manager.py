@@ -9,6 +9,7 @@ import re
 
 
 if TYPE_CHECKING:
+    from typing import Iterable
     from e3.anod.spec import Anod
 
 
@@ -78,8 +79,10 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
         return None  # all: no cover
 
     @abc.abstractmethod
-    def value(self, value: str) -> str | bool | frozenset[str]:
-        """Compute the value of qualifier given the use input."""
+    def value(
+        self, value: str | bool | Iterable[str] | None
+    ) -> str | bool | frozenset[str]:
+        """Compute the value of qualifier given the user input."""
 
     @abc.abstractmethod
     def repr(
@@ -147,10 +150,20 @@ class KeyValueDeclaration(QualifierDeclaration):
         """See QualifierDeclaration.default."""
         return self._default
 
-    def value(self, value: str) -> str | bool | frozenset[str]:
+    def value(
+        self, value: str | bool | Iterable[str] | None
+    ) -> str | bool | frozenset[str]:
         """See QualifierDeclaration.value."""
+        # Temporary until full switch to dict
+        if isinstance(value, bool):
+            value = ""
+
         if not isinstance(value, str):
-            raise AnodError("Key value qualifiers can only parse a string value.")
+            raise AnodError(
+                f"{self.origin}: Invalid value for qualifier {self.name}: "
+                f"requires a str value, got {type(value)}({value})"
+            )
+
         if self.choices is not None and value not in self.choices:
             choices_str = ", ".join((f"'{choice}'" for choice in self.choices))
             raise AnodError(
@@ -204,10 +217,22 @@ class TagDeclaration(QualifierDeclaration):
         """See QualifierDeclaration.value."""
         return False
 
-    def value(self, value: str) -> str | bool | frozenset[str]:
+    def value(
+        self, value: str | bool | Iterable[str] | None
+    ) -> str | bool | frozenset[str]:
         """See QualifierDeclaration.value."""
         # As soon as a tag qualifier is passed, its value is True
-        return True
+        if isinstance(value, str):
+            return True
+        elif value is None:
+            return True
+        elif isinstance(value, bool):
+            return value
+        else:
+            raise AnodError(
+                f"{self.origin}: Invalid value for qualifier {self.name}: "
+                f"requires a str, bool or None value, got {type(value)}({value})"
+            )
 
     def repr(
         self, value: str | bool | frozenset[str], hash_pool: list[str] | None
@@ -282,15 +307,43 @@ class KeySetDeclaration(QualifierDeclaration):
         """See QualifierDeclaration.default."""
         return self._default
 
-    def value(self, value: str) -> str | bool | frozenset[str]:
+    def value(
+        self, value: str | bool | Iterable[str] | None
+    ) -> str | bool | frozenset[str]:
         """See QualifierDeclaration.value."""
-        if not isinstance(value, str):
-            raise AnodError("Key set qualifiers can only parse a string value.")
+        if isinstance(value, bool):
+            raise AnodError(
+                f"{self.origin}: Invalid value for qualifier {self.name}: "
+                f"requires a str or Iterable[str], got bool"
+            )
+        elif value is None:
+            raise AnodError(
+                f"{self.origin}: Invalid value for qualifier {self.name}: "
+                f"requires a str or Iterable[str], got None"
+            )
+        elif isinstance(value, str):
+            # Make sure '' value is the empty set
+            value_set = (
+                frozenset(value.split(self.LIST_SEPARATOR)) if value else frozenset({})
+            )
+        else:
+            try:
+                result = all((isinstance(el, str) for el in value))
+                if not result:
+                    raise AnodError(
+                        f"{self.origin}: Invalid value for qualifier {self.name}: "
+                        f"one of the element in the Iterable is not a str: "
+                        f"got {type(value)}({value})"
+                    )
+            except TypeError as e:
 
-        # Make sure '' value is the empty set
-        value_set = (
-            frozenset(value.split(self.LIST_SEPARATOR)) if value else frozenset({})
-        )
+                raise AnodError(
+                    f"{self.origin}: Invalid value for qualifier {self.name}: "
+                    f"requires a str or Iterable[str], "
+                    f"got {type(value)}({value})"
+                ) from e
+
+            value_set = frozenset(value)
 
         # Check if the values are in choices
         if self.choices:
