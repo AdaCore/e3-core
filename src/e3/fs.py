@@ -779,7 +779,7 @@ def sync_tree(
         else:
             if hasattr(os, "utime"):
                 if preserve_timestamps:
-                    os.utime(dst.path, (src.stat.st_atime, src.stat.st_mtime))
+                    os.utime(dst.path, ns=(src.stat.st_atime_ns, src.stat.st_mtime_ns))
                 else:
                     os.utime(dst.path, None)
             if hasattr(os, "chmod"):
