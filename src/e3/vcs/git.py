@@ -32,19 +32,11 @@ from e3.text import bytes_as_str
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import (
-        Any,
-        Final,
-        IO,
-        Literal,
-        List,
-        Optional,
-        TextIO,
-    )
+    from typing import Any, Final, IO, Literal, Optional, TextIO, Union
     from collections.abc import Iterator
     from e3.os.process import Run, DEVNULL_VALUE, PIPE_VALUE
 
-    Git_Cmd = List[Optional[str]]
+    Git_Cmd = Union[list[str], list[Optional[str]]]
     GIT_LOG_STREAM_VALUE = Literal[-4]
 
 # Special value to direct outputs to the git log stream
