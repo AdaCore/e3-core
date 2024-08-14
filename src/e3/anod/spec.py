@@ -617,26 +617,30 @@ class Anod:
     @classmethod
     def primitive(
         cls,
-        pre: Callable[[Anod], dict] | None = None,
-        post: Callable[..., None] | None = None,
+        pre: str | None = None,
+        post: str | None = None,
         version: Callable[..., str] | None = None,
         require: Callable[[Anod], bool] | None = None,
+        post_install: bool = False,
     ) -> Callable:
         """Declare an anod primitive.
 
         Catch all exceptions and raise AnodError with the traceback
 
-        :param pre: None or a special function to call before running the
-            primitive. The function takes a unique parameter `self` and
+        :param pre: None or name of method in the spec to call before running
+            the primitive. The method takes a unique parameter `self` and
             returns a dict
-        :param post: None or a callback function to call after running the
-            primitive
+        :param post: None or "install". This parameter is obsolete and should
+            not be used. Prefer "post_install=True" to achieve the same effect
         :param version: None or a callback function returning the version
             that will be evaluated as a string. This callback is called
             after running the primitive
         :param require: None or a special function to call before running the
             primitive. The function takes a unique parameter `self` and
             returns a boolean
+        :param post_install: if True call the install primitive after the build
+            primitive. Note that between the two a binary package might be generated
+            depending on the context. This is equivalent to post="install"
         :raise: AnodError
         """
 
@@ -672,6 +676,7 @@ class Anod:
             primitive_func.is_primitive = True
             primitive_func.pre = pre
             primitive_func.post = post
+            primitive_func.post_install = post_install or (post == "install")
             primitive_func.version = version
             primitive_func.require = require
             return primitive_func
