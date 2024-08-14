@@ -217,6 +217,7 @@ class PyPI:
             for link in project_links:
                 try:
                     c = PyPICandidate(
+                        identifier=identifier,
                         link=link,
                         extras=extras,
                         cache_dir=os.path.join(self.cache_dir, "resources"),
@@ -261,16 +262,19 @@ class PyPI:
 class PyPICandidate:
     def __init__(
         self,
+        identifier: str,
         link: PyPILink,
         extras: set[str],
         cache_dir: str,
     ) -> None:
         """Initialize a Candidate.
 
+        :param identifier: the identifier on PyPI
         :param link: data return by PyPI simple API
         :param extras: list of extras that should be included
         :param cache_dir: cache location in which resources are downloaded
         """
+        self.name = canonicalize_name(identifier)
         self.url = link.url
         self.is_yanked = link.is_yanked
         self.has_direct_metadata = link.has_metadata
@@ -288,15 +292,17 @@ class PyPICandidate:
         if self.filename.endswith(".whl"):
             # Wheel filenames contain compatibility information
             tmp, py_tags, abi_tags, platform_tags = self.filename[:-4].rsplit("-", 3)
-            name, version = tmp.split("-", 1)
+            _, version = tmp.split("-", 1)
 
         elif self.filename.endswith(".tar.gz"):
-            name, version = self.filename[:-7].split("-", 1)
+            # For sources, packages naming scheme has changed other time
+            # (mainly handling of - and _) but we expect the format of
+            # the package to be: <STR_WITH_SAME_LENGTH_AS_NAME>-<VERSION>.tar.gz
+            version = self.filename[len(self.name) + 1 : -7]
         else:
             basename, ext = os.path.splitext(self.filename)
             name, version = basename.split("-")[:2]
 
-        self.name = canonicalize_name(name)
         self.version = Version(version)
         self.py_tags = py_tags.split(".")
         self.abi_tags = abi_tags.split(".")
@@ -362,10 +368,20 @@ class PyPICandidate:
                             file_fd = fd.extractfile(egg_info_requires)
                             assert file_fd is not None
                             requires = file_fd.read().decode("utf-8")
-                            self._reqs |= {
-                                Requirement(line.strip())
-                                for line in requires.splitlines()
-                            }
+                            current_marker = ""
+                            for line in requires.splitlines():
+                                line = line.strip()
+
+                                if line.startswith("[:") and line.endswith("]"):
+                                    # In requires.txt format markers are set using
+                                    # sections
+                                    current_marker = line[2:-1]
+                                elif line and not line.startswith("#"):
+                                    # Non empty lines that are not comments should be
+                                    # considered as requirements
+                                    self._reqs.add(
+                                        Requirement(f"{line};{current_marker}")
+                                    )
 
                     elif requirements_txt in archive_members:
                         # Check if there is a requirements.txt (this is a fallback)
@@ -532,12 +548,14 @@ class PyPIProvider(AbstractProvider):
                 version_has_wheel[c.version] = True
 
         for candidate in candidates:
-            # We only handle wheels
-
             if not candidate.filename.endswith(".whl"):
                 if version_has_wheel.get(candidate.version):
+                    # If a wheel is present for the candidate specific version,
+                    # don't use sdist files to fetch dependencies.
                     continue
+
                 elif not candidate.filename.endswith(".tar.gz"):
+                    # Only .tar.gz archive are considered for sdist files
                     continue
 
             if candidate.version in incomps:
