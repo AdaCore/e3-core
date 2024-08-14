@@ -81,11 +81,3 @@ def test_dependency3():
         d.env(parent_anod_instance, default_env=defaultenv).target.platform
         == defaultenv.build.platform
     )
-
-
-def test_dependency4():
-    d = e3.anod.deps.Dependency(
-        "dep", qualifier={"q1": False, "q2": True, "q_str": "str"}
-    )
-
-    assert d.qualifier == "q2,q_str=str"

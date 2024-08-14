@@ -57,7 +57,7 @@ class AnodDriver:
             if isinstance(e, self.anod_instance.Dependency):
                 dep_class = spec_repository.load(e.name)
                 dep_instance = dep_class(
-                    qualifier=e.qualifier,
+                    qualifier=e.parsed_qualifier,
                     kind=e.kind,
                     env=e.env(self.anod_instance, BaseEnv.from_env()),
                 )
