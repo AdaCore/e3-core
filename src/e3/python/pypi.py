@@ -217,7 +217,7 @@ class PyPI:
             for link in project_links:
                 try:
                     c = PyPICandidate(
-                        identifier=identifier,
+                        identifier=identifier.split("@", 1)[0],
                         link=link,
                         extras=extras,
                         cache_dir=os.path.join(self.cache_dir, "resources"),
@@ -379,9 +379,14 @@ class PyPICandidate:
                                 elif line and not line.startswith("#"):
                                     # Non empty lines that are not comments should be
                                     # considered as requirements
-                                    self._reqs.add(
-                                        Requirement(f"{line};{current_marker}")
-                                    )
+                                    if current_marker:
+                                        self._reqs.add(
+                                            Requirement(f"{line};{current_marker}")
+                                        )
+                                    else:
+                                        # Don't emit a final ; if the marker is empty
+                                        # as this is not accepted by the syntax
+                                        self._reqs.add(Requirement(line))
 
                     elif requirements_txt in archive_members:
                         # Check if there is a requirements.txt (this is a fallback)
