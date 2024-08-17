@@ -159,6 +159,7 @@ Test windows py3.12:
 Security:
   stage: Security
   extends: .linux-common
+  needs: []
   variables:
     PYTHON_VERSION: ${LATEST_PYTHON}
     CI_TOX_ENV: security
@@ -166,9 +167,10 @@ Security:
 Documentations:
   stage: Documentations
   extends: .linux-common
+  needs: ["Checkstyle"]
   variables:
     PYTHON_VERSION: ${LATEST_PYTHON}
-    CI_TOX_ENV: security
+    CI_TOX_ENV: docs
   only:
     refs:
       - merge_requests
