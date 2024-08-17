@@ -171,12 +171,11 @@ Documentations:
   variables:
     PYTHON_VERSION: ${LATEST_PYTHON}
     CI_TOX_ENV: docs
-  only:
-    refs:
-      - merge_requests
-    changes:
-      - docs/**/*
-      - pyproject.toml
-      - setup.cfg
-      - tox.ini
-      - .gitlab-ci.yml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - docs/**/*
+        - pyproject.toml
+        - setup.cfg
+        - tox.ini
+        - .gitlab-ci.yml
