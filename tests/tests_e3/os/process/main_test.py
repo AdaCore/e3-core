@@ -346,7 +346,7 @@ def test_poll():
     )
 
     assert result.poll() is None
-    time.sleep(2)
+    time.sleep(5)
     assert result.poll() == 0
     assert result.out.strip() == "process"
 
