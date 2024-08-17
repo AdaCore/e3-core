@@ -1,7 +1,5 @@
 ### GENERAL ###
 
-# Defaults
-
 variables:
   GITLAB_REMOTE:
     description: "The remote gitlab URL used."
@@ -25,27 +23,6 @@ default:
     - run_as_root:false
   interruptible: true
 
-# Images
-
-.linux-image:
-  services:
-    - image:all-pythons
-    - cpu:4
-  before_script:
-    - source /it/activate-py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2:2}
-    - python -m pip install -U pip
-
-.windows-image:
-  services:
-    - image:e3-windows-core-2022
-    - platform:x86_64-windows-2022
-    - cpu:2
-    - mem:4
-  before_script:
-    - source /it/activate-python ${PYTHON_VERSION}
-    - mkdir -p "C:/tmp/Trash"
-    - python -m pip install -U pip
-
 # Common
 
 .tox-common:
@@ -56,6 +33,16 @@ default:
     - 'echo "Tox run environment: ${CI_TOX_ENV:=py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2:2}-cov-xdist}"'
     - python -m tox --colored yes -e ${CI_TOX_ENV}
 
+### Linux jobs ###
+
+.linux-image:
+  services:
+    - image:all-pythons
+    - cpu:4
+  before_script:
+    - source /it/activate-py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2:2}
+    - python -m pip install -U pip
+
 .linux-common:
   extends:
     - .linux-image
@@ -64,15 +51,7 @@ default:
     - !reference [.linux-image, before_script]
     - !reference [.tox-common, before_script]
 
-.windows-common:
-  extends:
-    - .windows-image
-    - .tox-common
-  before_script:
-    - !reference [.windows-image, before_script]
-    - !reference [.tox-common, before_script]
-
-### CHECKSTYLE ###
+# Stage: Checks
 
 Style:
   stage: Checks
@@ -97,7 +76,34 @@ Style:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-### LINUX TESTS ###
+Security:
+  stage: Checks
+  needs: []
+  extends: .linux-common
+  variables:
+    PYTHON_VERSION: ${LATEST_PYTHON}
+    CI_TOX_ENV: security
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+Documentations:
+  stage: Checks
+  needs: ["Style"]
+  extends: .linux-common
+  variables:
+    PYTHON_VERSION: ${LATEST_PYTHON}
+    CI_TOX_ENV: docs
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - docs/**/*
+      - pyproject.toml
+      - setup.cfg
+      - tox.ini
+      - .gitlab-ci.yml
+
+# Stage: Tests
 
 .test-linux:
   stage: Tests Linux
@@ -155,7 +161,32 @@ Run Linux tests:
   #
   #     This is only useful if the previous stages have failed and you still want to run the tests.
 
-### WINDOWS TESTS ###
+### Windows jobs ###
+
+.windows-image:
+  services:
+    - image:e3-windows-core-2022
+    - platform:x86_64-windows-2022
+    - cpu:2
+    - mem:4
+  before_script:
+    - source /it/activate-python ${PYTHON_VERSION}
+    - mkdir -p "C:/tmp/Trash"
+    - python -m pip install -U pip
+
+.windows-common:
+  extends:
+    - .windows-image
+    - .tox-common
+  before_script:
+    - !reference [.windows-image, before_script]
+    - !reference [.tox-common, before_script]
+
+# Stage: Checks
+
+#--- Nothing to do during this stage ---#
+
+# Stage: Tests
 
 .test-windows:
   stage: Tests Windows
@@ -202,31 +233,3 @@ Run Windows tests:
   #     Are you sure you want to run Windows tests?
   #
   #     This is only useful if the previous stages have failed and you still want to run the tests.
-
-### OTHERS ###
-
-Security:
-  stage: Checks
-  extends: .linux-common
-  needs: []
-  variables:
-    PYTHON_VERSION: ${LATEST_PYTHON}
-    CI_TOX_ENV: security
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-
-Documentations:
-  stage: Checks
-  extends: .linux-common
-  needs: ["Style"]
-  variables:
-    PYTHON_VERSION: ${LATEST_PYTHON}
-    CI_TOX_ENV: docs
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - docs/**/*
-        - pyproject.toml
-        - setup.cfg
-        - tox.ini
-        - .gitlab-ci.yml
