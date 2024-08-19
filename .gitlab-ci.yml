@@ -159,6 +159,7 @@ Test windows py3.12:
 Security:
   stage: Security
   extends: .linux-common
+  needs: []
   variables:
     PYTHON_VERSION: ${LATEST_PYTHON}
     CI_TOX_ENV: security
@@ -166,15 +167,15 @@ Security:
 Documentations:
   stage: Documentations
   extends: .linux-common
+  needs: ["Checkstyle"]
   variables:
     PYTHON_VERSION: ${LATEST_PYTHON}
-    CI_TOX_ENV: security
-  only:
-    refs:
-      - merge_requests
-    changes:
-      - docs/**/*
-      - pyproject.toml
-      - setup.cfg
-      - tox.ini
-      - .gitlab-ci.yml
+    CI_TOX_ENV: docs
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - docs/**/*
+        - pyproject.toml
+        - setup.cfg
+        - tox.ini
+        - .gitlab-ci.yml
