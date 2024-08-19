@@ -1,4 +1,5 @@
 from e3.anod.error import AnodError
+from e3.anod.qualifier import Qualifier
 from e3.anod.qualifiers_manager import (
     QualifiersManager,
     KeyValueDeclaration,
@@ -8,6 +9,32 @@ from e3.anod.spec import Anod
 from e3.env import BaseEnv
 
 import pytest
+
+
+def test_qualifier_operations():
+    qual1 = Qualifier({"key1": "v1", "key2": "v2"})
+    qual2 = Qualifier({"key2": "v2.2", "key3": "v3"})
+    qual3 = Qualifier({"key1": "v1.3", "key4": "v4"})
+
+    # Test basic addition of qualifiers
+    assert qual1 + qual2 == Qualifier({"key1": "v1", "key2": "v2.2", "key3": "v3"})
+
+    # Test basic filtering-out of keys
+    assert qual1 - qual2 == Qualifier({"key1": "v1"})
+    assert qual1 - {"key2"} == Qualifier({"key1": "v1"})
+
+    # Test order/priority of operators
+    # + and - have the same priority thus are evaluated from left to right
+    assert qual1 + qual2 - qual3 == Qualifier({"key2": "v2.2", "key3": "v3"})
+    assert qual1 + (qual2 - qual3) == Qualifier(
+        {"key1": "v1", "key2": "v2.2", "key3": "v3"}
+    )
+
+    # & has a lower priority than +
+    assert qual1 + qual2 + qual3 & {"key1", "key2"} == Qualifier(
+        {"key1": "v1.3", "key2": "v2.2"}
+    )
+    assert (qual1 + None) == qual1
 
 
 # Cover Anod (e3.anod.spec.py)

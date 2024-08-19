@@ -19,6 +19,7 @@ import e3.text
 from e3.anod.error import AnodError, ShellError
 from e3.anod import qualifier_dict_to_str, qualifier_str_to_dict
 from e3.anod.qualifiers_manager import QualifiersManager
+from e3.anod.qualifier import Qualifier
 from e3.fs import find
 from e3.os.fs import which
 from e3.platform_db.knowledge_base import OS_INFO
@@ -353,7 +354,7 @@ class Anod:
     def args(self) -> dict[str, str | bool | frozenset[str]]:
         """Access to final qualifier values (with defaults set)."""
         if self.enable_name_generator:
-            return self.qualifiers_manager.qualifier_values
+            return Qualifier(self.qualifiers_manager.qualifier_values)
         else:
             return self.parsed_qualifier  # type: ignore
 
