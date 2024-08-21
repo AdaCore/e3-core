@@ -23,7 +23,7 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Iterable
+    from typing import Iterable, Any
     from collections.abc import Callable, Sequence
 
 
@@ -434,7 +434,9 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
         else:
             file_list = set(path)
 
-    def onerror(func: Callable, error_path: str, exc_info: tuple) -> None:
+    def onerror(
+        func: Callable[..., Any], error_path: str, exc_info: tuple | BaseException
+    ) -> None:
         """When shutil.rmtree fail, try again to delete the file.
 
         :param func: function to call on error
@@ -478,7 +480,10 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             os.chmod(error_path, 0o700)
 
             # And continue to delete the subdir
-            shutil.rmtree(error_path, onerror=onerror)
+            if sys.version_info[0] >= 3 and sys.version_info[1] >= 12:
+                shutil.rmtree(error_path, onexc=onerror)
+            else:
+                shutil.rmtree(error_path, onerror=onerror)
 
         else:
             raise FSError(origin="rm", message=f"unknown function: {func.__name__!r}")
@@ -497,7 +502,10 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
             if recursive and os.path.isdir(f) and not os.path.islink(f):
-                shutil.rmtree(f, onerror=onerror)
+                if sys.version_info[0] >= 3 and sys.version_info[1] >= 12:
+                    shutil.rmtree(f, onexc=onerror)
+                else:
+                    shutil.rmtree(f, onerror=onerror)
             else:
                 e3.os.fs.force_remove_file(f)
 
@@ -514,7 +522,7 @@ def splitall(path: str) -> tuple[str, ...]:
     :param path: path to split
     :return: a list of path components
     """
-    dirnames = []  # type: list[str]
+    dirnames: list[str] = []
     while 1:
         head, tail = os.path.split(path)
         if head == path:
