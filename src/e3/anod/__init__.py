@@ -18,12 +18,12 @@ def qualifier_dict_to_str(qual: dict) -> str:
             else:
                 # Empty string is used also for tag value. Should be removed
                 # once switch to dict is complete
-                tmp.append(f"{k}")
+                tmp.append(k)
         elif isinstance(v, bool):
             if v:
                 tmp.append(k)
         elif v:
-            tmp.append(";".join(sorted(v)))
+            tmp.append(f"{k}=" + ";".join(sorted(v)))
 
     return ",".join(sorted(tmp))
 
