@@ -13,6 +13,8 @@ import stat
 import sys
 from collections import namedtuple
 from typing import TYPE_CHECKING
+from packaging.version import Version
+from platform import python_version
 
 import e3
 import e3.error
@@ -480,7 +482,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             os.chmod(error_path, 0o700)
 
             # And continue to delete the subdir
-            if sys.version_info[0] >= 3 and sys.version_info[1] >= 12:
+            if Version(python_version()) >= Version("3.12"):
                 shutil.rmtree(error_path, onexc=onerror)
             else:
                 shutil.rmtree(error_path, onerror=onerror)
@@ -502,7 +504,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
             if recursive and os.path.isdir(f) and not os.path.islink(f):
-                if sys.version_info[0] >= 3 and sys.version_info[1] >= 12:
+                if Version(python_version()) >= Version("3.12"):
                     shutil.rmtree(f, onexc=onerror)
                 else:
                     shutil.rmtree(f, onerror=onerror)
