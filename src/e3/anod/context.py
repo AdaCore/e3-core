@@ -460,14 +460,26 @@ class AnodContext:
             spec_instance.deps[dep.local_name] = dep_instance
 
         # Initialize a spec instance
-        spec = self.load(
-            name,
-            qualifier=qualifier,
-            env=env,
-            kind=primitive,
-            sandbox=sandbox,
-            source_name=source_name,
-        )
+        try:
+            spec = self.load(
+                name,
+                qualifier=qualifier,
+                env=env,
+                kind=primitive,
+                sandbox=sandbox,
+                source_name=source_name,
+            )
+        except AnodError as err:
+            err.messages[-1] = "\n".join(
+                [
+                    err.messages[-1],
+                    "",
+                    "Anod traceback:",
+                    (f"raised from {primitive}(name={name}, " f"qual={qualifier})"),
+                ]
+            )
+            raise err
+
         result: Build | CreateSources | CreateSource | Install | Test
 
         # Initialize the resulting action based on the primitive name
@@ -691,18 +703,29 @@ class AnodContext:
                     )
 
                     continue
-
-                child_action = self.add_spec(
-                    name=e.name,
-                    env=e.env(spec, self.default_env),
-                    primitive=e.kind if e.kind != "download" else "install",
-                    qualifier=e.parsed_qualifier,
-                    plan_args=None,
-                    plan_line=plan_line,
-                    sandbox=sandbox,
-                    upload=upload,
-                    force_download=e.kind == "download",
-                )
+                try:
+                    child_action = self.add_spec(
+                        name=e.name,
+                        env=e.env(spec, self.default_env),
+                        primitive=e.kind if e.kind != "download" else "install",
+                        qualifier=e.parsed_qualifier,
+                        plan_args=None,
+                        plan_line=plan_line,
+                        sandbox=sandbox,
+                        upload=upload,
+                        force_download=e.kind == "download",
+                    )
+                except AnodError as err:
+                    err.messages[-1] = "\n".join(
+                        [
+                            err.messages[-1],
+                            (
+                                f"requested from {spec.kind}(name={spec.name}, "
+                                f"qual={spec.parsed_qualifier})"
+                            ),
+                        ]
+                    )
+                    raise err
 
                 add_dep(
                     spec_instance=spec, dep=e, dep_instance=child_action.anod_instance
