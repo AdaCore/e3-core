@@ -23,6 +23,9 @@ ECHO_HELLO_RESULT = CommandResult(["echo", '"hello"'], raw_out=b"hello\n")
 # Mock the result of echo "world"
 ECHO_WORLD_RESULT = CommandResult(["echo", '"world"'], raw_out=b"world\n")
 
+# Mock the result of echo "john"
+ECHO_JOHN_RESULT = CommandResult(["echo", '"john"'], raw_out=b"john\n")
+
 # Config for mock_run
 MOCK_RUN_CONFIG: MockRunConfig = {"results": [ECHO_HELLO_RESULT, ECHO_WORLD_RESULT]}
 
@@ -86,7 +89,9 @@ def test_mock_run_decorator_config() -> None:
 
 def test_mock_run_context_config() -> None:
     """Test mock_run as a context with config."""
-    with mock_run(config=MOCK_RUN_CONFIG):
+    with mock_run(config=MOCK_RUN_CONFIG) as run:
+        assert e3.os.process.Run == run
+
         # Run both commands
         echo_hello()
         echo_world()
@@ -94,7 +99,9 @@ def test_mock_run_context_config() -> None:
 
 def test_mock_run_initial_add_result() -> None:
     """Test add_result before running any command."""
-    with mock_run():
+    with mock_run() as run:
+        assert e3.os.process.Run == run
+
         # Add results for both commands
         for result in [ECHO_HELLO_RESULT, ECHO_WORLD_RESULT]:
             e3.os.process.Run.add_result(result)
@@ -159,3 +166,23 @@ def test_mock_run_multi_patch() -> None:
     with mock_run(), mock_run():
         e3.os.process.Run.add_result(ECHO_HELLO_RESULT)
         echo_hello()
+
+
+def test_mock_run_nested() -> None:
+    """Test that nested mock_run are handled properly."""
+    with mock_run(config=MOCK_RUN_CONFIG) as run1:
+        assert e3.os.process.Run == run1
+        echo_hello()
+
+        with mock_run(config={"results": [ECHO_JOHN_RESULT]}) as run2:
+            assert e3.os.process.Run == run2
+            echo("john")
+
+            assert e3.os.process.Run.all_called
+            assert e3.os.process.Run.call_count == 1
+
+            with pytest.raises(UnexpectedCommandError):
+                echo_world()
+
+        assert e3.os.process.Run == run1
+        echo_world()

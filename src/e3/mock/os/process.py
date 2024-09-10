@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, overload
-from functools import wraps
+from typing import TYPE_CHECKING
 from unittest.mock import patch
-from threading import Lock
+from contextlib import contextmanager
 import copy
 
-import e3.os.process
 from e3.os.process import Run, to_cmd_lines
 
 if TYPE_CHECKING:
-    from typing import Callable, Any, TypedDict
+    from typing import Any, TypedDict
+    from collections.abc import Iterator
     from typing_extensions import NotRequired, ParamSpec, TypeVar
     from e3.os.process import AnyCmdLine
 
@@ -38,27 +37,16 @@ class UnexpectedCommandError(MockRunError):
     pass
 
 
-@overload
-def mock_run(func: Callable[P, T]) -> Callable[P, T]: ...
-
-
-@overload
-def mock_run(func: None = None, config: MockRunConfig | None = None) -> RunPatcher: ...
-
-
-def mock_run(
-    func: Callable[P, T] | None = None, config: MockRunConfig | None = None
-) -> RunPatcher | Callable[P, T]:
+@contextmanager
+def mock_run(config: MockRunConfig | None = None) -> Iterator[MockRun]:
     """Mock e3.os.process.Run as a context or decorator.
 
-    :param func: decorated function
     :param config: config for the mock
-    :return: new RunPatcher instance or decorator
+    :return: new MockRun instance
     """
-    if func is not None:
-        return RunPatcher().__call__(func=func)
-    else:
-        return RunPatcher(config)
+    run = MockRun(config=config)
+    with patch("e3.os.process.Run", run):
+        yield run
 
 
 class CommandResult:
@@ -175,83 +163,3 @@ class MockRun(Run):
             self.call_count += 1
 
         return self
-
-
-class RunPatcher:
-    """Patch e3.os.process.Run when used as a context or decorator."""
-
-    _mock_run: MockRun | None = None
-    """Instance of MockRun."""
-    _nested_count = 0
-    """How many RunPatcher are currently alive."""
-    _mock_init_lock = Lock()
-    """Lock to avoid concurrency when patching/unpatching."""
-
-    def __init__(self, config: MockRunConfig | None = None) -> None:
-        """Initialize RunPatcher.
-
-        :param config: MockRun configuration
-        """
-        self.config = config
-
-    def __call__(self, func: Callable[P, T]) -> Callable[P, T]:
-        """Decorate func when mock_run is used as a decorator.
-
-        :param func: decorated function
-        :return: a decorator for calling func
-        """
-        return self._decorate_callable(func)
-
-    def __enter__(self) -> MockRun:
-        """Enter the context manager.
-
-        :return: MockRun instance
-        """
-        self.start()
-        assert self.__class__._mock_run is not None
-        return self.__class__._mock_run
-
-    def __exit__(self, *args: Any) -> None:
-        """Exit the context manager."""
-        self.stop()
-
-    def start(self) -> None:
-        """Start mocking e3.os.process.Run."""
-        with RunPatcher._mock_init_lock:
-            self.__class__._nested_count += 1
-            if self.__class__._nested_count == 1:
-                # Only apply the patch once
-                if isinstance(e3.os.process.Run, MockRun):
-                    raise MockRunError("e3.os.process.Run already patched")
-
-                self.__class__._mock_run = MockRun(config=self.config)
-                self._run_patch = patch("e3.os.process.Run", self.__class__._mock_run)
-                self._run_patch.start()
-
-    def stop(self) -> None:
-        """Stop mocking e3.os.process.Run."""
-        with RunPatcher._mock_init_lock:
-            self.__class__._nested_count -= 1
-            if self.__class__._nested_count < 0:
-                raise MockRunError("Called stop() before start().")
-
-            if self.__class__._nested_count == 0:
-                self.__class__._mock_run = None
-                self._run_patch.stop()
-
-    def _decorate_callable(self, func: Callable) -> Callable:
-        """Decorate the callable function.
-
-        :param func: decorated function
-        :return: a decorator for calling func
-        """
-
-        @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Callable:
-            self.start()
-            try:
-                return func(*args, **kwargs)
-            finally:
-                self.stop()
-
-        return wrapper
