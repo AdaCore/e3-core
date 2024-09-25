@@ -100,6 +100,13 @@ def main() -> None:
         default=None,
         help="allow to use yanked version for some requirements (See: PEP_592)",
     )
+
+    m.argument_parser.add_argument(
+        "--wheel-build-arg",
+        dest="wheel_build_args",
+        action="append",
+        help=argparse.SUPPRESS,
+    )
     m.parse_args()
     assert m.args is not None
 
@@ -159,7 +166,9 @@ def main() -> None:
 
         local_wheels.append(
             Wheel.build(
-                source_dir=checkout_manager.working_dir, dest_dir=wheel_cache_dir
+                source_dir=checkout_manager.working_dir,
+                dest_dir=wheel_cache_dir,
+                build_args=m.args.wheel_build_args,
             )
         )
 

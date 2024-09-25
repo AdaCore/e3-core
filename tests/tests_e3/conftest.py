@@ -54,7 +54,11 @@ class PypiSimulator:
         with open(path_join(name, name, "__init__.py"), "w") as fd:
             fd.write(f"# This is package {name}")
 
-        pkg = Wheel.build(source_dir=name, dest_dir=".")
+        pkg = Wheel.build(
+            source_dir=name,
+            dest_dir=".",
+            build_args=["--no-build-isolation", "--no-index"],
+        )
         assert isfile(pkg.path)
 
         with open(pkg.path, "rb") as f:
