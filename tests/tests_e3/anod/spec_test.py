@@ -40,15 +40,12 @@ CHECK_DLL_CLOSURE_ARGUMENTS = [
         (
             None,
             [
-                "libc.so.6",
-                "libstdc++.so.6",
                 "libstdc++.so.6",
                 "libgcc_s.so.1",
                 "libpthread.so.0",
                 "libdl.so.2",
                 "libm.so.6",
                 # Windows ignored Dlls.
-                "ADVAPI32.dll",
                 "CRYPTBASE.DLL",
                 "Comctl32.dll",
                 "FreeImage.dll",
@@ -195,9 +192,34 @@ def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
         lib_path: Path = Path(
             exe_path.parent.parent, "lib" if sys.platform != "win32" else ""
         )
-        test_spec.check_shared_libraries_closure(
-            prefix=str(lib_path), ignored_libs=ignored, ldd_output=None
-        )
+        try:
+            test_spec.check_shared_libraries_closure(
+                prefix=str(lib_path), ignored_libs=ignored, ldd_output=None
+            )
+        except AnodError as ae:
+            # As the list of shared libraries used by the interpreter varies
+            # from a host to another, we may catch exceptions. In that case,
+            # just make sure the libraries listed in the ignored list do not
+            # appear in the error message.
+            if len(ae.messages) > 0:
+                error_messages: list[str] = ae.messages[0].splitlines()
+                culprit_dlls: list[str] = []
+                dll_name: str
+                for msg in error_messages:
+                    if msg.strip().startswith("- "):
+                        dll_name = msg.strip()[2:].split(":")[0].strip()
+                        if dll_name not in culprit_dlls:
+                            culprit_dlls.append(dll_name)
+                # Check that none of the dlls listed in the error message
+                # actually belongs to the ignored dlls.
+                for culprit_dll in culprit_dlls:
+                    if culprit_dll in ignored:
+                        raise Exception(
+                            f"Shared library {culprit_dll} is listed in the "
+                            "dll closure errors, while it should be ignored"
+                        ) from ae
+            else:
+                raise ae
     elif errors:
         with pytest.raises(AnodError) as ae:
             test_spec.check_shared_libraries_closure(
