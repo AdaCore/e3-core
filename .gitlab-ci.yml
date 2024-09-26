@@ -1,5 +1,3 @@
-### GENERAL ###
-
 variables:
   GITLAB_REMOTE:
     description: "The remote gitlab URL used."
@@ -14,9 +12,9 @@ variables:
     value: "3.12"
 
 stages:
-  - Checks
-  - Tests Linux
-  - Tests Windows
+  - checks
+  - tests linux
+  - tests windows
 
 default:
   services:
@@ -38,7 +36,6 @@ default:
 .linux-image:
   services:
     - image:all-pythons
-    - cpu:4
   before_script:
     - source /it/activate-py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2:2}
     - python -m pip install -U pip
@@ -53,8 +50,8 @@ default:
 
 # Stage: Checks
 
-Style:
-  stage: Checks
+check:
+  stage: checks
   extends: .linux-common
   needs: []
   before_script:
@@ -72,42 +69,16 @@ Style:
     - !reference [.linux-common, script]
   variables:
     PYTHON_VERSION: ${LATEST_PYTHON}
-    CI_TOX_ENV: mypy
+    CI_TOX_ENV: check
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-
-Security:
-  stage: Checks
-  needs: []
-  extends: .linux-common
-  variables:
-    PYTHON_VERSION: ${LATEST_PYTHON}
-    CI_TOX_ENV: security
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-
-Documentations:
-  stage: Checks
-  needs: ["Style"]
-  extends: .linux-common
-  variables:
-    PYTHON_VERSION: ${LATEST_PYTHON}
-    CI_TOX_ENV: docs
-  only:
-    refs:
-      - merge_requests
-    changes:
-      - docs/**/*
-      - pyproject.toml
-      - setup.cfg
-      - tox.ini
-      - .gitlab-ci.yml
-
-# Stage: Tests
 
 .test-linux:
-  stage: Tests Linux
+  stage: tests linux
   extends: .linux-common
+  services:
+    - !reference [.linux-common, services]
+    - cpu:4
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   parallel:
     matrix:
@@ -122,23 +93,23 @@ Documentations:
         path: coverage.xml
       junit: pytest-report.xml
 
-Linux Python:
+linux python:
   extends: .test-linux
-  needs: ["Style"]
+  needs: ["check"]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-# A job tiggered by 'Run Linux tests'. This jobs will run without waiting any others
+# A job triggered by 'run linux tests'. This jobs will run without waiting any others
 # jobs.
-Linux Python (always):
+linux python (always):
   extends: .test-linux
   needs: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "parent_pipeline" && $CI_MERGE_REQUEST_ID && $CI_PROJECT_NAME == "e3-core" && $ALWAYS_LINUX_TESTS == "y"
 
-# A manual jobs to run Linux tests even if "Style" jobs has been failed
-Run Linux tests:
-  stage: Tests Linux
+# A manual job to run Linux tests even if "check" job has failed
+run linux tests:
+  stage: tests linux
   needs: []
   trigger:
     include: .gitlab-ci.yml
@@ -182,36 +153,32 @@ Run Linux tests:
     - !reference [.windows-image, before_script]
     - !reference [.tox-common, before_script]
 
-# Stage: Checks
-
-#--- Nothing to do during this stage ---#
-
-# Stage: Tests
-
 .test-windows:
-  stage: Tests Windows
+  stage: tests windows
   extends: .windows-common
   parallel:
     matrix:
       - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12"]
 
-Windows Python:
+# Stage: Tests
+
+windows python:
   extends: .test-windows
-  needs: ["Style"]
+  needs: ["check"]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 # A job tiggered by 'Run Windows tests'. This jobs will run without waiting any others
 # jobs.
-Windows Python (always):
+windows python (always):
   extends: .test-windows
   needs: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "parent_pipeline" && $CI_MERGE_REQUEST_ID && $CI_PROJECT_NAME == "e3-core" && $ALWAYS_WINDOWS_TESTS == "y"
 
-# A manual jobs to run Windows tests even if previous jobs has been failed
-Run Windows tests:
-  stage: Tests Windows
+# A manual job to run Windows tests even if previous jobs have failed
+run windows tests:
+  stage: tests windows
   needs: []
   trigger:
     include: .gitlab-ci.yml
@@ -233,3 +200,13 @@ Run Windows tests:
   #     Are you sure you want to run Windows tests?
   #
   #     This is only useful if the previous stages have failed and you still want to run the tests.
+
+documentations:
+  stage: checks
+  needs: ["check"]
+  extends: .linux-common
+  variables:
+    PYTHON_VERSION: ${LATEST_PYTHON}
+    CI_TOX_ENV: docs
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
