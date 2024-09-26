@@ -227,7 +227,7 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
             if "got an unexpected keyword argument 'map_path'" in str(te):
                 # Try with the old API ...
                 # noinspection PyArgumentList
-                new_coverage_data.update(old_coverage_data, aliases=paths)
+                new_coverage_data.update(old_coverage_data, aliases=paths)  # type: ignore[call-arg]
             else:
                 raise te
         new_coverage_data.write()
