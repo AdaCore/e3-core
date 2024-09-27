@@ -387,6 +387,7 @@ def unpack_archive(
                     message=f"Cannot unzip {filename} ({e})",
                 ) from e
         else:
+            # noinspection PyArgumentList
             assert_never()
 
         if remove_root_dir:
@@ -518,6 +519,7 @@ def create_archive(
         elif ext == "tar.xz":
             tar_format = "w:xz"
         else:
+            # noinspection PyArgumentList
             assert_never()
         with closing(
             tarfile.open(filepath, fileobj=fileobj, mode=tar_format)
