@@ -272,12 +272,21 @@ class PlanContext:
         if entry_point_parameters is None:
             entry_point_parameters = {}
 
+        nb_entry_points = len(plan.entry_points)
         if entry_point_name in plan.entry_points:
             plan.entry_points[entry_point_name].execute(**entry_point_parameters)
         else:
             # ??? An error should be raised as soon as entry points are
             # used everywhere
             plan.mod.__dict__[entry_point_name](**entry_point_parameters)
+
+        if len(plan.entry_points) != nb_entry_points:
+            # The number of entry points should not change when executing the
+            # code in an entry point. If it does, it means that there is a
+            # nested entry point, this is not supported.
+            raise PlanError(
+                f"the plan contains nested entry points in {entry_point_name}"
+            )
 
         return self.action_list
 

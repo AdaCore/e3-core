@@ -2,6 +2,7 @@ import e3.electrolyt.entry_point as entry_point
 import e3.electrolyt.host as host
 import e3.electrolyt.plan as plan
 import e3.env
+import pytest
 
 
 def build_action(spec, build=None, host=None, target=None, board=None):
@@ -143,6 +144,33 @@ def test_entry_points():
 
     assert len(ep_executed) == 1
     assert ep_executed[0].name == "machine2"
+
+
+def test_nested_entry_points():
+    """Test a plan containing nested entry points.
+
+    Nested entry points are not supported, verify that we get an Plan Error.
+    """
+    plan_content = [
+        '@machine(name="machine1", description="Machine 1",',
+        '         platform="x86_64-linux", version="rhES6")',
+        "def machine1():",
+        '    build("a")',
+        '    @machine(description="Machine 2",',
+        '             platform="x86_64-linux", version="rhES6")',
+        "    def machine2():",
+        '        build("b")',
+    ]
+    myplan = _get_plan({}, plan_content)
+
+    db = myplan.entry_points
+    assert len(db) == 1
+    assert "machine1" in db
+
+    context = _get_new_plancontext("machine1")
+    with pytest.raises(plan.PlanError) as pe:
+        context.execute(myplan, "machine1")
+    assert "nested" in str(pe)
 
 
 def test_plan_disable_lines():
