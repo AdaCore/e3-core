@@ -27,7 +27,9 @@ def generate_py_pkg_source(
     mkdir(path_join(name, name))
     with open(path_join(name, name, "__init__.py"), "w") as fd:
         fd.write(f"# This is package {name}")
-    return Wheel.build(source_dir=name, dest_dir=".")
+    return Wheel.build(
+        source_dir=name, dest_dir=".", build_args=["--no-build-isolation", "--no-index"]
+    )
 
 
 def test_wheel():
@@ -96,7 +98,14 @@ def test_pypi_closure_tool():
         )
     p = Run(
         python_script("e3-pypi-closure")
-        + ["--python3-version=10", "--local-clones=.", "config.yml", "dist"]
+        + [
+            "--python3-version=10",
+            "--local-clones=.",
+            "config.yml",
+            "dist",
+            "--wheel-build-arg=--no-build-isolation",
+            "--wheel-build-arg=--no-index",
+        ]
     )
     assert p.status == 0, p.out
     file_list = set(listdir("dist"))

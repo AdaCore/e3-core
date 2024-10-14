@@ -43,29 +43,35 @@ class Wheel:
                 }
 
     @classmethod
-    def build(cls, source_dir: str, dest_dir: str, python_tag: str = "py3") -> Wheel:
+    def build(
+        cls,
+        source_dir: str,
+        dest_dir: str,
+        python_tag: str = "py3",
+        build_args: list[str] | None = None,
+    ) -> Wheel:
         """Create a wheel package from a source directory.
 
         :param source_dir: location of the sources
         :param dest_dir: directory in which the wheel will be saved
         :param python_tag: python tag (default: py3)
+        :param build_args: extra `pip wheel` build arguments
         :return: a Wheel object
         """
         with tempfile.TemporaryDirectory() as build_dir:
-            p = Run(
-                python_script("pip")
-                + [
-                    "wheel",
-                    ".",
-                    "-q",
-                    "--no-deps",
-                    f"-C--python-tag={python_tag}",
-                    "-w",
-                    build_dir,
-                ],
-                cwd=source_dir,
-            )
+            cmd = python_script("pip") + [
+                "wheel",
+                ".",
+                "-q",
+                "--no-deps",
+                f"-C--python-tag={python_tag}",
+                "-w",
+                build_dir,
+            ]
 
+            if build_args is not None:
+                cmd += build_args
+            p = Run(cmd, cwd=source_dir)
             if p.status != 0:
                 raise WheelError(f"Error during wheel creation:\n{p.out}")
 
