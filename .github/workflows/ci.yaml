@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-           python-version: 3.9
+           python-version: 3.12
       - name: Install Tox and any other packages
         run: |
              python -m pip install -U pip
@@ -55,5 +55,5 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-           python-version: 3.9
+           python-version: 3.12
       - uses: pre-commit/action@v2.0.0
