@@ -412,7 +412,7 @@ class Anod:
         ignored_libs: list[str] | None = None,
         ldd_output: str | None = None,
         case_sensitive: bool | None = None,
-    ) -> None:
+    ) -> dict[str, list[tuple[str, str]]]:
         """Sanity check the shared library closure.
 
         Make sure that the libraries only depend on authorized system shared
@@ -446,12 +446,17 @@ class Anod:
             value in *ignored_libs* should be case-sensitive or not. If
             ``None``, the comparison is case-sensitive, but on Windows hosts.
 
+        :return: A dictionary, where keys are the analyzed files, and the
+            values are the shared libraries linked to that file (a tuple made
+            of the file name and its path).
+
         :raise AnodError: if some of the shared libraries in *prefix* (or in
             *ldd_output*) is not in the same directory as the analysed element.
         :raise FileNotFoundError: if *ldd_output* is not provided and ``ldd``
             application cannot be found in the ``PATH``.
         """  # noqa RST304
         ignored: list[str] = ignored_libs or []
+        result: dict[str, list[tuple[str, str]]] = {}
         errors: dict[str, list[str]] = {}
         lib_file: str = ""
 
@@ -473,6 +478,11 @@ class Anod:
                 root=prefix, pattern=f"*{OS_INFO[e3.env.Env().build.os.name]['dllext']}"
             )
             ldd_output = e3.os.process.Run(["ldd"] + lib_files).out or ""
+
+            # When only one path is specified, ldd does not add the name of the
+            # file in the output. This would break the parsing below.
+            if len(lib_files) == 1:
+                ldd_output = f"{lib_files[0]}:\n{ldd_output}"
         else:
             # An ldd output has been provided.
             lib_files = re.findall(r"^([^\t].*):$", ldd_output, flags=re.M)
@@ -492,6 +502,8 @@ class Anod:
                 # Line is like ``/mypath/mydll.so:``, it's the result of
                 # ldd for ``mydll.so``.
                 lib_file = line[:-1]
+                if lib_file not in result:
+                    result[lib_file] = []
             elif lib_file and " => " in line:
                 # Line looks like:
                 # ``        otherdll.so => /other/otherdll.so (0xabcd)``
@@ -507,6 +519,7 @@ class Anod:
 
                 # Make sure there are no "not found" errors
                 if "not found" in line.lower():
+                    result[lib_file].append((name, path))
                     if not in_ignored:
                         if lib_file not in errors:
                             errors[lib_file] = []
@@ -514,6 +527,7 @@ class Anod:
                     continue
 
                 path = re.sub(" (.*)", "", path)
+                result[lib_file].append((name, path))
 
                 # Make sure a path is defined, we may have lines like::
                 #
@@ -537,6 +551,8 @@ class Anod:
                     f"dependencies:{''.join(sorted(dependencies))}"
                 )
             raise AnodError(err_msg)
+
+        return result
 
     def load_config_file(
         self,

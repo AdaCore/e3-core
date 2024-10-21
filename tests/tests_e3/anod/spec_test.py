@@ -8,6 +8,10 @@ from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError, SpecError
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
+from e3.env import Env
+from e3.fs import cp
+from e3.os.process import Run
+from e3.platform_db.knowledge_base import OS_INFO
 
 import pytest
 
@@ -119,7 +123,7 @@ CHECK_DLL_CLOSURE_ARGUMENTS = [
             ),
             ["libc.so.6", "libselinux.so.1"],
         ),
-        (("- libpcre2-8.so.0: not found"),),
+        ("- libpcre2-8.so.0: not found",),
     ),
     (
         (
@@ -180,7 +184,7 @@ def test_spec_buildvars():
 
 # noinspection PyUnusedLocal
 @pytest.mark.parametrize("arguments,expected", CHECK_DLL_CLOSURE_ARGUMENTS)
-def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
+def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:  # type: ignore[no-untyped-def]
     """Create a simple spec with dependency to python and run dll closure."""
     ldd_output, ignored = arguments
     (errors,) = expected
@@ -221,16 +225,64 @@ def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
             else:
                 raise ae
     elif errors:
-        with pytest.raises(AnodError) as ae:
+        with pytest.raises(AnodError) as anod_error:
             test_spec.check_shared_libraries_closure(
                 prefix=None, ignored_libs=ignored, ldd_output=ldd_output
             )
-        assert errors in ae.value.args[0]
+        assert errors in anod_error.value.args[0]
     else:
         # There is an ldd_output, but no errors may be raised on unix hosts.
         test_spec.check_shared_libraries_closure(
             prefix=None, ignored_libs=ignored, ldd_output=ldd_output
         )
+
+
+# noinspection PyUnusedLocal
+def test_spec_check_dll_closure_single_file(ldd) -> None:  # type: ignore[no-untyped-def]
+    """Create a simple spec with dependency to python and run dll closure."""
+    name: str | None = None
+    path: str | None = None
+
+    test_spec: Anod = Anod("", kind="install")
+    test_spec.sandbox = SandBox(root_dir=os.getcwd())
+
+    # Get the ldd output of the current executable.
+    ldd_output = Run(["ldd"] + [sys.executable]).out or ""
+
+    # Extract the first dll with a path from the ldd output.
+    for line in ldd_output.splitlines():
+        if " => " in line:
+            name, path = line.strip().split(" => ", 1)
+            # Remove the load address from the file path.
+            path = path.split("(")[0].strip()
+            break
+
+    if name is None or path is None:
+        # Skip test.
+        pytest.skip("No shared library to analyse")
+
+    # Copy that file in here. As the share lib may have a name like
+    # my_shlib.so.1.0, better rename it simply my_shlib.so.
+    shlib_ext: str = f"{OS_INFO[Env().build.os.name]['dllext']}"
+    prefix: Path = Path(Path.cwd(), "prefix")
+    name = name.split(shlib_ext)[0] + shlib_ext
+    shlib_path: str = Path(prefix, name).as_posix()
+    prefix.mkdir()
+    cp(path, shlib_path)
+
+    # And now run check_shared_libraries_closure() on that shared library.
+    # As we do not define exceptions (ignored system libraries), and that the
+    # library may link with system libraries, take all possibilities into
+    # account:
+    # - exception: the analysis was ok, since it detected system libraries
+    # - result: make sure there is only one element in the result
+
+    try:
+        result = test_spec.check_shared_libraries_closure(prefix=str(prefix))
+        assert len(result) == 1
+        assert Path(sys.executable).as_posix() in result
+    except AnodError as ae:
+        assert shlib_path in ae.messages[0]
 
 
 def test_spec_wrong_dep():
@@ -335,7 +387,7 @@ def test_spec_qualifier():
 
 def test_missing_property():
     class NoProperty(Anod):
-        def source_pkg_build(self) -> list:
+        def source_pkg_build(self) -> list:  # type: ignore[override]
             return []
 
     noproperty = NoProperty(qualifier="", kind="source")
