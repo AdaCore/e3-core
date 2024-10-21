@@ -411,6 +411,9 @@ def activate(
 ) -> None:
     """Activate default E3 logging.
 
+    This function should be called only once. Subsequent calls will result
+    in a no-op.
+
     :param level: set the root logger level to the specified level
     :param datefmt: date/time format for the log handler
     :param stream_format: format string for the stream handler
@@ -418,6 +421,12 @@ def activate(
     :param filename: redirect logs to a file in addition to the StreamHandler
     :param e3_debug: activate full debug of the e3 library
     """
+    # Ensure that logs are not duplicated by mulitple calls to activate()
+    # e.g. this could be the case when running the testsuite with pytest xdist
+    if getattr(activate, "called_once", False):
+        return
+    else:
+        activate.called_once = True  # type: ignore[attr-defined]
     # By default do not filter anything. What is effectively logged
     # will be defined by setting/unsetting handlers
     logging.getLogger("").setLevel(logging.DEBUG)
