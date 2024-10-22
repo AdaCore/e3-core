@@ -15,6 +15,9 @@ import signal
 import subprocess
 import sys
 import time
+
+from pathlib import Path
+
 from typing import TYPE_CHECKING
 
 import e3.env
@@ -175,7 +178,7 @@ def command_line_image(cmds: AnyCmdLine) -> str:
     )
 
 
-def enable_commands_handler(filename: str, mode: str = "a") -> logging.Handler:
+def enable_commands_handler(filename: str | Path, mode: str = "a") -> logging.Handler:
     """Add a handler that log all commands launched with Run in a file.
 
     :param filename: path to log the commands
@@ -231,11 +234,13 @@ class Run:
     def __init__(
         self,
         cmds: AnyCmdLine,
-        cwd: str | None = None,
-        output: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = PIPE,
-        error: STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | IO | None = STDOUT,
+        cwd: str | Path | None = None,
+        output: DEVNULL_VALUE | PIPE_VALUE | str | Path | IO | None = PIPE,
+        error: (
+            STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | Path | IO | None
+        ) = STDOUT,
         input: (  # noqa: A002
-            DEVNULL_VALUE | PIPE_VALUE | str | bytes | IO | None  # noqa: A002
+            DEVNULL_VALUE | PIPE_VALUE | str | bytes | Path | IO | None  # noqa: A002
         ) = None,  # noqa: A002
         bg: bool = False,
         timeout: int | None = None,
@@ -639,6 +644,7 @@ class File:
         assert mode in "rw", "Mode should be r or w"
         self.fd: int | IO[str]
 
+        name = os.fspath(name) if isinstance(name, Path) else name
         self.name = name
         self.to_close = False
         if isinstance(name, bytes) and mode == "r" and name.startswith(b"|"):
