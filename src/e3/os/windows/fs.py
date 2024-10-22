@@ -31,6 +31,7 @@ from e3.os.windows.native_api import (
 if TYPE_CHECKING:
     from typing import Any
     from collections.abc import Callable
+    from pathlib import Path
 
 
 logger = e3.log.getLogger("os.windows.fs")
@@ -74,7 +75,7 @@ class NTFile:
     :ivar basic_info: ObjectAttributes object associated with the file
     """
 
-    def __init__(self, filename: str, parent: NTFile | None = None):
+    def __init__(self, filename: str | Path, parent: NTFile | None = None):
         """Initialize a NTFile object.
 
         :param filename: path to the file or basename if parent is not None
@@ -86,7 +87,8 @@ class NTFile:
             self.nt_filename = UnicodeString(f"\\??\\{self.path}")
             self.parent_handle = None
         else:
-            assert "\\" not in filename and "/" not in filename
+            file_path = os.fspath(filename)
+            assert "\\" not in file_path and "/" not in file_path
             self.path = os.path.join(parent.path, filename)
             self.nt_filename = UnicodeString(str(filename))
             self.parent_handle = parent.handle
