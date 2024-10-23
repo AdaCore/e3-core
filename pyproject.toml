@@ -71,6 +71,7 @@ check = [
   "types-PyYAML",
   "types-requests",
   "types-setuptools",
+  "distro; sys_platform=='darwin'",  # for type checking
 ]
 
 [project.scripts]
