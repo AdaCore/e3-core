@@ -483,7 +483,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
 
             # And continue to delete the subdir
             if Version(python_version()) >= Version("3.12"):
-                shutil.rmtree(error_path, onexc=onerror)
+                shutil.rmtree(error_path, onexc=onerror)  # type: ignore[call-arg]
             else:
                 shutil.rmtree(error_path, onerror=onerror)
 
@@ -505,7 +505,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             # directory, not a symbolic link to a directory
             if recursive and os.path.isdir(f) and not os.path.islink(f):
                 if Version(python_version()) >= Version("3.12"):
-                    shutil.rmtree(f, onexc=onerror)
+                    shutil.rmtree(f, onexc=onerror)  # type: ignore[call-arg]
                 else:
                     shutil.rmtree(f, onerror=onerror)
             else:

@@ -8,7 +8,9 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+
 from contextlib import closing
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import e3
@@ -44,7 +46,7 @@ logger = e3.log.getLogger("archive")
 
 if sys.platform == "win32":
     # On Windows force the executable bit on all files. This ensures that when
-    # using cygwin unziped files get an executable bit set (the executable
+    # using cygwin unzipped files get an executable bit set (the executable
     # does not exist in win32 but is simulated in Cygwin).
 
     class E3ZipInfo(zipfile.ZipInfo):
@@ -66,6 +68,7 @@ class E3ZipFile(zipfile.ZipFile):
         path: str | PathLike[str] | None,
         pwd: bytes | None,
     ) -> str:
+        # noinspection PyProtectedMember
         result = super()._extract_member(member, path, pwd)  # type: ignore
 
         if sys.platform != "win32":
@@ -226,7 +229,7 @@ def unpack_archive(
     ext = check_type(filename, force_extension=force_extension)
 
     # If remove_root_dir is set then extract to a temp directory first.
-    # Otherwise extract directly to the final destination
+    # Otherwise, extract directly to the final destination
     if remove_root_dir:
         if tmp_dir_root is None:
             tmp_dir_root = os.path.dirname(os.path.abspath(dest))
@@ -255,6 +258,62 @@ def unpack_archive(
                 ) as fd:
                     check_selected = set(selected_files)
 
+                    def filter_invalid_paths(
+                        destination: str, members: list[tarfile.TarInfo]
+                    ) -> list[tarfile.TarInfo]:
+                        """Filter invalid archive members.
+
+                        As per CWE-22 (and tracked by bandit's B202 report),
+                        using TarFile.extractall() should at least  filter
+                        members on invalid paths (like absolute paths, or
+                        traversal path - containing "..").
+
+                        :param destination: The destination path of the
+                            uncompressed archive content. This is used to make
+                            sure no element may be uncompressed outside this
+                            path.
+                        :param members: The list of elements of the archive to
+                            perform path filtering for.
+
+                        :return: The list of elements from the archive which are
+                            allowed to be uncompressed.
+                        """
+                        filtered: list[tarfile.TarInfo] = []
+                        if hasattr(tarfile, "data_filter"):
+                            # Use the tarfile filter.
+                            for member in members:
+                                try:
+                                    # The call to data_filter() raises an
+                                    # exception on any problematic member. We
+                                    # may build the list of members from
+                                    # unfiltered.
+                                    tarfile.data_filter(member, destination)
+                                    filtered.append(member)
+                                except Exception:
+                                    logger.error(
+                                        f"Ignoring invalid member {member.name}"
+                                        " from tarball"
+                                    )
+                        else:
+                            # At least remove some problematic paths.
+                            for member in members:
+                                member_path: Path = Path(member.name)
+                                if member_path.is_absolute():
+                                    logger.error(
+                                        f"Ignoring absolute path {member.name}"
+                                    )
+                                elif ".." in member_path.parts:
+                                    logger.error(
+                                        f"Ignoring traversal path {member.name}"
+                                    )
+                                elif member_path.is_reserved():
+                                    logger.error(
+                                        f"Ignoring reserved path {member.name}"
+                                    )
+                                else:
+                                    filtered.append(member)
+                        return filtered
+
                     def is_match(name: str, files: Sequence[str]) -> bool:
                         """check if name match any of the expression in files.
 
@@ -272,12 +331,12 @@ def unpack_archive(
                     dirs: list[str] = []
 
                     # IMPORTANT: don't use the method extract. Always use the
-                    # extractall function. Indeed extractall will set file
+                    # extractall function. Indeed, extractall will set file
                     # permissions only once all selected members are unpacked.
                     # Using extract can lead to permission denied for example
                     # if a read-only directory is created.
+                    member_list: list[tarfile.TarInfo] = []
                     if selected_files:
-                        member_list = []
                         for tinfo in fd:
                             if is_match(
                                 tinfo.name, selected_files
@@ -293,10 +352,16 @@ def unpack_archive(
                             raise ArchiveError(
                                 "unpack_archive", f"Cannot untar {filename} "
                             )
-
-                        fd.extractall(path=tmp_dest, members=member_list)
                     else:
-                        fd.extractall(path=tmp_dest)
+                        member_list = fd.getmembers()
+
+                    fd.extractall(
+                        path=tmp_dest,
+                        members=filter_invalid_paths(
+                            destination=tmp_dest,
+                            members=member_list,
+                        ),
+                    )
 
             except tarfile.TarError as e:
                 raise ArchiveError(
@@ -309,8 +374,12 @@ def unpack_archive(
                 with closing(
                     E3ZipFile(fileobj if fileobj is not None else filename, mode="r")
                 ) as zip_fd:
+                    # Note that the ZipFile.extractall() already takes care
+                    # of file names with "." or "..". Still bandit thinks this
+                    # is a call to TarFile.extractall(), adding a flag to let
+                    # `bandit` ignore this.
                     zip_fd.extractall(
-                        tmp_dest, selected_files if selected_files else None
+                        tmp_dest, selected_files if selected_files else None  # nosec
                     )
             except zipfile.BadZipfile as e:
                 raise ArchiveError(
@@ -318,6 +387,7 @@ def unpack_archive(
                     message=f"Cannot unzip {filename} ({e})",
                 ) from e
         else:
+            # noinspection PyArgumentList
             assert_never()
 
         if remove_root_dir:
@@ -449,6 +519,7 @@ def create_archive(
         elif ext == "tar.xz":
             tar_format = "w:xz"
         else:
+            # noinspection PyArgumentList
             assert_never()
         with closing(
             tarfile.open(filepath, fileobj=fileobj, mode=tar_format)
