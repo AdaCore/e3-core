@@ -5,6 +5,8 @@ import sys
 import tempfile
 import time
 
+from pathlib import Path
+
 import e3.fs
 import e3.os.fs
 
@@ -139,4 +141,4 @@ def test_which():
     path_to_e3 = e3.os.fs.which("e3")
     assert os.path.isfile(path_to_e3)
 
-    assert e3.os.fs.which(path_to_e3) == path_to_e3
+    assert e3.os.fs.which(Path(path_to_e3)) == path_to_e3

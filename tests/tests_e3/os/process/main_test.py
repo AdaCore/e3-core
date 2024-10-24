@@ -7,6 +7,8 @@ import textwrap
 import time
 import signal
 
+from pathlib import Path
+
 import e3.fs
 import e3.os.fs
 import e3.os.process
@@ -331,6 +333,13 @@ def test_run_pipe():
     p = e3.os.process.Run(cmd_right, input="dummy")
     assert p.status == 0
     assert p.out.strip() == "dummies"
+
+    with open("bunny", "w") as f:
+        f.write("bunny")
+    # Ensure we have support for Path
+    p = e3.os.process.Run(cmd_right, input=Path("bunny"))
+    assert p.status == 0
+    assert p.out.strip() == "bunnies"
 
 
 def test_command_line_image():

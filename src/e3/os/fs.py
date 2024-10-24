@@ -13,6 +13,8 @@ import re
 import shutil
 import stat
 import sys
+
+
 from typing import TYPE_CHECKING, overload
 
 import e3
@@ -22,6 +24,7 @@ import e3.log
 if TYPE_CHECKING:
     from typing import Any, Literal
     from collections.abc import Callable
+    from pathlib import Path
 
 
 class OSFSError(e3.error.E3Error):
@@ -31,7 +34,7 @@ class OSFSError(e3.error.E3Error):
 logger = e3.log.getLogger("os_fs")
 
 
-def cd(path: str) -> None:
+def cd(path: str | Path) -> None:
     """Change current directory.
 
     :param path: directory name
@@ -44,7 +47,7 @@ def cd(path: str) -> None:
         raise OSFSError(origin="cd", message=f"can't chdir to {path}\n") from e
 
 
-def chmod(mode: str, filename: str) -> int:
+def chmod(mode: str, filename: str | Path) -> int:
     """Chmod with interface similar to Unix tool.
 
     :param mode: should conform with posix specification for
@@ -135,14 +138,14 @@ def chmod(mode: str, filename: str) -> int:
 
 
 @overload
-def df(path: str) -> int: ...
+def df(path: str | Path) -> int: ...
 
 
 @overload
-def df(path: str, full: Literal[True]) -> tuple: ...
+def df(path: str | Path, full: Literal[True]) -> tuple: ...
 
 
-def df(path: str, full: bool = False) -> int | tuple:
+def df(path: str | Path, full: bool = False) -> int | tuple:
     """Disk space available on the filesystem containing the given path.
 
     :param path: a path
@@ -194,7 +197,9 @@ def df(path: str, full: bool = False) -> int | tuple:
     return free // (1024 * 1024)
 
 
-def __safe_unlink_func() -> tuple[Callable[[str], None], Callable[[str], None]]:
+def __safe_unlink_func() -> (
+    tuple[Callable[[str | Path], None], Callable[[str | Path], None]]
+):
     """Provide a safe unlink function on windows.
 
     Note that all this is done to ensure that rm is working fine on Windows 7
@@ -205,16 +210,16 @@ def __safe_unlink_func() -> tuple[Callable[[str], None], Callable[[str], None]]:
     if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.fs import NTFile
 
-        def win_rm(x: str) -> None:
+        def win_rm(x: str | Path) -> None:
             return NTFile(x).unlink()
 
         return win_rm, win_rm
     else:  # windows: no cover
 
-        def os_remove(x: str) -> None:
+        def os_remove(x: str | Path) -> None:
             return os.remove(x)
 
-        def os_rmdir(x: str) -> None:
+        def os_rmdir(x: str | Path) -> None:
             return os.rmdir(x)
 
         return os_remove, os_rmdir
@@ -223,7 +228,7 @@ def __safe_unlink_func() -> tuple[Callable[[str], None], Callable[[str], None]]:
 safe_remove, safe_rmdir = __safe_unlink_func()
 
 
-def force_remove_file(path: str) -> None:
+def force_remove_file(path: str | Path) -> None:
     """Force file removing, changing permissions if first attempt failed.
 
     :param path: path of the file to remove
@@ -256,7 +261,7 @@ def max_path() -> int:
         return os.pathconf("/", "PC_PATH_MAX")
 
 
-def mv(source: str, target: str) -> None:
+def mv(source: str | Path, target: str | Path) -> None:
     """Move a file.
 
     :param target: file to move
@@ -269,7 +274,7 @@ def mv(source: str, target: str) -> None:
         shutil.move(source, target)
 
 
-def touch(filename: str) -> None:
+def touch(filename: str | Path) -> None:
     """Update file access and modification times. Create the file if needed.
 
     :param filename: file to update
@@ -281,7 +286,7 @@ def touch(filename: str) -> None:
             pass
 
 
-def unixpath(path: str) -> str:
+def unixpath(path: str | Path) -> str:
     r"""Convert path to Unix/Cygwin format.
 
     :param path: path string to convert
@@ -293,16 +298,16 @@ def unixpath(path: str) -> str:
     if path and sys.platform == "win32":  # unix: no cover
         # Cygpath is not available so just replace \ by / and remove drive
         # information. This should work in most cases
-        result = path.replace("\\", "/")
+        result = os.fspath(path).replace("\\", "/")
         m = re.match("[a-zA-Z]:(.*)", result)
         if m is not None:
             result = m.group(1)
         return result
     else:  # windows: no cover
-        return path
+        return os.fspath(path)
 
 
-def which(prog: str, paths: str | None = None, default: Any = "") -> Any:
+def which(prog: str | Path, paths: str | None = None, default: Any = "") -> Any:
     """Locate executable.
 
     :param prog: program to find
@@ -332,7 +337,7 @@ def which(prog: str, paths: str | None = None, default: Any = "") -> Any:
     fpath, _ = os.path.split(prog)
     if fpath:
         # Full path given, check if executable
-        for progname in possible_names(prog):
+        for progname in possible_names(os.fspath(prog)):
             if is_exe(progname):
                 return progname
     else:

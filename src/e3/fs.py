@@ -14,6 +14,7 @@ import sys
 from collections import namedtuple
 from typing import TYPE_CHECKING
 from packaging.version import Version
+from pathlib import Path
 from platform import python_version
 
 import e3
@@ -34,8 +35,8 @@ class FSError(e3.error.E3Error):
 
 
 def cp(
-    source: str,
-    target: str,
+    source: str | Path,
+    target: str | Path,
     copy_attrs: bool = True,
     recursive: bool = False,
     preserve_symlinks: bool = False,
@@ -64,7 +65,11 @@ def cp(
         logger.warning("recursive copy always preserves file attributes")
 
     # Compute file list and number of file to copy
-    file_list = ls(source, emit_log_record=False)
+    file_list: list[str] | list[Path]
+    if isinstance(source, Path):
+        file_list = [source]
+    else:
+        file_list = ls(source, emit_log_record=False)
     file_number = len(file_list)
 
     if file_number == 0:
@@ -81,7 +86,7 @@ def cp(
             if os.path.isdir(target):
                 f_dest = os.path.join(target, os.path.basename(f))
             else:
-                f_dest = target
+                f_dest = os.fspath(target)
 
             if recursive and os.path.isdir(f):
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
@@ -100,7 +105,7 @@ def cp(
 
 
 def directory_content(
-    path: str, include_root_dir: bool = False, unixpath: bool = False
+    path: str | Path, include_root_dir: bool = False, unixpath: bool = False
 ) -> list[str]:
     """Return the complete directory content (recusrsively).
 
@@ -133,7 +138,9 @@ def directory_content(
     return result
 
 
-def echo_to_file(filename: str, content: str | list[str], append: bool = False) -> None:
+def echo_to_file(
+    filename: str | Path, content: str | list[str], append: bool = False
+) -> None:
     """Output content into a file.
 
     This function is useful when writing few content to a file for which we
@@ -156,7 +163,7 @@ def echo_to_file(filename: str, content: str | list[str], append: bool = False) 
 
 
 def find(
-    root: str,
+    root: str | Path,
     pattern: str | None = None,
     include_dirs: bool = False,
     include_files: bool = True,
@@ -188,7 +195,7 @@ def find(
 
 
 def get_filetree_state(
-    path: str, ignore_hidden: bool = True, hash_content: bool = False
+    path: str | Path, ignore_hidden: bool = True, hash_content: bool = False
 ) -> str:
     """Compute a hash on a filetree to reflect its current state.
 
@@ -251,7 +258,9 @@ def get_filetree_state(
     return result.hexdigest()
 
 
-def ls(path: str | list[str], emit_log_record: bool = True) -> list[str]:
+def ls(
+    path: str | list[str] | Path | list[Path], emit_log_record: bool = True
+) -> list[str]:
     """list files.
 
     :param path: glob pattern or glob pattern list
@@ -262,10 +271,10 @@ def ls(path: str | list[str], emit_log_record: bool = True) -> list[str]:
     This function do not raise an error if no file matching the glob pattern
     is encountered. The only consequence is that an empty list is returned.
     """
-    if isinstance(path, str):
-        path_list = [path]
+    if isinstance(path, (str, Path)):
+        path_list = [os.fspath(path)]
     else:
-        path_list = list(path)
+        path_list = [os.fspath(p) for p in path]
 
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
@@ -273,7 +282,7 @@ def ls(path: str | list[str], emit_log_record: bool = True) -> list[str]:
     return sorted(itertools.chain.from_iterable(glob.glob(p) for p in path_list))
 
 
-def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
+def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
     """Create a directory.
 
     :param path: path to create. If intermediate directories do not exist
@@ -303,10 +312,11 @@ def mkdir(path: str, mode: int = 0o755, quiet: bool = False) -> None:
             raise FSError(origin="mkdir", message=f"can't create {path}") from e
 
 
-def mv(source: str | list[str], target: str) -> None:
+def mv(source: str | Path | list[str] | list[Path], target: str | Path) -> None:
     """Move files.
 
-    :param source: a glob pattern
+    :param source: a glob pattern, a list of glob patterns, a path, or a list
+        of paths
     :param target: target file or directory. If the source resolves as
         several files then target should be a directory
 
@@ -378,10 +388,12 @@ def mv(source: str | list[str], target: str) -> None:
                 rm(src)
         return
 
-    if isinstance(source, str):
-        logger.debug("mv %s %s", source, target)
+    if isinstance(source, (str, Path)):
+        logger.debug(f"mv {os.fspath(source)} {os.fspath(target)}")
     else:
-        logger.debug("mv %s %s", " ".join(source), target)
+        logger.debug(
+            f"mv {' '.join([os.fspath(s) for s in source])} {os.fspath(target)}"
+        )
 
     try:
         # Compute file list and number of file to copy
@@ -395,7 +407,7 @@ def mv(source: str | list[str], target: str) -> None:
             if os.path.isdir(source) and os.path.isdir(target):
                 move_file(source, os.path.join(target, os.path.basename(source)))
             else:
-                move_file(source, target)
+                move_file(source, os.fspath(target))
         elif not os.path.isdir(target):
             # More than one file to move but the target is not a directory
             raise FSError("mv", f"{target} should be a directory")
@@ -409,7 +421,11 @@ def mv(source: str | list[str], target: str) -> None:
         raise FSError(origin="mv", message=str(e)) from e
 
 
-def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> None:
+def rm(
+    path: str | Path | list[str] | list[Path],
+    recursive: bool = False,
+    glob: bool = True,
+) -> None:
     """Remove files.
 
     :param path: a glob pattern, or a list of glob patterns
@@ -421,20 +437,22 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
     Note that the function will not raise an error is there are no file to
     delete.
     """
-    if recursive:
-        logger.debug("rm -r %s", str(path))
+    if isinstance(path, (str, Path)):
+        logger.debug(f"rm{' -r' if recursive else ''} {os.fspath(path)}")
     else:
-        logger.debug("rm %s", str(path))
+        logger.debug(
+            f"rm{' -r' if recursive else ''} {' '.join(os.fspath(p) for p in path)}"
+        )
 
     # We transform the list into a set in order to remove duplicate files in
     # the list
     if glob:
         file_list = set(ls(path, emit_log_record=False))
     else:
-        if isinstance(path, str):
-            file_list = {path}
+        if isinstance(path, (str, Path)):
+            file_list = {os.fspath(path)}
         else:
-            file_list = set(path)
+            file_list = {os.fspath(p) for p in path}
 
     def onerror(
         func: Callable[..., Any], error_path: str, exc_info: tuple | BaseException
@@ -518,7 +536,7 @@ def rm(path: str | list[str], recursive: bool = False, glob: bool = True) -> Non
             ) from e
 
 
-def splitall(path: str) -> tuple[str, ...]:
+def splitall(path: str | Path) -> tuple[str, ...]:
     """Split a path into a list of path components.
 
     :param path: path to split
@@ -574,8 +592,8 @@ VCS_IGNORE_LIST = (
 
 
 def sync_tree(
-    source: str,
-    target: str,
+    source: str | Path,
+    target: str | Path,
     ignore: str | Sequence[str] | None = None,
     file_list: list[str] | None = None,
     delete: bool = True,
@@ -1027,7 +1045,7 @@ def sync_tree(
     return updated_list, deleted_list
 
 
-def extension(path: str) -> str:
+def extension(path: str | Path) -> str:
     """Return the extension of a given filename.
 
     Contrary to os.path.splitext which returns .gz, the function will return

@@ -3,6 +3,7 @@
 * Take `main.Main` name's argument as the arguments parser's prog name
 * Add DLL closure check to Anod class
 * Add git_shallow_fetch_since to checkout.py
+* Accept `pathlib.Path` in `e3.fs`, `e3.os.fs`, and `e3.os.process`
 
 * Backward incompatible change:
   * Remove e3.config and typeguard dependency. This removes the possibility

@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import re
 import sys
@@ -58,6 +59,54 @@ def test_cp():
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.cp(a, os.path.join("does", "not", "exist"))
+
+
+def test_pathlib():
+    """Minimal test to see whether pathlib.Path are also accepted."""
+    path_a = Path("a")
+    path_a.touch()
+    path_b = Path("b")
+    e3.fs.cp(path_a, path_b)
+    assert path_b.is_file()
+
+    assert e3.fs.directory_content(Path(".")) == ["a", "b"]
+    e3.fs.echo_to_file(Path("c"), "c")
+    assert e3.fs.directory_content(Path(".")) == ["a", "b", "c"]
+
+    assert set(e3.fs.find(Path("."))) == {"./a", "./b", "./c"}
+
+    assert e3.fs.get_filetree_state(Path(".")) == e3.fs.get_filetree_state(".")
+
+    assert e3.fs.ls(Path("a")) == ["a"]
+    assert e3.fs.ls([Path("a"), Path("c")]) == ["a", "c"]
+
+    d = Path("d")
+    e3.fs.mkdir(d)
+    assert d.is_dir()
+    file_in_d = d / "a_file"
+    file_in_d.touch()
+
+    assert e3.fs.splitall(file_in_d) == ("d", "a_file")
+
+    e3.fs.mv(path_a, Path("e"))
+    e3.fs.mv(d, Path("f"))
+    assert [e3.os.fs.unixpath(p) for p in e3.fs.directory_content(Path("."))] == [
+        "b",
+        "c",
+        "e",
+        "f/",
+        "f/a_file",
+    ]
+
+    e3.fs.sync_tree(Path("f"), Path("a"))
+
+    e3.fs.rm(path_b)
+    e3.fs.rm([Path("e"), Path("f")], recursive=True)
+    assert [e3.os.fs.unixpath(p) for p in e3.fs.directory_content(Path("."))] == [
+        "a/",
+        "a/a_file",
+        "c",
+    ]
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
