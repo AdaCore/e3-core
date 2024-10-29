@@ -536,7 +536,7 @@ class AnodContext:
         elif primitive == "install":
             result = Install(spec)
         else:
-            assert_never()
+            raise SchedulingError(f"{primitive!r} is not an anod primitive")
 
         # If this action is directly linked with a plan line make sure
         # to register the link between the action and the plan even
