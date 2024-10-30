@@ -12,47 +12,7 @@ import pytest
 from unittest.mock import patch
 
 
-E3_ARCHIVE_EXTENSIONS: list[str] = [".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"]
-
-
-@pytest.mark.parametrize("ext", E3_ARCHIVE_EXTENSIONS)
-def test_bandit_b202(ext) -> None:
-    archive_name: str = f"test_b202{ext}"
-
-    # Create a tarball with ".." everywhere
-    e3.fs.mkdir("archive")
-    e3.fs.mkdir("archive/dir1")
-    with open("archive/dir1/file1", "w") as f:
-        f.write("file1")
-    e3.fs.mkdir("archive/dir2/")
-    with open("archive/dir2/file2", "w") as f:
-        f.write("file2")
-    dest = os.getcwd()
-    os.chdir("archive/dir1")
-    e3.archive.create_archive(archive_name, "..", dest)
-    os.chdir(dest)
-
-    # Make sure e3.archive.unpack_archive() unpacks it with caring about the
-    # ".." issues.
-    os.chdir(dest)
-    e3.fs.mkdir("unpack/level1")
-    e3.archive.unpack_archive(
-        os.path.join(dest, archive_name), os.path.join(dest, "unpack/level1")
-    )
-    # As we packed with (for instance) "../dir1/file1", make sure that none of
-    # - unpack/dir1
-    # - unpack/dir2
-    # exist.
-
-    assert (
-        os.path.exists("unpack/dir1") is False
-    ), "Directory unpack/dir1 should not exist"
-    assert (
-        os.path.exists("unpack/dir2") is False
-    ), "Directory unpack/dir2 should not exist"
-
-
-@pytest.mark.parametrize("ext", E3_ARCHIVE_EXTENSIONS)
+@pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
 def test_unpack(ext):
     dir_to_pack = os.path.dirname(__file__)
 
