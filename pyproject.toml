@@ -93,7 +93,7 @@ s3 = "e3.event.handler.s3:S3Handler"
 
 [project.entry-points."e3.store"]
 http-simple-store = "e3.store.backends.http_simple_store:HTTPSimpleStore"
-
+          
 [project.entry-points."e3.store.cache.backend"]
 file-cache = "e3.store.cache.backends.filecache:FileCache"
 
@@ -124,7 +124,7 @@ addopts = "--failed-first --disable-socket --e3"
 
 [tool.mypy]
 # Ensure mypy works with namespace in which there is no toplevel
-# __init__.py. Explicit_package_bases means that mypy_path
+# __init__.py. Explicit_package_bases means that that mypy_path
 # will define which directory is the toplevel directory of the
 # namespace.
 mypy_path = "src"
