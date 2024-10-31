@@ -679,7 +679,7 @@ class PyPIClosure:
             provider = PyPIProvider(
                 get_pip_env(platform, python_version=self.python3_version), self.pypi
             )
-            reporter = BaseReporter()
+            reporter: BaseReporter = BaseReporter()
             resolver: Resolver = Resolver(provider, reporter)
             try:
                 result = resolver.resolve(self.requirements, max_rounds=500)
