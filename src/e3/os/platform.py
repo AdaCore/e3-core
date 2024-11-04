@@ -97,7 +97,11 @@ class SystemInfo:
             try:
                 import psutil
 
-                cls.core_number = psutil.cpu_count()
+                tmp_core_number = psutil.cpu_count()
+                if not tmp_core_number:
+                    logger.error("psutil.cpu_count() returned None or 0")
+                else:
+                    cls.core_number = tmp_core_number
             except Exception:
                 logger.exception("psutil error")
 
