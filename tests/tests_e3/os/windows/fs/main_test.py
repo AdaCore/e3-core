@@ -13,7 +13,7 @@ if sys.platform == "win32":
     from e3.os.windows.fs import NTFile
     from e3.os.windows.native_api import (
         Access,
-        FileTime,
+        LargeFileTime,
         NTException,
         Share,
         FileAttribute,
@@ -60,14 +60,16 @@ def test_write_attributes():
     ntfile = NTFile(test_file_path)
     ntfile.read_attributes()
     ntfile.open(Access.READ_ATTRS)
-    ntfile.basic_info.change_time = FileTime(datetime.now() - timedelta(seconds=3600))
+    ntfile.basic_info.change_time = LargeFileTime(
+        datetime.now() - timedelta(seconds=3600)
+    )
     assert str(time.localtime().tm_year) in str(ntfile.basic_info.change_time)
     try:
         with pytest.raises(NTException):
             ntfile.write_attributes()
     finally:
         ntfile.close()
-    ntfile.basic_info.change_time = FileTime(datetime.now() - timedelta(days=3))
+    ntfile.basic_info.change_time = LargeFileTime(datetime.now() - timedelta(days=3))
     ntfile.write_attributes()
     assert datetime.now() - ntfile.basic_info.change_time.as_datetime > timedelta(
         seconds=3000
