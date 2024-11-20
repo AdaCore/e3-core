@@ -18,6 +18,7 @@ from ctypes.wintypes import (
     LPWSTR,
     ULONG,
     USHORT,
+    WORD,
 )
 from datetime import datetime
 
@@ -58,6 +59,24 @@ class FileAttribute(Structure):
         return ",".join(result)
 
 
+class IOReparseTag:
+    """Reparse Point Tag constants.
+
+    This is important to note that symbolic links on Windows are always implemented
+    using reparse points. Nevertheless a reparse point is a more general concept not
+    always associated with the concept of symbolic links. In the present code we are
+    only interested in checking whether a reparse point is a symbolic link or not.
+
+    Currenly Windows supports two kinds of symbolic links. One for Win32 apps (SYMLINK)
+    and one for WSL subsystem (WSL_SYMLINK). Note that Cygwin now uses the second one
+    to implement symbolic links. Note that WSL symbolic links are not handled correctly
+    by the Python runtime (for example os.path.islink will return False).
+    """
+
+    SYMLINK = 0xA000000C
+    WSL_SYMLINK = 0xA000001D
+
+
 class Access:
     """Desired Access constants."""
 
@@ -95,6 +114,7 @@ class OpenOptions:
     BACKUP_INTENT = 0x00004000
     SYNCHRONOUS_IO_NON_ALERT = 0x00000020
     DELETE_ON_CLOSE = 0x00001000
+    OPEN_REPARSE_POINT = 0x00200000
 
 
 class Wait:
@@ -160,29 +180,101 @@ class UnicodeString(Structure):
         return self.length
 
 
+# Offset in seconds between Windows and Linux epoch. Windows use January 1st 1601
+# whereas Posix systems are using January 1st 1970.
+W32_EPOCH_OFFSET = 11_644_473_600
+
+
 class FileTime(Structure):
     """Map FILETIME structure."""
 
-    _fields_ = [("filetime", LARGE_INTEGER)]
+    # Note: in a previous implementation that structure was directly mapped to
+    # LARGE_INTEGER Doing that is wrong as it force an implicit 8 byte alignment.
+    # Some structures do not respect that alignment (See FindData for example).
+    _fields_ = [("filetime_low", DWORD), ("filetime_high", DWORD)]
 
     def __init__(self, t: datetime) -> None:
+        # Transform date to Windows timestamp
         timestamp = (t - datetime(1970, 1, 1)).total_seconds()
-        timestamp = (int(timestamp) + 11644473600) * 10000000
-        Structure.__init__(self, timestamp)
+
+        # Windows use hundreds of ns as unit
+        timestamp = (int(timestamp) + W32_EPOCH_OFFSET) * 10_000_000
+
+        Structure.__init__(self, timestamp % 2**32, timestamp // 2**32)
+
+    @property
+    def filetime(self) -> int:
+        return self.filetime_low + self.filetime_high * 2**32
 
     @property
     def as_datetime(self) -> datetime:
         try:
-            return datetime.fromtimestamp(self.filetime // 10000000 - 11644473600)
+            return datetime.fromtimestamp(
+                self.filetime // 10_000_000 - W32_EPOCH_OFFSET
+            )
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
             raise ValueError(f"filetime '{self.filetime}' failed with {err}") from err
 
     def __str__(self) -> str:
         try:
-            return str(time.ctime(self.filetime // 10000000 - 11644473600))
+            return str(time.ctime(self.filetime // 10_000_000 - W32_EPOCH_OFFSET))
         except ValueError:  # defensive code
             return "none"
+
+
+class LargeFileTime(Structure):
+    """Map filetime implemented using LARGE_INTEGER."""
+
+    # Contrary to WIN32 API, Native API use LARGE_INTEGER instead of a tuple
+    # of DWORD. This means that there is an implicit alignment constraint of
+    # 8 bytes. As consequence even if similar, this should not be merged with
+    # FileTime.
+    _fields_ = [("filetime", LARGE_INTEGER)]
+
+    def __init__(self, t: datetime) -> None:
+        # Transform date to Windows timestamp
+        timestamp = (t - datetime(1970, 1, 1)).total_seconds()
+
+        # Windows use hundreds of ns as unit
+        timestamp = (int(timestamp) + W32_EPOCH_OFFSET) * 10_000_000
+        Structure.__init__(self, timestamp)
+
+    @property
+    def as_datetime(self) -> datetime:
+        try:
+            return datetime.fromtimestamp(
+                self.filetime // 10_000_000 - W32_EPOCH_OFFSET
+            )
+        except ValueError as err:  # defensive code
+            # Add some information to ease debugging
+            raise ValueError(f"filetime '{self.filetime}' failed with {err}") from err
+
+    def __str__(self) -> str:
+        try:
+            return str(time.ctime(self.filetime // 10_000_000 - W32_EPOCH_OFFSET))
+        except ValueError:  # defensive code
+            return "none"
+
+
+class FindData(Structure):
+    _fields_ = [
+        ("file_attributes", FileAttribute),
+        ("creation_time", FileTime),
+        ("last_access_time", FileTime),
+        ("last_write_time", FileTime),
+        ("file_size0", DWORD),
+        ("file_size1", DWORD),
+        # When the file is a reparse point, reserved0 field contains the reparse point
+        # tag (i.e: the reparse point kind).
+        ("reserved0", DWORD),
+        ("reserved1", DWORD),
+        ("filename", ctypes.c_wchar * 260),
+        ("dos_filename", ctypes.c_wchar * 14),
+        ("unused0", DWORD),
+        ("unused1", DWORD),
+        ("unused2", WORD),
+    ]
 
 
 class FileInfo:
@@ -190,6 +282,10 @@ class FileInfo:
 
     class Names:
         class_id = 12
+
+    class ReparsePoint(Structure):
+        _fields_ = [("file_reference", LARGE_INTEGER), ("tag", ULONG)]
+        class_id = 33
 
     class Disposition(Structure):
         _fields_ = [("delete_file", BOOLEAN)]
@@ -205,10 +301,10 @@ class FileInfo:
 
     class Basic(Structure):
         _fields_ = [
-            ("creation_time", FileTime),
-            ("last_access_time", FileTime),
-            ("last_write_time", FileTime),
-            ("change_time", FileTime),
+            ("creation_time", LargeFileTime),
+            ("last_access_time", LargeFileTime),
+            ("last_write_time", LargeFileTime),
+            ("change_time", LargeFileTime),
             ("file_attributes", FileAttribute),
         ]
         class_id = 4
@@ -286,6 +382,8 @@ class ObjectAttributes(Structure):
 
 # Declare the Win32 functions return types and signature
 class NT:
+    FindFirstFile = None
+    FindClose = None
     Sleep = None
     GetVolumePathName = None
     SetInformationFile = None
@@ -304,6 +402,14 @@ class NT:
         if sys.platform == "win32":
             kernel32 = ctypes.windll.kernel32
             ntdll = ctypes.windll.ntdll
+
+            cls.FindFirstFile = kernel32.FindFirstFileW
+            cls.FindFirstFile.restype = HANDLE
+            cls.FindFirstFile.argtypes = [c_wchar_p, POINTER(FindData)]
+
+            cls.FindClose = kernel32.FindClose
+            cls.FindClose.restype = BOOL
+            cls.FindClose.argtypes = [HANDLE]
 
             cls.GetVolumePathName = kernel32.GetVolumePathNameW
             cls.GetVolumePathName.restype = BOOL

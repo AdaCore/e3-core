@@ -19,6 +19,8 @@ from e3.os.windows.native_api import (
     Access,
     FileAttribute,
     FileInfo,
+    FindData,
+    IOReparseTag,
     IOStatusBlock,
     NTException,
     ObjectAttributes,
@@ -217,6 +219,30 @@ class NTFile:
 
         return result.index_number
 
+    @property
+    def reparse_tag(self) -> int:
+        """Find the reparse point tag for a given file.
+
+        :return: the tag as int. 0 is returned if not a reparse point
+        """
+        if not self.is_reparse_point:
+            return 0
+
+        result = FindData()
+        find_first_file: Callable = NT.FindFirstFile  # type: ignore
+        find_close: Callable = NT.FindClose  # type: ignore
+
+        handle = find_first_file(c_wchar_p(self.path), pointer(result))
+        if not handle:
+            raise NTException(
+                status=handle,
+                message=f"cannot find volume for {self.path}",
+                origin="NTFile.reparse_tag",
+            )
+        find_close(handle)
+
+        return result.reserved0
+
     def read_attributes_internal(self) -> None:
         """Retrieve file basic attributes (internal function).
 
@@ -304,6 +330,22 @@ class NTFile:
         :return: True if readonly, False otherwise
         """
         return self.basic_info.file_attributes.attr & FileAttribute.READONLY > 0
+
+    @property
+    def is_reparse_point(self) -> bool:
+        """Check if a given file is a reparse point.
+
+        :return: True if the file is a reparse point, False otherwise
+        """
+        return self.basic_info.file_attributes.attr & FileAttribute.REPARSE_POINT > 0
+
+    @property
+    def is_symlink(self) -> bool:
+        """Check whether a given file is a symlink or not.
+
+        :return: return True for all kind of symlinks (native and WSL).
+        """
+        return self.reparse_tag in (IOReparseTag.SYMLINK, IOReparseTag.WSL_SYMLINK)
 
     @property
     def trash_path(self) -> str:
@@ -502,6 +544,10 @@ class NTFile:
             # Try to remove the readonly flag
             self.basic_info.file_attributes.attr &= ~FileAttribute.READONLY
             self.write_attributes()
+
+        if self.is_symlink:
+            # If this is a symlink ensure that we don't delete the target
+            open_options |= OpenOptions.OPEN_REPARSE_POINT
 
         # set our access modes
         desired_access = Access.DELETE

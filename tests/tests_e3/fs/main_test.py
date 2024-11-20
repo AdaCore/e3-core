@@ -442,12 +442,23 @@ def test_rm_list():
     assert not os.path.exists("b")
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
-def test_rm_symlink_to_dir():
+def test_rm_symlink():
     e3.fs.mkdir("a")
-    os.symlink("a", "b")
+    try:
+        os.symlink("a", "b")
+    except Exception:
+        # This means symlinks are not supported on that system or not allowed
+        return
+
     e3.fs.rm("b", recursive=True)
     assert not os.path.exists("b")
+    assert os.path.exists("a")
+
+    e3.os.fs.touch("d")
+    os.symlink("d", "e")
+    e3.fs.rm("e", recursive=True)
+    assert not os.path.exists("e")
+    assert os.path.exists("d")
 
 
 def test_safe_copy():
