@@ -9,7 +9,8 @@ variables:
       - "3.10"
       - "3.11"
       - "3.12"
-    value: "3.12"
+      - "3.13"
+    value: "3.13"
 
 stages:
   - checks
@@ -83,7 +84,7 @@ check:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12"]
+      - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12", "3.13"]
   artifacts:
     when: always
     paths:
@@ -137,7 +138,7 @@ run linux tests:
 
 .windows-image:
   services:
-    - image:e3-windows-core-2022
+    - image:e3-windows-2022
     - platform:x86_64-windows-2022
     - cpu:2
     - mem:4
@@ -159,7 +160,7 @@ run linux tests:
   extends: .windows-common
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12"]
+      - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 # Stage: Tests
 
