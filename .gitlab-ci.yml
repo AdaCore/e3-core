@@ -11,6 +11,13 @@ variables:
       - "3.12"
       - "3.13"
     value: "3.13"
+  LINUX_CI_TOX_ENV:
+    # Run coverage only with one Python version as this is costly.
+    description: "Tox environments to run on Linux."
+    value: "py39-cov-xdist,py310-xdist,py311-xdist,py312-xdist,py313-xdist"
+  WINDOWS_CI_TOX_ENV:
+    description: "Tox environments to run on Windows."
+    value: "py312-xdist"
 
 stages:
   - checks
@@ -30,7 +37,7 @@ default:
     - python -m pip install --force tox
   script:
     # Should be quoted using \' to deal with ':' in the command
-    - 'echo "Tox run environment: ${CI_TOX_ENV:=py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2:2}-cov-xdist}"'
+    - 'echo "Tox run environment: ${CI_TOX_ENV}"'
     - python -m tox --colored yes -e ${CI_TOX_ENV}
 
 ### Linux jobs ###
@@ -39,8 +46,15 @@ default:
   services:
     - image:all-pythons
   before_script:
-    - source /it/activate-py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2:2}
-    - python -m pip install -U pip
+    - |
+      if [ -z "$PYTHON_VERSION" ]; then
+        versions=$(echo "$LINUX_CI_TOX_ENV" | sed -E 's/py([0-9]+)-[^,]+/\1/g' | tr ',' ' ')
+        for pyversion in $versions; do
+          source /it/activate-py$pyversion
+        done
+      else
+        source /it/activate-py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2}
+      fi
 
 .linux-common:
   extends:
@@ -82,9 +96,8 @@ check:
     - !reference [.linux-common, services]
     - cpu:4
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-  parallel:
-    matrix:
-      - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+  variables:
+    CI_TOX_ENV: $LINUX_CI_TOX_ENV
   artifacts:
     when: always
     paths:
@@ -143,9 +156,18 @@ run linux tests:
     - cpu:2
     - mem:4
   before_script:
-    - source /it/activate-python ${PYTHON_VERSION}
+    - |
+      if [ -z "$PYTHON_VERSION" ]; then
+        versions=$(echo "$WINDOWS_CI_TOX_ENV" | sed -E 's/py([0-9])([0-9]+)-[^,]+/\1.\2/g' | tr ',' ' ')
+        for pyversion in $versions; do
+          if [ -d /it/python/$pyversion ]; then
+            source /it/activate-python $pyversion
+          fi
+        done
+      else
+        source /it/activate-python $PYTHON_VERSION
+      fi
     - mkdir -p "C:/tmp/Trash"
-    - python -m pip install -U pip
 
 .windows-common:
   extends:
@@ -158,9 +180,8 @@ run linux tests:
 .test-windows:
   stage: tests windows
   extends: .windows-common
-  parallel:
-    matrix:
-      - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+  variables:
+    CI_TOX_ENV: $WINDOWS_CI_TOX_ENV
 
 # Stage: Tests
 
