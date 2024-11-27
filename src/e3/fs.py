@@ -259,7 +259,7 @@ def get_filetree_state(
 
 
 def ls(
-    path: str | list[str] | Path | list[Path], emit_log_record: bool = True
+    path: str | Iterable[str] | Path | Iterable[Path], emit_log_record: bool = True
 ) -> list[str]:
     """list files.
 
@@ -312,11 +312,11 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
             raise FSError(origin="mkdir", message=f"can't create {path}") from e
 
 
-def mv(source: str | Path | list[str] | list[Path], target: str | Path) -> None:
+def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) -> None:
     """Move files.
 
-    :param source: a glob pattern, a list of glob patterns, a path, or a list
-        of paths
+    :param source: a glob pattern, a sequence/iterator of glob patterns, a path,
+        or a sequence/iterator of paths
     :param target: target file or directory. If the source resolves as
         several files then target should be a directory
 
@@ -331,6 +331,7 @@ def mv(source: str | Path | list[str] | list[Path], target: str | Path) -> None:
         rmtree. This ensure moving a directory with read-only files will
         work.
         """
+        logger.debug(f"mv {src} {dst}")
 
         def same_file(src: str, dst: str) -> bool:
             if hasattr(os.path, "samefile"):
@@ -388,13 +389,6 @@ def mv(source: str | Path | list[str] | list[Path], target: str | Path) -> None:
                 rm(src)
         return
 
-    if isinstance(source, (str, Path)):
-        logger.debug(f"mv {os.fspath(source)} {os.fspath(target)}")
-    else:
-        logger.debug(
-            f"mv {' '.join([os.fspath(s) for s in source])} {os.fspath(target)}"
-        )
-
     try:
         # Compute file list and number of file to copy
         file_list = ls(source, emit_log_record=False)
@@ -414,7 +408,6 @@ def mv(source: str | Path | list[str] | list[Path], target: str | Path) -> None:
         else:
             for f in file_list:
                 f_dest = os.path.join(target, os.path.basename(f))
-                e3.log.debug("mv %s %s", f, f_dest)
                 move_file(f, f_dest)
     except Exception as e:
         logger.error(e)
@@ -422,13 +415,14 @@ def mv(source: str | Path | list[str] | list[Path], target: str | Path) -> None:
 
 
 def rm(
-    path: str | Path | list[str] | list[Path],
+    path: str | Path | Iterable[str] | Iterable[Path],
     recursive: bool = False,
     glob: bool = True,
 ) -> None:
     """Remove files.
 
-    :param path: a glob pattern, or a list of glob patterns
+    :param path: a glob pattern, a sequence/iterator of glob patterns, a path,
+        or a sequence/iterator of paths
     :param recursive: if True do a recursive deletion. Default is False
     :param glob: if True globbing pattern expansion is used
 
@@ -437,13 +431,6 @@ def rm(
     Note that the function will not raise an error is there are no file to
     delete.
     """
-    if isinstance(path, (str, Path)):
-        logger.debug(f"rm{' -r' if recursive else ''} {os.fspath(path)}")
-    else:
-        logger.debug(
-            f"rm{' -r' if recursive else ''} {' '.join(os.fspath(p) for p in path)}"
-        )
-
     # We transform the list into a set in order to remove duplicate files in
     # the list
     if glob:
@@ -453,6 +440,8 @@ def rm(
             file_list = {os.fspath(path)}
         else:
             file_list = {os.fspath(p) for p in path}
+
+    logger.debug(f"rm{' -r' if recursive else ''} {' '.join(file_list)}")
 
     def onerror(
         func: Callable[..., Any], error_path: str, exc_info: tuple | BaseException

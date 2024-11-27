@@ -109,6 +109,32 @@ def test_pathlib():
     ]
 
 
+def test_mv_with_iterables():
+    for idx in range(10):
+        e3.os.fs.touch(f"a{idx}")
+
+    def star(d):
+        for idx in range(10):
+            yield f"{d}{idx}"
+
+    e3.fs.mkdir("dst")
+    e3.fs.mv(star("a"), "dst")
+    for idx in range(10):
+        assert os.path.exists(os.path.join("dst", (f"a{idx}")))
+
+    def dst_star(d):
+        for idx in range(10):
+            yield Path("dst") / f"{d}{idx}"
+
+    assert e3.fs.ls(dst_star("a")) == [
+        os.path.join("dst", f"a{idx}") for idx in range(10)
+    ]
+
+    e3.fs.rm(dst_star("a"))
+    for idx in range(10):
+        assert not os.path.exists(os.path.join("dst", (f"a{idx}")))
+
+
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
 def test_cp_symplink():
     e3.os.fs.touch("c")
