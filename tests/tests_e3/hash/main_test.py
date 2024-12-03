@@ -1,3 +1,8 @@
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
 import e3.hash
 
 import pytest
@@ -14,3 +19,15 @@ def test_hash():
     )
     with pytest.raises(e3.hash.HashError):
         e3.hash.md5("doesnotexist")
+
+    # Check if PathLike[str] parameter is accepted
+    p = Path(f.name)
+    # Ensure `p` follow PathLike[str] rule
+    assert isinstance(os.fspath(p), str)
+
+    assert e3.hash.md5(p) == "f75b8179e4bbe7e2b4a074dcef62de95"
+    assert e3.hash.sha1(p) == "7fe70820e08a1aac0ef224d9c66ab66831cc4ab1"
+    assert (
+        e3.hash.sha256(p)
+        == "434728a410a78f56fc1b5899c3593436e61ab0c731e9072d95e96db290205e53"
+    )
