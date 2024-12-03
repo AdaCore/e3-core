@@ -9,6 +9,7 @@ import e3.error
 
 if TYPE_CHECKING:
     from typing import Literal
+    from os import PathLike
 
 
 class HashError(e3.error.E3Error):
@@ -16,7 +17,8 @@ class HashError(e3.error.E3Error):
 
 
 def __compute_hash(
-    path: str, kind: Literal["md5"] | Literal["sha1"] | Literal["sha256"]
+    path: PathLike[str] | str,
+    kind: Literal["md5"] | Literal["sha1"] | Literal["sha256"],
 ) -> str:
     if not os.path.isfile(path):
         raise HashError(kind, f"cannot find {path}")
@@ -31,7 +33,7 @@ def __compute_hash(
     return result.hexdigest()
 
 
-def md5(path: str) -> str:
+def md5(path: PathLike[str] | str) -> str:
     """Compute md5 hexadecimal digest of a file.
 
     :param path: path to a file
@@ -42,7 +44,7 @@ def md5(path: str) -> str:
     return __compute_hash(path, "md5")
 
 
-def sha1(path: str) -> str:
+def sha1(path: PathLike[str] | str) -> str:
     """Compute sha1 hexadecimal digest of a file.
 
     :param str path: path to a file
@@ -53,7 +55,7 @@ def sha1(path: str) -> str:
     return __compute_hash(path, "sha1")
 
 
-def sha256(path: str) -> str:
+def sha256(path: PathLike[str] | str) -> str:
     """Compute sha256 hexadecimal digest of a file.
 
     :param str path: path to a file
