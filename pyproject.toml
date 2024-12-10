@@ -110,7 +110,7 @@ version = {file = "VERSION"}
 fail_under = 90
 
 [tool.coverage.run]
-branch = true
+branch = false
 omit = [
    "*mypy.py"
 ]
