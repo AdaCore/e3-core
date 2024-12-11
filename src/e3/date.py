@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import calendar
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 from typing import overload
 
@@ -27,5 +27,5 @@ def timestamp_as_string(value: float | None) -> str | None:
 
 def utc_timestamp() -> int:
     """Return the number of seconds since epoch UTC."""
-    d = datetime.utcnow()
+    d = datetime.now(tz=timezone.utc)
     return calendar.timegm(d.utctimetuple())
