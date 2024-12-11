@@ -18,7 +18,7 @@ class HashError(e3.error.E3Error):
 
 def __compute_hash(
     path: PathLike[str] | str,
-    kind: Literal["md5"] | Literal["sha1"] | Literal["sha256"],
+    kind: Literal["md5"] | Literal["sha1"] | Literal["sha256"] | Literal["sha512"],
 ) -> str:
     if not os.path.isfile(path):
         raise HashError(kind, f"cannot find {path}")
@@ -64,3 +64,14 @@ def sha256(path: PathLike[str] | str) -> str:
     :raise HashError: in case of error
     """
     return __compute_hash(path, "sha256")
+
+
+def sha512(path: PathLike[str] | str) -> str:
+    """Compute sha512 hexadecimal digest of a file.
+
+    :param str path: path to a file
+
+    :return: the hash of the file content
+    :raise HashError: in case of error
+    """
+    return __compute_hash(path, "sha512")
