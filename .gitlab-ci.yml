@@ -235,21 +235,18 @@ documentations:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 upload-python-registry:
-  extends: .linux-image
   stage: upload
+  services:
+    - image:e3
   before_script:
-    - !reference [.linux-image, before_script]
     - python -m pip install twine
   script:
-    - CURRENT_DATE=$(date +"%Y%m%d%H%M")
-    - sed -i "s|[0-9][0-9.]*|&.${CURRENT_DATE}|" VERSION
-    - python -m pip wheel . -q --no-deps -C--python-tag=py3 -w build
+    - python build_wheel.py
     - python -m twine upload --skip-existing
       --repository-url https://${CI_SERVER_HOST}:${CI_SERVER_PORT}/api/v4/projects/202/packages/pypi
       build/*.whl
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   variables:
-    PYTHON_VERSION: "3.11"
     TWINE_PASSWORD: $CI_JOB_TOKEN
     TWINE_USERNAME: gitlab-ci-token
