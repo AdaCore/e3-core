@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime as dt, timezone as tz
 import sys
 import json
 import dateutil.parser
@@ -30,9 +30,8 @@ def test_log():
         log_datetime, _, _ = line.partition(": ")
 
         # Parse it and verify that it is it in GMT
-        assert (
-            datetime.datetime.utcnow() - dateutil.parser.parse(log_datetime)
-        ).seconds < 10
+        parsed_log_datetime = dateutil.parser.parse(log_datetime).replace(tzinfo=tz.utc)
+        assert (dt.now(tz=tz.utc) - parsed_log_datetime).seconds < 10
 
 
 def test_json_log():
