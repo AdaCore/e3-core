@@ -1,16 +1,14 @@
-import pkg_resources
 import stevedore
 from e3.platform_db import get_knowledge_base
+from importlib.metadata import EntryPoint
 
 
 def test_knownledge_base():
     """Test loading a e3.platform_db extension."""
     # Create a new entry point referencing AmberCPUSupport and load it.
-    mydb_ep = pkg_resources.EntryPoint.parse_group(
-        "e3.platform_db",
-        ["mydb = e3.platform_db:AmberCPUSupport"],
-        dist=pkg_resources.get_distribution("e3-core"),
-    )["mydb"]
+    mydb_ep = EntryPoint(
+        name="mydb", value="e3.platform_db:AmberCPUSupport", group="e3.platform_db"
+    )
     mydb_ep.load()
 
     # Inject it in the ExtensionManager entry point cache
