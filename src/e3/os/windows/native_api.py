@@ -156,6 +156,16 @@ class IOStatusBlock(Structure):
     _fields_ = [("status", NTSTATUS), ("information", POINTER(ULONG))]
 
 
+class ReparseGUIDDataBuffer(Structure):
+    _fields_ = [
+        ("tag", DWORD),
+        ("length", WORD),
+        ("reserved", WORD),
+        ("guid", DWORD),
+        ("data", ctypes.c_char * (16 * 1024)),
+    ]
+
+
 class UnicodeString(Structure):
     """Map UNICODE_STRING structure."""
 
@@ -402,6 +412,21 @@ class NT:
         if sys.platform == "win32":
             kernel32 = ctypes.windll.kernel32
             ntdll = ctypes.windll.ntdll
+
+            cls.FsControlFile = ntdll.NtFsControlFile
+            cls.FsControlFile.restype = NTSTATUS
+            cls.FsControlFile.argtypes = [
+                HANDLE,
+                HANDLE,
+                LPVOID,
+                LPVOID,
+                POINTER(IOStatusBlock),
+                ULONG,
+                LPVOID,
+                ULONG,
+                POINTER(ReparseGUIDDataBuffer),
+                ULONG,
+            ]
 
             cls.FindFirstFile = kernel32.FindFirstFileW
             cls.FindFirstFile.restype = HANDLE
