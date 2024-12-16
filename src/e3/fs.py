@@ -715,6 +715,16 @@ def sync_tree(
         """
         return fi.stat is not None and stat.S_ISDIR(fi.stat.st_mode)
 
+    def is_native_link(fi: FileInfo) -> bool:
+        """Check if a file is a native link.
+
+        :param fi: a FileInfo namedtuple
+        :return: return True if fi is a native symbolic link. The notion
+            of native link is only meaningful on Windows platform for which
+            some links are not well understood by the Win32 API (WSL links)
+        """
+        return fi.stat is not None and stat.S_ISLNK(fi.stat.st_mode)
+
     def islink(fi: FileInfo) -> bool:
         """Check if a file is a link.
 
@@ -722,7 +732,11 @@ def sync_tree(
 
         :return: True if fi is a symbolic link
         """
-        return fi.stat is not None and stat.S_ISLNK(fi.stat.st_mode)
+        return fi.stat is not None and (
+            stat.S_ISLNK(fi.stat.st_mode)
+            # Check for WSL links on Windows
+            or (sys.platform == "win32" and fi.stat.st_reparse_tag == 0xA000001D)
+        )
 
     def isfile(fi: FileInfo) -> bool:
         """Check if a file is a regular file.
@@ -822,8 +836,10 @@ def sync_tree(
         :param dst: the target FileInfo object
         """
         if islink(src):  # windows: no cover
-            linkto = os.readlink(src.path)
-            if not islink(dst) or os.readlink(dst.path) != linkto:
+            linkto = e3.os.fs.readlink(src.path)
+            if not is_native_link(dst) or e3.os.fs.readlink(dst.path) != linkto:
+                # Checking here if the file is a native link allows us on Windows
+                # to transform Cygwin links into Win32 symlinks
                 if dst.stat is not None:
                     rm(dst.path, recursive=True, glob=False)
                 os.symlink(linkto, dst.path, target_is_directory=is_directory)

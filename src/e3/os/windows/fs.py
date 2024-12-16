@@ -28,6 +28,7 @@ from e3.os.windows.native_api import (
     Share,
     Status,
     UnicodeString,
+    ReparseGUIDDataBuffer,
 )
 
 if TYPE_CHECKING:
@@ -242,6 +243,42 @@ class NTFile:
         find_close(handle)
 
         return result.reserved0
+
+    def wsl_reparse_link_target(self) -> str | None:
+        """Get target of a WSL link (also used by Cygwin).
+
+        :return: the link target
+        """
+        FSCTL_GET_REPARSE_POINT = 0x900A8
+        self.read_attributes_internal()
+        if self.reparse_tag != IOReparseTag.WSL_SYMLINK:
+            return None
+
+        self.open(open_options=OpenOptions.OPEN_REPARSE_POINT)
+        result = ReparseGUIDDataBuffer()
+        fs_control_file: Callable = NT.FsControlFile  # type: ignore
+        status = fs_control_file(
+            self.handle,
+            None,
+            None,
+            None,
+            pointer(self.io_status),
+            FSCTL_GET_REPARSE_POINT,
+            None,
+            0,
+            pointer(result),
+            sizeof(result),
+        )
+        self.close()
+        if status < 0:
+            raise NTException(
+                status=status,
+                message=f"cannot find target of WSL link for {self.path}",
+                origin="NTFile.wsl_reparse_link_target",
+            )
+        return os.path.join(
+            os.path.dirname(self.path), result.data[: result.length - 4].decode("utf-8")
+        )
 
     def read_attributes_internal(self) -> None:
         """Retrieve file basic attributes (internal function).

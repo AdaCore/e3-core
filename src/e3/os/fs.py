@@ -274,6 +274,27 @@ def mv(source: str | Path, target: str | Path) -> None:
         shutil.move(source, target)
 
 
+def readlink(filename: str | Path) -> str:
+    """Get target path of a symlink.
+
+    Equivalent of os.readlink with support for WSL Windows links.
+
+    :param filename: path containing a symlink
+    :return: target of the symlink
+    """
+    try:
+        return os.readlink(filename)
+    except Exception:
+        if sys.platform == "win32":
+            # This might be a WSL link
+            from e3.os.windows.fs import NTFile
+
+            f = NTFile(filename)
+            return f.wsl_reparse_link_target()
+        else:
+            raise
+
+
 def touch(filename: str | Path) -> None:
     """Update file access and modification times. Create the file if needed.
 
