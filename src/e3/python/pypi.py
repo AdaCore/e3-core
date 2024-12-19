@@ -79,16 +79,54 @@ def get_pip_env(platform: str, python_version: Version) -> dict[str, str]:
 class PyPILink:
     """Link returned by PyPI simple API."""
 
-    def __init__(self, url: str, yanked: str | None, has_metadata: bool) -> None:
+    def __init__(
+        self,
+        identifier: str,
+        url: str,
+        yanked: str | None,
+        has_metadata: bool,
+        require_python: str | None = None,
+    ) -> None:
         """Initialize a PyPI link.
 
+        :param identifier: the project identifier
         :param url: url of the resource
         :param yanked: yanker data
         :param has_metadata: True if metadata is directly available from PyPI
+        :param require_python: require python data
         """
+        self.identifier = identifier
         self.url = url
         self.yanked = yanked
+        self.require_python = require_python
         self.has_metadata = has_metadata
+        self._urlparse = urlparse(url)
+        self.checksum = self._urlparse.fragment.replace("sha256=", "", 1)
+        self.filename = self._urlparse.path.rpartition("/")[-1]
+
+        py_tags = ""
+        abi_tags = ""
+        platform_tags = ""
+        # Retreive a package version.
+        if self.filename.endswith(".whl"):
+            # Wheel filenames contain compatibility information
+            _, version, py_tags, abi_tags, platform_tags = self.filename[:-4].rsplit(
+                "-", 4
+            )
+        else:
+            package_filename = self.filename
+            if any(package_filename.endswith(ext) for ext in (".tar.gz", ".tar.bz2")):
+                # Remove .gz or .bz2
+                package_filename, _ = os.path.splitext(package_filename)
+            # Remove remaining extension
+            basename, ext = os.path.splitext(package_filename)
+            # Retrieve version
+            _, version, *_ = basename.rsplit("-", 1)
+
+        self.pkg_version = Version(version)
+        self.pkg_py_tags = py_tags.split(".")
+        self.pkg_abi_tags = abi_tags.split(".")
+        self.pkg_platform_tags = platform_tags.split(".")
 
     @property
     def is_yanked(self) -> bool:
@@ -102,11 +140,17 @@ class PyPILink:
 
     def as_dict(self) -> dict[str, None | bool | str]:
         """Serialize the a PyPILink into a Python dict that can be dump as json."""
-        return {
+        res = {
+            "identifier": self.identifier,
             "url": self.url,
+            "filename": self.filename,
+            "checksum": self.checksum,
             "yanked": self.yanked,
             "has_metadata": self.has_metadata,
         }
+        if self.require_python:
+            res["require_python"] = self.require_python
+        return res
 
     @classmethod
     def from_dict(cls, data: dict) -> PyPILink:
@@ -115,16 +159,21 @@ class PyPILink:
         :param data: the dict to read
         """
         return PyPILink(
-            url=data["url"], yanked=data["yanked"], has_metadata=data["has_metadata"]
+            identifier=data["identifier"],
+            url=data["url"],
+            yanked=data.get("yanked"),
+            has_metadata=data["has_metadata"],
+            require_python=data.get("require-python"),
         )
 
 
 class PyPILinksParser(HTMLParser):
     """HTML parser to parse links from the PyPI simple API."""
 
-    def __init__(self) -> None:
+    def __init__(self, identifier: str) -> None:
         """Initialize the parser."""
         super().__init__()
+        self.identifier = identifier
         self.links: list[PyPILink] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -132,13 +181,18 @@ class PyPILinksParser(HTMLParser):
         if tag == "a":
             attr_dict = dict(attrs)
             assert attr_dict["href"] is not None
-            self.links.append(
-                PyPILink(
-                    url=attr_dict["href"],
-                    yanked=attr_dict.get("data-yanked"),
-                    has_metadata="data-dist-info-metadata" in attr_dict,
+            try:
+                self.links.append(
+                    PyPILink(
+                        url=attr_dict["href"],
+                        yanked=attr_dict.get("data-yanked"),
+                        require_python=attr_dict.get("data-requires-python"),
+                        has_metadata="data-dist-info-metadata" in attr_dict,
+                        identifier=self.identifier,
+                    )
                 )
-            )
+            except InvalidVersion:
+                pass
 
 
 class PyPI:
@@ -194,7 +248,7 @@ class PyPI:
             logger.debug(f"fetch {identifier} links from {self.pypi_url}")
             pypi_request = requests.get(self.pypi_url + "simple/" + identifier + "/")
             pypi_request.raise_for_status()
-            pypi_links_parser = PyPILinksParser()
+            pypi_links_parser = PyPILinksParser(identifier)
             pypi_links_parser.feed(pypi_request.text)
 
             # Update cache
@@ -282,31 +336,12 @@ class PyPICandidate:
         self.cache_dir = os.path.abspath(cache_dir)
 
         # Compute filename and extract compatibility information
-        path = urlparse(self.url).path
-        self.filename = path.rpartition("/")[-1]
+        self.filename = link.filename
 
-        py_tags = ""
-        abi_tags = ""
-        platform_tags = ""
-
-        if self.filename.endswith(".whl"):
-            # Wheel filenames contain compatibility information
-            tmp, py_tags, abi_tags, platform_tags = self.filename[:-4].rsplit("-", 3)
-            _, version = tmp.split("-", 1)
-
-        elif self.filename.endswith(".tar.gz"):
-            # For sources, packages naming scheme has changed other time
-            # (mainly handling of - and _) but we expect the format of
-            # the package to be: <STR_WITH_SAME_LENGTH_AS_NAME>-<VERSION>.tar.gz
-            version = self.filename[len(self.name) + 1 : -7]
-        else:
-            basename, ext = os.path.splitext(self.filename)
-            name, version = basename.split("-")[:2]
-
-        self.version = Version(version)
-        self.py_tags = py_tags.split(".")
-        self.abi_tags = abi_tags.split(".")
-        self.platform_tags = platform_tags.split(".")
+        self.version = link.pkg_version
+        self.py_tags = link.pkg_py_tags
+        self.abi_tags = link.pkg_abi_tags
+        self.platform_tags = link.pkg_platform_tags
 
         # Requirements cache
         self._reqs: None | set[Requirement] = None
@@ -632,6 +667,7 @@ class PyPIClosure:
         name = os.path.basename(filename)[:-4].split("-")[0]
         self.pypi.cache[canonicalize_name(name)] = [
             PyPILink(
+                identifier=name,
                 url=f"file://{os.path.abspath(filename)}".replace("\\", "/"),
                 yanked=None,
                 has_metadata=False,
