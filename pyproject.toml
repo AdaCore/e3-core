@@ -56,8 +56,8 @@ test = [
   "pytest-socket",
   "ansi2html",
   "httpretty",
-  # set to 2.2.3 because urllib3>=2.3.0 breaks httpretty (https://github.com/gabrielfalcao/HTTPretty/issues/484)
-  "urllib3==2.2.3", 
+  # set urllib version because urllib3>=2.3.0 breaks httpretty (https://github.com/gabrielfalcao/HTTPretty/issues/484)
+  "urllib3<2.3.0",
   "ptyprocess; sys_platform!='win32'",
   "requests-mock"
 ]
