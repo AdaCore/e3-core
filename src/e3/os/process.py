@@ -759,7 +759,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
 
                 # Wait for a sigchld signal. Note that select might
                 # be interrupted by signals thus the loop
-                select_args = [[fd_r], [], []]
+                select_args: list[list[int] | float] = [[fd_r], [], []]
                 if timeout != 0:
                     select_args.append(remain)
 
