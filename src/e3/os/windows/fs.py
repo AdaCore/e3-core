@@ -276,9 +276,9 @@ class NTFile:
                 message=f"cannot find target of WSL link for {self.path}",
                 origin="NTFile.wsl_reparse_link_target",
             )
-        return os.path.join(
-            os.path.dirname(self.path), result.data[: result.length - 4].decode("utf-8")
-        )
+        # Don't return here an absolute path as usually the user needs to know if the
+        # link is relative or not.
+        return result.data[: result.length - 4].decode("utf-8")
 
     def read_attributes_internal(self) -> None:
         """Retrieve file basic attributes (internal function).
