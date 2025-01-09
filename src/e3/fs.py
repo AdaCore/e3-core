@@ -829,7 +829,7 @@ def sync_tree(
 
                     logger.debug("chflags: operation not supported [EOPNOTSUPP]")
 
-    def safe_copy(src: FileInfo, dst: FileInfo, is_directory: bool = False) -> None:
+    def safe_copy(src: FileInfo, dst: FileInfo) -> None:
         """Copy src file into dst preserving all attributes.
 
         :param src: the source FileInfo object
@@ -842,7 +842,43 @@ def sync_tree(
                 # to transform Cygwin links into Win32 symlinks
                 if dst.stat is not None:
                     rm(dst.path, recursive=True, glob=False)
-                os.symlink(linkto, dst.path, target_is_directory=is_directory)
+
+                target_is_directory = False
+                if sys.platform == "win32":
+                    # This is important to try guessing the right nature of the link
+                    # (i.e whether it points to a directory or a file). Indeed on
+                    # Windows system symbolic links to directory and files are distinct.
+                    # During a call to sync_tree we are not sure in advance what will
+                    # be created first: the link or the target of the link. Thus Python
+                    # cannot always guess the right nature of the link (in that case
+                    # Python defaults to a link to a file).
+                    # In addition this function support WSL links that may be created
+                    # by Cygwin when the nature of the target is not known. Python
+                    # cannot read those links so in that case doing
+                    # os.path.isdir(src.path) will always return False. That's why we
+                    # do the check directly on the target path.
+                    # limit recursion to 32 in order not to crash on link loops
+                    src_linkto_path = os.path.join(os.path.dirname(src.path), linkto)
+                    for _ in range(32):
+                        if not os.path.exists(src_linkto_path):
+                            break
+
+                        src_linkto = FileInfo(
+                            src_linkto_path,
+                            os.lstat(src_linkto_path),
+                            os.path.basename(src_linkto_path),
+                        )
+
+                        if not islink(src_linkto):
+                            break
+
+                        src_linkto_path = os.path.join(
+                            os.path.dirname(src_linkto.path),
+                            e3.os.fs.readlink(src_linkto.path),
+                        )
+                    target_is_directory = os.path.isdir(src_linkto_path)
+
+                os.symlink(linkto, dst.path, target_is_directory=target_is_directory)
             copystat(src, dst)
         else:
             if isdir(dst):
@@ -1034,9 +1070,7 @@ def sync_tree(
             # the source tree.
             if need_update(wf.source, wf.target):
                 if isfile(wf.source) or islink(wf.source):
-                    safe_copy(
-                        wf.source, wf.target, is_directory=os.path.isdir(wf.source.path)
-                    )
+                    safe_copy(wf.source, wf.target)
                     updated_list.append(wf.target.path)
                 elif isdir(wf.source):
                     safe_mkdir(wf.source, wf.target)
