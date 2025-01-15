@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 import re
 import tomllib
+from datetime import datetime, timezone
 
 from e3.main import Main
 from e3.os.process import Run
@@ -46,7 +47,22 @@ def main() -> None:
         default="pyproject.toml",
         help="Path to a Python project or pyproject.toml file",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Do not build the wheel")
+    parser.add_argument(
+        "--template", default="{major}.{minor}.{patch}", help="Version number template"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Do not change the version file nor build the wheel",
+    )
+    parser.add_argument(
+        "--no-build", action="store_true", help="Do not build the wheel"
+    )
+    parser.add_argument(
+        "--no-restore",
+        action="store_true",
+        help="Keep the modified version file with the computed build version",
+    )
 
     main.parse_args()
     assert main.args
@@ -131,7 +147,17 @@ def main() -> None:
         ["git", "rev-list", f"{previous_commit_sha}..HEAD", "--count"],
         cwd=root_dir,
     )
-    build_version = f"{version_major}.{version_minor}.{output.strip()}"
+
+    # Get the build version from custom version template
+    date = datetime.now(tz=timezone.utc)
+    build_version = main.args.template.format(
+        major=version_major,
+        minor=version_minor,
+        patch=output.strip(),
+        year=f"{date.year:04}",
+        month=f"{date.month:02}",
+        day=f"{date.day:02}",
+    )
     logger.info(f"{version_major}.{version_minor} -> {build_version}")
 
     if not main.args.dry_run:
@@ -141,24 +167,26 @@ def main() -> None:
 
         try:
             # Build the wheel
-            run(
-                [
-                    sys.executable,
-                    "-m",
-                    "pip",
-                    "wheel",
-                    ".",
-                    "-q",
-                    "--no-deps",
-                    "-C--python-tag=py3",
-                    "-w",
-                    "build",
-                ],
-                cwd=root_dir,
-            )
+            if not main.args.no_build:
+                run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "pip",
+                        "wheel",
+                        ".",
+                        "-q",
+                        "--no-deps",
+                        "-C--python-tag=py3",
+                        "-w",
+                        "build",
+                    ],
+                    cwd=root_dir,
+                )
         finally:
             # Revert change to version file
-            run(["git", "restore", version_path], cwd=root_dir, fail_ok=True)
+            if not main.args.no_restore:
+                run(["git", "restore", version_path], cwd=root_dir, fail_ok=True)
 
 
 if __name__ == "__main__":
