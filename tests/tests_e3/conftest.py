@@ -8,7 +8,7 @@ import json
 import shutil
 import os
 from e3.fs import mkdir, cp
-from e3.os.fs import touch
+from e3.os.fs import touch, which
 from e3.python.wheel import Wheel
 
 import pytest
@@ -21,7 +21,14 @@ from e3.pytest import require_tool
 
 git = require_tool("git")
 ldd = require_tool("ldd")
-svn = require_tool("svn")
+
+
+def svn_wrapper(request: pytest.FixtureRequest) -> None:
+    if not which("svn"):
+        pytest.skip("svn is not available")
+
+
+svn = pytest.fixture(svn_wrapper)
 
 
 class PypiSimulator:
