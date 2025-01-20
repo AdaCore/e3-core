@@ -28,10 +28,15 @@ jobs:
              mkdir C:/tmp/Trash
              echo "$ENV:ProgramFiles/Git/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         if: runner.os == 'Windows'
-      - name: Run Tox
-        run: tox
-        env:
-            TOXENV: py${{ matrix.python-version}}-xdist-cov
+      - name: Run Tox on Linux
+        # Pass the right version of Python to Tox, e.g. 311 for Python 3.11
+        run: |
+             pyversion="${{ matrix.python }}"
+             tox -e py${pyversion/./}-xdist-cov
+        if: runner.os == 'Linux'
+      - name: Run Tox on Windows
+        run: tox -e py-xdist-cov
+        if: runner.os == 'Windows'
 
   security:
     runs-on: ubuntu-latest
