@@ -21,7 +21,7 @@ from e3.anod import qualifier_dict_to_str, qualifier_str_to_dict
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.anod.qualifier import Qualifier
 from e3.fs import find
-from e3.os.fs import which
+from e3.os.fs import ldd_output_to_posix, which
 from e3.platform_db.knowledge_base import OS_INFO
 from e3.yaml import load_with_config
 
@@ -474,17 +474,23 @@ class Anod:
                 prefix = self.build_space.install_dir
 
             # Get all files matching the OS shared lib extension.
-            lib_files = find(
-                root=prefix, pattern=f"*{OS_INFO[e3.env.Env().build.os.name]['dllext']}"
-            )
-            ldd_output = e3.os.process.Run(["ldd"] + lib_files).out or ""
+            shlib_ext: str = f"{OS_INFO[e3.env.Env().build.os.name]['dllext']}"
+            lib_files = find(root=prefix, pattern=f"*{shlib_ext}")
 
-            # When only one path is specified, ldd does not add the name of the
-            # file in the output. This would break the parsing below.
-            if len(lib_files) == 1:
-                ldd_output = f"{lib_files[0]}:\n{ldd_output}"
+            if not lib_files:
+                self.log.info(f"No {shlib_ext} files to check in {prefix}")
+                ldd_output = ""
+            else:
+                ldd_output = e3.os.process.Run(["ldd"] + lib_files).out or ""
+
+                # When only one path is specified, ldd does not add the name of the
+                # file in the output. This would break the parsing below.
+                if len(lib_files) == 1:
+                    ldd_output = f"{lib_files[0]}:\n{ldd_output}"
+                ldd_output = ldd_output_to_posix(ldd_output)
         else:
-            # An ldd output has been provided.
+            # An ldd output has been provided. Update it first to Posix.
+            ldd_output = ldd_output_to_posix(ldd_output)
             lib_files = re.findall(r"^([^\t].*):$", ldd_output, flags=re.M)
 
         if self.sandbox and hasattr(self.sandbox, "root_dir"):
