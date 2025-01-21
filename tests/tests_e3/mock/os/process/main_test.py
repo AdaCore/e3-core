@@ -113,6 +113,21 @@ def test_mock_run_initial_add_result() -> None:
         echo_world()
 
 
+def test_mock_run_initial_add_results() -> None:
+    """Test add_result with multiple results before running any command."""
+    with mock_run() as run:
+        assert e3.os.process.Run == run
+
+        # Single call to add_result for multiple results
+        e3.os.process.Run.add_result([ECHO_HELLO_RESULT, ECHO_WORLD_RESULT])
+
+        # Run both commands
+        echo_hello()
+        assert not e3.os.process.Run.all_called
+        assert e3.os.process.Run.call_count == 1
+        echo_world()
+
+
 def test_mock_run_sequential_add_result() -> None:
     """Test add_result before running each command."""
     with mock_run():
