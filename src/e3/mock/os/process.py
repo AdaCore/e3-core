@@ -11,7 +11,7 @@ from e3.os.process import Run, to_cmd_lines
 
 if TYPE_CHECKING:
     from typing import Any, TypedDict
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Iterable
     from typing_extensions import NotRequired, ParamSpec, TypeVar
     from e3.os.process import AnyCmdLine
 
@@ -120,12 +120,15 @@ class MockRun(Run):
         """Check all expected commands have been run."""
         return not self.config.get("results", [])
 
-    def add_result(self, result: CommandResult) -> None:
-        """Queue a command result.
+    def add_result(self, result: CommandResult | Iterable[CommandResult]) -> None:
+        """Queue one or multiple command results.
 
-        :param result: new command result
+        :param result: new command results
         """
-        self.config.setdefault("results", []).append(result)
+        if isinstance(result, CommandResult):
+            result = [result]
+
+        self.config.setdefault("results", []).extend(result)
 
     def __call__(self, cmds: AnyCmdLine, *args: Any, **kwargs: Any) -> Run:
         """Emulate how e3.os.process.Run.__init__ works.
