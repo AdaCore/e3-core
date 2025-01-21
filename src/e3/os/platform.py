@@ -76,7 +76,7 @@ class SystemInfo:
 
         # Fetch linux distribution info on linux OS
         if cls.uname.system == "Linux":  # linux-only
-            import distro
+            import distro  # type: ignore[import-not-found]
 
             cls.ld_info = {
                 "name": distro.name(),

@@ -62,7 +62,7 @@ class SVNRepository:
             return True
         else:
             svn_version = e3.os.process.Run(["svn", "--version"]).out
-            if "cygwin" in svn_version:
+            if svn_version is not None and "cygwin" in svn_version:
                 return True
             else:
                 return False
