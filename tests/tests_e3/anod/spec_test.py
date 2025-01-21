@@ -105,7 +105,7 @@ CHECK_DLL_CLOSURE_ARGUMENTS = [
         ),
         (
             (
-                "- KERNEL32.DLL: /Windows/System32/KERNEL32.DLL"
+                "- KERNEL32.DLL: C:/Windows/System32/KERNEL32.DLL"
                 if sys.platform == "win32"
                 else None
             ),
@@ -190,6 +190,7 @@ def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
     (errors,) = expected
     test_spec: Anod = Anod("", kind="install")
     test_spec.sandbox = SandBox(root_dir=os.getcwd())
+
     if ldd_output is None:
         # Use the current executable lib directory.
         exe_path: Path = Path(sys.executable)
