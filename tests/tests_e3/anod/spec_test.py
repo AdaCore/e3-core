@@ -10,6 +10,7 @@ from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 from e3.env import Env
 from e3.fs import cp
+from e3.os.fs import ldd_output_to_posix
 from e3.os.process import Run
 from e3.platform_db.knowledge_base import OS_INFO
 
@@ -248,7 +249,7 @@ def test_spec_check_dll_closure_single_file(ldd) -> None:  # type: ignore[no-unt
     test_spec.sandbox = SandBox(root_dir=os.getcwd())
 
     # Get the ldd output of the current executable.
-    ldd_output = Run(["ldd"] + [sys.executable]).out or ""
+    ldd_output = ldd_output_to_posix(Run(["ldd"] + [sys.executable]).out or "")
 
     # Extract the first dll with a path from the ldd output.
     for line in ldd_output.splitlines():
@@ -281,7 +282,7 @@ def test_spec_check_dll_closure_single_file(ldd) -> None:  # type: ignore[no-unt
     try:
         result = test_spec.check_shared_libraries_closure(prefix=str(prefix))
         assert len(result) == 1
-        assert Path(sys.executable).as_posix() in result
+        assert Path(shlib_path).as_posix() in result
     except AnodError as ae:
         assert shlib_path in ae.messages[0]
 
