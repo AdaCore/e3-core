@@ -49,12 +49,12 @@ if sys.platform == "win32":
 
     class E3ZipInfo(zipfile.ZipInfo):
         @classmethod
-        def from_file(cls, *args, **kwargs):
+        def from_file(cls, *args, **kwargs):  # type: ignore[no-untyped-def]
             result = super().from_file(*args, **kwargs)
             result.external_attr = (0o555 << 16) | result.external_attr
             return result
 
-    zipfile.ZipInfo = E3ZipInfo
+    zipfile.ZipInfo = E3ZipInfo  # type: ignore[misc]
 
 
 class E3ZipFile(zipfile.ZipFile):

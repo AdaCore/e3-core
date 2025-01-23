@@ -163,7 +163,7 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
     if sys.platform == "win32":  # unix: no cover
         import ctypes
 
-        c_path = ctypes.c_wchar_p(path)
+        c_path = ctypes.c_wchar_p(str(path))
         GetDiskFreeSpaceEx: Callable = ctypes.WINFUNCTYPE(
             ctypes.c_int,
             ctypes.c_wchar_p,
@@ -176,13 +176,13 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
             ((1, "path"), (2, "freeuserspace"), (2, "totalspace"), (2, "freespace")),
         )
 
-        def GetDiskFreeSpaceEx_errcheck(result, func, args):
+        def GetDiskFreeSpaceEx_errcheck(result, func, args):  # type: ignore[no-untyped-def]
             del func
             if not result:  # defensive code
                 raise ctypes.WinError()
-            return (args[1].value, args[2].value, args[3].value)
+            return args[1].value, args[2].value, args[3].value
 
-        GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck
+        GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck  # type: ignore[attr-defined]
         _, total, free = GetDiskFreeSpaceEx(c_path)
         used = total - free
     else:  # windows: no cover
@@ -347,8 +347,10 @@ def readlink(filename: str | Path) -> str:
             # This might be a WSL link
             from e3.os.windows.fs import NTFile
 
-            f = NTFile(filename)
-            return f.wsl_reparse_link_target()
+            reparsed_link: str | None = NTFile(filename).wsl_reparse_link_target()
+            if reparsed_link is not None:
+                return reparsed_link
+            raise
         else:
             raise
 

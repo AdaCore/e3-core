@@ -394,6 +394,7 @@ class ObjectAttributes(Structure):
 class NT:
     FindFirstFile = None
     FindClose = None
+    FsControlFile = None
     Sleep = None
     GetVolumePathName = None
     SetInformationFile = None
