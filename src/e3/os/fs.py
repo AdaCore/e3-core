@@ -25,6 +25,10 @@ if TYPE_CHECKING:
     from typing import Any, Literal
     from collections.abc import Callable
 
+CYGPATH_MATCH: re.Pattern[str] = re.compile(
+    "/((cygdrive/|mnt/)?(?P<drive>[a-zA-Z])/)?(?P<path>.*)", re.IGNORECASE
+)
+
 
 class OSFSError(e3.error.E3Error):
     pass
@@ -253,8 +257,8 @@ def ldd_output_to_posix(ldd_output: str) -> str:
     This method does not have any impact when the ``ldd`` output has
     been executed on a Unix host, because paths are already POSIX there.
 
-    It applies only to ``ldd`` outputs on Windows, where the paths are
-    transformed by a call to ``cygpath -m``.
+    It applies only to ``ldd`` outputs on Windows, where the paths starting
+    with `/c/`, `/mnt/c/` or `/cygdrive/c/` are modified to `C:/`.
 
     For instance, ``/c/WINDOWS/System32/ntdll.dll`` is transformed to
     ``C:/WINDOWS/System32/ntdll.dll``.
@@ -268,16 +272,14 @@ def ldd_output_to_posix(ldd_output: str) -> str:
 
     :return: An ``ldd`` output with POSIX paths only.
     """
-    # Module may not be imported at toplevel, as it depends on this module.
-    from e3.os.process import Run
-
     posix_content: str = ldd_output
 
-    if sys.platform == "win32" and Path(which("cygpath")).exists():
+    if sys.platform == "win32":
         transformed: dict[str, str] = {}
         posix_path: str
         file_path: str | None = None
         lines: list[str] = posix_content.splitlines()
+        drive: str = Path.cwd().drive.rstrip(":")
 
         for line in lines:
             if line.strip().endswith(":"):
@@ -289,16 +291,17 @@ def ldd_output_to_posix(ldd_output: str) -> str:
 
             # Do not run on already transformed paths.
             if file_path and file_path not in transformed:
-                cygpath_run: Run = Run(["cygpath", "-m", file_path])
+                match = CYGPATH_MATCH.match(file_path)
+                if match:
+                    # If there is no drive, replace it with current drive.
+                    posix_path = (
+                        f"{match.group('drive') or drive}:/{match.group('path')}"
+                    )
 
-                # The value returned by cygpath may contain a trailing "\n",
-                # better remove it.
-                posix_path = cygpath_run.out.strip() if cygpath_run.out else file_path
-
-                if posix_path != file_path:
-                    # Transform all occurrences in the ldd output.
-                    posix_content = posix_content.replace(file_path, posix_path)
-                    transformed[file_path] = posix_path
+                    if posix_path != file_path:
+                        # Transform all occurrences in the ldd output.
+                        posix_content = posix_content.replace(file_path, posix_path)
+                        transformed[file_path] = posix_path
 
     return posix_content
 
