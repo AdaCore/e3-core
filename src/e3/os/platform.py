@@ -259,8 +259,12 @@ class SystemInfo:
                         else:
                             version = "2022"
                     else:
-                        version = "10"
-                        full_version = "10.0"
+                        if build_number > 22000:
+                            version = "11"
+                            full_version = "11.0"
+                        else:
+                            version = "10"
+                            full_version = "10.0"
 
         if full_version is None:
             full_version = version
