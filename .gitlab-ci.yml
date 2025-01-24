@@ -5,8 +5,6 @@ variables:
   LATEST_PYTHON:
     description: "The latest python version used to test this project."
     options:
-      - "3.9"
-      - "3.10"
       - "3.11"
       - "3.12"
       - "3.13"
@@ -14,7 +12,7 @@ variables:
   LINUX_CI_TOX_ENV:
     # Run coverage only with one Python version as this is costly.
     description: "Tox environments to run on Linux."
-    value: "py39-cov-xdist,py310-xdist,py311-xdist,py312-xdist,py313-xdist"
+    value: "py311-xdist,py312-xdist,py313-xdist"
   WINDOWS_CI_TOX_ENV:
     description: "Tox environments to run on Windows."
     value: "py312-xdist"
