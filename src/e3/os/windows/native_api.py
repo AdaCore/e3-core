@@ -306,7 +306,7 @@ class FileInfo:
         class_id = 6
 
     class Rename(Structure):
-        _fields_ = []  # type: list
+        _fields_ = []
         class_id = 10
 
     class Basic(Structure):
@@ -336,7 +336,7 @@ class ObjectInfo:
     """Declaration of structures returned by QueryObjectInformation."""
 
     class Name(Structure):
-        _fields_: list = []
+        _fields_ = []
         class_id = 1
 
 
