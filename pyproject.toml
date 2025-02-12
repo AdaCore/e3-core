@@ -48,7 +48,6 @@ Repository = "https://github.com/AdaCore/e3-core"
 
 [project.optional-dependencies]
 test = [
-  "coverage",
   "mock",
   "requests-mock",
   "pytest",
