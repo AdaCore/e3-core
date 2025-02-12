@@ -178,7 +178,6 @@ def main() -> None:
     }
 
     with PyPIClosure(
-        cache_file=os.path.join(m.args.cache_dir, "pip.cache"),
         cache_dir=wheel_cache_dir,
         python3_version=f"3.{m.args.python3_version}",
         platforms=config["platforms"],

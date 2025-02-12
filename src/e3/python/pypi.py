@@ -634,7 +634,6 @@ class PyPIClosure:
         python3_version: str,
         platforms: list[str],
         cache_dir: str,
-        cache_file: str | None = None,
         pypi_url: str = "https://pypi.org/",
         allowed_prerelease: list[str] | None = None,
         allowed_yanked: list[str] | None = None,
@@ -644,9 +643,6 @@ class PyPIClosure:
         :param python3_version: python 3 minor version (i.e: for 3.9.1 it's 9)
         :param platforms: the list of platforms for which packages should be considered
         :param cache_dir: a cache directory used to store wheels and sources
-        :param cache_file: if not None try to load data from a cache file. Note that
-            data is cached a maximum of 24h. The cache contains results of requests to
-            PyPI.
         :param pypi_url: set Python package registry URL. Default is PyPI
         :param allowed_prerelease: list of package names authorized to be into
             pre-release.

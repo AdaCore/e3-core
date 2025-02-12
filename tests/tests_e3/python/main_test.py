@@ -53,7 +53,6 @@ def test_wheel():
             "x86_64-darwin",
         ],
         cache_dir=".cache",
-        cache_file=".pypi.cache",
     ) as pypi:
         pypi.add_wheel(wheel1.path)
         pypi.add_wheel(wheel2.path)
@@ -76,7 +75,6 @@ def test_wheel():
             "x86_64-darwin",
         ],
         cache_dir=".cache",
-        cache_file=".pypi.cache",
     ) as pypi:
         pypi.add_requirement("src2==1.0.0")
         pypi.add_requirement("src1")
@@ -138,7 +136,6 @@ def test_star_requirements():
             "x86_64-linux",
         ],
         cache_dir=".cache",
-        cache_file=".pypi.cache",
     ) as pypi:
         pypi.add_wheel(wheel1.path)
         pypi.add_wheel(wheel2.path)
@@ -152,7 +149,6 @@ def test_star_requirements():
             "x86_64-linux",
         ],
         cache_dir=".cache",
-        cache_file=".pypi.cache",
     ) as pypi:
         pypi.add_wheel(wheel2.path)
         pypi.add_wheel(wheel3.path)
@@ -182,7 +178,6 @@ def test_yanked(pypi_server, arguments, expected):
                 "x86_64-linux",
             ],
             cache_dir="cache",
-            cache_file="pypi.cache",
             allowed_yanked=allowed_yanked,
         ) as pypi:
             if invalid_wheel:
