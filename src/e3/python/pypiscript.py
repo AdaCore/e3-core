@@ -1,5 +1,5 @@
 from __future__ import annotations
-from e3.python.pypi import PyPIClosure
+from e3.python.pypi import PyPIClosure, fetch_from_registry
 from e3.python.wheel import Wheel
 from e3.anod.checkout import CheckoutManager
 from packaging.requirements import Requirement
@@ -12,7 +12,6 @@ import re
 import yaml
 import logging
 from sys import version_info as python_version_info
-
 
 DESCRIPTION = """
 This script generates a directory containing the full closure of a set
@@ -40,7 +39,7 @@ wheels contains the optional list of wheel that should be locally built
 from source located at a git repository url (branch is specified after
 a #, if no branch is specified master is assumed
 
-update_wheel_verison_file is an optional parameter to force version
+update_wheel_version_file is an optional parameter to force version
 update during generation of the wheels based on sources. The update
 works only if the version is stored in a file called VERSION and the
 version in this file has MAJOR.MINOR format. In that case during
@@ -106,6 +105,12 @@ def main() -> None:
         dest="wheel_build_args",
         action="append",
         help=argparse.SUPPRESS,
+    )
+    m.argument_parser.add_argument(
+        "--check-target-registry",
+        type=str,
+        help="Checks whether the complete closure is present in the registry passed as "
+        "a parameter. This option will only log errors if a package is missing.",
     )
     m.parse_args()
     assert m.args is not None
@@ -192,12 +197,19 @@ def main() -> None:
             logging.info(f"Add top-level requirement {str(req)}")
             pypi.add_requirement(req)
 
+        packages: set[str] = set()
         for f in pypi.file_closure():
             pkg_name = os.path.basename(f).split("-")[0].replace("_", "-")
             if "discard_from_closure" not in config or not re.search(
                 config["discard_from_closure"], pkg_name
             ):
                 cp(f, m.args.target_dir)
+            packages.add(pkg_name)
+
+        if m.args.check_target_registry:
+            fetch_from_registry(
+                packages, m.args.check_target_registry, log_missing_packages=True
+            )
 
         with open(
             os.path.join(
