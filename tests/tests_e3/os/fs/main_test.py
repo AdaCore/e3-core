@@ -121,7 +121,7 @@ def test_df():
     assert all(isinstance(elt, numbers.Integral) for elt in statfs)
 
 
-def test_anod_ldd_output_to_posix() -> None:  # type: ignore[no-untyped-def]
+def test_anod_ldd_output_to_posix(ldd) -> None:  # type: ignore[no-untyped-def]
     # Get the ldd output of the current executable.
     ldd_output = e3.os.process.Run(["ldd"] + [sys.executable]).out or ""
     e3.os.fs.ldd_output_to_posix(ldd_output)
