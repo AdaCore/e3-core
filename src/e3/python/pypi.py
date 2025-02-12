@@ -18,10 +18,12 @@ from packaging.utils import canonicalize_name
 from html.parser import HTMLParser
 from packaging.version import Version, InvalidVersion
 from e3.error import E3Error
+from requests.exceptions import HTTPError
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Mapping, Iterator, Sequence, Iterable, Any
+    from typing import Any
+    from collections.abc import Iterable, Mapping, Sequence, Iterator
     from resolvelib.structs import Matches
     from resolvelib.providers import Preference
     from resolvelib.resolvers import RequirementInformation
@@ -756,3 +758,34 @@ class PyPIClosure:
         _tb: TracebackType | None,
     ) -> None:
         self.pypi.save_cache()
+
+
+def fetch_from_registry(
+    packages: Iterable[str], registry_url: str, *, log_missing_packages: bool = False
+) -> dict[str, PyPILink]:
+    """Fetch packages currently in a registry.
+
+    :param packages: The list of packages to look for.
+    :param registry_url: The URL to a python registry to use.
+        If the protocol is not defined on the URL, https will be used by default.
+    :return: A filename to link mapping (dict).
+    """
+    url = (
+        f"https://{registry_url}"
+        if not registry_url.startswith("http")
+        else registry_url
+    )
+
+    registry = PyPI(url)
+    res: dict[str, PyPILink] = {}
+    for p in packages:
+        try:
+            res.update(
+                {link.filename: link for link in registry.fetch_project_links(p)}
+            )
+        except HTTPError as err:
+            if err.response.status_code != 404:  # if other than NotFound
+                raise err
+            if log_missing_packages:
+                logger.error(f"Package {p!r} is missing on the given registry")
+    return res
