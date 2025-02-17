@@ -13,18 +13,12 @@ import e3.log
 
 try:
     import pytest
-    from coverage.sqldata import CoverageData
-    from coverage.files import PathAliases
-    from coverage import Coverage
 except ImportError as ie:  # defensive code
     # Those packages may be missing. In order to avoid importing tests or
     # coverage packages in release mode, they are deliberately not part of
     # the dependencies. Let the user know that the packages should be installed
     # if he wants to use e3 pytest driver.
-    raise ImportError(
-        "Missing test and coverage packages. Please install pytest and coverage "
-        "packages"
-    ) from ie
+    raise ImportError("The e3.pytest plugin requires the pytest package") from ie
 
 import typing
 
@@ -143,6 +137,9 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
     if hasattr(session.config.option, "cov_source") and session.config.getoption(
         "cov_source"
     ):
+        # Load only the coverage package if it was activated using the --cov option
+        from coverage import Coverage
+
         cov_file = str(session.config.rootpath / ".coverage")
         if hasattr(
             session.config.option, "e3_cov_rewrite"
@@ -205,6 +202,11 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
         e.g. src/
     :param cov_db: path to the .coverage database
     """
+    # Only import packages from coverage if needed, the pytest plugin can
+    # be used without coverage.
+    from coverage.sqldata import CoverageData
+    from coverage.files import PathAliases
+
     paths = PathAliases()
     paths.add(origin_dir, new_dir)
 
