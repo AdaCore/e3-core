@@ -260,6 +260,19 @@ def test_copy():
     assert new_e.target.platform == "arm-elf"
 
 
+def test_force_cores():
+    """Test that forcing the number of cores works in all cases."""
+    e = e3.env.BaseEnv()
+    e.set_build(cores=23)
+    assert e.build.cpu.cores == 23
+
+    e.set_build(name="x86_64-linux", cores=23)
+    assert e.build.cpu.cores == 23
+
+    e.set_build(name="x86_64-windows64", cores=23)
+    assert e.build.cpu.cores == 23
+
+
 def test_build_os_propagation():
     """Ensure that OS version is preserved when build platform is changed."""
     winenv = e3.env.BaseEnv(

@@ -59,6 +59,7 @@ class Platform(
         machine: str | None = None,
         mode: str | None = None,
         compute_default: bool = False,
+        cores: int | None = None,
     ) -> Platform:
         """Return a Platform object.
 
@@ -72,6 +73,7 @@ class Platform(
         :param mode: an os mode (ex: rtp for vxworks)
         :param compute_default: if True compute the default Arch for the
             current machine (this parameter is for internal purpose only).
+        :param cores: if not None force a number of apparent cores
         """
         # normalize arguments
         if not version:
@@ -112,7 +114,9 @@ class Platform(
         # Fill other attributes
         assert platform_name is not None
         pi = KNOWLEDGE_BASE.platform_info[platform_name]
-        cpu = e3.os.platform.CPU.get(pi["cpu"], pi.get("endian", None), is_host)
+        cpu = e3.os.platform.CPU.get(
+            pi["cpu"], pi.get("endian", None), is_host, cores=cores
+        )
         os = e3.os.platform.OS.get(pi["os"], is_host, version=version, mode=mode)
         is_hie = pi["is_hie"]
 
