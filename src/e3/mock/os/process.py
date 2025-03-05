@@ -60,8 +60,8 @@ class CommandResult:
         self,
         cmd: list[str],
         status: int | None = None,
-        raw_out: bytes | None = None,
-        raw_err: bytes | None = None,
+        raw_out: bytes = b"",
+        raw_err: bytes = b"",
     ) -> None:
         """Initialize CommandResult.
 
@@ -72,8 +72,8 @@ class CommandResult:
         """
         self.cmd = cmd
         self.status = status if status is not None else 0
-        self.raw_out = raw_out if raw_out is not None else b""
-        self.raw_err = raw_err if raw_err is not None else b""
+        self.raw_out = raw_out
+        self.raw_err = raw_err
 
     def check(self, cmd: list[str]) -> None:
         """Check that cmd matches the expected arguments.
@@ -140,8 +140,8 @@ class MockRun(Run):
         :param kwargs: unhandled keyword arguments
         """
         self.status: int | None = None
-        self.raw_out: bytes | None = b""
-        self.raw_err: bytes | None = b""
+        self.raw_out: bytes = b""
+        self.raw_err: bytes = b""
 
         cmds = to_cmd_lines(cmds)
         results: list[CommandResult] | None = self.config.get("results")
