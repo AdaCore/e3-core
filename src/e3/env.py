@@ -123,6 +123,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         version: str | None = None,
         machine: str | None = None,
         mode: str | None = None,
+        cores: int | None = None,
     ) -> None:
         """Set build platform.
 
@@ -138,6 +139,8 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         :param mode: a string containing the name of the mode. This
             notion is needed on some targets such as VxWorks to switch between
             kernel mode and other modes such as rtp
+        :param cores: force a number of apparent cores. If None that number
+            is either computed (when possible) or set to 1.
 
         When calling set_build, the target and host systems are reset to the
         build one. Thus you should call set_build before calling either
@@ -145,7 +148,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         """
         e3.log.debug("set_build (build_name=%s, build_version=%s)", name, version)
         self.build = Platform.get(
-            platform_name=name, version=version, machine=machine, mode=mode
+            platform_name=name, version=version, machine=machine, mode=mode, cores=cores
         )
         self.host = self.build
         self.target = self.build
@@ -156,6 +159,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         version: str | None = None,
         machine: str | None = None,
         mode: str | None = None,
+        cores: int | None = None,
     ) -> None:
         """Set host platform.
 
@@ -170,6 +174,8 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         :param mode: a string containing the name of the mode. This
             notion is needed on some targets such as VxWorks to switch between
             kernel mode and other modes such as rtp
+        :param cores: force a number of apparent cores. If None that number
+            is either computed (when possible) or set to 1.
 
         When calling set_host, the target system is reset to the host one.
         Thus you should call set_host before set_target otherwise your call
@@ -185,7 +191,11 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             self.host = self.build
         else:
             self.host = Platform.get(
-                platform_name=name, version=version, machine=machine, mode=mode
+                platform_name=name,
+                version=version,
+                machine=machine,
+                mode=mode,
+                cores=cores,
             )
         self.target = self.host
 
@@ -195,6 +205,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         version: str | None = None,
         machine: str | None = None,
         mode: str | None = None,
+        cores: int | None = None,
     ) -> None:
         """Set target platform.
 
@@ -211,6 +222,8 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         :param mode: a string containing the name of the mode. This
             notion is needed on some targets such as VxWorks to switch between
             kernel mode and other modes such as rtp
+        :param cores: force a number of apparent cores. If None that number
+            is either computed (when possible) or set to 1.
 
         The target parameters are ignored if the target_name is equal to the
         host platform.
@@ -224,7 +237,11 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             self.target = self.build
         else:
             self.target = Platform.get(
-                platform_name=name, version=version, machine=machine, mode=mode
+                platform_name=name,
+                version=version,
+                machine=machine,
+                mode=mode,
+                cores=cores,
             )
 
     def set_env(

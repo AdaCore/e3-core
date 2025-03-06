@@ -329,22 +329,31 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
 
     @classmethod
     def get(
-        cls, name: str, endian: str | None = None, compute_cores: bool = False
+        cls,
+        name: str,
+        endian: str | None = None,
+        compute_cores: bool = False,
+        cores: int | None = None,
     ) -> CPU:
         """Initialize CPU instance.
 
         :param name: cpu name
         :param endian: if not None override endianness default settings
         :param compute_cores: if True compute the number of cores
+        :param cores: if not None force the apparent number of
+            cpu to that value.
         """
         assert name in KNOWLEDGE_BASE.cpu_info, "invalid cpu name"
         bits = KNOWLEDGE_BASE.cpu_info[name]["bits"]
-        cores = 1
 
         if endian is None:
             endian = KNOWLEDGE_BASE.cpu_info[name]["endian"]
-        if compute_cores:
-            cores = SystemInfo.core_number
+
+        if cores is None:
+            if compute_cores:
+                cores = SystemInfo.core_number
+            else:
+                cores = 1
 
         return CPU(name, bits, endian, cores)
 
