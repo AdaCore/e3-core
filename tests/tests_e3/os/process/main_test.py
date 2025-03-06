@@ -17,7 +17,7 @@ from e3.env import Env
 
 import pytest
 
-from subprocess import STDOUT
+from subprocess import STDOUT, PIPE
 
 try:
     import psutil
@@ -561,5 +561,26 @@ def test_shell_override():
 
 
 def test_error_to_stdout():
-    p = e3.os.process.Run(["echo", "1"], error=STDOUT)
-    assert p.err is None
+    """Check that redirection of stderr to stdout works."""
+    python_cmd = ";".join(
+        [
+            "import sys; sys.stderr.write('hello_from_stderr')",
+            "sys.stderr.flush()",
+            "sys.stdout.write('hello_from_stdout')",
+        ]
+    )
+
+    # Test merge of STDERR in STDOUT
+    p = e3.os.process.Run([sys.executable, "-c", python_cmd], error=STDOUT)
+    assert p.out == "hello_from_stderrhello_from_stdout"
+    assert p.err == ""
+
+    # This is in fact the default behavior
+    p = e3.os.process.Run([sys.executable, "-c", python_cmd])
+    assert p.out == "hello_from_stderrhello_from_stdout"
+    assert p.err == ""
+
+    # Check when the STDERR and STDOUT are sepearate pipes.
+    p = e3.os.process.Run([sys.executable, "-c", python_cmd], error=PIPE)
+    assert p.out == "hello_from_stdout"
+    assert p.err == "hello_from_stderr"

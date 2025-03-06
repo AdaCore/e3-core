@@ -366,8 +366,8 @@ class Run:
         self.error_file = File(error, "w")
 
         self.status: int | None = None
-        self.raw_out: bytes | None = b""
-        self.raw_err: bytes | None = b""
+        self.raw_out: bytes = b""
+        self.raw_err: bytes = b""
         self.cmds = []
 
         if env is not None:
@@ -488,25 +488,23 @@ class Run:
             self.wait()
 
     @property
-    def out(self) -> str | None:
+    def out(self) -> str:
         """Process output as string.
 
         Attempt is done to decode as utf-8 the output. If the output is not in
         utf-8 a string representation will be returned
         (see e3.text.bytes_as_str).
         """
-        return bytes_as_str(self.raw_out) if self.raw_out is not None else None
+        return bytes_as_str(self.raw_out)
 
     @property
-    def err(self) -> str | None:
+    def err(self) -> str:
         """Process error as string.
 
         Attempt is done to decode as utf-8 the output. If the output is not in
         utf-8 a string representation will be returned
         (see e3.text.bytes_as_str).
         """
-        if self.raw_err is None:
-            return None
         return bytes_as_str(self.raw_err)
 
     def command_line_image(self) -> str:
@@ -569,7 +567,10 @@ class Run:
             if isinstance(tmp_input, str):
                 tmp_input = tmp_input.encode("utf-8")
 
-            (self.raw_out, self.raw_err) = self.internal.communicate(tmp_input)
+            (raw_out, raw_err) = self.internal.communicate(tmp_input)
+            self.raw_out = raw_out if raw_out is not None else b""
+            self.raw_err = raw_err if raw_err is not None else b""
+
             self.status = self.internal.returncode
 
         self.close_files()
