@@ -49,7 +49,10 @@ if TYPE_CHECKING:
         str, Platform, Platform, Platform, Optional[str], Optional[str], Optional[str]
     ]
     ResolverType = Callable[[Action, Decision], bool]
-
+    QualifierType = str | dict[str, str | bool | Iterable[str]] | None
+    SpecLoadHook = Callable[
+        [str, QualifierType, BaseEnv, PRIMITIVE], tuple[str, QualifierType]
+    ]
 
 logger = e3.log.getLogger("anod.context")
 
@@ -102,6 +105,7 @@ class AnodContext:
         spec_repository: AnodSpecRepository,
         default_env: BaseEnv | None = None,
         reject_duplicates: bool = False,
+        spec_load_hook: SpecLoadHook | None = None,
     ):
         """Initialize a new context.
 
@@ -112,6 +116,16 @@ class AnodContext:
             context if the local server
         :param reject_duplicates: if True, raise SchedulingError when two
             duplicated action are generated
+        :param spec_load_hook: a function that allows tweaking the anod DAG
+            creation by doing substitution of an anod instance by another
+            at load time. The hook function has the following signature:
+
+                hook(name="SPEC_NAME",
+                     qualifier=SPEC_QUALIFIER,
+                     env=SPEC_ENV,
+                     kind=ANOD_PRIMITIVE) -> (NEW_SPEC_NAME, NEW_QUALIFIER)
+
+            kind can be "install", "build", "test" or "source".
         """
         self.repo = spec_repository
         if default_env is None:
@@ -126,6 +140,7 @@ class AnodContext:
         self.add(self.root)
         self.cache: dict[CacheKeyType, Anod] = {}
         self.sources: dict[str, tuple[str, SourceBuilder]] = {}
+        self.spec_load_hook = spec_load_hook
 
     def load(
         self,
@@ -149,6 +164,12 @@ class AnodContext:
         """
         if env is None:
             env = self.default_env
+
+        # A hook that allows redirection to another spec or automatic adjustment of
+        # of qualifiers. This feature is only needed in user mode for development
+        # purposes.
+        if self.spec_load_hook is not None:
+            name, qualifier = self.spec_load_hook(name, qualifier, env, kind)
 
         # Key used for the spec instance cache
         if isinstance(qualifier, str) or qualifier is None:
