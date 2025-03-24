@@ -12,16 +12,9 @@ class MavenLink:
     def __init__(self, group: str, name: str, version: str) -> None:
         """Maven download link metadata.
 
-        Note:
-        -----
-        Checksum is not handled here because maven provides file checksum directly
-        in the HTTP request header using: x-checksum-md5 or x-checksum-sha1
-        The request URL is not provided, because the code will compute it depending on
-        the package group/name/version.
-
-        :param group: The package group
-        :param name: The package name
-        :param version: The package version
+        :param group: The package group.
+        :param name: The package name.
+        :param version: The package version.
         """
         filename = f"{name}-{version}.jar"
         self.filename = filename
@@ -29,6 +22,23 @@ class MavenLink:
         self.package_name = name
         self.version = version
         self.url = f"https://repo1.maven.org/maven2/{group}/{name}/{version}/{filename}"
+
+        # To get the expected checksum of the current file, we need to make an
+        # additonnal HEAD request. This is because maven send the checksum directly on
+        # the HTTP header.
+        hdrs = requests.head(self.url).headers
+
+        # Maven support two type of checksums
+        sha1_checksum = hdrs.get("x-checksum-sha1")
+        md5_checksum = hdrs.get("x-checksum-md5")
+        if not md5_checksum and not sha1_checksum:
+            raise RuntimeError("No checksum provided")
+
+        # No 'elif' because maven can send both together into HTTP headers.
+        if md5_checksum:
+            self.md5_checksum = md5_checksum
+        if sha1_checksum:
+            self.sha1_checksum = sha1_checksum
 
 
 class MavenLinksParser:
