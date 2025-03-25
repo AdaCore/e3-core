@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 from unittest.mock import patch
 from contextlib import contextmanager
 import copy
+import fnmatch
 
 from e3.os.process import Run, to_cmd_lines
 
@@ -49,6 +50,41 @@ def mock_run(config: MockRunConfig | None = None) -> Iterator[MockRun]:
         yield run
 
 
+class ArgumentChecker(Protocol):
+    """Argument checker."""
+
+    def check(self, arg: str) -> bool:
+        """Check an argument.
+
+        :param arg: the argument
+        :return: if the argument is valid
+        """
+        ...
+
+    def __repr__(self) -> str:
+        """Return a textual representation of the expected argument."""
+        ...
+
+
+class GlobChecker(ArgumentChecker):
+    """Check an argument against a glob."""
+
+    def __init__(self, pattern: str) -> None:
+        """Initialize GlobChecker.
+
+        :param pattern: the glob pattern
+        """
+        self.pattern = pattern
+
+    def check(self, arg: str) -> bool:
+        """See ArgumentChecker."""
+        return fnmatch.fnmatch(arg, self.pattern)
+
+    def __repr__(self) -> str:
+        """See ArgumentChecker."""
+        return self.pattern.__repr__()
+
+
 class CommandResult:
     """Result of a command.
 
@@ -58,7 +94,7 @@ class CommandResult:
 
     def __init__(
         self,
-        cmd: list[str],
+        cmd: list[str | ArgumentChecker],
         status: int | None = None,
         raw_out: bytes = b"",
         raw_err: bytes = b"",
@@ -86,10 +122,16 @@ class CommandResult:
             )
 
         for i, arg in enumerate(cmd):
-            if arg != self.cmd[i] and self.cmd[i] != "*":
-                raise UnexpectedCommandError(
-                    f"unexpected arguments {cmd}, expected {self.cmd}"
-                )
+            checker = self.cmd[i]
+            if isinstance(checker, str):
+                if arg == checker or checker == "*":
+                    continue
+            elif checker.check(arg):
+                continue
+
+            raise UnexpectedCommandError(
+                f"unexpected arguments {cmd}, expected {self.cmd}"
+            )
 
     def __call__(self, cmd: list[str], *args: Any, **kwargs: Any) -> None:
         """Allow to run code to emulate the command.

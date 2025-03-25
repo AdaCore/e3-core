@@ -10,7 +10,13 @@ import pytest
 import e3.fs
 import e3.os.fs
 import e3.os.process
-from e3.mock.os.process import mock_run, CommandResult, MockRun, UnexpectedCommandError
+from e3.mock.os.process import (
+    mock_run,
+    CommandResult,
+    MockRun,
+    UnexpectedCommandError,
+    GlobChecker,
+)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -201,3 +207,35 @@ def test_mock_run_nested() -> None:
 
         assert e3.os.process.Run == run1
         echo_world()
+
+
+def test_glob_checker() -> None:
+    """Test mock_run with the glob checker."""
+    with mock_run(
+        config={
+            "results": [
+                CommandResult(
+                    cmd=[
+                        # Any path ending with python
+                        GlobChecker("**/python"),
+                        # Any temp directory containing test.py
+                        GlobChecker("/tmp/**/test.py"),
+                    ]
+                )
+            ]
+            * 2
+        }
+    ):
+        # Both paths match the globs
+        e3.os.process.Run(["/usr/bin/python", "/tmp/abcd/test.py"])
+
+        # Second path starts with /pmt instead of /tmp
+        with pytest.raises(UnexpectedCommandError) as excinfo:
+            e3.os.process.Run(["/usr/bin/python", "/pmt/abcd/test.py"])
+
+        # Check this is the correct error
+        assert (
+            str(excinfo.value)
+            == "unexpected arguments ['/usr/bin/python', '/pmt/abcd/test.py'], "
+            "expected ['**/python', '/tmp/**/test.py']"
+        )
