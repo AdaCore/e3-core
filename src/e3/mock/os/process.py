@@ -85,6 +85,22 @@ class GlobChecker(ArgumentChecker):
         return self.pattern.__repr__()
 
 
+class SideEffect(Protocol):
+    """Function to be called when a mocked command is called."""
+
+    def __call__(
+        self, result: CommandResult, cmd: list[str], *args: Any, **kwargs: Any
+    ) -> None:
+        """Run when the mocked command is called.
+
+        :param result: the mocked command
+        :param cmd: actual arguments of the command
+        :param args: additional arguments for Run
+        :param kwargs: additional keyword arguments for Run
+        """
+        ...
+
+
 class CommandResult:
     """Result of a command.
 
@@ -98,6 +114,7 @@ class CommandResult:
         status: int | None = None,
         raw_out: bytes = b"",
         raw_err: bytes = b"",
+        side_effect: SideEffect | None = None,
     ) -> None:
         """Initialize CommandResult.
 
@@ -105,11 +122,13 @@ class CommandResult:
         :param status: status code
         :param raw_out: raw output log
         :param raw_err: raw error log
+        :param side_effect: a function to be called when the command is called
         """
         self.cmd = cmd
         self.status = status if status is not None else 0
         self.raw_out = raw_out
         self.raw_err = raw_err
+        self.side_effect = side_effect
 
     def check(self, cmd: list[str]) -> None:
         """Check that cmd matches the expected arguments.
@@ -143,7 +162,8 @@ class CommandResult:
         :param args: additional arguments for Run
         :param kwargs: additional keyword arguments for Run
         """
-        pass
+        if self.side_effect:
+            self.side_effect(self, cmd, *args, **kwargs)
 
 
 class MockRun(Run):

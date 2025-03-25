@@ -16,6 +16,7 @@ from e3.mock.os.process import (
     MockRun,
     UnexpectedCommandError,
     GlobChecker,
+    SideEffect,
 )
 
 if TYPE_CHECKING:
@@ -239,3 +240,36 @@ def test_glob_checker() -> None:
             == "unexpected arguments ['/usr/bin/python', '/pmt/abcd/test.py'], "
             "expected ['**/python', '/tmp/**/test.py']"
         )
+
+
+def test_side_effect_function() -> None:
+    """Test mock_run with a side effect function."""
+
+    def echo(result: CommandResult, cmd: list[str]):
+        """Write the value to echo to the raw output."""
+        result.raw_out = cmd[1].encode()
+
+    with mock_run(
+        config={"results": [CommandResult(cmd=["echo", '"hello"'], side_effect=echo)]}
+    ) as mocked_run:
+        e3.os.process.Run(["echo", '"hello"'])
+
+    # Check the raw output is correct
+    assert mocked_run.raw_out == b'"hello"'
+
+
+def test_side_effect_class() -> None:
+    """Test mock_run with a side effect class."""
+
+    class Echo(SideEffect):
+        def __call__(self, result: CommandResult, cmd: list[str]) -> None:
+            """Write the value to echo to the raw output."""
+            result.raw_out = cmd[1].encode()
+
+    with mock_run(
+        config={"results": [CommandResult(cmd=["echo", '"hello"'], side_effect=Echo())]}
+    ) as mocked_run:
+        e3.os.process.Run(["echo", '"hello"'])
+
+    # Check the raw output is correct
+    assert mocked_run.raw_out == b'"hello"'
