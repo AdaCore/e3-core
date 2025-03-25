@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 from unittest.mock import patch
 from contextlib import contextmanager
 import copy
+import fnmatch
 
 from e3.os.process import Run, to_cmd_lines
 
@@ -49,6 +50,57 @@ def mock_run(config: MockRunConfig | None = None) -> Iterator[MockRun]:
         yield run
 
 
+class ArgumentChecker(Protocol):
+    """Argument checker."""
+
+    def check(self, arg: str) -> bool:
+        """Check an argument.
+
+        :param arg: the argument
+        :return: if the argument is valid
+        """
+        ...
+
+    def __repr__(self) -> str:
+        """Return a textual representation of the expected argument."""
+        ...
+
+
+class GlobChecker(ArgumentChecker):
+    """Check an argument against a glob."""
+
+    def __init__(self, pattern: str) -> None:
+        """Initialize GlobChecker.
+
+        :param pattern: the glob pattern
+        """
+        self.pattern = pattern
+
+    def check(self, arg: str) -> bool:
+        """See ArgumentChecker."""
+        return fnmatch.fnmatch(arg, self.pattern)
+
+    def __repr__(self) -> str:
+        """See ArgumentChecker."""
+        return self.pattern.__repr__()
+
+
+class SideEffect(Protocol):
+    """Function to be called when a mocked command is called."""
+
+    def __call__(
+        self, result: CommandResult, cmd: list[str], *args: Any, **kwargs: Any
+    ) -> None:
+        """Run when the mocked command is called.
+
+        :param result: the mocked command
+        :param cmd: actual arguments of the command
+        :param args: additional arguments for Run
+        :param kwargs: additional keyword arguments for Run
+        """
+        ...
+
+
 class CommandResult:
     """Result of a command.
 
@@ -58,10 +110,11 @@ class CommandResult:
 
     def __init__(
         self,
-        cmd: list[str],
+        cmd: list[str | ArgumentChecker],
         status: int | None = None,
         raw_out: bytes = b"",
         raw_err: bytes = b"",
+        side_effect: SideEffect | None = None,
     ) -> None:
         """Initialize CommandResult.
 
@@ -69,11 +122,13 @@ class CommandResult:
         :param status: status code
         :param raw_out: raw output log
         :param raw_err: raw error log
+        :param side_effect: a function to be called when the command is called
         """
         self.cmd = cmd
         self.status = status if status is not None else 0
         self.raw_out = raw_out
         self.raw_err = raw_err
+        self.side_effect = side_effect
 
     def check(self, cmd: list[str]) -> None:
         """Check that cmd matches the expected arguments.
@@ -86,10 +141,16 @@ class CommandResult:
             )
 
         for i, arg in enumerate(cmd):
-            if arg != self.cmd[i] and self.cmd[i] != "*":
-                raise UnexpectedCommandError(
-                    f"unexpected arguments {cmd}, expected {self.cmd}"
-                )
+            checker = self.cmd[i]
+            if isinstance(checker, str):
+                if arg == checker or checker == "*":
+                    continue
+            elif checker.check(arg):
+                continue
+
+            raise UnexpectedCommandError(
+                f"unexpected arguments {cmd}, expected {self.cmd}"
+            )
 
     def __call__(self, cmd: list[str], *args: Any, **kwargs: Any) -> None:
         """Allow to run code to emulate the command.
@@ -101,7 +162,8 @@ class CommandResult:
         :param args: additional arguments for Run
         :param kwargs: additional keyword arguments for Run
         """
-        pass
+        if self.side_effect:
+            self.side_effect(self, cmd, *args, **kwargs)
 
 
 class MockRun(Run):
