@@ -21,7 +21,10 @@ class MavenLink:
         self.package_group = group
         self.package_name = name
         self.version = version
-        self.url = f"https://repo1.maven.org/maven2/{group}/{name}/{version}/{filename}"
+        self.url = (
+            f"https://repo1.maven.org/maven2/{group.replace('.', '/')}/{name}/{version}"
+            f"/{filename}"
+        )
 
         # To get the expected checksum of the current file, we need to make an
         # additonnal HEAD request. This is because maven send the checksum directly on
@@ -32,7 +35,7 @@ class MavenLink:
         sha1_checksum = hdrs.get("x-checksum-sha1")
         md5_checksum = hdrs.get("x-checksum-md5")
         if not md5_checksum and not sha1_checksum:
-            raise RuntimeError("No checksum provided")
+            raise RuntimeError(f"No checksum provided for {group}/{self.filename}")
 
         # No 'elif' because maven can send both together into HTTP headers.
         if md5_checksum:
