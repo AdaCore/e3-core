@@ -98,9 +98,40 @@ class Maven:
         """
         if name not in self.cache:
             logger.debug(f"fetch {name} links from {self.url}")
+            # First get the number of elements to retrieve using rows=0.
+            # This will return a JSON like:
+            # {
+            #   "reponseHeader": { ... },
+            #   "reponse" : {
+            #       "numFound": X,
+            #       ...
+            #   }
+            # }
+            #
+            # The numFound is the number of rows to ask. Currently, we don't find any
+            # case where this number is too big for making only one query.
+            tmp_request = requests.get(
+                f"{self.url}?q="
+                f"g:%22{group}%22+AND+a:%22{name}%22&core=gav&rows=0&wt=json",
+                headers=headers,
+            )
+            tmp_request.raise_for_status()
+
+            tmp = tmp_request.json()
+
+            if "response" not in tmp or "numFound" not in tmp["response"]:
+                raise KeyError(
+                    "Cannot determine the number of rows to request: "
+                    "'response:numFound' key not found."
+                )
+
+            rows = tmp["response"]["numFound"]
+
+            # Now, we have our numbers of rows, so lets make the same request, but with
+            # the right parameters.
             request = requests.get(
                 f"{self.url}?q="
-                f"g:%22{group}%22+AND+a:%22{name}%22&core=gav&rows=20&wt=json",
+                f"g:%22{group}%22+AND+a:%22{name}%22&core=gav&rows={rows}&wt=json",
                 headers=headers,
             )
             request.raise_for_status()
