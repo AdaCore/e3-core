@@ -32,16 +32,8 @@ class MavenLink:
         hdrs = requests.head(self.url).headers
 
         # Maven support two type of checksums
-        sha1_checksum = hdrs.get("x-checksum-sha1")
-        md5_checksum = hdrs.get("x-checksum-md5")
-        if not md5_checksum and not sha1_checksum:
-            raise RuntimeError(f"No checksum provided for {group}/{self.filename}")
-
-        # No 'elif' because maven can send both together into HTTP headers.
-        if md5_checksum:
-            self.md5_checksum = md5_checksum
-        if sha1_checksum:
-            self.sha1_checksum = sha1_checksum
+        self.sha1_checksum = hdrs.get("x-checksum-sha1")
+        self.md5_checksum = hdrs.get("x-checksum-md5")
 
 
 class MavenLinksParser:
