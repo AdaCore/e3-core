@@ -103,7 +103,7 @@ class TestContext:
     def test_add_anod_action2_force_install(self):
         """Check that forcing an install with no package is rejected."""
         ac = self.create_context()
-        try:
+        with pytest.raises(SchedulingError) as err:
             ac.add_anod_action(
                 "spec2",
                 env=ac.default_env,
@@ -111,11 +111,11 @@ class TestContext:
                 plan_args={},
                 plan_line="install_plan.txt:2",
             )
-        except SchedulingError as err:
-            assert (
-                "error in plan at install_plan.txt:2: install should "
-                "be replaced by build" in str(err)
-            )
+
+        assert (
+            "error in plan at install_plan.txt:2: install should be replaced by build"
+            in str(err)
+        )
 
     def test_add_anod_action2_no_source_resolver(self):
         def no_resolver(action, decision):
@@ -637,7 +637,6 @@ class TestContext:
         myplan.load("plan.plan")
 
         if not reject_duplicates:
-            # Execute the plan and create anod actions
             # Execute the plan and create anod actions
             for action in cm.execute(myplan, "myserver"):
                 ac.add_plan_action(action)
