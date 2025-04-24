@@ -149,6 +149,10 @@ class Builder(object):
         """  # noqa RST304
         return self.__id
 
+    @id.setter
+    def id(self, value: str | TypeURI) -> None:
+        self.__id = value if isinstance(value, TypeURI) else TypeURI(value)
+
     @property
     def version(self) -> dict[str, str]:
         """Builder version mapping.
@@ -279,6 +283,10 @@ class BuildMetadata(object):
         """The timestamp of when the build completed."""
         return self.__finished_on
 
+    @finished_on.setter
+    def finished_on(self, value: datetime | str) -> None:
+        self.__finished_on = self.__validate_timestamp(value)
+
     @property
     def invocation_id(self) -> str:
         """Build invocation identifier.
@@ -298,6 +306,10 @@ class BuildMetadata(object):
     def started_on(self) -> datetime:
         """The timestamp of when the build started."""
         return self.__started_on
+
+    @started_on.setter
+    def started_on(self, value: datetime | str) -> None:
+        self.__started_on = self.__validate_timestamp(value)
 
     # --------------------------- Public methods ---------------------------- #
 
@@ -380,13 +392,20 @@ class BuildMetadata(object):
     # --------------------------- Private methods --------------------------- #
 
     @staticmethod
-    def __validate_timestamp(timestamp: datetime) -> datetime:
+    def __validate_timestamp(timestamp: datetime | str) -> datetime:
         """Validate a timestamp."""
-        valid_timestamp: datetime
-        if isinstance(timestamp, datetime):
+        valid_timestamp: datetime | None = None
+        if isinstance(timestamp, str):
+            valid_timestamp = date_parser.parse(timestamp)
+        elif isinstance(timestamp, datetime):
+            valid_timestamp = timestamp
+
+        if isinstance(valid_timestamp, datetime):
             # When converting to JSON representation, the microseconds
             # are lost. Just remove them.
-            valid_timestamp = timestamp.astimezone(timezone.utc).replace(microsecond=0)
+            valid_timestamp = valid_timestamp.astimezone(timezone.utc).replace(
+                microsecond=0
+            )
         else:
             raise TypeError(f"Invalid timestamp type {type(timestamp)}")
 
