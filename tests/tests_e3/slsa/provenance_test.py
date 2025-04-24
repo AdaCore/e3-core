@@ -237,7 +237,7 @@ def test_builder_as_dict() -> None:
     dict_dep: dict = desc.as_dict()
     assert json.dumps(dict_repr, indent="  ") != ""
     assert dict_repr.get(Builder.ATTR_BUILD_ID) == build_id
-    assert dict_repr.get(Builder.ATTR_BUILDER_DEPENDENCIES)[0] == dict_dep
+    assert dict_repr.get(Builder.ATTR_BUILDER_DEPENDENCIES, [])[0] == dict_dep
     assert dict_repr.get(Builder.ATTR_VERSION) == version
 
 
@@ -264,6 +264,13 @@ def test_builder_init() -> None:
     assert builder.version == version
     # Test the __eq__ method with a wrong type.
     assert builder != {}
+    # Test setting the builder ID
+    builder_id: str = "protocol://path/file"
+    builder.id = builder_id
+    builder.id = TypeURI(builder_id)
+    with pytest.raises(ValueError) as invalid_builder_id:
+        builder.id = None
+    assert "Invalid URI None" in invalid_builder_id.value.args[0]
 
 
 def test_builder_load_dict() -> None:
@@ -332,6 +339,20 @@ def test_buildmetadata_init() -> None:
         BuildMetadata(
             invocation_id=invocation_id, started_on=None, finished_on=finish_time
         )
+    assert "Invalid timestamp type" in invalid_timestamp_type.value.args[0]
+    # Set start and finish times with datetime, string or invalid values.
+    test_time: str = "2025-04-16T07:32:19Z"
+    bm.started_on = test_time
+    bm.started_on = date_parser.parse(test_time)
+    with pytest.raises(TypeError) as invalid_timestamp_type:
+        # noinspection PyTypeChecker
+        bm.started_on = None
+    assert "Invalid timestamp type" in invalid_timestamp_type.value.args[0]
+    bm.finished_on = test_time
+    bm.finished_on = date_parser.parse(test_time)
+    with pytest.raises(TypeError) as invalid_timestamp_type:
+        # noinspection PyTypeChecker
+        bm.finished_on = None
     assert "Invalid timestamp type" in invalid_timestamp_type.value.args[0]
 
 
