@@ -256,8 +256,10 @@ class SystemInfo:
                             version = "2016"
                         elif build_number < 20348:
                             version = "2019"
-                        else:
+                        elif build_number < 26100:
                             version = "2022"
+                        else:
+                            version = "2025"
                     else:
                         if build_number > 22000:
                             version = "11"
