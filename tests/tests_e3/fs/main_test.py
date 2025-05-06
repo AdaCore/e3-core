@@ -433,6 +433,40 @@ def test_sync_tree_links():
         assert f.read() == "content"
 
 
+def test_sync_tree_top_source_is_link():
+    """Check handling of source top is a link."""
+    e3.fs.mkdir("a")
+    with open("a/content", "w") as f:
+        f.write("content")
+
+    try:
+        # Symlinks are supported on Windows, but the user must have sufficient
+        # permissions.
+        os.symlink(
+            os.path.join(os.getcwd(), "a"),
+            os.path.join(os.getcwd(), "b"),
+            target_is_directory=True,
+        )
+    except Exception as e:
+        if sys.platform == "win32":
+            pytest.skip("Insufficient permissions to create symbolic links on Windows")
+        else:
+            raise e
+
+    # Sync tree in "c", source top is "b", which is a symlink to "a".
+    e3.fs.mkdir("c")
+    e3.fs.sync_tree(
+        os.path.join(os.getcwd(), "b"),
+        os.path.join(os.getcwd(), "c", "a"),
+        preserve_timestamps=False,
+    )
+
+    # Make sure "c/a" is not a symlink
+    assert not os.path.islink(os.path.join(os.getcwd(), "c", "a"))
+    with open("c/a/content") as f:
+        assert f.read() == "content"
+
+
 def test_sync_tree_does_not_exist():
     """Check error message when sync_tree source does not exist."""
     with pytest.raises(e3.fs.FSError) as err:
