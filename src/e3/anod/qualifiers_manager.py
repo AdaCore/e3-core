@@ -9,8 +9,11 @@ import re
 
 
 if TYPE_CHECKING:
-    from typing import Iterable
+    from typing import AbstractSet, TypeAlias
     from e3.anod.spec import Anod
+
+    QualifierValue: TypeAlias = str | bool | AbstractSet[str]
+    """Possible types for a qualifier value."""
 
 
 VALID_NAME = re.compile(r"^[a-zA-Z0-9_.+-]+$")
@@ -70,7 +73,7 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
         )
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """Return default value for qualifier.
 
         :return: if None is returned it means the qualifier has not
@@ -79,15 +82,11 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
         return None  # all: no cover
 
     @abc.abstractmethod
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """Compute the value of qualifier given the user input."""
 
     @abc.abstractmethod
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """Compute a string representation of a qualifier.
 
         :param value: the effective value associated with the qualifier
@@ -146,13 +145,11 @@ class KeyValueDeclaration(QualifierDeclaration):
         self._default = default
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """See QualifierDeclaration.default."""
         return self._default
 
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """See QualifierDeclaration.value."""
         # Temporary until full switch to dict
         if isinstance(value, bool):
@@ -172,9 +169,7 @@ class KeyValueDeclaration(QualifierDeclaration):
             )
         return value
 
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
         if not value:
             # An empty value for a key_value qualifier should lead to an empty
@@ -213,13 +208,11 @@ class TagDeclaration(QualifierDeclaration):
     """Tag qualifier declaration."""
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """See QualifierDeclaration.value."""
         return False
 
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """See QualifierDeclaration.value."""
         # As soon as a tag qualifier is passed, its value is True
         if isinstance(value, str):
@@ -234,9 +227,7 @@ class TagDeclaration(QualifierDeclaration):
                 f"requires a str, bool or None value, got {type(value)}({value})"
             )
 
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
         if hash_pool is not None and self.repr_in_hash:
             if value:
@@ -303,13 +294,11 @@ class KeySetDeclaration(QualifierDeclaration):
         )
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """See QualifierDeclaration.default."""
         return self._default
 
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """See QualifierDeclaration.value."""
         if isinstance(value, bool):
             raise AnodError(
@@ -361,9 +350,7 @@ class KeySetDeclaration(QualifierDeclaration):
 
         return value_set
 
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
         assert isinstance(value, frozenset)
         if not value:
@@ -439,20 +426,16 @@ class QualifiersManager:
         # to be checked and prepared (add the default values...) before being actually
         # usable. The keys are the components names and the values are the dictionary
         # representing the corresponding qualifier configuration.
-        self.component_decls: dict[str, tuple[dict[str, str], bool]] = {}
+        self.component_decls: dict[str, tuple[dict[str, QualifierValue], bool]] = {}
 
         # Hold the declared components. The keys are the qualifier configurations
         # (tuples) and the value are the component names.
         # It is construct by end_declaration_phase using raw_component_decls.
-        self.component_names: dict[
-            tuple[tuple[str, str | bool | frozenset[str]], ...], str
-        ] = {}
-        self.build_space_names: dict[
-            tuple[tuple[str, str | bool | frozenset[str]], ...], str
-        ] = {}
+        self.component_names: dict[tuple[tuple[str, QualifierValue], ...], str] = {}
+        self.build_space_names: dict[tuple[tuple[str, QualifierValue], ...], str] = {}
 
         # Hold the final qualifier values for anod_instance.
-        self.qualifier_values: dict[str, str | bool | frozenset[str]] = {}
+        self.qualifier_values: dict[str, QualifierValue] = {}
 
         # When the first name has been generated it is no longer possible to add
         # neither new qualifiers nor new components.
@@ -681,7 +664,7 @@ class QualifiersManager:
     def declare_component(
         self,
         name: str,
-        required_qualifier_configuration: dict[str, str],
+        required_qualifier_configuration: dict[str, QualifierValue],
     ) -> None:
         """Declare a new component.
 
@@ -707,7 +690,7 @@ class QualifiersManager:
     def declare_build_space_name(
         self,
         name: str,
-        required_qualifier_configuration: dict[str, str],
+        required_qualifier_configuration: dict[str, QualifierValue],
         has_component: bool = False,
     ) -> None:
         """Declare a new component.
@@ -722,6 +705,7 @@ class QualifiersManager:
         :param name: A string representing the component name.
         :param required_qualifier_configuration: The dictionary of qualifiers
             value corresponding to the build linked to the component.
+        :param has_component: Ture if this build space name defines a component.
         """
         if self.is_declaration_phase_finished:
             raise AnodError(
@@ -740,8 +724,8 @@ class QualifiersManager:
 
     def compute_qualifier_values(
         self,
-        qualifier_dict: dict[str, str],
-    ) -> dict[str, str | bool | frozenset[str]]:
+        qualifier_dict: dict[str, QualifierValue],
+    ) -> dict[str, QualifierValue]:
         """Given a user qualifier dict compute and validate final values.
 
         :param qualifier_dict: User qualifiers
@@ -806,8 +790,8 @@ class QualifiersManager:
         return result
 
     def serialize_qualifier_values(
-        self, qualifier_values: dict[str, str | bool | frozenset[str]]
-    ) -> tuple[tuple[str, str | bool | frozenset[str]], ...]:
+        self, qualifier_values: dict[str, QualifierValue]
+    ) -> tuple[tuple[str, QualifierValue], ...]:
         """Return a hashable and deterministic representation of qualifier values.
 
         :param qualifier_values: qualifier values as returned by
@@ -816,7 +800,7 @@ class QualifiersManager:
         """
         return tuple(sorted(qualifier_values.items()))
 
-    def parse(self, user_qualifiers: dict[str, str]) -> None:
+    def parse(self, user_qualifiers: dict[str, QualifierValue]) -> None:
         """Parse the provided qualifiers.
 
         This function first makes sure that all the user_qualifiers
@@ -930,7 +914,7 @@ class QualifiersManager:
 
         self.build_space_name = "_".join([el for el in bs if el])
 
-    def __getitem__(self, key: str) -> str | bool | frozenset[str]:
+    def __getitem__(self, key: str) -> QualifierValue:
         """Return the parsed value of the requested qualifier.
 
         :return: The qualifier value after the parsing.

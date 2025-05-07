@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from typing import Any, IO, Literal, Union, Iterable
     from collections.abc import Callable, Sequence
     from e3.anod.buildspace import BuildSpace
+    from e3.anod.qualifiers_manager import QualifierValue
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
     from e3.os.process import DEVNULL_VALUE, PIPE_VALUE
@@ -624,7 +625,7 @@ class Anod:
         elif key.isupper():
             return getattr(self.build_space, key.lower(), None)
 
-    def get_qualifier(self, qualifier_name: str) -> str | bool | frozenset[str] | None:
+    def get_qualifier(self, qualifier_name: str) -> QualifierValue | None:
         """Return a qualifier value.
 
         Requires that qualifiers_manager attribute has been initialized and its parse

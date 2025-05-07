@@ -418,31 +418,44 @@ def test_qualifiers_manager():
         enable_name_generator = True
         base_name = "my_spec"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
-            qualifiers_manager.declare_tag_qualifier(
+        def declare_qualifiers_and_components(self, qualifiers_mgr):
+            qualifiers_mgr.declare_tag_qualifier(
                 name="debug",
                 description="State if the build must be done in debug mode.",
             )
 
-            qualifiers_manager.declare_key_value_qualifier(
+            qualifiers_mgr.declare_tag_qualifier(
+                name="static",
+                description="State if the build must be done with static libraries.",
+            )
+
+            qualifiers_mgr.declare_key_value_qualifier(
                 name="version",
                 description="State the version of the component to be build",
                 default="1.2",
                 repr_omit_key=True,
             )
 
-            qualifiers_manager.declare_component(
+            qualifiers_mgr.declare_component(
                 "my_spec",
                 {
                     "version": "1.3",
                 },
             )
 
-            qualifiers_manager.declare_component(
+            qualifiers_mgr.declare_component(
                 "my_spec_debug",
                 {
                     "version": "1.3",
                     "debug": "",
+                },
+            )
+
+            qualifiers_mgr.declare_component(
+                "my_spec_static",
+                {
+                    "version": "1.3",
+                    "static": True,
                 },
             )
 
@@ -457,6 +470,10 @@ def test_qualifiers_manager():
     anod_component_3 = AnodComponent("version=1.3", kind="build")
     assert anod_component_3.build_space_name == "my_spec"
     assert anod_component_3.component == "my_spec"
+
+    anod_component_4 = AnodComponent("version=1.3,static=True", kind="build")
+    assert anod_component_4.build_space_name == "my_spec_static"
+    assert anod_component_4.component == "my_spec_static"
 
     # test_only qualifier
     class AnodTestOnly(Anod):
