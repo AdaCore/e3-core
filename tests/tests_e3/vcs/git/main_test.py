@@ -63,7 +63,7 @@ def test_git_repo(git):
         ),
     )
 
-    repo.git_cmd(["add", "new.txt"])
+    repo.git_cmd(["-c", "core.safecrlf=false", "add", "new.txt"])
     repo.git_cmd(["config", "user.email", "e3-core@example.net"])
     repo.git_cmd(["config", "user.name", "e3 core"])
     repo.git_cmd(["commit", "-m", "new file"])
