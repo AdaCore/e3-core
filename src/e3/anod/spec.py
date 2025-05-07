@@ -624,6 +624,11 @@ class Anod:
         # Then check if the key (in lowercase) is in the build_space
         elif key.isupper():
             return getattr(self.build_space, key.lower(), None)
+        # .. todo:: Raise an error when the item does not exist. Meanwhile,
+        #           explicitly return `None`.
+        # raise KeyError(f"Invalid key {key!r} for object {self.__class__.__name__}")
+
+        return None
 
     def get_qualifier(self, qualifier_name: str) -> QualifierValue | None:
         """Return a qualifier value.

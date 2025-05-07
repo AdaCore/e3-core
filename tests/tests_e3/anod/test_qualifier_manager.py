@@ -147,7 +147,7 @@ def test_qualifiers_manager_errors():
     qualifiers_manager.declare_tag_qualifier(name="foo", description="bar")
 
     # Qualifier with empty description
-    qualifiers_manager = QualifiersManager(anod_dummy)
+    QualifiersManager(anod_dummy)
 
     # Qualifier with empty repr_alias
     qualifiers_manager = QualifiersManager(anod_dummy)
@@ -197,7 +197,7 @@ def test_qualifiers_manager_errors():
     qualifiers_manager = QualifiersManager(anod_dummy)
     qualifiers_manager.declare_key_value_qualifier(
         name="mandatory_qual",
-        description="some manadatory qualifier",
+        description="some mandatory qualifier",
     )
     with pytest.raises(AnodError) as err:
         qualifiers_manager.parse({})
@@ -310,6 +310,8 @@ def test_qualifiers_manager_errors():
     # Call value with something else that a str
     qualifiers_manager = QualifiersManager(Anod("", kind="build"))
     with pytest.raises(AnodError) as err:
+        # This is an intended invalid parameter type, no need to typecheck here.
+        # noinspection PyTypeChecker
         qualifiers_manager.declare_key_set_qualifier(
             name="q1",
             description="???",
@@ -325,10 +327,14 @@ def test_qualifiers_manager_errors():
     key_value = KeyValueDeclaration(origin="origin", name="q1", description="???")
 
     with pytest.raises(AnodError) as err:
+        # Intended value type error, disable type checker here.
+        # noinspection PyTypeChecker
         key_set.value(1)
     assert "origin: Invalid value for qualifier q1" in str(err.value)
 
     with pytest.raises(AnodError) as err:
+        # Intended value type error, disable type checker here.
+        # noinspection PyTypeChecker
         key_value.value(1)
     assert "origin: Invalid value for qualifier q1" in str(err.value)
 
@@ -338,12 +344,12 @@ def test_qualifiers_manager():
         enable_name_generator = True
         base_name = "simple"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
-            qualifiers_manager.declare_tag_qualifier(
+        def declare_qualifiers_and_components(self, qualifiers_mgr):
+            qualifiers_mgr.declare_tag_qualifier(
                 name="debug",
                 description="debug",
             )
-            qualifiers_manager.declare_key_value_qualifier(
+            qualifiers_mgr.declare_key_value_qualifier(
                 name="foo",
                 description="foo",
                 default="dval",
@@ -361,15 +367,15 @@ def test_qualifiers_manager():
         enable_name_generator = True
         base_name = "my_spec"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_mgr):
             # Add the "debug" qualifier
-            qualifiers_manager.declare_tag_qualifier(
+            qualifiers_mgr.declare_tag_qualifier(
                 name="debug",
                 description="State if the build must be done in debug mode.",
             )
 
             # Add the "version" qualifier
-            qualifiers_manager.declare_key_value_qualifier(
+            qualifiers_mgr.declare_key_value_qualifier(
                 name="version",
                 description="State the version of the component to be build",
                 choices=["1.2"],
@@ -377,7 +383,7 @@ def test_qualifiers_manager():
             )
 
             # Add the "path" qualifier
-            qualifiers_manager.declare_key_value_qualifier(
+            qualifiers_mgr.declare_key_value_qualifier(
                 name="path",
                 description="The first path.",
                 repr_in_hash=True,
@@ -385,7 +391,7 @@ def test_qualifiers_manager():
             )
 
             # Add the "path_bis" qualifier
-            qualifiers_manager.declare_key_value_qualifier(
+            qualifiers_mgr.declare_key_value_qualifier(
                 name="path_bis",
                 description="A second path.",
                 repr_in_hash=True,
@@ -480,19 +486,19 @@ def test_qualifiers_manager():
         enable_name_generator = True
         base_name = "my_spec"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
-            qualifiers_manager.declare_key_value_qualifier(
+        def declare_qualifiers_and_components(self, qualifiers_mgr):
+            qualifiers_mgr.declare_key_value_qualifier(
                 name="foo",
                 description="foo",
                 test_only=True,
             )
 
-            qualifiers_manager.declare_tag_qualifier(
+            qualifiers_mgr.declare_tag_qualifier(
                 name="bar",
                 description="foo",
             )
 
-            qualifiers_manager.declare_component(
+            qualifiers_mgr.declare_component(
                 "baz",
                 {},
             )
@@ -684,7 +690,7 @@ def test_key_set_qualifier():
             qualifiers_manager.declare_key_set_qualifier(
                 name="q5",
                 description="???",
-                default={},
+                default=set(),
                 repr_in_hash=True,
                 choices=["1", "2"],
             )
