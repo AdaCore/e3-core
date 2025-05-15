@@ -240,6 +240,7 @@ class PlanContext:
         entry_point_name: str,
         verify: bool = False,
         entry_point_parameters: dict | None = None,
+        symbols: dict[str, Any] | None = None,
     ) -> list[PlanActionEnv]:
         """Execute a plan.
 
@@ -250,9 +251,14 @@ class PlanContext:
             electrolyt entry point
         :param entry_point_parameters: parameters passed as keyword arguments
             to the entry point
+        :param symbols: any additional symbols (global variable, types, object,
+            function, and so on) that should be made available to the plan module.
         :raise: PlanError
         :return: a list of plan actions
         """
+        if symbols:
+            plan.mod.__dict__.update(symbols)
+
         # Give access to some useful data during plan execution
         plan.mod.__dict__["env"] = self.env
         plan.mod.__dict__["default_env"] = self.default_env
