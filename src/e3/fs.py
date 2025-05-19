@@ -608,10 +608,10 @@ def sync_tree(
         in source
     :param preserve_timestamps: if True preserve original timestamps.
         If False updated files get their timestamps set to current time.
-    :param delete_ignore: if True files that are explicitely ignored
+    :param delete_ignore: if True files that are explicitly ignored
         are deleted. Note delete should be set to True in that case.
     """
-    # Some structure used when walking the trees to be synched
+    # Some structure used when walking the trees to be synced
     FilesInfo = namedtuple("FilesInfo", ["rel_path", "source", "target"])
 
     # The basename in the FileInfo structure is used to compare casing of
