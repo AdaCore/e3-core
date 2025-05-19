@@ -2,12 +2,8 @@ from __future__ import annotations
 
 import json
 import requests
-from typing import TYPE_CHECKING
 
 from e3.log import getLogger
-
-if TYPE_CHECKING:
-    from typing import Any
 
 logger = getLogger("e3.npm")
 
@@ -20,7 +16,7 @@ class NPMLink:
         url: str,
         checksum: str,
         *,
-        metadata: dict[str, Any] | None = None,
+        metadata: dict[str, object] | None = None,
     ) -> None:
         """NPM download link metadata.
 
