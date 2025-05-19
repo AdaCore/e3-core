@@ -1056,7 +1056,11 @@ def sync_tree(
 
     # Use realpath here, or a FileNotFoundError is raised instead of an FSError
     # if source does not exist.
-    source_top = os.path.realpath(source_top, strict=True)
+    if Version(python_version()) < Version("3.10"):
+        # Parameter `strict` does not exist.
+        source_top = os.path.realpath(source_top)
+    else:
+        source_top = os.path.realpath(source_top, strict=True)
 
     # Keep track of deleted and updated files
     deleted_list: list[str] = []
