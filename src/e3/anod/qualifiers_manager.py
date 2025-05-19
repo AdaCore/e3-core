@@ -9,8 +9,11 @@ import re
 
 
 if TYPE_CHECKING:
-    from typing import Iterable
+    from typing import AbstractSet, TypeAlias
     from e3.anod.spec import Anod
+
+    QualifierValue: TypeAlias = str | bool | AbstractSet[str]
+    """Possible types for a qualifier value."""
 
 
 VALID_NAME = re.compile(r"^[a-zA-Z0-9_.+-]+$")
@@ -19,7 +22,7 @@ VALID_NAME = re.compile(r"^[a-zA-Z0-9_.+-]+$")
 def check_valid_name(name: str, value_kind: str, origin: str) -> str:
     """Check if a value is a valid qualifier name or component name.
 
-    A valid name is any non empty string containg alphanumeric character, dot,
+    A valid name is any non-empty string containing alphanumeric character, dot,
     dashes and underscores.
 
     :param name: the name to check
@@ -70,28 +73,24 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
         )
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """Return default value for qualifier.
 
-        :return: if None is returned it means the qualifier has not
-            default Value. Otherwise the default value is returned.
+        :return: If ``None`` is returned it means the qualifier has no
+            default value. Otherwise, the default value is returned.
         """
         return None  # all: no cover
 
     @abc.abstractmethod
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """Compute the value of qualifier given the user input."""
 
     @abc.abstractmethod
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """Compute a string representation of a qualifier.
 
         :param value: the effective value associated with the qualifier
-        :param hash_pool: if not None and repr_in_hash is True, the represantion
+        :param hash_pool: if not None and repr_in_hash is True, the representation
             is added to that list. The list is used then to compute a hash and
             thus reduce the build space length.
         :return: the qualifier representation if self.repr_in_hash is False
@@ -146,13 +145,11 @@ class KeyValueDeclaration(QualifierDeclaration):
         self._default = default
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """See QualifierDeclaration.default."""
         return self._default
 
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """See QualifierDeclaration.value."""
         # Temporary until full switch to dict
         if isinstance(value, bool):
@@ -172,9 +169,7 @@ class KeyValueDeclaration(QualifierDeclaration):
             )
         return value
 
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
         if not value:
             # An empty value for a key_value qualifier should lead to an empty
@@ -213,13 +208,11 @@ class TagDeclaration(QualifierDeclaration):
     """Tag qualifier declaration."""
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """See QualifierDeclaration.value."""
         return False
 
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """See QualifierDeclaration.value."""
         # As soon as a tag qualifier is passed, its value is True
         if isinstance(value, str):
@@ -234,9 +227,7 @@ class TagDeclaration(QualifierDeclaration):
                 f"requires a str, bool or None value, got {type(value)}({value})"
             )
 
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
         if hash_pool is not None and self.repr_in_hash:
             if value:
@@ -303,13 +294,11 @@ class KeySetDeclaration(QualifierDeclaration):
         )
 
     @property
-    def default(self) -> str | bool | frozenset[str] | None:
+    def default(self) -> QualifierValue | None:
         """See QualifierDeclaration.default."""
         return self._default
 
-    def value(
-        self, value: str | bool | Iterable[str] | None
-    ) -> str | bool | frozenset[str]:
+    def value(self, value: QualifierValue | None) -> QualifierValue:
         """See QualifierDeclaration.value."""
         if isinstance(value, bool):
             raise AnodError(
@@ -361,9 +350,7 @@ class KeySetDeclaration(QualifierDeclaration):
 
         return value_set
 
-    def repr(
-        self, value: str | bool | frozenset[str], hash_pool: list[str] | None
-    ) -> str:
+    def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
         assert isinstance(value, frozenset)
         if not value:
@@ -389,7 +376,7 @@ class KeySetDeclaration(QualifierDeclaration):
 
 
 class QualifiersManager:
-    """Parse the qualifiers and build an unique name.
+    """Parse the qualifiers and build a unique name.
 
     This class is used to manage the qualifiers, declare the components and generate
     the components and build_space names.
@@ -416,7 +403,7 @@ class QualifiersManager:
 
     This class is also used to generate the build_space name. The build_space name is
     computed using all the declared qualifiers and their values (at runtime).
-    This allow the build_space names to be different for each different builds
+    This allows the build_space names to be different for each different builds
     (assuming that different build <=> different set of qualifier values).
     """
 
@@ -435,24 +422,21 @@ class QualifiersManager:
         # values the qualifier properties.
         self.qualifier_decls: dict[str, QualifierDeclaration] = {}
 
-        # Hold all the declared components as stated by the user. They still need
+        # Holds all the declared components as stated by the user. They still need
         # to be checked and prepared (add the default values...) before being actually
         # usable. The keys are the components names and the values are the dictionary
         # representing the corresponding qualifier configuration.
-        self.component_decls: dict[str, tuple[dict[str, str], bool]] = {}
+        self.component_decls: dict[str, tuple[dict[str, QualifierValue], bool]] = {}
 
-        # Hold the declared components. The keys are the qualifier configurations
+        # Holds the declared components. The keys are the qualifier configurations
         # (tuples) and the value are the component names.
-        # It is construct by end_declaration_phase using raw_component_decls.
-        self.component_names: dict[
-            tuple[tuple[str, str | bool | frozenset[str]], ...], str
-        ] = {}
-        self.build_space_names: dict[
-            tuple[tuple[str, str | bool | frozenset[str]], ...], str
-        ] = {}
+        # It is set by end_declaration_phase using raw_component_decls.
+        self.component_names: dict[tuple[tuple[str, QualifierValue], ...], str] = {}
+        self.build_space_names: dict[tuple[tuple[str, QualifierValue], ...], str] = {}
+        self.serialized_qualifier_values: tuple[tuple[str, QualifierValue], ...] = ()
 
         # Hold the final qualifier values for anod_instance.
-        self.qualifier_values: dict[str, str | bool | frozenset[str]] = {}
+        self.qualifier_values: dict[str, QualifierValue] = {}
 
         # When the first name has been generated it is no longer possible to add
         # neither new qualifiers nor new components.
@@ -461,7 +445,7 @@ class QualifiersManager:
         # The base name to be used by the name generator
         self.base_name: str = self.anod_instance.base_name
 
-        # By default component and build_space_name are None
+        # By default, component and build_space_name are None
         self.component: str | None = None
         self.build_space_name: str = ""
 
@@ -516,7 +500,7 @@ class QualifiersManager:
     ) -> None:
         """Declare a new tag qualifier.
 
-        Declare a tag qualifier to allow it use in the spec. It will have an impact on
+        Declare a tag qualifier to allow its use in the spec. It will have an impact on
         the build_space and component names.
 
         A tag qualifier is a qualifier with an implicit value. Their value is True if
@@ -528,7 +512,7 @@ class QualifiersManager:
             the spec.
         :param description: A description of the qualifier purposes. It is used to
             make the help/error clearer.
-        :param test_only: By default the qualifier are used by all anod actions
+        :param test_only: By default, the qualifier are used by all anod actions
             (install, build, test...). If test_only is True, then this qualifier is
             only available for test.
         :param repr_alias: An alias for the qualifier name used by the name generation.
@@ -565,7 +549,7 @@ class QualifiersManager:
     ) -> None:
         """Declare a new key value qualifier.
 
-        Declare a key value qualifier to allow it use in the spec. It will have an
+        Declare a key value qualifier to allow its use in the spec. It will have an
         impact on the build_space and component names.
 
         A key value qualifier is a 'standard' qualifier. They require the user to
@@ -577,7 +561,7 @@ class QualifiersManager:
             the spec.
         :param description: A description of the qualifier purposes. It is used to
             make the help/error clearer.
-        :param test_only: By default the qualifier are used by all anod actions
+        :param test_only: By default, the qualifier are used by all anod actions
             (install, build, test...). If test_only is True, then this qualifier is
             only available for test.
         :param default: The default value given to the qualifier if no value was
@@ -590,7 +574,7 @@ class QualifiersManager:
             the hash at the end of the generated name. The result is less readable but
             shorter.
         :param repr_omit_key: If True, then the name generation don't display the
-            qualifier name/alias. It only use its value.
+            qualifier name/alias. It only uses its value.
         """
         if self.is_declaration_phase_finished:
             raise AnodError(
@@ -622,11 +606,11 @@ class QualifiersManager:
     ) -> None:
         """Declare a new key set qualifier.
 
-        Declare a key set qualifier to allow it use in the spec. It will have an
+        Declare a key set qualifier to allow its use in the spec. It will have an
         impact on the build_space and component names.
 
         A key set qualifier is a 'list' qualifier. They require the user to
-        provide their values as a semi-colon separated list.
+        provide their values as a semicolon separated list.
 
         This method cannot be called after the end of the declaration phase.
 
@@ -634,7 +618,7 @@ class QualifiersManager:
             the spec.
         :param description: A description of the qualifier purposes. It is used to
             make the help/error clearer.
-        :param test_only: By default the qualifier are used by all anod actions
+        :param test_only: By default, the qualifier are used by all anod actions
             (install, build, test...). If test_only is True, then this qualifier is
             only available for test.
         :param default: The default value given to the qualifier if no value was
@@ -647,7 +631,7 @@ class QualifiersManager:
             the hash at the end of the generated name. The result is less readable but
             shorter.
         :param repr_omit_key: If True, then the name generation don't display the
-            qualifier name/alias. It only use its value.
+            qualifier name/alias. It only uses its value.
         """
         if self.is_declaration_phase_finished:
             raise AnodError(
@@ -681,7 +665,7 @@ class QualifiersManager:
     def declare_component(
         self,
         name: str,
-        required_qualifier_configuration: dict[str, str],
+        required_qualifier_configuration: dict[str, QualifierValue],
     ) -> None:
         """Declare a new component.
 
@@ -698,7 +682,7 @@ class QualifiersManager:
         """
         if self.anod_instance.kind != "test":
             # Components have meaning only for build and install
-            return self.declare_build_space_name(
+            self.declare_build_space_name(
                 name=name,
                 required_qualifier_configuration=required_qualifier_configuration,
                 has_component=True,
@@ -707,7 +691,7 @@ class QualifiersManager:
     def declare_build_space_name(
         self,
         name: str,
-        required_qualifier_configuration: dict[str, str],
+        required_qualifier_configuration: dict[str, QualifierValue],
         has_component: bool = False,
     ) -> None:
         """Declare a new component.
@@ -722,6 +706,7 @@ class QualifiersManager:
         :param name: A string representing the component name.
         :param required_qualifier_configuration: The dictionary of qualifiers
             value corresponding to the build linked to the component.
+        :param has_component: True if this build space name defines a component.
         """
         if self.is_declaration_phase_finished:
             raise AnodError(
@@ -740,8 +725,8 @@ class QualifiersManager:
 
     def compute_qualifier_values(
         self,
-        qualifier_dict: dict[str, str],
-    ) -> dict[str, str | bool | frozenset[str]]:
+        qualifier_dict: dict[str, QualifierValue],
+    ) -> dict[str, QualifierValue]:
         """Given a user qualifier dict compute and validate final values.
 
         :param qualifier_dict: User qualifiers
@@ -756,7 +741,7 @@ class QualifiersManager:
 
         # Check that all qualifiers passed by the user are declared. Note that if we
         # have in qualifier_dict an entry with key is the null string we ignore it.
-        # This case can occurs when the qualifier string contains additionals commas.
+        # This case can occur when the qualifier string contains additional commas.
         invalid_keys = {k for k in qualifier_dict if k} - set(
             self.qualifier_decls.keys()
         )
@@ -805,9 +790,10 @@ class QualifiersManager:
 
         return result
 
+    @staticmethod
     def serialize_qualifier_values(
-        self, qualifier_values: dict[str, str | bool | frozenset[str]]
-    ) -> tuple[tuple[str, str | bool | frozenset[str]], ...]:
+        qualifier_values: dict[str, QualifierValue]
+    ) -> tuple[tuple[str, QualifierValue], ...]:
         """Return a hashable and deterministic representation of qualifier values.
 
         :param qualifier_values: qualifier values as returned by
@@ -816,7 +802,7 @@ class QualifiersManager:
         """
         return tuple(sorted(qualifier_values.items()))
 
-    def parse(self, user_qualifiers: dict[str, str]) -> None:
+    def parse(self, user_qualifiers: dict[str, QualifierValue]) -> None:
         """Parse the provided qualifiers.
 
         This function first makes sure that all the user_qualifiers
@@ -826,7 +812,7 @@ class QualifiersManager:
         * Have a value which respect the choices attribute.
 
         After the first call to this method, it is no longer possible to declare new
-        component nor qualifier. This ensure the consistency of the generated names.
+        component nor qualifier. This ensures the consistency of the generated names.
 
         After the call to parse, the qualifier_values are available using
         __getparsed_qualifiers.
@@ -886,7 +872,7 @@ class QualifiersManager:
             all qualifiers.
          * hash: The hash of the aggregation of all qualifiers marked with
             'repr_in_hash'.
-         * test: '-test' if the current anod primitive is test.
+         * test: '-test' if the current anod primitive is `test`.
 
         If the generated component is not None, then use it for consistency reason.
         """
@@ -907,6 +893,9 @@ class QualifiersManager:
         ]
         if hash_pool:
             hash_obj = sha1()  # nosec
+            # update() method does not implement Buffer. Ignore type checking
+            # here.
+            # noinspection PyTypeChecker
             hash_obj.update("_".join(hash_pool).encode("utf-8"))
             bs.append(hash_obj.hexdigest()[:8])
 
@@ -930,7 +919,7 @@ class QualifiersManager:
 
         self.build_space_name = "_".join([el for el in bs if el])
 
-    def __getitem__(self, key: str) -> str | bool | frozenset[str]:
+    def __getitem__(self, key: str) -> QualifierValue:
         """Return the parsed value of the requested qualifier.
 
         :return: The qualifier value after the parsing.
