@@ -9,6 +9,8 @@ import e3.fs
 import e3.hash
 import e3.os.fs
 
+from e3.os.process import Run
+
 import pytest
 
 
@@ -431,6 +433,36 @@ def test_sync_tree_links():
 
     with open("b/link") as f:
         assert f.read() == "content"
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="test using Windows mklink")
+def test_sync_tree_dir_links() -> None:
+    """Check handling of symbolic directory links in sync_tree.
+
+    This test is Windows specific, and aims only at making sure issue
+    https://github.com/AdaCore/e3-core/issues/738 is fixed.
+    """
+    e3.fs.mkdir("a/b")
+    # Create a directory symlink with `mklink /D`, and make sure it is listed
+    # as a <SYMLINKD> by the `DIR` command.
+    os.chdir("a")
+    mklink_process = Run(["CMD", "/C", "MKLINK /D c b"])
+    os.chdir("..")
+
+    if mklink_process.status != 0:
+        pytest.skip("Insufficient permissions to create symbolic links on Windows")
+
+    dir_process: Run = Run(["CMD", "/C", "DIR a"])
+    assert "<SYMLINKD>" in dir_process.out
+
+    # Sync trees.
+    e3.fs.sync_tree("a", "d", preserve_timestamps=False)
+
+    # Make sure the <SYMLINKD> type has been created, and not transformed
+    # into a file symlink as stated by
+    # https://github.com/AdaCore/e3-core/issues/738
+    dir_process = Run(["CMD", "/C", "DIR d"])
+    assert "<SYMLINKD>" in dir_process.out
 
 
 def test_sync_tree_top_source_is_link():
