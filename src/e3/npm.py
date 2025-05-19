@@ -2,26 +2,42 @@ from __future__ import annotations
 
 import json
 import requests
+from typing import TYPE_CHECKING
 
 from e3.log import getLogger
+
+if TYPE_CHECKING:
+    from typing import Any
 
 logger = getLogger("e3.npm")
 
 
 class NPMLink:
-    def __init__(self, name: str, version: str, url: str, checksum: str) -> None:
+    def __init__(
+        self,
+        name: str,
+        version: str,
+        url: str,
+        checksum: str,
+        *,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
         """NPM download link metadata.
 
         :param name: The package name
         :param version: The package version
         :param url: The download url
         :param checksum: The sha1 checksum of the package
+        :param metadata: The NPM metadata for this package.
+            This field contains the metadata as returned by
+            https://registry.npmjs.org/<YOUR PACKAGE>/<YOUR PACKAGE VERSION>.
         """
         self.filename = f"{name}-{version}.tgz"
         self.package_name = name
         self.version = version
         self.url = url
         self.checksum = checksum
+        self.metadata = metadata
 
 
 class NPMLinksParser:
@@ -59,6 +75,7 @@ class NPMLinksParser:
                     version,
                     dist["tarball"],
                     dist["shasum"],
+                    metadata=val,
                 )
             )
         return self
