@@ -608,10 +608,10 @@ def sync_tree(
         in source
     :param preserve_timestamps: if True preserve original timestamps.
         If False updated files get their timestamps set to current time.
-    :param delete_ignore: if True files that are explicitely ignored
+    :param delete_ignore: if True files that are explicitly ignored
         are deleted. Note delete should be set to True in that case.
     """
-    # Some structure used when walking the trees to be synched
+    # Some structure used when walking the trees to be synced
     FilesInfo = namedtuple("FilesInfo", ["rel_path", "source", "target"])
 
     # The basename in the FileInfo structure is used to compare casing of
@@ -1056,7 +1056,11 @@ def sync_tree(
 
     # Use realpath here, or a FileNotFoundError is raised instead of an FSError
     # if source does not exist.
-    source_top = os.path.realpath(source_top, strict=True)
+    if Version(python_version()) < Version("3.10"):
+        # Parameter `strict` does not exist.
+        source_top = os.path.realpath(source_top)
+    else:
+        source_top = os.path.realpath(source_top, strict=True)
 
     # Keep track of deleted and updated files
     deleted_list: list[str] = []

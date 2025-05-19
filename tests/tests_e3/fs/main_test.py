@@ -9,6 +9,8 @@ import e3.fs
 import e3.hash
 import e3.os.fs
 
+from e3.os.process import Run
+
 import pytest
 
 
@@ -40,11 +42,11 @@ def test_cp():
     assert "can't find files matching" in str(err.value)
 
     with pytest.raises(e3.fs.FSError) as err:
-        e3.fs.cp([a1, b1], dest2)
+        e3.fs.cp([a1, b1], dest2)  # type: ignore[arg-type]
     assert "target should be a directory" in str(err.value)
 
     e3.fs.mkdir(dest2)
-    e3.fs.cp([a1, b1], dest2)
+    e3.fs.cp([a1, b1], dest2)  # type: ignore[arg-type]
     assert os.path.exists(os.path.join(dest2, "a1"))
     assert os.path.exists(os.path.join(dest2, "b1"))
 
@@ -114,17 +116,17 @@ def test_mv_with_iterables():
         e3.os.fs.touch(f"a{idx}")
 
     def star(d):
-        for idx in range(10):
-            yield f"{d}{idx}"
+        for star_idx in range(10):
+            yield f"{d}{star_idx}"
 
     e3.fs.mkdir("dst")
     e3.fs.mv(star("a"), "dst")
     for idx in range(10):
-        assert os.path.exists(os.path.join("dst", (f"a{idx}")))
+        assert os.path.exists(os.path.join("dst", f"a{idx}"))
 
     def dst_star(d):
-        for idx in range(10):
-            yield Path("dst") / f"{d}{idx}"
+        for dst_star_idx in range(10):
+            yield Path("dst") / f"{d}{dst_star_idx}"
 
     assert e3.fs.ls(dst_star("a")) == [
         os.path.join("dst", f"a{idx}") for idx in range(10)
@@ -132,11 +134,11 @@ def test_mv_with_iterables():
 
     e3.fs.rm(dst_star("a"))
     for idx in range(10):
-        assert not os.path.exists(os.path.join("dst", (f"a{idx}")))
+        assert not os.path.exists(os.path.join("dst", f"a{idx}"))
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
-def test_cp_symplink():
+def test_cp_symlink():
     e3.os.fs.touch("c")
     os.symlink("c", "c_sym")
     e3.fs.cp("c_sym", "d", preserve_symlinks=True)
@@ -261,7 +263,7 @@ def test_tree_state():
     state3 = e3.fs.get_filetree_state(current_dir)
     assert state2 == state3
 
-    # To ensure that file system resolution is not hidding
+    # To ensure that file system resolution is not hiding
     # changes
     time.sleep(2)
 
@@ -420,7 +422,7 @@ def test_sync_tree_no_delete():
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
 def test_sync_tree_links():
-    """Check handling of symbolink links in sync_tree."""
+    """Check handling of symbolic links in sync_tree."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
     e3.fs.mkdir("c")
@@ -431,6 +433,36 @@ def test_sync_tree_links():
 
     with open("b/link") as f:
         assert f.read() == "content"
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="test using Windows mklink")
+def test_sync_tree_dir_links() -> None:
+    """Check handling of symbolic directory links in sync_tree.
+
+    This test is Windows specific, and aims only at making sure issue
+    https://github.com/AdaCore/e3-core/issues/738 is fixed.
+    """
+    e3.fs.mkdir("a/b")
+    # Create a directory symlink with `mklink /D`, and make sure it is listed
+    # as a <SYMLINKD> by the `DIR` command.
+    os.chdir("a")
+    mklink_process = Run(["CMD", "/C", "MKLINK /D c b"])
+    os.chdir("..")
+
+    if mklink_process.status != 0:
+        pytest.skip("Insufficient permissions to create symbolic links on Windows")
+
+    dir_process: Run = Run(["CMD", "/C", "DIR a"])
+    assert "<SYMLINKD>" in dir_process.out
+
+    # Sync trees.
+    e3.fs.sync_tree("a", "d", preserve_timestamps=False)
+
+    # Make sure the <SYMLINKD> type has been created, and not transformed
+    # into a file symlink as stated by
+    # https://github.com/AdaCore/e3-core/issues/738
+    dir_process = Run(["CMD", "/C", "DIR d"])
+    assert "<SYMLINKD>" in dir_process.out
 
 
 def test_sync_tree_top_source_is_link():
@@ -461,7 +493,7 @@ def test_sync_tree_top_source_is_link():
         preserve_timestamps=False,
     )
 
-    # Make sure "c/a" is not a symlink
+    # Make sure `c/a` is not a symlink
     assert not os.path.islink(os.path.join(os.getcwd(), "c", "a"))
     with open("c/a/content") as f:
         assert f.read() == "content"
