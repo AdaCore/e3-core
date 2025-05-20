@@ -28,8 +28,12 @@ class NPMLink:
             This field contains the metadata as returned by
             https://registry.npmjs.org/<YOUR PACKAGE>/<YOUR PACKAGE VERSION>.
         """
-        self.filename = f"{name}-{version}.tgz"
-        self.package_name = name
+        pkg_scope, pkg_name = name.rsplit("/", 1)
+
+        self.name = name
+        self.filename = f"{pkg_name}-{version}.tgz"
+        self.package_name = pkg_name
+        self.package_scope = pkg_scope
         self.version = version
         self.url = url
         self.checksum = checksum
