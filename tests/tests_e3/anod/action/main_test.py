@@ -83,6 +83,9 @@ def test_initall():
     upload_source = action.UploadSourceComponent(data=build_spec)
     assert str(upload_source).startswith("upload source metadata of ")
 
+    check_virus = action.CheckVirus(data=build_spec)
+    assert str(check_virus).startswith("check for viruses in ")
+
     a_decision = action.CreateSourceOrDownload(
         root=root, left=create_source, right=download_source
     )

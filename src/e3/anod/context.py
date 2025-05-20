@@ -22,6 +22,7 @@ from e3.anod.action import (
     UploadBinaryComponent,
     UploadSource,
     UploadSourceComponent,
+    CheckVirus,
 )
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
@@ -398,8 +399,10 @@ class AnodContext:
                 spec = build_action.data
                 if spec.component is not None and upload:
                     upload_bin: UploadBinaryComponent | UploadSourceComponent
+                    check_virus: None | CheckVirus = None
                     if spec.has_package:
                         upload_bin = UploadBinaryComponent(spec)
+                        check_virus = CheckVirus(spec)
                     else:
                         upload_bin = UploadSourceComponent(spec)
                     self.add(upload_bin)
@@ -410,7 +413,12 @@ class AnodContext:
                             plan_line=plan_line,
                             plan_args=plan_args,
                         )
-                    self.connect(self.root, upload_bin)
+                    if check_virus:
+                        self.add(check_virus)
+                        self.connect(self.root, check_virus)
+                        self.connect(check_virus, upload_bin)
+                    else:
+                        self.connect(self.root, upload_bin)
                     self.connect(upload_bin, build_action)
 
         elif primitive == "install":
@@ -961,7 +969,7 @@ class AnodContext:
             for which a decision should be taken
         """
         rev = self.tree.reverse_graph(enable_checks=False)
-        uploads: list[tuple[Upload, frozenset[VertexID]]] = []
+        uploads: list[tuple[Upload | CheckVirus, frozenset[VertexID], bool]] = []
         dag = DAG()
 
         # Retrieve existing tags
@@ -981,8 +989,14 @@ class AnodContext:
                 # to apply the triggers based on the current list of scheduled
                 # actions.
                 action.apply_triggers(dag)
-            elif isinstance(action, Upload):
-                uploads.append((action, self.tree.get_predecessors(uid)))
+            elif isinstance(action, (Upload, CheckVirus)):
+                uploads.append(
+                    (
+                        action,
+                        self.tree.get_predecessors(uid),
+                        "root" in self.tree.get_successors(uid),
+                    )
+                )
             else:
                 if TYPE_CHECKING:
                     assert isinstance(action, Action)
@@ -1057,15 +1071,24 @@ class AnodContext:
                                 a, predecessors=[uid], enable_checks=False
                             )
 
-        # Handle Upload nodes. Add the node only if all predecessors
-        # are scheduled.
-        for action, predecessors in uploads:
-            if len([p for p in predecessors if p not in dag]) == 0:
+        # Handle uploads related nodes.
+        # Upload nodes were added to the uploads list from a reverse DAG, we
+        # have to reverse the list to have the correct sequence.
+        uploads.reverse()
+        for upload_action, predecessors, connect_to_root in uploads:
+            # Add the node only if all predecessors are scheduled.
+            p_not_in_dag = [p for p in predecessors if p not in dag]
+            if len(p_not_in_dag) == 0:
                 dag.update_vertex(
-                    action.uid, action, predecessors=predecessors, enable_checks=False
+                    upload_action.uid,
+                    upload_action,
+                    predecessors=predecessors,
+                    enable_checks=False,
                 )
-                # connect upload to the root node
-                dag.update_vertex(
-                    "root", predecessors=[action.uid], enable_checks=False
-                )
+                # Last action of the uploads should be connected to the dag's root.
+                if connect_to_root:
+                    dag.update_vertex(
+                        "root", predecessors=[upload_action.uid], enable_checks=False
+                    )
+
         return dag

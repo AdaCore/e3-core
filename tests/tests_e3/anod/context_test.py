@@ -137,14 +137,15 @@ class TestContext:
         # declared
         ac = self.create_context()
         ac.add_anod_action("spec3", env=ac.default_env, primitive="build")
-        assert len(ac.tree) == 6, ac.tree.as_dot()
+        assert len(ac.tree) == 7, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 4, result.as_dot()
+        assert len(result) == 5, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec3.build",
             "x86-linux.spec3.install",
             "x86-linux.spec3.upload_bin",
+            "x86-linux.spec3.check_virus",
         }
 
     def test_add_anod_action4(self):
@@ -153,14 +154,15 @@ class TestContext:
         #   build primitive
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="build")
-        assert len(ac.tree) == 6, ac.tree.as_dot()
+        assert len(ac.tree) == 7, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 4, result.as_dot()
+        assert len(result) == 5, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec4.build",
             "x86-linux.spec4.install",
             "x86-linux.spec4.upload_bin",
+            "x86-linux.spec4.check_virus",
         }
 
     def test_add_anod_action4_2(self):
