@@ -415,6 +415,12 @@ class AnodContext:
                         )
                     if check_virus:
                         self.add(check_virus)
+                        if plan_line is not None and plan_args is not None:
+                            self.link_to_plan(
+                                vertex_id=check_virus.uid,
+                                plan_line=plan_line,
+                                plan_args=plan_args,
+                            )
                         self.connect(self.root, check_virus)
                         self.connect(check_virus, upload_bin)
                     else:
