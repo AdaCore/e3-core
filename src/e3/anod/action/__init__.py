@@ -359,6 +359,29 @@ class UploadSource(Upload):
         return f"upload source {self.source_name}"
 
 
+class CheckVirus(Action):
+    """CheckVirus Action.
+
+    Check virus on uploaded component.
+    """
+
+    __slots__ = ("uid", "data", "anod_instance")
+
+    def __init__(self, data: Anod):
+        """Initialize a CheckVirus object.
+
+        :param data: Anod instance
+        """
+        data_uid = data.uid.split(".")
+        data_uid[-1] = "check_virus"
+        uid = ".".join(data_uid)
+        super().__init__(uid=uid, data=data)
+        self.anod_instance = data
+
+    def __str__(self) -> str:
+        return f"check for viruses in {self.uid.rsplit('.', 1)[0]}"
+
+
 class Decision(Action, metaclass=abc.ABCMeta):
     """Decision Action.
 
