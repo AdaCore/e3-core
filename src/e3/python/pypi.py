@@ -172,9 +172,10 @@ class PyPILink:
 class PyPILinksParser(HTMLParser):
     """HTML parser to parse links from the PyPI simple API."""
 
-    def __init__(self, identifier: str) -> None:
+    def __init__(self, identifier: str, *, ignore_errors: bool = False) -> None:
         """Initialize the parser."""
         super().__init__()
+        self.ignore_errors = ignore_errors
         self.identifier = identifier
         self.links: list[PyPILink] = []
 
@@ -195,6 +196,9 @@ class PyPILinksParser(HTMLParser):
                 )
             except InvalidVersion:
                 pass
+            except Exception as err:
+                if not self.ignore_errors:
+                    raise err
 
 
 class PyPI:
@@ -238,10 +242,13 @@ class PyPI:
         """Get location of file containing result of pypi requests."""
         return os.path.join(self.cache_dir, "pypi-cache.json")
 
-    def fetch_project_links(self, name: str) -> list[PyPILink]:
+    def fetch_project_links(
+        self, name: str, *, ignore_errors: bool = False
+    ) -> list[PyPILink]:
         """Fetch list of resource for a given Python package.
 
         :param name: Python package name
+        :param ignore_errors: If True, ignore errors while parsing PyPi link.
         :return: a list of dict containing the link to each resource along with
             some metadata
         """
@@ -250,7 +257,7 @@ class PyPI:
             logger.debug(f"fetch {identifier} links from {self.pypi_url}")
             pypi_request = requests.get(self.pypi_url + "simple/" + identifier + "/")
             pypi_request.raise_for_status()
-            pypi_links_parser = PyPILinksParser(identifier)
+            pypi_links_parser = PyPILinksParser(identifier, ignore_errors=ignore_errors)
             pypi_links_parser.feed(pypi_request.text)
 
             # Update cache
