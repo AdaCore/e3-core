@@ -23,7 +23,7 @@ from requests.exceptions import HTTPError
 if TYPE_CHECKING:
     from types import TracebackType
     from typing import Any
-    from collections.abc import Iterable, Mapping, Sequence, Iterator
+    from collections.abc import Iterable, Mapping, Sequence, Iterator, Callable
     from resolvelib.structs import Matches
     from resolvelib.providers import Preference
     from resolvelib.resolvers import RequirementInformation
@@ -768,7 +768,11 @@ class PyPIClosure:
 
 
 def fetch_from_registry(
-    packages: Iterable[str], registry_url: str, *, log_missing_packages: bool = False
+    packages: Iterable[str],
+    registry_url: str,
+    *,
+    log_missing_packages: bool = False,
+    sanitize_packages: Callable[[list[PyPILink]], list[PyPILink]] = lambda x: x,
 ) -> dict[str, PyPILink]:
     """Fetch packages currently in a registry.
 
@@ -788,7 +792,10 @@ def fetch_from_registry(
     for p in packages:
         try:
             res.update(
-                {link.filename: link for link in registry.fetch_project_links(p)}
+                {
+                    link.filename: link
+                    for link in sanitize_packages(registry.fetch_project_links(p))
+                }
             )
         except HTTPError as err:
             if err.response.status_code != 404:  # if other than NotFound
