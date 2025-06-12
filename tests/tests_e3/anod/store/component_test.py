@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 import datetime
+import json
 import os
-
 from pathlib import Path
-from typing import TYPE_CHECKING
-
 import pytest
+from typing import TYPE_CHECKING
 
 from e3.anod.store.interface import StoreError
 from e3.anod.store.buildinfo import BuildInfo
@@ -422,7 +421,7 @@ def test_component_meta_file() -> None:
 
     with pytest.raises(StoreError, match="non existing metafile"):
         Component.load_from_meta_file(str(cwd), c.name, ignore_errors=False)
-    Component.load_from_meta_file(str(cwd), c.name, ignore_errors=True)
+    assert Component.load_from_meta_file(str(cwd), c.name, ignore_errors=True) is None
 
     # Save to meta file. Use the old API with a name provided.
     c.save_to_meta_file(str(cwd), c.name)
@@ -431,6 +430,14 @@ def test_component_meta_file() -> None:
 
     tmp = Component.load_from_meta_file(str(cwd), c.name)
     assert tmp == c
+
+    with metadata_file.open("r+") as f:
+        data = json.load(f)
+        del data["build_id"]
+        f.write(json.dumps(data, indent=2))
+    with pytest.raises(StoreError, match="error while loading component metadata file"):
+        Component.load_from_meta_file(str(cwd), c.name, ignore_errors=False)
+    assert Component.load_from_meta_file(str(cwd), c.name, ignore_errors=True) is None
 
     # Remove the file before the next test.
     metadata_file.unlink()

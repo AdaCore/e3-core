@@ -168,10 +168,14 @@ def test_push(store):
         resource_path="myfile.txt",
         store=store,
     )
+    assert str(f) == "myfile:FileKind.source:None"
     tmp = f.push()
     assert isinstance(tmp, File)
     assert tmp is not f
     assert tmp == f
+    assert f.file_id is not None
+    assert tmp.file_id is not None
+    assert str(f) == f"myfile:FileKind.source:{tmp.file_id}"
 
     store_data = store.get_source_info("myfile", bid.id, kind="source")
     other = File.load(data=store_data, store=store)
@@ -323,6 +327,18 @@ def test_corrupted_meta_file(store):
     source.download(dest_dir="sandbox", as_name="new_name")
     source2 = File.load_from_meta_file(dest_dir="sandbox", name="new_name", store=store)
     assert source2.file_id == source.file_id
+
+    with pytest.raises(StoreError, match="non existing metafile"):
+        File.load_from_meta_file(dest_dir="notexist", name="notexist_name", store=store)
+
+    meta_file = File.metadata_path(dest_dir="sandbox", name="new_name")
+    with open(meta_file, "r+") as f:
+        data = json.load(f)
+        del data["_id"]
+        f.write(json.dumps(data, indent=2))
+
+    with pytest.raises(StoreError, match="error while loading metadata file"):
+        File.load_from_meta_file(dest_dir="sandbox", name="new_name", store=store)
 
 
 def test_upload_thirdparty(store):

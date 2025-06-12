@@ -159,7 +159,7 @@ def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
     BuildInfo.create(
         store=store,
         setup=DEFAULT_SETUP,
-        version="1.0",
+        version="2.0",
         date="20250510",
         mark_ready=True,
     )
@@ -177,12 +177,17 @@ def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
     # Check with other setup
     bis = BuildInfo.list(store, setup="other", build_date="20250518", nb_days=10)
     assert len(bis) == 1
+    bis = BuildInfo.list(store, setup="other")
+    assert len(bis) == 1
 
     # Check with all setup (both using "all" or None)
     bis = BuildInfo.list(store, setup="all", build_date="20250518", nb_days=10)
     assert len(bis) == 7
     bis = BuildInfo.list(store, build_date="20250518", nb_days=10)
     assert len(bis) == 7
+
+    bis = BuildInfo.list(store, setup=DEFAULT_SETUP, build_version="2.0")
+    assert len(bis) == 1
 
 
 def test_get_latest_build_not_found(store):

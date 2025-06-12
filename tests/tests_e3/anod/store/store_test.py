@@ -401,3 +401,31 @@ def test_bulk_query(store) -> None:
     assert tmp[0]["response"]["name"] == "comp"
     assert tmp[0]["response"]["build"]["setup"] == "test"
     assert tmp[0]["response"]["platform"] == "x86_64-linux"
+
+    del query_comp["setup"]
+    tmp = store.bulk_query([query_comp])
+    assert len(tmp) == 1
+    assert tmp[0]["msg"].startswith(
+        "Invalid component query: one or more mandatory keys"
+    )
+
+    query_comp["setup"] = "test"
+    del query_comp["query"]
+    tmp = store.bulk_query([query_comp])
+    assert len(tmp) == 1
+    assert tmp[0]["msg"] == "Invalid query: missing 'query' key"
+
+    query_comp["query"] = "notknow"
+    tmp = store.bulk_query([query_comp])
+    assert len(tmp) == 1
+    assert tmp[0]["msg"] == "Invalid query type 'notknow'"
+
+    query_comp = {
+        "query": "component",
+        "setup": "test",
+        "platform": "x86-linux",
+        "name": "comp",
+    }
+    tmp = store.bulk_query([query_comp])
+    assert len(tmp) == 1
+    assert tmp[0]["msg"] == "No component matching criteria"

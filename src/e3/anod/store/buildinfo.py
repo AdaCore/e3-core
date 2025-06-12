@@ -237,7 +237,7 @@ class BuildInfo(object):
     def list(
         cls,
         store: StoreReadInterface | StoreRWInterface,
-        build_date: str,
+        build_date: str = "all",
         setup: str = "all",
         build_version: str = "all",
         nb_days: int = 1,
