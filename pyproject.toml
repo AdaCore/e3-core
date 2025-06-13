@@ -24,6 +24,7 @@ classifiers = [
 # dependencies are not installed by default. This is on purpose to avoid
 # importing test/coverage packages in a release install.
 dependencies = [
+  "bson",
   "colorama",
   "pyyaml",
   "python-dateutil",
@@ -148,7 +149,8 @@ module = [
     "ld.*",
     "requests_toolbelt.*",
     "stevedore.*",
-    "tqdm.*"
+    "tqdm.*",
+    "bson.*"
 ]
 ignore_missing_imports = true
 
