@@ -12,7 +12,7 @@ variables:
   LINUX_CI_TOX_ENV:
     # Run coverage only with one Python version as this is costly.
     description: "Tox environments to run on Linux."
-    value: "py311-xdist,py312-xdist,py313-xdist"
+    value: "py311-xdist,py312-xdist,py313-cov-xdist"
   WINDOWS_CI_TOX_ENV:
     description: "Tox environments to run on Windows."
     value: "py312-xdist"
