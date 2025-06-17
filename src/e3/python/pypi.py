@@ -276,7 +276,13 @@ class PyPI:
         """
         if identifier not in self.candidate_cache:
             self.candidate_cache[identifier] = []
-            project_links = self.fetch_project_links(identifier.split("@", 1)[0])
+            # When we are trying to fetch a PyPI candidate, we can just ignore errors.
+            # Indeed the goal of the current function is to create a list of candidate.
+            # A package that causes an Exception during parsing should not be
+            # considered as a valid candidate.
+            project_links = self.fetch_project_links(
+                identifier.split("@", 1)[0], ignore_errors=True
+            )
             for link in project_links:
                 try:
                     c = PyPICandidate(
