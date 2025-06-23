@@ -14,7 +14,13 @@ from resolvelib import BaseReporter, Resolver
 from resolvelib.providers import AbstractProvider
 from resolvelib.resolvers import ResolutionImpossible
 from packaging.requirements import Requirement
-from packaging.utils import canonicalize_name
+from packaging.utils import (
+    canonicalize_name,
+    parse_wheel_filename,
+    parse_sdist_filename,
+    InvalidWheelFilename,
+    InvalidSdistFilename,
+)
 from html.parser import HTMLParser
 from packaging.version import Version, InvalidVersion
 from e3.error import E3Error
@@ -81,30 +87,6 @@ def get_pip_env(platform: str, python_version: Version) -> dict[str, str]:
 class PyPILink:
     """Link returned by PyPI simple API."""
 
-    # According to PEP0427 (https://peps.python.org/pep-0427/#file-name-convention)
-    # The filename is:
-    #   {distribution}-{version}(-{build tags})?-{python tags}-{abi tags}-{platform tags}.whl # noqa: B950
-    WHEEL_FILENAME_REGEX = re.compile(
-        r"""
-        ^                                     # Start of the string
-        (?P<distribution>[\w.-]+?)            # Distribution name (aka identifier)
-        -
-        (?P<version>[\w.!+-]+)                # Package version
-        (?:-                                  # Optional 'build tags' group
-            (?P<build_tags>\d[a-zA-Z0-9_.]*)  # Build tags (start with a number)
-        )?
-        -
-        (?P<py_tags>py\d+|[a-zA-Z0-9_.]+)     # Python tags (ex: py3, cp310, py2.py3)
-        -
-        (?P<abi_tags>[a-zA-Z0-9_.]+)          # ABI tags (ex: abi3, cp310m, none)
-        -
-        (?P<platform_tags>[a-zA-Z0-9_.]+)     # Plateform tags (ex: win_amd64, manylinux_x86_64, any) # noqa: B950
-        \.whl                                 # File extension .whl
-        $                                     # End of the string
-        """,
-        re.VERBOSE | re.IGNORECASE,
-    )
-
     def __init__(
         self,
         identifier: str,
@@ -130,33 +112,21 @@ class PyPILink:
         self.checksum = self._urlparse.fragment.replace("sha256=", "", 1)
         self.filename = self._urlparse.path.rpartition("/")[-1]
 
-        py_tags = ""
-        abi_tags = ""
-        platform_tags = ""
-
-        wheel_filename = self.WHEEL_FILENAME_REGEX.match(self.filename)
-        # Retreive a package version.
-        if wheel_filename:
-            # Wheel filenames contain compatibility information
-            data = wheel_filename.groupdict()
-            version = data["version"]
-            py_tags = data["py_tags"]
-            abi_tags = data["abi_tags"]
-            platform_tags = data["platform_tags"]
+        if self.filename.endswith(".whl"):
+            name, version, build, tags = parse_wheel_filename(self.filename)
+            py_tags = {tag.interpreter for tag in tags}
+            abi_tags = {tag.abi for tag in tags}
+            platform_tags = {tag.platform for tag in tags}
         else:
-            package_filename = self.filename
-            if any(package_filename.endswith(ext) for ext in (".tar.gz", ".tar.bz2")):
-                # Remove .gz or .bz2
-                package_filename, _ = os.path.splitext(package_filename)
-            # Remove remaining extension
-            basename, ext = os.path.splitext(package_filename)
-            # Retrieve version
-            _, version, *_ = basename.rsplit("-", 1)
+            name, version = parse_sdist_filename(self.filename)
+            build, py_tags, abi_tags, platform_tags = None, set(), set(), set()
 
-        self.pkg_version = Version(version)
-        self.pkg_py_tags = py_tags.split(".")
-        self.pkg_abi_tags = abi_tags.split(".")
-        self.pkg_platform_tags = platform_tags.split(".")
+        self.pkg_name = name
+        self.pkg_version = version
+        self.build_tag = build
+        self.pkg_py_tags = list(py_tags)
+        self.pkg_abi_tags = list(abi_tags)
+        self.pkg_platform_tags = list(platform_tags)
 
     @property
     def is_yanked(self) -> bool:
@@ -222,7 +192,7 @@ class PyPILinksParser(HTMLParser):
                         identifier=self.identifier,
                     )
                 )
-            except InvalidVersion:
+            except (InvalidVersion, InvalidWheelFilename, InvalidSdistFilename):
                 pass
             except Exception as err:
                 if not self.ignore_errors:
