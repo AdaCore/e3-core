@@ -81,6 +81,30 @@ def get_pip_env(platform: str, python_version: Version) -> dict[str, str]:
 class PyPILink:
     """Link returned by PyPI simple API."""
 
+    # According to PEP0427 (https://peps.python.org/pep-0427/#file-name-convention)
+    # The filename is:
+    #   {distribution}-{version}(-{build tags})?-{python tags}-{abi tags}-{platform tags}.whl # noqa: B950
+    WHEEL_FILENAME_REGEX = re.compile(
+        r"""
+        ^                                     # Start of the string
+        (?P<distribution>[\w.-]+?)            # Distribution name (aka identifier)
+        -
+        (?P<version>[\w.!+-]+)                # Package version
+        (?:-                                  # Optional 'build tags' group
+            (?P<build_tags>\d[a-zA-Z0-9_.]*)  # Build tags (start with a number)
+        )?
+        -
+        (?P<py_tags>py\d+|[a-zA-Z0-9_.]+)     # Python tags (ex: py3, cp310, py2.py3)
+        -
+        (?P<abi_tags>[a-zA-Z0-9_.]+)          # ABI tags (ex: abi3, cp310m, none)
+        -
+        (?P<platform_tags>[a-zA-Z0-9_.]+)     # Plateform tags (ex: win_amd64, manylinux_x86_64, any) # noqa: B950
+        \.whl                                 # File extension .whl
+        $                                     # End of the string
+        """,
+        re.VERBOSE | re.IGNORECASE,
+    )
+
     def __init__(
         self,
         identifier: str,
@@ -109,12 +133,16 @@ class PyPILink:
         py_tags = ""
         abi_tags = ""
         platform_tags = ""
+
+        wheel_filename = self.WHEEL_FILENAME_REGEX.match(self.filename)
         # Retreive a package version.
-        if self.filename.endswith(".whl"):
+        if wheel_filename:
             # Wheel filenames contain compatibility information
-            _, version, py_tags, abi_tags, platform_tags = self.filename[:-4].rsplit(
-                "-", 4
-            )
+            data = wheel_filename.groupdict()
+            version = data["version"]
+            py_tags = data["py_tags"]
+            abi_tags = data["abi_tags"]
+            platform_tags = data["platform_tags"]
         else:
             package_filename = self.filename
             if any(package_filename.endswith(ext) for ext in (".tar.gz", ".tar.bz2")):
