@@ -537,6 +537,75 @@ class TestContext:
                     == "my_spec3_weather"
                 )
 
+    def test_dag_with_shared_knowledge(self):
+        # Create a new plan context
+        ac = self.create_context()
+        current_env = BaseEnv()
+        cm = plan.PlanContext(server=current_env)
+
+        # Declare available actions and their signature
+        def anod_action(
+            module,
+            build=None,
+            default_build=False,
+            host=None,
+            target=None,
+            board=None,
+            weathers=None,
+            product_version=None,
+            when_missing=None,
+            manual_action=False,
+            qualifier=None,
+            jobs=None,
+            releases=None,
+            process_suffix=None,
+            update_vcs=False,
+            recursive=None,
+            query_range=None,
+            force_repackage=False,
+        ):
+            pass
+
+        cm.register_action("anod_build", anod_action)
+
+        # Create a simple plan. The call to `spec()` here in fact calls
+        # for :meth:`AnodContext.repo.load()` as defined in the
+        # ``cm.execute()`` call below. Previous to the addition of the
+        # `symbols` parameters, it was not possible for a plan to access
+        # some of the spec variables/methods.
+        content = [
+            "def myserver():",
+            '    anod_build(spec("spec12").myname(), weathers="foo")',
+        ]
+        with open("plan.txt", "w") as f:
+            f.write("\n".join(content))
+        myplan = plan.Plan({}, plan_ext=".txt")
+        myplan.load("plan.txt")
+
+        # Execute the plan and create anod actions. Through the use
+        # of ``symbols`` parameter, we tell the plan that calling `spec()`
+        # is bound to calling :meth:`AnodContext.repo.load()`. See the calls
+        # to `spec()` in the test.
+        for action in cm.execute(myplan, "myserver", symbols={"spec": ac.repo.load}):
+            ac.add_plan_action(action)
+
+        # Create a reverse tag to have a working get_context
+        # when looking for parameters such as weathers we want to
+        # get the plan line that has triggered the action, e.g.
+        # for spec3.build that has been triggered by spec10.build
+        # we want to propagate the weathers set in the line
+        #     anod_build("spec10", weathers="foo")
+        # in the Build action for spec3
+        reverse_dag = ac.tree.reverse_graph()
+
+        for uid, _ in ac.tree:
+            if uid.endswith("spec12.build"):
+                assert ac.tree.get_tag(uid)
+                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                assert cuid == uid
+                assert ctag["plan_args"]["weathers"] == "foo"
+                assert ctag["plan_line"] == "plan.txt:2"
+
     def test_dag_2_plan_sources(self):
         """Check that we can extract values from plan in final dag.
 

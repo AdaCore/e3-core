@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from e3.anod.spec import Anod
 from e3.anod.package import Source
 
@@ -10,5 +12,9 @@ class Spec12(Anod):
                   Anod.Dependency('spec1', require='source_pkg')]
 
     @Anod.primitive()
-    def build(self):
+    def build(self) -> None:
         pass
+
+    @classmethod
+    def myname(cls) -> str:
+        return "spec12"
