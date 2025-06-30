@@ -236,7 +236,7 @@ class _Store(_StoreContextManager):
         )
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.files}("
-            "   id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "   id TEXT NOT NULL PRIMARY KEY,"
             "   name TEXT NOT NULL,"
             "   alias TEXT NOT NULL,"
             "   filename TEXT NOT NULL,"
@@ -273,19 +273,19 @@ class _Store(_StoreContextManager):
         )
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.components}("
-            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "    name TEXT NOT NULL,"
-            "    platform TEXT NOT NULL,"
-            "    version TEXT NOT NULL,"
-            "    specname TEXT,"  # Can be Null
-            "    build_id TEXT NOT NULL,"
-            "    creation_date TEXT NOT NULL DEFAULT("
-            "        STRFTIME('%Y-%m-%d %H:%M:%f+00:00', 'now')"
-            "    ),"
-            "    is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
-            "    is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
+            "   id TEXT NOT NULL PRIMARY KEY,"
+            "   name TEXT NOT NULL,"
+            "   platform TEXT NOT NULL,"
+            "   version TEXT NOT NULL,"
+            "   specname TEXT,"  # Can be Null
+            "   build_id TEXT NOT NULL,"
+            "   creation_date TEXT NOT NULL DEFAULT("
+            "       STRFTIME('%Y-%m-%d %H:%M:%f+00:00', 'now')"
+            "   ),"
+            "   is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
+            "   is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
             # Component has at least one file
-            "    readme_id TEXT"
+            "   readme_id TEXT"
             ")"
         )
         self.connection.commit()
@@ -682,7 +682,7 @@ class _Store(_StoreContextManager):
             releases = [  # type: ignore[misc]
                 name
                 for _, name, _ in self._select(
-                    _Store.TableName.component_releases, ["id"], [comp_id]  # type: ignore[arg-type]
+                    _Store.TableName.component_releases, ["component_id"], [comp_id]  # type: ignore[arg-type]
                 )
             ]
 
@@ -890,6 +890,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert(
             _Store.TableName.components,
             [  # type: ignore[arg-type]
+                "id",
                 "name",
                 "platform",
                 "version",
@@ -900,6 +901,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "readme_id",
             ],
             [
+                str(ObjectId()),
                 component_info["name"],
                 component_info["platform"],
                 component_info["version"],
@@ -1066,6 +1068,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert(
             _Store.TableName.files,
             [  # type: ignore[arg-type]
+                "id",
                 "name",
                 "alias",
                 "filename",
@@ -1076,6 +1079,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "metadata",
             ],
             [
+                str(ObjectId()),
                 file_info["name"],
                 file_info["alias"],
                 file_info["filename"],
