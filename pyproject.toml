@@ -24,7 +24,6 @@ classifiers = [
 # dependencies are not installed by default. This is on purpose to avoid
 # importing test/coverage packages in a release install.
 dependencies = [
-  "bson",
   "colorama",
   "pyyaml",
   "python-dateutil",

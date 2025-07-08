@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from bson.objectid import ObjectId
 from enum import StrEnum
 import os
 import json
@@ -8,6 +7,7 @@ import sqlite3
 from packaging.version import Version
 from typing import TYPE_CHECKING
 
+from e3.event import unique_id
 from e3.fs import cp
 from e3.log import getLogger
 from e3.anod.store.interface import (
@@ -901,7 +901,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "readme_id",
             ],
             [
-                str(ObjectId()),
+                unique_id(),
                 component_info["name"],
                 component_info["platform"],
                 component_info["version"],
@@ -962,7 +962,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert(
             _Store.TableName.buildinfos,
             ["id", "build_date", "setup", "build_version"],  # type: ignore[arg-type]
-            [str(ObjectId()), date, setup, version],
+            [unique_id(), date, setup, version],
         )
         self.connection.commit()
         return self._tuple_to_buildinfo(req_tuple)  # type: ignore[arg-type]
@@ -976,7 +976,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             ") "
             "  SELECT ?, build_date, ?, build_version"
             f"       FROM {_Store.TableName.buildinfos} WHERE id=?",
-            [str(ObjectId()), dest_setup, bid],
+            [unique_id(), dest_setup, bid],
         )
         self.connection.commit()
         return self._tuple_to_buildinfo(req_tuple)  # type: ignore[arg-type]
@@ -1079,7 +1079,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "metadata",
             ],
             [
-                str(ObjectId()),
+                unique_id(),
                 file_info["name"],
                 file_info["alias"],
                 file_info["filename"],
