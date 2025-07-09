@@ -66,7 +66,11 @@ if TYPE_CHECKING:
 
     # Anod Dependency can target a build, install, or source
     DEPENDENCY_PRIMITIVE = Union[
-        BUILD_PRIMITIVE, DOWNLOAD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE
+        BUILD_PRIMITIVE,
+        DOWNLOAD_PRIMITIVE,
+        INSTALL_PRIMITIVE,
+        SOURCE_PRIMITIVE,
+        TEST_PRIMITIVE,
     ]
 
     # Supported primitives are build, install, source, and test

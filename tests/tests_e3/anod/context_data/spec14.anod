@@ -1,0 +1,12 @@
+from e3.anod.spec import Anod
+
+
+class Spec14(Anod):
+
+    @property
+    def build_deps(self):
+        return [Anod.Dependency(name="spec4", require="test")]
+
+    @Anod.primitive()
+    def build(self):
+        pass

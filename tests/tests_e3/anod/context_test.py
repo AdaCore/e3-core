@@ -367,6 +367,13 @@ class TestContext:
         assert "x86-linux.spec13.download_bin" in keys
         assert "x86-linux.spec13.install" in keys
 
+    def test_add_anod_action14(self):
+        """Check test dependency."""
+        ac = self.create_context()
+        ac.add_anod_action("spec14", env=ac.default_env, primitive="build")
+        result = ac.schedule(ac.always_download_source_resolver)
+        assert "x86-linux.spec4.test" in list(result.vertex_data.keys())
+
     def test_source_fails_when_missing_source_primitive(self):
         """Source action should fail when the source primitive is undefined.
 

@@ -12,7 +12,6 @@ from e3.env import BaseEnv
 if TYPE_CHECKING:
     from typing import Any, Hashable, Literal
     from e3.anod.spec import Anod, DEPENDENCY_PRIMITIVE
-    from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.deps")
 
@@ -38,6 +37,14 @@ class BuildVar:
 class Dependency:
     kind: DEPENDENCY_PRIMITIVE
 
+    ALLOWED_REQUIRE: dict[str, str] = {
+        "build_tree": "build",
+        "download": "download",
+        "installation": "install",
+        "source_pkg": "source",
+        "test": "test",
+    }
+
     def __init__(
         self,
         name: str,
@@ -52,6 +59,7 @@ class Dependency:
             | Literal["installation"]
             | Literal["download"]
             | Literal["source_pkg"]
+            | Literal["test"]
         ) = "build_tree",
         track: bool = False,
         **kwargs: Any,
@@ -103,26 +111,14 @@ class Dependency:
         else:
             raise e3.anod.error.SpecError(f"invalid qualifier type: {qualifier}")
 
-        if require not in (
-            "build_tree",
-            "download",
-            "installation",
-            "source_pkg",
-        ):
-            raise e3.anod.error.SpecError(
-                f"require should be build_tree, download, installation,"
-                f" or source_pkg not {require}."
-            )
-        if require == "build_tree":
-            self.kind = "build"
-        elif require == "download":
-            self.kind = "download"
-        elif require == "installation":
-            self.kind = "install"
-        elif require == "source_pkg":
-            self.kind = "source"
+        if require in self.ALLOWED_REQUIRE:
+            self.kind = self.ALLOWED_REQUIRE[require]  # type: ignore[assignment]
         else:
-            assert_never()
+            raise e3.anod.error.SpecError(
+                f"Invalid require parameter {require!r}. "
+                f"Allowed values are {', '.join(self.ALLOWED_REQUIRE)}"
+            )
+
         self.track = track
 
     def env(self, parent: Anod, default_env: BaseEnv) -> BaseEnv:

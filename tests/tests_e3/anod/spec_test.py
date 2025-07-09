@@ -289,13 +289,14 @@ def test_spec_check_dll_closure_single_file(ldd) -> None:  # type: ignore[no-unt
 
 def test_spec_wrong_dep():
     """Check exception message when wrong dependency is set."""
-    with pytest.raises(SpecError) as err:
+    with pytest.raises(
+        SpecError,
+        match=(
+            "Invalid require parameter 'invalid'. "
+            f"Allowed values are {', '.join(Anod.Dependency.ALLOWED_REQUIRE)}"
+        ),
+    ):
         Anod.Dependency("foo", require="invalid")
-
-    assert (
-        "require should be build_tree, download, installation,"
-        " or source_pkg not invalid" in str(err)
-    )
 
 
 def test_primitive():
