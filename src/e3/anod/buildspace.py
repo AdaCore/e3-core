@@ -15,6 +15,7 @@ class BuildSpace:
     """Build space located inside a sandbox."""
 
     DIRS = (
+        "artifacts",
         "binary",
         "build",
         "install",
