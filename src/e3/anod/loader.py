@@ -232,7 +232,7 @@ class AnodModule:
                 assert self.anod_class is not None
             return self.anod_class
 
-        logger.debug("loading anod spec: %s", self.name)
+        logger.debug("loading anod spec class: %s", self.name)
 
         # Create a new module
         mod_name = "anod_" + self.name

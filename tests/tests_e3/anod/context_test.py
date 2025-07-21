@@ -374,6 +374,65 @@ class TestContext:
         result = ac.schedule(ac.always_download_source_resolver)
         assert "x86-linux.spec4.test" in list(result.vertex_data.keys())
 
+    def test_add_anod_action15(self):
+        """Check for duplicate nodes."""
+        # The goal of the test is to ensure that only one instance of a given Anod spec
+        # for a given context exists at a given time, independently of how the context
+        # was passed.
+
+        ac = self.create_context()
+        result = [
+            ac.add_anod_action(
+                "spec15", env=ac.default_env, qualifier=None, primitive="build"
+            ),
+            ac.add_anod_action(
+                "spec15", env=ac.default_env, qualifier={}, primitive="build"
+            ),
+            ac.add_anod_action(
+                "spec15", env=ac.default_env, qualifier={"q1": False}, primitive="build"
+            ),
+            ac.add_anod_action(
+                "spec15",
+                env=ac.default_env,
+                qualifier={"q1": False, "q2": "default_q2"},
+                primitive="build",
+            ),
+            ac.add_anod_action(
+                "spec15",
+                env=ac.default_env,
+                qualifier="q2=default_q2",
+                primitive="build",
+            ),
+            ac.add_anod_action(
+                "spec15",
+                env=ac.default_env,
+                qualifier="",
+                primitive="build",
+            ),
+        ]
+        for i in range(len(result) - 1):
+            assert result[i].anod_instance is result[i + 1].anod_instance
+
+        result = [
+            ac.add_anod_action(
+                "spec15", env=ac.default_env, qualifier="q1", primitive="build"
+            ),
+            ac.add_anod_action(
+                "spec15",
+                env=ac.default_env,
+                qualifier="q1,q2=default_q2",
+                primitive="build",
+            ),
+            ac.add_anod_action(
+                "spec15",
+                env=ac.default_env,
+                qualifier="q2=default_q2,q1",
+                primitive="build",
+            ),
+        ]
+        for i in range(len(result) - 1):
+            assert result[i].anod_instance is result[i + 1].anod_instance
+
     def test_source_fails_when_missing_source_primitive(self):
         """Source action should fail when the source primitive is undefined.
 

@@ -1,0 +1,15 @@
+from e3.anod.spec import Anod
+
+
+class Spec15(Anod):
+    enable_name_generator = True
+
+    def declare_qualifiers_and_components(self, qualifiers_manager):
+        qualifiers_manager.declare_tag_qualifier(name="q1", description="help q1")
+        qualifiers_manager.declare_key_value_qualifier(
+            name="q2", description="help of q2", default="default_q2"
+        )
+
+    @Anod.primitive()
+    def build(self):
+        pass
