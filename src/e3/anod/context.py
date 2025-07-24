@@ -181,22 +181,54 @@ class AnodContext:
 
         if key not in self.cache:
             # Spec is not in cache so create a new instance
-            self.cache[key] = self.repo.load(name)(
-                qualifier=qualifier, env=env, kind=kind
+            result = self.repo.load(name)(qualifier=qualifier, env=env, kind=kind)
+
+            # Once a spec is loaded the qualifier has been expanded/normalized
+            # to its final value (a dict with default values set).
+            # After normalization, check if a spec instance with the same
+            # context already exists to avoid creating duplicate instances for
+            # logically equivalent spec instances and ensure cache correctness.
+            # For that purpose recompute the cache key using the normalized
+            # qualifier value.
+            if result.enable_name_generator and kind != "source":
+                final_qualifier_key = qualifier_dict_to_str(result.args)
+            else:
+                final_qualifier_key = result.qualifier
+            final_key = (
+                name,
+                env.build,
+                env.host,
+                env.target,
+                final_qualifier_key,
+                kind,
+                source_name,
             )
-            if sandbox is not None:
-                self.cache[key].bind_to_sandbox(sandbox)
 
-            # Update tracking of dependencies
-            self.dependencies[self.cache[key].uid] = {}
+            if final_key in self.cache:
+                # The spec is in fact already in the cache so abandon the
+                # instantiation, after updating the cache
+                logger.debug(f"loading cached spec instance {result.uid}({kind})")
+                self.cache[key] = self.cache[final_key]
+            else:
+                logger.debug(f"loading new spec instance {result.uid}({kind})")
+                # By updating both entries in the cache we avoid useless
+                # instantiation of the specs
+                self.cache[final_key] = result
+                self.cache[key] = result
 
-            # Update the list of available sources. ??? Should be done
-            # once per spec (and not once per spec instance). Need some
-            # spec cleanup to achieve that ???
-            source_builders = self.cache[key].source_pkg_build
-            if source_builders is not None:
-                for s in source_builders:
-                    self.sources[s.name] = (name, s)
+                if sandbox is not None:
+                    self.cache[key].bind_to_sandbox(sandbox)
+
+                # Update tracking of dependencies
+                self.dependencies[self.cache[key].uid] = {}
+
+                # Update the list of available sources. ??? Should be done
+                # once per spec (and not once per spec instance). Need some
+                # spec cleanup to achieve that ???
+                source_builders = self.cache[key].source_pkg_build
+                if source_builders is not None:
+                    for s in source_builders:
+                        self.sources[s.name] = (name, s)
 
         return self.cache[key]
 
