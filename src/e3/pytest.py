@@ -67,6 +67,29 @@ def pytest_addoption(
     group.addoption("--e3-cov-rewrite", nargs=2, help="Use e3 fixtures and reporting")
 
 
+def set_git_env_config() -> None:
+    """Set the Git environment configuration.
+
+    This function is called by the env_protect fixture to ensure that
+    the Git environment configuration is set to a known state.
+
+    Set the `init.defaultbranch` to `default_branch` to ensure that
+    the default branch is not assumed to be `master` or `main`.
+
+    The best practice when writing test is to either explicitely name the branch
+    or to get the value with `git branch --show-current`
+    """
+    # If GIT_CONFIG_COUNT is already set, we increment it to avoid overwriting
+    # existing configuration keys.
+    if "GIT_CONFIG_COUNT" not in os.environ:
+        git_config_count = 0
+    else:
+        git_config_count = int(os.environ["GIT_CONFIG_COUNT"])
+    os.environ["GIT_CONFIG_COUNT"] = str(git_config_count + 1)
+    os.environ[f"GIT_CONFIG_KEY_{git_config_count}"] = "init.defaultbranch"
+    os.environ[f"GIT_CONFIG_VALUE_{git_config_count}"] = "default_branch"
+
+
 @pytest.fixture(autouse=True)
 def env_protect(request: pytest.FixtureRequest) -> None:
     """Protection against environment change.
@@ -88,14 +111,7 @@ def env_protect(request: pytest.FixtureRequest) -> None:
         if "E3_HOSTNAME" in os.environ:
             del os.environ["E3_HOSTNAME"]
 
-        # Set environment variables for the default Git branch to
-        # ensure that we do not assume that the default branch is
-        # named master. The best practice when writing test is
-        # to either explicitely name the branch or to get the
-        # value with `git branch --show-current`
-        os.environ["GIT_CONFIG_COUNT"] = "1"
-        os.environ["GIT_CONFIG_KEY_0"] = "init.defaultbranch"
-        os.environ["GIT_CONFIG_VALUE_0"] = "default_branch"
+        set_git_env_config()
 
         def restore_env() -> None:
             Env().restore()
