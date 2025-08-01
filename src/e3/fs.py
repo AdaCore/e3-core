@@ -441,7 +441,8 @@ def rm(
         else:
             file_list = {os.fspath(p) for p in path}
 
-    logger.debug(f"rm{' -r' if recursive else ''} {' '.join(file_list)}")
+    if file_list:
+        logger.debug(f"rm{' -r' if recursive else ''} {' '.join(file_list)}")
 
     def onerror(
         func: Callable[..., Any], error_path: str, exc_info: tuple | BaseException
