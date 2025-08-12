@@ -1,19 +1,21 @@
 from __future__ import annotations
 
 import abc
-from e3.error import E3Error
-from e3.hash import sha1
+import os
 from typing import TYPE_CHECKING
 
+from e3.error import E3Error
+from e3.hash import sha1
+
 if TYPE_CHECKING:
-    from typing import Any, TypeVar, TypedDict
+    from typing import Any, TypeVar, TypedDict, Literal
 
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.component import ComponentDict
     from e3.anod.store.file import FileDict
 
-    _StoreContextManagerSelf = TypeVar(
-        "_StoreContextManagerSelf", bound="_StoreContextManager"
+    StoreContextManagerType = TypeVar(
+        "StoreContextManagerType", bound="_StoreContextManager"
     )
 
     class BuildDataDict(TypedDict):
@@ -25,7 +27,7 @@ class StoreError(E3Error):
     pass
 
 
-def resource_id(path: str) -> str:
+def resource_id(path: os.PathLike[str] | str) -> str:
     """Given a path to a file return the resource id.
 
     :param path: a path to an existing path
@@ -38,15 +40,41 @@ class _StoreContextManager(metaclass=abc.ABCMeta):
     """A class to define the context manager interface needed by a Store class."""
 
     @abc.abstractmethod
-    def __enter__(self: _StoreContextManagerSelf) -> _StoreContextManagerSelf:
+    def __enter__(self: StoreContextManagerType) -> StoreContextManagerType:
+        """Enter in a new context.
+
+        This method is called when used with the "with" keyword. For example:
+
+        .. code-block:: python
+
+            with _StoreContextManager() as x:
+                pass
+
+        :return: Self
+        """
         pass  # all: no cover
 
     @abc.abstractmethod
     def __exit__(self, *args: Any) -> None:
+        """Exit a context.
+
+        This method is called when exiting a "with" context. For example:
+
+        .. code-block:: python
+
+            with _StoreContextManager() as x:
+                pass
+            # __exit__ is call here
+        """
         pass  # all: no cover
 
     @abc.abstractmethod
     def close(self) -> None:
+        """Close the current context.
+
+        This method is used to close a context, generally not initiated using the
+        `with` keyword. See `builtin.open` for more example.
+        """
         pass  # all: no cover
 
 
@@ -327,11 +355,8 @@ class StoreWriteInterface(object, metaclass=abc.ABCMeta):
         """Copy a build id.
 
         :param bid: a build id
-        :type bid: str
         :param dest_setup: setup destination different from source setup
-        :type bid: str
         :return: a dict representing a build id
-        :rtype: dict
         """
 
     @abc.abstractmethod
@@ -351,10 +376,128 @@ class StoreWriteInterface(object, metaclass=abc.ABCMeta):
         This function attach an ALREADY SUBMITTED file to a component.
 
         :param component_id: the component id.
-        :param name: the attachment name.
         :param file_id: the id of the attachment file.
+        :param name: the attachment name.
         """
 
 
 class StoreRWInterface(StoreReadInterface, StoreWriteInterface):
     pass
+
+
+class LocalStoreInterface(object, metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def raw_add_build_info(self, build_info_data: BuildInfoDict) -> None:
+        """Add a build info to the local store.
+
+        :param build_info_data: build info data (i.e: result of BuildInfo.to_dict())
+        """
+        raise NotImplementedError  # all: no cover
+
+    @abc.abstractmethod
+    def add_build_info_from_store(
+        self, from_store: StoreReadInterface, bid: str
+    ) -> None:
+        """Add a build info to the local store from another store instance.
+
+        :param from_store: The other store instance where the buildinfo is retrieve.
+        :param bid: The buildinfo ID to retrieve.
+        """
+        raise NotImplementedError  # all: no cover
+
+    @abc.abstractmethod
+    def raw_add_file(self, file_info: FileDict) -> None:
+        """Add a file to the local store.
+
+        :param file_info: a file dict (i.e: result of File.as_dict()).
+        """
+        raise NotImplementedError  # all: no cover
+
+    @abc.abstractmethod
+    def add_source_from_store(
+        self,
+        from_store: StoreReadInterface,
+        name: str,
+        bid: str | None = None,
+        setup: str | None = None,
+        date: str = "all",
+        kind: Literal["source", "thirdparty"] = "source",
+    ) -> None:
+        """Add a file info and all associated informations to the db.
+
+        The associated build id is also automatically added.
+
+        .. note::
+            If the file information is already present no call to the online store is
+            performed.
+
+            This method doesn't retrieve the resource pointed by the added file. Trying
+            to download the file without calling `add_resource` will raise an error.
+
+        :param from_store: instance of an online store to query.
+        :param name: the source name to retrieve.
+        :param bid: a build id.
+        :param setup: a setup name.
+        :param date: a build date.
+        :param kind: kind can be either source or thirdparty.
+        """
+        raise NotImplementedError  # all: no cover
+
+    @abc.abstractmethod
+    def raw_add_component(self, component_info: ComponentDict) -> None:
+        """Add a component to the local store.
+
+        :param component_info: a Component dict (i.e: result of Component.to_dict()).
+        """
+        raise NotImplementedError  # all: no cover
+
+    @abc.abstractmethod
+    def add_component_from_store(
+        self,
+        from_store: StoreReadInterface,
+        setup: str,
+        name: str = "all",
+        platform: str = "all",
+        date: str | None = None,
+        specname: str | None = None,
+    ) -> None:
+        """Add a component and all associated informatios to the db.
+
+        The associated build id is also automatically added
+
+        :param from_store: instance of an online store to query.
+        :param setup: a setup name.
+        :param name: a component name.
+        :param platform: a platform name.
+        :param date: a build date.
+        :param specname: the spec name related to the component.
+        """
+        raise NotImplementedError  # all: no cover
+
+    @abc.abstractmethod
+    def save(self, filename: os.PathLike | None = None) -> None:
+        """Save the local store database.
+
+        This function can does nothing and is hightly related to the LocalStore
+        implementation.
+
+        :param filename: the file path to save the database.
+        """
+        raise NotImplementedError  # all: no cover
+
+    @abc.abstractmethod
+    def bulk_update_from_store(
+        self, from_store: StoreReadInterface, queries: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Perform a list of update queries (source and components) to Store.
+
+        Each element of the queries list should conform to the specifications define by
+        self.bulk_query.
+
+        This function will populate the LocalStore depending of the queries.
+
+        :param from_store: instance of an online store to query.
+        :param queries: a list of queries
+        :return: a list of answers
+        """
+        raise NotImplementedError  # all: no cover
