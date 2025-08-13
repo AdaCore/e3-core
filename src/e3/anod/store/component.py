@@ -15,12 +15,14 @@ from e3.log import getLogger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from typing import Literal
+    from typing import Literal, TypeVar
 
     from e3.archive import RemoveRootDirType
     from e3.anod.store.interface import StoreReadInterface
     from e3.anod.store.buildinfo import BuildInfo, BuildInfoDict
     from e3.anod.store.file import FileDict
+
+    ComponentType = TypeVar("ComponentType", bound="Component")
 
     class ComponentAttachmentDict(TypedDict, total=True):
         name: str
@@ -72,7 +74,7 @@ class Component(object):
     """
 
     def __init__(
-        self,
+        self: ComponentType,
         build_id: str,
         name: str,
         platform: str,
@@ -129,7 +131,7 @@ class Component(object):
         self.store = store
 
     def add_attachment(
-        self, key: str, file: File, overwrite_existing: bool = False
+        self: ComponentType, key: str, file: File, overwrite_existing: bool = False
     ) -> str | None:
         """Add a file in this component's attachments.
 
@@ -161,7 +163,7 @@ class Component(object):
 
         return file_key
 
-    def get_attachments(self, key: str | None = None) -> dict[str, File]:
+    def get_attachments(self: ComponentType, key: str | None = None) -> dict[str, File]:
         """Get the list of attachments matching *key*.
 
         If an attachment key starts with ``<key>,``, it is added to the returned
@@ -185,7 +187,7 @@ class Component(object):
         return attachments
 
     @classmethod
-    def metadata_path(cls, dest_dir: str, name: str) -> str:
+    def metadata_path(cls: type[ComponentType], dest_dir: str, name: str) -> str:
         """Return path to file containing component metadata.
 
         :param dest_dir: directory in which the metadata file can be found
@@ -194,7 +196,7 @@ class Component(object):
         """
         return os.path.join(dest_dir, name + "_component.json")
 
-    def remove_attachment(self, key: str | None = None) -> bool:
+    def remove_attachment(self: ComponentType, key: str | None = None) -> bool:
         """Remove an attachment by key.
 
         To remove all `"spdx"` attachments (for instance), use
@@ -220,7 +222,9 @@ class Component(object):
                     removed = True
         return removed
 
-    def save_to_meta_file(self, dest_dir: str, name: str | None = None) -> None:
+    def save_to_meta_file(
+        self: ComponentType, dest_dir: str, name: str | None = None
+    ) -> None:
         """Dump as json file component information.
 
         :param dest_dir: directory in which the metadata file should
@@ -231,7 +235,7 @@ class Component(object):
         with open(self.metadata_path(dest_dir, as_name), "w") as fd:
             fd.write(json.dumps(self.as_dict(), indent=2))
 
-    def submit_attachment(self, key: str, file: File) -> ComponentDict:
+    def submit_attachment(self: ComponentType, key: str, file: File) -> ComponentDict:
         """Submit an attachment to a store component.
 
         Add an attachment to an existing component, upload the file to Store,
@@ -283,31 +287,31 @@ class Component(object):
     @overload
     @classmethod
     def load_from_meta_file(
-        cls,
+        cls: type[ComponentType],
         dest_dir: str,
         name: str,
-        store: StoreReadInterface | StoreRWInterface | None = None,
+        store: StoreReadInterface | None = None,
         ignore_errors: Literal[False] = False,
-    ) -> Component: ...
+    ) -> ComponentType: ...
 
     @overload
     @classmethod
     def load_from_meta_file(  # noqa: F811
-        cls,
+        cls: type[ComponentType],
         dest_dir: str,
         name: str,
-        store: StoreReadInterface | StoreRWInterface | None = None,
+        store: StoreReadInterface | None = None,
         ignore_errors: Literal[True] = True,
-    ) -> Component | None: ...
+    ) -> ComponentType | None: ...
 
     @classmethod
     def load_from_meta_file(  # noqa: F811
-        cls,
+        cls: type[ComponentType],
         dest_dir: str,
         name: str,
-        store: StoreReadInterface | StoreRWInterface | None = None,
+        store: StoreReadInterface | None = None,
         ignore_errors: bool = False,
-    ) -> Component | None:
+    ) -> ComponentType | None:
         """Load components from a metadata file.
 
         :param dest_dir: directory in which the metadata is located
@@ -336,7 +340,7 @@ class Component(object):
                     f"error while loading component metadata file {meta_path} ({e})"
                 ) from None
 
-    def as_dict(self) -> ComponentDict:
+    def as_dict(self: ComponentType) -> ComponentDict:
         """Return a dictionary representation of self.
 
         Feeding to this class' "load" method the value returned by
@@ -373,10 +377,10 @@ class Component(object):
 
     @classmethod
     def load(
-        cls,
+        cls: type[ComponentType],
         data: ComponentDict,
         store: StoreReadInterface | StoreRWInterface | None = None,
-    ) -> Component:
+    ) -> ComponentType:
         """Create a Component from the result of a Store request.
 
         :param data: The dictionary returned by Store.
@@ -405,7 +409,7 @@ class Component(object):
         if "build" in data:
             build_info = BuildInfo.load(data["build"])
 
-        return Component(
+        return cls(
             component_id=str(data["_id"]) if data["_id"] is not None else data["_id"],
             build_id=str(data["build_id"]),
             name=str(data["name"]),
@@ -426,7 +430,7 @@ class Component(object):
 
     @classmethod
     def latest(
-        cls,
+        cls: type[ComponentType],
         store: StoreReadInterface | StoreRWInterface,
         setup: str,
         date: str | None = None,
@@ -434,7 +438,7 @@ class Component(object):
         component: str = "all",
         specname: str | None = None,
         build_id: str = "all",
-    ) -> list[Component]:
+    ) -> list[ComponentType]:
         """Get a list of latest components.
 
         :param store: a store instance
@@ -462,7 +466,7 @@ class Component(object):
         return [cls.load(data=comp, store=store) for comp in comps]
 
     def download(
-        self,
+        self: ComponentType,
         dest_dir: str | None,
         as_name: str | None = None,
         unpack_dir: str | None = None,
@@ -528,7 +532,7 @@ class Component(object):
             tmp_dir_root=tmp_dir_root,
         )
 
-    def push(self) -> Component:
+    def push(self: ComponentType) -> ComponentType:
         """Push the component to store, using self.store to do so.
 
         This operation requires self.store to be a StoreRWInterface; otherwise,
@@ -544,7 +548,7 @@ class Component(object):
         self.__update(result)
         return result
 
-    def __update(self, component: Component) -> None:
+    def __update(self: ComponentType, component: Component) -> None:
         """Update this component data.
 
         This method is used to update the value of the current component from another.
@@ -572,7 +576,13 @@ class Component(object):
         self.build_info = component.build_info
         self.creation_date = component.creation_date
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self: ComponentType, other: object) -> bool:
+        """Compare two component object.
+
+        :param other: the other object to compare with the current one.
+        :return: False if other is not a component or if other is different to the
+            current component.
+        """
         if not isinstance(other, self.__class__):
             return False
         for attr_name, attr_val in list(self.__dict__.items()):
@@ -589,5 +599,9 @@ class Component(object):
                 return False
         return True
 
-    def __ne__(self, other: object) -> bool:
+    def __ne__(self: ComponentType, other: object) -> bool:
+        """Inverse of self.__eq__.
+
+        :return: True if not self.__eq__(other).
+        """
         return not self.__eq__(other)

@@ -15,12 +15,14 @@ from e3.anod.store.interface import StoreRWInterface
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from typing import Any, Literal, TypedDict
+    from typing import Any, Literal, TypedDict, TypeVar
 
     from e3.archive import RemoveRootDirType
 
     from e3.anod.store.interface import StoreReadInterface
     from e3.anod.store.buildinfo import BuildInfo, BuildInfoDict
+
+    FileType = TypeVar("FileType", bound="File")
 
     class ResourceDict(TypedDict):
         id: str
@@ -90,7 +92,7 @@ class File(object):
     """
 
     def __init__(
-        self,
+        self: FileType,
         build_id: str,
         kind: FileKind,
         name: str,
@@ -155,19 +157,19 @@ class File(object):
         if resource_path is not None:
             self.bind_to_resource(resource_path)
 
-    def push(self) -> File:
+    def push(self: FileType) -> FileType:
         """Upload this file to Store, using self.store to do so.
 
         :return: A newly created File instance of the final file. The current instance
             is also updated accordingly.
         """
-        res = File.load(
+        res = self.load(
             data=self.store.submit_file(self.as_dict()), store=self.store  # type: ignore[union-attr]
         )
         self.__update(res)
         return res
 
-    def __update(self, file: File) -> None:
+    def __update(self: FileType, file: FileType) -> None:
         """Update this file data.
 
         This method is used to update the value of the current file from another.
@@ -193,7 +195,7 @@ class File(object):
         self.unpack_dir = file.unpack_dir
         self.build_info = file.build_info
 
-    def bind_to_resource(self, path: os.PathLike[str] | str) -> None:
+    def bind_to_resource(self: FileType, path: os.PathLike[str] | str) -> None:
         """Bind this File to the file at the given path.
 
         Unless self.resource_id is already set, this also sets self.resource_id
@@ -206,7 +208,7 @@ class File(object):
             self.resource_id = store_resource_id(path)
         self.downloaded_as = os.path.abspath(path)
 
-    def set_metadata_statement(self, name: str, data: DSSE) -> None:
+    def set_metadata_statement(self: FileType, name: str, data: DSSE) -> None:
         """Set metadata statement.
 
         :param name: statement name
@@ -218,7 +220,7 @@ class File(object):
             )
         self.metadata[name] = data.as_dict()
 
-    def get_metadata_statement(self, name: str) -> DSSE | None:
+    def get_metadata_statement(self: FileType, name: str) -> DSSE | None:
         """Get metadata statement.
 
         :param name: statement name
@@ -242,13 +244,13 @@ class File(object):
 
         return DSSE.load_dict(result_data)
 
-    def update_metadata(self) -> None:
+    def update_metadata(self: FileType) -> None:
         """Push file updates to Store."""
         assert isinstance(self.store, StoreRWInterface)
         self.store.update_file_metadata(self.as_dict())
 
     @classmethod
-    def metadata_path(cls, dest_dir: str, name: str) -> str:
+    def metadata_path(cls: type[FileType], dest_dir: str, name: str) -> str:
         """Return the path to the metadata file associated to a File.
 
         :param dest_dir: The directory where the File is to be downloaded to.
@@ -258,7 +260,7 @@ class File(object):
         return os.path.join(dest_dir, name + "_meta.json")
 
     def download(
-        self,
+        self: FileType,
         dest_dir: str | None,
         as_name: str | None = None,
         unpack_dir: str | None = None,
@@ -343,7 +345,7 @@ class File(object):
         if dest_dir is not None:
             if not os.path.isdir(dest_dir):
                 raise StoreError(f"non existent dir: {dest_dir}")
-            prev_source = File.load_from_meta_file(
+            prev_source = self.load_from_meta_file(
                 dest_dir=dest_dir,
                 name=cast(str, meta_name),
                 store=self.store,
@@ -440,7 +442,7 @@ class File(object):
                 )
         return not skip
 
-    def as_dict(self) -> FileDict:
+    def as_dict(self: FileType) -> FileDict:
         """Convert the current File instance into a python dictionary.
 
         :return: The dictionary representation of the file instance.
@@ -465,10 +467,10 @@ class File(object):
 
     @classmethod
     def load(
-        cls,
+        cls: type[FileType],
         data: FileDict,
         store: StoreReadInterface | StoreRWInterface | None = None,
-    ) -> File:
+    ) -> FileType:
         """Load and create a File class instance from a dictionary.
 
         :param data: The dictionary representing a file.
@@ -498,7 +500,7 @@ class File(object):
             internal = kind != "binary"
 
         try:
-            result = File(
+            result = cls(
                 file_id=data["_id"],
                 build_id=data["build_id"],
                 kind=FileKind(kind),
@@ -518,38 +520,45 @@ class File(object):
             logger.exception(e)
             logger.critical(f"cannot unserialize File from object: {data}")
             raise e
+
         return result
 
     @overload
     @classmethod
     def load_from_meta_file(
-        cls,
+        cls: type[FileType],
         dest_dir: str,
         name: str,
         store: StoreReadInterface | StoreRWInterface | None = None,
         ignore_errors: Literal[False] = False,
-    ) -> File:
+    ) -> FileType:
+        """See self.load_from_meta_file.
+
+        This overload indicate that the method will always return a component if
+        ignore_errors is False. If no component is found for any reason, raise an error.
+        """
         pass  # pragma: no cover
 
     @overload
     @classmethod
     def load_from_meta_file(  # noqa: F811
-        cls,
+        cls: type[FileType],
         dest_dir: str,
         name: str,
         store: StoreReadInterface | StoreRWInterface | None = None,
         ignore_errors: Literal[True] = True,
-    ) -> File | None:
+    ) -> FileType | None:
+        """See self.load_from_meta_file."""
         pass  # pragma: no cover
 
     @classmethod
     def load_from_meta_file(  # noqa: F811
-        cls,
+        cls: type[FileType],
         dest_dir: str,
         name: str,
         store: StoreReadInterface | StoreRWInterface | None = None,
         ignore_errors: bool = False,
-    ) -> File | None:
+    ) -> FileType | None:
         """Load file from a metadata file.
 
         :param dest_dir: directory in which the metadata is located
@@ -578,20 +587,20 @@ class File(object):
                     f"error while loading metadata file {meta_path} ({e})"
                 ) from e
 
-    def save_to_meta_file(self, dest_dir: str, name: str) -> None:
+    def save_to_meta_file(self: FileType, dest_dir: str, name: str) -> None:
         """Dump as json file component information.
 
         :param dest_dir: directory in which the metadata file should
             be saved
         :param name: file basename
         """
-        with open(File.metadata_path(dest_dir=dest_dir, name=name), "w") as fd:
+        with open(self.metadata_path(dest_dir=dest_dir, name=name), "w") as fd:
             fd.write(json.dumps(self.as_dict(), indent=2))
 
     @classmethod
     def upload_thirdparty(
-        cls, store: StoreRWInterface, path: str, force: bool = False
-    ) -> File:
+        cls: type[FileType], store: StoreRWInterface, path: str, force: bool = False
+    ) -> FileType:
         """Upload the given file to Store as a third party.
 
         :param store: A store read-write object.
@@ -632,7 +641,7 @@ class File(object):
 
     @classmethod
     def upload_thirdparty_from_dir(
-        cls,
+        cls: type[FileType],
         store: StoreRWInterface,
         path: str,
         prefix: str,
@@ -673,7 +682,13 @@ class File(object):
 
         return filename
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self: FileType, other: object) -> bool:
+        """Compare two file object.
+
+        :param other: the other object to compare with the current one.
+        :return: False if other is not a file or if other is different to the
+            current file.
+        """
         if not isinstance(other, self.__class__):
             return False
         for attr_name, attr_val in list(self.__dict__.items()):
@@ -689,8 +704,13 @@ class File(object):
                 return False
         return True
 
-    def __ne__(self, other: object) -> bool:
+    def __ne__(self: FileType, other: object) -> bool:
+        """Inverse of self.__eq__.
+
+        :return: True if not self.__eq__(other).
+        """
         return not self.__eq__(other)
 
-    def __str__(self) -> str:
+    def __str__(self: FileType) -> str:
+        """Convert a file to a str."""
         return f"{self.name}:{self.kind}:{self.file_id}"

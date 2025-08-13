@@ -11,13 +11,15 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from typing import TypedDict
+    from typing import TypedDict, TypeVar
 
     from e3.anod.store.interface import (
         StoreReadInterface,
         StoreRWInterface,
         BuildDataDict,
     )
+
+    BuildInfoType = TypeVar("BuildInfoType", bound="BuildInfo")
 
     class BuildInfoDict(TypedDict):
         _id: str
@@ -51,16 +53,16 @@ class BuildInfo(object):
 
     @classmethod
     def load(
-        cls,
+        cls: type[BuildInfoType],
         data: BuildInfoDict,
         store: StoreReadInterface | StoreRWInterface | None = None,
-    ) -> BuildInfo:
+    ) -> BuildInfoType:
         """Create a BuildInfo from the result of a Store build info request.
 
         :param data: The dictionary returned by Store after a build info request.
         :param store: a Store instance
         """
-        return BuildInfo(
+        return cls(
             build_date=str(data["build_date"]),
             setup=str(data["setup"]),
             creation_date=data["creation_date"],
@@ -71,7 +73,7 @@ class BuildInfo(object):
         )
 
     def __init__(
-        self,
+        self: BuildInfoType,
         build_date: str,
         setup: str,
         creation_date: str,
@@ -98,7 +100,8 @@ class BuildInfo(object):
         self.isready = isready
         self.store = store
 
-    def __str__(self) -> str:
+    def __str__(self: BuildInfoType) -> str:
+        """Convert a buildinfo to a str."""
         return "%-8s | %-16s | %-16s | %s | %s | %s" % (
             self.build_date,
             self.setup,
@@ -108,7 +111,13 @@ class BuildInfo(object):
             "ready" if self.isready else "notready",
         )
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self: BuildInfoType, other: object) -> bool:
+        """Compare two buildinfo object.
+
+        :param other: the other object to compare with the current one.
+        :return: False if other is not a buildinfo or if other is different to the
+            current buildinfo.
+        """
         if not isinstance(other, self.__class__):
             return False
         for attr_name, attr_val in list(self.__dict__.items()):
@@ -120,10 +129,14 @@ class BuildInfo(object):
                 return False
         return True
 
-    def __ne__(self, other: object) -> bool:
+    def __ne__(self: BuildInfoType, other: object) -> bool:
+        """Inverse of self.__eq__.
+
+        :return: True if not self.__eq__(other).
+        """
         return not self.__eq__(other)
 
-    def get_build_data(self) -> BuildDataDict:
+    def get_build_data(self: BuildInfoType) -> BuildDataDict:
         """Call self.store.get_build_data.
 
         :raises AttributeError: If self.store is None.
@@ -133,7 +146,7 @@ class BuildInfo(object):
             raise AttributeError("self.store is None")
         return self.store.get_build_data(bid=self.id)
 
-    def mark_ready(self) -> bool:
+    def mark_ready(self: BuildInfoType) -> bool:
         """Call self.store.mark_build_ready.
 
         :raises AttributeError: If self.store is None or not a StoreWriteInterface.
@@ -146,7 +159,7 @@ class BuildInfo(object):
         self.isready = self.store.mark_build_ready(bid=self.id)
         return self.isready
 
-    def get_source_list(self) -> list[File]:
+    def get_source_list(self: BuildInfoType) -> list[File]:
         """Get the list of source files associated to our BuildInfo object.
 
         :raises AttributeError: If self.store is None.
@@ -157,9 +170,11 @@ class BuildInfo(object):
         result = self.store.get_build_data(bid=self.id)
         return [File.load(f, store=self.store) for f in result.get("sources", [])]
 
-    def get_source_info(self, name: str, kind: str = "source") -> File:
+    def get_source_info(self: BuildInfoType, name: str, kind: str = "source") -> File:
         """Return the File with the given name and kind.
 
+        :param name: the file object name.
+        :param kind: the file object kind.
         :raises AttributeError: If self.store is None.
         :return: A File.
         """
@@ -170,7 +185,7 @@ class BuildInfo(object):
             store=self.store,
         )
 
-    def get_component(self, name: str, platform: str) -> Component:
+    def get_component(self: BuildInfoType, name: str, platform: str) -> Component:
         """Get a component for a given build id.
 
         :param name: component name
@@ -186,7 +201,7 @@ class BuildInfo(object):
         return result[0]
 
     def get_component_list(
-        self, name: str = "all", platform: str = "all"
+        self: BuildInfoType, name: str = "all", platform: str = "all"
     ) -> list[Component]:
         """Get a component list for the given build id.
 
@@ -204,13 +219,13 @@ class BuildInfo(object):
 
     @classmethod
     def latest(
-        cls,
+        cls: type[BuildInfoType],
         store: StoreReadInterface | StoreRWInterface,
         setup: str,
         build_version: str = "all",
         build_date: str | None = "all",
         ready_only: bool = True,
-    ) -> BuildInfo:
+    ) -> BuildInfoType:
         """Find a build.
 
         :param store: A Store instance.
@@ -235,19 +250,19 @@ class BuildInfo(object):
 
     @classmethod
     def list(
-        cls,
+        cls: type[BuildInfoType],
         store: StoreReadInterface | StoreRWInterface,
         build_date: str = "all",
         setup: str = "all",
         build_version: str = "all",
         nb_days: int = 1,
-    ) -> list[BuildInfo]:
+    ) -> list[BuildInfoType]:
         """Find a build in a date range.
 
         :param store: Store instance to get build list from.
-        :param setup: setup the returned build info should match.
         :param build_date: build date, in 'YYYYMMDD' format the returned build
             info should match (along with *nb_days*).
+        :param setup: setup the returned build info should match.
         :param build_version: version the returned build info should match.
         :param nb_days: maximum number of days to retrieve.
 
@@ -267,22 +282,21 @@ class BuildInfo(object):
 
     @classmethod
     def create(
-        cls,
+        cls: type[BuildInfoType],
         store: StoreRWInterface,
         setup: str,
         version: str,
         date: str | None = None,
         *,
         mark_ready: bool = False,
-    ) -> BuildInfo:
+    ) -> BuildInfoType:
         """Create a new build id.
 
-        :param store: The store instance to use.
-            Must be able to write.
-        :param setup: setup name
-        :param version: version
-        :param date: build date
-        :param mark_ready: Mark the buildinfo as ready after creating it
+        :param store: The store instance to use. Must be able to write.
+        :param setup: setup name.
+        :param version: version.
+        :param date: build date.
+        :param mark_ready: Mark the buildinfo as ready after creating it.
         """
         if date is None:
             date = cls.today_build_date()
@@ -297,29 +311,45 @@ class BuildInfo(object):
 
     @classmethod
     def from_id(
-        cls, store: StoreReadInterface | StoreRWInterface, build_id: str
-    ) -> BuildInfo:
+        cls: type[BuildInfoType],
+        store: StoreReadInterface | StoreRWInterface,
+        build_id: str,
+    ) -> BuildInfoType:
         """Return a build object based on its id.
 
-        :param store: Store instance
-        :param build_id: the build id
-        :return: a BuildInfo object
+        :param store: Store instance.
+        :param build_id: the build id.
+        :return: a BuildInfo object.
         """
         return cls.load(data=store.get_build_info(bid=build_id), store=store)
 
     @classmethod
-    def today_build_date(cls) -> str:
+    def today_build_date(cls: type[BuildInfoType]) -> str:
+        """Return the today build date using the YYYYMMDD format.
+
+        The today build date is the current date minus 1 day.
+        """
         return (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y%m%d")
 
     @classmethod
     def wait(
-        cls,
+        cls: type[BuildInfoType],
         store: StoreReadInterface | StoreRWInterface,
         setup: str,
         build_date: str | None = None,
         timeout: float = 36000.0,
         retry_delay: float = 60.0,
-    ) -> BuildInfo:
+    ) -> BuildInfoType:
+        """Wait until the today buildinfo is available.
+
+        :param store: the store instance used.
+        :param setup: the setup of the buildinfo waited.
+        :param build_date: the date of the build info to wait for.
+        :param timeout: the global amount of time to wait.
+        :param retry_delay: the amount of time  to wait before trying again in the loop.
+        :return: a buildinfo object.
+        :raises E3Error: If the timeout is exceeded.
+        """
         if build_date is None:
             build_date = cls.today_build_date()
 
@@ -354,7 +384,9 @@ class BuildInfo(object):
 
         return build_info
 
-    def copy(self, dest_setup: str, mark_as_ready: bool = True) -> BuildInfo:
+    def copy(
+        self: BuildInfoType, dest_setup: str, mark_as_ready: bool = True
+    ) -> BuildInfoType:
         """Copy the current build id into another setup.
 
         Note that only sources elements are copied.
@@ -377,7 +409,7 @@ class BuildInfo(object):
             result.mark_ready()
         return result
 
-    def to_dict(self) -> BuildInfoDict:
+    def to_dict(self: BuildInfoType) -> BuildInfoDict:
         """Return a dictionary representation of self.
 
         Feeding to this class' "load" method the value returned by
