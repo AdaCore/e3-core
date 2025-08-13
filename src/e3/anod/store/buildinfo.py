@@ -79,7 +79,7 @@ class BuildInfo(object):
         build_version: str,
         isready: bool,
         store: StoreReadInterface | StoreRWInterface | None = None,
-    ):
+    ) -> None:
         """Initialize the BuildInfo object.
 
         :param build_date: Same as the attribute.

@@ -85,11 +85,11 @@ def test_file(store):
     assert f["alias"] == "test.txt"
     assert f["filename"] == "test.txt"
     assert f["revision"] == ""
-    assert f["metadata"] is None
+    assert f["metadata"] == {}
     assert f["build_id"] == buildinfo["_id"]
     assert "resource_id" in f
-    assert "_id" in f["resource"]
-    assert f["resource"]["_id"] == f["resource_id"]
+    assert "id" in f["resource"]
+    assert f["resource"]["id"] == f["resource_id"]
     assert f["resource"]["path"] == path_abs
     assert f["resource"]["size"] == 1
     date = datetime.fromisoformat(f["resource"]["creation_date"]).replace(

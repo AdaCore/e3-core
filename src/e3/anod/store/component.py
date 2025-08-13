@@ -115,7 +115,7 @@ class Component(object):
         else:
             self.attachments = attachments or {}
 
-        self.releases = releases
+        self.releases = releases or []
         self.is_valid = is_valid
         self.is_published = is_published
         self.build_info = build_info
@@ -583,7 +583,8 @@ class Component(object):
             val = getattr(other, attr_name)
             if val != attr_val:
                 logger.debug(
-                    f"Component attribute {attr_name} differ: {val!r} != {attr_val!r}"
+                    f"Component attribute {attr_name!r} differ: "
+                    f"other.{attr_name} = {val!r}, self.{attr_name} = {attr_val!r}"
                 )
                 return False
         return True

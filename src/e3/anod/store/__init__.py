@@ -201,7 +201,7 @@ class _Store(_StoreContextManager):
         component_releases = "component_releases"
         components = "components"
 
-    def __init__(self, db: os.PathLike | None = None) -> None:
+    def __init__(self, db: os.PathLike[str] | str | None = None) -> None:
         """Initialize the Store class.
 
         This will create the database and its tables (if needed).
@@ -209,7 +209,8 @@ class _Store(_StoreContextManager):
         :param db: A path to the database. If None, a new database is created with the
             name `.store.db`.
         """
-        self.connection = sqlite3.connect(db or ".store.db")
+        self.db_path = os.fspath(db or ".store.db")
+        self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.buildinfos}("
@@ -217,7 +218,7 @@ class _Store(_StoreContextManager):
             "    build_date TEXT NOT NULL,"
             "    setup TEXT NOT NULL,"
             "    creation_date TEXT NOT NULL DEFAULT("
-            "        STRFTIME('%Y-%m-%d %H:%M:%f+00:00', 'now')"
+            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
             "    ),"
             "    build_version TEXT NOT NULL,"
             "    isready INTEGER NOT NULL DEFAULT 0 CHECK(isready in (0, 1))"
@@ -230,7 +231,7 @@ class _Store(_StoreContextManager):
             "    path TEXT NOT NULL,"
             "    size INTEGER NOT NULL,"
             "    creation_date TEXT NOT NULL DEFAULT("
-            "        STRFTIME('%Y-%m-%d %H:%M:%f+00:00', 'now')"
+            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
             "    )"
             ")"
         )
@@ -246,7 +247,7 @@ class _Store(_StoreContextManager):
             "   revision TEXT NOT NULL,"
             "   metadata TEXT NOT NULL,"
             "   creation_date TEXT NOT NULL DEFAULT("
-            "       STRFTIME('%Y-%m-%d %H:%M:%f+00:00', 'now')"
+            "       STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
             "   )"
             ")"
         )
@@ -259,7 +260,7 @@ class _Store(_StoreContextManager):
             "   internal INTEGER NOT NULL DEFAULT 1 CHECK(internal IN (0, 1)),"
             "   attachment_name TEXT,"
             "   CHECK("
-            "       (attachment_name IS NOT NULL AND kind='attachment')"
+            "       (attachment_name IS NOT NULL AND kind='attachment') "
             "       OR kind IN ('file', 'source')"
             "   )"
             ")"
@@ -280,7 +281,7 @@ class _Store(_StoreContextManager):
             "   specname TEXT,"  # Can be Null
             "   build_id TEXT NOT NULL,"
             "   creation_date TEXT NOT NULL DEFAULT("
-            "       STRFTIME('%Y-%m-%d %H:%M:%f+00:00', 'now')"
+            "       STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
             "   ),"
             "   is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
             "   is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
@@ -341,6 +342,7 @@ class _Store(_StoreContextManager):
         if where_clause:
             sql = f"{sql}WHERE {where_clause} "
         sql = f"{sql}ORDER BY {order_by}"
+
         return self.cursor.execute(sql, dynamic_where_values).fetchall()
 
     def _select_one(
@@ -397,7 +399,7 @@ class _Store(_StoreContextManager):
         """
         _, resource_id, path, size, creation_date = req_tuple
         return {
-            "_id": resource_id,
+            "id": resource_id,
             "path": path,
             "size": size,
             "creation_date": creation_date,
@@ -447,7 +449,7 @@ class _Store(_StoreContextManager):
                 self._select_one(_Store.TableName.buildinfos, build_id)  # type: ignore[arg-type]
             )
 
-        if not resource or resource["_id"] != resource_id:
+        if not resource or resource["id"] != resource_id:
             resource = self._tuple_to_resource(
                 self._select_one(
                     _Store.TableName.resources, resource_id, field_name="resource_id"  # type: ignore[arg-type]
@@ -461,7 +463,7 @@ class _Store(_StoreContextManager):
             "alias": alias,
             "filename": filename,
             "revision": revision,
-            "metadata": json.loads(metadata) if metadata else None,
+            "metadata": json.loads(metadata) if metadata else {},
             "build_id": str(build_id),
             "resource_id": resource_id,
             "build": buildinfo,
@@ -729,7 +731,8 @@ class _Store(_StoreContextManager):
                 else self._list_component_files(
                     "attachment", comp_id, component_buildinfo=buildinfo
                 )
-            ),
+            )
+            or None,
             "build": buildinfo,
         }
 
@@ -822,29 +825,29 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         file_info["revision"] = ""
         return self.submit_file(file_info)
 
+    def _insert_to_component_files(
+        self,
+        kind: Literal["file"] | Literal["source"] | Literal["attachment"],
+        file_list: Sequence[tuple[str | None, FileDict]],
+        component_id: str | int,
+    ) -> None:
+        """Insert a list of files to the component_files database table.
+
+        :param kind: The kind of file to insert.
+        :param file_list: A sequence of tuples. The first element of this tuple must
+            be None if the kind != attachment. Otherwise, this represents the
+            attachment name. The second element should always be a FileDict.
+        :param component_id: The component id linked to these files.
+        """
+        for att_name, f in file_list:
+            self._insert(
+                _Store.TableName.component_files,
+                ["kind", "file_id", "component_id", "attachment_name"],  # type: ignore[arg-type]
+                [kind, f["_id"], component_id, att_name],
+            )
+
     def submit_component(self, component_info: ComponentDict) -> ComponentDict:
         """See e3.anod.store.interface.StoreWriteInterface."""
-
-        def insert_to_component_files(
-            kind: Literal["file"] | Literal["source"] | Literal["attachment"],
-            file_list: Sequence[tuple[str | None, FileDict]],
-            component_id: str | int,
-        ) -> None:
-            """Insert a list of files to the component_files database table.
-
-            :param kind: The kind of file to insert.
-            :param file_list: A sequence of tuples. The first element of this tuple must
-                be None if the kind != attachment. Otherwise, this represents the
-                attachment name. The second element should always be a FileDict.
-            :param component_id: The component id linked to these files.
-            """
-            for att_name, f in file_list:
-                self._insert(
-                    _Store.TableName.component_files,
-                    ["kind", "file_id", "component_id", "attachment_name"],  # type: ignore[arg-type]
-                    [kind, f["_id"], component_id, att_name],
-                )
-
         # Upload only readmes, binaries and attachments, as sources are supposed to be
         # already there.
 
@@ -859,7 +862,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         # Retrieve binaries an upload them.
         files = [self._submit_file(file_info) for file_info in component_info["files"]]
 
-        # Retrieve attachment an upload them.
+        # Retrieve attachments and upload them.
         attachments_with_name: dict[str, FileDict] = {}
         attachments = component_info.get("attachments")
         if attachments:
@@ -914,10 +917,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         )
         # Create relation between files/sources/attachment and the new component.
         comp_id = req_tuple[0]
-        insert_to_component_files("file", [(None, f) for f in files], comp_id)
+        self._insert_to_component_files("file", [(None, f) for f in files], comp_id)
         sources = component_info["sources"]
-        insert_to_component_files("source", [(None, src) for src in sources], comp_id)
-        insert_to_component_files(
+        self._insert_to_component_files(
+            "source", [(None, src) for src in sources], comp_id
+        )
+        self._insert_to_component_files(
             "attachment", list(attachments_with_name.items()), comp_id
         )
         # Add the list of releases linked to this component.
@@ -1002,12 +1007,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             _Store.TableName.files,
             fid,
             ["metadata"],  # type: ignore[arg-type]
-            [json.dumps(file_info["metadata"]) if file_info["metadata"] else ""],
+            [json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}"],
         )
         self.connection.commit()
         return self._tuple_to_file(req_tuple, buildinfo=buildinfo)  # type: ignore[arg-type]
 
-    def add_component_attachment(
+    def _add_component_attachment(
         self, component_id: str, file_id: str, name: str
     ) -> None:
         """See e3.anod.store.interface.StoreWriteInterface."""
@@ -1016,6 +1021,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             ["kind", "file_id", "component_id", "attachment_name"],  # type: ignore[arg-type]
             ["attachment", file_id, component_id, name],
         )
+
+    def add_component_attachment(
+        self, component_id: str, file_id: str, name: str
+    ) -> None:
+        """See e3.anod.store.interface.StoreWriteInterface."""
+        self._add_component_attachment(component_id, file_id, name)
         self.connection.commit()
 
     ### PRIVATE ###
@@ -1087,7 +1098,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 file_info["kind"],
                 resource_id,
                 file_info["revision"],
-                json.dumps(file_info["metadata"]) if file_info["metadata"] else "",
+                json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}",
             ],
         )
         res = self._tuple_to_file(req_tuple, resource=resource)  # type: ignore[arg-type]
@@ -1258,7 +1269,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
         date = date or "all"
 
         static_where_rules: tuple[str, ...]
-        if date == "all":
+        if not date or date == "all":
             static_where_rules = ()
         else:
             assert len(date) == 8
