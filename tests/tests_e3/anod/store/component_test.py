@@ -12,7 +12,9 @@ from e3.anod.store.interface import StoreError
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
+from e3.dsse import DSSE
 from e3.os.fs import touch
+from e3.slsa.provenance import Statement
 
 if TYPE_CHECKING:
     from e3.anod.store.component import ComponentDict
@@ -59,8 +61,7 @@ def create_component_with_attachments() -> tuple[Component, File, File]:
     return c, att_1, att_2
 
 
-def test_component_push(store):
-    """Check that we can create a component and retrieve it."""
+def push_component(store, metadata: dict[str, object] | None = None) -> Component:
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     del build_id
@@ -96,9 +97,14 @@ def test_component_push(store):
         files=[binary],
         attachments={"toto_att": att},
         store=store,
+        metadata=metadata,
     )
-    c = c.push()
+    return c.push()
 
+
+def test_component_push(store):
+    """Check that we can create a component and retrieve it."""
+    c = push_component(store=store)
     comp_list = Component.latest(store=store, setup=DEFAULT_SETUP)
     assert len(comp_list) == 1, "Only one component pushed"
     comp = comp_list[0]
@@ -216,6 +222,7 @@ def test_component_eq_ne():
         "is_published": (not c.is_published, False),
         "build_info": ("whatever", False),
         "creation_date": ("some date", False),
+        "metadata": ({"some": "dict"}, False),
         # Attributes that do not affect comparison...
         "store": ("unimportant", True),
     }
@@ -290,6 +297,70 @@ def test_component_attachment(caplog) -> None:  # type: ignore[no-untyped-def]
     removed = c.remove_attachment(att2_key)
     assert removed is True
     assert len(c.get_attachments()) == 0
+
+
+def test_component_metadata(store) -> None:  # type: ignore[no-untyped-def]
+    """Check component metadata APIs."""
+    metadata: dict[str, object] = {
+        "one": 1,
+        "two": "two",
+        "three": {1: 1, 2: 2},
+        "none": None,
+        "list": '["one", "two"]',
+    }
+    comp: Component = push_component(store=store, metadata=metadata)
+
+    # Add a metadata statement
+    statement: Statement = Statement(
+        statement_type=Statement.SCHEMA_TYPE_VALUE, subject=[]
+    )
+    comp.set_metadata_statement(
+        "provenance",
+        DSSE(body=statement.as_json(), payload_type="application/provenance-data+json"),
+    )
+    comp.push()
+
+    # Retrieve the component from store, and check metadata
+    comp_list = Component.latest(store=store, setup=DEFAULT_SETUP)
+    assert len(comp_list) == 1, "Too many registered components"
+    latest_comp: Component = comp_list[0]
+    assert "provenance" in latest_comp.metadata, "Missing provenance metadata"
+    latest_statement: DSSE = latest_comp.get_metadata_statement("provenance")
+    assert isinstance(
+        latest_statement, DSSE
+    ), f"Invalid provenance metadata type ({latest_statement.__class__.__name__}!r)"
+    # Now compare the retrieved statement
+    assert (
+        Statement.load_json(latest_statement.body) == statement
+    ), "Statement metadata has been modified"
+    # Check initial metadata values
+    for key, value in metadata.items():
+        if isinstance(value, dict):
+            # Compare through JSON
+            assert json.dumps(latest_comp.metadata[key], sort_keys=True) == json.dumps(
+                value, sort_keys=True
+            )
+        else:
+            assert (
+                latest_comp.metadata[key] == value
+            ), "Missing key/value pair in metadata"
+
+    # More code coverage for the get_metadata_statement() method
+    assert latest_comp.get_metadata_statement("none") is None
+    with pytest.raises(TypeError, match="the JSON object must be"):
+        latest_comp.get_metadata_statement("one")
+    # assert "the JSON object must be" in te.value.args[0]
+    with pytest.raises(json.decoder.JSONDecodeError, match="Expecting value"):
+        latest_comp.get_metadata_statement("two")
+
+    with pytest.raises(TypeError, match="Corrupted metadata:"):
+        latest_comp.get_metadata_statement("list")
+
+    # More code coverage for the set_metadata_statement() method
+    with pytest.raises(
+        StoreError, match="Metadata statement should be a DSSE envelope."
+    ):
+        comp.set_metadata_statement("Not-a-DSSE", None)
 
 
 def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untyped-def]

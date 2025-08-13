@@ -143,6 +143,7 @@ class _Store(_StoreContextManager):
             "is_valid",
             "is_published",
             "readme_id",
+            "metadata",
         ]
         ComponentTuple = tuple[
             DB_IDType,  # id
@@ -155,6 +156,7 @@ class _Store(_StoreContextManager):
             DB_BoolType,  # is_valid
             DB_BoolType,  # is_published
             DB_OptionalIDType,  # readme_id
+            str,  # metadata
         ]
 
         AnyField = Union[
@@ -286,7 +288,8 @@ class _Store(_StoreContextManager):
             "   is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
             "   is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
             # Component has at least one file
-            "   readme_id TEXT"
+            "   readme_id TEXT,"
+            "   metadata TEXT NOT NULL"
             ")"
         )
         self.connection.commit()
@@ -697,6 +700,7 @@ class _Store(_StoreContextManager):
             is_valid,
             is_published,
             readmeid,
+            metadata,
         ) = req_tuple
 
         # If no buildinfo is provided or a wrong one, retrieve the correct buildinfo
@@ -761,6 +765,7 @@ class _Store(_StoreContextManager):
             )
             or None,
             "build": buildinfo,
+            "metadata": json.loads(metadata) if metadata else {},
         }
 
     def _tuple_list_to_comp_list(
@@ -932,6 +937,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "is_valid",
                 "is_published",
                 "readme_id",
+                "metadata",
             ],
             [
                 unique_id(),
@@ -943,6 +949,11 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 int(component_info.get("is_valid", True)),
                 int(component_info.get("is_published", False)),
                 readme_id or None,
+                (
+                    json.dumps(component_info["metadata"])
+                    if component_info.get("metadata")
+                    else "{}"
+                ),
             ],
         )
         # Create relation between files/sources/attachment and the new component.
