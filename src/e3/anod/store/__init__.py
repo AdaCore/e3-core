@@ -411,6 +411,7 @@ class _Store(_StoreContextManager):
         *,
         resource: ResourceDict | None = None,
         buildinfo: BuildInfoDict | None = None,
+        internal: bool | None = None,
     ) -> FileDict:
         """Convert a tuple to a FileDict.
 
@@ -423,6 +424,8 @@ class _Store(_StoreContextManager):
             retrieved from the database.
         :param buildinfo: The buildinfo dict linked to this file. If None, this dict is
             retrieved from the database.
+        :param internal: None if unknown, True if the file is intern to a component,
+            False otherwise.
         :return: The `dict` representation of a `File` object.
         """
         (
@@ -456,6 +459,9 @@ class _Store(_StoreContextManager):
                 )
             )
 
+        if internal is None:
+            internal = kind != "binary"
+
         return {
             "_id": str(fid),
             "kind": kind,
@@ -468,6 +474,9 @@ class _Store(_StoreContextManager):
             "resource_id": resource_id,
             "build": buildinfo,
             "resource": resource,
+            "internal": bool(internal),
+            "unpack_dir": None,
+            "downloaded_as": resource["path"] or None,
         }
 
     def _tuple_list_to_buildinfo_list(
@@ -601,10 +610,14 @@ class _Store(_StoreContextManager):
         fields: list[tuple[_Store.TableName, _Store.AnyField | Literal["*"]]] = (
             [
                 (_Store.TableName.component_files, "attachment_name"),
+                (_Store.TableName.component_files, "internal"),
                 (_Store.TableName.files, "*"),
             ]
             if is_attachment
-            else [(_Store.TableName.files, "*")]
+            else [
+                (_Store.TableName.component_files, "internal"),
+                (_Store.TableName.files, "*"),
+            ]
         )
         req = self._select_inner_join(
             _Store.TableName.files,
@@ -627,13 +640,20 @@ class _Store(_StoreContextManager):
                 assert (
                     len(req_tuple) >= 1
                 ), "Should never occur: empty database response"
-                name, *file_tuple = req_tuple
+                name, internal, *file_tuple = req_tuple
                 # We are sure here that 'name' is a string.
                 res[name] = self._tuple_to_file(  # type: ignore[index]
-                    file_tuple, buildinfo=component_buildinfo  # type: ignore[arg-type]
+                    file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
                 )
         else:
-            res = self._tuple_list_to_file_list(req, buildinfo=component_buildinfo)  # type: ignore[arg-type]
+            res = []
+            for req_tuple in req:
+                internal, *file_tuple = req_tuple
+                res.append(
+                    self._tuple_to_file(  # type: ignore[index]
+                        file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
+                    )
+                )
         return res
 
     def _tuple_to_comp(
@@ -840,10 +860,13 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         :param component_id: The component id linked to these files.
         """
         for att_name, f in file_list:
+            internal = f.get("internal", True)
+            if internal is None:
+                internal = True
             self._insert(
                 _Store.TableName.component_files,
-                ["kind", "file_id", "component_id", "attachment_name"],  # type: ignore[arg-type]
-                [kind, f["_id"], component_id, att_name],
+                ["kind", "file_id", "component_id", "internal", "attachment_name"],  # type: ignore[arg-type]
+                [kind, f["_id"], component_id, internal, att_name],
             )
 
     def submit_component(self, component_info: ComponentDict) -> ComponentDict:

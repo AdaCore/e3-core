@@ -44,9 +44,9 @@ if TYPE_CHECKING:
         build_id: str
         resource_id: str | None
         build: BuildInfoDict
-        resource: Any
-        internal: bool
-        downloaded_as: str | None
+        resource: ResourceDict
+        internal: bool | None
+        downloaded_as: os.PathLike[str] | str | None
         unpack_dir: str | None
 
 
