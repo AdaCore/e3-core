@@ -4,6 +4,7 @@ from enum import StrEnum
 import os
 import json
 import sqlite3
+import time
 from packaging.version import Version
 from typing import TYPE_CHECKING
 
@@ -15,6 +16,7 @@ from e3.anod.store.interface import (
     StoreReadInterface,
     StoreWriteInterface,
     StoreRWInterface,
+    LocalStoreInterface,
     _StoreContextManager,
 )
 
@@ -1610,3 +1612,536 @@ class StoreRW(StoreRWInterface, StoreReadOnly, StoreWriteOnly):
 
 class Store(StoreReadOnly):
     pass
+
+
+class LocalStore(StoreRW, LocalStoreInterface):
+    def __init__(
+        self,
+        db: os.PathLike[str] | str | None = None,
+        online_store: StoreReadInterface | StoreRWInterface | None = None,
+    ) -> None:
+        """Initialise the LocalStore class.
+
+        :param db: The path to the current sqlite database file.
+        :param online_store: A store interface from which data is retrieved if needed.
+        """
+        super().__init__(db)
+        self.online_store = online_store
+
+    def download_resource(
+        self,
+        resource_id: str,
+        path: str,
+        *,
+        online_store: StoreReadInterface | None = None,
+    ) -> str:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.download_resource`
+        """
+        online_store = online_store or self.online_store
+
+        if online_store is not None:
+            return online_store.download_resource(resource_id, path)
+        else:
+            raise NotImplementedError
+
+    def _raw_add_build_info(self, build_info: BuildInfoDict) -> bool:
+        """Private interface method implementation.
+
+        This function will not commit the change to the database automatically. Return
+        True if something should be committed.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.raw_add_build_info`
+
+        :return: True if some change should be committed to the dabase, False otherwise.
+        """
+        tmp = dict(build_info)
+        tmp["id"] = build_info["_id"]
+        tmp.pop("_id", None)
+        try:
+            self._insert(
+                _Store.TableName.buildinfos,
+                list(tmp.keys()),  # type: ignore[arg-type]
+                list(tmp.values()),  # type: ignore[arg-type]
+            )
+        except sqlite3.IntegrityError as err:
+            if "UNIQUE constraint failed: buildinfos.id" not in str(err):
+                raise err
+            return False
+        else:
+            return True
+
+    def raw_add_build_info(self, build_info: BuildInfoDict) -> None:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.raw_add_build_info`
+        """
+        if self._raw_add_build_info(build_info):
+            self.connection.commit()
+
+    def add_build_info_from_store(
+        self, from_store: StoreReadInterface, bid: str
+    ) -> None:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.add_build_info_from_store`
+        """
+        try:
+            _ = self.get_build_info(bid)
+        except StoreError:
+            self.raw_add_build_info(from_store.get_build_info(bid))
+
+    def _raw_add_file(self, file_info: FileDict) -> bool:
+        """Private interface method implementation.
+
+        This function will not commit the change to the database automatically. Return
+        True if something should be committed.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.raw_add_file`
+
+        :return: True if some change should be committed to the dabase, False otherwise.
+        """
+        if not file_info.get("metadata"):
+            file_info["metadata"] = {}
+        if not file_info.get("downloaded_as"):
+            file_info["downloaded_as"] = None
+        if not file_info.get("unpack_dir"):
+            file_info["unpack_dir"] = None
+
+        name = file_info["name"]
+        bid = file_info["build_id"]
+        kind = file_info["kind"]
+
+        # Check if the file is already in our database.
+        try:
+            existing_file_info = self.get_source_info(name, bid, kind=kind)
+        except StoreError:
+            # Not found, we have to insert it.
+            pass
+        else:
+            # The file already exists, so just return.
+            file_info.update(existing_file_info)
+            return False
+
+        resource_id = file_info["resource_id"]
+
+        # Create the file entry
+        self._insert(
+            _Store.TableName.files,
+            [  # type: ignore[arg-type]
+                "id",
+                "name",
+                "alias",
+                "filename",
+                "build_id",
+                "kind",
+                "resource_id",
+                "revision",
+                "metadata",
+                # No creation_date, this is not part of a File representation.
+            ],
+            [
+                file_info["_id"],
+                name,
+                file_info["alias"],
+                file_info["filename"],
+                bid,
+                kind,
+                resource_id,
+                file_info["revision"],
+                json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}",
+            ],
+        )
+        # As get_source_info looks backward the final build id associated  with the
+        # returned source may differ from the one in the request. Be sure to register
+        # the build id associated with the source.
+        self._raw_add_build_info(file_info["build"])
+
+        downloaded_as = file_info.get("downloaded_as")
+        resource_path = os.path.abspath(downloaded_as) if downloaded_as else ""
+
+        resource_tmp = self._select(
+            _Store.TableName.resources, ["resource_id"], [resource_id]  # type: ignore[arg-type]
+        )
+        if resource_tmp:
+            row_id, resource_id, path, *rest = resource_tmp[0]
+            # Check if the path is still valid, if not, we got a new valid path,
+            # so we just need to update the database.
+            if os.path.isfile(path):
+                resource = self._tuple_to_resource(resource_tmp[0])  # type: ignore[arg-type]
+            else:
+                resource = self._tuple_to_resource(
+                    self._update(
+                        _Store.TableName.resources, row_id, ["path"], [resource_path]  # type: ignore[arg-type]
+                    )
+                )
+        else:  # Create the resource entry
+            resource = self._tuple_to_resource(
+                self._insert(  # type: ignore[arg-type]
+                    _Store.TableName.resources,
+                    ["resource_id", "path", "size", "creation_date"],  # type: ignore[arg-type]
+                    [
+                        resource_id,
+                        resource_path,
+                        os.stat(resource_path).st_size if resource_path else 0,
+                        file_info["resource"]["creation_date"],
+                    ],
+                )
+            )
+
+        file_info["resource"] = resource
+        if resource["path"]:
+            file_info["downloaded_as"] = resource["path"]
+        return True
+
+    def raw_add_file(self, file_info: FileDict) -> None:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.raw_add_file`
+        """
+        if self._raw_add_file(file_info):
+            self.connection.commit()
+
+    def add_source_from_store(
+        self,
+        from_store: StoreReadInterface,
+        name: str,
+        bid: str | None = None,
+        setup: str | None = None,
+        date: str = "all",
+        kind: Literal["source", "thirdparty"] = "source",
+    ) -> None:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.add_source_from_store`
+        """
+        if not bid:
+            assert setup is not None
+            bi = from_store.get_latest_build_info(setup=setup, date=date)
+            self.raw_add_build_info(bi)
+        else:
+            try:
+                _ = self.get_build_info(bid)
+            except StoreError:
+                bi = from_store.get_build_info(bid)
+                self.raw_add_build_info(bi)
+
+        self.raw_add_file(from_store.get_source_info(name, bi["_id"], kind=kind))
+
+    def _raw_add_component(self, component_info: ComponentDict) -> bool:
+        """Private interface method implementation.
+
+        This function will not commit the change to the database automatically. Return
+        True if something should be committed.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.raw_add_component`
+
+        :return: True if some change should be committed to the dabase, False otherwise.
+        """
+        comp_id = component_info["_id"]
+        # Check if the component is already in our database.
+        try:
+            tmp = self._tuple_to_comp(
+                self._select_one(Store.TableName.components, comp_id)  # type: ignore[arg-type]
+            )
+        except StoreError as err:
+            if f"No element with id={comp_id} found" not in str(err):
+                raise err
+        else:
+            # The file already exists, so just return.
+            component_info.update(tmp)
+            return False
+
+        if not comp_id:
+            raise StoreError("cannot add a raw component without id")
+
+        for file in (*component_info["files"], *component_info["sources"]):
+            self._raw_add_file(file)
+
+        # Retrieve attachments and upload them.
+        attachments_with_name: dict[str, FileDict] = {}
+        attachments = component_info.get("attachments")
+        if attachments:
+            if isinstance(attachments, dict):
+                for name, file_dict in attachments.items():
+                    self._raw_add_file(file_dict)
+                    attachments_with_name[name] = file_dict
+            elif isinstance(attachments, list):
+                for att in attachments:
+                    if att["name"] in attachments_with_name:
+                        raise StoreError("Two attachments cannot use the same name")
+                    self._raw_add_file(att["att_file"])
+                    attachments_with_name[att["name"]] = att["att_file"]
+            else:
+                raise TypeError(
+                    "Unknown attachments type: expected list or dict, "
+                    f"got {type(attachments)}"
+                )
+
+        # Add the list of releases linked to this component.
+        #   Note: The releases key can be present, but set to None.
+        releases_list = component_info.get("releases") or []
+        for release in releases_list:
+            self._insert(
+                _Store.TableName.component_releases,
+                ["name", "component_id"],  # type: ignore[arg-type]
+                [release, comp_id],
+            )
+
+        self._raw_add_build_info(component_info["build"])
+
+        component_build_id = component_info.get("build", {}).get(
+            "_id", component_info.get("build_id")
+        )
+        if not component_build_id:
+            raise StoreError("No build id associate with the component to submit")
+
+        readme_id = None
+        readme = component_info.get("readme")
+        if readme:
+            self._raw_add_file(readme)
+            readme_id = readme["_id"]
+
+        # Insert the component itself.
+        self._insert(
+            _Store.TableName.components,
+            [  # type: ignore[arg-type]
+                "id",
+                "name",
+                "platform",
+                "version",
+                "specname",
+                "build_id",
+                "creation_date",
+                "is_valid",
+                "is_published",
+                "readme_id",
+                "metadata",
+            ],
+            [
+                component_info["_id"],
+                component_info["name"],
+                component_info["platform"],
+                component_info["version"],
+                component_info.get("specname"),
+                component_build_id,
+                component_info["creation_date"],
+                int(component_info.get("is_valid", True)),
+                int(component_info.get("is_published", False)),
+                readme_id or None,
+                (
+                    json.dumps(component_info["metadata"])
+                    if component_info.get("metadata")
+                    else "{}"
+                ),
+            ],
+        )
+
+        # Create relation between files/sources/attachment and the new component.
+        self._insert_to_component_files(
+            "file", [(None, f) for f in component_info["files"]], comp_id
+        )
+        sources = component_info["sources"]
+        self._insert_to_component_files(
+            "source", [(None, src) for src in sources], comp_id
+        )
+        self._insert_to_component_files(
+            "attachment", list(attachments_with_name.items()), comp_id
+        )
+        # Add the list of releases linked to this component.
+        #   Note: The releases key can be present, but set to None.
+        releases_list = component_info.get("releases") or []
+        for release in releases_list:
+            self._insert(
+                _Store.TableName.component_releases,
+                ["name", "component_id"],  # type: ignore[arg-type]
+                [release, comp_id],
+            )
+        return True
+
+    def raw_add_component(self, component_info: ComponentDict) -> None:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.raw_add_component`
+        """
+        if self._raw_add_component(component_info):
+            self.connection.commit()
+
+    def add_component_from_store(
+        self,
+        from_store: StoreReadInterface,
+        setup: str,
+        name: str = "all",
+        platform: str = "all",
+        date: str | None = None,
+        specname: str | None = None,
+    ) -> None:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.add_component_from_store`
+        """
+        comps = from_store.latest_components(
+            setup=setup, date=date, component=name, platform=platform, specname=specname
+        )
+        if not comps:
+            raise StoreError(
+                "Cannot find any component matching the following criteria: "
+                f"{setup=}, {date=}, {name=}, {platform=}, {specname=}"
+            )
+
+        for comp in comps:
+            self._raw_add_component(comp)
+        self.connection.commit()
+
+    def save(self, filename: os.PathLike[str] | str | None = None) -> None:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.save`
+        """
+        if filename and filename != self.db_path:
+            cp(self.db_path, filename)
+        # Make sure everything is flushed to the database.
+        self.connection.commit()
+
+    def bulk_update_from_store(
+        self, from_store: StoreReadInterface, queries: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Interface method implementation.
+
+        .. seealso::
+
+            :py:meth:`e3.anod.store.interface.LocalStore.bulk_update_from_store`
+        """
+        # List of queries done from store
+        queries_done = []
+        # Track a list of bid we need inside the database
+        required_bids = set()
+
+        local_db_results = []
+
+        for unprocessed_query in queries:
+            # First do request preprocessing to ensure that the request is valid from a
+            # Store point of view.
+            query = unprocessed_query
+            if unprocessed_query.get("query", "") == "source":
+                query = {"kind": "source", "bid": ""}
+                query.update(unprocessed_query)
+
+                if query["kind"] == "source" and not query["bid"] and "setup" in query:
+                    try:
+                        query["bid"] = from_store.get_latest_build_info(
+                            setup=query["setup"], date=query.get("date", "all")
+                        )["_id"]
+                    except StoreError:
+                        pass
+
+                if query.get("bid"):
+                    required_bids.add(query["bid"])
+
+                if query["kind"] == "thirdparty":
+                    # Remove bid information for thirdparty to simplify lookup
+                    query["bid"] = ""
+
+            # Then check for entries that are already in the local database
+            if query.get("query", "") == "source":
+                try:
+                    src_info = self.get_source_info(
+                        name=query["name"],
+                        bid=query["bid"],
+                        kind=query["kind"],
+                    )
+                    # For regular sources consider the query resolved only if
+                    # the bid of the returned source correspond to the bid of
+                    # the query. For thirdparties source (kind=thirdparty),
+                    # checking the presence is enough.
+                    if (
+                        query["kind"] == "source"
+                        and src_info["build"]["_id"] != query["bid"]
+                    ):
+                        queries_done.append(query)
+                    else:
+                        local_db_results.append(
+                            {"query": query, "msg": "", "response": src_info}
+                        )
+
+                except StoreError:
+                    # Result is not in the offline db
+                    queries_done.append(query)
+            else:
+                # This is a component query. For the moment we don't know
+                # how to cache it.
+                queries_done.append(query)
+
+        # Perform online queries
+
+        # Total number of requests
+        queries_num = len(queries_done)
+
+        # Compute chunk size and number of chunks
+        try:
+            chunk_size = int(os.environ.get("E3_CATHOD_BULK_CHUNK_SIZE", "100"))
+        except ValueError:
+            chunk_size = 100
+
+        if chunk_size <= 0:
+            chunk_size = 100
+
+        chunk_num = queries_num // chunk_size + (0 if queries_num % chunk_size else 1)
+
+        logger.info(
+            f"Perform {queries_num} queries to Store ({chunk_num} requests of "
+            f"size < {chunk_size})"
+        )
+        all_results = []
+
+        for index, store_queries_chunk in enumerate(
+            (
+                queries_done[i : i + chunk_size]
+                for i in range(0, queries_num, chunk_size)
+            )
+        ):
+            start_time = time.time()
+            logger.debug(f" Query chunk {index + 1}/{chunk_num}")
+            results = from_store.bulk_query(store_queries_chunk)
+            query_time = time.time() - start_time
+            logger.debug(f" Query chunk {index + 1}/{chunk_num} time: {query_time}s")
+            all_results.extend(results)
+
+            for result in results:
+                if result["response"] is None:
+                    continue
+
+                if (
+                    result["query"].get("query", "") == "source"
+                    or result["query"].get("type", "") == "source"
+                ):
+                    self.raw_add_file(result["response"])
+                else:
+                    self.raw_add_component(result["response"])
+
+            for required_bid in required_bids:
+                self.add_build_info_from_store(from_store, required_bid)
+        return all_results + local_db_results
