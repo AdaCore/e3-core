@@ -522,6 +522,7 @@ def test_file_eq_neq():
         "revision": ("rev20", False),
         "metadata": ("unimportant", False),
         "build_info": ("unimportant", False),
+        "resource": ("unimportant", False),
         # Attributes that do not affect comparison...
         "downloaded_as": ("/path/to/download/src.tar.gz", True),
         "unpack_dir": ("/path/to/unpack/src", True),

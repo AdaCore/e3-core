@@ -1,5 +1,6 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, UTC
+from dataclasses import dataclass
 from enum import Enum
 from typing import cast, overload, TYPE_CHECKING
 import json
@@ -51,6 +52,22 @@ if TYPE_CHECKING:
 
 
 logger = getLogger("e3.anod.store.buildinfo")
+
+
+@dataclass
+class Resource:
+    """The resource information about a file.
+
+    :ivar id: The resource id (generaly the sha1 of the file).
+    :ivar path: The resource path (Where the file is located).
+    :ivar size: The file size.
+    :ivar creation_date: The creation date of this resource.
+    """
+
+    id: str
+    path: os.PathLike[str] | str
+    size: int
+    creation_date: str
 
 
 class FileKind(Enum):
@@ -107,6 +124,7 @@ class File(object):
         store: StoreReadInterface | StoreRWInterface | None = None,
         resource_path: os.PathLike[str] | str | None = None,
         unpack_dir: str | None = None,
+        resource: Resource | None = None,
     ) -> None:
         """Initialize a File.
 
@@ -125,6 +143,8 @@ class File(object):
         :param resource_path: the path of the file in the current computer. Generaly
             used to create a file to push.
         :param unpack_dir: the directory to unpack the file (if the file is an archive).
+        :param resource: a Resource dataclass. Use to link the current file object with
+            its real location.
         """
         if resource_path:
             resource_path = os.fspath(resource_path)
@@ -154,8 +174,15 @@ class File(object):
         self.build_info = build_info
 
         self.store = store
+        self.resource = resource
+
         if resource_path is not None:
             self.bind_to_resource(resource_path)
+
+        if self.resource and self.resource_id and self.resource.id != self.resource_id:
+            raise StoreError(
+                f"File({self.name=}).resource_id != File({self.name=}).resource.id"
+            )
 
     def push(self: FileType) -> FileType:
         """Upload this file to Store, using self.store to do so.
@@ -194,6 +221,7 @@ class File(object):
         self.downloaded_as = file.downloaded_as
         self.unpack_dir = file.unpack_dir
         self.build_info = file.build_info
+        self.resource = file.resource
 
     def bind_to_resource(self: FileType, path: os.PathLike[str] | str) -> None:
         """Bind this File to the file at the given path.
@@ -206,7 +234,16 @@ class File(object):
         """
         if self.resource_id is None:
             self.resource_id = store_resource_id(path)
+
         self.downloaded_as = os.path.abspath(path)
+
+        if not self.resource:
+            self.resource = Resource(
+                id=self.resource_id,
+                path=self.downloaded_as,
+                size=os.stat(self.downloaded_as).st_size,
+                creation_date=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%f+00:00"),
+            )
 
     def set_metadata_statement(self: FileType, name: str, data: DSSE) -> None:
         """Set metadata statement.
@@ -463,6 +500,14 @@ class File(object):
         }
         if self.build_info is not None:
             result["build"] = self.build_info.to_dict()
+
+        if self.resource:
+            result["resource"] = {
+                "id": self.resource.id,
+                "path": self.resource.path,
+                "size": self.resource.size,
+                "creation_date": self.resource.creation_date,
+            }
         return result
 
     @classmethod
@@ -515,6 +560,16 @@ class File(object):
                 unpack_dir=data.get("unpack_dir"),
                 build_info=build_info,
                 store=store,
+                resource=(
+                    Resource(
+                        id=data["resource"]["id"],
+                        path=data["resource"]["path"],
+                        size=data["resource"]["size"],
+                        creation_date=data["resource"]["creation_date"],
+                    )
+                    if "resource" in data
+                    else None
+                ),
             )
         except Exception as e:
             logger.exception(e)
