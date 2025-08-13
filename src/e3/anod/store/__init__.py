@@ -523,6 +523,7 @@ class _Store(_StoreContextManager):
         dynamic_where_values: Sequence[int | str],
         *,
         static_where_rules: Sequence[str] = (),
+        order_by: tuple[_Store.TableName, str] | None = None,
         use_or_filter: bool = False,
     ) -> list[tuple[str | int | None, ...]]:
         """Run a SELECT JOIN request on the database.
@@ -572,7 +573,12 @@ class _Store(_StoreContextManager):
             here, we want a tuple sequence to be able to specify which table the field
             comes from.
         :param dynamic_where_values: See _select.where_values.
-        :param static_where_rules: See _select.static_where_rules
+        :param static_where_rules: See _select.static_where_rules.
+        :param order_by: A tuple of two element. The first element is one of the "INNER
+            JOIN" tables and the second the fields to use. For example, if an "INNER
+            JOIN" request between buildinfo and files is used, to sort the output
+            depending on the buildinfo creation_date field, the value for this param
+            should be ("buildinfos", "creation_date").
         :param use_or_filter: See _select.use_or_filter.
         :return: A list of tuples matching the actual database request.
         """
@@ -581,11 +587,12 @@ class _Store(_StoreContextManager):
         where = [f"{tab}.{field}=?" for tab, field in dynamic_where_rules]
         where.extend(static_where_rules)
         where_clause = " OR ".join(where) if use_or_filter else " AND ".join(where)
+        order_by_sql = f" ORDER BY {'.'.join(order_by)}" if order_by else ""
 
         req = self.cursor.execute(
             f"SELECT {selected_field} FROM {table} "  # nosec B608
             f"INNER JOIN {inner_join} ON {on_cond} "
-            f"WHERE {where_clause}",
+            f"WHERE {where_clause}{order_by_sql}",
             dynamic_where_values,
         )
         return req.fetchall()
@@ -1338,7 +1345,55 @@ class StoreReadOnly(_Store, StoreReadInterface):
         kind: str = "source",
     ) -> FileDict:
         """See e3.anod.store.interface.StoreReadInterface."""
-        return self._get_file(name=name, kind=kind, bid=bid)  # type: ignore[return-value]
+        # When looking for sources (kind="source"), the build ID doesn't matter that
+        # much.
+        #
+        # New sources should be generated when a change occur, and so may not be
+        # linked to a "today" build id.
+        #
+        # To deal with that, the build id is used as a limit. We are looking for source
+        # that match the current build id or that have been generated BEFORE the
+        # current build ID.
+        #
+        # The SQL request to make:
+        #
+        #   SELECT files.* INNER JOIN buildinfos
+        #   ON buildinfos.id=files.build_id
+        #   WHERE files.name={name} AND files.kind={kind} AND (
+        #       files.build_id={bid} OR (
+        #           files.kind='source' AND buildinfos.creation_date <= (
+        #               SELECT creation_date FROM buildinfos WHERE id={bid}
+        #           )
+        #       )
+        #   )
+        #
+        # Note: According to the presented SQL query, the INNER JOIN is useless when
+        # kind is not equal to "source". This doesn't matter because SQLite will
+        # optimize the request and will not check the buildinfos table in that case.
+        req = self._select_inner_join(
+            table=_Store.TableName.files,
+            fields=[(_Store.TableName.files, "*")],
+            inner_join=_Store.TableName.buildinfos,
+            on=(
+                (_Store.TableName.buildinfos, "id"),
+                (_Store.TableName.files, "build_id"),
+            ),
+            dynamic_where_rules=[
+                (_Store.TableName.files, "name"),
+                (_Store.TableName.files, "kind"),
+            ],
+            dynamic_where_values=[name, kind, bid, bid],
+            static_where_rules=[
+                f"({_Store.TableName.files}.build_id=? "
+                f"OR ({_Store.TableName.files}.kind='source' "
+                f"AND {_Store.TableName.buildinfos}.creation_date <= ("
+                f"SELECT creation_date FROM {_Store.TableName.buildinfos} WHERE id=?)))"
+            ],
+            order_by=(_Store.TableName.buildinfos, "creation_date DESC"),
+        )
+        if not req:
+            raise StoreError(f"File({name=}, {kind=}, {bid=}) not found")
+        return self._tuple_to_file(req[0])  # type: ignore[arg-type]
 
     def download_resource(self, rid: str, path: str) -> str:
         """See e3.anod.store.interface.StoreReadInterface."""
