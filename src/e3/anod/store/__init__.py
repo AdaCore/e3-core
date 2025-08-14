@@ -689,6 +689,7 @@ class _Store(_StoreContextManager):
         :param readme: A FileDict.
         :param buildinfo: A BuildInfoDict.
         """
+        _unused_values: object
         (
             comp_id,
             name,
@@ -701,6 +702,7 @@ class _Store(_StoreContextManager):
             is_published,
             readmeid,
             metadata,
+            *_unused_values,
         ) = req_tuple
 
         # If no buildinfo is provided or a wrong one, retrieve the correct buildinfo
@@ -1245,14 +1247,39 @@ class StoreReadOnly(_Store, StoreReadInterface):
         if build_id and build_id != "all":
             where_rules.append(f"{_Store.TableName.components}.build_id=?")
             where_values.append(build_id)
+
+        # Return "unique" component (aka: Only one component for a given name/platform)
+        #
+        # The "Readable" SQL request:
+        #
+        #   WITH latest_components AS (
+        #       SELECT components.*, ROW_NUMBER() OVER (
+        #           PARTITION BY components.name
+        #           ORDER BY components.creation_date DESC
+        #       ) AS lc
+        #       FROM components
+        #       INNER JOIN buildinfos
+        #       ON components.build_id=buildinfos.id
+        #       WHERE {' AND '.join(where_rules)}
+        #   )
+        #   SELECT * FROM latest_components WHERE lc=1 ORDER BY creation_date DESC
         return self._tuple_list_to_comp_list(
             self.cursor.execute(
-                f"SELECT {_Store.TableName.components}.* "  # nosec: B608
+                "WITH latest_components AS ("  # nosec: B608
+                f"SELECT {_Store.TableName.components}.*, ROW_NUMBER() OVER ("
+                "PARTITION BY "
+                f"{_Store.TableName.components}.name, "
+                f"{_Store.TableName.components}.platform "
+                f"ORDER BY {_Store.TableName.components}.creation_date DESC"
+                ") AS lc "
                 f"FROM {_Store.TableName.components} "
                 f"INNER JOIN {_Store.TableName.buildinfos} "
-                f"ON {_Store.TableName.components}.build_id={_Store.TableName.buildinfos}.id "  # noqa: B950
-                f"WHERE {' AND '.join(where_rules)} "
-                f"ORDER BY {_Store.TableName.components}.creation_date DESC",
+                f"ON {_Store.TableName.components}.build_id="
+                f"{_Store.TableName.buildinfos}.id "
+                f"WHERE {' AND '.join(where_rules)}"
+                ")"
+                "SELECT * FROM latest_components WHERE lc=1 "
+                "ORDER BY creation_date DESC",
                 where_values,
             ).fetchall()
         )
