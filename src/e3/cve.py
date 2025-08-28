@@ -75,6 +75,15 @@ class NVD:
     ) -> Iterator[CVE]:
         """Return a list of matching CVE entries.
 
+        :param cpe_name: The CPE string as defined by NVD APIs doc. It may look
+            like ``"cpeName=cpe:2.3:a:gnu:gcc:12.3.0:*:*:*:*:*:*:*"``` when
+            looking for CVEs on GCC version 12.3.0.
+        :param is_vulnerable: Returns only CVE associated with a specific CPE,
+            where the CPE is also considered vulnerable. The exact value
+            provided with *cpe_name* is compared against the CPE Match Criteria
+            within a CVE applicability statement. If the value of cpeName is
+            considered to match, and is also considered vulnerable the CVE is
+            included in the results.
         :param no_rejected: remove CVE records with the REJECT or Rejected
             status from API response
         :param results_per_page: number of results to return for each request,
