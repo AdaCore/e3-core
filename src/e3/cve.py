@@ -96,6 +96,8 @@ class NVD:
         start_index = 0
         while True:
             r = self.session.get(url + f"&startIndex={start_index}", headers=headers)
+            if not r.ok:
+                r.raise_for_status()
             r_json = r.json()
             vulnerabilities = r_json["vulnerabilities"]
             total_results = r_json["totalResults"]
