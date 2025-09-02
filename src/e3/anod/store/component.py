@@ -12,6 +12,7 @@ from typing import overload, TypedDict, TYPE_CHECKING
 from e3.anod.store.file import File
 from e3.anod.store.interface import StoreError, StoreRWInterface
 from e3.log import getLogger
+from e3.dsse import DSSE
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
         readme: FileDict | None
         attachments: dict[str, FileDict] | list[ComponentAttachmentDict] | None
         build: BuildInfoDict
+        metadata: dict[str, object]
 
 
 logger = getLogger("e3.anod.store.component")
@@ -91,6 +93,7 @@ class Component(object):
         creation_date: datetime.datetime | None = None,
         build_info: BuildInfo | None = None,
         store: StoreReadInterface | StoreRWInterface | None = None,
+        metadata: dict[str, object] | None = None,
     ) -> None:
         """Initialize a Component."""
         self.component_id = component_id
@@ -129,6 +132,43 @@ class Component(object):
             self.creation_date = creation_date
 
         self.store = store
+        self.metadata = metadata or {}
+
+    def set_metadata_statement(self, name: str, data: DSSE) -> None:
+        """Set additional metadata statement.
+
+        :param name: Statement name
+        :param data: The Dead Simple Signature envelope of the data associated
+            with *name*.
+        """
+        if not isinstance(data, DSSE):
+            raise StoreError(
+                f"Metadata statement should be a DSSE envelope. Got {type(data)}"
+            )
+        self.metadata[name] = data.as_dict()
+
+    def get_metadata_statement(self, name: str) -> DSSE | None:
+        """Get metadata statement.
+
+        :param name: statement name
+        :return: a DSSE envelope
+        """
+        result_data = self.metadata.get(name)
+        if result_data is None:
+            return None
+
+        if not isinstance(result_data, dict):
+            try:
+                result_data = json.loads(result_data)  # type: ignore[arg-type]
+                if not isinstance(result_data, dict):
+                    raise TypeError(
+                        "Corrupted metadata: Cannot convert metadata into dictionary"
+                    )
+            except Exception as e:
+                logger.exception(e)
+                raise e
+
+        return DSSE.load_dict(result_data)
 
     def add_attachment(
         self: ComponentType, key: str, file: File, overwrite_existing: bool = False
@@ -368,6 +408,7 @@ class Component(object):
                 if self.attachments
                 else None
             ),
+            "metadata": self.metadata,
         }
 
         if self.build_info is not None:
@@ -426,6 +467,7 @@ class Component(object):
             is_published=bool(data["is_published"]),
             build_info=build_info,
             store=store,
+            metadata=data.get("metadata"),
         )
 
     @classmethod
@@ -575,6 +617,7 @@ class Component(object):
         self.is_published = component.is_published
         self.build_info = component.build_info
         self.creation_date = component.creation_date
+        self.metadata = component.metadata
 
     def __eq__(self: ComponentType, other: object) -> bool:
         """Compare two component object.
