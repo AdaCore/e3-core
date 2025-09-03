@@ -23,13 +23,15 @@ from e3.fs import rm, mkdir
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Deque, Protocol
+    from typing import Any, Deque, Protocol, TypeVar
     from collections.abc import Callable
     from requests.auth import AuthBase
     from requests.models import Response
 
     class _Fileobj(Protocol):
         def write(self, __b: bytes) -> object: ...
+
+    HTTPSessionType = TypeVar("HTTPSessionType", bound="HTTPSession")
 
 
 logger = e3.log.getLogger("net.http")
@@ -103,7 +105,7 @@ class HTTPSession:
         self.session = requests.Session()
         self.last_base_url: BaseURL | None = None
 
-    def __enter__(self) -> HTTPSession:
+    def __enter__(self: HTTPSessionType) -> HTTPSessionType:
         self.session.__enter__()
         return self
 

@@ -12,6 +12,7 @@ import shutil
 import stat
 import sys
 from collections import namedtuple
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 from packaging.version import Version
 from pathlib import Path
@@ -26,7 +27,7 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Iterable, Any
+    from typing import Any
     from collections.abc import Callable, Sequence
 
 
@@ -35,8 +36,8 @@ class FSError(e3.error.E3Error):
 
 
 def cp(
-    source: str | Path,
-    target: str | Path,
+    source: str | os.PathLike[str],
+    target: str | os.PathLike[str],
     copy_attrs: bool = True,
     recursive: bool = False,
     preserve_symlinks: bool = False,
@@ -259,7 +260,8 @@ def get_filetree_state(
 
 
 def ls(
-    path: str | Iterable[str] | Path | Iterable[Path], emit_log_record: bool = True
+    path: str | Iterable[str] | os.PathLike[str] | Iterable[os.PathLike[str]],
+    emit_log_record: bool = True,
 ) -> list[str]:
     """list files.
 
@@ -271,10 +273,10 @@ def ls(
     This function do not raise an error if no file matching the glob pattern
     is encountered. The only consequence is that an empty list is returned.
     """
-    if isinstance(path, (str, Path)):
-        path_list = [os.fspath(path)]
-    else:
+    if isinstance(path, Iterable) and not isinstance(path, str):
         path_list = [os.fspath(p) for p in path]
+    else:
+        path_list = [os.fspath(path)]
 
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
