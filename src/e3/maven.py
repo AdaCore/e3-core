@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import json
+from defusedxml.ElementTree import XMLParser
+import hashlib
 import requests
 
 from e3.log import getLogger
@@ -9,6 +10,8 @@ logger = getLogger("e3.maven")
 
 
 class MavenLink:
+    BASE_URL = "https://repo.maven.apache.org/maven2"
+
     def __init__(self, group: str, name: str, version: str) -> None:
         """Maven download link metadata.
 
@@ -20,57 +23,90 @@ class MavenLink:
         self.filename = filename
         self.package_group = group
         self.package_name = name
+        self.name = f"{group}/{name}"
         self.version = version
         self.url = (
-            f"https://repo1.maven.org/maven2/{group.replace('.', '/')}/{name}/{version}"
-            f"/{filename}"
+            f"{self.BASE_URL}/{group.replace('.', '/')}/{name}/{version}/{filename}"
         )
+        self.pom_url = f"{self.url[:-4]}.pom"
 
         # To get the expected checksum of the current file, we need to make an
         # additonnal HEAD request. This is because maven send the checksum directly on
-        # the HTTP header.
+        # the HTTP headers.
         hdrs = requests.head(self.url).headers
-
-        # Maven support two type of checksums
         self.sha1_checksum = hdrs.get("x-checksum-sha1")
         self.md5_checksum = hdrs.get("x-checksum-md5")
 
+        # To get the expected checksum of the POM file, we need to make an additonnal
+        # HEAD request. This is because maven sends the checksum directly on the HTTP
+        # headers.
+        hdrs = requests.head(self.pom_url).headers
+        self.pom_sha1_checksum = hdrs.get("x-checksum-sha1")
+        self.pom_md5_checksum = hdrs.get("x-checksum-md5")
+
 
 class MavenLinksParser:
-    def __init__(self) -> None:
-        """Create the MavenLinksParser."""
-        self.links: list[MavenLink] = []
+    def __init__(self, group: str, name: str) -> None:
+        """Create the MavenLinksParser.
 
-    def _raise_missing_key(self, key: str) -> None:
-        raise KeyError(
-            f"Maven links parser failed: key {key!r} is missing from the HTTP answer"
+        :param group: The package group.
+        :param name: The package name.
+        """
+        self.links: list[MavenLink] = []
+        self.group = group
+        self.name = name
+
+        self.__version_already_done: set[str] = set()
+        self.__should_retrieve_data = False
+        self.__parser = XMLParser(target=self)
+
+    def start(self, tag: str, attrs: dict[str, str | None]) -> None:
+        """See XMLParser.start.
+
+        .. note::
+
+            The `attrs` parameter is not used by this method implementation, but is
+            defined by XMLParser.start method signature.
+        """
+        self.__should_retrieve_data = tag in ("version", "release", "latest")
+
+    def data(self, text: str) -> None:
+        """See XMLParser.data."""
+        text = text.strip()
+
+        if (
+            not text
+            or not self.__should_retrieve_data
+            or text in self.__version_already_done
+        ):
+            return
+
+        self.links.append(
+            MavenLink(
+                group=self.group,
+                name=self.name,
+                version=text,
+            )
         )
+        self.__version_already_done.add(text)
 
     def feed(self, data: str) -> MavenLinksParser:
-        """See HTMLParser.feed."""
-        docs = json.loads(data).get("response", {}).get("docs")
-        if not docs:
-            self._raise_missing_key("response:docs")
+        """See HTMLParser.feed.
 
-        for pkgmeta in docs:
-            for k in ("g", "a", "v"):
-                if k not in pkgmeta:
-                    self._raise_missing_key(f"response:docs:{k}")
-
-            group = pkgmeta["g"]
-            name = pkgmeta["a"]
-            version = pkgmeta["v"]
-            self.links.append(MavenLink(group, name, version))
+        This class doesn't use the HTMLParser, but this method as the exact same
+        function and logic that HTMLParser.feed.
+        """
+        self.__parser.feed(data)
         return self
 
 
 class Maven:
-    def __init__(self, url: str = "https://search.maven.org/solrsearch/select") -> None:
+    def __init__(self, url: str = MavenLink.BASE_URL) -> None:
         """Initialize Maven manager class.
 
         :param url: The package search URL
         """
-        self.url = url
+        self.url = url if not url.endswith("/") else url[:-1]
         self.cache: dict[str, list[MavenLink]] = {}
 
     def fetch_project_links(
@@ -90,44 +126,34 @@ class Maven:
         """
         if name not in self.cache:
             logger.debug(f"fetch {name} links from {self.url}")
-            # First get the number of elements to retrieve using rows=0.
-            # This will return a JSON like:
-            # {
-            #   "reponseHeader": { ... },
-            #   "reponse" : {
-            #       "numFound": X,
-            #       ...
-            #   }
-            # }
-            #
-            # The numFound is the number of rows to ask. Currently, we don't find any
-            # case where this number is too big for making only one query.
-            tmp_request = requests.get(
-                f"{self.url}?q="
-                f"g:%22{group}%22+AND+a:%22{name}%22&core=gav&rows=0&wt=json",
-                headers=headers,
-            )
-            tmp_request.raise_for_status()
-
-            tmp = tmp_request.json()
-
-            if "response" not in tmp or "numFound" not in tmp["response"]:
-                raise KeyError(
-                    "Cannot determine the number of rows to request: "
-                    "'response:numFound' key not found."
-                )
-
-            rows = tmp["response"]["numFound"]
-
-            # Now, we have our numbers of rows, so lets make the same request, but with
-            # the right parameters.
             request = requests.get(
-                f"{self.url}?q="
-                f"g:%22{group}%22+AND+a:%22{name}%22&core=gav&rows={rows}&wt=json",
+                f"{self.url}/{group.replace('.', '/')}/{name}/maven-metadata.xml",
                 headers=headers,
             )
             request.raise_for_status()
 
-            # Update cache
-            self.cache[name] = MavenLinksParser().feed(request.text).links
+            # The maven-metadata.xml file comes with checksum: So lets check if
+            # everything is fine, just in case.
+            sha1_checksum = request.headers.get("x-checksum-sha1")
+            md5_checksum = request.headers.get("x-checksum-md5")
+            if sha1_checksum:
+                content_sha1 = hashlib.sha1(request.content).hexdigest()
+                if content_sha1 != sha1_checksum:
+                    raise RuntimeError(
+                        f"'{group}/{name}' maven-metadata.xml sha1 checksum missmatch: "
+                        f"expected {sha1_checksum}, got: {content_sha1}"
+                    )
+            elif md5_checksum:
+                content_md5 = hashlib.md5(request.content).hexdigest()
+                if content_md5 != md5_checksum:
+                    raise RuntimeError(
+                        f"'{group}/{name}' maven-metadata.xml md5 checksum missmatch: "
+                        f"expected {md5_checksum}, got: {content_md5}"
+                    )
+            else:
+                raise RuntimeError(
+                    f"'{group}/{name}' maven-metadata.xml: no checksum provided"
+                )
+
+            self.cache[name] = MavenLinksParser(group, name).feed(request.text).links
         return self.cache[name]

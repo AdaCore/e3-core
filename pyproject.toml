@@ -24,6 +24,7 @@ classifiers = [
 # dependencies are not installed by default. This is on purpose to avoid
 # importing test/coverage packages in a release install.
 dependencies = [
+  "defusedxml",
   "colorama",
   "pyyaml",
   "python-dateutil",
@@ -69,6 +70,7 @@ check = [
   "types-PyYAML",
   "types-requests",
   "types-setuptools",
+  "types-defusedxml",
   "distro; sys_platform=='darwin'",  # for type checking
 ]
 
