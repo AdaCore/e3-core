@@ -240,7 +240,7 @@ upload-python-registry:
     - python -m pip install twine
   script:
     - python build_wheel.py
-    - python -m twine upload --skip-existing
+    - python -m twine upload
       --repository-url https://${CI_SERVER_HOST}:${CI_SERVER_PORT}/api/v4/projects/202/packages/pypi
       build/*.whl
   rules:
