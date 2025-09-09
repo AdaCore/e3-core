@@ -13,19 +13,25 @@ from e3.anod.store.interface import StoreError
 
 
 def test_create_and_get_build_info(store):
+    # Ensure the "build_info" is created between 'start' and 'end'.
+    #
+    # With the current implementation the buildinfo is created automatically when
+    # a new entry is added to the database.
+    #
+    # Doing this ensures that the retrieved build_info is not an old relic kept on
+    # the database (which should normally be recreated for each tests). This also,
+    # ensures that the retrieved dict contains a parsable "creation_date" key.
+    start = datetime.now(timezone.utc).replace(microsecond=0)
     created = store.create_build_id("test", "20241028", "1.0")
+    date = datetime.fromisoformat(created["creation_date"]).replace(microsecond=0)
+    end = datetime.now(timezone.utc).replace(microsecond=0)
+    assert start <= date <= end
+
     assert created["_id"] is not None
     assert created["setup"] == "test"
     assert created["isready"] is False
     assert created["build_date"] == "20241028"
     assert created["build_version"] == "1.0"
-
-    # Remove second or microsecond because it's too precise for the comparison.
-    now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-    date = datetime.fromisoformat(created["creation_date"]).replace(
-        second=0, microsecond=0
-    )
-    assert date == now
 
     get = store.get_build_info(created["_id"])
     assert get == created
