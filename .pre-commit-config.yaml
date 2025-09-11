@@ -11,7 +11,7 @@ repos:
           - flake8-rst-docstrings
         name: flake8-7.1.1
   - repo: https://github.com/ambv/black
-    rev: 24.10.0
+    rev: 25.1.0
     hooks:
       - id: black
-        name: black-24.10.0
+        name: black-25.1.0
