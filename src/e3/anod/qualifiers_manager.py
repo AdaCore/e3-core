@@ -792,7 +792,7 @@ class QualifiersManager:
 
     @staticmethod
     def serialize_qualifier_values(
-        qualifier_values: dict[str, QualifierValue]
+        qualifier_values: dict[str, QualifierValue],
     ) -> tuple[tuple[str, QualifierValue], ...]:
         """Return a hashable and deterministic representation of qualifier values.
 
