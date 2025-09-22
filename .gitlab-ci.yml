@@ -28,6 +28,11 @@ default:
     - run_as_root:false
   interruptible: true
 
+include:
+  - component: $CI_SERVER_FQDN/it/gitlab-templates/gitleaks@~latest
+    inputs:
+      stage: checks
+
 # Common
 
 .tox-common:

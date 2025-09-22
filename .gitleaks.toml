@@ -1,0 +1,11 @@
+title = "e3-core GitLeaks Configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+targetRule = "generic-api-key"
+regexes = [
+  # token for e3.net.token test
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZGFjb3Jl.*",
+]
