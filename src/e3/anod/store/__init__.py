@@ -1609,11 +1609,11 @@ class StoreReadOnly(_Store, StoreReadInterface):
         return self._tuple_to_buildinfo(possible_buildinfos[0])  # type: ignore[arg-type]
 
 
-class StoreRW(StoreRWInterface, StoreReadOnly, StoreWriteOnly):
+class Store(StoreReadOnly):
     pass
 
 
-class Store(StoreReadOnly):
+class StoreRW(StoreRWInterface, Store, StoreWriteOnly):
     pass
 
 
