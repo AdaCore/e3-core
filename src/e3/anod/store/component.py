@@ -62,9 +62,9 @@ class Component(object):
     :ivar str platform: platform
     :ivar str version: version
     :ivar str | None specname: the name of the spec that created the component
-    :ivar list[File] | None files: list of binary files
-    :ivar list[File] | None sources: list of sources
-    :ivar File | None readme: readme file if present
+    :ivar list[anod.store.file.File] | None files: list of binary files
+    :ivar list[anod.store.file.File] | None sources: list of sources
+    :ivar anod.store.file.File | None readme: readme file if present
     :ivar list[str] | None releases: list of releases
     :ivar bool is_valid: True if the component is valid
     :ivar bool is_published: True if published
@@ -286,8 +286,10 @@ class Component(object):
 
         :return: The updated component.
 
-        :raise StoreError: If the current store is not a writable instance
-        :raise StoreError: If submitting *file* did not return a valid ID
+        :raise e3.anod.store.interface.StoreError: If the current store is not a
+            writable instance
+        :raise e3.anod.store.interface.StoreError: If submitting *file* did not
+            return a valid ID
         :raise FileNotFoundError: If *file* has no valid `download_as` field
             (meaning the file does not exist on the file system)
         :raise ValueError: If this component is invalid (no valid ID)
