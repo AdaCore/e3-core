@@ -15,4 +15,4 @@ __pycache__
 docs/build
 docs/source/requirement_coverage.rst
 docs/source/requirement_coverage.yaml
-pytest-report.html
+pytest-report.*

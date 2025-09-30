@@ -365,7 +365,8 @@ class _Store(_StoreContextManager):
         :param rid: The id to use.
         :param field_name: The 'id' field name in the database.
         :return: A tuple of element.
-        :raise StoreError: if no or more than one element found.
+        :raise anod.store.interface.StoreError: if no or more than one element
+            found.
         """
         res = self._select(table, [field_name], [rid])  # type: ignore[arg-type, list-item]
         if not res:
@@ -1533,7 +1534,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
         :param possibly_empty: If true the method can return an empty result. Otherwise,
             if no result is available, this method raises a StoreError.
 
-        :raise StoreError: if possibly_empty is False and no result is found.
+        :raise anod.store.interface.StoreError: if possibly_empty is False and
+            no result is found.
         """
         if (not name or name == "all") and (not fid or fid == "all"):
             raise ValueError("Cannot find file without name or file id")
@@ -1585,8 +1587,9 @@ class StoreReadOnly(_Store, StoreReadInterface):
         :param static_where_rules: See _Store._select
         :param only_one: If true, no multiple results is allowed.
 
-        :raise StoreError: Raises a StoreError if no result is found or if only_one is
-            true and more than one result is available.
+        :raise anod.store.interface.StoreError: Raises a StoreError if no result
+            is found or if only_one is true and more than one result is
+            available.
         """
         possible_buildinfos = self._select(
             _Store.TableName.buildinfos,

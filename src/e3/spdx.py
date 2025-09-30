@@ -6,15 +6,15 @@ a simple example can be found at ./tests/tests_e3/spdx_test.py
 
 from __future__ import annotations
 
+import re
+
 from enum import Enum, auto
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field, fields
 from datetime import datetime, timezone
 from uuid import uuid4
-import re
 
 from typing import TYPE_CHECKING
-
 
 if TYPE_CHECKING:
     from typing import Literal, Union, Any
@@ -33,6 +33,31 @@ if TYPE_CHECKING:
     MAYBE_STR = Union[str, Literal["NOASSERTION"], Literal["NONE"]]
 
 SPDXID_R = re.compile("[^a-zA-Z0-9.-]")
+
+
+def get_entity(value: str | None) -> Organization | Person | Tool | None:
+    """Get an entity according to an entity string.
+
+    The entity string looks like ``<entity_type>: <entity_name>``. If the
+    entity type is ``Organization``, ``Person`` or ``Tool``, the appropriate
+    :class:`Organization`, :class:`Person` or :class:`Tool` initialised with
+    *entity_name* is returned.
+
+    If not possible match if found, :const:`None` is returned.
+
+    :param value: A string to extract entity definition from.
+
+    :return: The entity initialised by *value*, or :const:`None` on error.
+    """  # noqa RST304
+    if isinstance(value, str) and ":" in value:
+        entity_type, entity_name = value.split(":", 1)
+        if entity_type.lower() == "tool":
+            return Tool(entity_name.strip())
+        elif entity_type.lower() == "person":
+            return Person(entity_name.strip())
+        elif entity_type.lower() == "organization":
+            return Organization(entity_name.strip())
+    return None
 
 
 class InvalidSPDX(Exception):
@@ -67,6 +92,20 @@ class SPDXEntry(metaclass=ABCMeta):
     def json_entry_key(self) -> str:
         """Name of the SPDXEntry as visible in the SPDX JSON report."""
         return self.entry_key[0].lower() + self.entry_key[1:]
+
+    @classmethod
+    def get_entry_key(cls) -> str:
+        """Name of the SPDXEntry as visible in the SPDX tag:value report."""
+        return cls.__name__
+
+    @classmethod
+    def get_json_entry_key(cls) -> str:
+        """Name of the SPDXEntry as visible in the SPDX JSON report."""
+        if isinstance(cls.json_entry_key, str):
+            return str(cls.json_entry_key)  # type: ignore[unreachable]
+        else:
+            entry_key: str = cls.get_entry_key()
+            return f"{entry_key[0].lower()}{entry_key[1:]}"
 
     @abstractmethod
     def __str__(self) -> str:
@@ -190,7 +229,31 @@ class SPDXVersion(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#61-spdx-version-field>`_.
     """
 
+    VERSION: str = "SPDX-2.3"
+
     json_entry_key = "spdxVersion"
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> SPDXVersion:
+        """Initialize an :class:`SPDXVersion` from a :class:`dict`.
+
+        If an SPDX version value could not be extracted from *obj*, the default
+        value :attr:`SPDXVersion.VERSION` is used.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`SPDXVersion` with.
+
+        For instance:
+
+        >>> from e3.spdx import SPDXVersion
+        >>> SPDXVersion.from_json_dict({"spdxVersion": "1.2.3"}).value
+        '1.2.3'
+        >>> SPDXVersion.from_json_dict({"xxx": "1.2.3"}).value
+        'SPDX-2.3'
+
+        :return: The :class:`SPDXVersion` initialized with the value of *obj*.
+        """  # noqa RST304
+        return SPDXVersion(obj.get(cls.get_json_entry_key(), cls.VERSION))
 
 
 class DataLicense(SPDXEntryStr):
@@ -199,6 +262,30 @@ class DataLicense(SPDXEntryStr):
     See 6.2 `Data license field
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#62-data-license-field>`_.
     """
+
+    LICENSE: str = "CC0-1.0"
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> DataLicense:
+        """Initialize a :class:`DataLicense` from a :class:`dict`.
+
+        If a data license value could not be extracted from *obj*, the default
+        value :attr:`DataLicense.LICENSE` is used.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize a :class:`DataLicense` with.
+
+        For instance:
+
+        >>> from e3.spdx import DataLicense
+        >>> DataLicense.from_json_dict({"dataLicense": "1.2.3"}).value
+        '1.2.3'
+        >>> DataLicense.from_json_dict({"xxx": "1.2.3"}).value
+        'CC0-1.0'
+
+        :return: The :class:`DataLicense` initialized with the value of *obj*.
+        """  # noqa RST304
+        return DataLicense(obj.get(cls.get_json_entry_key(), cls.LICENSE))
 
 
 class SPDXID(SPDXEntryStr):
@@ -212,22 +299,52 @@ class SPDXID(SPDXEntryStr):
     The value is a unique string containing letters, numbers, ., and/or -.
     """
 
+    PREFIX: str = "SPDXRef-"
+    DEFAULT_ID: str = "DOCUMENT"
+
     json_entry_key = "SPDXID"
 
     def __init__(self, value: str) -> None:
         # The format of the SPDXID should be "SPDXRef-"[idstring]
         # where [idstring] is a unique string containing letters, numbers, .,
         # and/or -.
+        if value.startswith(self.PREFIX):
+            value = value[len(self.PREFIX) :]
         super().__init__(re.sub(SPDXID_R, "", value))
 
     def __str__(self) -> str:
-        return f"SPDXRef-{self.value}"
+        return f"{self.PREFIX}{self.value}"
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, SPDXID) and o.value == self.value
 
     def __hash__(self) -> int:
         return hash(self.value)
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> SPDXID:
+        """Initialize an :class:`SPDXID` from a :class:`dict`.
+
+        If an SPDX ID value could not be extracted from *obj*, the default
+        value :attr:`SPDXID.DEFAULT_ID` is used.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`SPDXID` with.
+
+        For instance:
+
+        >>> from e3.spdx import SPDXID
+        >>> SPDXID.from_json_dict({"SPDXID": "1.2.3"}).value
+        '1.2.3'
+        >>> SPDXID.from_json_dict({"xxx": "1.2.3"}).value
+        'DOCUMENT'
+
+        :return: The :class:`SPDXID` initialized with the value of *obj*.
+        """  # noqa RST304
+        id_from_dict: str = obj.get(cls.get_json_entry_key(), cls.DEFAULT_ID)
+        if id_from_dict.startswith(f"{cls.PREFIX}"):
+            id_from_dict = id_from_dict[len(cls.PREFIX) :]
+        return SPDXID(id_from_dict)
 
 
 class DocumentName(SPDXEntryStr):
@@ -247,6 +364,30 @@ class DocumentNamespace(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#65-spdx-document-namespace-field>`_.
     """
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> DocumentNamespace:
+        """Initialize a :class:`DocumentNamespace` from a :class:`dict`.
+
+        If a document namespace value could not be extracted from *obj*, an
+        empty string is used.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize a :class:`DocumentNamespace`
+            with.
+
+        For instance:
+
+        >>> from e3.spdx import DocumentNamespace
+        >>> DocumentNamespace.from_json_dict({"documentNamespace": "namespace"}).value
+        'namespace'
+        >>> DocumentNamespace.from_json_dict({"xxx": "namespace"}).value
+        ''
+
+        :return: The :class:`DocumentNamespace` initialized with the value of
+            *obj*.
+        """  # noqa RST304
+        return DocumentNamespace(obj.get(cls.get_json_entry_key(), ""))
+
 
 class LicenseListVersion(SPDXEntryStr):
     """Provide the version of the SPDX License List used.
@@ -255,9 +396,49 @@ class LicenseListVersion(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#67-license-list-version-field>`_.
     """
 
+    VERSION: str = "3.19"
+    """Default license list version value."""
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, str]) -> LicenseListVersion:
+        """Initialize a :class:`LicenseListVersion` from a :class:`dict`.
+
+        If a license list version value could not be extracted from *obj*, the
+        default :attr:`LicenseListVersion.VERSION` value is used.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize a :class:`LicenseListVersion`
+            with.
+
+        For instance:
+
+        >>> from e3.spdx import LicenseListVersion
+        >>> LicenseListVersion.from_json_dict({"licenseListVersion": "3.2.1"}).value
+        '3.2.1'
+        >>> LicenseListVersion.from_json_dict({"xxx": "3.2.1"}).value
+        '3.19'
+
+        :return: The :class:`LicenseListVersion` initialized with the value of
+            *obj*.
+        """  # noqa RST304
+        return LicenseListVersion(obj.get(cls.get_json_entry_key(), cls.VERSION))
+
 
 class Entity(SPDXEntryStr):
     """Represent an Entity (Organization, Person, Tool)."""
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, str]) -> Tool | Person | Organization | None:
+        """Initialize an :class:`Entity` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`Entity`
+            with.
+
+        :return: The :class:`Entity` initialized with the value of *obj*, or
+            :const:`None` if the JSON key does not match.
+        """  # noqa RST304
+        return get_entity(obj.get(cls.get_json_entry_key()))
 
 
 class EntityRef(SPDXEntry):
@@ -301,6 +482,23 @@ class Creator(EntityRef):
 
     json_entry_key = "creators"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> Creator | None:
+        """Initialize a :class:`Creator` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize a :class:`Creator` with.
+
+        :return: The :class:`Creator` initialized with the value of *obj*, or
+            :const:`None` if the JSON key does not match.
+        """  # noqa RST304
+        entity: Organization | Person | Tool | None = get_entity(
+            obj.get(cls.get_json_entry_key())
+        )
+        if entity is not None:
+            return cls(entity)
+        return None
+
 
 class Created(SPDXEntryStr):
     """Identify when the SPDX document was originally created.
@@ -308,6 +506,20 @@ class Created(SPDXEntryStr):
     See 6.9 `Created field
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#69-created-field>`_.
     """
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> Created:
+        """Initialize a :class:`Created` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`Created`
+            with.
+
+        :return: The :class:`Created` initialized with the value of *obj*.
+        """  # noqa RST304
+        if cls.get_json_entry_key() in obj:
+            return Created(str(obj.get(cls.get_json_entry_key(), "")))
+        return Created(datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
 
 
 class Organization(Entity):
@@ -331,6 +543,18 @@ class PackageName(SPDXEntryStr):
 
     json_entry_key = "name"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageName:
+        """Initialize a :class:`PackageName` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`PackageName`
+            with.
+
+        :return: The :class:`PackageName` initialized with the value of *obj*.
+        """  # noqa RST304
+        return PackageName(str(obj.get(cls.get_json_entry_key(), "")))
+
 
 class PackageVersion(SPDXEntryStr):
     """Identify the version of the package.
@@ -341,6 +565,18 @@ class PackageVersion(SPDXEntryStr):
 
     json_entry_key = "versionInfo"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageVersion:
+        """Initialize a :class:`PackageVersion` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`PackageVersion`
+            with.
+
+        :return: The :class:`PackageVersion` initialized with the value of *obj*.
+        """  # noqa RST304
+        return PackageVersion(str(obj.get(cls.get_json_entry_key(), "")))
+
 
 class PackageFileName(SPDXEntryStr):
     """Provide the actual file name of the package.
@@ -348,6 +584,18 @@ class PackageFileName(SPDXEntryStr):
     See 7.4 `Package file name field
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#74-package-file-name-field>`_
     """
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageFileName:
+        """Initialize a :class:`PackageFileName` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`PackageFileName`
+            with.
+
+        :return: The :class:`PackageFileName` initialized with the value of *obj*.
+        """  # noqa RST304
+        return PackageFileName(str(obj.get(cls.get_json_entry_key(), "")))
 
 
 class PackageSupplier(EntityRef):
@@ -359,6 +607,24 @@ class PackageSupplier(EntityRef):
 
     json_entry_key = "supplier"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageSupplier | None:
+        """Initialize a :class:`PackageSupplier` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize a :class:`PackageSupplier`
+            with.
+
+        :return: The :class:`PackageSupplier` initialized with the value of
+            *obj*, or :const:`None` if the JSON key does not match.
+        """  # noqa RST304
+        entity: Organization | Person | Tool | None = get_entity(
+            obj.get(cls.get_json_entry_key())
+        )
+        if entity is not None:
+            return cls(entity)
+        return None
+
 
 class PackageOriginator(EntityRef):
     """Identify from where the package originally came.
@@ -368,6 +634,24 @@ class PackageOriginator(EntityRef):
     """
 
     json_entry_key = "originator"
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageOriginator | None:
+        """Initialize a :class:`PackageOriginator` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize a :class:`PackageOriginator`
+            with.
+
+        :return: The :class:`PackageOriginator` initialized with the value of
+            *obj*, or :const:`None` if the JSON key does not match.
+        """  # noqa RST304
+        entity: Organization | Person | Tool | None = get_entity(
+            obj.get(cls.get_json_entry_key())
+        )
+        if entity is not None:
+            return cls(entity)
+        return None
 
 
 class PackageDownloadLocation(SPDXEntryMaybeStr):
@@ -379,6 +663,18 @@ class PackageDownloadLocation(SPDXEntryMaybeStr):
 
     json_entry_key = "downloadLocation"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageDownloadLocation:
+        """Initialize a :class:`PackageDownloadLocation` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`PackageDownloadLocation`
+            with.
+
+        :return: The :class:`PackageDownloadLocation` initialized with the value of *obj*.
+        """  # noqa RST304
+        return PackageDownloadLocation(obj.get(cls.get_json_entry_key(), NONE_VALUE))
+
 
 class FilesAnalyzed(SPDXEntryBool):
     """Indicates whether the file content of this package have been analyzed.
@@ -386,6 +682,23 @@ class FilesAnalyzed(SPDXEntryBool):
     See 7.8 `Files analyzed field
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#78-files-analyzed-field>`_
     """
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> FilesAnalyzed:
+        """Initialize a :class:`FilesAnalyzed` from a :class:`dict`.
+
+        By default, if *obj* does not contain this class' JSON entry key,
+        ``FilesAnalyzed(False)`` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`FilesAnalyzed`
+            with.
+
+        :return: The :class:`FilesAnalyzed` initialized with the value of *obj*.
+        """  # noqa RST304
+        if cls.get_json_entry_key() in obj:
+            return FilesAnalyzed(obj.get(cls.get_json_entry_key(), False))
+        return FilesAnalyzed(False)
 
 
 class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
@@ -414,6 +727,35 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
             }
         }
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageChecksum:
+        """Initialize a :class:`PackageChecksum` from a :class:`dict`.
+
+        Supported algorithms so far:
+
+        - `sha1`
+        - `sha256`
+        - `sha512`
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`PackageChecksum`
+            with.
+
+        :return: The :class:`PackageChecksum` initialized with the value of *obj*.
+
+        :raise: :exc:`ValueError` if the algorithm defined by *obj* is not supported.
+        """  # noqa RST304
+        if isinstance(obj, dict) and "algorithm" in obj and "checksumValue" in obj:
+            if obj["algorithm"].upper() == SHA1.algorithm:
+                return SHA1(obj["checksumValue"])
+            elif obj["algorithm"].upper() == SHA256.algorithm:
+                return SHA256(obj["checksumValue"])
+            elif obj["algorithm"].upper() == SHA512.algorithm:
+                return SHA512(obj["checksumValue"])
+            else:
+                raise ValueError(f"Unsupported checksum algorithm {obj['algorithm']}.")
+        raise ValueError(f"Invalid input checksum dict {obj!r}.")
+
 
 class PackageHomePage(SPDXEntryMaybeStr):
     """Identifies the homepage location of the package.
@@ -424,6 +766,23 @@ class PackageHomePage(SPDXEntryMaybeStr):
 
     json_entry_key = "homepage"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageHomePage | None:
+        """Initialize a :class:`PackageHomePage` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an :class:`PackageHomePage`
+            with.
+
+        :return: The :class:`PackageHomePage` initialized with the value of *obj*.
+        """  # noqa RST304
+        homepage: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
+            cls.get_json_entry_key()
+        )
+        if homepage is not None:
+            return PackageHomePage(homepage)
+        return None
+
 
 class SHA1(PackageChecksum):
     algorithm = "SHA1"
@@ -431,6 +790,10 @@ class SHA1(PackageChecksum):
 
 class SHA256(PackageChecksum):
     algorithm = "SHA256"
+
+
+class SHA512(PackageChecksum):
+    algorithm = "SHA512"
 
 
 class PackageLicenseConcluded(SPDXEntryMaybeStr):
@@ -442,6 +805,26 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
 
     json_entry_key = "licenseConcluded"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseConcluded:
+        """Initialize a :class:`PackageLicenseConcluded` from a :class:`dict`.
+
+        By default a :class:`PackageLicenseConcluded(NONE_VALUE)` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`PackageLicenseConcluded` with.
+
+        :return: The :class:`PackageLicenseConcluded` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        lic: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
+            cls.get_json_entry_key(), NONE_VALUE
+        )
+        if lic is not None:
+            return PackageLicenseConcluded(lic)
+        return PackageLicenseConcluded(NONE_VALUE)
+
 
 class PackageLicenseDeclared(SPDXEntryMaybeStr):
     """Contain the license having been declared by the authors of the package.
@@ -451,6 +834,26 @@ class PackageLicenseDeclared(SPDXEntryMaybeStr):
     """
 
     json_entry_key = "licenseDeclared"
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseDeclared | None:
+        """Initialize a :class:`PackageLicenseDeclared` from a :class:`dict`.
+
+        By default :const:`None` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`PackageLicenseDeclared` with.
+
+        :return: The :class:`PackageLicenseDeclared` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        lic: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
+            cls.get_json_entry_key()
+        )
+        if lic is not None:
+            return PackageLicenseDeclared(lic)
+        return None
 
 
 class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
@@ -462,6 +865,26 @@ class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
 
     json_entry_key = "licenseComments"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseComments | None:
+        """Initialize a :class:`PackageLicenseComments` from a :class:`dict`.
+
+        By default :const:`None` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`PackageLicenseComments` with.
+
+        :return: The :class:`PackageLicenseComments` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        comment: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
+            cls.get_json_entry_key()
+        )
+        if comment is not None:
+            return PackageLicenseComments(comment)
+        return None
+
 
 class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
     """Identify the copyright holders of the package.
@@ -472,6 +895,63 @@ class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
 
     json_entry_key = "copyrightText"
 
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageCopyrightText | None:
+        """Initialize a :class:`PackageCopyrightText` from a :class:`dict`.
+
+        By default :const:`None` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`PackageCopyrightText` with.
+
+        :return: The :class:`PackageCopyrightText` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        txt: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
+            cls.get_json_entry_key()
+        )
+        if txt is not None:
+            return PackageCopyrightText(txt)
+        return None
+
+
+class PackageDescription(SPDXEntryMaybeStrMultilines):
+    """A more detailed description of the package.
+
+    It may also be extracted from the packages itself.
+
+    Provides recipients of the SPDX document with a detailed technical
+    explanation of the functionality, anticipated use, and anticipated
+    implementation of the package. This field may also include a description
+    of improvements over prior versions of the package.
+
+    See 7.19 `Package detailed description field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#719-package-detailed-description-field>`_
+    """
+
+    json_entry_key = "description"
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageDescription | None:
+        """Initialize a :class:`PackageDescription` from a :class:`dict`.
+
+        By default :const:`None` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`PackageDescription` with.
+
+        :return: The :class:`PackageDescription` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        desc: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
+            cls.get_json_entry_key()
+        )
+        if desc is not None:
+            return PackageDescription(desc)
+        return None
+
 
 class PackageComment(SPDXEntryMaybeStrMultilines):
     """Record background information or analysis for the Concluded License.
@@ -481,6 +961,26 @@ class PackageComment(SPDXEntryMaybeStrMultilines):
     """
 
     json_entry_key = "comment"
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PackageComment | None:
+        """Initialize a :class:`PackageComment` from a :class:`dict`.
+
+        By default :const:`None` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`PackageComment` with.
+
+        :return: The :class:`PackageComment` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        comment: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
+            cls.get_json_entry_key()
+        )
+        if comment is not None:
+            return PackageComment(comment)
+        return None
 
 
 class ExternalRefCategory(Enum):
@@ -558,12 +1058,16 @@ class ExternalRef(SPDXEntry):
 
     @classmethod
     def from_dict(cls, external_ref_dict: dict[str, str]) -> ExternalRef:
-        """Generate an External Ref from a dict compatible with the JSON format.
+        """Initialize an :class:`ExternalRef` from a :class:`dict`.
 
-        :param external_ref_dict: a dict with the referenceCategory, referenceType,
-            and referenceLocator keys
-        :return: a new ExternalRef instance
-        """
+        :param external_ref_dict: A :class:`dict` containing the
+            ``"referenceCategory"``, ``"referenceType"`` and
+            ``"referenceLocator"`` keys. The values of those keys are used
+            to initialize a new :class:`ExternalRef`.
+
+        :return: The :class:`ExternalRef` initialized with the value
+            of *external_ref_dict*.
+        """  # noqa RST304
         return ExternalRef(
             reference_category=ExternalRefCategory(
                 external_ref_dict["referenceCategory"]
@@ -571,6 +1075,75 @@ class ExternalRef(SPDXEntry):
             reference_type=external_ref_dict["referenceType"],
             reference_locator=external_ref_dict["referenceLocator"],
         )
+
+
+class PrimaryPackagePurpose(Enum):
+    """Provides information about the primary purpose of the identified package.
+
+    Package Purpose is intrinsic to how the package is being used rather than
+    the content of the package. The options to populate this field are limited
+    to the values below.
+
+    See 7.24 `Primary Package Purpose field
+    <https://spdx.github.io/spdx-spec/v2.3/package-information/#724-primary-package-purpose-field>`_
+    """  # noqa: B950
+
+    APPLICATION = auto()
+    # If the package is a software application
+    FRAMEWORK = auto()
+    # If the package is a software framework
+    LIBRARY = auto()
+    # If the package is a software library
+    CONTAINER = auto()
+    # If the package refers to a container image which can be used by a
+    # container runtime application
+    OPERATING_SYSTEM = auto()
+    # If the package refers to an operating system
+    DEVICE = auto()
+    # If the package refers to a chipset, processor, or electronic board
+    FIRMWARE = auto()
+    # If the package provides low level control over a device's hardware
+    SOURCE = auto()
+    # If the package is a collection of source files
+    ARCHIVE = auto()
+    # If the package refers to an archived collection of files (.tar, .zip,
+    # etc.)
+    FILE = auto()
+    # If the package is a single file which can be independently distributed
+    # (configuration file, statically linked binary, Kubernetes deployment,
+    # etc.)
+    INSTALL = auto()
+    # If the package is used to install software on disk
+    OTHER = auto()
+    # If the package doesn't fit into the above categories.
+
+    @classmethod
+    def get_json_entry_key(cls) -> str:
+        return f"{cls.__name__[0].lower()}{cls.__name__[1:]}"
+
+    def to_tagvalue(self) -> str:
+        return f"{self.__class__.__name__}: {self.name}"
+
+    def to_json_dict(self) -> dict[str, str]:
+        return {self.get_json_entry_key(): self.name}
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> PrimaryPackagePurpose | None:
+        """Initialize a :class:`PrimaryPackagePurpose` from a :class:`dict`.
+
+        By default :const:`None` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`PrimaryPackagePurpose` with.
+
+        :return: The :class:`PrimaryPackagePurpose` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        purpose_name: str | None = obj.get(cls.get_json_entry_key(), None)
+        if purpose_name:
+            return PrimaryPackagePurpose.__members__[purpose_name]
+        return None
 
 
 class RelationshipType(Enum):
@@ -679,6 +1252,36 @@ class RelationshipType(Enum):
     #  in the formal SPDX specification
     OTHER = auto()
 
+    @classmethod
+    def get_json_entry_key(cls) -> str:
+        return f"{cls.__name__[0].lower()}{cls.__name__[1:]}"
+
+    def to_tagvalue(self) -> str:
+        return f"{self.__class__.__name__}: {self.name}"
+
+    def to_json_dict(self) -> dict[str, str]:
+        return {self.get_json_entry_key(): self.name}
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> RelationshipType:
+        """Initialize a :class:`RelationshipType` from a :class:`dict`.
+
+        By default ``RelationshipType.OTHER`` is returned.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`RelationshipType` with.
+
+        :return: The :class:`RelationshipType` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        if cls.get_json_entry_key() in obj:
+            rela_name: str = obj.get(
+                cls.get_json_entry_key(), RelationshipType.OTHER.name
+            )
+            return RelationshipType.__members__[rela_name]
+        return RelationshipType.OTHER
+
 
 class Relationship(SPDXEntry):
     """Provides information about the relationship between two SPDX elements.
@@ -717,6 +1320,27 @@ class Relationship(SPDXEntry):
             "relationshipType": self.relationship_type.name,
             "relatedSpdxElement": str(self.related_spdx_element),
         }
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> Relationship:
+        """Initialize a :class:`Relationship` from a :class:`dict`.
+
+        :param obj: A :class:`dict` which key is this class' JSON entry key,
+            and the value, an object to initialize an
+            :class:`Relationship` with.
+
+        :return: The :class:`Relationship` initialized with the value
+            of *obj*.
+        """  # noqa RST304
+        return Relationship(
+            spdx_element_id=SPDXID.from_json_dict(
+                {SPDXID.get_json_entry_key(): obj.get("spdxElementId")}
+            ),
+            relationship_type=RelationshipType.from_json_dict(obj),
+            related_spdx_element=SPDXID.from_json_dict(
+                {SPDXID.get_json_entry_key(): obj.get("relatedSpdxElement")}
+            ),
+        )
 
 
 @dataclass
@@ -786,6 +1410,10 @@ class Package(SPDXSection):
         that does not originate from the package authors, e.g. license
         information from a third-party repository, should not be included in
         this field.
+    :ivar PrimaryPackagePurposeType | None primary_purpose: Provides information
+        about the primary purpose of the identified package. Package Purpose is
+        intrinsic to how the package is being used rather than the content of
+        the package.
     :ivar PackageHomePage | None homepage: Provide a place for the SPDX document
         creator to record a website that serves as the package's home page. This
         link can also be used to reference further information about the package
@@ -806,6 +1434,9 @@ class Package(SPDXSection):
                     reference_type="purl",
                     reference_locator="pkg:generic/my-dep@1b2"
                 )
+    :ivar PackageDescription | None description: This field is a more detailed
+        description of the package. It may also be extracted from the packages
+        itself.
     :ivar PackageComment | None comment: This field provides a place for the
         SPDX document creator to record any general comments about the package
         being described.
@@ -818,7 +1449,7 @@ class Package(SPDXSection):
     checksum: list[PackageChecksum]
     supplier: PackageSupplier
     originator: PackageOriginator
-    copyright_text: PackageCopyrightText
+    copyright_text: PackageCopyrightText | None
     files_analyzed: FilesAnalyzed
     license_concluded: PackageLicenseConcluded
     license_comments: PackageLicenseComments | None
@@ -827,6 +1458,50 @@ class Package(SPDXSection):
     download_location: PackageDownloadLocation
     external_refs: list[ExternalRef] | None
     comment: PackageComment | None = field(default=None)
+    primary_purpose: PrimaryPackagePurpose | None = field(default=None)
+    description: PackageDescription | None = field(default=None)
+
+    @classmethod
+    def from_json_dict(cls, package_dict: dict[str, Any]) -> Package:
+        """Initialize a :class:`Package` from a :class:`dict`.
+
+        :param package_dict: A :class:`dict` containing JSON elements to
+            initialize this :class:`Package` with.
+
+        :return: The :class:`Package` initialized with the values of *obj*.
+        """  # noqa RST304
+        checksums: list[PackageChecksum] = [
+            PackageChecksum.from_json_dict(ck_dict)
+            for ck_dict in package_dict.get(PackageChecksum.get_json_entry_key(), [])
+        ]
+        external_refs: list[ExternalRef] | None = None
+        if ExternalRef.get_json_entry_key() in package_dict:
+            external_refs = []
+            for ext_ref_dict in package_dict.get(ExternalRef.get_json_entry_key(), {}):
+                external_refs.append(ExternalRef.from_dict(ext_ref_dict))
+        pkg: Package = Package(
+            name=PackageName.from_json_dict(package_dict),
+            spdx_id=SPDXID.from_json_dict(package_dict),
+            version=PackageVersion.from_json_dict(package_dict),
+            file_name=PackageFileName.from_json_dict(package_dict),
+            checksum=checksums,
+            supplier=PackageSupplier.from_json_dict(package_dict)
+            or PackageSupplier(Organization("AdaCore")),
+            originator=PackageOriginator.from_json_dict(package_dict)
+            or PackageOriginator(Organization("AdaCore")),
+            copyright_text=PackageCopyrightText.from_json_dict(package_dict),
+            files_analyzed=FilesAnalyzed.from_json_dict(package_dict),
+            license_concluded=PackageLicenseConcluded.from_json_dict(package_dict),
+            license_comments=PackageLicenseComments.from_json_dict(package_dict),
+            license_declared=PackageLicenseDeclared.from_json_dict(package_dict),
+            homepage=PackageHomePage.from_json_dict(package_dict),
+            download_location=PackageDownloadLocation.from_json_dict(package_dict),
+            external_refs=external_refs,
+            comment=PackageComment.from_json_dict(package_dict),
+            primary_purpose=PrimaryPackagePurpose.from_json_dict(package_dict),
+            description=PackageDescription.from_json_dict(package_dict),
+        )
+        return pkg
 
 
 @dataclass
@@ -835,12 +1510,35 @@ class DocumentInformation(SPDXSection):
 
     document_name: DocumentName
     document_namespace: DocumentNamespace = field(init=False)
-    version: SPDXVersion = SPDXVersion("SPDX-2.3")
-    data_license: DataLicense = DataLicense("CC0-1.0")
-    spdx_id: SPDXID = SPDXID("DOCUMENT")
+    version: SPDXVersion = SPDXVersion(SPDXVersion.VERSION)
+    data_license: DataLicense = DataLicense(DataLicense.LICENSE)
+    spdx_id: SPDXID = SPDXID(SPDXID.DEFAULT_ID)
 
     def __post_init__(self) -> None:
         self.document_namespace = DocumentNamespace(f"{self.document_name}-{uuid4()}")
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> DocumentInformation:
+        """Initialize a :class:`DocumentInformation` from a :class:`dict`.
+
+        :param obj: A :class:`dict` containing JSON elements to initialize this
+            :class:`DocumentInformation` with.
+
+        :return: The :class:`DocumentInformation` initialized with the values of
+            *obj*.
+        """  # noqa RST304
+        res: DocumentInformation = DocumentInformation(
+            DocumentName(obj.get("name", ""))
+        )
+        if DocumentNamespace.get_json_entry_key() in obj:
+            res.document_namespace = DocumentNamespace.from_json_dict(obj)
+        if SPDXVersion.get_json_entry_key() in obj:
+            res.version = SPDXVersion.from_json_dict(obj)
+        if DataLicense.get_json_entry_key() in obj:
+            res.data_license = DataLicense.from_json_dict(obj)
+        if SPDXID.get_json_entry_key() in obj:
+            res.spdx_id = SPDXID.from_json_dict(obj)
+        return res
 
 
 @dataclass
@@ -849,11 +1547,44 @@ class CreationInformation(SPDXSection):
 
     creators: list[Creator]
     created_now: Created = field(init=False)
-    license_list_version: LicenseListVersion = LicenseListVersion("3.19")
+    license_list_version: LicenseListVersion = LicenseListVersion(
+        LicenseListVersion.VERSION
+    )
 
     def __post_init__(self) -> None:
         self.created_now = Created(
             datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        )
+
+    @classmethod
+    def from_json_dict(cls, obj: dict[str, Any]) -> CreationInformation:
+        """Initialize a :class:`CreationInformation` from a :class:`dict`.
+
+        :param obj: A :class:`dict` containing JSON elements to initialize this
+            :class:`CreationInformation` with.
+
+        :return: The :class:`CreationInformation` initialized with the values of
+            *obj*.
+        """  # noqa RST304
+        if "creationInfo" in obj:
+            ci_dict: dict = obj.get("creationInfo", {})
+            creators: list[Creator] = []
+            for entity in ci_dict.get(Creator.json_entry_key, []):
+                creator: Creator | None = Creator.from_json_dict(
+                    {Creator.get_json_entry_key(): entity}
+                )
+                if creator is not None:
+                    creators.append(creator)
+            creation_info: CreationInformation = CreationInformation(
+                license_list_version=LicenseListVersion.from_json_dict(ci_dict),
+                creators=creators,
+            )
+            if Created.get_json_entry_key() in ci_dict:
+                creation_info.created_now = Created.from_json_dict(ci_dict)
+            return creation_info
+        return CreationInformation(
+            license_list_version=cls.license_list_version,
+            creators=[Creator(NOASSERTION)],
         )
 
 
@@ -1033,3 +1764,74 @@ class Document:
         output["packages"] = packages
 
         return output
+
+    @classmethod
+    def from_json_dict(cls, doc_dict: dict[str, Any]) -> Document:
+        """Create a :class:`Document` out of a JSON :class:`dict`.
+
+        This may be used when initializing a :class:`Document` from an SPDX
+        JSON file, or to duplicate a :class:`Document`.
+
+        For instance:
+
+        >>> import json
+        >>> from pathlib import Path
+        >>> with Path("my.spdx.json").(encoding="utf-8", errors="replace") as spdx_handle:
+        >>>     spdx_dict = json.load(spdx_handle)
+        >>> spdx_doc: Document = Document.from_json_dict(spdx_dict)
+        >>> spdx_doc2: Document = Document.from_json_dict(spdx_doc.to_json_dict())
+
+        :param doc_dict: The :class:`dict` containing JSON values to initialize
+            this :class:`Document` with.
+
+        :returns: A new :class:`Document` initialized with the JSON values of
+            *doc_dict*.
+        """  # noqa RST304
+        creators: list[Entity] = []
+        # As the Entity.from_json_dict() may return None, better handle the
+        # case.
+        for creator in doc_dict.get("creationInfo", {}).get("creators", []):
+            entity: Entity | None = Entity.from_json_dict(
+                {Entity.get_json_entry_key(): creator}
+            )
+            if entity is not None:
+                creators.append(entity)
+
+        doc: Document = Document(
+            document_name=doc_dict.get("name", ""),
+            creators=creators,
+        )
+        doc.creation_info = CreationInformation.from_json_dict(doc_dict)
+        doc.doc_info = DocumentInformation.from_json_dict(doc_dict)
+
+        # Look for the main package in documentDescribes entry. If it does not
+        # exist, we may look at packages with a primaryPackagePurpose field.
+        main_packages: list[SPDXID] = []
+        for spdx_id in doc_dict.get("documentDescribes", []):
+            main_packages.append(SPDXID(spdx_id))
+        if not main_packages:
+            # Look for a package with  a primaryPackagePurpose field.
+            for package_dict in doc_dict.get("packages", []):
+                if PrimaryPackagePurpose.get_json_entry_key() in package_dict:
+                    main_packages.append(package_dict.get(SPDXID.json_entry_key))
+
+        # Now that we know which package is the main package, we may add all
+        # packages to the SPDX document.
+        package: Package
+        for package_dict in doc_dict.get("packages", []):
+            package = Package.from_json_dict(package_dict)
+            is_main_package: bool = package.spdx_id in main_packages
+
+            # Set add_relationship for main package only, all other
+            # relationships are added later on.
+            doc.add_package(
+                package,
+                is_main_package=is_main_package,
+                add_relationship=is_main_package,
+            )
+
+        for relationship_dict in doc_dict.get("relationships", []):
+            rela = Relationship.from_json_dict(relationship_dict)
+            doc.add_relationship(rela)
+
+        return doc

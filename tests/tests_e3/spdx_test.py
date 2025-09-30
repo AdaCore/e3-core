@@ -1,5 +1,14 @@
+from __future__ import annotations
+
+import json
+
+import pytest
+
 from e3.spdx import (
+    NONE_VALUE,
+    Created,
     Document,
+    Entity,
     EntityRef,
     ExternalRef,
     ExternalRefCategory,
@@ -8,8 +17,10 @@ from e3.spdx import (
     Organization,
     Tool,
     Package,
+    PackageChecksum,
     PackageComment,
     PackageCopyrightText,
+    PackageDescription,
     PackageDownloadLocation,
     PackageFileName,
     PackageLicenseComments,
@@ -20,8 +31,10 @@ from e3.spdx import (
     PackageSupplier,
     PackageVersion,
     Person,
+    PrimaryPackagePurpose,
     SHA1,
     SHA256,
+    SHA512,
     SPDXID,
     SPDXEntryStr,
     SPDXEntryMaybeStrMultilines,
@@ -29,62 +42,12 @@ from e3.spdx import (
     Relationship,
     RelationshipType,
     InvalidSPDX,
+    PackageHomePage,
+    CreationInformation,
 )
 
-import pytest
 
-
-def test_entities_ref_spdx():
-    org = Organization("AdaCore")
-    assert org.to_tagvalue() == "Organization: AdaCore"
-    assert "AdaCore" in str(org)
-    assert "NOASSERTION" in str(Organization(NOASSERTION))
-    assert Organization(NOASSERTION).to_json_dict() == {"organization": "NOASSERTION"}
-
-    assert Creator(org).to_tagvalue() == "Creator: Organization: AdaCore"
-
-    assert (
-        PackageSupplier(org).to_tagvalue() == "PackageSupplier: Organization: AdaCore"
-    )
-    assert (
-        PackageOriginator(NOASSERTION).to_tagvalue() == "PackageOriginator: NOASSERTION"
-    )
-
-
-def test_entity_ref() -> None:
-    """Tests for the EntityRef class which are not covered by the other tests."""
-    org: EntityRef = EntityRef(Organization("AdaCore"))
-    no_assertion: EntityRef = EntityRef(NOASSERTION)
-
-    assert org.to_tagvalue() == "EntityRef: Organization: AdaCore"
-    assert no_assertion.to_tagvalue() == "EntityRef: NOASSERTION"
-    assert str(no_assertion) == "NOASSERTION"
-    assert str(org) == "Organization: AdaCore"
-    assert no_assertion.to_json_dict() == {"entityRef": "NOASSERTION"}
-    assert org.to_json_dict() == {"entityRef": "Organization: AdaCore"}
-
-
-def test_external_ref():
-    value = {
-        "referenceType": "purl",
-        "referenceLocator": "pkg:pypi/wheel@0.36.2",
-        "referenceCategory": "PACKAGE-MANAGER",
-    }
-    assert (
-        ExternalRef.from_dict(value).to_tagvalue()
-        == "ExternalRef: PACKAGE-MANAGER purl pkg:pypi/wheel@0.36.2"
-    )
-    assert ExternalRef.from_dict(value).to_json_dict() == {
-        "externalRefs": {
-            "referenceCategory": "PACKAGE-MANAGER",
-            "referenceLocator": "pkg:pypi/wheel@0.36.2",
-            "referenceType": "purl",
-        }
-    }
-
-
-def test_spdx():
-    """Test a SPDX document creation."""
+def create_spdx() -> Document:
     doc = Document(
         document_name="my-spdx-test",
         creators=[
@@ -114,6 +77,10 @@ def test_spdx():
         copyright_text=PackageCopyrightText("2023 AdaCore"),
         external_refs=None,
         homepage=None,
+        primary_purpose=PrimaryPackagePurpose.ARCHIVE,
+        description=PackageDescription(
+            "My SPDX test main package\nmade of several\nlines."
+        ),
     )
 
     doc.add_package(package, is_main_package=True)
@@ -177,6 +144,62 @@ def test_spdx():
         )
     )
 
+    return doc
+
+
+def test_entities_ref_spdx():
+    org = Organization("AdaCore")
+    assert org.to_tagvalue() == "Organization: AdaCore"
+    assert "AdaCore" in str(org)
+    assert "NOASSERTION" in str(Organization(NOASSERTION))
+    assert Organization(NOASSERTION).to_json_dict() == {"organization": "NOASSERTION"}
+
+    assert Creator(org).to_tagvalue() == "Creator: Organization: AdaCore"
+
+    assert (
+        PackageSupplier(org).to_tagvalue() == "PackageSupplier: Organization: AdaCore"
+    )
+    assert (
+        PackageOriginator(NOASSERTION).to_tagvalue() == "PackageOriginator: NOASSERTION"
+    )
+
+
+def test_entity_ref() -> None:
+    """Tests for the EntityRef class which are not covered by the other tests."""
+    org: EntityRef = EntityRef(Organization("AdaCore"))
+    no_assertion: EntityRef = EntityRef(NOASSERTION)
+
+    assert org.to_tagvalue() == "EntityRef: Organization: AdaCore"
+    assert no_assertion.to_tagvalue() == "EntityRef: NOASSERTION"
+    assert str(no_assertion) == "NOASSERTION"
+    assert str(org) == "Organization: AdaCore"
+    assert no_assertion.to_json_dict() == {"entityRef": "NOASSERTION"}
+    assert org.to_json_dict() == {"entityRef": "Organization: AdaCore"}
+
+
+def test_external_ref():
+    value = {
+        "referenceType": "purl",
+        "referenceLocator": "pkg:pypi/wheel@0.36.2",
+        "referenceCategory": "PACKAGE-MANAGER",
+    }
+    assert (
+        ExternalRef.from_dict(value).to_tagvalue()
+        == "ExternalRef: PACKAGE-MANAGER purl pkg:pypi/wheel@0.36.2"
+    )
+    assert ExternalRef.from_dict(value).to_json_dict() == {
+        "externalRefs": {
+            "referenceCategory": "PACKAGE-MANAGER",
+            "referenceLocator": "pkg:pypi/wheel@0.36.2",
+            "referenceType": "purl",
+        }
+    }
+
+
+def test_spdx():
+    """Test a SPDX document creation."""
+    doc = create_spdx()
+
     tagvalue_content = doc.to_tagvalue()
     json_content = doc.to_json_dict()
 
@@ -238,6 +261,10 @@ def test_spdx():
         "PackageLicenseConcluded: GPL-3.0-or-later",
         "PackageLicenseDeclared: GPL-3.0-or-later",
         "PackageDownloadLocation: NOASSERTION",
+        "PrimaryPackagePurpose: ARCHIVE",
+        "PackageDescription: <text>My SPDX test main package\n"
+        "made of several\n"
+        "lines.</text>",
         "",
         "",
         "# Package",
@@ -319,12 +346,16 @@ def test_spdx():
                     },
                 ],
                 "copyrightText": "2023 AdaCore",
+                "description": "My SPDX test main package\n"
+                "made of several\n"
+                "lines.",
                 "downloadLocation": "NOASSERTION",
                 "packageFileName": "main-pkg.zip",
                 "licenseConcluded": "GPL-3.0-or-later",
                 "licenseDeclared": "GPL-3.0-or-later",
                 "name": "my-spdx-test-main",
                 "originator": "Organization: AdaCore",
+                "primaryPackagePurpose": "ARCHIVE",
                 "supplier": "Organization: AdaCore",
                 "versionInfo": "2.2.2",
             },
@@ -473,3 +504,187 @@ def test_spdx_entry_str_gt() -> None:
     assert e2 > e1
     # Check the branch where two different objects are compared.
     assert e2.__gt__("One") is False
+
+
+def test_spdx_from_json_dict() -> None:
+    doc = create_spdx()
+    doc2: Document = Document.from_json_dict(doc.to_json_dict())
+    spdx = doc.to_json_dict()
+    spdx2 = doc2.to_json_dict()
+    assert json.dumps(spdx, indent=2, sort_keys=True) == json.dumps(
+        spdx2, indent=2, sort_keys=True
+    )
+
+
+def test_creator() -> None:
+    creator: Creator | None = Creator(Organization("AdaCore"))
+    creator_dict: dict = creator.to_json_dict()
+    creator2: Creator = Creator.from_json_dict(creator_dict)
+    creator_dict2 = creator2.to_json_dict()
+    assert json.dumps(creator_dict, indent=2, sort_keys=True) == json.dumps(
+        creator_dict2, indent=2, sort_keys=True
+    )
+    creator = Creator.from_json_dict({Creator.get_json_entry_key(): "Person: me"})
+    assert creator.value.value == "me"
+    assert isinstance(creator, Creator)
+    assert isinstance(creator.value, Person)
+    creator = Creator.from_json_dict({"xxx": "Person: me"})
+    assert creator is None
+    creator = Creator.from_json_dict(
+        {Creator.get_json_entry_key(): "Organization: AdaCore"}
+    )
+    assert creator.value.value == "AdaCore"
+    assert isinstance(creator, Creator)
+    assert isinstance(creator.value, Organization)
+    creator = Creator.from_json_dict({Creator.get_json_entry_key(): "Tool: e3"})
+    assert creator.value.value == "e3"
+    assert isinstance(creator, Creator)
+    assert isinstance(creator.value, Tool)
+    creator = Creator.from_json_dict(
+        {Creator.get_json_entry_key(): "Anything: anything"}
+    )
+    assert creator is None
+
+
+def test_entity() -> None:
+    entity: Entity | None = Entity.from_json_dict({"entity": "Person: me"})
+    assert entity.value == "me"
+    assert isinstance(entity, Person)
+    entity = Entity.from_json_dict({"xxx": "Person: me"})
+    assert entity is None
+    entity = Entity.from_json_dict({"entity": "Organization: AdaCore"})
+    assert entity.value == "AdaCore"
+    assert isinstance(entity, Organization)
+    entity = Entity.from_json_dict({"entity": "Tool: e3"})
+    assert entity.value == "e3"
+    assert isinstance(entity, Tool)
+    entity = Entity.from_json_dict({"entity": "Anything: anything"})
+    assert entity is None
+
+
+def test_misc_from_json_dict() -> None:
+    created: Created = Created.from_json_dict(
+        {Created.get_json_entry_key(): "2025-09-26"}
+    )
+    assert isinstance(created, Created)
+    # Test the default assignment
+    created = Created.from_json_dict({"invalid": "2025-09-26"})
+    assert isinstance(created, Created)
+    supplier: PackageSupplier | None = PackageSupplier.from_json_dict({})
+    assert supplier is None
+    originator: PackageOriginator | None = PackageOriginator.from_json_dict({})
+    assert originator is None
+    analyzed: FilesAnalyzed | None = FilesAnalyzed.from_json_dict({})
+    assert analyzed.value is False
+    cksum: PackageChecksum = PackageChecksum.from_json_dict(
+        {"algorithm": SHA512.algorithm, "checksumValue": "not checked"}
+    )
+    assert cksum.value == "not checked"
+    with pytest.raises(ValueError, match="Invalid input checksum dict"):
+        PackageChecksum.from_json_dict({})
+    with pytest.raises(ValueError, match="Unsupported checksum algorithm"):
+        PackageChecksum.from_json_dict(
+            ({"algorithm": "invalid", "checksumValue": "not checked"})
+        )
+    homepage: PackageHomePage | None = PackageHomePage.from_json_dict(
+        {PackageHomePage.get_json_entry_key(): "homepage"}
+    )
+    assert homepage.value == "homepage"
+    assert PackageHomePage.from_json_dict({"not homepage": "not a homepage"}) is None
+    license_concluded: PackageLicenseConcluded = PackageLicenseConcluded.from_json_dict(
+        {"not license": "not a license"}
+    )
+    assert license_concluded.value == NONE_VALUE
+    license_concluded: PackageLicenseConcluded = PackageLicenseConcluded.from_json_dict(
+        {PackageLicenseConcluded.get_json_entry_key(): None}
+    )
+    assert license_concluded.value == NONE_VALUE
+    copyright_text: PackageCopyrightText | None = PackageCopyrightText.from_json_dict(
+        {PackageCopyrightText.get_json_entry_key(): None}
+    )
+    assert copyright_text is None
+    rela_type: RelationshipType = RelationshipType.from_json_dict(
+        {RelationshipType.get_json_entry_key(): RelationshipType.DATA_FILE_OF.name}
+    )
+    assert rela_type.value == RelationshipType.DATA_FILE_OF.value
+    # Some tests for to_tagvalue() and to_json_dict()
+    assert rela_type.to_tagvalue() == "RelationshipType: DATA_FILE_OF"
+    assert rela_type.to_json_dict() == {
+        RelationshipType.get_json_entry_key(): RelationshipType.DATA_FILE_OF.name
+    }
+    rela_type = RelationshipType.from_json_dict(
+        {"anything": RelationshipType.DATA_FILE_OF.name}
+    )
+    assert rela_type == RelationshipType.OTHER
+    creation_info: CreationInformation = CreationInformation.from_json_dict(
+        {"an invalid": "dict"}
+    )
+    assert isinstance(creation_info, CreationInformation)
+
+
+def test_spdx_without_main_package() -> None:
+    doc_dict: dict = {
+        "SPDXID": "SPDXRef-DOCUMENT",
+        "creationInfo": {
+            "created": "2025-09-24T09:54:19.745Z",
+            "creators": ["Tool: npm/cli-11.4.2"],
+        },
+        "dataLicense": "CC0-1.0",
+        "documentNamespace": (
+            "http://spdx.org/spdxdocs/ada-26.0.202508111-f5857bbc-8122-4a8c-a90e-4349d65c0a11"
+        ),
+        "name": "ada@26.0.202508111",
+        "packages": [
+            {
+                "SPDXID": "SPDXRef-Package-ada-26.0.202508111",
+                "description": (
+                    "Ada & SPARK IntelliSense, code browsing, debugging and more."
+                ),
+                "downloadLocation": "NOASSERTION",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceLocator": "pkg:npm/ada@26.0.202508111",
+                        "referenceType": "purl",
+                    }
+                ],
+                "filesAnalyzed": False,
+                "homepage": "https://github.com/AdaCore/ada_language_server#readme",
+                "licenseDeclared": "GPL-3.0",
+                "name": "ada",
+                "packageFileName": "",
+                "primaryPackagePurpose": "LIBRARY",
+                "versionInfo": "26.0.202508111",
+            },
+            {
+                "SPDXID": "SPDXRef-Package-colors.colors-1.6.0",
+                "checksums": [
+                    {
+                        "algorithm": "SHA512",
+                        "checksumValue": (
+                            "22bf803a26eaceb22c2fa6a3b77473dcbb2407b3a23151ea96"
+                            "d666b296d6fd326e4d5bb238c8ab56a0248df63a2484a22c78"
+                            "3236a89c002f00c871c6ccd77f74"
+                        ),
+                    }
+                ],
+                "description": "get colors in your node.js console",
+                "downloadLocation": "NOASSERTION",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceLocator": "pkg:npm/%40colors/colors@1.6.0",
+                        "referenceType": "purl",
+                    }
+                ],
+                "filesAnalyzed": False,
+                "homepage": "https://github.com/DABH/colors.js",
+                "licenseDeclared": "MIT",
+                "name": "@colors/colors",
+                "packageFileName": "node_modules/@colors/colors",
+                "versionInfo": "1.6.0",
+            },
+        ],
+    }
+    doc: Document = Document.from_json_dict(doc_dict)
+    assert "documentDescribes" in doc.to_json_dict()
