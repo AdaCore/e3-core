@@ -85,9 +85,13 @@ def test_python_func():
             "/foo/Scripts/run",
         ]
         # Don't check cases as on windows we might get .EXE or .exe
-        assert [e3.os.fs.unixpath(p) for p in e3.sys.python_script("run")][
-            0
-        ].lower() == e3.os.fs.unixpath(sys.executable).lower()
+        #
+        # Note: On windows sys.executable sometimes references python.exe and sometimes
+        # python3.exe. To avoid having different assert depending on the windows
+        # platform used, we just remove the "3" from the executable name.
+        assert [e3.os.fs.unixpath(p) for p in e3.sys.python_script("run")][0].replace(
+            "3", ""
+        ).lower() == e3.os.fs.unixpath(sys.executable.replace("3", "")).lower()
 
         e3.fs.mkdir("Scripts")
         e3.os.fs.touch("Scripts/run.exe")
