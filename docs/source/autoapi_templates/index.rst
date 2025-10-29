@@ -1,4 +1,4 @@
-e-core API
+e3-core API
 ##########
 
 .. toctree::
