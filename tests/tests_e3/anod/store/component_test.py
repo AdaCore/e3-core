@@ -315,7 +315,7 @@ def test_component_metadata(store) -> None:  # type: ignore[no-untyped-def]
     # precision of seconds. When two consecutive component pushes are done, like in
     # this test, it may result in two components with the same creation_date field.
     #
-    # To avoid this error and make a better fix, we will simply sleep for one second
+    # To avoid this error, waiting for a better fix, we will simply sleep for one second
     # between two pushes.
     time.sleep(1)
 
