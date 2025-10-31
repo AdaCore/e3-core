@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import pytest
 from typing import TYPE_CHECKING
+import time
 
 from e3.anod.store.interface import StoreError
 from e3.anod.store.buildinfo import BuildInfo
@@ -309,6 +310,14 @@ def test_component_metadata(store) -> None:  # type: ignore[no-untyped-def]
         "list": '["one", "two"]',
     }
     comp: Component = push_component(store=store, metadata=metadata)
+
+    # !!! The creation date field, used to retrieve the latest component, has a
+    # precision of seconds. When two consecutive component pushes are done, like in
+    # this test, it may result in two components with the same creation_date field.
+    #
+    # To avoid this error and make a better fix, we will simply sleep for one second
+    # between two pushes.
+    time.sleep(1)
 
     # Add a metadata statement
     statement: Statement = Statement(
