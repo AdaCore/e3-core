@@ -41,7 +41,13 @@ LEVELS = {
 # e3.main. This limitation can be bypassed by explicitely set back the
 # logging level to DEBUG: logging.getLogger(module).setLevel(logging.DEBUG)
 # after parsing the arguments.
-NO_DEBUG_LOGGING_MODULES = ["boto3", "botocore", "requests", "urllib3"]
+NO_DEBUG_LOGGING_MODULES = [
+    "boto3",
+    "botocore",
+    "requests",
+    "requests_cache",
+    "urllib3",
+]
 
 
 # Default output stream (sys.stdout by default, or a file descriptor if
