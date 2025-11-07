@@ -64,7 +64,7 @@ def test_load_build_info_ready():
 
 
 def test_load_build_info_not_ready():
-    """Test basic BuildInfo.load and BuildInfo.to_dict."""
+    """Test basic BuildInfo.load and BuildInfo.as_dict."""
     build_info_data = {
         "build_date": "20170915",
         "isready": False,
@@ -75,11 +75,11 @@ def test_load_build_info_not_ready():
     }
     bi = BuildInfo.load(build_info_data)
     assert str(bi)
-    assert bi.to_dict() == build_info_data
+    assert bi.as_dict() == build_info_data
 
 
 def test_load_build_info_implict_not_ready():
-    """Test basic BuildInfo.load and BuildInfo.to_dict."""
+    """Test basic BuildInfo.load and BuildInfo.as_dict."""
     build_info_data = {
         "build_date": "20170915",
         "setup": "gcc-49",
@@ -89,10 +89,10 @@ def test_load_build_info_implict_not_ready():
     }
     bi = BuildInfo.load(build_info_data)
 
-    to_dict_result = dict(build_info_data)
-    to_dict_result["isready"] = False
+    as_dict_result = dict(build_info_data)
+    as_dict_result["isready"] = False
     assert str(bi)
-    assert bi.to_dict() == to_dict_result
+    assert bi.as_dict() == as_dict_result
 
 
 def test_create_build_info_from_id(store):
@@ -102,7 +102,7 @@ def test_create_build_info_from_id(store):
 
     bi = BuildInfo.from_id(store, ref_bi["_id"])
     assert str(bi)
-    assert bi.to_dict() == ref_bi
+    assert bi.as_dict() == ref_bi
 
 
 def test_create_build_info_from_invalid_id(store):

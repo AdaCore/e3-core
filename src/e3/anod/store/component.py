@@ -414,7 +414,7 @@ class Component(object):
         }
 
         if self.build_info is not None:
-            result["build"] = self.build_info.to_dict()
+            result["build"] = self.build_info.as_dict()
 
         return result
 

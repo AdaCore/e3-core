@@ -499,7 +499,7 @@ class File(object):
             "unpack_dir": self.unpack_dir,
         }
         if self.build_info is not None:
-            result["build"] = self.build_info.to_dict()
+            result["build"] = self.build_info.as_dict()
 
         if self.resource:
             result["resource"] = {

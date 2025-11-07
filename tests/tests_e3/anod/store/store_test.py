@@ -217,7 +217,7 @@ def test_component(store):
     assert tmp[0]["platform"] == "x86_64-linux"
     assert tmp[0]["version"] == "1.0"
     assert tmp[0]["build_id"] == bid.id
-    assert tmp[0]["build"] == bid.to_dict()
+    assert tmp[0]["build"] == bid.as_dict()
     assert tmp[0]["readme"]["name"] == "readme.name"
     assert tmp[0]["readme"]["kind"] == "readme"
     assert tmp[0]["readme"]["filename"] == "readme.txt"
@@ -271,7 +271,7 @@ def test_component(store):
     assert tmp[0]["platform"] == "x86_64-windows64"
     assert tmp[0]["version"] == "2.0"
     assert tmp[0]["build_id"] == bid.id
-    assert tmp[0]["build"] == bid.to_dict()
+    assert tmp[0]["build"] == bid.as_dict()
 
     tmp = store.latest_components("test", platform="x86_64-linux")
     assert tmp[0]["name"] == "comp1"
@@ -279,7 +279,7 @@ def test_component(store):
     assert tmp[0]["platform"] == "x86_64-linux"
     assert tmp[0]["version"] == "1.0"
     assert tmp[0]["build_id"] == bid.id
-    assert tmp[0]["build"] == bid.to_dict()
+    assert tmp[0]["build"] == bid.as_dict()
 
     with open("att2.txt", "w") as fd:
         fd.write("a")
@@ -324,7 +324,7 @@ def test_component(store):
     assert tmp[0]["platform"] == "x86_64-linux"
     assert tmp[0]["version"] == "3.0"
     assert tmp[0]["build_id"] == bid.id
-    assert tmp[0]["build"] == bid.to_dict()
+    assert tmp[0]["build"] == bid.as_dict()
     assert isinstance(tmp[0]["attachments"], dict) and "myatt2" in tmp[0]["attachments"]
 
 
