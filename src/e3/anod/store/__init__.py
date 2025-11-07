@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from enum import Enum
 import os
 import json
@@ -22,10 +23,9 @@ from e3.anod.store.interface import (
 
 if TYPE_CHECKING:
     from typing import Any, Literal, Union
-    from collections.abc import Sequence
 
     from e3.anod.store.file import FileDict, ResourceDict
-    from e3.anod.store.component import ComponentDict
+    from e3.anod.store.component import ComponentDict, ComponentAttachmentDict
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.interface import BuildDataDict
 
@@ -382,7 +382,7 @@ class _Store(_StoreContextManager):
         if not res:
             raise StoreError(f"No element with {field_name}={rid} found")
         if len(res) != 1:
-            raise StoreError(
+            raise StoreError(  # defensive code
                 f"Database corrupted: multiple element with {field_name}={rid} found"
             )
         return res[0]
@@ -914,12 +914,18 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
         # Retrieve attachments and upload them.
         attachments_with_name: dict[str, FileDict] = {}
+
+        attachments: dict[str, FileDict] | Sequence[ComponentAttachmentDict] | None
         attachments = component_info.get("attachments")
+
         if attachments:
             if isinstance(attachments, dict):
                 for name, file_dict in attachments.items():
                     attachments_with_name[name] = self._submit_file(file_dict)
-            elif isinstance(attachments, list):
+            # The Component dict ask for a list in that case, however, from this code
+            # point of view, we only need an implementation of __contains__ and
+            # __iter__, having a list, a tuple or a set doesn't matter here.
+            elif isinstance(attachments, Sequence):
                 for att in attachments:
                     if att["name"] in attachments_with_name:
                         raise StoreError("Two attachments cannot use the same name")
@@ -928,7 +934,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                     )
             else:
                 raise TypeError(
-                    "Unknown attachments type: expected list or dict, "
+                    "Unknown attachments type: expected Sequence or dict, "
                     f"got {type(attachments)}"
                 )
 
@@ -1849,7 +1855,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             self.raw_add_build_info(bi)
         else:
             try:
-                _ = self.get_build_info(bid)
+                bi = self.get_build_info(bid)
             except StoreError:
                 bi = from_store.get_build_info(bid)
                 self.raw_add_build_info(bi)
@@ -1890,13 +1896,17 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
         # Retrieve attachments and upload them.
         attachments_with_name: dict[str, FileDict] = {}
+        attachments: dict[str, FileDict] | Sequence[ComponentAttachmentDict] | None
         attachments = component_info.get("attachments")
         if attachments:
             if isinstance(attachments, dict):
                 for name, file_dict in attachments.items():
                     self._raw_add_file(file_dict)
                     attachments_with_name[name] = file_dict
-            elif isinstance(attachments, list):
+            # The Component dict ask for a list in that case, however, from this code
+            # point of view, we only need an implementation of __contains__ and
+            # __iter__, having a list, a tuple or a set doesn't matter here.
+            elif isinstance(attachments, Sequence):
                 for att in attachments:
                     if att["name"] in attachments_with_name:
                         raise StoreError("Two attachments cannot use the same name")
@@ -1904,7 +1914,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
                     attachments_with_name[att["name"]] = att["att_file"]
             else:
                 raise TypeError(
-                    "Unknown attachments type: expected list or dict, "
+                    "Unknown attachments type: expected Sequence or dict, "
                     f"got {type(attachments)}"
                 )
 
@@ -2063,20 +2073,16 @@ class LocalStore(StoreRW, LocalStoreInterface):
                 query = {"kind": "source", "bid": ""}
                 query.update(unprocessed_query)
 
-                if query["kind"] == "source" and not query["bid"] and "setup" in query:
+                if not query["bid"] and "setup" in query:
                     try:
                         query["bid"] = from_store.get_latest_build_info(
-                            setup=query["setup"], date=query.get("date", "all")
+                            setup=query["setup"], date=query.get("date")
                         )["_id"]
                     except StoreError:
                         pass
 
                 if query.get("bid"):
                     required_bids.add(query["bid"])
-
-                if query["kind"] == "thirdparty":
-                    # Remove bid information for thirdparty to simplify lookup
-                    query["bid"] = ""
 
             # Then check for entries that are already in the local database
             if query.get("query", "") == "source":
