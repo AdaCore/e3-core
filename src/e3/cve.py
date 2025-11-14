@@ -166,7 +166,8 @@ class NVD:
 
             warn(
                 "Using NVD.session without using `with` statement is deprecated",
-                DeprecationWarning,
+                category=DeprecationWarning,
+                stacklevel=2,
             )
             self.__enter__()
 

@@ -90,6 +90,7 @@ class memoize:
             "this decorator will be removed in a later version of e3-core, "
             "please use functools.lru_cache instead",
             category=DeprecationWarning,
+            stacklevel=2,  # warn from the caller site
         )
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
