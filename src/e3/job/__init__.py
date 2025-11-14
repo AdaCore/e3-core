@@ -142,7 +142,6 @@ class Job(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def run(self) -> None:
         """Job activity."""
-        pass  # all: no cover
 
     @property
     def status(self) -> ReturnValue:
@@ -169,14 +168,12 @@ class Job(metaclass=abc.ABCMeta):
 
         This allow the user to do some logging on job startup
         """
-        pass
 
     def on_finish(self, scheduler: Scheduler) -> None:  # noqa: B027 (empty by design)
         """Call whenever a job is finished.
 
         This allow the user to do some logging on job termination
         """
-        pass
 
 
 class EmptyJob(Job):
@@ -276,7 +273,6 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
 
         :return: the command line
         """
-        pass  # all: no cover
 
     @property
     def cmd_options(self) -> dict:

@@ -52,7 +52,6 @@ class _StoreContextManager(metaclass=abc.ABCMeta):
 
         :return: Self
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def __exit__(self, *args: Any) -> None:
@@ -66,7 +65,6 @@ class _StoreContextManager(metaclass=abc.ABCMeta):
                 pass
             # __exit__ is call here
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def close(self) -> None:
@@ -75,7 +73,6 @@ class _StoreContextManager(metaclass=abc.ABCMeta):
         This method is used to close a context, generally not initiated using the
         `with` keyword. See `builtin.open` for more example.
         """
-        pass  # all: no cover
 
 
 class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
@@ -108,7 +105,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
             See e3.anod.store.component.Component.load implementation for the
             description of the expected structure.
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def list_components(
@@ -126,7 +122,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
             See e3.anod.store.component.Component.load implementation for the
             description of the expected structure.
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def latest_components(
@@ -151,7 +146,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
             Note that no error is raised when no component matching the
             criteria is found (an empty list is returned).
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def get_build_data(self, bid: str) -> BuildDataDict:
@@ -163,7 +157,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
             and e3.anod.store.component.Component.load for description of
             the expected structure
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def get_build_info(self, bid: str) -> BuildInfoDict:
@@ -174,7 +167,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
             e3.anod.store.buildinfo.BuildInfo.load for description of the
             structure.
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def get_build_info_list(
@@ -193,7 +185,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
         :return: a dict with the build metadata. See
             e3.anod.store.buildinfo.BuildInfo.load for description of the structure.
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def get_latest_build_info(
@@ -213,7 +204,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
             See e3.anod.store.buildinfo.BuildInfo.load for description of the
             structure.
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def get_source_info(
@@ -234,7 +224,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
         :return: a dict representing a file structure
             (see e3.anod.store.file.File.load)
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def download_resource(self, rid: str, path: str) -> str:
@@ -244,7 +233,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
         :param path: destination
         :return: absolute path to the downloaded resource
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def latest_thirdparty(
@@ -258,7 +246,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
         :return: a dict representing a file structure or None if the third
             party does not exist. (See e3.anod.store.file.File.load)
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def bulk_query(self, queries: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -296,7 +283,6 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
         :param queries: a list of queries
         :return: a list of answers
         """
-        pass  # all: no cover
 
 
 class StoreWriteInterface(object, metaclass=abc.ABCMeta):
@@ -311,7 +297,6 @@ class StoreWriteInterface(object, metaclass=abc.ABCMeta):
         :return: a dict representing the final file structure
             (see e3.anod.store.file.File.load)
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def submit_component(self, component_info: ComponentDict) -> ComponentDict:

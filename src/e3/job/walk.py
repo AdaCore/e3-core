@@ -84,7 +84,6 @@ class Walk:
         DEFAULT_JOB_MAX_DURATION. Child classes requiring different
         scheduling parameters should override this method.
         """
-        pass
 
     def compute_fingerprint(
         self, uid: str, data: Any, is_prediction: bool = False
@@ -128,7 +127,6 @@ class Walk:
             job, or None, if the fingerprint should be deleted instead
             of saved.
         """
-        pass
 
     def load_previous_fingerprint(self, uid: str) -> Fingerprint | None:
         """Get the fingerprint from the given action's previous execution.
@@ -223,7 +221,6 @@ class Walk:
         :param predecessors: A list of predecessor jobs, or None.
         :notify_end: Same as the notify_end parameter in Job.__init__.
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def request_requeue(self, job: ProcessJob) -> bool:
@@ -233,7 +230,6 @@ class Walk:
 
         :param job: The job to requeue.
         """
-        pass  # all: no cover
 
     def get_job(
         self,

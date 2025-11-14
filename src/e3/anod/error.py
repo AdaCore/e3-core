@@ -11,19 +11,13 @@ if TYPE_CHECKING:
 class AnodError(e3.error.E3Error):
     """Base Anod error."""
 
-    pass
-
 
 class SpecError(AnodError):
     """Invalid specification file."""
 
-    pass
-
 
 class SandBoxError(AnodError):
     """Invalid sandbox or wrong sandbox configuration."""
-
-    pass
 
 
 class ShellError(AnodError):

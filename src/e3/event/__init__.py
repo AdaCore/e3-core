@@ -218,7 +218,6 @@ class EventHandler(metaclass=abc.ABCMeta):
         :param event: an Event
         :return: True on success, False otherwise
         """
-        pass  # all: no cover
 
     @classmethod
     def decode_config(cls, config_str: str) -> dict:

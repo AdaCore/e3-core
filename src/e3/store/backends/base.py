@@ -26,7 +26,6 @@ class ResourceInfo(metaclass=abc.ABCMeta):
 
         This is meant to be used to implement a cache system.
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def verify(self, resource_path: str) -> bool:
@@ -35,7 +34,6 @@ class ResourceInfo(metaclass=abc.ABCMeta):
         This is meant to validate the resource fingerprint (e.g. sha1sum).
         :param resource_path: path to the downloaded resource
         """
-        pass  # all: no cover
 
 
 class CachedResource(namedtuple("CachedResource", ["uid", "local_path"])):
@@ -66,7 +64,6 @@ class Store(metaclass=abc.ABCMeta):
         :param query: a dictionary containing store specific queries to
             identify a resource
         """
-        pass  # all: no cover
 
     def download_resource(self, metadata: ResourceInfo, dest: str) -> str | None:
         """Download a resource identified by its metadata in dest.
@@ -114,4 +111,3 @@ class Store(metaclass=abc.ABCMeta):
         :param dest: directory where the resource will be stored
         :return: resource path
         """
-        pass  # all: no cover

@@ -80,8 +80,6 @@ class GetSource(Action):
 class Download(Action):
     """General root class for all download actions."""
 
-    pass
-
 
 class DownloadSource(Download):
     """DownloadSource Action.
@@ -252,19 +250,13 @@ class AnodAction(Action):
 class Build(AnodAction):
     """Anod build primitive."""
 
-    pass
-
 
 class Test(AnodAction):
     """Anod test primitive."""
 
-    pass
-
 
 class Install(AnodAction):
     """Anod install primitive."""
-
-    pass
 
 
 class DownloadBinary(Download):
@@ -291,8 +283,6 @@ class DownloadBinary(Download):
 
 class Upload(Action):
     """General root class for all upload actions."""
-
-    pass
 
 
 class UploadComponent(Upload):
@@ -568,7 +558,6 @@ class Decision(Action, metaclass=abc.ABCMeta):
         :return: A description of the given parameter (named "decision",
             but actually a choice).
         """
-        pass  # all: no cover
 
     def suggest_plan_fix(self, choice: Choice) -> str | None:
         """Suggest a plan line that would fix the conflict.
