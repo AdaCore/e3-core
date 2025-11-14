@@ -457,7 +457,6 @@ def rm(
         :param exc_info: exception raised when the first delete attempt was made
         """
         del exc_info
-        e3.log.debug(f"error when running {func.__name__!r} on {error_path}")
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
@@ -500,6 +499,13 @@ def rm(
 
         else:
             raise FSError(origin="rm", message=f"unknown function: {func.__name__!r}")
+
+        # If the file still exists, let the user know through a debug message.
+        if os.path.exists(error_path):
+            logger.debug(
+                f"error when running {func.__name__!r} on {error_path}. "
+                "Element could not be removed."
+            )
 
     for f in file_list:
         try:
