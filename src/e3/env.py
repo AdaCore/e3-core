@@ -72,12 +72,10 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
         This is mostly useful to implement a singleton, as done in Env()
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def _items(self) -> Iterable:
         """Return the list of instance variables."""
-        pass  # all: no cover
 
     @property
     def platform(self) -> str:

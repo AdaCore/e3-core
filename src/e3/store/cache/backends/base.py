@@ -24,7 +24,6 @@ class Cache(metaclass=abc.ABCMeta):
         :param uid: the resource uid
         :param default: the default value if not found
         """
-        pass  # all: no cover
 
     def get_expiry_time(self, timeout: int = DEFAULT_TIMEOUT) -> float:
         """Return the expiry time based upon the provided timeout.
@@ -50,7 +49,6 @@ class Cache(metaclass=abc.ABCMeta):
             default cache timeout will be used.
         :return: True if the value is set, False in case of failure
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def delete(self, uid: str) -> None:
@@ -59,16 +57,13 @@ class Cache(metaclass=abc.ABCMeta):
         Do nothing if the uid does not exist.
         :param uid: the resource uid
         """
-        pass  # all: no cover
 
     @abc.abstractmethod
     def clear(self) -> None:
         """Remove *all* values from the cache at once."""
-        pass  # all: no cover
 
     def close(self) -> None:  # noqa: B027 (empty by design)
         """Close the cache connection."""
-        pass  # all: no cover
 
     def __contains__(self, uid: str) -> bool:
         """Return True if the resource is in the cache and has not expired.

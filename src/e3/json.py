@@ -23,8 +23,6 @@ class JsonError(e3.error.E3Error):
 class JsonDataInvalidJsonError(e3.error.E3Error):
     """An error thrown when input data string does not represent a dictionary."""
 
-    pass
-
 
 class JsonData(ABC):
     """An object to represent JSON data content."""

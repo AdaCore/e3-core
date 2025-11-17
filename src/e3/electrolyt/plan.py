@@ -23,8 +23,6 @@ if TYPE_CHECKING:
 class PlanError(E3Error):
     """Error when parsing or executing the plan."""
 
-    pass
-
 
 class Plan:
     """Electrolyt Plan.

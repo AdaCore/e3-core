@@ -592,7 +592,6 @@ class File(object):
         This overload indicate that the method will always return a component if
         ignore_errors is False. If no component is found for any reason, raise an error.
         """
-        pass  # pragma: no cover
 
     @overload
     @classmethod
@@ -604,7 +603,6 @@ class File(object):
         ignore_errors: Literal[True] = True,
     ) -> FileType | None:
         """See self.load_from_meta_file."""
-        pass  # pragma: no cover
 
     @classmethod
     def load_from_meta_file(  # noqa: F811

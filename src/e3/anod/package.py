@@ -183,8 +183,6 @@ class SharedSource(Source):
     directory
     """
 
-    pass
-
 
 class SourceBuilder:
     DEFAULT_PATCH_CMD: Final = 1

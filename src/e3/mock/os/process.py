@@ -29,13 +29,9 @@ if TYPE_CHECKING:
 class MockRunError(Exception):
     """Error raised by mock_run."""
 
-    pass
-
 
 class UnexpectedCommandError(MockRunError):
     """Error raised when MockRun receives an unexpected command."""
-
-    pass
 
 
 @contextmanager

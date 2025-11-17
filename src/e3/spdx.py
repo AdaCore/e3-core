@@ -63,8 +63,6 @@ def get_entity(value: str | None) -> Organization | Person | Tool | None:
 class InvalidSPDX(Exception):
     """Raise an exception when the SPDX document cannot be generated."""
 
-    pass
-
 
 class SPDXPackageSupplier(Enum):
     """Used by the SPDX originator field.
@@ -121,7 +119,6 @@ class SPDXEntry(metaclass=ABCMeta):
     @abstractmethod
     def to_json_dict(self) -> dict[str, Any]:
         """Return a chunk of the SPDX JSON document."""
-        pass
 
 
 class SPDXEntryStr(SPDXEntry):

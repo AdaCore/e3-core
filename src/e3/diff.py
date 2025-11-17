@@ -18,16 +18,12 @@ logger = e3.log.getLogger("diff")
 class DiffError(e3.error.E3Error):
     """Error returned when the patch command fails."""
 
-    pass
-
 
 class EmptyDiffError(DiffError):
     """Error returned when the patch is empty.
 
     These situation can occur when all the patched files are discarded.
     """
-
-    pass
 
 
 def diff(

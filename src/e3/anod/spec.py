@@ -353,7 +353,6 @@ class Anod:
 
         :param qualifiers_manager: the QualifiersManager instance to be configured.
         """
-        pass
 
     @property
     def args(self) -> dict[str, str | bool | frozenset[str]]:
