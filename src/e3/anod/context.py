@@ -542,7 +542,7 @@ class AnodContext:
                     err.messages[-1],
                     "",
                     "Anod traceback:",
-                    (f"raised from {primitive}(name={name}, " f"qual={qualifier})"),
+                    f"raised from {primitive}(name={name}, qual={qualifier})",
                 ]
             )
             raise err
