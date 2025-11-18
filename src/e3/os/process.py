@@ -314,10 +314,7 @@ class Run:
             """
             if not parse_shebang:
                 # nothing to do
-                paths = env["PATH"] if env and "PATH" in env else None
-                return [
-                    which(cmd_line[0], paths=paths, default=cmd_line[0])
-                ] + cmd_line[1:]
+                return [which(cmd_line[0], default=cmd_line[0])] + cmd_line[1:]
 
             prog = which(cmd_line[0], default=None)
             if prog is None:
