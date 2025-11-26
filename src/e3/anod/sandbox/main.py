@@ -49,7 +49,7 @@ def main(get_argument_parser: bool = False) -> ArgumentParser | None:
     )
 
     # Load all sandbox actions plugins
-    ext = stevedore.ExtensionManager(
+    ext: stevedore.ExtensionManager = stevedore.ExtensionManager(
         namespace="e3.anod.sandbox.sandbox_action",
         invoke_on_load=True,
         invoke_args=(subparsers,),
@@ -57,8 +57,8 @@ def main(get_argument_parser: bool = False) -> ArgumentParser | None:
 
     if len(ext.names()) != len(ext.entry_points_names()):
         raise SandBoxError(
-            "an error occured when loading sandbox_action entry points %s"
-            % ",".join(ext.entry_points_names())
+            "an error occurred when loading sandbox_action entry points "
+            f"{','.join(ext.entry_points_names())}"
         )  # defensive code
 
     if get_argument_parser:
@@ -70,7 +70,9 @@ def main(get_argument_parser: bool = False) -> ArgumentParser | None:
 
     # An action has been selected, run it
     try:
-        ext[args.action].obj.run(args)
+        # Prevent a mypy error like:
+        #  error: Item "None" of "Any | None" has no attribute "run"  [union-attr]
+        ext[args.action].obj.run(args)  # type: ignore[union-attr]
     except SandBoxError as err:
         logger.error(err)
         sys.exit(1)

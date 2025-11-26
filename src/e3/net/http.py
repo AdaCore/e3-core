@@ -40,7 +40,7 @@ logger = e3.log.getLogger("net.http")
 
 
 def get_filename(content_disposition: str) -> str | None:
-    """Return a filename from a HTTP Content-Disposition header.
+    """Return a filename from an HTTP Content-Disposition header.
 
     :param content_disposition: a Content-Disposition header string
     :return: the filename or None
@@ -176,7 +176,7 @@ class HTTPSession:
         for base_url in list(self.base_urls):
             if self.last_base_url != base_url:
                 # if base_url is None then it means that self.base_urls is deque([None])
-                # in that case last_base_url is always None. The code is confusing and
+                # in that case last_base_url is always None. The code is confusing, and
                 # we should remove that complexity by always forcing self.base_urls to
                 # be set. ???
                 if TYPE_CHECKING:
@@ -351,16 +351,16 @@ class WeakSession(
         requests_cache.CachedSession | requests.Session, requests_cache.CachedSession
     ]
 ):
-    """A weak `requests.Session` (and derivate) reference manager.
+    """A weak `requests.Session` (and derivative) reference manager.
 
-    A session is an object that may contains some sensitive data, like tokens. The goal
+    A session is an object that may contain some sensitive data, like tokens. The goal
     of this class is to keep in live a session the minimum amount of time without
-    breaking any functionnality.
+    breaking any functionality.
 
     When the user provide a session, he is responsible for the session lifetime. The
     same object will be used while a strong reference is kept in memory. Once the user
     session has been collected, the WeakSession will generate a new strong reference on
-    demande if necessary.
+    demand if necessary.
 
     .. note::
 
@@ -418,7 +418,7 @@ class WeakSession(
     if TYPE_CHECKING:
 
         def __enter__(self) -> requests.Session:
-            """Enter in a new context.
+            """Enter a new context.
 
             .. seealso: `e3.weakref.WeakRef.__enter__`
 

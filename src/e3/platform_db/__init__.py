@@ -74,7 +74,7 @@ def get_knowledge_base() -> KnowledgeBase:
 
     e3.log.debug("loading knownledge base")
     # Load all platform_db plugins
-    ext = stevedore.ExtensionManager(
+    ext: stevedore.ExtensionManager = stevedore.ExtensionManager(
         namespace="e3.platform_db",
         invoke_on_load=True,
         invoke_args=(CPU_INFO, OS_INFO, PLATFORM_INFO, BUILD_TARGETS, HOST_GUESS),
