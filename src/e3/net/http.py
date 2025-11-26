@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import logging
 import os
 import socket
 import tempfile
@@ -288,16 +289,30 @@ class HTTPSession:
                 self.request(method="GET", url=url, stream=True, **kwargs)
             ) as response:
                 content_length = int(response.headers.get("content-length", 0))
-                e3.log.debug(response.headers)
+                logger.debug(response.headers)
                 if filename is None:
                     if "content-disposition" in response.headers:
                         filename = get_filename(response.headers["content-disposition"])
 
                 expected_size = content_length // self.CHUNK_SIZE
 
-                chunks = e3.log.progress_bar(
-                    response.iter_content(self.CHUNK_SIZE), total=expected_size
-                )
+                # If the log level is > INFO (WARNING, ERROR or CRITICAL), it
+                # means that the user only wants error messages. In that case,
+                # no need to print out the progress bar, use the *disable*
+                # parameter accordingly.
+                if e3.log.pretty_cli:
+                    chunks = e3.log.progress_bar(
+                        response.iter_content(self.CHUNK_SIZE),
+                        total=expected_size,
+                        disable=logger.getEffectiveLevel() > logging.INFO,
+                    )
+                else:
+                    # When pretty_cli is True, the *disable* parameter is
+                    # already set to True.
+                    chunks = e3.log.progress_bar(
+                        response.iter_content(self.CHUNK_SIZE),
+                        total=expected_size,
+                    )
 
                 if fileobj is not None:
                     # Write to file object if provided
