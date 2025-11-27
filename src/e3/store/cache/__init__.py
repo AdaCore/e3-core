@@ -9,5 +9,7 @@ if TYPE_CHECKING:
 
 
 def load_cache(name: str = "file-cache", configuration: Any = None) -> Cache:
-    plugin = stevedore.DriverManager(namespace="e3.store.cache.backend", name=name)
+    plugin: stevedore.DriverManager = stevedore.DriverManager(
+        namespace="e3.store.cache.backend", name=name
+    )
     return plugin.driver(configuration)

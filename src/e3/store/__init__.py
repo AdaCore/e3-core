@@ -11,6 +11,6 @@ if TYPE_CHECKING:
 
 
 def load_store(name: str, configuration: Any, cache: Cache) -> Store:
-    plugin = stevedore.DriverManager("e3.store", name)
+    plugin: stevedore.DriverManager = stevedore.DriverManager("e3.store", name)
 
     return plugin.driver(configuration, cache)

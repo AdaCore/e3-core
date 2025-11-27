@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import logging
 import os
 import socket
 import tempfile
@@ -40,7 +41,7 @@ logger = e3.log.getLogger("net.http")
 
 
 def get_filename(content_disposition: str) -> str | None:
-    """Return a filename from a HTTP Content-Disposition header.
+    """Return a filename from an HTTP Content-Disposition header.
 
     :param content_disposition: a Content-Disposition header string
     :return: the filename or None
@@ -176,7 +177,7 @@ class HTTPSession:
         for base_url in list(self.base_urls):
             if self.last_base_url != base_url:
                 # if base_url is None then it means that self.base_urls is deque([None])
-                # in that case last_base_url is always None. The code is confusing and
+                # in that case last_base_url is always None. The code is confusing, and
                 # we should remove that complexity by always forcing self.base_urls to
                 # be set. ???
                 if TYPE_CHECKING:
@@ -288,16 +289,30 @@ class HTTPSession:
                 self.request(method="GET", url=url, stream=True, **kwargs)
             ) as response:
                 content_length = int(response.headers.get("content-length", 0))
-                e3.log.debug(response.headers)
+                logger.debug(response.headers)
                 if filename is None:
                     if "content-disposition" in response.headers:
                         filename = get_filename(response.headers["content-disposition"])
 
                 expected_size = content_length // self.CHUNK_SIZE
 
-                chunks = e3.log.progress_bar(
-                    response.iter_content(self.CHUNK_SIZE), total=expected_size
-                )
+                # If the log level is > INFO (WARNING, ERROR or CRITICAL), it
+                # means that the user only wants error messages. In that case,
+                # no need to print out the progress bar, use the *disable*
+                # parameter accordingly.
+                if e3.log.pretty_cli:
+                    chunks = e3.log.progress_bar(
+                        response.iter_content(self.CHUNK_SIZE),
+                        total=expected_size,
+                        disable=logger.getEffectiveLevel() > logging.INFO,
+                    )
+                else:
+                    # When pretty_cli is True, the *disable* parameter is
+                    # already set to True.
+                    chunks = e3.log.progress_bar(
+                        response.iter_content(self.CHUNK_SIZE),
+                        total=expected_size,
+                    )
 
                 if fileobj is not None:
                     # Write to file object if provided
@@ -351,16 +366,16 @@ class WeakSession(
         requests_cache.CachedSession | requests.Session, requests_cache.CachedSession
     ]
 ):
-    """A weak `requests.Session` (and derivate) reference manager.
+    """A weak `requests.Session` (and derivative) reference manager.
 
-    A session is an object that may contains some sensitive data, like tokens. The goal
+    A session is an object that may contain some sensitive data, like tokens. The goal
     of this class is to keep in live a session the minimum amount of time without
-    breaking any functionnality.
+    breaking any functionality.
 
     When the user provide a session, he is responsible for the session lifetime. The
     same object will be used while a strong reference is kept in memory. Once the user
     session has been collected, the WeakSession will generate a new strong reference on
-    demande if necessary.
+    demand if necessary.
 
     .. note::
 
@@ -418,7 +433,7 @@ class WeakSession(
     if TYPE_CHECKING:
 
         def __enter__(self) -> requests.Session:
-            """Enter in a new context.
+            """Enter a new context.
 
             .. seealso: `e3.weakref.WeakRef.__enter__`
 
