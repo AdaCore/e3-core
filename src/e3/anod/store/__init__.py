@@ -1426,7 +1426,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             dynamic_where_values=[name, kind, bid, bid],
             static_where_rules=[
                 f"({_Store.TableName.files}.build_id=? "
-                f"OR ({_Store.TableName.files}.kind='source' "
+                f"OR ({_Store.TableName.files}.kind IN ('source', 'thirdparty') "
                 f"AND {_Store.TableName.buildinfos}.creation_date <= ("
                 f"SELECT creation_date FROM {_Store.TableName.buildinfos} WHERE id=?)))"
             ],
