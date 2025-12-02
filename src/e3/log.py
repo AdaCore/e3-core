@@ -197,7 +197,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         )
 
 
-def progress_bar(it: Iterator[T] | Sequence[T], **kwargs: Any) -> Iterator[T]:
+def progress_bar(it: Iterator[T] | Sequence[T], **kwargs: Any) -> tqdm[T]:
     """Create a tqdm progress bar.
 
     :param it: an interator

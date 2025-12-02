@@ -71,6 +71,7 @@ check = [
   "types-PyYAML",
   "types-requests",
   "types-setuptools",
+  "types-tqdm",
   "types-defusedxml",
   "distro; sys_platform=='darwin'",  # for type checking
 ]
@@ -148,11 +149,7 @@ no_implicit_optional = true
 [[tool.mypy.overrides]]
 module = [
     "coverage.*",
-    "ld.*",
     "requests_toolbelt.*",
-    "stevedore.*",
-    "tqdm.*",
-    "bson.*"
 ]
 ignore_missing_imports = true
 
