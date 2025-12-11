@@ -126,7 +126,10 @@ class Component(object):
         self.build_info = build_info
 
         if creation_date is None:
-            self.creation_date = datetime.datetime.now(datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.timezone.utc)
+            self.creation_date = now.replace(
+                microsecond=(now.microsecond // 1000) * 1000
+            )
         else:
             assert isinstance(creation_date, datetime.datetime)
             self.creation_date = creation_date
@@ -396,7 +399,7 @@ class Component(object):
             "specname": self.specname,
             "_id": self.component_id,
             "build_id": self.build_id,
-            "creation_date": self.creation_date.isoformat(),
+            "creation_date": self.creation_date.isoformat(timespec="milliseconds"),
             "version": self.version,
             "is_valid": self.is_valid,
             "is_published": self.is_published,
