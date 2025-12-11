@@ -84,6 +84,7 @@ class _Store(_StoreContextManager):
 
         FileField = Literal[
             "id",
+            "file_id",
             "name",
             "alias",
             "filename",
@@ -95,7 +96,8 @@ class _Store(_StoreContextManager):
             "creation_date",
         ]
         FileTuple = tuple[
-            DB_IDType,  # id
+            int,  # id
+            DB_IDType,  # file_id
             str,  # name
             str,  # alias
             str,  # filename
@@ -256,18 +258,19 @@ class _Store(_StoreContextManager):
         )
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.files}("
-            "   id TEXT NOT NULL PRIMARY KEY,"
-            "   name TEXT NOT NULL,"
-            "   alias TEXT NOT NULL,"
-            "   filename TEXT NOT NULL,"
-            "   build_id INTEGER NOT NULL,"
-            "   kind TEXT NOT NULL,"
-            "   resource_id TEXT NOT NULL,"
-            "   revision TEXT NOT NULL,"
-            "   metadata TEXT NOT NULL,"
-            "   creation_date TEXT NOT NULL DEFAULT("
-            "       STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "   )"
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    file_id TEXT NOT NULL UNIQUE,"
+            "    name TEXT NOT NULL,"
+            "    alias TEXT NOT NULL,"
+            "    filename TEXT NOT NULL,"
+            "    build_id INTEGER NOT NULL,"
+            "    kind TEXT NOT NULL,"
+            "    resource_id TEXT NOT NULL,"
+            "    revision TEXT NOT NULL,"
+            "    metadata TEXT NOT NULL,"
+            "    creation_date TEXT NOT NULL DEFAULT("
+            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
+            "    )"
             ")"
         )
         self.cursor.execute(
@@ -453,6 +456,7 @@ class _Store(_StoreContextManager):
         :return: The `dict` representation of a `File` object.
         """
         (
+            _,
             fid,
             name,
             alias,
@@ -563,7 +567,7 @@ class _Store(_StoreContextManager):
                 [(_Store.TableName.files, "*")],
                 _Store.TableName.component_files,
                 (
-                    (_Store.TableName.files, "id"),
+                    (_Store.TableName.files, "file_id"),
                     (_Store.TableName.component_files, "file_id"),
                 ),
                 [
@@ -578,7 +582,7 @@ class _Store(_StoreContextManager):
         .. code-block:: sql
 
             SELECT files.* FROM files
-                INNER JOIN component_files ON files.id=component_files.file_id
+                INNER JOIN component_files ON files.file_id=component_files.file_id
                 WHERE component_files.component_id=? AND component_files.kind=?
 
         .. note::
@@ -657,7 +661,7 @@ class _Store(_StoreContextManager):
             fields,
             _Store.TableName.component_files,
             (
-                (_Store.TableName.files, "id"),
+                (_Store.TableName.files, "file_id"),
                 (_Store.TableName.component_files, "file_id"),
             ),
             [
@@ -775,7 +779,7 @@ class _Store(_StoreContextManager):
                 readme
                 or (
                     self._tuple_to_file(
-                        self._select_one(_Store.TableName.files, readmeid),  # type: ignore[arg-type]
+                        self._select_one(_Store.TableName.files, readmeid, field_name="file_id"),  # type: ignore[arg-type]
                         buildinfo=buildinfo,
                     )
                     if readmeid
@@ -1086,6 +1090,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             fid,
             ["metadata"],  # type: ignore[arg-type]
             [json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}"],
+            id_field="file_id",
         )
         self.connection.commit()
         return self._tuple_to_file(req_tuple, buildinfo=buildinfo)  # type: ignore[arg-type]
@@ -1157,7 +1162,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert(
             _Store.TableName.files,
             [  # type: ignore[arg-type]
-                "id",
+                "file_id",
                 "name",
                 "alias",
                 "filename",
@@ -1583,7 +1588,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             where_rules.append("name")
             where_values.append(name)
         if fid and fid != "all":
-            where_rules.append("id")
+            where_rules.append("file_id")
             where_values.append(fid)
         if bid and bid != "all":
             where_rules.append("build_id")
@@ -1777,7 +1782,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
         self._insert(
             _Store.TableName.files,
             [  # type: ignore[arg-type]
-                "id",
+                "file_id",
                 "name",
                 "alias",
                 "filename",
