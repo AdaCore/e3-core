@@ -145,6 +145,7 @@ class _Store(_StoreContextManager):
 
         ComponentField = Literal[
             "id",
+            "component_id",
             "name",
             "platform",
             "version",
@@ -157,7 +158,8 @@ class _Store(_StoreContextManager):
             "metadata",
         ]
         ComponentTuple = tuple[
-            DB_IDType,  # id
+            int,  # id
+            DB_IDType,  # component_id
             str,  # name
             str,  # platform
             str,  # version
@@ -296,17 +298,18 @@ class _Store(_StoreContextManager):
         )
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.components}("
-            "   id TEXT NOT NULL PRIMARY KEY,"
-            "   name TEXT NOT NULL,"
-            "   platform TEXT NOT NULL,"
-            "   version TEXT NOT NULL,"
-            "   specname TEXT,"  # Can be Null
-            "   build_id TEXT NOT NULL,"
-            "   creation_date TEXT NOT NULL DEFAULT("
-            "       STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "   ),"
-            "   is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
-            "   is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    component_id TEXT NOT NULL UNIQUE,"
+            "    name TEXT NOT NULL,"
+            "    platform TEXT NOT NULL,"
+            "    version TEXT NOT NULL,"
+            "    specname TEXT,"  # Can be Null
+            "    build_id TEXT NOT NULL,"
+            "    creation_date TEXT NOT NULL DEFAULT("
+            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
+            "    ),"
+            "    is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
+            "    is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
             # Component has at least one file
             "   readme_id TEXT,"
             "   metadata TEXT NOT NULL"
@@ -718,6 +721,7 @@ class _Store(_StoreContextManager):
         """
         _unused_values: object
         (
+            _,
             comp_id,
             name,
             platform,
@@ -779,7 +783,9 @@ class _Store(_StoreContextManager):
                 readme
                 or (
                     self._tuple_to_file(
-                        self._select_one(_Store.TableName.files, readmeid, field_name="file_id"),  # type: ignore[arg-type]
+                        self._select_one(  # type: ignore[arg-type]
+                            _Store.TableName.files, readmeid, field_name="file_id"
+                        ),
                         buildinfo=buildinfo,
                     )
                     if readmeid
@@ -969,7 +975,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert(
             _Store.TableName.components,
             [  # type: ignore[arg-type]
-                "id",
+                "component_id",
                 "name",
                 "platform",
                 "version",
@@ -998,7 +1004,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             ],
         )
         # Create relation between files/sources/attachment and the new component.
-        comp_id = req_tuple[0]
+        comp_id = req_tuple[1]
         self._insert_to_component_files("file", [(None, f) for f in files], comp_id)
         sources = component_info["sources"]
         self._insert_to_component_files(
@@ -1237,7 +1243,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 _Store.TableName.components,
                 (
                     (_Store.TableName.component_releases, "component_id"),
-                    (_Store.TableName.components, "id"),
+                    (_Store.TableName.components, "component_id"),
                 ),
                 [(_Store.TableName.component_releases, "name")],
                 [name],
@@ -1901,10 +1907,12 @@ class LocalStore(StoreRW, LocalStoreInterface):
         # Check if the component is already in our database.
         try:
             tmp = self._tuple_to_comp(
-                self._select_one(Store.TableName.components, comp_id)  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    Store.TableName.components, comp_id, field_name="component_id"
+                )
             )
         except StoreError as err:
-            if f"No element with id={comp_id} found" not in str(err):
+            if f"No element with component_id={comp_id} found" not in str(err):
                 raise err
         else:
             # The file already exists, so just return.
@@ -1969,7 +1977,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
         self._insert(
             _Store.TableName.components,
             [  # type: ignore[arg-type]
-                "id",
+                "component_id",
                 "name",
                 "platform",
                 "version",
