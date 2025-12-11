@@ -44,11 +44,18 @@ class _Store(_StoreContextManager):
         # BuildInfo Types
 
         BuildInfoField = Literal[
-            "id", "build_date", "setup", "creation_date", "build_version", "isready"
+            "id",
+            "build_id",
+            "build_date",
+            "setup",
+            "creation_date",
+            "build_version",
+            "isready",
         ]
 
         BuildInfoTuple = tuple[
-            DB_IDType,  # id
+            int,  # id
+            DB_IDType,  # build_id
             str,  # build_date
             str,  # setup
             str,  # creation_date
@@ -225,7 +232,8 @@ class _Store(_StoreContextManager):
         self.cursor = self.connection.cursor()
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.buildinfos}("
-            "    id TEXT NOT NULL PRIMARY KEY,"
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    build_id TEXT NOT NULL UNIQUE,"
             "    build_date TEXT NOT NULL,"
             "    setup TEXT NOT NULL,"
             "    creation_date TEXT NOT NULL DEFAULT("
@@ -395,7 +403,7 @@ class _Store(_StoreContextManager):
             a BuildInfoDict.
         :return: The `dict` representation of a `BuildInfo` object.
         """
-        bid, bdate, setup, creation_date, bversion, isready = req_tuple
+        _, bid, bdate, setup, creation_date, bversion, isready = req_tuple
         return {
             "_id": str(bid),
             "setup": setup,
@@ -465,13 +473,15 @@ class _Store(_StoreContextManager):
         # database.
         if not buildinfo or buildinfo["_id"] != build_id:
             buildinfo = self._tuple_to_buildinfo(
-                self._select_one(_Store.TableName.buildinfos, build_id)  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    _Store.TableName.buildinfos, build_id, field_name="build_id"
+                )
             )
 
         if not resource or resource["id"] != resource_id:
             resource = self._tuple_to_resource(
-                self._select_one(
-                    _Store.TableName.resources, resource_id, field_name="resource_id"  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    _Store.TableName.resources, resource_id, field_name="resource_id"
                 )
             )
 
@@ -722,15 +732,17 @@ class _Store(_StoreContextManager):
         # for this component.
         if not buildinfo or buildinfo["_id"] != build_id:
             buildinfo = self._tuple_to_buildinfo(
-                self._select_one(_Store.TableName.buildinfos, build_id)  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    _Store.TableName.buildinfos, build_id, field_name="build_id"
+                )
             )
 
         # If no releases is provided, retrieve the correct releases for this component.
         if releases is None:
             releases = [  # type: ignore[misc]
                 name
-                for _, name, _ in self._select(
-                    _Store.TableName.component_releases, ["component_id"], [comp_id]  # type: ignore[arg-type]
+                for _, name, _ in self._select(  # type: ignore[arg-type]
+                    _Store.TableName.component_releases, ["component_id"], [comp_id]
                 )
             ]
 
@@ -848,6 +860,8 @@ class _StoreWrite(_Store):
         rowid: str | int,
         toset: _Store.AnyFieldSequence,
         values: list[str | int | None],
+        *,
+        id_field: str = "id",
     ) -> _Store.AnyTuple:
         """Update a row in a table.
 
@@ -855,12 +869,14 @@ class _StoreWrite(_Store):
         :param rowid: The row id to update.
         :param toset: The list of row fields to update.
         :param values: The values to update.
+        :param id_field: The id field to use, in case the `rowid` doesn't reference the
+            primary key of the current table.
         :return: A tuple.
         """
         elm_to_set = [f"{tmp}=?" for tmp in toset]
         return self._insert_or_update(
             table,
-            f"UPDATE {table} SET {','.join(elm_to_set)} WHERE id=?",
+            f"UPDATE {table} SET {','.join(elm_to_set)} WHERE {id_field}=?",
             values + [rowid],
         )
 
@@ -1018,8 +1034,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
     def mark_build_ready(self, bid: str) -> bool:
         """See e3.anod.store.interface.StoreWriteInterface."""
-        _, _, _, _, isready, *_ = self._update(
-            _Store.TableName.buildinfos, bid, ["isready"], [1]  # type: ignore[arg-type, misc]
+        _, _, _, _, _, isready, *_ = self._update(
+            _Store.TableName.buildinfos, bid, ["isready"], [1], id_field="build_id"  # type: ignore[arg-type, misc]
         )
         self.connection.commit()
         return bool(isready)
@@ -1028,7 +1044,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         """See e3.anod.store.interface.StoreWriteInterface."""
         req_tuple = self._insert(
             _Store.TableName.buildinfos,
-            ["id", "build_date", "setup", "build_version"],  # type: ignore[arg-type]
+            ["build_id", "build_date", "setup", "build_version"],  # type: ignore[arg-type]
             [unique_id(), date, setup, version],
         )
         self.connection.commit()
@@ -1039,10 +1055,10 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert_or_update(
             _Store.TableName.buildinfos,
             f"INSERT INTO {_Store.TableName.buildinfos}("
-            "   id, build_date, setup, build_version"
+            "   build_id, build_date, setup, build_version"
             ") "
             "  SELECT ?, build_date, ?, build_version"
-            f"       FROM {_Store.TableName.buildinfos} WHERE id=?",
+            f"       FROM {_Store.TableName.buildinfos} WHERE build_id=?",
             [unique_id(), dest_setup, bid],
         )
         self.connection.commit()
@@ -1171,7 +1187,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 class StoreReadOnly(_Store, StoreReadInterface):
     def get_build_info(self, bid: str) -> BuildInfoDict:
         """See e3.anod.store.interface.StoreReadInterface."""
-        return self._get_buildinfo(["id"], [bid], only_one=True)
+        return self._get_buildinfo(["build_id"], [bid], only_one=True)
 
     def get_latest_build_info(
         self,
@@ -1278,7 +1294,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
         #       ) AS lc
         #       FROM components
         #       INNER JOIN buildinfos
-        #       ON components.build_id=buildinfos.id
+        #       ON components.build_id=buildinfos.build_id
         #       WHERE {' AND '.join(where_rules)}
         #   )
         #   SELECT * FROM latest_components WHERE lc=1 ORDER BY creation_date DESC
@@ -1294,7 +1310,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 f"FROM {_Store.TableName.components} "
                 f"INNER JOIN {_Store.TableName.buildinfos} "
                 f"ON {_Store.TableName.components}.build_id="
-                f"{_Store.TableName.buildinfos}.id "
+                f"{_Store.TableName.buildinfos}.build_id "
                 f"WHERE {' AND '.join(where_rules)}"
                 ")"
                 "SELECT * FROM latest_components WHERE lc=1 "
@@ -1415,11 +1431,11 @@ class StoreReadOnly(_Store, StoreReadInterface):
         # The SQL request to make:
         #
         #   SELECT files.* INNER JOIN buildinfos
-        #   ON buildinfos.id=files.build_id
+        #   ON buildinfos.build_id=files.build_id
         #   WHERE files.name={name} AND files.kind={kind} AND (
         #       files.build_id={bid} OR (
         #           files.kind='source' AND buildinfos.creation_date <= (
-        #               SELECT creation_date FROM buildinfos WHERE id={bid}
+        #               SELECT creation_date FROM buildinfos WHERE build_id={bid}
         #           )
         #       )
         #   )
@@ -1432,7 +1448,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             fields=[(_Store.TableName.files, "*")],
             inner_join=_Store.TableName.buildinfos,
             on=(
-                (_Store.TableName.buildinfos, "id"),
+                (_Store.TableName.buildinfos, "build_id"),
                 (_Store.TableName.files, "build_id"),
             ),
             dynamic_where_rules=[
@@ -1444,7 +1460,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 f"({_Store.TableName.files}.build_id=? "
                 f"OR ({_Store.TableName.files}.kind IN ('source', 'thirdparty') "
                 f"AND {_Store.TableName.buildinfos}.creation_date <= ("
-                f"SELECT creation_date FROM {_Store.TableName.buildinfos} WHERE id=?)))"
+                f"SELECT creation_date FROM {_Store.TableName.buildinfos} "
+                "WHERE build_id=?)))"
             ],
             order_by=(_Store.TableName.buildinfos, "creation_date DESC"),
         )
@@ -1680,8 +1697,9 @@ class LocalStore(StoreRW, LocalStoreInterface):
         :return: True if some change should be committed to the dabase, False otherwise.
         """
         tmp = dict(build_info)
-        tmp["id"] = build_info["_id"]
+        tmp["build_id"] = build_info["_id"]
         tmp.pop("_id", None)
+        tmp.pop("id", None)
         try:
             self._insert(
                 _Store.TableName.buildinfos,
@@ -1689,7 +1707,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
                 list(tmp.values()),  # type: ignore[arg-type]
             )
         except sqlite3.IntegrityError as err:
-            if "UNIQUE constraint failed: buildinfos.id" not in str(err):
+            if "UNIQUE constraint failed: buildinfos.build_id" not in str(err):
                 raise err
             return False
         else:
