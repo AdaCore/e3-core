@@ -1316,7 +1316,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 "PARTITION BY "
                 f"{_Store.TableName.components}.name, "
                 f"{_Store.TableName.components}.platform "
-                f"ORDER BY {_Store.TableName.components}.creation_date DESC"
+                f"ORDER BY {_Store.TableName.components}.id DESC"
                 ") AS lc "
                 f"FROM {_Store.TableName.components} "
                 f"INNER JOIN {_Store.TableName.buildinfos} "
@@ -1325,7 +1325,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 f"WHERE {' AND '.join(where_rules)}"
                 ")"
                 "SELECT * FROM latest_components WHERE lc=1 "
-                "ORDER BY creation_date DESC",
+                "ORDER BY id DESC",
                 where_values,
             ).fetchall()
         )
@@ -1359,7 +1359,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                     fields,
                     [bid],
                     static_where_rules=["kind IN ('source', 'thirdparty')"],
-                    order_by="creation_date DESC",
+                    order_by="id DESC",
                 )
             ),
             "components": self._tuple_list_to_comp_list(
@@ -1367,7 +1367,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                     _Store.TableName.components,
                     fields,
                     [bid],
-                    order_by="creation_date DESC",  # type: ignore[arg-type]
+                    order_by="id DESC",  # type: ignore[arg-type]
                 )
             ),
         }
@@ -1607,7 +1607,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             _Store.TableName.files,
             where_rules,
             where_values,
-            order_by="creation_date DESC",
+            order_by="id DESC",
         )
         if not file_list:
             if not possibly_empty:
@@ -1640,7 +1640,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             dynamic_where_rules,
             dynamic_where_values,
             static_where_rules=static_where_rules,
-            order_by="build_date DESC, creation_date DESC",
+            order_by="build_date DESC, id DESC",
         )
 
         if not possible_buildinfos:
