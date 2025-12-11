@@ -375,7 +375,7 @@ class LocalStoreInterface(object, metaclass=abc.ABCMeta):
     def raw_add_build_info(self, build_info_data: BuildInfoDict) -> None:
         """Add a build info to the local store.
 
-        :param build_info_data: build info data (i.e: result of BuildInfo.to_dict())
+        :param build_info_data: build info data (i.e: result of BuildInfo.as_dict())
         """
         raise NotImplementedError  # all: no cover
 
@@ -432,7 +432,7 @@ class LocalStoreInterface(object, metaclass=abc.ABCMeta):
     def raw_add_component(self, component_info: ComponentDict) -> None:
         """Add a component to the local store.
 
-        :param component_info: a Component dict (i.e: result of Component.to_dict()).
+        :param component_info: a Component dict (i.e: result of Component.as_dict()).
         """
         raise NotImplementedError  # all: no cover
 

@@ -409,7 +409,7 @@ class BuildInfo(object):
             result.mark_ready()
         return result
 
-    def to_dict(self: BuildInfoType) -> BuildInfoDict:
+    def as_dict(self: BuildInfoType) -> BuildInfoDict:
         """Return a dictionary representation of self.
 
         Feeding to this class' "load" method the value returned by
@@ -425,3 +425,18 @@ class BuildInfo(object):
             "build_version": self.build_version,
             "isready": self.isready,
         }
+
+    def to_dict(self: BuildInfoType) -> BuildInfoDict:
+        """Return a dictionary representation of self.
+
+        This function is only here for compatibility purpose and will be removed later.
+
+        .. seealso:: py:meth:`as_dict`.
+        """
+        import warnings
+
+        warnings.warn(
+            "`BuildInfo.to_dict` is deprecated, use `BuildInfo.as_dict` instead",
+            DeprecationWarning,
+        )
+        return self.as_dict()
