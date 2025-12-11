@@ -402,7 +402,8 @@ def activate_with_args(args: Namespace, default_level: int = logging.WARNING) ->
         level=level,
         filename=args.log_file,
         json_format=args.json_logs,
-        e3_debug=level == logging.DEBUG,
+        # Activate e3_debug if we pass "-vv" or more
+        e3_debug=level < logging.DEBUG,
     )
 
 
