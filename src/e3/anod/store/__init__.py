@@ -632,36 +632,25 @@ class _Store(_StoreContextManager):
 
     def _list_component_files(
         self,
-        kind: Literal["file"] | Literal["source"] | Literal["attachment"],
+        kind: Literal["file"] | Literal["source"],
         component_id: _Store.DB_IDType,
         *,
         component_buildinfo: BuildInfoDict | None = None,
-    ) -> list[FileDict] | dict[str, FileDict]:
+    ) -> list[FileDict]:
         """Retrieve the files of a component.
 
         :param kind: The file kind to retrieve.
         :param component_id: The component id associated to these files.
         :param component_buildinfo: A buildinfo dict to avoid unnecessary call to the
             database.
-        :return: A list of files if the kind is not attachment, otherwise return an
-            attachment dict.
+        :return: A list of files.
         """
-        is_attachment = kind == "attachment"
-        fields: list[tuple[_Store.TableName, _Store.AnyField | Literal["*"]]] = (
-            [
-                (_Store.TableName.component_files, "attachment_name"),
-                (_Store.TableName.component_files, "internal"),
-                (_Store.TableName.files, "*"),
-            ]
-            if is_attachment
-            else [
-                (_Store.TableName.component_files, "internal"),
-                (_Store.TableName.files, "*"),
-            ]
-        )
         req = self._select_inner_join(
             _Store.TableName.files,
-            fields,
+            [
+                (_Store.TableName.component_files, "internal"),
+                (_Store.TableName.files, "*"),
+            ],
             _Store.TableName.component_files,
             (
                 (_Store.TableName.files, "file_id"),
@@ -673,27 +662,55 @@ class _Store(_StoreContextManager):
             ],
             [component_id, kind],
         )
-        res: dict[str, FileDict] | list[FileDict]
-        if is_attachment:
-            res = {}
-            for req_tuple in req:
-                assert (
-                    len(req_tuple) >= 1
-                ), "Should never occur: empty database response"
-                name, internal, *file_tuple = req_tuple
-                # We are sure here that 'name' is a string.
-                res[name] = self._tuple_to_file(  # type: ignore[index]
+        res: list[FileDict] = []
+        for req_tuple in req:
+            internal, *file_tuple = req_tuple
+            res.append(
+                self._tuple_to_file(  # type: ignore[index]
                     file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
                 )
-        else:
-            res = []
-            for req_tuple in req:
-                internal, *file_tuple = req_tuple
-                res.append(
-                    self._tuple_to_file(  # type: ignore[index]
-                        file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
-                    )
-                )
+            )
+        return res
+
+    def _list_component_attachments(
+        self,
+        component_id: _Store.DB_IDType,
+        *,
+        component_buildinfo: BuildInfoDict | None = None,
+    ) -> dict[str, FileDict]:
+        """Retrieve the files of a component.
+
+        :param component_id: The component id associated to these files.
+        :param component_buildinfo: A buildinfo dict to avoid unnecessary call to the
+            database.
+        :return: An attachment dict.
+        """
+        req = self._select_inner_join(
+            _Store.TableName.files,
+            [
+                (_Store.TableName.component_files, "attachment_name"),
+                (_Store.TableName.component_files, "internal"),
+                (_Store.TableName.files, "*"),
+            ],
+            _Store.TableName.component_files,
+            (
+                (_Store.TableName.files, "file_id"),
+                (_Store.TableName.component_files, "file_id"),
+            ),
+            [
+                (_Store.TableName.component_files, "component_id"),
+                (_Store.TableName.component_files, "kind"),
+            ],
+            [component_id, "attachment"],
+        )
+        res: dict[str, FileDict] = {}
+        for req_tuple in req:
+            assert len(req_tuple) >= 1, "Should never occur: empty database response"
+            name, internal, *file_tuple = req_tuple
+            # We are sure here that 'name' is a string.
+            res[name] = self._tuple_to_file(  # type: ignore[index]
+                file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
+            )
         return res
 
     def _tuple_to_comp(
@@ -749,8 +766,8 @@ class _Store(_StoreContextManager):
         if releases is None:
             releases = [  # type: ignore[misc]
                 name
-                for _, name, _ in self._select(  # type: ignore[arg-type]
-                    _Store.TableName.component_releases, ["component_id"], [comp_id]
+                for _, name, _ in self._select(
+                    _Store.TableName.component_releases, ["component_id"], [comp_id]  # type: ignore[arg-type]
                 )
             ]
 
@@ -796,8 +813,8 @@ class _Store(_StoreContextManager):
             "attachments": (
                 attachments  # type: ignore[typeddict-item]
                 if attachments is not None
-                else self._list_component_files(
-                    "attachment", comp_id, component_buildinfo=buildinfo
+                else self._list_component_attachments(
+                    comp_id, component_buildinfo=buildinfo
                 )
             )
             or None,
@@ -1127,7 +1144,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         Mainly for optimization purpose.
         """
         downloaded_as = file_info.get("downloaded_as", "")
-        resource_id = file_info.get("resource_id", "")
+        resource_id: _Store.DB_IDType | None = file_info.get("resource_id", "")
 
         if not downloaded_as:
             raise StoreError("Trying to submit file without 'downloaded_as' field")
@@ -1482,7 +1499,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
 
     def download_resource(self, rid: str, path: str) -> str:
         """See e3.anod.store.interface.StoreReadInterface."""
-        _, _, resource_path, *rest = self._select_one(
+        _, _, resource_path, *_ = self._select_one(
             _Store.TableName.resources, rid, field_name="resource_id"
         )
         cp(resource_path, path)  # type: ignore[arg-type]
@@ -1782,7 +1799,10 @@ class LocalStore(StoreRW, LocalStoreInterface):
             file_info.update(existing_file_info)
             return False
 
-        resource_id = file_info["resource_id"]
+        resource_id: _Store.DB_IDType | None = file_info["resource_id"]
+        assert (
+            resource_id is not None
+        ), "Trying to submit file without 'resource_id' field"
 
         # Create the file entry
         self._insert(
@@ -1823,7 +1843,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             _Store.TableName.resources, ["resource_id"], [resource_id]  # type: ignore[arg-type]
         )
         if resource_tmp:
-            row_id, resource_id, path, *rest = resource_tmp[0]
+            row_id, resource_id, path, *_ = resource_tmp[0]
             # Check if the path is still valid, if not, we got a new valid path,
             # so we just need to update the database.
             if os.path.isfile(path):
@@ -1903,7 +1923,9 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
         :return: True if some change should be committed to the dabase, False otherwise.
         """
-        comp_id = component_info["_id"]
+        comp_id: _Store.DB_IDType | None = component_info["_id"]
+        assert comp_id is not None, "Trying to submit file without '_id' field"
+
         # Check if the component is already in our database.
         try:
             tmp = self._tuple_to_comp(
