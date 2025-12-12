@@ -16,7 +16,7 @@ variables:
     value: "py311-xdist,py312-xdist,py313-xdist,py314-cov-xdist"
   WINDOWS_CI_TOX_ENV:
     description: "Tox environments to run on Windows."
-    value: "py312-xdist"
+    value: "py313-xdist"
 
 stages:
   - checks
