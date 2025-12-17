@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from dataclasses import dataclass
 from enum import Enum
 from typing import cast, overload, TYPE_CHECKING
@@ -242,7 +242,9 @@ class File(object):
                 id=self.resource_id,
                 path=self.downloaded_as,
                 size=os.stat(self.downloaded_as).st_size,
-                creation_date=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%f+00:00"),
+                creation_date=datetime.now(timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%f+00:00"
+                ),
             )
 
     def set_metadata_statement(self: FileType, name: str, data: DSSE) -> None:
