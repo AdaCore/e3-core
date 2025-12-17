@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 import os
 import json
 import sqlite3
@@ -197,13 +197,20 @@ class _Store(_StoreContextManager):
             list[ComponentTuple],
         ]
 
-    class TableName(StrEnum):
+    class TableName(str, Enum):
         buildinfos = "buildinfos"
         resources = "resources"
         files = "files"
         component_files = "component_files"
         component_releases = "component_releases"
         components = "components"
+
+        # !!! We must replace the default TableName.__str__ Otherwise, we are losing the
+        # automatic casting ability, forcing us to use the `value` property.
+        #
+        # Note: Using the `value` property will ask us to rework the typing of this
+        # file.
+        __str__ = str.__str__
 
     def __init__(self, db: os.PathLike[str] | str | None = None) -> None:
         """Initialize the Store class.
