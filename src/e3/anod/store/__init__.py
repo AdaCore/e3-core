@@ -303,6 +303,9 @@ class _Store(_StoreContextManager):
         )
         self.connection.commit()
 
+    def __del__(self) -> None:
+        self.close()
+
     def __enter__(self) -> _Store:
         return self
 
