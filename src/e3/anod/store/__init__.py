@@ -1722,7 +1722,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_build_info`
 
-        :return: True if some change should be committed to the dabase, False otherwise.
+        :return: True if some change should be committed to the database, False
+            otherwise.
         """
         tmp = dict(build_info)
         tmp["build_id"] = build_info["_id"]
@@ -1775,7 +1776,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_file`
 
-        :return: True if some change should be committed to the dabase, False otherwise.
+        :return: True if some change should be committed to the database, False
+            otherwise.
         """
         if not file_info.get("metadata"):
             file_info["metadata"] = {}
@@ -1921,7 +1923,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_component`
 
-        :return: True if some change should be committed to the dabase, False otherwise.
+        :return: True if some change should be committed to the database, False
+            otherwise.
         """
         comp_id: _Store.DB_IDType | None = component_info["_id"]
         assert comp_id is not None, "Trying to submit file without '_id' field"
