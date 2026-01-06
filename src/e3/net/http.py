@@ -10,7 +10,6 @@ from collections import deque
 from email.message import Message
 
 import requests
-import requests_cache
 import requests.adapters
 import requests.exceptions
 import urllib3.exceptions
@@ -22,7 +21,6 @@ import e3.log
 import requests_toolbelt.multipart
 from e3.error import E3Error
 from e3.fs import rm, mkdir
-from e3.weakref import WeakRef
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -359,84 +357,3 @@ class HTTPSession:
             if exception_on_error:
                 raise
         return None
-
-
-class WeakSession(
-    WeakRef[
-        requests_cache.CachedSession | requests.Session, requests_cache.CachedSession
-    ]
-):
-    """A weak `requests.Session` (and derivative) reference manager.
-
-    A session is an object that may contain some sensitive data, like tokens. The goal
-    of this class is to keep in live a session the minimum amount of time without
-    breaking any functionality.
-
-    When the user provide a session, he is responsible for the session lifetime. The
-    same object will be used while a strong reference is kept in memory. Once the user
-    session has been collected, the WeakSession will generate a new strong reference on
-    demand if necessary.
-
-    .. note::
-
-        This class is designed to be used in a context ('with' clause) to force the user
-        to get a strong reference on the object before using it.
-
-    .. seealso::
-
-        :py:class:`e3.weakref.WeakRef`
-    """
-
-    def default(self) -> requests_cache.CachedSession:
-        """Get a CachedSession.
-
-        This method as no side effect and can be called at any moment. It is also
-        automatically called when the previous weak session reference has been
-        destroyed.
-
-        .. note::
-
-            This method always returns a strong reference.
-
-        :return: A new `requests_cache.CachedSession` instance.
-        """
-        return requests_cache.CachedSession()
-
-    def cleanup(self) -> None:
-        """Clean the session.
-
-        This function removes the HTTP cache (if one is used) and close all connections.
-        """
-        session = self.value
-        if session:
-            if isinstance(session, requests_cache.CachedSession):
-                # Removes the cache, the session is finished
-                session.cache.clear()  # type: ignore[no-untyped-call]
-            session.close()
-
-    def __del__(self) -> None:
-        """Destroy the WeakSession instance.
-
-        Call `self.cleanup`.
-        """
-        self.cleanup()
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> bool | None:
-        self.cleanup()
-        return super().__exit__(exc_type, exc_value, traceback)
-
-    if TYPE_CHECKING:
-
-        def __enter__(self) -> requests.Session:
-            """Enter a new context.
-
-            .. seealso: `e3.weakref.WeakRef.__enter__`
-
-            Method redefined for typing purpose.
-            """
-            ...
