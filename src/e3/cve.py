@@ -144,7 +144,7 @@ class NVD:
                 # Use cache data in case of errors
                 stale_if_error=True,
                 # Ignore headers
-                match_header=False,
+                match_headers=False,
             )
             logger.debug(f"using requests cache from {self.cache_db_path}")
         else:

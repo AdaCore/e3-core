@@ -5,7 +5,6 @@
   "headers": {
     "content-type": "application/json",
     "content-encoding": "gzip",
-    "vary": "Accept-Encoding",
     "x-frame-options": "SAMEORIGIN",
     "access-control-allow-origin": "*",
     "access-control-allow-headers": "accept, apiKey, content-type, origin, x-requested-with",
