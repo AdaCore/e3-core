@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from enum import Enum
 import os
 import json
@@ -22,10 +23,9 @@ from e3.anod.store.interface import (
 
 if TYPE_CHECKING:
     from typing import Any, Literal, Union
-    from collections.abc import Sequence
 
     from e3.anod.store.file import FileDict, ResourceDict
-    from e3.anod.store.component import ComponentDict
+    from e3.anod.store.component import ComponentDict, ComponentAttachmentDict
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.interface import BuildDataDict
 
@@ -44,11 +44,18 @@ class _Store(_StoreContextManager):
         # BuildInfo Types
 
         BuildInfoField = Literal[
-            "id", "build_date", "setup", "creation_date", "build_version", "isready"
+            "id",
+            "build_id",
+            "build_date",
+            "setup",
+            "creation_date",
+            "build_version",
+            "isready",
         ]
 
         BuildInfoTuple = tuple[
-            DB_IDType,  # id
+            int,  # id
+            DB_IDType,  # build_id
             str,  # build_date
             str,  # setup
             str,  # creation_date
@@ -77,6 +84,7 @@ class _Store(_StoreContextManager):
 
         FileField = Literal[
             "id",
+            "file_id",
             "name",
             "alias",
             "filename",
@@ -88,7 +96,8 @@ class _Store(_StoreContextManager):
             "creation_date",
         ]
         FileTuple = tuple[
-            DB_IDType,  # id
+            int,  # id
+            DB_IDType,  # file_id
             str,  # name
             str,  # alias
             str,  # filename
@@ -136,6 +145,7 @@ class _Store(_StoreContextManager):
 
         ComponentField = Literal[
             "id",
+            "component_id",
             "name",
             "platform",
             "version",
@@ -148,7 +158,8 @@ class _Store(_StoreContextManager):
             "metadata",
         ]
         ComponentTuple = tuple[
-            DB_IDType,  # id
+            int,  # id
+            DB_IDType,  # component_id
             str,  # name
             str,  # platform
             str,  # version
@@ -225,7 +236,8 @@ class _Store(_StoreContextManager):
         self.cursor = self.connection.cursor()
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.buildinfos}("
-            "    id TEXT NOT NULL PRIMARY KEY,"
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    build_id TEXT NOT NULL UNIQUE,"
             "    build_date TEXT NOT NULL,"
             "    setup TEXT NOT NULL,"
             "    creation_date TEXT NOT NULL DEFAULT("
@@ -248,18 +260,19 @@ class _Store(_StoreContextManager):
         )
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.files}("
-            "   id TEXT NOT NULL PRIMARY KEY,"
-            "   name TEXT NOT NULL,"
-            "   alias TEXT NOT NULL,"
-            "   filename TEXT NOT NULL,"
-            "   build_id INTEGER NOT NULL,"
-            "   kind TEXT NOT NULL,"
-            "   resource_id TEXT NOT NULL,"
-            "   revision TEXT NOT NULL,"
-            "   metadata TEXT NOT NULL,"
-            "   creation_date TEXT NOT NULL DEFAULT("
-            "       STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "   )"
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    file_id TEXT NOT NULL UNIQUE,"
+            "    name TEXT NOT NULL,"
+            "    alias TEXT NOT NULL,"
+            "    filename TEXT NOT NULL,"
+            "    build_id INTEGER NOT NULL,"
+            "    kind TEXT NOT NULL,"
+            "    resource_id TEXT NOT NULL,"
+            "    revision TEXT NOT NULL,"
+            "    metadata TEXT NOT NULL,"
+            "    creation_date TEXT NOT NULL DEFAULT("
+            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
+            "    )"
             ")"
         )
         self.cursor.execute(
@@ -285,17 +298,18 @@ class _Store(_StoreContextManager):
         )
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.components}("
-            "   id TEXT NOT NULL PRIMARY KEY,"
-            "   name TEXT NOT NULL,"
-            "   platform TEXT NOT NULL,"
-            "   version TEXT NOT NULL,"
-            "   specname TEXT,"  # Can be Null
-            "   build_id TEXT NOT NULL,"
-            "   creation_date TEXT NOT NULL DEFAULT("
-            "       STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "   ),"
-            "   is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
-            "   is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    component_id TEXT NOT NULL UNIQUE,"
+            "    name TEXT NOT NULL,"
+            "    platform TEXT NOT NULL,"
+            "    version TEXT NOT NULL,"
+            "    specname TEXT,"  # Can be Null
+            "    build_id TEXT NOT NULL,"
+            "    creation_date TEXT NOT NULL DEFAULT("
+            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
+            "    ),"
+            "    is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
+            "    is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
             # Component has at least one file
             "   readme_id TEXT,"
             "   metadata TEXT NOT NULL"
@@ -382,7 +396,7 @@ class _Store(_StoreContextManager):
         if not res:
             raise StoreError(f"No element with {field_name}={rid} found")
         if len(res) != 1:
-            raise StoreError(
+            raise StoreError(  # defensive code
                 f"Database corrupted: multiple element with {field_name}={rid} found"
             )
         return res[0]
@@ -395,7 +409,7 @@ class _Store(_StoreContextManager):
             a BuildInfoDict.
         :return: The `dict` representation of a `BuildInfo` object.
         """
-        bid, bdate, setup, creation_date, bversion, isready = req_tuple
+        _, bid, bdate, setup, creation_date, bversion, isready = req_tuple
         return {
             "_id": str(bid),
             "setup": setup,
@@ -445,6 +459,7 @@ class _Store(_StoreContextManager):
         :return: The `dict` representation of a `File` object.
         """
         (
+            _,
             fid,
             name,
             alias,
@@ -465,13 +480,15 @@ class _Store(_StoreContextManager):
         # database.
         if not buildinfo or buildinfo["_id"] != build_id:
             buildinfo = self._tuple_to_buildinfo(
-                self._select_one(_Store.TableName.buildinfos, build_id)  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    _Store.TableName.buildinfos, build_id, field_name="build_id"
+                )
             )
 
         if not resource or resource["id"] != resource_id:
             resource = self._tuple_to_resource(
-                self._select_one(
-                    _Store.TableName.resources, resource_id, field_name="resource_id"  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    _Store.TableName.resources, resource_id, field_name="resource_id"
                 )
             )
 
@@ -553,7 +570,7 @@ class _Store(_StoreContextManager):
                 [(_Store.TableName.files, "*")],
                 _Store.TableName.component_files,
                 (
-                    (_Store.TableName.files, "id"),
+                    (_Store.TableName.files, "file_id"),
                     (_Store.TableName.component_files, "file_id"),
                 ),
                 [
@@ -568,7 +585,7 @@ class _Store(_StoreContextManager):
         .. code-block:: sql
 
             SELECT files.* FROM files
-                INNER JOIN component_files ON files.id=component_files.file_id
+                INNER JOIN component_files ON files.file_id=component_files.file_id
                 WHERE component_files.component_id=? AND component_files.kind=?
 
         .. note::
@@ -615,39 +632,28 @@ class _Store(_StoreContextManager):
 
     def _list_component_files(
         self,
-        kind: Literal["file"] | Literal["source"] | Literal["attachment"],
+        kind: Literal["file"] | Literal["source"],
         component_id: _Store.DB_IDType,
         *,
         component_buildinfo: BuildInfoDict | None = None,
-    ) -> list[FileDict] | dict[str, FileDict]:
+    ) -> list[FileDict]:
         """Retrieve the files of a component.
 
         :param kind: The file kind to retrieve.
         :param component_id: The component id associated to these files.
         :param component_buildinfo: A buildinfo dict to avoid unnecessary call to the
             database.
-        :return: A list of files if the kind is not attachment, otherwise return an
-            attachment dict.
+        :return: A list of files.
         """
-        is_attachment = kind == "attachment"
-        fields: list[tuple[_Store.TableName, _Store.AnyField | Literal["*"]]] = (
-            [
-                (_Store.TableName.component_files, "attachment_name"),
-                (_Store.TableName.component_files, "internal"),
-                (_Store.TableName.files, "*"),
-            ]
-            if is_attachment
-            else [
-                (_Store.TableName.component_files, "internal"),
-                (_Store.TableName.files, "*"),
-            ]
-        )
         req = self._select_inner_join(
             _Store.TableName.files,
-            fields,
+            [
+                (_Store.TableName.component_files, "internal"),
+                (_Store.TableName.files, "*"),
+            ],
             _Store.TableName.component_files,
             (
-                (_Store.TableName.files, "id"),
+                (_Store.TableName.files, "file_id"),
                 (_Store.TableName.component_files, "file_id"),
             ),
             [
@@ -656,27 +662,55 @@ class _Store(_StoreContextManager):
             ],
             [component_id, kind],
         )
-        res: dict[str, FileDict] | list[FileDict]
-        if is_attachment:
-            res = {}
-            for req_tuple in req:
-                assert (
-                    len(req_tuple) >= 1
-                ), "Should never occur: empty database response"
-                name, internal, *file_tuple = req_tuple
-                # We are sure here that 'name' is a string.
-                res[name] = self._tuple_to_file(  # type: ignore[index]
+        res: list[FileDict] = []
+        for req_tuple in req:
+            internal, *file_tuple = req_tuple
+            res.append(
+                self._tuple_to_file(  # type: ignore[index]
                     file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
                 )
-        else:
-            res = []
-            for req_tuple in req:
-                internal, *file_tuple = req_tuple
-                res.append(
-                    self._tuple_to_file(  # type: ignore[index]
-                        file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
-                    )
-                )
+            )
+        return res
+
+    def _list_component_attachments(
+        self,
+        component_id: _Store.DB_IDType,
+        *,
+        component_buildinfo: BuildInfoDict | None = None,
+    ) -> dict[str, FileDict]:
+        """Retrieve the files of a component.
+
+        :param component_id: The component id associated to these files.
+        :param component_buildinfo: A buildinfo dict to avoid unnecessary call to the
+            database.
+        :return: An attachment dict.
+        """
+        req = self._select_inner_join(
+            _Store.TableName.files,
+            [
+                (_Store.TableName.component_files, "attachment_name"),
+                (_Store.TableName.component_files, "internal"),
+                (_Store.TableName.files, "*"),
+            ],
+            _Store.TableName.component_files,
+            (
+                (_Store.TableName.files, "file_id"),
+                (_Store.TableName.component_files, "file_id"),
+            ),
+            [
+                (_Store.TableName.component_files, "component_id"),
+                (_Store.TableName.component_files, "kind"),
+            ],
+            [component_id, "attachment"],
+        )
+        res: dict[str, FileDict] = {}
+        for req_tuple in req:
+            assert len(req_tuple) >= 1, "Should never occur: empty database response"
+            name, internal, *file_tuple = req_tuple
+            # We are sure here that 'name' is a string.
+            res[name] = self._tuple_to_file(  # type: ignore[index]
+                file_tuple, buildinfo=component_buildinfo, internal=internal  # type: ignore[arg-type]
+            )
         return res
 
     def _tuple_to_comp(
@@ -704,6 +738,7 @@ class _Store(_StoreContextManager):
         """
         _unused_values: object
         (
+            _,
             comp_id,
             name,
             platform,
@@ -722,7 +757,9 @@ class _Store(_StoreContextManager):
         # for this component.
         if not buildinfo or buildinfo["_id"] != build_id:
             buildinfo = self._tuple_to_buildinfo(
-                self._select_one(_Store.TableName.buildinfos, build_id)  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    _Store.TableName.buildinfos, build_id, field_name="build_id"
+                )
             )
 
         # If no releases is provided, retrieve the correct releases for this component.
@@ -763,7 +800,9 @@ class _Store(_StoreContextManager):
                 readme
                 or (
                     self._tuple_to_file(
-                        self._select_one(_Store.TableName.files, readmeid),  # type: ignore[arg-type]
+                        self._select_one(  # type: ignore[arg-type]
+                            _Store.TableName.files, readmeid, field_name="file_id"
+                        ),
                         buildinfo=buildinfo,
                     )
                     if readmeid
@@ -774,8 +813,8 @@ class _Store(_StoreContextManager):
             "attachments": (
                 attachments  # type: ignore[typeddict-item]
                 if attachments is not None
-                else self._list_component_files(
-                    "attachment", comp_id, component_buildinfo=buildinfo
+                else self._list_component_attachments(
+                    comp_id, component_buildinfo=buildinfo
                 )
             )
             or None,
@@ -848,6 +887,8 @@ class _StoreWrite(_Store):
         rowid: str | int,
         toset: _Store.AnyFieldSequence,
         values: list[str | int | None],
+        *,
+        id_field: str = "id",
     ) -> _Store.AnyTuple:
         """Update a row in a table.
 
@@ -855,12 +896,14 @@ class _StoreWrite(_Store):
         :param rowid: The row id to update.
         :param toset: The list of row fields to update.
         :param values: The values to update.
+        :param id_field: The id field to use, in case the `rowid` doesn't reference the
+            primary key of the current table.
         :return: A tuple.
         """
         elm_to_set = [f"{tmp}=?" for tmp in toset]
         return self._insert_or_update(
             table,
-            f"UPDATE {table} SET {','.join(elm_to_set)} WHERE id=?",
+            f"UPDATE {table} SET {','.join(elm_to_set)} WHERE {id_field}=?",
             values + [rowid],
         )
 
@@ -914,12 +957,18 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
         # Retrieve attachments and upload them.
         attachments_with_name: dict[str, FileDict] = {}
+
+        attachments: dict[str, FileDict] | Sequence[ComponentAttachmentDict] | None
         attachments = component_info.get("attachments")
+
         if attachments:
             if isinstance(attachments, dict):
                 for name, file_dict in attachments.items():
                     attachments_with_name[name] = self._submit_file(file_dict)
-            elif isinstance(attachments, list):
+            # The Component dict ask for a list in that case, however, from this code
+            # point of view, we only need an implementation of __contains__ and
+            # __iter__, having a list, a tuple or a set doesn't matter here.
+            elif isinstance(attachments, Sequence):
                 for att in attachments:
                     if att["name"] in attachments_with_name:
                         raise StoreError("Two attachments cannot use the same name")
@@ -928,7 +977,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                     )
             else:
                 raise TypeError(
-                    "Unknown attachments type: expected list or dict, "
+                    "Unknown attachments type: expected Sequence or dict, "
                     f"got {type(attachments)}"
                 )
 
@@ -943,7 +992,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert(
             _Store.TableName.components,
             [  # type: ignore[arg-type]
-                "id",
+                "component_id",
                 "name",
                 "platform",
                 "version",
@@ -972,7 +1021,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             ],
         )
         # Create relation between files/sources/attachment and the new component.
-        comp_id = req_tuple[0]
+        comp_id = req_tuple[1]
         self._insert_to_component_files("file", [(None, f) for f in files], comp_id)
         sources = component_info["sources"]
         self._insert_to_component_files(
@@ -1012,8 +1061,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
     def mark_build_ready(self, bid: str) -> bool:
         """See e3.anod.store.interface.StoreWriteInterface."""
-        _, _, _, _, isready, *_ = self._update(
-            _Store.TableName.buildinfos, bid, ["isready"], [1]  # type: ignore[arg-type, misc]
+        _, _, _, _, _, isready, *_ = self._update(
+            _Store.TableName.buildinfos, bid, ["isready"], [1], id_field="build_id"  # type: ignore[arg-type, misc]
         )
         self.connection.commit()
         return bool(isready)
@@ -1022,7 +1071,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         """See e3.anod.store.interface.StoreWriteInterface."""
         req_tuple = self._insert(
             _Store.TableName.buildinfos,
-            ["id", "build_date", "setup", "build_version"],  # type: ignore[arg-type]
+            ["build_id", "build_date", "setup", "build_version"],  # type: ignore[arg-type]
             [unique_id(), date, setup, version],
         )
         self.connection.commit()
@@ -1033,10 +1082,10 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert_or_update(
             _Store.TableName.buildinfos,
             f"INSERT INTO {_Store.TableName.buildinfos}("
-            "   id, build_date, setup, build_version"
+            "   build_id, build_date, setup, build_version"
             ") "
             "  SELECT ?, build_date, ?, build_version"
-            f"       FROM {_Store.TableName.buildinfos} WHERE id=?",
+            f"       FROM {_Store.TableName.buildinfos} WHERE build_id=?",
             [unique_id(), dest_setup, bid],
         )
         self.connection.commit()
@@ -1064,6 +1113,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             fid,
             ["metadata"],  # type: ignore[arg-type]
             [json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}"],
+            id_field="file_id",
         )
         self.connection.commit()
         return self._tuple_to_file(req_tuple, buildinfo=buildinfo)  # type: ignore[arg-type]
@@ -1094,7 +1144,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         Mainly for optimization purpose.
         """
         downloaded_as = file_info.get("downloaded_as", "")
-        resource_id = file_info.get("resource_id", "")
+        resource_id: _Store.DB_IDType | None = file_info.get("resource_id", "")
 
         if not downloaded_as:
             raise StoreError("Trying to submit file without 'downloaded_as' field")
@@ -1135,7 +1185,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert(
             _Store.TableName.files,
             [  # type: ignore[arg-type]
-                "id",
+                "file_id",
                 "name",
                 "alias",
                 "filename",
@@ -1165,7 +1215,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 class StoreReadOnly(_Store, StoreReadInterface):
     def get_build_info(self, bid: str) -> BuildInfoDict:
         """See e3.anod.store.interface.StoreReadInterface."""
-        return self._get_buildinfo(["id"], [bid], only_one=True)
+        return self._get_buildinfo(["build_id"], [bid], only_one=True)
 
     def get_latest_build_info(
         self,
@@ -1210,7 +1260,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 _Store.TableName.components,
                 (
                     (_Store.TableName.component_releases, "component_id"),
-                    (_Store.TableName.components, "id"),
+                    (_Store.TableName.components, "component_id"),
                 ),
                 [(_Store.TableName.component_releases, "name")],
                 [name],
@@ -1272,7 +1322,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
         #       ) AS lc
         #       FROM components
         #       INNER JOIN buildinfos
-        #       ON components.build_id=buildinfos.id
+        #       ON components.build_id=buildinfos.build_id
         #       WHERE {' AND '.join(where_rules)}
         #   )
         #   SELECT * FROM latest_components WHERE lc=1 ORDER BY creation_date DESC
@@ -1283,16 +1333,16 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 "PARTITION BY "
                 f"{_Store.TableName.components}.name, "
                 f"{_Store.TableName.components}.platform "
-                f"ORDER BY {_Store.TableName.components}.creation_date DESC"
+                f"ORDER BY {_Store.TableName.components}.id DESC"
                 ") AS lc "
                 f"FROM {_Store.TableName.components} "
                 f"INNER JOIN {_Store.TableName.buildinfos} "
                 f"ON {_Store.TableName.components}.build_id="
-                f"{_Store.TableName.buildinfos}.id "
+                f"{_Store.TableName.buildinfos}.build_id "
                 f"WHERE {' AND '.join(where_rules)}"
                 ")"
                 "SELECT * FROM latest_components WHERE lc=1 "
-                "ORDER BY creation_date DESC",
+                "ORDER BY id DESC",
                 where_values,
             ).fetchall()
         )
@@ -1326,7 +1376,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                     fields,
                     [bid],
                     static_where_rules=["kind IN ('source', 'thirdparty')"],
-                    order_by="creation_date DESC",
+                    order_by="id DESC",
                 )
             ),
             "components": self._tuple_list_to_comp_list(
@@ -1334,7 +1384,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                     _Store.TableName.components,
                     fields,
                     [bid],
-                    order_by="creation_date DESC",  # type: ignore[arg-type]
+                    order_by="id DESC",  # type: ignore[arg-type]
                 )
             ),
         }
@@ -1409,11 +1459,11 @@ class StoreReadOnly(_Store, StoreReadInterface):
         # The SQL request to make:
         #
         #   SELECT files.* INNER JOIN buildinfos
-        #   ON buildinfos.id=files.build_id
+        #   ON buildinfos.build_id=files.build_id
         #   WHERE files.name={name} AND files.kind={kind} AND (
         #       files.build_id={bid} OR (
         #           files.kind='source' AND buildinfos.creation_date <= (
-        #               SELECT creation_date FROM buildinfos WHERE id={bid}
+        #               SELECT creation_date FROM buildinfos WHERE build_id={bid}
         #           )
         #       )
         #   )
@@ -1426,7 +1476,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             fields=[(_Store.TableName.files, "*")],
             inner_join=_Store.TableName.buildinfos,
             on=(
-                (_Store.TableName.buildinfos, "id"),
+                (_Store.TableName.buildinfos, "build_id"),
                 (_Store.TableName.files, "build_id"),
             ),
             dynamic_where_rules=[
@@ -1438,7 +1488,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 f"({_Store.TableName.files}.build_id=? "
                 f"OR ({_Store.TableName.files}.kind IN ('source', 'thirdparty') "
                 f"AND {_Store.TableName.buildinfos}.creation_date <= ("
-                f"SELECT creation_date FROM {_Store.TableName.buildinfos} WHERE id=?)))"
+                f"SELECT creation_date FROM {_Store.TableName.buildinfos} "
+                "WHERE build_id=?)))"
             ],
             order_by=(_Store.TableName.buildinfos, "creation_date DESC"),
         )
@@ -1448,7 +1499,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
 
     def download_resource(self, rid: str, path: str) -> str:
         """See e3.anod.store.interface.StoreReadInterface."""
-        _, _, resource_path, *rest = self._select_one(
+        _, _, resource_path, *_ = self._select_one(
             _Store.TableName.resources, rid, field_name="resource_id"
         )
         cp(resource_path, path)  # type: ignore[arg-type]
@@ -1560,7 +1611,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             where_rules.append("name")
             where_values.append(name)
         if fid and fid != "all":
-            where_rules.append("id")
+            where_rules.append("file_id")
             where_values.append(fid)
         if bid and bid != "all":
             where_rules.append("build_id")
@@ -1573,7 +1624,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             _Store.TableName.files,
             where_rules,
             where_values,
-            order_by="creation_date DESC",
+            order_by="id DESC",
         )
         if not file_list:
             if not possibly_empty:
@@ -1606,7 +1657,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             dynamic_where_rules,
             dynamic_where_values,
             static_where_rules=static_where_rules,
-            order_by="build_date DESC, creation_date DESC",
+            order_by="build_date DESC, id DESC",
         )
 
         if not possible_buildinfos:
@@ -1671,11 +1722,13 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_build_info`
 
-        :return: True if some change should be committed to the dabase, False otherwise.
+        :return: True if some change should be committed to the database, False
+            otherwise.
         """
         tmp = dict(build_info)
-        tmp["id"] = build_info["_id"]
+        tmp["build_id"] = build_info["_id"]
         tmp.pop("_id", None)
+        tmp.pop("id", None)
         try:
             self._insert(
                 _Store.TableName.buildinfos,
@@ -1683,7 +1736,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
                 list(tmp.values()),  # type: ignore[arg-type]
             )
         except sqlite3.IntegrityError as err:
-            if "UNIQUE constraint failed: buildinfos.id" not in str(err):
+            if "UNIQUE constraint failed: buildinfos.build_id" not in str(err):
                 raise err
             return False
         else:
@@ -1723,7 +1776,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_file`
 
-        :return: True if some change should be committed to the dabase, False otherwise.
+        :return: True if some change should be committed to the database, False
+            otherwise.
         """
         if not file_info.get("metadata"):
             file_info["metadata"] = {}
@@ -1747,13 +1801,16 @@ class LocalStore(StoreRW, LocalStoreInterface):
             file_info.update(existing_file_info)
             return False
 
-        resource_id = file_info["resource_id"]
+        resource_id: _Store.DB_IDType | None = file_info["resource_id"]
+        assert (
+            resource_id is not None
+        ), "Trying to submit file without 'resource_id' field"
 
         # Create the file entry
         self._insert(
             _Store.TableName.files,
             [  # type: ignore[arg-type]
-                "id",
+                "file_id",
                 "name",
                 "alias",
                 "filename",
@@ -1788,7 +1845,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             _Store.TableName.resources, ["resource_id"], [resource_id]  # type: ignore[arg-type]
         )
         if resource_tmp:
-            row_id, resource_id, path, *rest = resource_tmp[0]
+            row_id, resource_id, path, *_ = resource_tmp[0]
             # Check if the path is still valid, if not, we got a new valid path,
             # so we just need to update the database.
             if os.path.isfile(path):
@@ -1849,7 +1906,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             self.raw_add_build_info(bi)
         else:
             try:
-                _ = self.get_build_info(bid)
+                bi = self.get_build_info(bid)
             except StoreError:
                 bi = from_store.get_build_info(bid)
                 self.raw_add_build_info(bi)
@@ -1866,16 +1923,21 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_component`
 
-        :return: True if some change should be committed to the dabase, False otherwise.
+        :return: True if some change should be committed to the database, False
+            otherwise.
         """
-        comp_id = component_info["_id"]
+        comp_id: _Store.DB_IDType | None = component_info["_id"]
+        assert comp_id is not None, "Trying to submit file without '_id' field"
+
         # Check if the component is already in our database.
         try:
             tmp = self._tuple_to_comp(
-                self._select_one(Store.TableName.components, comp_id)  # type: ignore[arg-type]
+                self._select_one(  # type: ignore[arg-type]
+                    Store.TableName.components, comp_id, field_name="component_id"
+                )
             )
         except StoreError as err:
-            if f"No element with id={comp_id} found" not in str(err):
+            if f"No element with component_id={comp_id} found" not in str(err):
                 raise err
         else:
             # The file already exists, so just return.
@@ -1890,13 +1952,17 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
         # Retrieve attachments and upload them.
         attachments_with_name: dict[str, FileDict] = {}
+        attachments: dict[str, FileDict] | Sequence[ComponentAttachmentDict] | None
         attachments = component_info.get("attachments")
         if attachments:
             if isinstance(attachments, dict):
                 for name, file_dict in attachments.items():
                     self._raw_add_file(file_dict)
                     attachments_with_name[name] = file_dict
-            elif isinstance(attachments, list):
+            # The Component dict ask for a list in that case, however, from this code
+            # point of view, we only need an implementation of __contains__ and
+            # __iter__, having a list, a tuple or a set doesn't matter here.
+            elif isinstance(attachments, Sequence):
                 for att in attachments:
                     if att["name"] in attachments_with_name:
                         raise StoreError("Two attachments cannot use the same name")
@@ -1904,7 +1970,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
                     attachments_with_name[att["name"]] = att["att_file"]
             else:
                 raise TypeError(
-                    "Unknown attachments type: expected list or dict, "
+                    "Unknown attachments type: expected Sequence or dict, "
                     f"got {type(attachments)}"
                 )
 
@@ -1936,7 +2002,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
         self._insert(
             _Store.TableName.components,
             [  # type: ignore[arg-type]
-                "id",
+                "component_id",
                 "name",
                 "platform",
                 "version",
@@ -2063,20 +2129,16 @@ class LocalStore(StoreRW, LocalStoreInterface):
                 query = {"kind": "source", "bid": ""}
                 query.update(unprocessed_query)
 
-                if query["kind"] == "source" and not query["bid"] and "setup" in query:
+                if not query["bid"] and "setup" in query:
                     try:
                         query["bid"] = from_store.get_latest_build_info(
-                            setup=query["setup"], date=query.get("date", "all")
+                            setup=query["setup"], date=query.get("date")
                         )["_id"]
                     except StoreError:
                         pass
 
                 if query.get("bid"):
                     required_bids.add(query["bid"])
-
-                if query["kind"] == "thirdparty":
-                    # Remove bid information for thirdparty to simplify lookup
-                    query["bid"] = ""
 
             # Then check for entries that are already in the local database
             if query.get("query", "") == "source":
