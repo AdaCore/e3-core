@@ -452,7 +452,7 @@ def test_invalid_spdx() -> None:
     add_main(is_main_package=True)
 
     with pytest.raises(InvalidSPDX) as err:
-        for idx in range(0, 2):
+        for idx in range(2):
             if idx == 0:
                 name = "my-dep"
             else:

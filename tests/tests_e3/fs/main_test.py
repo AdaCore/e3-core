@@ -617,7 +617,7 @@ def test_splitall() -> None:
 def test_sync_tree_with_file_list() -> None:
     """Test sync_tree with file_list."""
     e3.fs.mkdir("a")
-    for x in range(0, 10):
+    for x in range(10):
         e3.os.fs.touch("a/%d" % x)
 
     e3.fs.mkdir("b")
@@ -630,7 +630,7 @@ def test_sync_tree_with_file_list() -> None:
 def test_sync_tree_with_ignore() -> None:
     """Test sync_tree with ignore."""
     e3.fs.mkdir("a")
-    for x in range(0, 10):
+    for x in range(10):
         e3.os.fs.touch("a/%d" % x)
 
     e3.fs.mkdir("b")
@@ -648,7 +648,7 @@ def test_sync_tree_with_ignore() -> None:
     e3.os.fs.touch("a/test.py")
     e3.fs.sync_tree("a", "b", ignore="*.py", delete_ignore=True)
     assert not os.path.exists("b/test.py")
-    for x in range(0, 10):
+    for x in range(10):
         assert os.path.exists("b/" + str(x))
 
 

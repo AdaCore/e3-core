@@ -476,7 +476,7 @@ def test_kill_process_tree() -> None:
             f.write(prog)
 
         parent_process = e3.os.process.Run([sys.executable, gen_prog_name], bg=True)
-        for _ in range(0, 100):
+        for _ in range(100):
             try:
                 with open(pid_file) as f:
                     child_pid = f.read()
