@@ -11,25 +11,25 @@ class TestLoader:
     spec_dir = os.path.join(os.path.dirname(__file__), "data")
     spec2_dir = os.path.join(os.path.dirname(__file__), "data2")
 
-    def test_spec_does_not_exist(self):
+    def test_spec_does_not_exist(self) -> None:
         with pytest.raises(SandBoxError) as err:
             AnodSpecRepository("/foo/bar")
 
         assert str(err.value).startswith("spec directory /foo/bar does not exist")
 
-    def test_spec_loader1(self):
+    def test_spec_loader1(self) -> None:
         spec_repo = AnodSpecRepository(self.spec_dir)
         s = spec_repo.load("loader1")
         assert s.name == "loader1"
 
-    def test_spec_loader2(self):
+    def test_spec_loader2(self) -> None:
         spec_repo = AnodSpecRepository(self.spec_dir)
 
         with pytest.raises(SandBoxError) as err:
             spec_repo.load("loader2")
         assert str(err.value).startswith("load: cannot find Anod subclass in")
 
-    def test_invalid_spec(self):
+    def test_invalid_spec(self) -> None:
         """Ensure that loading an invalid spec result in a SandboxError."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         with pytest.raises(SandBoxError) as err:
@@ -37,7 +37,7 @@ class TestLoader:
 
         assert "invalid spec code" in str(err.value)
 
-    def test_spec_loader_prolog(self):
+    def test_spec_loader_prolog(self) -> None:
         spec_repo = AnodSpecRepository(self.spec_dir)
         anod_class = spec_repo.load("prolog_test")
 
@@ -47,7 +47,7 @@ class TestLoader:
         anod_instance = anod_class("prolog_test", "", "build")
         assert anod_instance.prolog_test, "prolog not executed properly"
 
-    def test_spec_loader_prolog_with_repos(self):
+    def test_spec_loader_prolog_with_repos(self) -> None:
         sync_tree(self.spec_dir, "specs_dir")
         repositories_yaml = os.path.join("specs_dir", "config", "repositories.yaml")
         cp(repositories_yaml + ".tmpl", repositories_yaml)
@@ -77,14 +77,14 @@ class TestLoader:
 
         assert anod_class2.has_foo is True
 
-    def test_spec_inheritance(self):
+    def test_spec_inheritance(self) -> None:
         """Load a spec that inherit from another spec."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         anod_class = spec_repo.load("child")
         anod_instance = anod_class("load", "", "build")
         assert anod_instance.parent_info == "from_parent"
 
-    def test_multiple_spec_repository(self):
+    def test_multiple_spec_repository(self) -> None:
         """Ensure that spec function is context dependent."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         spec2_repo = AnodSpecRepository(self.spec2_dir)
@@ -95,7 +95,7 @@ class TestLoader:
         anod_instance2 = anod_class2("load", "", "build")
         assert anod_instance2.parent_info == "from_parent2"
 
-    def test_load_all(self):
+    def test_load_all(self) -> None:
         spec_repo = AnodSpecRepository(self.spec_dir)
         with pytest.raises(SandBoxError):
             spec_repo.load_all()
@@ -106,7 +106,7 @@ class TestLoader:
         assert "child" in spec_repo
         assert "unknown" not in spec_repo
 
-    def test_load_config(self):
+    def test_load_config(self) -> None:
         spec_repo = AnodSpecRepository(self.spec_dir)
         spec_repo.api_version = "1.4"
         anod_class = spec_repo.load("withconfig")
@@ -121,14 +121,14 @@ class TestLoader:
 
         assert list(anod_instance.test3()) == ["case_foo"]
 
-    def test_getitem_without_buildspace(self):
+    def test_getitem_without_buildspace(self) -> None:
         """Without a build space PKG_DIR returns 'unknown'."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         anod_class = spec_repo.load("parent")
         anod_instance = anod_class("", "build")
         assert anod_instance["PKG_DIR"] == "unknown"
 
-    def test_reuse_anod(self):
+    def test_reuse_anod(self) -> None:
         """Reject spec reusing Anod class name."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         with pytest.raises(SandBoxError) as err:

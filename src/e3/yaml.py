@@ -50,7 +50,7 @@ class OrderedDictYAMLLoader(Loader):
         )  # type: ignore
         self.add_constructor("!include", type(self).yaml_include)  # type: ignore
 
-    def yaml_include(self, node):
+    def yaml_include(self, node) -> OrderedDict:
         # Get the path out of the yaml file
         if self.name is None:
             if not isinstance(self.stream, str) or isinstance(self.stream, str):
@@ -64,13 +64,13 @@ class OrderedDictYAMLLoader(Loader):
         with open(file_name, "rb") as inputfile:
             return yaml.load(inputfile, OrderedDictYAMLLoader)
 
-    def construct_yaml_map(self, node):
+    def construct_yaml_map(self, node) -> OrderedDict:
         data = OrderedDict()
         yield data
         value = self.construct_mapping(node)
         data.update(value)
 
-    def construct_mapping(self, node, deep=False):
+    def construct_mapping(self, node, deep=False) -> OrderedDict:
         if isinstance(node, yaml.MappingNode):
             self.flatten_mapping(node)
         else:

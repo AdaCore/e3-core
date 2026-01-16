@@ -9,7 +9,7 @@ class InvalidProcessJob(ProcessJob):
 
 
 class TestJob:
-    def test_run_empty_job(self):
+    def test_run_empty_job(self) -> None:
         """Try running an empty job...
 
         In theory, trying to run an EmptyJob does not make sense,
@@ -28,7 +28,7 @@ class TestJob:
         assert job.should_skip is True
         assert job.status == ReturnValue.success
 
-    def test_process_job_status_before_run(self):
+    def test_process_job_status_before_run(self) -> None:
         """Check the status of a ProcessJob before running it.
 
         Normally, we don't expect anyone to try this, but in case
@@ -42,14 +42,14 @@ class TestJob:
         job = EmptyProcessJob("1", None, print)
         assert job.status is ReturnValue.notready
 
-    def test_invalid_job_status(self, caplog):
+    def test_invalid_job_status(self, caplog) -> None:
         """Verify that when the return code is invalid we return a failure."""
         job = InvalidProcessJob("myuid", {}, None)
         job.run()
         assert job.status is ReturnValue.failure
         assert "job myuid returned an unknown status 6" in caplog.text
 
-    def test_none_job_status(self, caplog):
+    def test_none_job_status(self, caplog) -> None:
         """Verify that when the return code is None, we return a failure."""
         job = InvalidProcessJob("myuid", {}, None)
         job.run()
@@ -57,7 +57,7 @@ class TestJob:
         assert job.status is ReturnValue.failure
         assert "job myuid returned None for status" in caplog.text
 
-    def test_spawn_issue(self):
+    def test_spawn_issue(self) -> None:
         """Verify that status is set to failure when the spawn fails."""
 
         class SpawnIssueProcessJob(ProcessJob):

@@ -9,6 +9,6 @@ if sys.platform == "win32":
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_unicode_string_preallocation():
+def test_unicode_string_preallocation() -> None:
     s = e3.os.windows.native_api.UnicodeString(max_length=10)
     assert len(s) == 0, "preallocated unicode string has still a 0 length"

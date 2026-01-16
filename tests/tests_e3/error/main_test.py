@@ -1,7 +1,7 @@
 from e3.error import E3Error
 
 
-def test_e3error():
+def test_e3error() -> None:
     err = None
 
     try:

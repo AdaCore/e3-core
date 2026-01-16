@@ -10,7 +10,7 @@ class TestSourceClosure:
         os.path.join(os.path.dirname(__file__), "force_download")
     )
 
-    def test_force_download_after_install(self):
+    def test_force_download_after_install(self) -> None:
         """Test two deps on the same spec with installation and download.
 
         Here we have two specs having an "installation" and a "download"
@@ -37,7 +37,7 @@ class TestSourceClosure:
             "x86_64-linux.spec_build.download_bin",
         }
 
-    def test_force_download_before_install(self):
+    def test_force_download_before_install(self) -> None:
         """Test two deps on the same spec with installation and download.
 
         Same as test_force_download_after_install but in a different
@@ -68,7 +68,7 @@ class TestSourceClosure:
             "x86_64-linux.spec_build.download_bin",
         }
 
-    def test_force_download_after_build(self):
+    def test_force_download_after_build(self) -> None:
         """Test two deps on the same spec with build and download.
 
         Here we have two specs having an "build_tree" and a "download"
@@ -96,7 +96,7 @@ class TestSourceClosure:
             ac.schedule(ac.always_create_source_resolver)
         assert "explicit DownloadBinary decision made" in str(err)
 
-    def test_force_download_before_build(self):
+    def test_force_download_before_build(self) -> None:
         """Test two deps on the same spec with build and download.
 
         Same as test_force_download_after_build but in a different order.
@@ -112,7 +112,7 @@ class TestSourceClosure:
             ac.schedule(ac.always_create_source_resolver)
         assert "explicit DownloadBinary decision made" in str(err)
 
-    def test_force_download_without_download_primitive(self):
+    def test_force_download_without_download_primitive(self) -> None:
         """Test that the force download do not require the download primitive.
 
         Having a download() primitive or not should not impact this feature.
@@ -135,7 +135,7 @@ class TestSourceClosure:
             "x86_64-linux.spec_nodownloadprimitive.download_bin",
         }
 
-    def test_force_download_without_require_condition(self):
+    def test_force_download_without_require_condition(self) -> None:
         """Test that the force download can be done thanks to require=xxx.
 
         A require condition can be added to the build primitive to disable the

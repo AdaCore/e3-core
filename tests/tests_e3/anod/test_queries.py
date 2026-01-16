@@ -9,7 +9,9 @@ class TestSourceClosure:
         os.path.join(os.path.dirname(__file__), "source_closure_specs")
     )
 
-    def get_source_closure(self, name, expand_packages=True, other_builds=None):
+    def get_source_closure(
+        self, name, expand_packages=True, other_builds=None
+    ) -> SourceClosure:
         asr = AnodSpecRepository(self.spec_dir)
         ac = AnodContext(asr)
         anod_instance = ac.add_anod_action(
@@ -23,13 +25,13 @@ class TestSourceClosure:
             anod_instance=anod_instance, context=ac, expand_packages=expand_packages
         )
 
-    def test_empty_source_closure(self):
+    def test_empty_source_closure(self) -> None:
         """Simple test with null source closure."""
         sc = self.get_source_closure("spec1")
         sources = sc.get_source_list()
         assert len(sources) == 0
 
-    def test_simple_source_closure(self):
+    def test_simple_source_closure(self) -> None:
         """Simple test with one public and one private source."""
         sc = self.get_source_closure("spec2", other_builds=["spec1"])
         for key in sc.source_list:
@@ -46,7 +48,7 @@ class TestSourceClosure:
             and unpublished_sources[0] == "spec2-internal-src"
         )
 
-    def test_recursive_source_closure(self):
+    def test_recursive_source_closure(self) -> None:
         sc = self.get_source_closure("spec3")
 
         for key in sc.source_list:
@@ -76,7 +78,7 @@ class TestSourceClosure:
         assert published_sources == ["spec2-src", "spec4-src"]
         assert len(unpublished_sources) == 2
 
-    def test_recursive_source_closure_with_package(self):
+    def test_recursive_source_closure_with_package(self) -> None:
         sc = self.get_source_closure("spec5", expand_packages=True)
 
         for key in sc.source_list:
@@ -117,7 +119,7 @@ class TestSourceClosure:
         assert published_sources == ["spec2-package-src", "spec5-src"]
         assert len(unpublished_sources) == 2
 
-    def test_recursive_source_closure_with_download(self):
+    def test_recursive_source_closure_with_download(self) -> None:
         sc = self.get_source_closure("spec6")
 
         for key in sc.source_list:

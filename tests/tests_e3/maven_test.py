@@ -3,7 +3,7 @@ from __future__ import annotations
 from e3.maven import Maven
 
 
-def test_maven(maven_central):
+def test_maven(maven_central) -> None:
     mvn = Maven()
 
     maven_central.register_package(

@@ -3,7 +3,7 @@ from e3.dsse import DSSE, DSSEError
 import pytest
 
 
-def test_dsse():
+def test_dsse() -> None:
     # Generate a temporary x509 keypairs
     p = Run(
         [

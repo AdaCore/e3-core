@@ -4,7 +4,7 @@ import e3.platform
 import pytest
 
 
-def test_platform():
+def test_platform() -> None:
     a = e3.platform.Platform.get()
     b = e3.platform.Platform.get()
 
@@ -19,12 +19,12 @@ def test_platform():
     assert c.os.name == "linux"
 
 
-def test_is_host():
+def test_is_host() -> None:
     p = e3.platform.Platform.get(machine=e3.env.Env().build.machine)
     assert p.is_host
 
 
-def test_immutable():
+def test_immutable() -> None:
     a = e3.platform.Platform.get()
 
     with pytest.raises(AttributeError):

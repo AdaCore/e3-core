@@ -77,7 +77,7 @@ class AnodDriver:
         return False
 
     @primitive_check()
-    def download(self):
+    def download(self) -> None:
         """Run the download primitive."""
         # First check whether there is a download primitive implemented by
         # the Anod spec.

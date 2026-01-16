@@ -44,7 +44,7 @@ except ImportError:
         ),
     ],
 )
-def test_case_parser(config, expected):
+def test_case_parser(config, expected) -> None:
     """Test yaml CaseParser."""
     yaml_case_content = """
 case_param1:
@@ -75,7 +75,7 @@ case_param2:
     assert parse_it2 == expected
 
 
-def test_case_parser_object():
+def test_case_parser_object() -> None:
     """CaseParser supports any objects."""
     yaml_case_content = """
 case_v:
@@ -89,7 +89,7 @@ result: '%(dt)s'
     assert "time.struct_time" in parse_it["result"]
 
 
-def test_case_parser_err():
+def test_case_parser_err() -> None:
     """Test CaseParser error handling."""
     yaml_case_content = "result: '%(dt)s'"
     d = yaml.load(StringIO(yaml_case_content), e3.yaml.OrderedDictYAMLLoader)
@@ -97,7 +97,7 @@ def test_case_parser_err():
     assert parse_it["result"] == "%(dt)s"
 
 
-def test_include():
+def test_include() -> None:
     """Test yaml !include."""
     with open("1.yaml", "w") as f:
         f.write("b: !include 2.yaml\n")
@@ -117,7 +117,7 @@ def test_include():
     assert "foo.yaml" in str(err.value)
 
 
-def test_duplicatekey():
+def test_duplicatekey() -> None:
     """Duplicated key should be rejected by load_ordered."""
     with open("dup.yaml", "w") as f:
         f.write("b: 2\nb: 9")
@@ -127,7 +127,7 @@ def test_duplicatekey():
     assert "found duplicate key (b)" in str(err.value)
 
 
-def test_yaml_err():
+def test_yaml_err() -> None:
     """Test load_ordered error handling."""
     with open("err.yaml", "w") as f:
         f.write("[1]: 2\n")
@@ -144,7 +144,7 @@ def test_yaml_err():
     assert "expected a mapping node" in str(err.value)
 
 
-def test_load_with_config_err():
+def test_load_with_config_err() -> None:
     """Test load_with_config error handling."""
     with pytest.raises(e3.yaml.YamlError) as err:
         e3.yaml.load_with_config("/does/not/exist", {})
@@ -158,7 +158,7 @@ def test_load_with_config_err():
     assert "invalid yaml" in str(err.value)
 
 
-def test_load_with_regexp():
+def test_load_with_regexp() -> None:
     """Test load_with_regexp."""
     with open("regexp1.yaml", "w") as f:
         f.write(

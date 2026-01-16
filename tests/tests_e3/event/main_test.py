@@ -10,7 +10,7 @@ import e3.os.fs
 import mock
 
 
-def test_smtp_event():
+def test_smtp_event() -> None:
     e3.event.add_handler(
         "smtp",
         subject="test subject",
@@ -87,7 +87,7 @@ def test_smtp_event():
     assert event_mail["Subject"] == "test subject"
 
 
-def test_smtp_servers_as_str():
+def test_smtp_servers_as_str() -> None:
     """Test when smtp server setting is a string."""
     e3.event.add_handler(
         "smtp",

@@ -8,7 +8,7 @@ import e3.hash
 import pytest
 
 
-def test_hash():
+def test_hash() -> None:
     with open("to-hash.txt", "wb") as f:
         f.write(b"content\n")
     assert e3.hash.md5(f.name) == "f75b8179e4bbe7e2b4a074dcef62de95"

@@ -33,7 +33,7 @@ class TestContext:
         ac = AnodContext(asr, default_env=env, reject_duplicates=reject_duplicates)
         return ac
 
-    def test_context_init(self):
+    def test_context_init(self) -> None:
         # Create a context using:
         # 1. the local default configuration
         # 2. forcing a x86-linux configuration
@@ -44,7 +44,7 @@ class TestContext:
         assert ac.default_env.target == BaseEnv().target
         self.create_context()
 
-    def test_load(self):
+    def test_load(self) -> None:
         # Load a simple build specification that declares a single source
         ac = self.create_context()
         ac.load("spec1", env=ac.default_env, qualifier="", kind="build")
@@ -60,7 +60,7 @@ class TestContext:
         # One spec instance should have been registered in the cache
         assert len(ac.cache) == 1, "caching of anod instances broken"
 
-    def test_add_anod_action(self):
+    def test_add_anod_action(self) -> None:
         # Load spec1 with build primitive
         ac = self.create_context()
 
@@ -69,7 +69,7 @@ class TestContext:
         with pytest.raises(SchedulingError):
             print(ac.add_anod_action("spec1", env=ac.default_env, primitive="build"))
 
-    def test_add_anod_action_source(self):
+    def test_add_anod_action_source(self) -> None:
         """Test source packaging."""
         ac = self.create_context()
 
@@ -84,7 +84,7 @@ class TestContext:
             "x86-linux.spec1.upload_src.spec1-src",
         }
 
-    def test_add_anod_action2(self):
+    def test_add_anod_action2(self) -> None:
         # Simple spec with sources associated to the build primitive
         ac = self.create_context()
         ac.add_anod_action("spec2", env=ac.default_env, primitive="build")
@@ -100,7 +100,7 @@ class TestContext:
             "download.spec2-src",
         }
 
-    def test_add_anod_action2_force_install(self):
+    def test_add_anod_action2_force_install(self) -> None:
         """Check that forcing an install with no package is rejected."""
         ac = self.create_context()
         with pytest.raises(SchedulingError) as err:
@@ -117,7 +117,7 @@ class TestContext:
             in str(err)
         )
 
-    def test_add_anod_action2_no_source_resolver(self):
+    def test_add_anod_action2_no_source_resolver(self) -> None:
         def no_resolver(action, decision):
             return AnodContext.decision_error(action, decision)
 
@@ -132,7 +132,7 @@ class TestContext:
             " for resolving source_get.spec2-src." in str(err)
         )
 
-    def test_add_anod_action3(self):
+    def test_add_anod_action3(self) -> None:
         # Simple spec with both install and build primitive and a package
         # declared
         ac = self.create_context()
@@ -148,7 +148,7 @@ class TestContext:
             "x86-linux.spec3.check_virus",
         }
 
-    def test_add_anod_action4(self):
+    def test_add_anod_action4(self) -> None:
         # Simple spec with:
         #   install primitive, package, component
         #   build primitive
@@ -165,7 +165,7 @@ class TestContext:
             "x86-linux.spec4.check_virus",
         }
 
-    def test_add_anod_action4_2(self):
+    def test_add_anod_action4_2(self) -> None:
         # Same previous example but calling install primitive instead of build
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="install")
@@ -178,7 +178,7 @@ class TestContext:
             "x86-linux.spec4.install",
         }
 
-    def test_add_anod_action4_3(self):
+    def test_add_anod_action4_3(self) -> None:
         # Same as previous example but calling test primitive
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="test")
@@ -190,7 +190,7 @@ class TestContext:
             "x86-linux.spec4.test",
         }
 
-    def test_add_anod_action5(self):
+    def test_add_anod_action5(self) -> None:
         # Case in which a source component should be uploaded (i.e: no binary
         # package declared)
         ac = self.create_context()
@@ -204,7 +204,7 @@ class TestContext:
             "x86-linux.spec5.upload_bin",
         }
 
-    def test_add_anod_action6(self):
+    def test_add_anod_action6(self) -> None:
         # Calling install on a spec without install primitive result in a build
         # ??? should we allow that ???
         ac = self.create_context()
@@ -217,7 +217,7 @@ class TestContext:
             "x86-linux.spec6.build",
         }
 
-    def test_add_anod_action6_2(self):
+    def test_add_anod_action6_2(self) -> None:
         # Same as previous example. Just ensure that if the spec is called
         # twice with different qualifiers that have no effect on build space
         # name then the result is only one install. (and thus qualifier value
@@ -236,7 +236,7 @@ class TestContext:
             "x86-linux.spec6.build",
         }
 
-    def test_add_anod_action7(self):
+    def test_add_anod_action7(self) -> None:
         # Ensure that build_deps = None is accepted
         ac = self.create_context()
         ac.add_anod_action("spec7", env=ac.default_env, primitive="build")
@@ -247,20 +247,20 @@ class TestContext:
             "x86-linux.spec7.build",
         }
 
-    def test_add_anod_action8(self):
+    def test_add_anod_action8(self) -> None:
         """Simple spec with source that does not exist."""
         ac = self.create_context()
         with pytest.raises(AnodError):
             ac.add_anod_action("spec8", env=ac.default_env, primitive="build")
 
-    def test_add_anod_action9(self):
+    def test_add_anod_action9(self) -> None:
         """Test source dependency."""
         ac = self.create_context()
         ac.add_anod_action("spec9", env=ac.default_env, primitive="build")
         result = ac.schedule(ac.always_download_source_resolver)
         assert "download.spec2-src" in list(result.vertex_data.keys())
 
-    def test_add_anod_action10(self):
+    def test_add_anod_action10(self) -> None:
         """Verify that requiring both build and install fails."""
         ac = self.create_context()
         ac.add_anod_action("spec3", env=ac.default_env, primitive="install")
@@ -269,7 +269,7 @@ class TestContext:
         with pytest.raises(SchedulingError):
             ac.schedule(ac.always_download_source_resolver)
 
-    def test_add_anod_action11_build_tree_dep(self):
+    def test_add_anod_action11_build_tree_dep(self) -> None:
         """Check build dependencies."""
         ac = self.create_context()
         ac.add_anod_action(
@@ -300,7 +300,7 @@ class TestContext:
 
         assert "explicit DownloadBinary decision made by myplan:2" in str(err)
 
-    def test_add_anod_action11_build_tree_dep_with_env(self):
+    def test_add_anod_action11_build_tree_dep_with_env(self) -> None:
         """Check build dependencies."""
         ac = self.create_context()
         ac.add_anod_action(
@@ -323,7 +323,7 @@ class TestContext:
             ' target="arm-elf")' in str(err.value)
         )
 
-    def test_add_anod_action11_install_dep(self):
+    def test_add_anod_action11_install_dep(self) -> None:
         """Check build dependencies."""
         ac = self.create_context()
         ac.add_anod_action(
@@ -348,7 +348,7 @@ class TestContext:
         # This call should not raise an exception
         ac.schedule(ac.always_download_source_resolver)
 
-    def test_add_anod_action12(self):
+    def test_add_anod_action12(self) -> None:
         """Check handling of duplicated source package."""
         ac = self.create_context()
         ac.add_anod_action("spec12", env=ac.default_env, primitive="build")
@@ -357,7 +357,7 @@ class TestContext:
         assert "download.spec1-src" in keys
         assert "download.unmanaged-src" in keys
 
-    def test_add_anod_action13(self):
+    def test_add_anod_action13(self) -> None:
         """Check handling of install without build."""
         ac = self.create_context()
         ac.add_anod_action("spec13", env=ac.default_env, primitive="install")
@@ -367,14 +367,14 @@ class TestContext:
         assert "x86-linux.spec13.download_bin" in keys
         assert "x86-linux.spec13.install" in keys
 
-    def test_add_anod_action14(self):
+    def test_add_anod_action14(self) -> None:
         """Check test dependency."""
         ac = self.create_context()
         ac.add_anod_action("spec14", env=ac.default_env, primitive="build")
         result = ac.schedule(ac.always_download_source_resolver)
         assert "x86-linux.spec4.test" in list(result.vertex_data.keys())
 
-    def test_add_anod_action15(self):
+    def test_add_anod_action15(self) -> None:
         """Check for duplicate nodes."""
         # The goal of the test is to ensure that only one instance of a given Anod spec
         # for a given context exists at a given time, independently of how the context
@@ -433,7 +433,7 @@ class TestContext:
         for i in range(len(result) - 1):
             assert result[i].anod_instance is result[i + 1].anod_instance
 
-    def test_source_fails_when_missing_source_primitive(self):
+    def test_source_fails_when_missing_source_primitive(self) -> None:
         """Source action should fail when the source primitive is undefined.
 
         Check that a SchedulingError is thrown if the source primitive is absent and a
@@ -450,7 +450,7 @@ class TestContext:
                 "missing_source_primitive", env=ac.default_env, primitive="source"
             )
 
-    def test_add_anod_action_unmanaged_source(self):
+    def test_add_anod_action_unmanaged_source(self) -> None:
         """Check no source creation for thirdparties."""
         ac = self.create_context()
         ac.add_anod_action(
@@ -461,7 +461,7 @@ class TestContext:
         assert len(keys) == 2, keys
         assert "x86-linux.spec-unmanaged-source.source.wheel.whl" not in keys
 
-    def test_add_anod_action_managed_source(self):
+    def test_add_anod_action_managed_source(self) -> None:
         """Check no source creation for thirdparties."""
         ac = self.create_context()
         ac.add_anod_action(
@@ -473,7 +473,7 @@ class TestContext:
         assert "checkout.a-git" in keys
         assert "x86-linux.spec-managed-source.source.a-src" in keys
 
-    def test_dag_2_plan(self):
+    def test_dag_2_plan(self) -> None:
         """Check that we can extract values from plan in final dag.
 
         Some paramaters passed in the plan are lost in the final
@@ -603,7 +603,7 @@ class TestContext:
                     == "my_spec3_weather"
                 )
 
-    def test_dag_with_shared_knowledge(self):
+    def test_dag_with_shared_knowledge(self) -> None:
         # Create a new plan context
         ac = self.create_context()
         current_env = BaseEnv()
@@ -672,7 +672,7 @@ class TestContext:
                 assert ctag["plan_args"]["weathers"] == "foo"
                 assert ctag["plan_line"] == "plan.txt:2"
 
-    def test_dag_2_plan_sources(self):
+    def test_dag_2_plan_sources(self) -> None:
         """Check that we can extract values from plan in final dag.
 
         Use a scheduler to always create source and ask for a source
@@ -732,7 +732,7 @@ class TestContext:
                 )
 
     @pytest.mark.parametrize("reject_duplicates", [True, False])
-    def test_duplicated_lines(self, reject_duplicates):
+    def test_duplicated_lines(self, reject_duplicates) -> None:
         """Check that duplicated lines in plan are properly rejected."""
         ac = self.create_context(reject_duplicates=reject_duplicates)
         current_env = BaseEnv()
@@ -786,7 +786,7 @@ class TestContext:
                 for action in cm.execute(myplan, "myserver"):
                     ac.add_plan_action(action)
 
-    def test_plan_call_args(self):
+    def test_plan_call_args(self) -> None:
         """Retrieve call args values."""
         current_env = BaseEnv()
         cm = plan.PlanContext(server=current_env)
@@ -807,7 +807,7 @@ class TestContext:
             assert action.plan_call_args == {"platform": "any"}
             assert action.plan_args["platform"] == BaseEnv().platform
 
-    def test_add_anod_action_duplicate_dep(self):
+    def test_add_anod_action_duplicate_dep(self) -> None:
         """Verify that duplicate dep with same local_name are rejected."""
         ac = self.create_context()
         with pytest.raises(AnodError) as err:
@@ -818,7 +818,7 @@ class TestContext:
             "local_name attribute (spec3)" in str(err)
         )
 
-    def test_add_anod_action_missing_src_pkg_dep(self, caplog):
+    def test_add_anod_action_missing_src_pkg_dep(self, caplog) -> None:
         ac = self.create_context()
         ac.add_anod_action("missing_src_pkg_dep", env=ac.default_env, primitive="build")
         assert (

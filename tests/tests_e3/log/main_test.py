@@ -7,7 +7,7 @@ import e3.os.process
 from logging import LogRecord
 
 
-def test_log():
+def test_log() -> None:
     p = e3.os.process.Run(
         [
             sys.executable,
@@ -34,7 +34,7 @@ def test_log():
         assert (dt.now(tz=tz.utc) - parsed_log_datetime).seconds < 10
 
 
-def test_json_log():
+def test_json_log() -> None:
     """test logger method wrappers and json logs."""
     p = e3.os.process.Run(
         [
@@ -72,7 +72,7 @@ def test_json_log():
         assert len(record.keys()) == 6
 
 
-def test_json_log_compat():
+def test_json_log_compat() -> None:
     """make sure that code do not crash if json is not activated."""
     p = e3.os.process.Run(
         [
@@ -93,7 +93,7 @@ def test_json_log_compat():
     assert p.status == 0
 
 
-def test_json_log_exception():
+def test_json_log_exception() -> None:
     """test exception attribute support."""
     p = e3.os.process.Run(
         [
@@ -122,7 +122,7 @@ def test_json_log_exception():
     assert "exc_text" in record
 
 
-def test_json_context():
+def test_json_context() -> None:
     """test context attribute when console_logs is used."""
     p = e3.os.process.Run(
         [
@@ -150,7 +150,7 @@ def test_json_context():
     assert record["context"] == "test_json"
 
 
-def test_json_formatter():
+def test_json_formatter() -> None:
     """test json formatter."""
     formatter = e3.log.JSONFormatter()
     record = LogRecord("_test_", 20, "module.py", 20, "Message", (), None)

@@ -5,7 +5,7 @@ import e3.env
 import pytest
 
 
-def build_action(spec, build=None, host=None, target=None, board=None):
+def build_action(spec, build=None, host=None, target=None, board=None) -> str:
     return "build " + spec
 
 
@@ -25,7 +25,7 @@ def _get_plan(data, content):
     return myplan
 
 
-def test_simple_plan():
+def test_simple_plan() -> None:
     """Test a very basic electrolyt plan."""
     context = _get_new_plancontext("myserver")
 
@@ -48,7 +48,7 @@ def test_simple_plan():
     assert actions[1].spec == "b"
 
 
-def test_plan_without_server_info():
+def test_plan_without_server_info() -> None:
     context = plan.PlanContext()
     context.register_action("build", build_action)
     myplan = _get_plan(data={"a": "a"}, content=["def myserver():\n", "    build(a)\n"])
@@ -56,7 +56,7 @@ def test_plan_without_server_info():
     assert actions[0].build.platform == e3.env.Env().build.platform
 
 
-def test_plan_scope():
+def test_plan_scope() -> None:
     context = _get_new_plancontext("myserver")
 
     myplan = _get_plan(
@@ -92,7 +92,7 @@ def test_plan_scope():
     assert actions[4].build.platform == actions[4].target.platform
 
 
-def test_board():
+def test_board() -> None:
     """Test a very basic electrolyt plan."""
     context = _get_new_plancontext("myserver")
 
@@ -107,7 +107,7 @@ def test_board():
     assert actions[0].target.machine == "bobby"
 
 
-def test_entry_points():
+def test_entry_points() -> None:
     """Test a plan containing electrolyt entry points."""
     plan_content = [
         '@machine(name="machine1", description="Machine 1",',
@@ -146,7 +146,7 @@ def test_entry_points():
     assert ep_executed[0].name == "machine2"
 
 
-def test_nested_entry_points():
+def test_nested_entry_points() -> None:
     """Test a plan containing nested entry points.
 
     Nested entry points are not supported, verify that we get an Plan Error.
@@ -173,7 +173,7 @@ def test_nested_entry_points():
     assert "nested" in str(pe)
 
 
-def test_plan_disable_lines():
+def test_plan_disable_lines() -> None:
     """Check that lines in enabled=False blocks are disabled."""
     context = _get_new_plancontext("myserver")
 
@@ -205,7 +205,7 @@ def test_plan_disable_lines():
     assert actions2[3].spec == "bar3"
 
 
-def test_plan_disable_lines_with_conditional_constants():
+def test_plan_disable_lines_with_conditional_constants() -> None:
     """Check that lines in enabled=False blocks are disabled."""
     context = _get_new_plancontext("myserver")
 

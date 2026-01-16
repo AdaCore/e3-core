@@ -17,7 +17,7 @@ def mock_download() -> MagicMock:
     return mock_response
 
 
-def test_simple_store(caplog):
+def test_simple_store(caplog) -> None:
     """Basic test of HTTPSimpleStore."""
     query = {
         "url": "http://test.example",
@@ -44,7 +44,7 @@ def test_simple_store(caplog):
         assert path is not None
 
 
-def test_store_with_cache():
+def test_store_with_cache() -> None:
     """Test HTTPSimpleStore with a FileCache."""
     fc = FileCache({"cache_dir": os.path.join(os.getcwd(), "cache")})
 

@@ -8,7 +8,7 @@ from e3.fingerprint import Fingerprint
 import pytest
 
 
-def test_fingerprint():
+def test_fingerprint() -> None:
     f1 = Fingerprint()
     f1.add("foo", "2")
 
@@ -46,7 +46,7 @@ def test_fingerprint():
     assert len(f6.checksum()) == 64
 
 
-def test_add_order_not_important():
+def test_add_order_not_important() -> None:
     def create_fingerprint(first, second, third):
         """Create a fingerprint with 3 elements added in the given order.
 
@@ -88,7 +88,7 @@ def test_add_order_not_important():
     check_scenario(3, 2, 1)
 
 
-def test_fingerprint_version():
+def test_fingerprint_version() -> None:
     """Changing the FINGERPRINT_VERSION modify the fingerprint's checksum."""
     import e3.fingerprint
 
@@ -106,14 +106,14 @@ def test_fingerprint_version():
     assert f2.checksum() == f3.checksum()
 
 
-def test_invalid_fingerprint():
+def test_invalid_fingerprint() -> None:
     """A fingerprint value should be hashable."""
     f1 = Fingerprint()
     with pytest.raises(E3Error):
         f1.add("invalid", {})
 
 
-def test_fingerprint_eq():
+def test_fingerprint_eq() -> None:
     """Check fingerprint __eq__ function."""
     f1 = Fingerprint()
     f1.add("1", "1")
@@ -128,7 +128,7 @@ def test_fingerprint_eq():
     assert f1.compare_to(f1) is None
 
 
-def test_fingerprint_save_and_load():
+def test_fingerprint_save_and_load() -> None:
     # Create a directory where to store our fingerprints, allowing us
     # to use any fingerprint name without potentially colliding with
     # other files used by this testcase.

@@ -152,7 +152,7 @@ def test_update_metadata(store) -> None:
     assert tmp["metadata"] == source.metadata
 
 
-def test_push(store):
+def test_push(store) -> None:
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")
 
     with open("myfile.txt", "x") as f:
@@ -182,7 +182,7 @@ def test_push(store):
     assert other == tmp and other == f
 
 
-def test_download(store):
+def test_download(store) -> None:
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     with open("my-src", "w") as fd:
@@ -265,7 +265,7 @@ def test_download(store):
     assert source.download(dest_dir="atest1")
 
 
-def test_download_as_name(store):
+def test_download_as_name(store) -> None:
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     touch("my-src")
@@ -295,7 +295,7 @@ def test_download_as_name(store):
     assert os.path.isfile(os.path.join("sandbox", "new_name_meta.json"))
 
 
-def test_corrupted_meta_file(store):
+def test_corrupted_meta_file(store) -> None:
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     touch("my-src")
@@ -341,7 +341,7 @@ def test_corrupted_meta_file(store):
         File.load_from_meta_file(dest_dir="sandbox", name="new_name", store=store)
 
 
-def test_upload_thirdparty(store):
+def test_upload_thirdparty(store) -> None:
     bid = store.create_build_id("thirdparties", "20271031", "1.0")["_id"]
     store.mark_build_ready(bid)
     del bid
@@ -370,7 +370,7 @@ def test_upload_thirdparty(store):
         assert content == "This is a new content"
 
 
-def test_upload_thirdparty_from_dir(store):
+def test_upload_thirdparty_from_dir(store) -> None:
     bid = store.create_build_id("thirdparties", "20271031", "1.0")["_id"]
     store.mark_build_ready(bid)
     del bid
@@ -397,7 +397,7 @@ def test_upload_thirdparty_from_dir(store):
         File.upload_thirdparty_from_dir(store=store, path="test", prefix="foo")
 
 
-def test_download_and_unpack(store):
+def test_download_and_unpack(store) -> None:
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
 
@@ -463,7 +463,7 @@ def test_download_and_unpack(store):
         source.download(dest_dir="sandbox", unpack_dir="sandbox/non-existent")
 
 
-def test_file_eq_neq():
+def test_file_eq_neq() -> None:
     ref_f = File(
         build_id="a" * 24,
         kind=FileKind.source,

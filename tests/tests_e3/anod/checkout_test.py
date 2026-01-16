@@ -13,7 +13,7 @@ import uuid
 import time
 
 
-def test_rsync_mode():
+def test_rsync_mode() -> None:
     """Check that rsync mode is faster than default mode."""
     mkdir("work")
     mkdir("work2")
@@ -45,7 +45,7 @@ class TestCheckout:
 
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
-    def test_git_clone(self, git, compute_changelog, e3_feature):
+    def test_git_clone(self, git, compute_changelog, e3_feature) -> None:
         """Test CheckoutManager with Git repositories."""
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
@@ -121,7 +121,7 @@ class TestCheckout:
         reason="legacy test using SVN - only minimal testing on Linux",
     )
     @pytest.mark.parametrize("compute_changelog", [True, False])
-    def test_svn_checkout(self, svn, compute_changelog):
+    def test_svn_checkout(self, svn, compute_changelog) -> None:
         """Test CheckoutManager with Subversion repositories."""
         url = SVNRepository.create("svn", initial_content_path=self.repo_data)
         url2 = SVNRepository.create("svn2", initial_content_path=self.repo_data2)
@@ -170,7 +170,7 @@ class TestCheckout:
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file1.txt", "data2.txt"))
 
-    def test_shallow_since_checkout(self):
+    def test_shallow_since_checkout(self) -> None:
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
         os.environ["GIT_COMMITTER_NAME"] = "e3 core"
@@ -210,7 +210,7 @@ class TestCheckout:
         assert os.path.isfile(os.path.join("myrepo", "file4.txt"))
         assert log == ["second commit"]
 
-    def test_max_depth_checkout(self):
+    def test_max_depth_checkout(self) -> None:
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
         os.environ["GIT_COMMITTER_NAME"] = "e3 core"

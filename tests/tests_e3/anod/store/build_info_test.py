@@ -10,7 +10,7 @@ from e3.error import E3Error
 DEFAULT_SETUP = "test"
 
 
-def test_build_info_create(store):
+def test_build_info_create(store) -> None:
     """Test creating a BuildInfo object from a build ID."""
     today = BuildInfo.today_build_date()
 
@@ -48,7 +48,7 @@ def test_build_info_create(store):
     assert latest == bid2 and latest.isready
 
 
-def test_load_build_info_ready():
+def test_load_build_info_ready() -> None:
     """Test basic BuildInfo.load with ready build ID."""
     build_info_data = {
         "build_date": "20170915",
@@ -63,7 +63,7 @@ def test_load_build_info_ready():
     assert bi is not None
 
 
-def test_load_build_info_not_ready():
+def test_load_build_info_not_ready() -> None:
     """Test basic BuildInfo.load and BuildInfo.as_dict."""
     build_info_data = {
         "build_date": "20170915",
@@ -78,7 +78,7 @@ def test_load_build_info_not_ready():
     assert bi.as_dict() == build_info_data
 
 
-def test_load_build_info_implict_not_ready():
+def test_load_build_info_implict_not_ready() -> None:
     """Test basic BuildInfo.load and BuildInfo.as_dict."""
     build_info_data = {
         "build_date": "20170915",
@@ -95,7 +95,7 @@ def test_load_build_info_implict_not_ready():
     assert bi.as_dict() == as_dict_result
 
 
-def test_create_build_info_from_id(store):
+def test_create_build_info_from_id(store) -> None:
     """Test creating a BuildInfo object from a build ID."""
     ref_bi = store.create_build_id(DEFAULT_SETUP, "20241030", "1.0")
     ref_bi["isready"] = store.mark_build_ready(ref_bi["_id"])
@@ -105,7 +105,7 @@ def test_create_build_info_from_id(store):
     assert bi.as_dict() == ref_bi
 
 
-def test_create_build_info_from_invalid_id(store):
+def test_create_build_info_from_invalid_id(store) -> None:
     """Test creating a BuildInfo object from a nonexistant build ID."""
     with pytest.raises(StoreError):
         BuildInfo.from_id(store, "non-existant")
@@ -190,13 +190,13 @@ def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
     assert len(bis) == 1
 
 
-def test_get_latest_build_not_found(store):
+def test_get_latest_build_not_found(store) -> None:
     """Test BuildInfo.latest class method."""
     with pytest.raises(StoreError):
         BuildInfo.from_id(store, "nonexistant")
 
 
-def test_get_latest_build_ready(store):
+def test_get_latest_build_ready(store) -> None:
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     bid = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
@@ -210,7 +210,7 @@ def test_get_latest_build_ready(store):
     assert bi.build_date == "20241002"
 
 
-def test_get_latest_build_ready_or_not(store):
+def test_get_latest_build_ready_or_not(store) -> None:
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     bid = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
@@ -224,7 +224,7 @@ def test_get_latest_build_ready_or_not(store):
     assert bi.build_date == "20241003"
 
 
-def test_get_source_list(store):
+def test_get_source_list(store) -> None:
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
 
@@ -309,7 +309,7 @@ def test_get_source_list(store):
     assert len(src_list) == 4
 
 
-def test_get_build_data(store):
+def test_get_build_data(store) -> None:
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
 
@@ -426,7 +426,7 @@ def test_get_build_data(store):
     assert len(data["components"]) == 1
 
 
-def test_get_component_list(store):
+def test_get_component_list(store) -> None:
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
 
@@ -475,7 +475,7 @@ def test_get_component_list(store):
     assert data.name == "comp1" and data.platform == "x86-linux"
 
 
-def test_get_source_info(store):
+def test_get_source_info(store) -> None:
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     touch("test")
@@ -500,7 +500,7 @@ def test_get_source_info(store):
         bi.get_source_info("nonexist-src")
 
 
-def test_wait(store):
+def test_wait(store) -> None:
     with pytest.raises(E3Error):
         bid = BuildInfo.wait(
             store=store, timeout=0.1, setup=DEFAULT_SETUP, retry_delay=0.1
@@ -518,7 +518,7 @@ def test_wait(store):
     assert bid.setup == DEFAULT_SETUP
 
 
-def test_build_info_eq_ne():
+def test_build_info_eq_ne() -> None:
     ref_bi = BuildInfo(
         build_date="20170915",
         setup=DEFAULT_SETUP,
@@ -595,7 +595,7 @@ def test_build_info_eq_ne():
         assert (bi == 1) is False
 
 
-def test_build_info_copy(store):
+def test_build_info_copy(store) -> None:
     OTHER_SETUP = f"{DEFAULT_SETUP}-other"
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")
     copy = bid.copy(OTHER_SETUP, mark_as_ready=False)

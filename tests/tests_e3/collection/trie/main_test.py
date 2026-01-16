@@ -14,7 +14,7 @@ ENGLISH_WORD_LIST = load_words()
 
 
 @pytest.mark.xfail(reason="unstable test, duration might be too short")
-def test_simple_word_matching():
+def test_simple_word_matching() -> None:
     t = Trie(word_list=ENGLISH_WORD_LIST[:10])
 
     start = time.time()
@@ -38,7 +38,7 @@ def test_simple_word_matching():
     assert test2_time < 2 * test1_time
 
 
-def test_prefix_matching():
+def test_prefix_matching() -> None:
     t = Trie(word_list=ENGLISH_WORD_LIST)
     assert t.match("across l'univers")
     assert t.match("across l'univers", delimiter=" ")
@@ -46,7 +46,7 @@ def test_prefix_matching():
     assert not t.match("acrossl'univers", delimiter=" ")
 
 
-def test_suffix_matching():
+def test_suffix_matching() -> None:
     t = Trie(word_list=ENGLISH_WORD_LIST, use_suffix=True)
     assert t.match("je parle a lot")
     assert t.match("je parlealot")

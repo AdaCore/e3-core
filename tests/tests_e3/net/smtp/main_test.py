@@ -8,7 +8,7 @@ import mock
 import pytest
 
 
-def test_sendmail():
+def test_sendmail() -> None:
     from_addr = "e3@example.net"
     to_addresses = ["info@example.net", "info@example.com"]
     msg_as_string = "test mail content"
@@ -42,7 +42,7 @@ def test_sendmail():
         )
 
 
-def test_sendmail_onerror(caplog):
+def test_sendmail_onerror(caplog) -> None:
     from_addr = "e3@example.net"
     to_addresses = ["info@example.net", "info@example.com"]
     msg_as_string = "test mail content"
@@ -96,7 +96,7 @@ def test_sendmail_onerror(caplog):
         assert "Message-ID: %s sent successfully" % mid in caplog.text
 
 
-def test_send_message():
+def test_send_message() -> None:
     from_addr = "e3@example.net"
     to_addresses = ["info@example.net", "info@example.com"]
     msg_content = "test mail content"

@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
-def test_unpack(ext):
+def test_unpack(ext) -> None:
     dir_to_pack = os.path.dirname(__file__)
 
     test_dir = os.path.basename(dir_to_pack)
@@ -93,7 +93,7 @@ def test_unpack(ext):
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".zip"))
-def test_unpack_fileobj(ext):
+def test_unpack_fileobj(ext) -> None:
     dir_to_pack = os.path.dirname(__file__)
 
     test_dir = os.path.basename(dir_to_pack)
@@ -129,21 +129,21 @@ def test_unpack_fileobj(ext):
         e3.fs.rm(dest, True)
 
 
-def test_unsupported():
+def test_unsupported() -> None:
     """Test unsupported archive format."""
     with pytest.raises(e3.archive.ArchiveError) as err:
         e3.archive.create_archive("foo.foo", os.getcwd(), "dest")
     assert 'unknown format "foo.foo"' in str(err)
 
 
-def test_unpackerror():
+def test_unpackerror() -> None:
     """Test unpack_archive when archive file is not found."""
     with pytest.raises(e3.archive.ArchiveError) as err:
         e3.archive.unpack_archive("foo", "dest")
     assert "cannot find foo" in str(err)
 
 
-def test_unpack_cmd():
+def test_unpack_cmd() -> None:
     """Test custom unpack_cmd."""
     dir_to_pack = os.path.dirname(__file__)
 
@@ -185,7 +185,7 @@ def test_unpack_cmd():
     assert t.kwargs["s"] == ["bar"]
 
 
-def test_unpack_cmd_fileobj():
+def test_unpack_cmd_fileobj() -> None:
     """Test custom unpack_cmd with fileobj."""
     dir_to_pack = os.path.dirname(__file__)
 
@@ -227,7 +227,7 @@ def test_unpack_cmd_fileobj():
     assert t.kwargs["fo"] == fo
 
 
-def test_unpack_files():
+def test_unpack_files() -> None:
     """Test unpack_archive with selected_files."""
     e3.fs.mkdir("d")
     e3.fs.mkdir(os.path.join("d/a"))
@@ -260,7 +260,7 @@ def test_unpack_files():
     assert not os.path.exists(os.path.join(result_dir, "d", "b"))
 
 
-def test_unpack_error():
+def test_unpack_error() -> None:
     """Test unpack errors."""
     e3.fs.mkdir("dest")
     # create an invalid tgz
@@ -276,7 +276,7 @@ def test_unpack_error():
     assert "unpack_archive: Cannot unzip" in str(err.value)
 
 
-def test_zip_no_root_dir():
+def test_zip_no_root_dir() -> None:
     """Create a zip with no_root_dir."""
     e3.fs.mkdir("from")
     e3.os.fs.touch(os.path.join("from", "afile"))
@@ -289,7 +289,7 @@ def test_zip_no_root_dir():
     assert os.path.exists(os.path.join("result", "afile"))
 
 
-def test_remove_root_dir():
+def test_remove_root_dir() -> None:
     """Try create_archive no_root_dir and unpack_archive remove_root_dir."""
     e3.fs.mkdir("from")
     e3.os.fs.touch(os.path.join("from", "a"))
@@ -325,7 +325,7 @@ def test_remove_root_dir():
 
 
 @patch("tempfile.mkdtemp", wraps=tempfile.mkdtemp)
-def test_tmp_dir_root(mock_mkdtemp):
+def test_tmp_dir_root(mock_mkdtemp) -> None:
     """Try to unpack an archive with remove_root_dir and a custom tmp_dir root."""
     e3.fs.mkdir("custom_tmp_dir_root")
     e3.fs.mkdir("result")
@@ -339,7 +339,7 @@ def test_tmp_dir_root(mock_mkdtemp):
     assert os.path.exists("result/test.sh")
 
 
-def test_empty():
+def test_empty() -> None:
     """Create an archive with an empty content."""
     e3.fs.mkdir("from")
     e3.fs.mkdir("dest")
@@ -356,14 +356,14 @@ def test_empty():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test executable attribute")
-def test_zip_attributes():
+def test_zip_attributes() -> None:
     zip_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.zip")
     e3.fs.mkdir("result")
     e3.archive.unpack_archive(zip_file, "result", remove_root_dir=True)
     assert os.access("result/test.sh", os.X_OK)
 
 
-def test_archive_with_readonly_dir():
+def test_archive_with_readonly_dir() -> None:
     """Test unpack of archive with read-only directory."""
     e3.fs.mkdir("from")
     e3.fs.mkdir("dest")

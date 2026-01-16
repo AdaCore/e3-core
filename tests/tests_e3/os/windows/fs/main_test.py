@@ -24,7 +24,7 @@ if sys.platform == "win32":
     sys.platform != "win32",
     reason="windows specific test",
 )
-def test_read_attributes():
+def test_read_attributes() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_read_attr_file.txt")
@@ -39,7 +39,7 @@ def test_read_attributes():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_file_info():
+def test_file_info() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_read_attr_file.txt")
@@ -52,7 +52,7 @@ def test_file_info():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_write_attributes():
+def test_write_attributes() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_write_attr_file.txt")
@@ -77,7 +77,7 @@ def test_write_attributes():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_uid():
+def test_uid() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_uid.txt")
@@ -93,7 +93,7 @@ def test_uid():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_open_file_in_dir():
+def test_open_file_in_dir() -> None:
     work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, "dir")
@@ -107,7 +107,7 @@ def test_open_file_in_dir():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_volume_path():
+def test_volume_path() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_vpath.txt")
@@ -122,7 +122,7 @@ def test_volume_path():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_move_to_trash():
+def test_move_to_trash() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_mv_to_trash.txt")
@@ -140,7 +140,7 @@ def test_move_to_trash():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_dispose():
+def test_dispose() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_dispose.txt")
@@ -156,7 +156,7 @@ def test_dispose():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_rename():
+def test_rename() -> None:
     work_dir = os.getcwd()
 
     test_file_path = os.path.join(work_dir, "test_rename.txt")
@@ -172,7 +172,7 @@ def test_rename():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_iterate_on_dir():
+def test_iterate_on_dir() -> None:
     work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, "dir")
@@ -214,7 +214,7 @@ def test_iterate_on_dir():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_is_dir_empty():
+def test_is_dir_empty() -> None:
     work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, "dir")
@@ -242,7 +242,7 @@ def test_is_dir_empty():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_unlink():
+def test_unlink() -> None:
     work_dir = os.getcwd()
 
     test_dir_path = os.path.join(work_dir, "dir")

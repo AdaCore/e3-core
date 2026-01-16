@@ -12,7 +12,7 @@ from e3.anod.store.component import Component
 from e3.anod.store.interface import StoreError
 
 
-def test_create_and_get_build_info(store):
+def test_create_and_get_build_info(store) -> None:
     # Ensure the "build_info" is created between 'start' and 'end'.
     #
     # With the current implementation the buildinfo is created automatically when
@@ -52,7 +52,7 @@ def test_create_and_get_build_info(store):
     assert tmp == previous
 
 
-def test_build_info_ready(store):
+def test_build_info_ready(store) -> None:
     created = store.create_build_id("test", "20241028", "1.0")
     assert created["isready"] is False
 
@@ -67,7 +67,7 @@ def test_build_info_ready(store):
     assert tmp == created
 
 
-def test_file(store):
+def test_file(store) -> None:
     buildinfo = store.create_build_id("test", "20241028", "1.0")
     touch("test.txt")
     assert os.path.isfile("test.txt")
@@ -136,7 +136,7 @@ def test_file(store):
     assert tmp["name"] == "test-tp.txt"
 
 
-def test_component(store):
+def test_component(store) -> None:
     """Check that we can add a component to the offline db."""
     buildinfo = store.create_build_id("test", "20241029", "1.0")
     store.mark_build_ready(buildinfo["_id"])

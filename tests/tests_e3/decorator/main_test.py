@@ -5,7 +5,7 @@ import e3.decorator
 import pytest
 
 
-def test_memoize():
+def test_memoize() -> None:
     # First generate a function returning random values so that we
     # can see whether the cache is used or not
 
@@ -44,7 +44,7 @@ def test_memoize():
     assert C().t(2) != C().t(2)
 
 
-def test_enabled():
+def test_enabled() -> None:
     @e3.decorator.enabled
     def foo():
         return 22
@@ -52,7 +52,7 @@ def test_enabled():
     assert foo() == 22
 
 
-def test_disabled():
+def test_disabled() -> None:
     @e3.decorator.disabled
     def foo():
         return 22

@@ -11,7 +11,7 @@ from e3.env import BaseEnv
 import pytest
 
 
-def test_qualifier_operations():
+def test_qualifier_operations() -> None:
     qual1 = Qualifier({"key1": "v1", "key2": "v2"})
     qual2 = Qualifier({"key2": "v2.2", "key3": "v3"})
     qual3 = Qualifier({"key1": "v1.3", "key4": "v4"})
@@ -38,7 +38,7 @@ def test_qualifier_operations():
 
 
 # Cover Anod (e3.anod.spec.py)
-def test_anod_name_generator():
+def test_anod_name_generator() -> None:
     # Create a dummy spec.
     class Dummy(Anod):
         enable_name_generator = True
@@ -90,7 +90,7 @@ def test_anod_name_generator():
     assert base.get_qualifier("debug") == "bar"
 
 
-def test_qualifiers_manager_errors():
+def test_qualifiers_manager_errors() -> None:
     class AnodDummy(Anod):
         name = "dummy_spec"
         enable_name_generator = True
@@ -339,7 +339,7 @@ def test_qualifiers_manager_errors():
     assert "origin: Invalid value for qualifier q1" in str(err.value)
 
 
-def test_qualifiers_manager():
+def test_qualifiers_manager() -> None:
     class Simple(Anod):
         enable_name_generator = True
         base_name = "simple"
@@ -525,7 +525,7 @@ def test_qualifiers_manager():
     qualifiers_manager.parse({})
 
 
-def test_qualifiers_with_source_primitive():
+def test_qualifiers_with_source_primitive() -> None:
     class SimpleAnod(Anod):
         enable_name_generator = True
         base_name = "simple"
@@ -535,7 +535,7 @@ def test_qualifiers_with_source_primitive():
     assert simple_anod.build_space_name == "simple_anod"
 
 
-def test_add_target_info_to_build_space():
+def test_add_target_info_to_build_space() -> None:
     class ParentAnod(Anod):
         enable_name_generator = True
         name = "parent"
@@ -583,7 +583,7 @@ def test_add_target_info_to_build_space():
     )
 
 
-def test_key_value_qualifier():
+def test_key_value_qualifier() -> None:
     class Spec(Anod):
         name = "spec"
         enable_name_generator = True
@@ -616,7 +616,7 @@ def test_key_value_qualifier():
     )
 
 
-def test_tag_qualifier():
+def test_tag_qualifier() -> None:
     class Spec(Anod):
         name = "spec"
         enable_name_generator = True
@@ -652,7 +652,7 @@ def test_tag_qualifier():
     assert tag.value("") is True
 
 
-def test_key_set_qualifier():
+def test_key_set_qualifier() -> None:
     class Spec(Anod):
         name = "spec"
         enable_name_generator = True
@@ -759,7 +759,7 @@ def test_key_set_qualifier():
     assert spec2.build_space_name == "spec_q1-1-2-3_test"
 
 
-def test_declare_build_space():
+def test_declare_build_space() -> None:
     class Spec(Anod):
         name = "spec"
         enable_name_generator = True

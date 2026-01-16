@@ -14,7 +14,7 @@ from e3.os.process import Run
 import pytest
 
 
-def test_cp():
+def test_cp() -> None:
     current_dir = os.getcwd()
     hash_test = os.path.join(current_dir, "hash_test")
     e3.fs.cp(__file__, hash_test)
@@ -63,7 +63,7 @@ def test_cp():
         e3.fs.cp(a, os.path.join("does", "not", "exist"))
 
 
-def test_pathlib():
+def test_pathlib() -> None:
     """Minimal test to see whether pathlib.Path are also accepted."""
     path_a = Path("a")
     path_a.touch()
@@ -111,7 +111,7 @@ def test_pathlib():
     ]
 
 
-def test_mv_with_iterables():
+def test_mv_with_iterables() -> None:
     for idx in range(10):
         e3.os.fs.touch(f"a{idx}")
 
@@ -138,14 +138,14 @@ def test_mv_with_iterables():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
-def test_cp_symlink():
+def test_cp_symlink() -> None:
     e3.os.fs.touch("c")
     os.symlink("c", "c_sym")
     e3.fs.cp("c_sym", "d", preserve_symlinks=True)
     assert os.path.islink("d")
 
 
-def test_echo():
+def test_echo() -> None:
     dest_file = "echo_test"
     e3.fs.echo_to_file(dest_file, "foo")
     e3.fs.echo_to_file(dest_file, "foo")
@@ -158,7 +158,7 @@ def test_echo():
         assert fd.read().strip() == "line1\nline2"
 
 
-def test_find():
+def test_find() -> None:
     d = os.path.dirname(__file__)
     parent_d = os.path.dirname(d)
 
@@ -186,7 +186,7 @@ def test_find():
     assert {os.path.basename(f) for f in result} == {"fs"}
 
 
-def test_ls(caplog):
+def test_ls(caplog) -> None:
     e3.os.fs.touch("a")
     e3.fs.ls("a", emit_log_record=True)
     assert "ls a" in caplog.text
@@ -200,20 +200,20 @@ def test_ls(caplog):
     assert e3.fs.ls(k for k in ("a", "c")) == ["a", "c"]
 
 
-def test_mkdir(caplog):
+def test_mkdir(caplog) -> None:
     e3.fs.mkdir("subdir")
     for record in caplog.records:
         assert "mkdir" in record.msg
 
 
-def test_mkdir_exists(caplog):
+def test_mkdir_exists(caplog) -> None:
     os.makedirs("subdir")
     e3.fs.mkdir("subdir")
     for record in caplog.records:
         assert "mkdir" not in record.msg
 
 
-def test_mv():
+def test_mv() -> None:
     for fname in ("a1", "a2", "a3", "1", "2", "3", "11", "12", "13"):
         e3.os.fs.touch(fname)
 
@@ -248,7 +248,7 @@ def test_mv():
     assert "Cannot move a directory 'B' into itself 'B/b" in str(err)
 
 
-def test_tree_state():
+def test_tree_state() -> None:
     import time
 
     current_dir = os.getcwd()
@@ -311,7 +311,7 @@ def test_tree_state():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
-def test_sync_tree_with_symlinks():
+def test_sync_tree_with_symlinks() -> None:
     current_dir = os.getcwd()
     a = os.path.join(current_dir, "a")
     b = os.path.join(current_dir, "b")
@@ -358,7 +358,7 @@ def test_sync_tree_with_symlinks():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="test relevant only on win32")
-def test_sync_tree_case_insensitive():
+def test_sync_tree_case_insensitive() -> None:
     e3.fs.mkdir("test/a")
     e3.fs.mkdir("test/b")
     e3.os.fs.touch("test/a/initial.txt")
@@ -381,7 +381,7 @@ def test_sync_tree_case_insensitive():
     assert e3.fs.directory_content("test/b") == e3.fs.directory_content("test/a")
 
 
-def test_sync_tree_preserve_timestamps():
+def test_sync_tree_preserve_timestamps() -> None:
     """Run sync_tree without preserving timestamps."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
@@ -399,7 +399,7 @@ def test_sync_tree_preserve_timestamps():
         assert f.read() == "content2"
 
 
-def test_sync_tree_no_delete():
+def test_sync_tree_no_delete() -> None:
     """Run sync_tree without deleting."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
@@ -421,7 +421,7 @@ def test_sync_tree_no_delete():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
-def test_sync_tree_links():
+def test_sync_tree_links() -> None:
     """Check handling of symbolic links in sync_tree."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
@@ -465,7 +465,7 @@ def test_sync_tree_dir_links() -> None:
     assert "<SYMLINKD>" in dir_process.out
 
 
-def test_sync_tree_top_source_is_link():
+def test_sync_tree_top_source_is_link() -> None:
     """Check handling of source top is a link."""
     e3.fs.mkdir("a")
     with open("a/content", "w") as f:
@@ -499,14 +499,14 @@ def test_sync_tree_top_source_is_link():
         assert f.read() == "content"
 
 
-def test_sync_tree_does_not_exist():
+def test_sync_tree_does_not_exist() -> None:
     """Check error message when sync_tree source does not exist."""
     with pytest.raises(e3.fs.FSError) as err:
         e3.fs.sync_tree("doesnotexist", "dest")
     assert "doesnotexist does not exist" in str(err)
 
 
-def test_rm_on_error():
+def test_rm_on_error() -> None:
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/b")
     e3.os.fs.touch("a/b/c")
@@ -525,7 +525,7 @@ def test_rm_on_error():
     e3.fs.rm("a", True)
 
 
-def test_rm_list():
+def test_rm_list() -> None:
     """Call rm with list of files to remove."""
     e3.os.fs.touch("a")
     e3.os.fs.touch("b")
@@ -534,7 +534,7 @@ def test_rm_list():
     assert not os.path.exists("b")
 
 
-def test_rm_symlink():
+def test_rm_symlink() -> None:
     e3.fs.mkdir("a")
     try:
         os.symlink("a", "b")
@@ -553,7 +553,7 @@ def test_rm_symlink():
     assert os.path.exists("d")
 
 
-def test_safe_copy():
+def test_safe_copy() -> None:
     """sync_tree should replace directory by files and fix permissions."""
     # Check that a directory in the target dir is replaced by a file when
     # needed.
@@ -576,7 +576,7 @@ def test_safe_copy():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
-def test_safe_copy_links():
+def test_safe_copy_links() -> None:
     """sync_tree should replace directory by symlinks when needed."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/d")
@@ -587,7 +587,7 @@ def test_safe_copy_links():
     assert os.path.islink("b/l")
 
 
-def test_sync_tree_dir_vs_file():
+def test_sync_tree_dir_vs_file() -> None:
     """sync_tree should replace file by directory when needed."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/d")
@@ -597,7 +597,7 @@ def test_sync_tree_dir_vs_file():
     assert os.path.isdir("b/d")
 
 
-def test_safe_mkdir():
+def test_safe_mkdir() -> None:
     """sync_tree should copy dir even when no permission in target dir."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/a")
@@ -607,14 +607,14 @@ def test_safe_mkdir():
     assert os.path.isdir("b/a")
 
 
-def test_splitall():
+def test_splitall() -> None:
     assert e3.fs.splitall("a/b") == ("a", "b")
     assert e3.fs.splitall("/a") == ("/", "a")
     assert e3.fs.splitall("/a/b") == ("/", "a", "b")
     assert e3.fs.splitall("/a/b/") == ("/", "a", "b")
 
 
-def test_sync_tree_with_file_list():
+def test_sync_tree_with_file_list() -> None:
     """Test sync_tree with file_list."""
     e3.fs.mkdir("a")
     for x in range(0, 10):
@@ -627,7 +627,7 @@ def test_sync_tree_with_file_list():
     assert not os.path.exists("b/5")
 
 
-def test_sync_tree_with_ignore():
+def test_sync_tree_with_ignore() -> None:
     """Test sync_tree with ignore."""
     e3.fs.mkdir("a")
     for x in range(0, 10):
@@ -652,14 +652,14 @@ def test_sync_tree_with_ignore():
         assert os.path.exists("b/" + str(x))
 
 
-def test_extension():
+def test_extension() -> None:
     assert e3.fs.extension("/home/file1.2.txt") == ".txt"
     assert e3.fs.extension("file2.tar.gz") == ".tar.gz"
     assert e3.fs.extension("file2.tar") == ".tar"
     assert e3.fs.extension("file2.tar.bz2") == ".tar.bz2"
 
 
-def test_directory_content():
+def test_directory_content() -> None:
     """Test e3.fs.directory_content."""
     e3.fs.mkdir("test1")
     e3.fs.mkdir("test1/test2")

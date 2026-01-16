@@ -6,12 +6,12 @@ import e3.archive
 import pytest
 
 
-def test_non_existing():
+def test_non_existing() -> None:
     """Check that a non existing file will be considered as null string."""
     assert e3.diff.diff("foo1", "foo2") == ""
 
 
-def test_patch():
+def test_patch() -> None:
     test_dir = os.path.dirname(__file__)
     file_to_patch = os.path.join(test_dir, "file_to_patch.orig.txt")
     file_after_patch = os.path.join(test_dir, "file_to_patch.new.txt")
@@ -49,7 +49,7 @@ def test_patch():
     )
 
 
-def test_patch_ignore_all(caplog):
+def test_patch_ignore_all(caplog) -> None:
     test_dir = os.path.dirname(__file__)
     file_to_patch = os.path.join(test_dir, "file_to_patch.orig.txt")
     file_patch2 = os.path.join(test_dir, "patch2.txt")
@@ -62,7 +62,7 @@ def test_patch_ignore_all(caplog):
         e3.diff.patch("patch2.txt", current_dir, discarded_files=lambda x: True)
 
 
-def test_discarded():
+def test_discarded() -> None:
     test_dir = os.path.dirname(__file__)
     orig = os.path.join(test_dir, "data.txt")
     new = os.path.join(test_dir, "data_new.txt")
@@ -95,7 +95,7 @@ def test_discarded():
     e3.fs.cp(orig, current_dir)
 
 
-def test_patch_invalid():
+def test_patch_invalid() -> None:
     test_dir = os.path.dirname(__file__)
     file_to_patch = os.path.join(test_dir, "file_to_patch.orig.txt")
     file_patch2 = os.path.join(test_dir, "patch2.txt")
@@ -112,7 +112,7 @@ def test_patch_invalid():
         e3.diff.patch("patch2.txt", current_dir)
 
 
-def test_patch_git_format():
+def test_patch_git_format() -> None:
     test_dir = os.path.dirname(__file__)
     file_to_patch = os.path.join(test_dir, "git_file.txt")
     patch_file = os.path.join(test_dir, "git_diff.patch")
@@ -128,7 +128,7 @@ def test_patch_git_format():
     assert "That's nice it's working !" in content
 
 
-def test_patch_git_format_ignore():
+def test_patch_git_format_ignore() -> None:
     test_dir = os.path.dirname(__file__)
     file_to_patch = os.path.join(test_dir, "git_file.txt")
     patch_file = os.path.join(test_dir, "*.patch")
@@ -164,7 +164,7 @@ def test_patch_git_format_ignore():
     assert "That's nice it's working !" in content
 
 
-def test_patch_git_with_headers():
+def test_patch_git_with_headers() -> None:
     test_dir = os.path.dirname(__file__)
     patch_file = os.path.join(test_dir, "git_patch_with_header")
 
@@ -197,7 +197,7 @@ def test_patch_git_with_headers():
     assert not os.path.isfile("file2")
 
 
-def test_patch_git_binary():
+def test_patch_git_binary() -> None:
     test_dir = os.path.dirname(__file__)
     patch_file = os.path.join(test_dir, "unicorn.patch")
     cwd = os.getcwd()
