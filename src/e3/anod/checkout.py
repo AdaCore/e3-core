@@ -57,7 +57,7 @@ class CheckoutManager:
 
     def update(
         self,
-        vcs: Literal["git"] | Literal["svn"] | Literal["external"],
+        vcs: Literal["git", "svn", "external"],
         url: str,
         revision: str | None = None,
     ) -> ReturnValue:

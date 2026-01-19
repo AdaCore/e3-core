@@ -30,7 +30,7 @@ This value should only be used if there is sufficient evidence to support this
 assertion."""
 
 if TYPE_CHECKING:
-    MAYBE_STR = Union[str, Literal["NOASSERTION"], Literal["NONE"]]
+    MAYBE_STR = Union[Literal["NOASSERTION", "NONE"], str]
 
 SPDXID_R = re.compile("[^a-zA-Z0-9.-]")
 

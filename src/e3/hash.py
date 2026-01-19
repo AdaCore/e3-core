@@ -18,7 +18,7 @@ class HashError(e3.error.E3Error):
 
 def __compute_hash(
     path: PathLike[str] | str,
-    kind: Literal["md5"] | Literal["sha1"] | Literal["sha256"] | Literal["sha512"],
+    kind: Literal["md5", "sha1", "sha256", "sha512"],
 ) -> str:
     if not os.path.isfile(path):
         raise HashError(kind, f"cannot find {path}")
