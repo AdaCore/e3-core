@@ -28,7 +28,7 @@ def test_chmod() -> None:
     os.umask(0o022)
     e3.os.fs.touch("a")
 
-    def check_mode(filename, mode):
+    def check_mode(filename, mode) -> None:
         fmode = stat.S_IMODE(os.stat(filename).st_mode)
         assert fmode == mode, "{} != {}".format(oct(fmode), oct(mode))
 

@@ -6,6 +6,7 @@ from e3.error import E3Error
 
 import mock
 import pytest
+from typing import NoReturn
 
 
 def test_sendmail() -> None:
@@ -84,7 +85,7 @@ def test_sendmail_onerror(caplog) -> None:
         smtp_mock = mock_smtp.return_value
         smtp_mock.sendmail.return_value = {}
 
-        def error_on_quit():
+        def error_on_quit() -> NoReturn:
             raise smtplib.SMTPException("error on quit ignored")
 
         smtp_mock.quit = error_on_quit

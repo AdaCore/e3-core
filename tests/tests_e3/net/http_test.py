@@ -124,7 +124,7 @@ class TestHTTP:
             pass
 
     def test_retry(self, socket_enabled) -> None:
-        def func(server, base_url):
+        def func(server, base_url) -> None:
             with HTTPSession() as session:
                 session.set_max_retries(base_url, connect=5)
                 result = session.download_file(base_url + "dummy", dest=".")
@@ -136,7 +136,7 @@ class TestHTTP:
         run_server(RetryHandler, func)
 
     def test_content_dispo(self, socket_enabled) -> None:
-        def func(server, base_url):
+        def func(server, base_url) -> None:
             with HTTPSession() as session:
                 result = session.download_file(base_url + "dummy", dest=".")
                 with open(result, "rb") as fd:
@@ -147,7 +147,7 @@ class TestHTTP:
         run_server(ContentDispoHandler, func)
 
     def test_content_dispo_fileobj(self, socket_enabled) -> None:
-        def func(server, base_url):
+        def func(server, base_url) -> None:
             with HTTPSession() as session:
                 fo = BytesIO()
                 result = session.download_file(base_url + "dummy", fileobj=fo)
@@ -157,10 +157,10 @@ class TestHTTP:
         run_server(ContentDispoHandler, func)
 
     def test_content_validation(self, socket_enabled) -> None:
-        def validate(path):
+        def validate(path) -> bool:
             return False
 
-        def func(server, base_url):
+        def func(server, base_url) -> None:
             with HTTPSession() as session:
                 result = session.download_file(
                     base_url + "dummy", dest=".", validate=validate
@@ -170,7 +170,7 @@ class TestHTTP:
         run_server(ContentDispoHandler, func)
 
     def test_error(self, socket_enabled) -> None:
-        def func(server, base_url):
+        def func(server, base_url) -> None:
             with HTTPSession() as session:
                 # first test with no exception on error
                 result = session.download_file(base_url + "dummy", dest=".")
@@ -187,8 +187,8 @@ class TestHTTP:
         run_server(ServerErrorHandler, func)
 
     def test_fallback(self, socket_enabled) -> None:
-        def func(server, base_url):
-            def inner_func(server2, base_url2):
+        def func(server, base_url) -> None:
+            def inner_func(server2, base_url2) -> None:
                 logging.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
                     session.set_max_retries(connect=4)
@@ -202,8 +202,8 @@ class TestHTTP:
         run_server(ServerErrorHandler, func)
 
     def test_content_abort(self, socket_enabled) -> None:
-        def func(server, base_url):
-            def inner_func(server2, base_url2):
+        def func(server, base_url) -> None:
+            def inner_func(server2, base_url2) -> None:
                 logging.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
                     session.DEFAULT_TIMEOUT = (10.0, 0.2)
@@ -218,8 +218,8 @@ class TestHTTP:
         run_server(ServerErrorHandler, func)
 
     def test_post_stream_data(self, socket_enabled) -> None:
-        def outter_func(nok_server, nok_url):
-            def func(server, url):
+        def outter_func(nok_server, nok_url) -> None:
+            def func(server, url) -> None:
                 with HTTPSession(base_urls=[nok_url, url]) as session:
                     session.DEFAULT_TIMEOUT = (3.0, 3.0)
                     with open("./data.txt", "wb") as fd:
@@ -243,7 +243,7 @@ class TestHTTP:
         run_server(ServerErrorHandler, outter_func)
 
     def test_authorization_header(self, socket_enabled) -> None:
-        def func(server, base_url):
+        def func(server, base_url) -> None:
             with HTTPSession() as session:
                 # first test with no authorization header
                 try:

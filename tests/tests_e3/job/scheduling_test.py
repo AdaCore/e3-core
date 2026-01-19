@@ -5,6 +5,7 @@ from e3.job import Job, ProcessJob
 from e3.job.scheduler import Scheduler
 
 import pytest
+from typing import NoReturn
 
 
 class NopJob(Job):
@@ -40,7 +41,7 @@ class TestScheduler:
         """Test that jobs are ordered correctly."""
         results = []
 
-        def collect(job):
+        def collect(job) -> None:
             results.append(job.uid)
 
         dag = DAG()
@@ -68,7 +69,7 @@ class TestScheduler:
         """
         results = {}
 
-        def collect(job):
+        def collect(job) -> bool:
             if job.uid not in results:
                 results[job.uid] = True
                 return True
@@ -94,7 +95,7 @@ class TestScheduler:
             result.should_skip = True
             return result
 
-        def collect(job):
+        def collect(job) -> None:
             results[job.uid] = job.timing_info
 
         # This time test with two interdependent jobs
@@ -117,7 +118,7 @@ class TestScheduler:
         def get_job(uid, data, predecessors, notify_end):
             return SleepJob(uid, data, notify_end)
 
-        def collect(job):
+        def collect(job) -> None:
             results[job.uid] = job
 
         dag = DAG()
@@ -137,7 +138,7 @@ class TestScheduler:
         def get_job(uid, data, predecessors, notify_end):
             return NopJob(uid, data, notify_end)
 
-        def collect(job):
+        def collect(job) -> None:
             results[job.uid] = job
 
         dag = DAG()
@@ -146,7 +147,7 @@ class TestScheduler:
         s = Scheduler(get_job, tokens=2, collect=collect, job_timeout=2)
 
         # fake log_state that will raise a KeyboardInterrupt
-        def fake_log_state():
+        def fake_log_state() -> NoReturn:
             raise KeyboardInterrupt
 
         s.log_state = fake_log_state
@@ -181,7 +182,7 @@ class TestScheduler:
                         result.should_skip = True
                 return result
 
-            def collect(self, job):
+            def collect(self, job) -> None:
                 if job.should_skip:
                     # Skipped jobs are considered failed
                     self.results[job.uid] = [False, job]

@@ -2,6 +2,7 @@ import sys
 
 from e3.anod.status import ReturnValue
 from e3.job import EmptyJob, ProcessJob
+from typing import NoReturn
 
 
 class InvalidProcessJob(ProcessJob):
@@ -62,7 +63,7 @@ class TestJob:
 
         class SpawnIssueProcessJob(ProcessJob):
             @property
-            def cmdline(self):
+            def cmdline(self) -> NoReturn:
                 # This will be called by self.run() and simulate an error
                 # when spawning the job
                 raise OSError("spawn issue")
