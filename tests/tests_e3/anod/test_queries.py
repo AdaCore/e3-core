@@ -101,12 +101,15 @@ class TestSourceClosure:
 
         for key in sc.package_list:
             if not key.track and not key.has_closure:
-                print("skip %s" % key.anod_uid)
+                print("skip {}".format(key.anod_uid))
                 continue
             name = key.anod_uid.split(".")[1]
             sc.resolve_package(
                 key.anod_uid,
-                [("%s-package-src" % name, True), ("%s-package-int-src" % name, False)],
+                [
+                    ("{}-package-src".format(name), True),
+                    ("{}-package-int-src".format(name), False),
+                ],
             )
 
         sources = sc.get_source_list()

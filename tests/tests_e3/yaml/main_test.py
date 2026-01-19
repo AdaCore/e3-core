@@ -101,7 +101,7 @@ def test_include() -> None:
     """Test yaml !include."""
     with open("1.yaml", "w") as f:
         f.write("b: !include 2.yaml\n")
-        f.write("c: !include %s\n" % os.path.join(os.getcwd(), "2.yaml"))
+        f.write("c: !include {}\n".format(os.path.join(os.getcwd(), "2.yaml")))
 
     with open("2.yaml", "w") as f:
         f.write("a: 4\n")

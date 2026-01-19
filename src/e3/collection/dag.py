@@ -80,9 +80,10 @@ class DAGIterator:
                     minimal_cycle = self.dag.shortest_path(node, node)
                     if minimal_cycle is not None:
                         raise DAGError(
-                            "cycle detected: %s"
-                            % " -> ".join(
-                                [str(vertex_id) for vertex_id in minimal_cycle]
+                            "cycle detected: {}".format(
+                                " -> ".join(
+                                    [str(vertex_id) for vertex_id in minimal_cycle]
+                                )
                             )
                         )
                 raise DAGError("cycle detected (unknown error)")

@@ -156,8 +156,9 @@ class ControlledJob(ProcessJob):
             result.append("import sys; sys.exit(%d)" % ReturnValue.notready.value)
         elif self.uid.startswith(DOWNLOAD_JOB_UID_PREFIX):
             result.append(
-                "import shutil; shutil.copyfile(r'%s', r'%s')"
-                % (source_store_fullpath(self.uid), source_fullpath(self.uid))
+                "import shutil; shutil.copyfile(r'{}', r'{}')".format(
+                    source_store_fullpath(self.uid), source_fullpath(self.uid)
+                )
             )
         else:
             result.append('print("Hello World")')
@@ -216,7 +217,7 @@ class FingerprintWalk(SimpleWalk):
         for pred_uid in self.actions.get_predecessors(uid):
             pred_fingerprint = self.new_fingerprints[pred_uid]
             if pred_fingerprint is not None:
-                f.add("pred:%s" % pred_uid, pred_fingerprint.checksum())
+                f.add("pred:{}".format(pred_uid), pred_fingerprint.checksum())
         if os.path.exists(source_fullpath(uid)):
             f.add_file(source_fullpath(uid))
         return f
@@ -471,7 +472,7 @@ def test_source_deps(setup_sbx) -> None:
     # Create source dependencies for each actions
     for uid in ("1", "2", "3", "4", "5"):
         with open(source_fullpath(uid), "w") as f:
-            f.write("contents of sources for action %s\n" % uid)
+            f.write("contents of sources for action {}\n".format(uid))
 
     # Now, execute our planned actions
 
@@ -971,7 +972,7 @@ def test_corrupted_fingerprint(setup_sbx) -> None:
 
     for uid in ("1", "2", "4", "5", "6"):
         job = r2.saved_jobs[uid]
-        assert isinstance(job, EmptyJob), "job %s should be EmptyJob" % uid
+        assert isinstance(job, EmptyJob), "job {} should be EmptyJob".format(uid)
         assert job.should_skip is True
         assert job.status == ReturnValue.skip
 

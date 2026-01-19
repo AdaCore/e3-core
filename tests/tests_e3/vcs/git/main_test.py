@@ -129,7 +129,7 @@ def test_git_repo(git) -> None:
         assert commits[1]["diff"] != commits[0]["diff"]
 
     repo2 = GitRepository(working_tree2)
-    giturl = "file://%s" % working_tree.replace("\\", "/")
+    giturl = "file://{}".format(working_tree.replace("\\", "/"))
     repo2.init(url=giturl, remote="tree1")
     repo2.update(url=giturl, refspec=main_branch)
     assert repo2.rev_parse() == repo.rev_parse()

@@ -110,7 +110,7 @@ def run_server(handler, func) -> None:
         thread = threading.Thread(target=server.serve_forever)
         thread.daemon = True
         thread.start()
-        base_url = "http://%s:%s/" % server.server_address
+        base_url = "http://{}:{}/".format(*server.server_address)
         func(server, base_url)
     finally:
         server.shutdown()
