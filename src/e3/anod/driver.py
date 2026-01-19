@@ -82,7 +82,10 @@ class AnodDriver:
         # First check whether there is a download primitive implemented by
         # the Anod spec.
         self.anod_instance.build_space.create(quiet=True)
-        download_data = self.anod_instance.download()
+
+        if hasattr(self.anod_instance, "download"):
+            download_data = self.anod_instance.download()
+
         if download_data is None:
             raise AnodError("no download metadata returned by the download primitive")
         try:

@@ -414,7 +414,7 @@ class Run:
             )
 
             if len(self.cmds) == 1:
-                popen_args = {
+                popen_args: dict[str, Any | IO[Any] | Path | None] = {
                     "stdin": self.input_file.fd,
                     "stdout": self.output_file.fd,
                     "stderr": self.error_file.fd,
@@ -430,7 +430,7 @@ class Run:
                 if sys.platform == "win32":
                     popen_args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-                self.internal = Popen(self.cmds[0], **popen_args)
+                self.internal = Popen(self.cmds[0], **popen_args)  # type: ignore[arg-type]
 
             else:
                 runs: list[Popen] = []
@@ -470,7 +470,7 @@ class Run:
                         )
 
                     try:
-                        runs.append(Popen(cmd, **popen_args))
+                        runs.append(Popen(cmd, **popen_args))  # type: ignore[arg-type]
                     except OSError:
                         logger.error("error when spawning %s", cmd)
                         # We have an error (e.g. file not found), try to kill

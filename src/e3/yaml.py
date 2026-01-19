@@ -75,16 +75,21 @@ class OrderedDictYAMLLoader(Loader):
         if isinstance(node, yaml.MappingNode):
             self.flatten_mapping(node)
         else:
+            problem_msg = "expected a mapping node"
+
+            if hasattr(node, "id"):
+                problem_msg += f", but found {node.id}"
+
             raise yaml.constructor.ConstructorError(
                 context=None,
                 context_mark=None,
-                problem=f"expected a mapping node, but found {node.id}",
+                problem=problem_msg,
                 problem_mark=node.start_mark,
             )
 
         mapping = OrderedDict()
         for key_node, value_node in node.value:
-            key = self.construct_object(key_node, deep=deep)
+            key = self.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
             try:
                 hash(key)
             except TypeError as exc:
@@ -94,7 +99,7 @@ class OrderedDictYAMLLoader(Loader):
                     problem=f"found unacceptable key ({exc})",
                     problem_mark=key_node.start_mark,
                 ) from exc
-            value = self.construct_object(value_node, deep=deep)
+            value = self.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
             if key in mapping:
                 raise yaml.constructor.ConstructorError(
                     context="while constructing a mapping",
