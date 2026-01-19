@@ -16,10 +16,8 @@ def file_url(path, unix=False) -> str:
             path = path[0].upper() + path[1:]
         if unix:
             return "file://" + unixpath(path)
-        else:
-            return "file:///" + path.replace("\\", "/")
-    else:
-        return "file://" + path
+        return "file:///" + path.replace("\\", "/")
+    return "file://" + path
 
 
 @pytest.mark.skipif(

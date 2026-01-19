@@ -184,7 +184,7 @@ def main() -> None:
     if m.args.version:
         print(version())
         return
-    elif m.args.check:
+    if m.args.check:
         errors = sanity_check()
         if errors:  # defensive code
             logger.error("sanity checking failed!")
@@ -228,19 +228,16 @@ def interpreter(prefix: str | None = None) -> str:
         python3 = os.path.join(prefix, "python3.exe")
         if os.path.exists(python3):
             return python3
-        else:
-            # Might be the python location when in a venv
-            python3 = os.path.join(prefix, "Scripts", "python.exe")
-            if os.path.exists(python3):
-                return python3
-            else:
-                return os.path.join(prefix, "python.exe")
-    else:  # windows: no cover
-        python3 = os.path.join(prefix, "bin", "python3")
+        # Might be the python location when in a venv
+        python3 = os.path.join(prefix, "Scripts", "python.exe")
         if os.path.exists(python3):
             return python3
-        else:
-            return os.path.join(prefix, "bin", "python")
+        return os.path.join(prefix, "python.exe")
+    # windows: no cover
+    python3 = os.path.join(prefix, "bin", "python3")
+    if os.path.exists(python3):
+        return python3
+    return os.path.join(prefix, "bin", "python")
 
 
 def python_script(name: str, prefix: str | None = None) -> list[str]:
@@ -297,17 +294,15 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
             # If we have a side <basename>-script.py always use it, instead of
             # the .exe
             return [interpreter(prefix), script_py]
-        elif os.path.isfile(script_exe):
+        if os.path.isfile(script_exe):
             # A .exe without side python script
             if has_relative_python_shebang(script_exe):  # all: no cover
                 # relocatable python distribution
                 return [interpreter(prefix), script_exe]
             return [script_exe]
-        else:
-            # Case in which the script is probably a Python file
-            return [interpreter(prefix), script]
-    else:
-        return [interpreter(prefix), os.path.join(prefix, "bin", name)]
+        # Case in which the script is probably a Python file
+        return [interpreter(prefix), script]
+    return [interpreter(prefix), os.path.join(prefix, "bin", name)]
 
 
 def is_console() -> bool:
@@ -331,10 +326,9 @@ def is_console() -> bool:
         stdin_name = object_name(get_osfhandle(stdin_fd))  # type: ignore[arg-type]
         if re.match(r"\\Device\\NamedPipe\\(cygwin|msys).*-pty.*$", stdin_name):
             return True
-        else:
-            return False
-    else:  # win32: no cover
         return False
+    # win32: no cover
+    return False
 
 
 def relocate_python_distrib(

@@ -144,14 +144,13 @@ class AuthorRole(Enum):
         """  # noqa RST304
         if isinstance(value, str) and value:
             return cls(value)
-        elif isinstance(value, cls):
+        if isinstance(value, cls):
             return value
-        elif default:
+        if default:
             # The default value is either an AuthorRole or a string, better
             # return a AuthorRole.
             return cls.from_value(default)
-        else:
-            raise ValueError(f"Invalid default value {default}")
+        raise ValueError(f"Invalid default value {default}")
 
 
 class Document(JsonData):
@@ -344,14 +343,13 @@ class Justification(Enum):
         """  # noqa RST304
         if isinstance(value, str) and value:
             return cls(value)
-        elif isinstance(value, cls):
+        if isinstance(value, cls):
             return value
-        elif default:
+        if default:
             # The default value is either a Justification object or a string,
             # better return a Justification.
             return cls.from_value(default)
-        else:
-            raise ValueError(f"Invalid default value {default}")
+        raise ValueError(f"Invalid default value {default}")
 
 
 class Metadata(JsonData):
@@ -649,14 +647,13 @@ class ProductStatus(Enum):
         """  # noqa RST304
         if isinstance(value, str) and value:
             return cls(value)
-        elif isinstance(value, cls):
+        if isinstance(value, cls):
             return value
-        elif default:
+        if default:
             # The default value is either a Product status or a string, better
             # return a ProductStatus.
             return cls.from_value(default)
-        else:
-            raise ValueError(f"Invalid default value {default}")
+        raise ValueError(f"Invalid default value {default}")
 
 
 class Statement(JsonData):

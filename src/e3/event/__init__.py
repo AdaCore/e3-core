@@ -148,8 +148,7 @@ class Event:
         """
         if isinstance(value, float):
             return {key: timestamp_as_string(value)}
-        else:
-            return {key: value}
+        return {key: value}
 
     def as_dict(self) -> dict[str, str]:
         """Convert the event data into a dict that can be serialized as json.

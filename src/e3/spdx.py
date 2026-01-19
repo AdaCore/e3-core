@@ -53,9 +53,9 @@ def get_entity(value: str | None) -> Organization | Person | Tool | None:
         entity_type, entity_name = value.split(":", 1)
         if entity_type.lower() == "tool":
             return Tool(entity_name.strip())
-        elif entity_type.lower() == "person":
+        if entity_type.lower() == "person":
             return Person(entity_name.strip())
-        elif entity_type.lower() == "organization":
+        if entity_type.lower() == "organization":
             return Organization(entity_name.strip())
     return None
 
@@ -101,9 +101,8 @@ class SPDXEntry(metaclass=ABCMeta):
         """Name of the SPDXEntry as visible in the SPDX JSON report."""
         if isinstance(cls.json_entry_key, str):
             return str(cls.json_entry_key)  # type: ignore[unreachable]
-        else:
-            entry_key: str = cls.get_entry_key()
-            return f"{entry_key[0].lower()}{entry_key[1:]}"
+        entry_key: str = cls.get_entry_key()
+        return f"{entry_key[0].lower()}{entry_key[1:]}"
 
     @abstractmethod
     def __str__(self) -> str:
@@ -162,8 +161,7 @@ class SPDXEntryMaybeStrMultilines(SPDXEntryMaybeStr):
         """
         if self.value in (NOASSERTION, NONE_VALUE):
             return f"{self.entry_key}: {self.value}"
-        else:
-            return f"{self.entry_key}: <text>{self}</text>"
+        return f"{self.entry_key}: <text>{self}</text>"
 
 
 class SPDXEntryBool(SPDXEntry):
@@ -454,20 +452,17 @@ class EntityRef(SPDXEntry):
     def __str__(self) -> str:
         if self.value == NOASSERTION:
             return NOASSERTION
-        else:
-            return self.value.to_tagvalue()
+        return self.value.to_tagvalue()
 
     def to_tagvalue(self) -> str:
         if self.value == NOASSERTION:
             return f"{self.entry_key}: {self.value}"
-        else:
-            return f"{self.entry_key}: {self.value.to_tagvalue()}"
+        return f"{self.entry_key}: {self.value.to_tagvalue()}"
 
     def to_json_dict(self) -> dict[str, Any]:
         if self.value == NOASSERTION:
             return {self.json_entry_key: self.value}
-        else:
-            return {self.json_entry_key: self.value.to_tagvalue()}
+        return {self.json_entry_key: self.value.to_tagvalue()}
 
 
 class Creator(EntityRef):
@@ -745,12 +740,11 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
         if isinstance(obj, dict) and "algorithm" in obj and "checksumValue" in obj:
             if obj["algorithm"].upper() == SHA1.algorithm:
                 return SHA1(obj["checksumValue"])
-            elif obj["algorithm"].upper() == SHA256.algorithm:
+            if obj["algorithm"].upper() == SHA256.algorithm:
                 return SHA256(obj["checksumValue"])
-            elif obj["algorithm"].upper() == SHA512.algorithm:
+            if obj["algorithm"].upper() == SHA512.algorithm:
                 return SHA512(obj["checksumValue"])
-            else:
-                raise ValueError(f"Unsupported checksum algorithm {obj['algorithm']}.")
+            raise ValueError(f"Unsupported checksum algorithm {obj['algorithm']}.")
         raise ValueError(f"Invalid input checksum dict {obj!r}.")
 
 

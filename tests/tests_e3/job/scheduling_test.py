@@ -73,8 +73,7 @@ class TestScheduler:
             if job.uid not in results:
                 results[job.uid] = True
                 return True
-            else:
-                return False
+            return False
 
         # This time test with two interdependent jobs
         dag = DAG()

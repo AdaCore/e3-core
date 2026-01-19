@@ -99,11 +99,9 @@ class Trie:
         for letter in self.word_iterator(word):
             if self.END_MARKER in cursor and (not delimiter or letter in delimiter):
                 return True
-            else:
-                new_cursor = cursor.get(letter, None)
-                if new_cursor is None:
-                    return False
-                else:
-                    cursor = new_cursor
+            new_cursor = cursor.get(letter, None)
+            if new_cursor is None:
+                return False
+            cursor = new_cursor
 
         return self.END_MARKER in cursor

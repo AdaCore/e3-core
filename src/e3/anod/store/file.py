@@ -627,8 +627,7 @@ class File(object):
         if not os.path.isfile(meta_path):
             if ignore_errors:
                 return None
-            else:
-                raise StoreError(f"non existing metafile {meta_path}")
+            raise StoreError(f"non existing metafile {meta_path}")
         try:
             with open(meta_path, "r") as fd:
                 data = json.load(fd)
@@ -636,11 +635,10 @@ class File(object):
         except Exception as e:
             if ignore_errors:
                 return None
-            else:
-                logger.exception(e)
-                raise StoreError(
-                    f"error while loading metadata file {meta_path} ({e})"
-                ) from e
+            logger.exception(e)
+            raise StoreError(
+                f"error while loading metadata file {meta_path} ({e})"
+            ) from e
 
     def save_to_meta_file(self: FileType, dest_dir: str, name: str) -> None:
         """Dump as json file component information.

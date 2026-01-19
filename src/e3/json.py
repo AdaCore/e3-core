@@ -113,8 +113,6 @@ def load_from_json_file(
         with open(path) as fd:
             content = json.load(fd)
         return content
-    else:
-        if ignore_non_existing:
-            return default
-        else:
-            raise JsonError(f"json file {path} does not exist")
+    if ignore_non_existing:
+        return default
+    raise JsonError(f"json file {path} does not exist")

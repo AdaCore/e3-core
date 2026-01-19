@@ -190,8 +190,7 @@ class CheckoutManager:
         new_commit = get_filetree_state(self.working_dir, ignore_hidden=False)
         if new_commit == old_commit:
             return ReturnValue.unchanged, old_commit, new_commit
-        else:
-            return ReturnValue.success, old_commit, new_commit
+        return ReturnValue.success, old_commit, new_commit
 
     @staticmethod
     def git_remote_name(url: str) -> str:

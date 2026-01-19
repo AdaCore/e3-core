@@ -217,15 +217,15 @@ def __safe_unlink_func() -> (
             return NTFile(x).unlink()
 
         return win_rm, win_rm
-    else:  # windows: no cover
+    # windows: no cover
 
-        def os_remove(x: str | Path) -> None:
-            return os.remove(x)
+    def os_remove(x: str | Path) -> None:
+        return os.remove(x)
 
-        def os_rmdir(x: str | Path) -> None:
-            return os.rmdir(x)
+    def os_rmdir(x: str | Path) -> None:
+        return os.rmdir(x)
 
-        return os_remove, os_rmdir
+    return os_remove, os_rmdir
 
 
 safe_remove, safe_rmdir = __safe_unlink_func()
@@ -315,8 +315,8 @@ def max_path() -> int:
         from ctypes.wintypes import MAX_PATH
 
         return MAX_PATH
-    else:  # windows: no cover
-        return os.pathconf("/", "PC_PATH_MAX")
+    # windows: no cover
+    return os.pathconf("/", "PC_PATH_MAX")
 
 
 def mv(source: str | Path, target: str | Path) -> None:
@@ -384,8 +384,8 @@ def unixpath(path: str | Path) -> str:
         if m is not None:
             result = m.group(1)
         return result
-    else:  # windows: no cover
-        return os.fspath(path)
+    # windows: no cover
+    return os.fspath(path)
 
 
 def which(prog: str | Path, paths: str | None = None, default: Any = "") -> Any:

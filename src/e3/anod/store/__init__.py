@@ -1709,8 +1709,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
         if online_store is not None:
             return online_store.download_resource(resource_id, path)
-        else:
-            raise NotImplementedError
+        raise NotImplementedError
 
     def _raw_add_build_info(self, build_info: BuildInfoDict) -> bool:
         """Private interface method implementation.

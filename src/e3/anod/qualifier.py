@@ -32,8 +32,7 @@ class Qualifier(dict):
         """
         if other is None:
             return Qualifier(self)
-        else:
-            return Qualifier(self | other)
+        return Qualifier(self | other)
 
     def __and__(self, other: Iterable[str]) -> Qualifier:
         """Create a new dict qualifier with the subset other of the keys.

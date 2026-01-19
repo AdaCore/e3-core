@@ -509,13 +509,11 @@ class Decision(Action, metaclass=abc.ABCMeta):
         """
         if self.choice is None or self.choice == Decision.BOTH:
             return None
-        else:
-            if self.expected_choice is not None and self.expected_choice != self.choice:
-                return None
-            elif self.choice == Decision.LEFT:
-                return self.left
-            else:
-                return self.right
+        if self.expected_choice is not None and self.expected_choice != self.choice:
+            return None
+        if self.choice == Decision.LEFT:
+            return self.left
+        return self.right
 
     def get_expected_decision(self) -> str | None:
         """Get expected decision.
@@ -525,10 +523,9 @@ class Decision(Action, metaclass=abc.ABCMeta):
         """
         if self.expected_choice == Decision.LEFT:
             return self.left
-        elif self.expected_choice == Decision.RIGHT:
+        if self.expected_choice == Decision.RIGHT:
             return self.right
-        else:
-            return None
+        return None
 
     def set_decision(self, which: Choice, decision_maker: str | None) -> None:
         """Record a choice made by an action in a plan.

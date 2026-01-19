@@ -45,8 +45,7 @@ class DSSE:
             base64_signature = base64.b64encode(p.raw_out).decode("utf-8")
             self.signatures.append({"keyid": key_id, "sig": base64_signature})
             return base64_signature
-        else:
-            raise DSSEError(f"SSL error: {p.out}")
+        raise DSSEError(f"SSL error: {p.out}")
 
     def verify(self, certificate: str) -> bool:
         """Preliminary check on the signature.

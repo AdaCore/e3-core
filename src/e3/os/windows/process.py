@@ -68,7 +68,7 @@ def wait_for_objects(
     object_index = wait_for_multiples_objects(size, handles, wait_for_all, timeout)
     if object_index == Wait.TIMEOUT:
         return None
-    elif object_index == Wait.FAILED:  # defensive code
+    if object_index == Wait.FAILED:  # defensive code
         raise OSError("error while waiting for objects")
     elif Wait.ABANDONED <= object_index < Wait.ABANDONED + size:  # defensive code
         return object_index - Wait.ABANDONED

@@ -158,8 +158,7 @@ class Fingerprint:
 
         if len(updated) == 0 and len(new) == 0 and len(obsolete) == 0:
             return None
-        else:
-            return {"updated": updated, "new": new, "obsolete": obsolete}
+        return {"updated": updated, "new": new, "obsolete": obsolete}
 
     def __str__(self) -> str:
         """Return a string representation of the fingerprint."""

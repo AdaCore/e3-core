@@ -292,11 +292,9 @@ class SourceBuilder:
             # a package can be created with Anod, no patch function is
             # provided and there is only a single repository to patch
             return default_apply_patch
-        else:
-            if self.__apply_patch is None:
-                return no_apply_patch
-            else:
-                return self.__apply_patch
+        if self.__apply_patch is None:
+            return no_apply_patch
+        return self.__apply_patch
 
 
 class UnmanagedSourceBuilder(SourceBuilder):

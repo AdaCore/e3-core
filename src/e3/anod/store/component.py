@@ -370,8 +370,7 @@ class Component(object):
         if not os.path.isfile(meta_path):
             if ignore_errors:
                 return None
-            else:
-                raise StoreError(f"non existing metafile {meta_path}")
+            raise StoreError(f"non existing metafile {meta_path}")
         try:
             with open(meta_path, "r") as fd:
                 data = json.load(fd)
@@ -379,11 +378,10 @@ class Component(object):
         except Exception as e:
             if ignore_errors:
                 return None
-            else:
-                logger.exception(e)
-                raise StoreError(
-                    f"error while loading component metadata file {meta_path} ({e})"
-                ) from None
+            logger.exception(e)
+            raise StoreError(
+                f"error while loading component metadata file {meta_path} ({e})"
+            ) from None
 
     def as_dict(self: ComponentType) -> ComponentDict:
         """Return a dictionary representation of self.

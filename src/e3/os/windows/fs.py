@@ -574,10 +574,9 @@ class NTFile:
         except NTException as e:
             if e.status == Status.OBJECT_NAME_NOT_FOUND:
                 return
-            elif e.status == Status.DELETE_PENDING:
+            if e.status == Status.DELETE_PENDING:
                 return
-            else:
-                raise
+            raise
 
         if self.is_readonly:
             # Try to remove the readonly flag
