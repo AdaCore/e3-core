@@ -127,7 +127,7 @@ def test_complex_json_data() -> None:
     assert cmplx == other_complex
 
 
-def test_json_files():
+def test_json_files() -> None:
     """Tests saving to, and loading from a JSON file."""
     json_path: Path = Path.cwd() / f"{__name__}.json"
     dump_to_json_file(str(json_path), DICT_VALUES)

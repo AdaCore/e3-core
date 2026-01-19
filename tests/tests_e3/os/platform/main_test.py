@@ -1,7 +1,7 @@
 import e3.os.platform
 
 
-def test_system_info():
+def test_system_info() -> None:
     """Compute SystemInfo and test the cache system."""
     s = e3.os.platform.SystemInfo
     s.reset_cache()
@@ -16,7 +16,7 @@ def test_system_info():
     assert s.os_version() == os_version
 
 
-def test_hostname():
+def test_hostname() -> None:
     """Test SystemInfo.hostname."""
     s = e3.os.platform.SystemInfo
     try:
@@ -40,13 +40,13 @@ def test_hostname():
         s.reset_cache()
 
 
-def test_cpu():
+def test_cpu() -> None:
     """Simple test for CPU."""
     cpu = e3.os.platform.CPU.get("x86_64")
     assert cpu.as_dict()["bits"] == 64
 
 
-def test_os():
+def test_os() -> None:
     """Simple test for OS."""
     os = e3.os.platform.OS.get("linux")
     assert os.as_dict()["dllext"] == ".so"

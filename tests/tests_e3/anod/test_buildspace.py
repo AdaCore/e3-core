@@ -7,7 +7,7 @@ from e3.os.fs import touch
 import pytest
 
 
-def test_reset():
+def test_reset() -> None:
     """Verify that BuildSpace reset() delete expected content."""
     bs = BuildSpace(root_dir=os.getcwd())
     bs.create()
@@ -24,14 +24,14 @@ def test_reset():
             assert not exists
 
 
-def test_subdir():
+def test_subdir() -> None:
     """Check error handling of subdir."""
     bs = BuildSpace(root_dir=os.getcwd())
     with pytest.raises(ValueError):
         bs.subdir("foo")
 
 
-def test_reset_tmp_dir():
+def test_reset_tmp_dir() -> None:
     """Check that the tmp_dir is reset when the build space is created."""
     bs = BuildSpace(root_dir=os.getcwd())
     marker = os.path.join(bs.subdir(name="tmp"), "deleteme")
@@ -42,7 +42,7 @@ def test_reset_tmp_dir():
     assert not os.path.exists(marker)
 
 
-def test_build_space_exists():
+def test_build_space_exists() -> None:
     """Test the BuildSpace.exists method."""
     bs_name = os.path.abspath("foo")
     bs = BuildSpace(bs_name)

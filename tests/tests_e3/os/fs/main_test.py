@@ -14,7 +14,7 @@ import e3.os.process
 import pytest
 
 
-def test_cd():
+def test_cd() -> None:
     with pytest.raises(e3.os.fs.OSFSError) as err:
         e3.os.fs.cd("doesnotexist")
 
@@ -24,7 +24,7 @@ def test_cd():
 @pytest.mark.xfail(
     sys.platform == "win32", reason="not completely supported on windows"
 )
-def test_chmod():
+def test_chmod() -> None:
     os.umask(0o022)
     e3.os.fs.touch("a")
 
@@ -75,7 +75,7 @@ def test_chmod():
 @pytest.mark.xfail(
     sys.platform == "win32", reason="windows specific rm not yet added to e3-core"
 )
-def test_rm():
+def test_rm() -> None:
     base = tempfile.mkdtemp()
     try:
         bc = os.path.join(base, "b", "c")
@@ -97,7 +97,7 @@ def test_rm():
         e3.fs.rm(base, True)
 
 
-def test_mv():
+def test_mv() -> None:
     os.makedirs("a")
     e3.os.fs.mv("a", "b")
     assert os.path.isdir("b")
@@ -113,7 +113,7 @@ def test_mv():
     assert os.path.isfile(os.path.join("dest", "d"))
 
 
-def test_df():
+def test_df() -> None:
     cwd = os.getcwd()
     statfs = e3.os.fs.df(cwd)
     assert isinstance(statfs, numbers.Integral)
@@ -133,12 +133,12 @@ def test_anod_ldd_output_to_posix(ldd) -> None:  # type: ignore[no-untyped-def]
     e3.os.fs.ldd_output_to_posix(ldd_output)
 
 
-def test_maxpath():
+def test_maxpath() -> None:
     maxPath = e3.os.fs.max_path()
     assert isinstance(maxPath, numbers.Integral)
 
 
-def test_touch():
+def test_touch() -> None:
     e3.os.fs.touch("a")
     assert os.path.exists("a")
 
@@ -150,7 +150,7 @@ def test_touch():
     assert os.stat("a").st_atime - now < 100
 
 
-def test_which():
+def test_which() -> None:
     path_to_e3 = e3.os.fs.which("e3")
     assert os.path.isfile(path_to_e3)
 

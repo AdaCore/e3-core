@@ -1,7 +1,7 @@
 import e3.electrolyt.host as host
 
 
-def test_host_db():
+def test_host_db() -> None:
     db = host.HostDB()
     db.add_host(
         hostname="computer1",
@@ -15,7 +15,7 @@ def test_host_db():
     assert db["computer1"].platform == "x86_64-linux"
 
 
-def test_host_db_yaml():
+def test_host_db_yaml() -> None:
     with open("db.yaml", "w") as f:
         f.write(
             "computer2:\n"
@@ -33,7 +33,7 @@ def test_host_db_yaml():
     assert db["computer3"].platform == "x86_64-darwin"
 
 
-def test_host_db_yaml_alias():
+def test_host_db_yaml_alias() -> None:
     with open("db.yaml", "w") as f:
         f.write(
             "computer2: &computer2_alias\n"

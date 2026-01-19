@@ -9,7 +9,7 @@ import e3.platform
 import pytest
 
 
-def test_autodetect():
+def test_autodetect() -> None:
     sys_platform = (
         sys.platform.replace("linux2", "linux")
         .replace("win32", "windows")
@@ -33,7 +33,7 @@ def test_autodetect():
     assert b.get_attr("build.os.version") == "rhES7"
 
 
-def test_platform():
+def test_platform() -> None:
     e = e3.env.BaseEnv()
     e.set_host("x86-linux")
     assert e.platform == "x86-linux"
@@ -41,7 +41,7 @@ def test_platform():
     assert e.platform == "x86-solaris-linux"
 
 
-def test_is_canadian():
+def test_is_canadian() -> None:
     e = e3.env.BaseEnv()
     e.set_build("sparc-solaris")
     assert not e.is_canadian
@@ -51,7 +51,7 @@ def test_is_canadian():
     assert e.is_canadian
 
 
-def test_set_host():
+def test_set_host() -> None:
     e = e3.env.BaseEnv()
     e.set_build("x86-linux")
 
@@ -77,7 +77,7 @@ def test_set_host():
     assert e.host == e.target
 
 
-def test_set_target():
+def test_set_target() -> None:
     e = e3.env.BaseEnv()
     e.set_build("x86-linux")
     e.set_host("x86_64-linux")
@@ -94,7 +94,7 @@ def test_set_target():
     assert e.host == e.target
 
 
-def test_set_env():
+def test_set_env() -> None:
     e = e3.env.BaseEnv()
     e.set_env("x86-linux,rhEs5", "x86_64-linux,debian7", "x86-windows,2008")
     assert e.build.platform == "x86-linux"
@@ -118,7 +118,7 @@ def test_set_env():
     assert e.target.platform == "x86_64-linux"
 
 
-def test_cmd_triplet():
+def test_cmd_triplet() -> None:
     if e3.env.Env().build.platform == "x86-linux":
         build_platform = "x86_64-linux,rhES5"
     else:
@@ -132,7 +132,7 @@ def test_cmd_triplet():
     assert cmd_options[2].startswith("--target=x86-windows,2008")
 
 
-def test_get_attr():
+def test_get_attr() -> None:
     e = e3.env.BaseEnv()
     e.set_env("x86-linux,rhES5", "x86_64-linux,debian7", "x86-windows,2008")
     assert e.get_attr("host.os.name") == "linux"
@@ -151,7 +151,7 @@ def test_get_attr():
         print(e.does_not_exist)
 
 
-def test_add_path():
+def test_add_path() -> None:
     e = e3.env.Env()
     saved_path = os.environ["PATH"]
     e.store()
@@ -163,7 +163,7 @@ def test_add_path():
     assert saved_path == os.environ["PATH"]
 
 
-def test_add_dll_path():
+def test_add_dll_path() -> None:
     e = e3.env.Env()
     saved_path = os.environ.get(e.dll_path_var)
     e.store()
@@ -175,7 +175,7 @@ def test_add_dll_path():
     assert saved_path == os.environ.get(e.dll_path_var)
 
 
-def test_discriminants():
+def test_discriminants() -> None:
     e = e3.env.Env()
     e.store()
     assert "native" in e.discriminants
@@ -187,18 +187,18 @@ def test_discriminants():
     e.restore()
 
 
-def test_tmp():
+def test_tmp() -> None:
     e = e3.env.Env()
     current_dir = os.getcwd()
     os.environ["TMPDIR"] = current_dir
     assert e.tmp_dir == current_dir
 
 
-def test_to_dict():
+def test_to_dict() -> None:
     assert e3.env.Env().to_dict()["is_cross"] is False
 
 
-def test_store():
+def test_store() -> None:
     c = e3.env.Env()
 
     c.abc = "foo"
@@ -229,7 +229,7 @@ def test_store():
     assert not hasattr(c, "abc")
 
 
-def test_from_platform_name():
+def test_from_platform_name() -> None:
     e = e3.env.BaseEnv.from_platform_name("arm-linux-linux")
     assert e.target.platform == "arm-linux"
     assert e.build.platform == "x86-linux"
@@ -253,14 +253,14 @@ def test_from_platform_name():
     assert e is None
 
 
-def test_copy():
+def test_copy() -> None:
     e = e3.env.BaseEnv()
     new_e = e.copy(target="arm-elf")
 
     assert new_e.target.platform == "arm-elf"
 
 
-def test_force_cores():
+def test_force_cores() -> None:
     """Test that forcing the number of cores works in all cases."""
     e = e3.env.BaseEnv()
     e.set_build(cores=23)
@@ -273,7 +273,7 @@ def test_force_cores():
     assert e.build.cpu.cores == 23
 
 
-def test_build_os_propagation():
+def test_build_os_propagation() -> None:
     """Ensure that OS version is preserved when build platform is changed."""
     winenv = e3.env.BaseEnv(
         build=e3.platform.Platform.get(

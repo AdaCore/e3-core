@@ -13,7 +13,7 @@ from e3.sys import RewriteImportNodeTransformer, RewriteImportRule, RewriteNodeE
 import pytest
 
 
-def test_filtering_import():
+def test_filtering_import() -> None:
     script = """
 import a, b, c
 import a1, b, c
@@ -76,7 +76,7 @@ from foo.bar2.module import name2
     assert "module='foo.bar." in str(err3.value)
 
 
-def test_python_func():
+def test_python_func() -> None:
     e3.sys.set_python_env("/foo")
     if sys.platform == "win32":
         assert "/foo" in os.environ["PATH"].split(os.pathsep)
@@ -130,7 +130,7 @@ def test_python_func():
 @pytest.mark.xfail(
     os.environ.get("TRAVIS", "") == "true", reason="Test not working on travis"
 )
-def test_relocate_python_distrib():
+def test_relocate_python_distrib() -> None:
     env = e3.env.Env()
 
     # Create a venv and add pip manually to ensure no upgrade is done.

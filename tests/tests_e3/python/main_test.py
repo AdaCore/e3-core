@@ -13,7 +13,7 @@ import pytest
 
 def generate_py_pkg_source(
     name: str, requires: list[str] | None = None, version="1.0.0"
-):
+) -> Wheel:
     mkdir(name)
     if requires:
         requires_str = ",".join([f'"{el}"' for el in requires])
@@ -32,7 +32,7 @@ def generate_py_pkg_source(
     )
 
 
-def test_wheel():
+def test_wheel() -> None:
     wheel1 = generate_py_pkg_source("src1")
     assert isfile(wheel1.path)
     assert not wheel1.requirements
@@ -82,7 +82,7 @@ def test_wheel():
         assert len(pypi.requirements_closure()) == 2
 
 
-def test_pypi_closure_tool():
+def test_pypi_closure_tool() -> None:
     generate_py_pkg_source("src1")
     generate_py_pkg_source("src2", requires=["src1<=2.0.0"])
     with open("config.yml", "w") as fd:
@@ -114,7 +114,7 @@ def test_pypi_closure_tool():
     }
 
 
-def test_star_requirements():
+def test_star_requirements() -> None:
     """Test package requirements ending with * with != operator."""
     wheel1 = generate_py_pkg_source("src1", version="1.0.4")
     assert isfile(wheel1.path)
@@ -165,7 +165,7 @@ def test_star_requirements():
         ((None, "setuptools_scm==8"), None),
     ],
 )
-def test_yanked(pypi_server, arguments, expected):
+def test_yanked(pypi_server, arguments, expected) -> None:
     allowed_yanked, invalid_wheel = arguments
     expected_wheel = expected
 

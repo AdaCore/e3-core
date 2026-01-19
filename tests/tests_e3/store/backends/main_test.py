@@ -3,7 +3,7 @@ import os
 from e3.store.cache.backends.filecache import FileCache
 
 
-def test_cache():
+def test_cache() -> None:
     fc = FileCache({"cache_dir": os.path.join(os.getcwd(), "cache")})
     fc.set("a", 1)
     assert fc.get("a") == 1

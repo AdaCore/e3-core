@@ -6,7 +6,7 @@ from e3.anod.store import StoreRW
 
 
 @pytest.fixture(scope="function")
-def store():
+def store() -> StoreRW:
     # Adding a default DB filename is mandatory to avoid collision between the tests and
     # the fixture.
     #

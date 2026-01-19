@@ -4,7 +4,7 @@ import e3.collection.dag
 import e3.env
 
 
-def test_initall():
+def test_initall() -> None:
     """Very simple test to check that all objects can be initialized."""
     root = action.Root()
     assert root.uid == "root"
@@ -104,7 +104,7 @@ def test_initall():
     assert boi_decision.get_decision() == build.uid
 
 
-def test_trigger():
+def test_trigger() -> None:
     """Test Decision triggers."""
 
     class Spec(e3.anod.spec.Anod):

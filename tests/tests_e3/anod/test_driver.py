@@ -7,7 +7,7 @@ import e3.anod.spec
 import pytest
 
 
-def test_simple_driver():
+def test_simple_driver() -> None:
     sandbox = e3.anod.sandbox.SandBox(root_dir=os.getcwd())
 
     class Simple(e3.anod.spec.Anod):
@@ -24,7 +24,7 @@ def test_simple_driver():
         driver.download()
 
 
-def test_deps_driver():
+def test_deps_driver() -> None:
     class Deps(e3.anod.spec.Anod):
         build_deps = [e3.anod.spec.Anod.Dependency(name="parent")]
 

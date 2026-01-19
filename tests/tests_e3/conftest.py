@@ -153,7 +153,7 @@ class PypiSimulator:
 
 
 @pytest.fixture(scope="function")
-def pypi_server(requests_mock):
+def pypi_server(requests_mock) -> PypiSimulator:
     requests_mock.stop()
     return PypiSimulator(requests_mock)
 
@@ -404,6 +404,6 @@ class MavenCentralSimulator:
 
 
 @pytest.fixture(scope="function")
-def maven_central(requests_mock):
+def maven_central(requests_mock) -> MavenCentralSimulator:
     requests_mock.stop()
     return MavenCentralSimulator(requests_mock)

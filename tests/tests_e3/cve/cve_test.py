@@ -4,7 +4,7 @@ from e3.fs import cp
 import os
 
 
-def test_nvd_cve_search(socket_disabled):
+def test_nvd_cve_search(socket_disabled) -> None:
     """Test the CVE DB research using cached data."""
     from requests_cache import NEVER_EXPIRE
     from warnings import catch_warnings, simplefilter as warn_filter

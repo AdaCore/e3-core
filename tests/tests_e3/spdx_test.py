@@ -147,7 +147,7 @@ def create_spdx() -> Document:
     return doc
 
 
-def test_entities_ref_spdx():
+def test_entities_ref_spdx() -> None:
     org = Organization("AdaCore")
     assert org.to_tagvalue() == "Organization: AdaCore"
     assert "AdaCore" in str(org)
@@ -177,7 +177,7 @@ def test_entity_ref() -> None:
     assert org.to_json_dict() == {"entityRef": "Organization: AdaCore"}
 
 
-def test_external_ref():
+def test_external_ref() -> None:
     value = {
         "referenceType": "purl",
         "referenceLocator": "pkg:pypi/wheel@0.36.2",
@@ -196,7 +196,7 @@ def test_external_ref():
     }
 
 
-def test_spdx():
+def test_spdx() -> None:
     """Test a SPDX document creation."""
     doc = create_spdx()
 
@@ -408,7 +408,7 @@ def test_spdx():
     }
 
 
-def test_invalid_spdx():
+def test_invalid_spdx() -> None:
     """Test creating an invalid SPDX document."""
     doc = Document(
         document_name="my-spdx-test",
@@ -452,7 +452,7 @@ def test_invalid_spdx():
     add_main(is_main_package=True)
 
     with pytest.raises(InvalidSPDX) as err:
-        for idx in range(0, 2):
+        for idx in range(2):
             if idx == 0:
                 name = "my-dep"
             else:

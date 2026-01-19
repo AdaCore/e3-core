@@ -8,7 +8,7 @@ from e3.os.fs import touch
 import pytest
 
 
-def test_source_builder_default_prepare_src():
+def test_source_builder_default_prepare_src() -> None:
     """Test SourceBuilder with the default prepare_src function."""
     sb = e3.anod.package.SourceBuilder(
         name="a-src", fullname=lambda: "a-src.tgz", checkout=["a-git"]
@@ -44,7 +44,7 @@ def test_source_builder_default_prepare_src():
     assert tp.prepare_src is None
 
 
-def test_source_builder_custom_prepare_src():
+def test_source_builder_custom_prepare_src() -> None:
     """Test SourceBuilder with a custom prepare_src function."""
 
     def prepare_src(repos, dest):
@@ -61,7 +61,7 @@ def test_source_builder_custom_prepare_src():
     assert os.path.exists("my_generated_source_file")
 
 
-def test_apply_patch():
+def test_apply_patch() -> None:
     """Test SourceBuilder.apply_patch handling."""
     sb = e3.anod.package.SourceBuilder(
         name="d-src", fullname=lambda: "d-src.tgz", checkout=["d-git"]

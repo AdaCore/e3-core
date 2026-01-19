@@ -3,7 +3,7 @@ from e3.collection.dag import DAG, DAGError, DAGIterator
 import pytest
 
 
-def test_simple_dag():
+def test_simple_dag() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -16,7 +16,7 @@ def test_simple_dag():
     assert d.check() is None
 
 
-def test_add_vertex():
+def test_add_vertex() -> None:
     d = DAG()
 
     # add_vertex should fail in case a dep does not exist
@@ -64,7 +64,7 @@ def test_add_vertex():
     assert compound_data == "dataforc_datafora_"
 
 
-def test_cycle_detection():
+def test_cycle_detection() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -96,7 +96,7 @@ def test_cycle_detection():
         d.reverse_graph()
 
 
-def test_shortest_path():
+def test_shortest_path() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -118,7 +118,7 @@ def test_shortest_path():
     assert d.shortest_path("d", "a") is None
 
 
-def test_dag_merge():
+def test_dag_merge() -> None:
     d = DAG()
     d.add_vertex("b")
     d.add_vertex("a", predecessors=["b"])
@@ -136,7 +136,7 @@ def test_dag_merge():
     assert result == ["c", "b", "a"]
 
 
-def test_dag_len():
+def test_dag_len() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -144,7 +144,7 @@ def test_dag_len():
     assert len(d) == 2
 
 
-def test_dag_str():
+def test_dag_str() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -152,7 +152,7 @@ def test_dag_str():
     assert str(d)
 
 
-def test_iter_with_busy_state():
+def test_iter_with_busy_state() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b", predecessors=["a"])
@@ -163,7 +163,7 @@ def test_iter_with_busy_state():
             it.leave("a")
 
 
-def test_inexisting():
+def test_inexisting() -> None:
     d = DAG()
     d.add_vertex("a")
     assert "a" in d
@@ -174,7 +174,7 @@ def test_inexisting():
         d.check()
 
 
-def test_cycle():
+def test_cycle() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -188,7 +188,7 @@ def test_cycle():
         d.get_context("b")
 
 
-def test_reverse_dag():
+def test_reverse_dag() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b", predecessors=["a"])
@@ -203,14 +203,14 @@ def test_reverse_dag():
     assert [k for k, _ in reverse_it] == ["d", "c", "b", "a"]
 
 
-def test_dot():
+def test_dot() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b", predecessors=["a"])
     assert '"b" -> "a"' in d.as_dot()
 
 
-def test_pruned_dag():
+def test_pruned_dag() -> None:
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("a1")
@@ -253,7 +253,7 @@ def test_pruned_dag():
     assert d4.get_tag("d") == "tag"
 
 
-def test_tagged_dag():
+def test_tagged_dag() -> None:
     r"""Test add_tag/get_tag/get_context.
 
     With the following DAG::

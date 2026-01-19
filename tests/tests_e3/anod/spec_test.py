@@ -143,7 +143,7 @@ CHECK_DLL_CLOSURE_ARGUMENTS = [
 ]
 
 
-def test_simple_spec():
+def test_simple_spec() -> None:
     class Simple(Anod):
         test_qualifier_format = (("with_bar", False),)
 
@@ -169,7 +169,7 @@ def test_simple_spec():
     assert len(simple_test_with_bar.test_source_list) == 2
 
 
-def test_spec_buildvars():
+def test_spec_buildvars() -> None:
     """Build vars are used by the driver and not visible in deps."""
 
     class MySpec(Anod):
@@ -287,7 +287,7 @@ def test_spec_check_dll_closure_single_file(ldd) -> None:  # type: ignore[no-unt
         assert shlib_path in ae.messages[0]
 
 
-def test_spec_wrong_dep():
+def test_spec_wrong_dep() -> None:
     """Check exception message when wrong dependency is set."""
     with pytest.raises(
         SpecError,
@@ -299,7 +299,7 @@ def test_spec_wrong_dep():
         Anod.Dependency("foo", require="invalid")
 
 
-def test_primitive():
+def test_primitive() -> None:
     class NoPrimitive(Anod):
         @staticmethod
         def build():
@@ -360,7 +360,7 @@ def test_primitive():
         with_primitive3.build()
 
 
-def test_api_version():
+def test_api_version() -> None:
     # __version__ is supported
     check_api_version(__version__)
 
@@ -368,7 +368,7 @@ def test_api_version():
         check_api_version("0.0")
 
 
-def test_spec_qualifier():
+def test_spec_qualifier() -> None:
     class GeneratorEnabled(Anod):
         enable_name_generator = True
 
@@ -388,7 +388,7 @@ def test_spec_qualifier():
     assert spec_disable.args == {"q1": ""}
 
 
-def test_missing_property():
+def test_missing_property() -> None:
     class NoProperty(Anod):
         def source_pkg_build(self) -> list:  # type: ignore[override]
             return []

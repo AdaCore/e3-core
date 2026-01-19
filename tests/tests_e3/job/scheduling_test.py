@@ -8,11 +8,11 @@ import pytest
 
 
 class NopJob(Job):
-    def run(self):
+    def run(self) -> None:
         pass
 
     @property
-    def priority(self):
+    def priority(self) -> int:
         try:
             result = -int(self.uid)
         except Exception:
@@ -22,12 +22,12 @@ class NopJob(Job):
 
 class SleepJob(ProcessJob):
     @property
-    def cmdline(self):
+    def cmdline(self) -> list[str]:
         return [sys.executable, "-c", "import time; time.sleep(6.0)"]
 
 
 class TestScheduler:
-    def test_minimal_run(self):
+    def test_minimal_run(self) -> None:
         """Test with only two independent jobs."""
         dag = DAG()
         dag.add_vertex("1")
@@ -36,7 +36,7 @@ class TestScheduler:
         s.run(dag)
         assert s.max_active_jobs == 2
 
-    def test_ordering(self):
+    def test_ordering(self) -> None:
         """Test that jobs are ordered correctly."""
         results = []
 
@@ -51,7 +51,7 @@ class TestScheduler:
         s.run(dag)
         assert tuple(results) == ("0", "1", "3")
 
-    def test_minimal_run2(self):
+    def test_minimal_run2(self) -> None:
         """Test with two interdependent jobs."""
         dag = DAG()
         dag.add_vertex("1")
@@ -60,7 +60,7 @@ class TestScheduler:
         s.run(dag)
         assert s.max_active_jobs == 1
 
-    def test_requeue(self):
+    def test_requeue(self) -> None:
         """Requeue test.
 
         Same as previous example except that all tests are requeued
@@ -85,7 +85,7 @@ class TestScheduler:
         assert results["1"]
         assert results["2"]
 
-    def test_skip(self):
+    def test_skip(self) -> None:
         """Simple example in which all the tests are skipped."""
         results = {}
 
@@ -109,7 +109,7 @@ class TestScheduler:
             assert v.start_time is None
             assert v.stop_time is None
 
-    def test_timeout(self):
+    def test_timeout(self) -> None:
         """Ensure that jobs are interrupted correctly on timeout."""
         results = {}
         pytest.importorskip("psutil")
@@ -129,7 +129,7 @@ class TestScheduler:
         for v in results.values():
             assert v.interrupted
 
-    def test_keyboard_interrupt(self):
+    def test_keyboard_interrupt(self) -> None:
         """Ensure that jobs can be interrupted."""
         results = {}
         pytest.importorskip("psutil")
@@ -157,7 +157,7 @@ class TestScheduler:
         for v in results.values():
             assert v.interrupted
 
-    def test_collect_feedback_scheme(self):
+    def test_collect_feedback_scheme(self) -> None:
         """Collect feedback construction.
 
         Scheme in which if a job predecessor "fails" then job is skipped

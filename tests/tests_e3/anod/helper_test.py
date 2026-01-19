@@ -7,7 +7,7 @@ from e3.anod.spec import Anod
 from e3.env import BaseEnv
 
 
-def test_make():
+def test_make() -> None:
     class AnodMake(Anod):
         def shell(self, *cmd, **kwargs):
             """Mock for Anod.shell that does not spawn processes."""
@@ -47,7 +47,7 @@ def test_make():
     )
 
 
-def test_configure():
+def test_configure() -> None:
     class AnodConf(Anod):
         @Anod.primitive()
         def build(self):
@@ -97,7 +97,7 @@ def test_configure():
     assert "--target=arm-eabi" in ac3.build()["cmd"]
 
 
-def test_configure_opts():
+def test_configure_opts() -> None:
     """Check configure options."""
 
     class AnodConf(Anod):
@@ -139,7 +139,7 @@ def test_configure_opts():
     assert result[3]["cmd"][:-1] == ["ksh", "./configure"]
 
 
-def test_text_replace():
+def test_text_replace() -> None:
     with open("myfile", "w") as f:
         f.write("what who when")
 

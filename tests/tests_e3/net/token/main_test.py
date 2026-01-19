@@ -20,7 +20,7 @@ def create_token(payload: dict) -> str:
     return token.decode("utf-8")
 
 
-def test_get_payload():
+def test_get_payload() -> None:
     expected = {
         "GivenName": "Toto",
         "Email": "toto@example.com",
@@ -37,7 +37,7 @@ def test_get_payload():
     assert payload == expected
 
 
-def test_valid_token():
+def test_valid_token() -> None:
     valid_token = create_token({"exp": FUTURE_TIMESTAMP})
     assert is_valid(valid_token)
 
@@ -46,7 +46,7 @@ def test_valid_token():
     assert is_valid(near_future_token)
 
 
-def test_old_token():
+def test_old_token() -> None:
     old_token = create_token({"exp": 1419064452})
     assert not is_valid(old_token)
 
@@ -56,11 +56,11 @@ def test_old_token():
     assert not is_valid(expire_soon_token)
 
 
-def test_exception_pass():
+def test_exception_pass() -> None:
     assert not is_valid("..")
 
 
-def test_token_str():
+def test_token_str() -> None:
     token = (
         "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZGFjb3JlLmNvbSI"
         "sImlhdCI6MTUxOTExOTcxMSwiZXhwIjoxNTUwNjU1NzExLCJhdWQiOiJ3d3cuYWR"

@@ -3,7 +3,7 @@ from e3.platform_db import get_knowledge_base
 from importlib.metadata import EntryPoint
 
 
-def test_knownledge_base():
+def test_knownledge_base() -> None:
     """Test loading a e3.platform_db extension."""
     # Create a new entry point referencing AmberCPUSupport and load it.
     mydb_ep = EntryPoint(

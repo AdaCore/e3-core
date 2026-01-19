@@ -25,7 +25,7 @@ except ImportError:
     psutil = None
 
 
-def test_run_stdout_stderr():
+def test_run_stdout_stderr() -> None:
     """Check Run with partial redirection.
 
     Verify that Run is working when stdout is redirected to a file and
@@ -47,7 +47,7 @@ def test_run_stdout_stderr():
     assert p.err.replace("\r", "") == "stderr\n"
 
 
-def test_run_shebang(caplog):
+def test_run_shebang(caplog) -> None:
     """Verify that the parse shebang option works."""
     prog_filename = os.path.join(os.getcwd(), "prog")
     with open(prog_filename, "wb") as f:
@@ -70,7 +70,7 @@ def test_run_shebang(caplog):
     assert "doesnot exist" in caplog.text
 
 
-def test_split_err_out():
+def test_split_err_out() -> None:
     """Split err and out to distinct pipes."""
     p = e3.os.process.Run(
         [
@@ -85,7 +85,7 @@ def test_split_err_out():
     assert p.err == "stderr"
 
 
-def test_non_utf8_out():
+def test_non_utf8_out() -> None:
     """Test that we can get an output for a process not emitting utf-8."""
     p = e3.os.process.Run(
         [sys.executable, "-c", "import sys; sys.stdout.buffer.write(b'\\xff\\xff')"]
@@ -93,7 +93,7 @@ def test_non_utf8_out():
     assert p.out == "\\xff\\xff"
 
 
-def test_rlimit():
+def test_rlimit() -> None:
     """rlimit kill the child process after a timeout."""
 
     def run_test():
@@ -123,7 +123,7 @@ def test_rlimit():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="A linux/macOS test")
-def test_rlimit_ctrl_c():
+def test_rlimit_ctrl_c() -> None:
     """Test rlimit CTRL-C.
 
     When a parent process launched two or more child processes using rlimit, the CTRL-C
@@ -193,7 +193,7 @@ p2.wait()
 
 
 @pytest.mark.skipif(sys.platform != "linux", reason="A linux test")
-def test_rlimit_foreground_option():
+def test_rlimit_foreground_option() -> None:
     """Test rlimit --foreground.
 
     Test if we can read/write from an interactive terminal using rlimit --foreground.
@@ -236,7 +236,7 @@ def test_rlimit_foreground_option():
     p.kill(signal.SIGKILL)
 
 
-def test_not_found():
+def test_not_found() -> None:
     with pytest.raises(OSError) as err:
         e3.os.process.Run(["e3-bin-not-found"])
     assert "e3-bin-not-found not found" in str(err.value)
@@ -259,7 +259,7 @@ def test_not_found():
     assert "e3-bin-not-found2 not found" in str(err.value)
 
 
-def test_enable_commands_handler():
+def test_enable_commands_handler() -> None:
     log_file = "cmds.log"
     h = e3.os.process.enable_commands_handler(log_file)
     try:
@@ -274,7 +274,7 @@ def test_enable_commands_handler():
 
 
 @pytest.mark.xfail(sys.platform != "win32", reason="unix implem not complete")
-def test_wait_for_processes():
+def test_wait_for_processes() -> None:
     for v in (1, 2):
         with open("p%d.py" % v, "w") as f:
             f.write(
@@ -317,7 +317,7 @@ def test_wait_for_processes():
     assert e3.os.process.wait_for_processes([], 10) is None
 
 
-def test_run_pipe():
+def test_run_pipe() -> None:
     cmd_left = [sys.executable, "-c", 'print("dummy")']
     cmd_right = [
         sys.executable,
@@ -342,14 +342,14 @@ def test_run_pipe():
     assert p.out.strip() == "bunnies"
 
 
-def test_command_line_image():
+def test_command_line_image() -> None:
     result = e3.os.process.command_line_image(["echo", ""])
     assert result == "echo ''"
     result = e3.os.process.command_line_image([["echo", "dummy"], ["grep", "m"]])
     assert result == "echo dummy | grep m"
 
 
-def test_poll():
+def test_poll() -> None:
     result = e3.os.process.Run(
         [sys.executable, "-c", 'import time; time.sleep(1); print("process")'], bg=True
     )
@@ -366,7 +366,7 @@ def test_poll():
     assert result.out.strip() == "process"
 
 
-def test_file_redirection():
+def test_file_redirection() -> None:
     p_out = "p.out"
     result = e3.os.process.Run(
         [sys.executable, "-c", 'print("dummy")'],
@@ -380,7 +380,7 @@ def test_file_redirection():
     assert content == "dummy"
 
 
-def test_output_append():
+def test_output_append() -> None:
     p_out = "p.out"
     e3.os.process.Run([sys.executable, "-c", 'print("line1")'], output=p_out)
     e3.os.process.Run([sys.executable, "-c", 'print("line2")'], output="+" + p_out)
@@ -389,14 +389,14 @@ def test_output_append():
     assert content == "line1\nline2"
 
 
-def test_pipe_input():
+def test_pipe_input() -> None:
     p = e3.os.process.Run(
         [sys.executable, "-c", "import sys; print(sys.stdin.read())"], input="|dummy"
     )
     assert p.out.strip() == "dummy"
 
 
-def test_is_running():
+def test_is_running() -> None:
     p = e3.os.process.Run([sys.executable, "-c", "import time; time.sleep(1)"], bg=True)
     assert e3.os.process.is_running(p.pid)
     p.kill(recursive=False)
@@ -413,7 +413,7 @@ def test_is_running():
 
 
 @pytest.mark.skipif(psutil is None, reason="require psutil")
-def test_is_running_non_existant():
+def test_is_running_non_existant() -> None:
     """Call is_running on non-existing process."""
     pid_list = psutil.pids()
     pid_list.sort()
@@ -429,7 +429,7 @@ def test_is_running_non_existant():
 
 
 @pytest.mark.xfail(reason="unstable test, p.status can be 0")
-def test_interrupt():
+def test_interrupt() -> None:
     t0 = time.time()
     p = e3.os.process.Run(
         [sys.executable, "-c", "import time; time.sleep(30)"], bg=True
@@ -444,7 +444,7 @@ def test_interrupt():
 
 
 @pytest.mark.skipif(psutil is None, reason="require psutil")
-def test_kill_process_tree():
+def test_kill_process_tree() -> None:
     wait_timeout = 3
     p1 = e3.os.process.Run(
         [sys.executable, "-c", "import time; time.sleep(10); import sys; sys.exit(2)"],
@@ -476,7 +476,7 @@ def test_kill_process_tree():
             f.write(prog)
 
         parent_process = e3.os.process.Run([sys.executable, gen_prog_name], bg=True)
-        for _ in range(0, 100):
+        for _ in range(100):
             try:
                 with open(pid_file) as f:
                     child_pid = f.read()
@@ -516,7 +516,7 @@ def test_kill_process_tree():
     assert e3.os.process.kill_process_tree(p3.internal) is True
 
 
-def test_run_with_env():
+def test_run_with_env() -> None:
     os.environ["EXT_VAR"] = "bar"
     cmd = [
         sys.executable,
@@ -531,7 +531,7 @@ def test_run_with_env():
     assert p1.out.strip() == "helloworld"
 
 
-def test_no_rlimit(caplog):
+def test_no_rlimit(caplog) -> None:
     fake_rlimit = e3.os.process.get_rlimit(platform="null")
     old_get_rlimit = e3.os.process.get_rlimit
     e3.os.process.get_rlimit = lambda: fake_rlimit  # type: ignore
@@ -545,7 +545,7 @@ def test_no_rlimit(caplog):
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_shell_override():
+def test_shell_override() -> None:
     """Unix shell shebang handling.
 
     On windows, we ensure that /bin/bash /bin/sh shebangs are replaced by
@@ -560,7 +560,7 @@ def test_shell_override():
     assert p.out.strip() == sys.executable
 
 
-def test_error_to_stdout():
+def test_error_to_stdout() -> None:
     """Check that redirection of stderr to stdout works."""
     python_cmd = ";".join(
         [

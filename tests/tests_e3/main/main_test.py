@@ -7,14 +7,14 @@ import e3.os.process
 import pytest
 
 
-def test_main():
+def test_main() -> None:
     assert (
         e3.env.Env().build.platform
         in e3.os.process.Run(["e3", "--platform-info=build"]).out
     )
 
 
-def test_mainprog():
+def test_mainprog() -> None:
     with open("mymain.py", "w") as f:
         f.write(
             "\n".join(
@@ -38,7 +38,7 @@ def test_mainprog():
 #
 # In a first time, simply remove (by renaming) the test so that no other MR is
 # impacted by timeout issue.
-def to_rework_modules_logging_limitations():
+def to_rework_modules_logging_limitations() -> None:
     """Ensure that by default DEBUG logging info is not enabled for some modules."""
     with open("mymain.py", "w") as f:
         f.write(
@@ -74,7 +74,7 @@ def to_rework_modules_logging_limitations():
     assert "DEBUG" in p2.out
 
 
-def test_mainprog_with_console_logs():
+def test_mainprog_with_console_logs() -> None:
     with open("mymain.py", "w") as f:
         f.write(
             "\n".join(
@@ -106,7 +106,7 @@ def test_mainprog_with_console_logs():
     sys.platform not in ("win32",),
     reason="This test is only for windows platform",
 )
-def test_x86_64_windows_default():
+def test_x86_64_windows_default() -> None:
     with open("mymain.py", "w") as f:
         f.write(
             "\n".join(
@@ -123,7 +123,7 @@ def test_x86_64_windows_default():
     assert "x86_64-windows64" in p.out
 
 
-def test_default_env_callback():
+def test_default_env_callback() -> None:
     with open("mymain.py", "w") as f:
         f.write(
             "\n".join(
@@ -152,7 +152,7 @@ def test_default_env_callback():
     sys.platform in ("win32", "sunos5"),
     reason="Signal handler not set on windows. Bug in signal handling in solaris",
 )
-def test_sigterm():
+def test_sigterm() -> None:
     with open("mymain.py", "w") as f:
         f.write(
             "\n".join(

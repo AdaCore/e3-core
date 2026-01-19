@@ -17,8 +17,9 @@ from e3.text import format_with_dict
 if TYPE_CHECKING:
     # Conditonal imports do not work with mypy, unconditionaly use yaml.Loader
     # for type checking
-    from typing import Any, IO
+    from typing import Any, IO, Generator
     from yaml import Loader
+    from yaml.nodes import Node
 else:
     try:
         from yaml import CLoader as Loader
@@ -50,10 +51,10 @@ class OrderedDictYAMLLoader(Loader):
         )  # type: ignore
         self.add_constructor("!include", type(self).yaml_include)  # type: ignore
 
-    def yaml_include(self, node):
+    def yaml_include(self, node: Node) -> OrderedDict:
         # Get the path out of the yaml file
         if self.name is None:
-            if not isinstance(self.stream, str) or isinstance(self.stream, str):
+            if not isinstance(self.stream, str):
                 self.name = getattr(self.stream, "name", None)
 
         if self.name is not None and os.path.isfile(self.name):
@@ -64,26 +65,31 @@ class OrderedDictYAMLLoader(Loader):
         with open(file_name, "rb") as inputfile:
             return yaml.load(inputfile, OrderedDictYAMLLoader)
 
-    def construct_yaml_map(self, node):
-        data = OrderedDict()
+    def construct_yaml_map(self, node: Node) -> Generator[OrderedDict, None, None]:
+        data: OrderedDict = OrderedDict()
         yield data
         value = self.construct_mapping(node)
         data.update(value)
 
-    def construct_mapping(self, node, deep=False):
+    def construct_mapping(self, node: Node, deep: bool = False) -> OrderedDict:
         if isinstance(node, yaml.MappingNode):
             self.flatten_mapping(node)
         else:
+            problem_msg = "expected a mapping node"
+
+            if hasattr(node, "id"):
+                problem_msg += f", but found {node.id}"
+
             raise yaml.constructor.ConstructorError(
                 context=None,
                 context_mark=None,
-                problem=f"expected a mapping node, but found {node.id}",
+                problem=problem_msg,
                 problem_mark=node.start_mark,
             )
 
         mapping = OrderedDict()
         for key_node, value_node in node.value:
-            key = self.construct_object(key_node, deep=deep)
+            key = self.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
             try:
                 hash(key)
             except TypeError as exc:
@@ -93,7 +99,7 @@ class OrderedDictYAMLLoader(Loader):
                     problem=f"found unacceptable key ({exc})",
                     problem_mark=key_node.start_mark,
                 ) from exc
-            value = self.construct_object(value_node, deep=deep)
+            value = self.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
             if key in mapping:
                 raise yaml.constructor.ConstructorError(
                     context="while constructing a mapping",

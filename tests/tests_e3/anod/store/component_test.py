@@ -102,7 +102,7 @@ def push_component(store, metadata: dict[str, object] | None = None) -> Componen
     return c.push()
 
 
-def test_component_push(store):
+def test_component_push(store) -> None:
     """Check that we can create a component and retrieve it."""
     c = push_component(store=store)
     comp_list = Component.latest(store=store, setup=DEFAULT_SETUP)
@@ -112,7 +112,7 @@ def test_component_push(store):
     assert comp == c, f"components are different: {comp.as_dict()} != {c.as_dict()}"
 
 
-def test_component_eq_ne():
+def test_component_eq_ne() -> None:
     ref_build_id = "a" * 24
 
     ref_date = datetime.datetime.now(datetime.timezone.utc)
@@ -430,7 +430,7 @@ def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untype
             raise ValueError(f"Unknown attachment {attachment.name}")
 
 
-def test_component_download(store):
+def test_component_download(store) -> None:
     bid = BuildInfo.create(store=store, setup=DEFAULT_SETUP, version="1.0")
     c = Component(
         build_id=bid.id,

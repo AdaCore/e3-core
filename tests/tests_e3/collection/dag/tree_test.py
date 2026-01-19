@@ -3,18 +3,18 @@ import pytest
 from e3.collection.dag import DAG
 
 
-def test_empty_tree():
+def test_empty_tree() -> None:
     t = DAG()
     assert t.as_tree() == ""
 
 
-def test_single_node_tree():
+def test_single_node_tree() -> None:
     t = DAG()
     t.add_vertex("foo")
     assert t.as_tree() == "foo"
 
 
-def test_multi_node_tree():
+def test_multi_node_tree() -> None:
     t = DAG()
     t.add_vertex("foo")
     t.add_vertex("bar", predecessors=["foo"])
@@ -33,7 +33,7 @@ foo
     assert t.as_tree() == expected_tree
 
 
-def test_name_key_tree():
+def test_name_key_tree() -> None:
     t = DAG()
     t.add_vertex("foo1", data={"name": "foo-one"})
     t.add_vertex("foo2", data={"name": "foo-two"}, predecessors=["foo1"])
