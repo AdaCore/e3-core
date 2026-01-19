@@ -20,7 +20,7 @@ class Action:
     child classes are used directly.
     """
 
-    __slots__ = ("uid", "data")
+    __slots__ = ("data", "uid")
 
     def __init__(self, uid: str, data: Any):
         """Initialize an Action.
@@ -44,7 +44,7 @@ class Root(Action):
     Actions are completed.
     """
 
-    __slots__ = ("uid", "data")
+    __slots__ = ("data", "uid")
 
     def __init__(self) -> None:
         """Initialize a root node."""
@@ -63,7 +63,7 @@ class GetSource(Action):
     CreateSource using a Decision node.
     """
 
-    __slots__ = ("uid", "builder")
+    __slots__ = ("builder", "uid")
 
     def __init__(self, builder: SourceBuilder):
         """Object initializer.
@@ -88,7 +88,7 @@ class DownloadSource(Download):
     source. DownloadSource is always a leaf of the DAG.
     """
 
-    __slots__ = ("uid", "builder")
+    __slots__ = ("builder", "uid")
 
     def __init__(self, builder: SourceBuilder):
         """Object initializer.
@@ -110,7 +110,7 @@ class InstallSource(Action):
     a GetSource Action.
     """
 
-    __slots__ = ("uid", "spec", "source")
+    __slots__ = ("source", "spec", "uid")
 
     def __init__(self, uid: str, spec: Anod, source: Source):
         """Object initializer.
@@ -134,7 +134,7 @@ class CreateSource(Action):
     checkouts. CreateSource has at least one Checkout child node.
     """
 
-    __slots__ = ("uid", "anod_instance", "source_name")
+    __slots__ = ("anod_instance", "source_name", "uid")
 
     def __init__(self, anod_instance: Anod, source_name: str):
         """Initialize CreateSource object.
@@ -162,7 +162,7 @@ class CreateSources(Action):
     anod spec.
     """
 
-    __slots__ = ("uid", "anod_instance")
+    __slots__ = ("anod_instance", "uid")
 
     def __init__(self, anod_instance: Anod):
         """Initialize CreateSources object.
@@ -183,7 +183,7 @@ class Checkout(Action):
     repository.
     """
 
-    __slots__ = ("uid", "repo_name", "repo_data")
+    __slots__ = ("repo_data", "repo_name", "uid")
 
     def __init__(self, repo_name: str, repo_data: dict[str, Any]):
         """Initialize a Checkout object.
@@ -213,7 +213,7 @@ class AnodAction(Action):
     Correspond to an Anod primitive call. Only subclasses should be used.
     """
 
-    __slots__ = ("uid", "anod_instance")
+    __slots__ = ("anod_instance", "uid")
 
     def __init__(self, anod_instance: Anod):
         """Initialize an anod Action.
@@ -265,7 +265,7 @@ class DownloadBinary(Download):
     Download a binary package from the store.
     """
 
-    __slots__ = ("uid", "data")
+    __slots__ = ("data", "uid")
 
     def __init__(self, data: Anod):
         """Initialize a DownloadBinary object.
@@ -291,7 +291,7 @@ class UploadComponent(Upload):
     Upload a component to the store.
     """
 
-    __slots__ = ("uid", "data", "anod_instance")
+    __slots__ = ("anod_instance", "data", "uid")
     str_prefix = ""
 
     def __init__(self, data: Anod):
@@ -327,7 +327,7 @@ class UploadSourceComponent(UploadComponent):
 class UploadSource(Upload):
     """Upload a source package."""
 
-    __slots__ = ("uid", "anod_instance", "source_name")
+    __slots__ = ("anod_instance", "source_name", "uid")
 
     def __init__(self, anod_instance: Anod, source_name: str):
         """Initialize UploadSource object.
@@ -355,7 +355,7 @@ class CheckVirus(Action):
     Check virus on uploaded component.
     """
 
-    __slots__ = ("uid", "data", "anod_instance")
+    __slots__ = ("anod_instance", "data", "uid")
 
     def __init__(self, data: Anod):
         """Initialize a CheckVirus object.
