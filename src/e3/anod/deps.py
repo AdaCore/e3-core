@@ -54,13 +54,9 @@ class Dependency:
         build: str | None = None,
         qualifier: str | None | dict[str, str | bool | frozenset] = None,
         local_name: str | None = None,
-        require: (
-            Literal["build_tree"]
-            | Literal["installation"]
-            | Literal["download"]
-            | Literal["source_pkg"]
-            | Literal["test"]
-        ) = "build_tree",
+        require: Literal[
+            "build_tree", "installation", "download", "source_pkg", "test"
+        ] = "build_tree",
         track: bool = False,
         **kwargs: Any,
     ) -> None:

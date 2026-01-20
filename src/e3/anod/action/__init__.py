@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 from e3.anod.spec import Anod
 
 if TYPE_CHECKING:
-    from typing import Any, Final, Literal, Union
+    from typing import Any, Final, Literal
     from e3.anod.package import Source, SourceBuilder
     from e3.collection.dag import DAG
 
-    Choice = Union[Literal[0], Literal[1], Literal[2]]
+    Choice = Literal[0, 1, 2]
 
 
 class Action:

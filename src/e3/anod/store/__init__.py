@@ -632,7 +632,7 @@ class _Store(_StoreContextManager):
 
     def _list_component_files(
         self,
-        kind: Literal["file"] | Literal["source"],
+        kind: Literal["file", "source"],
         component_id: _Store.DB_IDType,
         *,
         component_buildinfo: BuildInfoDict | None = None,
@@ -917,7 +917,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
     def _insert_to_component_files(
         self,
-        kind: Literal["file"] | Literal["source"] | Literal["attachment"],
+        kind: Literal["file", "source", "attachment"],
         file_list: Sequence[tuple[str | None, FileDict]],
         component_id: str | int,
     ) -> None:
