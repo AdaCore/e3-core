@@ -1083,7 +1083,7 @@ class PrimaryPackagePurpose(Enum):
 
     See 7.24 `Primary Package Purpose field
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#724-primary-package-purpose-field>`_
-    """  # noqa: B950
+    """
 
     APPLICATION = auto()
     # If the package is a software application
