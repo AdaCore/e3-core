@@ -318,36 +318,34 @@ class HTTPSession:
                     for chunk in chunks:
                         fileobj.write(chunk)
                     return filename
-                else:
-                    # Dest can't be None here according to condition at the top
-                    assert dest is not None
+                # Dest can't be None here according to condition at the top
+                assert dest is not None
 
-                    # Fallback to local file otherwise
-                    if filename is None:
-                        # Generate a temporary name
-                        tmpf = tempfile.NamedTemporaryFile(
-                            delete=False, dir=dest, prefix="download."
-                        )
-                        tmpf.close()
-                        filename = tmpf.name
+                # Fallback to local file otherwise
+                if filename is None:
+                    # Generate a temporary name
+                    tmpf = tempfile.NamedTemporaryFile(
+                        delete=False, dir=dest, prefix="download."
+                    )
+                    tmpf.close()
+                    filename = tmpf.name
 
-                    path = os.path.join(dest, filename)
+                path = os.path.join(dest, filename)
 
-                    # create dest subdir if they do not exist
-                    dest_dir = os.path.dirname(path)
-                    if not os.path.exists(dest_dir):
-                        mkdir(dest_dir)
+                # create dest subdir if they do not exist
+                dest_dir = os.path.dirname(path)
+                if not os.path.exists(dest_dir):
+                    mkdir(dest_dir)
 
-                    logger.info("downloading %s size=%s", path, content_length)
+                logger.info("downloading %s size=%s", path, content_length)
 
-                    with open(path, "wb") as fd:
-                        for chunk in chunks:
-                            fd.write(chunk)
+                with open(path, "wb") as fd:
+                    for chunk in chunks:
+                        fd.write(chunk)
 
-                    if validate is None or validate(path):
-                        return path
-                    else:
-                        rm(path)
+                if validate is None or validate(path):
+                    return path
+                rm(path)
         except (requests.exceptions.RequestException, HTTPError) as e:
             # An error (timeout?) occurred while downloading the file
             logger.warning("download failed")

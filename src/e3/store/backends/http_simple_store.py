@@ -25,8 +25,7 @@ class HTTPSimpleStoreResourceInfo(ResourceInfo):
                 resource_sha,
             )
             return False
-        else:
-            return True
+        return True
 
     @property
     def uid(self) -> str:

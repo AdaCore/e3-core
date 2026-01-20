@@ -297,10 +297,9 @@ class Walk:
             uid, self.prev_fingerprints[uid], self.new_fingerprints[uid]
         ):
             return self.create_job(uid, data, predecessors, notify_end)
-        else:
-            return self.create_skipped_job(
-                uid, data, predecessors, "skipped", notify_end, status=ReturnValue.skip
-            )
+        return self.create_skipped_job(
+            uid, data, predecessors, "skipped", notify_end, status=ReturnValue.skip
+        )
 
     def collect(self, job: ProcessJob) -> bool:
         """Collect all the results from the given job.

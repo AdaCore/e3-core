@@ -126,10 +126,8 @@ def has_primitive(anod_instance: Anod, name: Literal["download"] | PRIMITIVE) ->
     if is_primitive:
         if func.require is None:
             return True
-        else:
-            return func.require(anod_instance)
-    else:
-        return False
+        return func.require(anod_instance)
+    return False
 
 
 def fetch_attr(instance: Any, name: str, default_value: Any) -> Any:
@@ -361,8 +359,7 @@ class Anod:
         """Access to final qualifier values (with defaults set)."""
         if self.enable_name_generator:
             return Qualifier(self.qualifiers_manager.qualifier_values)
-        else:
-            return self.parsed_qualifier  # type: ignore
+        return self.parsed_qualifier  # type: ignore
 
     @property
     def base_name(self) -> str:
@@ -388,8 +385,7 @@ class Anod:
         """
         if self.enable_name_generator and self.kind != "source":
             return self.qualifiers_manager.build_space_name
-        else:
-            return self.name
+        return self.name
 
     @property
     def build_space(self) -> BuildSpace:
@@ -602,9 +598,8 @@ class Anod:
             config_selectors.update(self.env.to_dict())
 
             return load_with_config(filename, config_selectors)
-        else:
-            with open(filename) as f:
-                return yaml.safe_load(f.read())
+        with open(filename) as f:
+            return yaml.safe_load(f.read())
 
     def __getitem__(self, key: str) -> Any:
         """Access build_space attributes and pre callback values directly.
@@ -627,7 +622,7 @@ class Anod:
             return self._config[key]
 
         # Then check if the key (in lowercase) is in the build_space
-        elif key.isupper():
+        if key.isupper():
             return getattr(self.build_space, key.lower(), None)
         # .. todo:: Raise an error when the item does not exist. Meanwhile,
         #           explicitly return `None`.
@@ -649,8 +644,7 @@ class Anod:
         if self.enable_name_generator:
             assert self.qualifiers_manager is not None
             return self.qualifiers_manager[qualifier_name]
-        else:
-            return self.parsed_qualifier.get(qualifier_name, None)
+        return self.parsed_qualifier.get(qualifier_name, None)
 
     @classmethod
     def primitive(

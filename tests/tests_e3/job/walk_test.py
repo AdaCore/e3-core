@@ -246,8 +246,7 @@ class FingerprintWalk(SimpleWalk):
         filename = self.fingerprint_filename(uid)
         if os.path.exists(filename):
             return Fingerprint.load_from_file(filename)
-        else:
-            return None
+        return None
 
 
 class FingerprintWalkDryRun(FingerprintWalk):

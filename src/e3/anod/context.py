@@ -339,7 +339,7 @@ class AnodContext:
         ):
             logger.warning(f"Unknown primtive {primitive}")
             return None
-        elif TYPE_CHECKING:
+        if TYPE_CHECKING:
             primitive = cast(PRIMITIVE, primitive)
 
         qual_dict: dict[str, str | bool | Iterable[str]]
@@ -985,20 +985,18 @@ class AnodContext:
         """
         if isinstance(action, CreateSource):
             return False
-        elif isinstance(action, DownloadSource):
+        if isinstance(action, DownloadSource):
             return True
-        else:
-            return cls.decision_error(action, decision)
+        return cls.decision_error(action, decision)
 
     @classmethod
     def always_create_source_resolver(cls, action: Action, decision: Decision) -> bool:
         """Force source creation when scheduling a plan."""
         if isinstance(action, CreateSource):
             return True
-        elif isinstance(action, DownloadSource):
+        if isinstance(action, DownloadSource):
             return False
-        else:
-            return cls.decision_error(action, decision)
+        return cls.decision_error(action, decision)
 
     def schedule(self, resolver: ResolverType) -> DAG:
         """Compute a DAG of scheduled actions.

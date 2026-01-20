@@ -1615,7 +1615,7 @@ class TypeURI(object):
         """Check if this type uri is equal to *other*."""
         if isinstance(other, TypeURI):
             return self.uri == other.uri
-        elif isinstance(other, str):
+        if isinstance(other, str):
             return self.uri == other
         return False
 

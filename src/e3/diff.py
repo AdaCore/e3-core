@@ -166,14 +166,12 @@ def patch(
             if discarded_files(path):
                 logger.debug(f"patch {patch_file} discarding {path}")
                 return True
-            else:
-                return False
-        else:
-            for pattern in discarded_files:
-                if fnmatch.fnmatch(path, pattern):
-                    logger.debug(f"patch {patch_file} discarding {path}")
-                    return True
             return False
+        for pattern in discarded_files:
+            if fnmatch.fnmatch(path, pattern):
+                logger.debug(f"patch {patch_file} discarding {path}")
+                return True
+        return False
 
     if discarded_files is None:
         apply_patch(patch_file)

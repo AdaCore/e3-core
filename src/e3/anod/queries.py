@@ -55,10 +55,9 @@ def get_build_node(
     if anod_instance.kind != "install":
         return default
 
-    elif anod_instance.uid[:-8] + ".build" in context.tree:
+    if anod_instance.uid[:-8] + ".build" in context.tree:
         return context[anod_instance.uid[:-8] + ".build"].anod_instance  # type: ignore
-    else:
-        return default
+    return default
 
 
 def get_source_builder(

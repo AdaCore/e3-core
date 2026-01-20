@@ -60,12 +60,13 @@ class SVNRepository:
         """
         if sys.platform != "win32":
             return True
-        else:
-            svn_version = e3.os.process.Run(["svn", "--version"]).out
-            if svn_version is not None and "cygwin" in svn_version:
-                return True
-            else:
-                return False
+
+        svn_version = e3.os.process.Run(["svn", "--version"]).out  # type: ignore[unreachable]
+
+        if svn_version is not None and "cygwin" in svn_version:
+            return True
+
+        return False
 
     @classmethod
     def local_url(cls, repo_path: str) -> str:
@@ -80,8 +81,8 @@ class SVNRepository:
                 # svn info returns the URL with an uppercase letter drive
                 repo_path = repo_path[0].upper() + repo_path[1:]
             return "file:///" + repo_path.replace("\\", "/")
-        else:  # windows: no cover
-            return "file://" + e3.os.fs.unixpath(repo_path)
+        # windows: no cover
+        return "file://" + e3.os.fs.unixpath(repo_path)
 
     @classmethod
     def create(cls, repo_path: str, initial_content_path: str | None = None) -> str:

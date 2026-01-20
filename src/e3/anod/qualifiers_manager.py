@@ -200,8 +200,7 @@ class KeyValueDeclaration(QualifierDeclaration):
             if str_repr:
                 hash_pool.append(str_repr)
             return ""
-        else:
-            return str_repr
+        return str_repr
 
 
 class TagDeclaration(QualifierDeclaration):
@@ -217,15 +216,14 @@ class TagDeclaration(QualifierDeclaration):
         # As soon as a tag qualifier is passed, its value is True
         if isinstance(value, str):
             return True
-        elif value is None:
+        if value is None:
             return True
-        elif isinstance(value, bool):
+        if isinstance(value, bool):
             return value
-        else:
-            raise AnodError(
-                f"{self.origin}: Invalid value for qualifier {self.name}: "
-                f"requires a str, bool or None value, got {type(value)}({value})"
-            )
+        raise AnodError(
+            f"{self.origin}: Invalid value for qualifier {self.name}: "
+            f"requires a str, bool or None value, got {type(value)}({value})"
+        )
 
     def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr."""
@@ -233,10 +231,9 @@ class TagDeclaration(QualifierDeclaration):
             if value:
                 hash_pool.append(self.repr_name)
             return ""
-        elif value:
+        if value:
             return self.repr_name
-        else:
-            return ""
+        return ""
 
 
 class KeySetDeclaration(QualifierDeclaration):
@@ -371,8 +368,7 @@ class KeySetDeclaration(QualifierDeclaration):
             if str_repr:
                 hash_pool.append(str_repr)
             return ""
-        else:
-            return str_repr
+        return str_repr
 
 
 class QualifiersManager:

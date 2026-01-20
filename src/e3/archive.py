@@ -120,26 +120,23 @@ def check_type(
         or (force_extension is not None and force_extension in [".tar.gz", ".tgz"])
     ):
         return "tar.gz"
-    elif filename.endswith(".tar.bz2") or (
+    if filename.endswith(".tar.bz2") or (
         force_extension is not None and force_extension == ".tar.bz2"
     ):
         return "tar.bz2"
-    elif filename.endswith(".tar.xz") or (
+    if filename.endswith(".tar.xz") or (
         force_extension is not None and force_extension == ".tar.xz"
     ):
         return "tar.xz"
-    elif filename.endswith(".tar") or (
+    if filename.endswith(".tar") or (
         force_extension is not None and force_extension == ".tar"
     ):
         return "tar"
-    elif filename.endswith(".zip") or (
+    if filename.endswith(".zip") or (
         force_extension is not None and force_extension == ".zip"
     ):
         return "zip"
-    else:
-        raise ArchiveError(
-            origin="unpack_archive", message=f'unknown format "{filename}"'
-        )
+    raise ArchiveError(origin="unpack_archive", message=f'unknown format "{filename}"')
 
 
 def unpack_archive(

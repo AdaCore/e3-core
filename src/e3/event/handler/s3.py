@@ -82,13 +82,12 @@ class S3Handler(EventHandler):
             success = s3_cp(attach_path, s3_url)
             if not success:
                 return False
-            else:
-                ctype, encoding = mimetypes.guess_type(attach_path)
-                s3_attachs[name] = {
-                    "s3_url": s3_url,
-                    "encoding": encoding,
-                    "ctype": ctype,
-                }
+            ctype, encoding = mimetypes.guess_type(attach_path)
+            s3_attachs[name] = {
+                "s3_url": s3_url,
+                "encoding": encoding,
+                "ctype": ctype,
+            }
 
         # Create the JSON to send on the event bucket
         s3_event = {"attachments": s3_attachs, "event": event.as_dict()}
@@ -110,8 +109,7 @@ class S3Handler(EventHandler):
 
             if not success:
                 return False
-            else:
-                return True
+            return True
         finally:
             if tempfile_name is not None:
                 rm(tempfile_name)

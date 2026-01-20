@@ -473,16 +473,15 @@ class DAG:
         if dist[path_source] == infinite:
             # No path exist between source and target (or no cycle).
             return None
-        else:
-            result: list[VertexID | None] = [path_source]
-            while prev[result[-1]] is not None:
-                result.append(prev[result[-1]])
+        result: list[VertexID | None] = [path_source]
+        while prev[result[-1]] is not None:
+            result.append(prev[result[-1]])
 
-            # In case of cycle detection the first node is None which
-            # is in reality our source node.
-            if path_source is None:
-                result[0] = target
-            return result
+        # In case of cycle detection the first node is None which
+        # is in reality our source node.
+        if path_source is None:
+            result[0] = target
+        return result
 
     def check(self) -> None:
         """Check for cycles and inexisting nodes.
@@ -492,7 +491,7 @@ class DAG:
         # Noop if check already done
         if self.__has_cycle is False:
             return
-        elif self.__has_cycle:
+        if self.__has_cycle:
             raise DAGError(
                 message="this DAG contains at least one cycle", origin="DAG.check"
             )
@@ -663,28 +662,27 @@ class DAG:
             if not successors:
                 # Base case, return node name.
                 return result
-            else:
-                # Recursive case, iterate over children.
-                for i, node in enumerate(sorted(successors)):  # type: ignore
-                    if i == len(successors) - 1:
-                        # If it's the last child, no need to prefix by a pipe.
-                        # Furthermore, the suffix pipe should not continue downwards (we
-                        # need an 'L'-shaped piece instead of a 'T'-shaped one).
-                        new_prefix = "    "
-                        suffix = "\u2514\u2500\u2500 "
-                    else:
-                        # Else, we need to prefix by a pipe.
-                        # Furthermore, we need the suffix pipe to continue downwards
-                        # ('T'-shaped pipe).
-                        new_prefix = "\u2502   "
-                        suffix = "\u251c\u2500\u2500 "
+            # Recursive case, iterate over children.
+            for i, node in enumerate(sorted(successors)):  # type: ignore
+                if i == len(successors) - 1:
+                    # If it's the last child, no need to prefix by a pipe.
+                    # Furthermore, the suffix pipe should not continue downwards (we
+                    # need an 'L'-shaped piece instead of a 'T'-shaped one).
+                    new_prefix = "    "
+                    suffix = "\u2514\u2500\u2500 "
+                else:
+                    # Else, we need to prefix by a pipe.
+                    # Furthermore, we need the suffix pipe to continue downwards
+                    # ('T'-shaped pipe).
+                    new_prefix = "\u2502   "
+                    suffix = "\u251c\u2500\u2500 "
 
-                    node_subtree = get_subtree(
-                        root=node, name_key=name_key, prefix=prefix + new_prefix
-                    )
-                    result += f"\n{prefix}{suffix}{node_subtree}"
+                node_subtree = get_subtree(
+                    root=node, name_key=name_key, prefix=prefix + new_prefix
+                )
+                result += f"\n{prefix}{suffix}{node_subtree}"
 
-                return result
+            return result
 
         if not self.__vertex_predecessors:
             return ""

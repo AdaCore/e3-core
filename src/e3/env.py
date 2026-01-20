@@ -93,9 +93,8 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             if self.host.cpu.bits == 64 and self.host.os.name != "darwin":
                 suffix += "64"
             return self.target.platform + "-" + suffix
-        else:
-            # In native concept the platform is equivalent to target.platform
-            return self.target.platform
+        # In native concept the platform is equivalent to target.platform
+        return self.target.platform
 
     @property
     def is_canadian(self) -> bool:
@@ -104,16 +103,14 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             if (self.build.platform, self.host.platform) in CANADIAN_EXCEPTIONS:
                 return False
             return True
-        else:
-            return False
+        return False
 
     @property
     def is_cross(self) -> bool:
         """Return true if this is a cross configuration."""
         if self.target != self.host:
             return True
-        else:
-            return False
+        return False
 
     def set_build(
         self,
@@ -277,34 +274,33 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
             if split_value[0] == "build":
                 return saved_build
-            elif split_value[0] == "host":
+            if split_value[0] == "host":
                 return saved_host
-            elif split_value[0] == "target":
+            if split_value[0] == "target":
                 return saved_target
-            elif not propagate_build_info:
+            if not propagate_build_info:
                 return Platform.get(
                     platform_name=split_value[0],
                     version=split_value[1],
                     machine=split_value[2],
                     mode=split_value[3],
                 )
-            else:
-                # Propagate machine name and OS version if necessary
-                if split_value[2] is None:
-                    # No new machine name specified, reuse the current one
-                    split_value[2] = saved_build.machine
+            # Propagate machine name and OS version if necessary
+            if split_value[2] is None:
+                # No new machine name specified, reuse the current one
+                split_value[2] = saved_build.machine
 
-                    # And if there is no OS version set also keep the
-                    # current one, setting build='x86-linux' on a 64bit
-                    # Linux machine should not change the OS version
-                    if split_value[1] is None:
-                        split_value[1] = saved_build.os.version
-                return Platform.get(
-                    platform_name=split_value[0],
-                    version=split_value[1],
-                    machine=split_value[2],
-                    mode=split_value[3],
-                )
+                # And if there is no OS version set also keep the
+                # current one, setting build='x86-linux' on a 64bit
+                # Linux machine should not change the OS version
+                if split_value[1] is None:
+                    split_value[1] = saved_build.os.version
+            return Platform.get(
+                platform_name=split_value[0],
+                version=split_value[1],
+                machine=split_value[2],
+                mode=split_value[3],
+            )
 
         # Retrieve final values for build, host and target
         build_opts = get_platform(build, propagate_build_info=True)
@@ -396,8 +392,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         for a in attributes:
             if not hasattr(result, a):
                 return default_value
-            else:
-                result = getattr(result, a)
+            result = getattr(result, a)
 
         if result is None or result == "":
             return default_value
@@ -556,10 +551,9 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
                 pass
         if not found:
             return None
-        else:
-            # Verify that the computed platform is equal to what we had
-            assert e.platform == platform
-            return e
+        # Verify that the computed platform is equal to what we had
+        assert e.platform == platform
+        return e
 
 
 if TYPE_CHECKING:
@@ -637,8 +631,7 @@ class BaseEnv(AbstractBaseEnv):
         """
         if env is None:
             return cls(build=Env().build, host=Env().host, target=Env().target)
-        else:
-            return cls(build=env.build, host=env.host, target=env.target)
+        return cls(build=env.build, host=env.host, target=env.target)
 
 
 class Env(AbstractBaseEnv):

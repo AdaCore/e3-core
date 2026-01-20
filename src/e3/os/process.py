@@ -158,8 +158,7 @@ def to_cmd_lines(cmds: AnyCmdLine) -> list[CmdLine]:
         # the multiple-commands case.  This will allow us
         # to treat both cases the same way.
         return [cmds]  # type: ignore
-    else:
-        return cmds  # type: ignore
+    return cmds  # type: ignore
 
 
 def command_line_image(cmds: AnyCmdLine) -> str:
@@ -356,7 +355,7 @@ class Run:
                             interpreter_cmds[1], default=interpreter_cmds[1]
                         )
                         return interpreter_cmds[1:] + cmd_line
-                    elif (
+                    if (
                         interpreter_cmds[0] in ("/bin/bash", "/bin/sh")
                         and "SHELL" in os.environ
                     ):
@@ -600,8 +599,7 @@ class Run:
             # Process is finished, call wait to finalize it (closing handles,
             # ...)
             return self.wait()
-        else:
-            return None
+        return None
 
     def kill(self, recursive: bool = True, timeout: int = 3) -> None:
         """Kill the process.
@@ -627,8 +625,7 @@ class Run:
         if not has_psutil:  # defensive code
             # psutil not imported, use our is_running function
             return is_running(self.pid)
-        else:
-            return self.internal.is_running()
+        return self.internal.is_running()
 
     def children(self) -> list[Any]:
         """Return list of child processes (using psutil)."""

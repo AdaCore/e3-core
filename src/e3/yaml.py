@@ -182,8 +182,7 @@ class CaseParser:
         if result is not None:
             e3.log.debug("%s=%s match %s", key, result[0], result[1])
             return result[2]
-        else:
-            return None
+        return None
 
     def __format_value(self, value: Any) -> Any:
         """Format a value.
@@ -195,9 +194,9 @@ class CaseParser:
         try:
             if isinstance(value, str):
                 return format_with_dict(value, self.__state)
-            elif isinstance(value, dict):
+            if isinstance(value, dict):
                 return {k: self.__format_value(v) for k, v in value.items()}
-            elif isinstance(value, list):
+            if isinstance(value, list):
                 return [self.__format_value(d) for d in value]
         except (KeyError, TypeError):
             e3.log.debug("Cannot format %s, ignore it", value)
@@ -285,8 +284,7 @@ class CaseParser:
 
         if cursor is self.__state:
             return {k: v for k, v in cursor.items() if k in self.keys}
-        else:
-            return cursor
+        return cursor
 
 
 def load_with_config(filename: str | list[str], config: dict) -> Any:

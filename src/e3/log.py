@@ -206,11 +206,10 @@ def progress_bar(it: Iterator[T] | Sequence[T], **kwargs: Any) -> Iterator[T]:
     """
     if pretty_cli:  # all: no cover
         return tqdm(it, file=sys.stderr, **kwargs)
-    else:
-        # When pretty cli is disabled return a progress bar that do nothing.
-        # returning just the iterator will break calls to tqdm method
-        # otherwise.
-        return tqdm(it, disable=True, file=sys.stderr, **kwargs)
+    # When pretty cli is disabled return a progress bar that do nothing.
+    # returning just the iterator will break calls to tqdm method
+    # otherwise.
+    return tqdm(it, disable=True, file=sys.stderr, **kwargs)
 
 
 __null_handler_set = set()
@@ -432,8 +431,7 @@ def activate(
     # e.g. this could be the case when running the testsuite with pytest xdist
     if getattr(activate, "called_once", False):
         return
-    else:
-        activate.called_once = True  # type: ignore[attr-defined]
+    activate.called_once = True  # type: ignore[attr-defined]
     # By default do not filter anything. What is effectively logged
     # will be defined by setting/unsetting handlers
     logging.getLogger("").setLevel(logging.DEBUG)

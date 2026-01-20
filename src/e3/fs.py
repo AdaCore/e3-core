@@ -299,19 +299,18 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
     """
     if os.path.isdir(path):
         return
-    else:
-        if not quiet:
-            logger.debug("mkdir %s (mode=%s)", path, oct(mode))
-        try:
-            os.makedirs(path, mode)
-        except Exception as e:  # defensive code
-            if os.path.isdir(path):
-                # Take care of cases where in parallel execution environment
-                # the directory is created after the initial test on its
-                # existence and the call to makedirs
-                return
-            logger.error(e)
-            raise FSError(origin="mkdir", message=f"can't create {path}") from e
+    if not quiet:
+        logger.debug("mkdir %s (mode=%s)", path, oct(mode))
+    try:
+        os.makedirs(path, mode)
+    except Exception as e:  # defensive code
+        if os.path.isdir(path):
+            # Take care of cases where in parallel execution environment
+            # the directory is created after the initial test on its
+            # existence and the call to makedirs
+            return
+        logger.error(e)
+        raise FSError(origin="mkdir", message=f"can't create {path}") from e
 
 
 def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) -> None:
@@ -1117,5 +1116,4 @@ def extension(path: str | Path) -> str:
     _, ext2 = os.path.splitext(root)
     if ext2 == ".tar":
         return ext2 + ext
-    else:
-        return ext
+    return ext

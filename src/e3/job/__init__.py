@@ -250,22 +250,20 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
         """See Job.status' description."""
         if self.__spawn_error:
             return ReturnValue.failure
-        elif self.proc_handle is None:
+        if self.proc_handle is None:
             return ReturnValue.notready
-        else:
-            try:
-                if self.proc_handle.status is None:
-                    logger.exception("job %s returned None for status", self.uid)
-                    return ReturnValue.failure
-                else:
-                    return ReturnValue(self.proc_handle.status)
-            except ValueError:
-                logger.exception(
-                    "job %s returned an unknown status %s",
-                    self.uid,
-                    self.proc_handle.status,
-                )
+        try:
+            if self.proc_handle.status is None:
+                logger.exception("job %s returned None for status", self.uid)
                 return ReturnValue.failure
+            return ReturnValue(self.proc_handle.status)
+        except ValueError:
+            logger.exception(
+                "job %s returned an unknown status %s",
+                self.uid,
+                self.proc_handle.status,
+            )
+            return ReturnValue.failure
 
     @abc.abstractproperty
     def cmdline(self) -> list[str]:
