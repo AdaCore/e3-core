@@ -45,7 +45,7 @@ class Walk:
     :vartype scheduler: e3.job.scheduler.Scheduler
     """  # noqa RST304
 
-    def __init__(self, actions: DAG):
+    def __init__(self, actions: DAG) -> None:
         """Object initializer.
 
         :param actions: DAG of actions to perform.

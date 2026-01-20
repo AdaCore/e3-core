@@ -51,7 +51,7 @@ class ElectrolytJob(Job):
         store: Store,
         force_status: ReturnValue = STATUS.unknown,
         dry_run: bool = False,
-    ):
+    ) -> None:
         """Initialize the context of the job.
 
         :param uid: uid of the job
@@ -199,7 +199,7 @@ class ElectrolytJobFactory:
         asr: AnodSpecRepository,
         store: Store,
         dry_run: bool = False,
-    ):
+    ) -> None:
         self.job_status: dict[str, ReturnValue] = {}
         self.sandbox = sandbox
         self.asr = asr

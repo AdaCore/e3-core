@@ -57,7 +57,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         build: Platform | None = None,
         host: Platform | None = None,
         target: Platform | None = None,
-    ):
+    ) -> None:
         if not self._initialized:
             self.build = Platform.get() if build is None else build
             self.host = self.build if host is None else host
@@ -571,7 +571,7 @@ class BaseEnv(AbstractBaseEnv):
         build: Platform | None = None,
         host: Platform | None = None,
         target: Platform | None = None,
-    ):
+    ) -> None:
         """Initialize a BaseEnv object.
 
         On first instantiation, build attribute will be computed and host

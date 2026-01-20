@@ -37,7 +37,7 @@ class HostDB:
     :ivar hosts: dict indexed by host name
     """
 
-    def __init__(self, filename: str | None = None):
+    def __init__(self, filename: str | None = None) -> None:
         """Initialize a host database.
 
         :param filename: if not None, initialize the database from a yaml

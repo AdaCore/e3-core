@@ -546,7 +546,7 @@ class PyPICandidate:
 class PyPIProvider(AbstractProvider):
     """Class that should declared to instanciate a resolver (see resolvelib doc)."""
 
-    def __init__(self, env: dict[str, str], pypi: PyPI):
+    def __init__(self, env: dict[str, str], pypi: PyPI) -> None:
         """Initialize the provider.
 
         :param env: a pip environment selected packages should match

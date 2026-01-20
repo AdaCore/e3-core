@@ -58,7 +58,7 @@ class Main:
         platform_args: bool = False,
         default_x86_64_on_windows: bool = False,
         argument_parser: ArgumentParser | None = None,
-    ):
+    ) -> None:
         """Initialize Main object.
 
         :param name: name of the program (if not specified the filename without

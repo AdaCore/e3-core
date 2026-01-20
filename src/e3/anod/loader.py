@@ -55,7 +55,7 @@ class AnodSpecRepository:
         # Ideally should be spec_config: SpecConfig | None = None,
         # We keep it to Any to avoid mypy issues on other projects
         extra_repositories_config: dict | None = None,
-    ):
+    ) -> None:
         """Initialize an AnodSpecRepository.
 
         :param spec_dir: directory containing the anod specs.
@@ -199,7 +199,7 @@ class AnodSpecRepository:
 
 
 class AnodModule:
-    def __init__(self, name: str, path: str, data: list[str]):
+    def __init__(self, name: str, path: str, data: list[str]) -> None:
         """Initialize an AnodModule instance.
 
         :param name: module name

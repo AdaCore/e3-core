@@ -58,7 +58,7 @@ class Job(metaclass=abc.ABCMeta):
     lock = threading.RLock()
     index_counter = 0
 
-    def __init__(self, uid: str, data: Any, notify_end: NotifyEndType):
+    def __init__(self, uid: str, data: Any, notify_end: NotifyEndType) -> None:
         """Initialize worker.
 
         :param uid: unique work identifier
@@ -211,7 +211,7 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
     :vartype proc_handle: e3.os.process.Run | None
     """
 
-    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]):
+    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]) -> None:
         super().__init__(uid, data, notify_end)
         self.proc_handle: Run | None = None
 

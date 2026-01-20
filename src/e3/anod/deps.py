@@ -19,7 +19,7 @@ logger = e3.log.getLogger("e3.anod.deps")
 class BuildVar:
     """Declare a dependency between an Anod spec and a variable."""
 
-    def __init__(self, name: str, value: Hashable):
+    def __init__(self, name: str, value: Hashable) -> None:
         """Initialize a BuildVar object.
 
         :param name: name of the variable

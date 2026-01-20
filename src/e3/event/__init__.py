@@ -48,7 +48,9 @@ class Event:
       * end_time: time at which the event was closed
     """
 
-    def __init__(self, name: str, uid: str | None = None, **kwargs: dict[str, Any]):
+    def __init__(
+        self, name: str, uid: str | None = None, **kwargs: dict[str, Any]
+    ) -> None:
         """Initialize an Event object.
 
         :param name: name of the event (e.g. e3_test)

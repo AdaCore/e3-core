@@ -21,7 +21,7 @@ class EntryPoint:
         kind: str,
         name: str | None = None,
         description: str | None = None,
-    ):
+    ) -> None:
         """Initialize an entry point.
 
         :param db: dictionary that tracks the list of entry points
@@ -68,7 +68,7 @@ class Machine(EntryPoint):
         name: str | None = None,
         description: str | None = None,
         secure_control_plane: bool = False,
-    ):
+    ) -> None:
         """Initialize a Machine entry point.
 
         :param db: see EntryPoint

@@ -38,7 +38,7 @@ class OrderedDictYAMLLoader(Loader):
     inclusion of yaml files into another yaml
     """
 
-    def __init__(self, stream: IO[str]):
+    def __init__(self, stream: IO[str]) -> None:
         self.name = None
         self.stream = stream
         super().__init__(stream)
@@ -156,7 +156,7 @@ class CaseParser:
     supported by the `re` module, in your case values.
     """
 
-    def __init__(self, initial_config: dict, case_prefix: str = "case_"):
+    def __init__(self, initial_config: dict, case_prefix: str = "case_") -> None:
         self.__state = initial_config.copy()
         self.case_prefix = case_prefix
 

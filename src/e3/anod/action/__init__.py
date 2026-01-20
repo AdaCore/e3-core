@@ -22,7 +22,7 @@ class Action:
 
     __slots__ = ("data", "uid")
 
-    def __init__(self, uid: str, data: Any):
+    def __init__(self, uid: str, data: Any) -> None:
         """Initialize an Action.
 
         :param uid: an unique identifier
@@ -65,7 +65,7 @@ class GetSource(Action):
 
     __slots__ = ("builder", "uid")
 
-    def __init__(self, builder: SourceBuilder):
+    def __init__(self, builder: SourceBuilder) -> None:
         """Object initializer.
 
         :param builder: A SourceBuilder object for the source we need to get.
@@ -90,7 +90,7 @@ class DownloadSource(Download):
 
     __slots__ = ("builder", "uid")
 
-    def __init__(self, builder: SourceBuilder):
+    def __init__(self, builder: SourceBuilder) -> None:
         """Object initializer.
 
         :param builder: A SourceBuilder object for the source we need
@@ -112,7 +112,7 @@ class InstallSource(Action):
 
     __slots__ = ("source", "spec", "uid")
 
-    def __init__(self, uid: str, spec: Anod, source: Source):
+    def __init__(self, uid: str, spec: Anod, source: Source) -> None:
         """Object initializer.
 
         :param uid: The job ID for this source's install.
@@ -136,7 +136,7 @@ class CreateSource(Action):
 
     __slots__ = ("anod_instance", "source_name", "uid")
 
-    def __init__(self, anod_instance: Anod, source_name: str):
+    def __init__(self, anod_instance: Anod, source_name: str) -> None:
         """Initialize CreateSource object.
 
         :param anod_instance: The Anod instance of the spec providing
@@ -164,7 +164,7 @@ class CreateSources(Action):
 
     __slots__ = ("anod_instance", "uid")
 
-    def __init__(self, anod_instance: Anod):
+    def __init__(self, anod_instance: Anod) -> None:
         """Initialize CreateSources object.
 
         :param anod_instance: the Anod instance of the spec
@@ -185,7 +185,7 @@ class Checkout(Action):
 
     __slots__ = ("repo_data", "repo_name", "uid")
 
-    def __init__(self, repo_name: str, repo_data: dict[str, Any]):
+    def __init__(self, repo_name: str, repo_data: dict[str, Any]) -> None:
         """Initialize a Checkout object.
 
         :param repo_name: The name of the repository.
@@ -215,7 +215,7 @@ class AnodAction(Action):
 
     __slots__ = ("anod_instance", "uid")
 
-    def __init__(self, anod_instance: Anod):
+    def __init__(self, anod_instance: Anod) -> None:
         """Initialize an anod Action.
 
         :param anod_instance: an Anod spec instance
@@ -267,7 +267,7 @@ class DownloadBinary(Download):
 
     __slots__ = ("data", "uid")
 
-    def __init__(self, data: Anod):
+    def __init__(self, data: Anod) -> None:
         """Initialize a DownloadBinary object.
 
         :param data: Anod instance
@@ -294,7 +294,7 @@ class UploadComponent(Upload):
     __slots__ = ("anod_instance", "data", "uid")
     str_prefix = ""
 
-    def __init__(self, data: Anod):
+    def __init__(self, data: Anod) -> None:
         """Initialize an UploadComponent object.
 
         :param data: Anod instance
@@ -329,7 +329,7 @@ class UploadSource(Upload):
 
     __slots__ = ("anod_instance", "source_name", "uid")
 
-    def __init__(self, anod_instance: Anod, source_name: str):
+    def __init__(self, anod_instance: Anod, source_name: str) -> None:
         """Initialize UploadSource object.
 
         :param anod_instance: The Anod instance of the spec providing
@@ -357,7 +357,7 @@ class CheckVirus(Action):
 
     __slots__ = ("anod_instance", "data", "uid")
 
-    def __init__(self, data: Anod):
+    def __init__(self, data: Anod) -> None:
         """Initialize a CheckVirus object.
 
         :param data: Anod instance
@@ -435,7 +435,7 @@ class Decision(Action, metaclass=abc.ABCMeta):
 
     def __init__(
         self, root: Action, left: Action, right: Action, choice: Choice | None = None
-    ):
+    ) -> None:
         """Initialize a Decision instance.
 
         :param root: parent node
@@ -573,7 +573,7 @@ class CreateSourceOrDownload(Decision):
     CREATE: Final = Decision.LEFT
     DOWNLOAD: Final = Decision.RIGHT
 
-    def __init__(self, root: Action, left: CreateSource, right: DownloadSource):
+    def __init__(self, root: Action, left: CreateSource, right: DownloadSource) -> None:
         """Initialize a CreateSourceOrDownload instance.
 
         :param root: parent node
@@ -595,7 +595,7 @@ class BuildOrDownload(Decision):
     BUILD: Final = Decision.LEFT
     INSTALL: Final = Decision.RIGHT
 
-    def __init__(self, root: Install, left: Build, right: DownloadBinary):
+    def __init__(self, root: Install, left: Build, right: DownloadBinary) -> None:
         """Initialize a BuildOrDownload instance.
 
         :param root: parent node

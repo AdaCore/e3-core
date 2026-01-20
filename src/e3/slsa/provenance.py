@@ -1597,7 +1597,7 @@ class TypeURI(object):
         https://in-toto.io/Statement/v1
     """
 
-    def __init__(self, uri: str):
+    def __init__(self, uri: str) -> None:
         # Validate this uri.
         from urllib.parse import ParseResult, urlparse
 
@@ -1658,5 +1658,5 @@ class ResourceURI(TypeURI):
         pkg:deb/debian/stunnel@5.50-3?arch=amd64
     """
 
-    def __init__(self, uri: str):
+    def __init__(self, uri: str) -> None:
         super(ResourceURI, self).__init__(uri)

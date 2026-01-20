@@ -45,7 +45,7 @@ class SVNRepository:
     svn_bin = None
     log_stream: TextIO | IO[str] = sys.stdout
 
-    def __init__(self, working_copy: str):
+    def __init__(self, working_copy: str) -> None:
         """Initialize a SVNRepository object.
 
         :param working_copy: working copy of the SVNRepository

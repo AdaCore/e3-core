@@ -35,7 +35,9 @@ class RewriteImportRule:
         reject = 0
         skip = 1
 
-    def __init__(self, module: str, name: str = ".*", action: RuleAction | None = None):
+    def __init__(
+        self, module: str, name: str = ".*", action: RuleAction | None = None
+    ) -> None:
         """Initialize the object.
 
         :param module: regexp suitable for re.match() to match against the
@@ -104,7 +106,7 @@ class RewriteImportNodeTransformer(ast.NodeTransformer):
     Currently only the RewriteImportRule are supported.
     """
 
-    def __init__(self, rules: list[RewriteImportRule]):
+    def __init__(self, rules: list[RewriteImportRule]) -> None:
         """Load a set of rules.
 
         :param rules: list of rule objects

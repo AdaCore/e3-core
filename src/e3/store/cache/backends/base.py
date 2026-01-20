@@ -12,7 +12,7 @@ DEFAULT_TIMEOUT = 3600 * 24
 
 
 class Cache(metaclass=abc.ABCMeta):
-    def __init__(self, cache_configuration: Any):
+    def __init__(self, cache_configuration: Any) -> None:
         self.cache_configuration = cache_configuration
 
     @abc.abstractmethod

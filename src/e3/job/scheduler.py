@@ -39,7 +39,7 @@ class Scheduler:
         queues: dict[str, int] | None = None,
         tokens: int = 1,
         job_timeout: int = DEFAULT_JOB_MAX_DURATION,
-    ):
+    ) -> None:
         """Initialize Scheduler.
 
         :param job_provider: function that returns instances of Job.

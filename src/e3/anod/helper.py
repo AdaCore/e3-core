@@ -27,7 +27,7 @@ class Make:
         exec_dir: str | None = None,
         jobs: int | None = None,
         make_exe: str = "make",
-    ):
+    ) -> None:
         """Initialize a Make object.
 
         :param anod_instance: an Anod instance
@@ -148,7 +148,7 @@ class Configure:
         src_dir: str | None = None,
         exec_dir: str | None = None,
         auto_target: bool = True,
-    ):
+    ) -> None:
         """Initialize a Configure object.
 
         :param anod_instance: an Anod instance

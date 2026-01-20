@@ -67,7 +67,7 @@ class SchedulingError(E3Error):
         origin: str | None = None,
         uid: VertexID | None = None,
         initiators: list[VertexID] | None = None,
-    ):
+    ) -> None:
         """Scheduling error initialization.
 
         :param message: the exception message
@@ -107,7 +107,7 @@ class AnodContext:
         default_env: BaseEnv | None = None,
         reject_duplicates: bool = False,
         spec_load_hook: SpecLoadHook | None = None,
-    ):
+    ) -> None:
         """Initialize a new context.
 
         :param spec_repository: an Anod repository

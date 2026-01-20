@@ -47,7 +47,7 @@ class ActionOrImpact(JsonData):
         self,
         statement: str | None = None,
         timestamp: datetime | None = None,
-    ):
+    ) -> None:
         """Initialize an action or impact object.
 
         :param str | None statement: The action or impact statement. If
@@ -175,7 +175,7 @@ class Document(JsonData):
         self,
         metadata: Metadata,
         statements: list[Statement] | None = None,
-    ):
+    ) -> None:
         """Initialize a VEX document object.
 
         :param metadata: The metadata defining this VEX document.
@@ -403,7 +403,7 @@ class Metadata(JsonData):
         created_on: datetime | None = None,
         last_updated_on: datetime | None = None,
         spec_version: str = SPEC_VERSION,
-    ):
+    ) -> None:
         """Initialize a VEX specification metadata.
 
         :param author: The author of this VEX document.
@@ -514,7 +514,7 @@ class Product(JsonData):
         products: list[ProductId],
         supplier: str,
         subcomponents: list[SubProductId] | None = None,
-    ):
+    ) -> None:
         """Initialize a product object.
 
         :param products: The list of product IDs defined by this product.
@@ -597,7 +597,7 @@ class ProductId(JsonData):
         self,
         _id: str,
         version: str,
-    ):
+    ) -> None:
         """Initialize this product ID object.
 
         :param _id: The ID defining this product.
@@ -681,7 +681,7 @@ class Statement(JsonData):
         status: StatementStatus,
         vulnerability: Vulnerability,
         product: Product,
-    ):
+    ) -> None:
         """Initialize a VEX document statement object.
 
         :param metadata: The metadata of this statement.
@@ -762,7 +762,7 @@ class StatementMetadata(JsonData):
         _id: str | None = None,
         first_issued_on: datetime | None = None,
         last_updated_on: datetime | None = None,
-    ):
+    ) -> None:
         """Initialize a statement metadata object.
 
         :param version: The version of this statement.
@@ -850,7 +850,7 @@ class StatementStatus(JsonData):
         justification: Justification | str | None = Justification.NO_JUSTIFICATION,
         action: ActionOrImpact | None = None,
         notes: str | None = None,
-    ):
+    ) -> None:
         """Initialize a statement status.
 
         :param status: The product status with regard to the current statement.
@@ -920,7 +920,7 @@ class SubProductId(ProductId):
         version: str,
         platforms: list[str],
         status: StatementStatus | None,
-    ):
+    ) -> None:
         """Initialize a Sub-product ID.
 
         :ivar str _id: see :class:`ProductId`
@@ -1006,7 +1006,7 @@ class Vulnerability(JsonData):
         version: str | None = None,
         source: str | None = None,
         url: str | None = None,
-    ):
+    ) -> None:
         """Initialize a VEX vulnerability object.
 
         :param _id: The vulnerability ID.

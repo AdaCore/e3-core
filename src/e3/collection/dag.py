@@ -26,7 +26,7 @@ class DAGIterator:
     BUSY = 1
     VISITED = 2
 
-    def __init__(self, dag: DAG, enable_busy_state: bool = False):
+    def __init__(self, dag: DAG, enable_busy_state: bool = False) -> None:
         """Initialize DAG iterator.
 
         :param dag: the dag on which iteration is done

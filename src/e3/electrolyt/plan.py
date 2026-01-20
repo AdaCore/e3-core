@@ -36,7 +36,7 @@ class Plan:
         data: dict[str, Any],
         entry_point_cls: dict[str, Callable[..., EntryPoint]] | None = None,
         plan_ext: str = ".plan",
-    ):
+    ) -> None:
         """Initialize a new plan.
 
         :param data: a dictionary defining additional globals to push
@@ -140,7 +140,7 @@ class PlanContext:
         enabled: bool = True,
         default_push_to_store: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         """Initialize an execution context or a scope.
 
         :param stack: stack of PlanAction object that keep track of scopes. Used
