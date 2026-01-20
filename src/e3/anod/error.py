@@ -28,6 +28,6 @@ class ShellError(AnodError):
         message: str,
         origin: str | None = None,
         process: "Run" | None = None,
-    ):
+    ) -> None:
         super().__init__(message, origin)
         self.process = process

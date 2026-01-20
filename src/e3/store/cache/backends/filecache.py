@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 class FileCache(Cache):
     cache_suffix = ".cache"
 
-    def __init__(self, cache_configuration: Any):
+    def __init__(self, cache_configuration: Any) -> None:
         super().__init__(cache_configuration)
         self.cache_dir = cache_configuration["cache_dir"]
 

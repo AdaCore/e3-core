@@ -68,7 +68,7 @@ class BaseURL:
     The root class BaseURL does not use authentication
     """
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         """Initialize a base url object.
 
         :param url: the base url
@@ -90,7 +90,7 @@ class HTTPSession:
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 
-    def __init__(self, base_urls: list[str | BaseURL] | None = None):
+    def __init__(self, base_urls: list[str | BaseURL] | None = None) -> None:
         """Initialize HTTP session.
 
         :param base_urls: list of urls used as prefix to subsequent requests.

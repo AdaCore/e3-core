@@ -27,17 +27,17 @@ DICT_VALUES: dict = {
 
 
 class AnObject(object):
-    def __init__(self, value: dict):
+    def __init__(self, value: dict) -> None:
         self.value = value
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return self.value == other.value
         return False
 
 
 class SimpleJsonData(JsonData):
-    def __init__(self, string: str, integer: int, float_var: float):
+    def __init__(self, string: str, integer: int, float_var: float) -> None:
         self.string: str = string
         self.integer: int = integer
         self.float_var: float = float_var
@@ -53,7 +53,7 @@ class SimpleJsonData(JsonData):
 class ComplexJsonData(JsonData):
     """Example of a JsonData which needs to overwrite the from_dict() method."""
 
-    def __init__(self, data: SimpleJsonData, an_object: AnObject):
+    def __init__(self, data: SimpleJsonData, an_object: AnObject) -> None:
         self.data: SimpleJsonData = data
         self.an_object = an_object
 

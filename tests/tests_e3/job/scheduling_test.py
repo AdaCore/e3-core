@@ -167,7 +167,7 @@ class TestScheduler:
         """
 
         class SchedulerContext:
-            def __init__(self):
+            def __init__(self) -> None:
                 # Save in results tuples with first element being a bool
                 # indicating success or failure and the second the job itself
                 self.results = {}

@@ -142,7 +142,7 @@ class PypiSimulator:
         context.status_code = 200
         return result
 
-    def __enter__(self):
+    def __enter__(self) -> PypiSimulator:
         self.requests_mock.start()
         self.requests_mock.get(self.SIMPLE_MATCHER, text=self.get_metadata)
         self.requests_mock.get(self.DOWNLOAD_MATCHER, content=self.get_resource)
@@ -392,7 +392,7 @@ class MavenCentralSimulator:
         ).hexdigest()
         return result
 
-    def __enter__(self):
+    def __enter__(self) -> MavenCentralSimulator:
         self.__requests_mock.start()
         self.__requests_mock.get(self.METADATA_MATCHER, text=self._get_metadata)
         self.__requests_mock.head(self.FILE_MATCHER, text=self._get_file)

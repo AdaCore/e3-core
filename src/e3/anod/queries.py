@@ -100,7 +100,7 @@ class SourceClosure:
         context: AnodContext,
         expand_packages: bool = False,
         data_key: Callable[[Any], str] | None = None,
-    ):
+    ) -> None:
         """Initialize a SourceClosure.
 
         :param anod_instance: an Anod instance

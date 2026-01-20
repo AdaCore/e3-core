@@ -22,7 +22,7 @@ class SMTPHandler(EventHandler):
         from_addr: str,
         to_addr: str,
         smtp_servers: str | list[str],
-    ):
+    ) -> None:
         """Initialize a SMTP event manager."""
         self.default_subject = subject
         self.from_addr = from_addr

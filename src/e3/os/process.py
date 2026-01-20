@@ -637,7 +637,7 @@ class Run:
 class File:
     """Can be a PIPE, a file object."""
 
-    def __init__(self, name: Any, mode: str = "r"):
+    def __init__(self, name: Any, mode: str = "r") -> None:
         """Create a new File.
 
         :param name: can be PIPE, STDOUT, a filename string, bytes, an opened

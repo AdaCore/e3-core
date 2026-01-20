@@ -171,7 +171,7 @@ class UnicodeString(Structure):
 
     _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]
 
-    def __init__(self, value: str | None = None, max_length: int = 0):
+    def __init__(self, value: str | None = None, max_length: int = 0) -> None:
         strbuf = None
         length = 0
         if value is not None or max_length > 0:
@@ -372,7 +372,7 @@ class ObjectAttributes(Structure):
         ("security_quality_of_service", LPVOID),
     ]
 
-    def __init__(self, name: UnicodeString, parent: HANDLE | None = None):
+    def __init__(self, name: UnicodeString, parent: HANDLE | None = None) -> None:
         """Initialize ObjectAttributes.
 
         :param name: full path to the file if parent is None else filename
@@ -525,13 +525,13 @@ if sys.platform == "win32":
 
 
 class NTException(E3Error):
-    def __init__(self, status: int, message: str, origin: str | None = None):
+    def __init__(self, status: int, message: str, origin: str | None = None) -> None:
         self.status = status
         if self.status < 0:
             self.status += 2**32
         E3Error.__init__(self, message, origin=origin)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return E3Error.__str__(self) + "(status={:X} '{}')".format(
             self.status,
             Status.msgs.get(self.status, "unknown"),

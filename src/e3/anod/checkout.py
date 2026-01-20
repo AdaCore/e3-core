@@ -39,7 +39,9 @@ class CheckoutManager:
                                         created
     """
 
-    def __init__(self, name: str, working_dir: str, compute_changelog: bool = True):
+    def __init__(
+        self, name: str, working_dir: str, compute_changelog: bool = True
+    ) -> None:
         """Initialize CheckoutManager instance.
 
         :param name: a symbolic name for that checkout

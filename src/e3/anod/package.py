@@ -33,7 +33,7 @@ class Package:
         prefix: str,
         publish: bool = False,
         version: Callable[[], str] | None = None,
-    ):
+    ) -> None:
         """Create a binary package.
 
         :param prefix: prefix of the package to create, the name will be
@@ -118,7 +118,7 @@ class Source:
         unpack_cmd: Callable | None = None,
         remove_root_dir: bool = True,
         ignore: None = None,
-    ):
+    ) -> None:
         """Create a new source object.
 
         Register a source package and describe where it should be installed.
@@ -195,7 +195,7 @@ class SourceBuilder:
         prepare_src: PrepareSrcCB | None = None,
         apply_patch: Literal[1] | ApplyPatchCB | None = None,
         kind: str = "source",
-    ):
+    ) -> None:
         """Define a builder for the source package.
 
         :param name: short name of the package (as used by build_source_list
@@ -309,7 +309,7 @@ class UnmanagedSourceBuilder(SourceBuilder):
 class ThirdPartySourceBuilder(UnmanagedSourceBuilder):
     """SourceBuilder for thirdparty packages."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         """Create a SourceBuilder for a third party package.
 
         :param name: full package name (including extension)
@@ -333,7 +333,7 @@ class ExternalSourceBuilder(UnmanagedSourceBuilder):
         setup: str | None = None,
         date: str | None = None,
         query_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize ExternalSourceBuilder.
 
         :param name: source name

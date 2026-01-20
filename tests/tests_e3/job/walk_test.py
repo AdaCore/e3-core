@@ -137,7 +137,7 @@ class ControlledJob(ProcessJob):
     the "cmd" line method for more details on this.
     """
 
-    def __init__(self, uid, data, notify_end):
+    def __init__(self, uid, data, notify_end) -> None:
         super().__init__(uid, data, notify_end)
         self.run_count = 0
 
@@ -168,7 +168,7 @@ class ControlledJob(ProcessJob):
 class SimpleWalk(Walk):
     dry_run_mode = False
 
-    def __init__(self, actions):
+    def __init__(self, actions) -> None:
         # The list of jobs (by UID) that have been requeued.
         self.saved_jobs = {}
         self.requeued = {}

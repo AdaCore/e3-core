@@ -27,7 +27,7 @@ class BuildSpace:
         "tmp",
     )
 
-    def __init__(self, root_dir: str):
+    def __init__(self, root_dir: str) -> None:
         """Initialise a build space.
 
         :param root_dir: build space root dir

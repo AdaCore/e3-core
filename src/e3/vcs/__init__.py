@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class VCSError(E3Error):
-    def __init__(self, message: str, origin: str, process: Run | None = None):
+    def __init__(self, message: str, origin: str, process: Run | None = None) -> None:
         super().__init__(message, origin)
         self.origin = origin
         self.message = message

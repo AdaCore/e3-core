@@ -77,7 +77,7 @@ class JSONFormatter(logging.Formatter):
         self,
         date_fmt: str | None = None,
         context: Mapping[str, Any] | None = None,
-    ):
+    ) -> None:
         """Initialize formatter with context.
 
         :param date_fmt: see logging module

@@ -46,7 +46,7 @@ class WithOpenFile:
         desired_access: int | None = None,
         shared_access: int | None = None,
         open_options: int | None = None,
-    ):
+    ) -> None:
         self.desired_access = desired_access
         self.shared_access = shared_access
         self.open_options = open_options
@@ -78,7 +78,7 @@ class NTFile:
     :ivar basic_info: ObjectAttributes object associated with the file
     """
 
-    def __init__(self, filename: str | Path, parent: NTFile | None = None):
+    def __init__(self, filename: str | Path, parent: NTFile | None = None) -> None:
         """Initialize a NTFile object.
 
         :param filename: path to the file or basename if parent is not None

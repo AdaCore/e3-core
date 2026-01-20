@@ -70,7 +70,7 @@ class GitRepository:
     git: str | None = None
     log_stream: TextIO | IO[str] = sys.stdout
 
-    def __init__(self, working_tree: str):
+    def __init__(self, working_tree: str) -> None:
         """Initialize a GitRepository object.
 
         :param working_tree: working tree of the GitRepository

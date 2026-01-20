@@ -4,7 +4,7 @@ from __future__ import annotations
 class E3Error(Exception):
     """Exception raised by functions defined in E3."""
 
-    def __init__(self, message: str | list[str], origin: str | None = None):
+    def __init__(self, message: str | list[str], origin: str | None = None) -> None:
         """Initialize an E3Error.
 
         E3Error can store several messages and thus be used to propagate them.

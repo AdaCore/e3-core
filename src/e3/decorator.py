@@ -79,7 +79,7 @@ class memoize:
     No keyword argument can be passed to the decorated function.
     """
 
-    def __init__(self, func: Callable):
+    def __init__(self, func: Callable) -> None:
         """Initialize the decorator.
 
         :param func: function to decorate

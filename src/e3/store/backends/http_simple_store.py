@@ -11,7 +11,7 @@ logger = e3.log.getLogger("store.httpsimplestore")
 
 
 class HTTPSimpleStoreResourceInfo(ResourceInfo):
-    def __init__(self, url: str, sha: str):
+    def __init__(self, url: str, sha: str) -> None:
         self.url = url
         self.sha = sha
 

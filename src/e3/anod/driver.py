@@ -38,7 +38,7 @@ def primitive_check() -> Callable[[F], F]:
 
 
 class AnodDriver:
-    def __init__(self, anod_instance: Anod, store: Store):
+    def __init__(self, anod_instance: Anod, store: Store) -> None:
         """Initialize the Anod driver for a given Anod instance.
 
         :param anod_instance: an Anod instance

@@ -242,7 +242,7 @@ class Anod:
         env: BaseEnv | None = None,
         *,
         parse_qualifiers: bool = True,
-    ):
+    ) -> None:
         """Initialize an Anod instance.
 
         :param qualifier: the qualifier used when loading the spec
