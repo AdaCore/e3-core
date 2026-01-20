@@ -164,22 +164,22 @@ class Platform(
     def __str__(self) -> str:
         """Return a representation string of the object."""
         result = (
-            "platform: %(platform)s\n"
-            "machine:  %(machine)s\n"
-            "is_hie:   %(is_hie)s\n"
-            "is_host:  %(is_host)s\n"
-            "triplet:  %(triplet)s\n"
-            "domain:   %(domain)s\n"
+            "platform: {platform}\n"
+            "machine:  {machine}\n"
+            "is_hie:   {is_hie}\n"
+            "is_host:  {is_host}\n"
+            "triplet:  {triplet}\n"
+            "domain:   {domain}\n"
             "OS\n"
-            "   name:          %(os_name)s\n"
-            "   version:       %(os_version)s\n"
-            "   exeext:        %(os_exeext)s\n"
-            "   dllext:        %(os_dllext)s\n"
-            "   is_bareboard:  %(os_is_bareboard)s\n"
+            "   name:          {os_name}\n"
+            "   version:       {os_version}\n"
+            "   exeext:        {os_exeext}\n"
+            "   dllext:        {os_dllext}\n"
+            "   is_bareboard:  {os_is_bareboard}\n"
             "CPU\n"
-            "   name:   %(cpu_name)s\n"
-            "   bits:   %(cpu_bits)s\n"
-            "   endian: %(cpu_endian)s\n"
-            "   cores:  %(cpu_cores)s" % self.to_dict(full_os_version=True)
+            "   name:   {cpu_name}\n"
+            "   bits:   {cpu_bits}\n"
+            "   endian: {cpu_endian}\n"
+            "   cores:  {cpu_cores}".format(**self.to_dict(full_os_version=True))
         )
         return result

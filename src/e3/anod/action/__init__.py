@@ -33,7 +33,7 @@ class Action:
 
     @property
     def run_method(self) -> str:
-        return "do_%s" % self.__class__.__name__.lower()
+        return "do_{}".format(self.__class__.__name__.lower())
 
 
 class Root(Action):
@@ -278,7 +278,7 @@ class DownloadBinary(Download):
         super().__init__(uid=uid, data=data)
 
     def __str__(self) -> str:
-        return "download binary of %s" % self.uid.rsplit(".", 1)[0]
+        return "download binary of {}".format(self.uid.rsplit(".", 1)[0])
 
 
 class Upload(Action):

@@ -65,7 +65,7 @@ def test_configure() -> None:
     # Check that the two other arguments are as expected
     assert ac.build()["cmd"][-2:] == [
         "../src/configure",
-        "--build=%s" % ac.env.build.triplet,
+        "--build={}".format(ac.env.build.triplet),
     ]
 
     # Check with canadian env

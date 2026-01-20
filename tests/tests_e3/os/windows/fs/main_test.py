@@ -194,7 +194,7 @@ def test_iterate_on_dir() -> None:
         ntfile.close()
 
     for n in range(40):
-        touch(os.path.join(test_dir_path, "%s.txt" % n))
+        touch(os.path.join(test_dir_path, "{}.txt".format(n)))
     try:
         ntfile = NTFile(test_dir_path)
         status = ntfile.iterate_on_dir(fun, default_result=False)

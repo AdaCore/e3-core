@@ -856,8 +856,8 @@ class AnodContext:
                 else:
                     raise AnodError(
                         origin="expand_spec",
-                        message="source %s does not exist "
-                        "(referenced by %s)" % (s.name, result.uid),
+                        message="source {} does not exist "
+                        "(referenced by {})".format(s.name, result.uid),
                     )
 
                 src_get_action = GetSource(obj)

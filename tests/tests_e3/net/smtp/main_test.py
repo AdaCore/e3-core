@@ -77,7 +77,7 @@ def test_sendmail_onerror(caplog) -> None:
             from_addr, to_addresses, msg_as_string, ["smtp.localhost"], message_id=mid
         )
         assert result is True
-        assert "Message-ID: %s sent successfully" % mid in caplog.text
+        assert "Message-ID: {} sent successfully".format(mid) in caplog.text
         assert "smtp quit" in caplog.text
 
     with mock.patch("smtplib.SMTP_SSL") as mock_smtp:
@@ -93,7 +93,7 @@ def test_sendmail_onerror(caplog) -> None:
             from_addr, to_addresses, msg_as_string, ["smtp.localhost"], message_id=mid
         )
         assert result is True
-        assert "Message-ID: %s sent successfully" % mid in caplog.text
+        assert "Message-ID: {} sent successfully".format(mid) in caplog.text
 
 
 def test_send_message() -> None:

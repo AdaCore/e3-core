@@ -382,7 +382,9 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
             elif os.path.isdir(src):
                 if destinsrc(src, dst):
                     raise FSError(
-                        "Cannot move a directory '%s' into itself '%s'." % (src, dst)
+                        "Cannot move a directory '{}' into itself '{}'.".format(
+                            src, dst
+                        )
                     ) from err
                 shutil.copytree(src, real_dst, symlinks=True)
                 rm(src, recursive=True)

@@ -224,7 +224,7 @@ class CaseParser:
         if cursor is self.__state:
             self.keys.add(real_key)
 
-        real_key_str = "[%s]" % "][".join(prefix + (real_key,))
+        real_key_str = "[{}]".format("][".join(prefix + (real_key,)))
 
         if real_key not in cursor or real_key == key:
             e3.log.debug("set %s -> %s", real_key_str, real_value)

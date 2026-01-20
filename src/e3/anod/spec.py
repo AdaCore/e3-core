@@ -87,8 +87,10 @@ def check_api_version(version: str) -> None:
     if version.strip() not in SUPPORTED_API:
         raise AnodError(
             origin="check_api_version",
-            message="API version mismatch. Anod specs are at %s but the "
-            "driver is only supporting %s" % (version.strip(), ",".join(SUPPORTED_API)),
+            message="API version mismatch. Anod specs are at {} but the "
+            "driver is only supporting {}".format(
+                version.strip(), ",".join(SUPPORTED_API)
+            ),
         )
 
 

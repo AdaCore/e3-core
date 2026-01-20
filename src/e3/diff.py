@@ -78,12 +78,12 @@ def diff(
     for k in (0, 1):
         if ignore_white_chars:
             contents[k] = [
-                "%s\n" % line.strip() for line in contents[k] if line.strip()
+                "{}\n".format(line.strip()) for line in contents[k] if line.strip()
             ]
         else:
             # Even if white spaces are not ignored we should ensure at
             # that we don't depend on platform specific newline
-            contents[k] = ["%s\n" % line.rstrip("\r\n") for line in contents[k]]
+            contents[k] = ["{}\n".format(line.rstrip("\r\n")) for line in contents[k]]
 
         # If we have a filter apply it now
         if ignore is not None:
@@ -141,8 +141,9 @@ def patch(
         if p.status != 0:
             raise DiffError(
                 origin="patch",
-                message="running %s < %s in %s failed with:\n%s"
-                % (" ".join(cmd), fname, working_dir, p.out),
+                message="running {} < {} in {} failed with:\n{}".format(
+                    " ".join(cmd), fname, working_dir, p.out
+                ),
             )
         logger.debug(p.out)
 

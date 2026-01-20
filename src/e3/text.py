@@ -14,7 +14,7 @@ def format_with_dict(pattern: str, values: dict[str, str]) -> str:
         replaced
     """
     key_regexp = r"|".join([rf"\({k}\)" for k in values])
-    result = re.sub(r"%%(?!%s)" % key_regexp, r"%%", pattern)
+    result = re.sub(r"%(?!{})".format(key_regexp), r"%%", pattern)
     return result % values
 
 
