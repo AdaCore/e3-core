@@ -5,6 +5,7 @@ from enum import Enum
 from typing import cast, overload, TYPE_CHECKING
 import json
 import os
+from pathlib import Path
 import tempfile
 from e3.fs import extension, rm, mv, cp, sync_tree
 from e3.anod.store.interface import StoreError, resource_id as store_resource_id
@@ -433,8 +434,9 @@ class File(object):
             ):
                 if self.downloaded_as is not None:
                     # The resource is already on the local file system. Just copy it.
-                    if os.path.abspath(self.downloaded_as) != os.path.abspath(
-                        downloaded_file
+                    if (
+                        Path(self.downloaded_as).resolve()
+                        != Path(downloaded_file).resolve()
                     ):
                         cp(self.downloaded_as, downloaded_file)
                 else:
