@@ -423,19 +423,11 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         else:
             if append:
                 new_path = os.path.pathsep + path
-                logger.debug(
-                    "export {env_var}=${env_var}{new_path}".format(
-                        env_var=env_var, new_path=new_path
-                    )
-                )
+                logger.debug(f"export {env_var}=${env_var}{new_path}")
                 os.environ[env_var] += new_path
             else:
                 new_path = path + os.path.pathsep + os.environ[env_var]
-                logger.debug(
-                    "export {env_var}={new_path}".format(
-                        env_var=env_var, new_path=new_path
-                    )
-                )
+                logger.debug(f"export {env_var}={new_path}")
                 os.environ[env_var] = new_path
 
     @property

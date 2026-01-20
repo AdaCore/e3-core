@@ -250,7 +250,7 @@ class SourceBuilder:
         elif len(self.checkout) > 1:
             raise e3.anod.error.SpecError(
                 "more than 1 checkout and no prepare_src function"
-                " given for {}".format(self.name)
+                f" given for {self.name}"
             )
 
         # Set default function (a basic sync_tree call) that ignore

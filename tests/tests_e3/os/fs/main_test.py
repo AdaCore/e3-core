@@ -30,7 +30,7 @@ def test_chmod() -> None:
 
     def check_mode(filename, mode) -> None:
         fmode = stat.S_IMODE(os.stat(filename).st_mode)
-        assert fmode == mode, "{} != {}".format(oct(fmode), oct(mode))
+        assert fmode == mode, f"{oct(fmode)} != {oct(mode)}"
 
     with pytest.raises(e3.os.fs.OSFSError) as err:
         e3.os.fs.chmod("666", "a")

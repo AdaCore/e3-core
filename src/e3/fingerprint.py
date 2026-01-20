@@ -163,7 +163,7 @@ class Fingerprint:
     def __str__(self) -> str:
         """Return a string representation of the fingerprint."""
         return "\n".join(
-            ["{}: {}".format(k, self.elements[k]) for k in sorted(self.elements.keys())]
+            [f"{k}: {self.elements[k]}" for k in sorted(self.elements.keys())]
         )
 
     def checksum(self) -> str:

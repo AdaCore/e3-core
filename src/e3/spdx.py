@@ -709,7 +709,7 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
         pass
 
     def __str__(self) -> str:
-        return "{0}: {1}".format(self.algorithm, self.value)
+        return f"{self.algorithm}: {self.value}"
 
     def to_json_dict(self) -> dict[str, dict[str, str]]:
         return {
