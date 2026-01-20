@@ -66,7 +66,7 @@ class BuildInfo(object):
             build_date=str(data["build_date"]),
             setup=str(data["setup"]),
             creation_date=data["creation_date"],
-            build_id=str(data["_id"]),
+            id=str(data["_id"]),
             build_version=str(data["build_version"]),
             isready=data.get("isready", False),
             store=store,
@@ -77,7 +77,7 @@ class BuildInfo(object):
         build_date: str,
         setup: str,
         creation_date: str,
-        build_id: str,  # noqa: A002
+        id: str,  # noqa: A002
         build_version: str,
         isready: bool,
         store: StoreReadInterface | StoreRWInterface | None = None,
@@ -95,7 +95,7 @@ class BuildInfo(object):
         self.build_date = build_date
         self.setup = setup
         self.creation_date = creation_date
-        self.id = build_id
+        self.id = id
         self.build_version = build_version
         self.isready = isready
         self.store = store

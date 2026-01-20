@@ -2099,10 +2099,10 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.save`
         """
-        if filename and filename != self.db_path:
-            cp(self.db_path, filename)
         # Make sure everything is flushed to the database.
         self.connection.commit()
+        if filename and filename != self.db_path:
+            cp(self.db_path, filename)
 
     def bulk_update_from_store(
         self, from_store: StoreReadInterface, queries: list[dict[str, Any]]
