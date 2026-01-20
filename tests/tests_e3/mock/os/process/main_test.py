@@ -245,7 +245,7 @@ def test_glob_checker() -> None:
 def test_side_effect_function() -> None:
     """Test mock_run with a side effect function."""
 
-    def echo(result: CommandResult, cmd: list[str]):
+    def echo(result: CommandResult, cmd: list[str]) -> None:
         """Write the value to echo to the raw output."""
         result.raw_out = cmd[1].encode()
 

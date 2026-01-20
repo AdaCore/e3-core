@@ -176,7 +176,7 @@ def test_spec_buildvars() -> None:
         build_deps = [Anod.BuildVar("key", "value")]
 
         @Anod.primitive()
-        def build(self):
+        def build(self) -> None:
             pass
 
     ms = MySpec("", kind="build")
@@ -372,7 +372,7 @@ def test_spec_qualifier() -> None:
     class GeneratorEnabled(Anod):
         enable_name_generator = True
 
-        def declare_qualifiers_and_components(self, qm):
+        def declare_qualifiers_and_components(self, qm) -> None:
             qm.declare_tag_qualifier(
                 "q1",
                 description="???",

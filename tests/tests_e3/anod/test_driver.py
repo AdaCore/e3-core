@@ -12,7 +12,7 @@ def test_simple_driver() -> None:
 
     class Simple(e3.anod.spec.Anod):
         @e3.anod.spec.Anod.primitive()
-        def download(self):
+        def download(self) -> None:
             pass
 
     anod_instance = Simple(qualifier="", kind="build")

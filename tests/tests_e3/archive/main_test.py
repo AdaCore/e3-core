@@ -166,12 +166,12 @@ def test_unpack_cmd() -> None:
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
     class TestResult:
-        def store_result(self, **kwargs):
+        def store_result(self, **kwargs) -> None:
             self.kwargs = kwargs
 
     t = TestResult()
 
-    def custom_unpack(filename, dest, selected_files):
+    def custom_unpack(filename, dest, selected_files) -> None:
         t.store_result(f=filename, d=dest, s=selected_files)
 
     e3.archive.unpack_archive(
@@ -207,12 +207,12 @@ def test_unpack_cmd_fileobj() -> None:
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
     class TestResult:
-        def store_result(self, **kwargs):
+        def store_result(self, **kwargs) -> None:
             self.kwargs = kwargs
 
     t = TestResult()
 
-    def custom_unpack(filename, dest, fileobj):
+    def custom_unpack(filename, dest, fileobj) -> None:
         t.store_result(f=filename, d=dest, fo=fileobj)
 
     fo.seek(0)

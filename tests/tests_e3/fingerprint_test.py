@@ -64,7 +64,7 @@ def test_add_order_not_important() -> None:
 
     f_ref = create_fingerprint(1, 2, 3)
 
-    def check_scenario(first, second, third):
+    def check_scenario(first, second, third) -> None:
         """Check scenario where adding fingerprint elements in given order.
 
         Create a fingerprint using create_fingerprint above

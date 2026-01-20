@@ -46,7 +46,7 @@ def test_memoize() -> None:
 
 def test_enabled() -> None:
     @e3.decorator.enabled
-    def foo():
+    def foo() -> int:
         return 22
 
     assert foo() == 22
@@ -54,7 +54,7 @@ def test_enabled() -> None:
 
 def test_disabled() -> None:
     @e3.decorator.disabled
-    def foo():
+    def foo() -> int:
         return 22
 
     assert foo() is None

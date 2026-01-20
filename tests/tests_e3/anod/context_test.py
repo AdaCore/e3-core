@@ -506,7 +506,7 @@ class TestContext:
             recursive=None,
             query_range=None,
             force_repackage=False,
-        ):
+        ) -> None:
             pass
 
         for a in ("anod_build", "anod_install", "anod_source", "anod_test"):
@@ -629,7 +629,7 @@ class TestContext:
             recursive=None,
             query_range=None,
             force_repackage=False,
-        ):
+        ) -> None:
             pass
 
         cm.register_action("anod_build", anod_action)
@@ -703,7 +703,7 @@ class TestContext:
             recursive=None,
             query_range=None,
             force_repackage=False,
-        ):
+        ) -> None:
             pass
 
         cm.register_action("anod_source", anod_action)
@@ -758,7 +758,7 @@ class TestContext:
             recursive=None,
             query_range=None,
             force_repackage=False,
-        ):
+        ) -> None:
             pass
 
         cm.register_action("anod_build", anod_action)
@@ -792,7 +792,7 @@ class TestContext:
         cm = plan.PlanContext(server=current_env)
 
         # Declare available actions and their signature
-        def plan_action(platform):
+        def plan_action(platform) -> None:
             pass
 
         cm.register_action("plan_action", plan_action)

@@ -55,7 +55,7 @@ def test_anod_name_generator() -> None:
 
         base_name = "simple"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             qualifiers_manager.declare_tag_qualifier(
                 name="debug",
                 description="simple description",
@@ -288,7 +288,7 @@ def test_qualifiers_manager_errors() -> None:
         enable_name_generator = True
         name = "dummy_spec"
 
-        def declare_qualifiers_and_components(self, qm):
+        def declare_qualifiers_and_components(self, qm) -> None:
             qm.declare_tag_qualifier(
                 name="test_qual1",
                 description="desc",
@@ -344,7 +344,7 @@ def test_qualifiers_manager() -> None:
         enable_name_generator = True
         base_name = "simple"
 
-        def declare_qualifiers_and_components(self, qualifiers_mgr):
+        def declare_qualifiers_and_components(self, qualifiers_mgr) -> None:
             qualifiers_mgr.declare_tag_qualifier(
                 name="debug",
                 description="debug",
@@ -367,7 +367,7 @@ def test_qualifiers_manager() -> None:
         enable_name_generator = True
         base_name = "my_spec"
 
-        def declare_qualifiers_and_components(self, qualifiers_mgr):
+        def declare_qualifiers_and_components(self, qualifiers_mgr) -> None:
             # Add the "debug" qualifier
             qualifiers_mgr.declare_tag_qualifier(
                 name="debug",
@@ -424,7 +424,7 @@ def test_qualifiers_manager() -> None:
         enable_name_generator = True
         base_name = "my_spec"
 
-        def declare_qualifiers_and_components(self, qualifiers_mgr):
+        def declare_qualifiers_and_components(self, qualifiers_mgr) -> None:
             qualifiers_mgr.declare_tag_qualifier(
                 name="debug",
                 description="State if the build must be done in debug mode.",
@@ -486,7 +486,7 @@ def test_qualifiers_manager() -> None:
         enable_name_generator = True
         base_name = "my_spec"
 
-        def declare_qualifiers_and_components(self, qualifiers_mgr):
+        def declare_qualifiers_and_components(self, qualifiers_mgr) -> None:
             qualifiers_mgr.declare_key_value_qualifier(
                 name="foo",
                 description="foo",
@@ -540,13 +540,13 @@ def test_add_target_info_to_build_space() -> None:
         enable_name_generator = True
         name = "parent"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             qualifiers_manager.add_target_info()
 
     class ChildAnod(ParentAnod):
         name = "child"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             qualifiers_manager.add_target_info(
                 machine_aliases={"myboard": "m"}, os_version_aliases={"2.0": "2"}
             )
@@ -554,7 +554,7 @@ def test_add_target_info_to_build_space() -> None:
     class GrandChildAnod(ChildAnod):
         name = "grandchild"
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             qualifiers_manager.remove_target_info()
 
     env = BaseEnv()
@@ -588,7 +588,7 @@ def test_key_value_qualifier() -> None:
         name = "spec"
         enable_name_generator = True
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             super().declare_qualifiers_and_components(qualifiers_manager)
 
             qualifiers_manager.declare_key_value_qualifier(
@@ -621,7 +621,7 @@ def test_tag_qualifier() -> None:
         name = "spec"
         enable_name_generator = True
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             super().declare_qualifiers_and_components(qualifiers_manager)
 
             qualifiers_manager.declare_tag_qualifier(
@@ -657,7 +657,7 @@ def test_key_set_qualifier() -> None:
         name = "spec"
         enable_name_generator = True
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             super().declare_qualifiers_and_components(qualifiers_manager)
 
             qualifiers_manager.declare_key_set_qualifier(
@@ -712,7 +712,7 @@ def test_key_set_qualifier() -> None:
     )
 
     class BadSpec(Spec):
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             super().declare_qualifiers_and_components(qualifiers_manager)
 
             qualifiers_manager.declare_key_set_qualifier(
@@ -743,7 +743,7 @@ def test_key_set_qualifier() -> None:
         name = "spec"
         enable_name_generator = True
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             super().declare_qualifiers_and_components(qualifiers_manager)
 
             qualifiers_manager.declare_key_set_qualifier(
@@ -764,7 +764,7 @@ def test_declare_build_space() -> None:
         name = "spec"
         enable_name_generator = True
 
-        def declare_qualifiers_and_components(self, qualifiers_manager):
+        def declare_qualifiers_and_components(self, qualifiers_manager) -> None:
             qualifiers_manager.declare_tag_qualifier(
                 name="q1",
                 description="???",
