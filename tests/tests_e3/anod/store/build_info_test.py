@@ -523,7 +523,7 @@ def test_build_info_eq_ne() -> None:
         build_date="20170915",
         setup=DEFAULT_SETUP,
         creation_date="2017-09-16 01:05:03.132488",
-        build_id="59bc78bfc7a447cf3bbe0ece",
+        id="59bc78bfc7a447cf3bbe0ece",
         build_version="18.0w",
         isready=True,
     )
@@ -536,7 +536,7 @@ def test_build_info_eq_ne() -> None:
         build_date=ref_bi.build_date,
         setup=ref_bi.setup,
         creation_date=ref_bi.creation_date,
-        build_id=ref_bi.id,
+        id=ref_bi.id,
         build_version=ref_bi.build_version,
         isready=ref_bi.isready,
     )
@@ -584,7 +584,7 @@ def test_build_info_eq_ne() -> None:
             build_date=ref_bi.build_date,
             setup=ref_bi.setup,
             creation_date=ref_bi.creation_date,
-            build_id=ref_bi.id,
+            id=ref_bi.id,
             build_version=ref_bi.build_version,
             isready=ref_bi.isready,
         )
