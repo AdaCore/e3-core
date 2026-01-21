@@ -184,7 +184,7 @@ def test_spec_buildvars() -> None:
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.parametrize("arguments,expected", CHECK_DLL_CLOSURE_ARGUMENTS)
+@pytest.mark.parametrize(("arguments", "expected"), CHECK_DLL_CLOSURE_ARGUMENTS)
 def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:  # type: ignore[no-untyped-def]
     """Create a simple spec with dependency to python and run dll closure."""
     ldd_output, ignored = arguments

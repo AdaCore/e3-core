@@ -86,7 +86,7 @@ def test_mock_env_decorator_without_config(caplog: LogCaptureFixture) -> None:
 
 
 @pytest.mark.parametrize(
-    "platform_name,version,func,command_result",
+    ("platform_name", "version", "func", "command_result"),
     [
         ("x86_64-windows64", "2019", echo_hello, WINDOWS_ECHO_HELLO),
         ("aarch64-linux", "ubuntu24", echo_hello, LINUX_ECHO_HELLO),

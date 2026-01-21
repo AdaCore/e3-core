@@ -294,7 +294,7 @@ def test_document_author_role_from_value() -> None:
         AuthorRole.from_value(None, None)  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize("arguments,expected", METADATA_ARGUMENTS)
+@pytest.mark.parametrize(("arguments", "expected"), METADATA_ARGUMENTS)
 def test_document(arguments: tuple, expected: tuple) -> None:
     author, author_role, tooling, version, spec_version, exc = arguments
     e_exc = expected[-1]
@@ -391,7 +391,7 @@ def test_document(arguments: tuple, expected: tuple) -> None:
         assert e_exc in ve.value.args[0]
 
 
-@pytest.mark.parametrize("arguments,expected", METADATA_ARGUMENTS)
+@pytest.mark.parametrize(("arguments", "expected"), METADATA_ARGUMENTS)
 def test_document_metadata(arguments: tuple, expected: tuple) -> None:
     author, author_role, tooling, version, spec_version, exc = arguments
     e_author, e_author_role, e_tooling, e_version, e_spec_version, e_exc = expected
@@ -458,7 +458,7 @@ def test_document_status_from_value() -> None:
 # ----------------------------- Statement tests ------------------------------ #
 
 
-@pytest.mark.parametrize("arguments,expected", STATEMENT_METADATA_ARGUMENTS)
+@pytest.mark.parametrize(("arguments", "expected"), STATEMENT_METADATA_ARGUMENTS)
 def test_statement(arguments: tuple, expected: tuple) -> None:
     _id, version, first, last = arguments
     statement: Statement = create_statement(_id, version, first, last)
@@ -499,7 +499,7 @@ def test_statement_justification_from_value() -> None:
         Justification.from_value(None, None)  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize("arguments,expected", STATEMENT_METADATA_ARGUMENTS)
+@pytest.mark.parametrize(("arguments", "expected"), STATEMENT_METADATA_ARGUMENTS)
 def test_statement_metadata_init(arguments: tuple, expected: tuple) -> None:
     _id, version, first, last = arguments
     e_id, e_version, e_first, e_last = expected
@@ -524,7 +524,7 @@ def test_statement_metadata_init(arguments: tuple, expected: tuple) -> None:
         assert isinstance(metadata.last_updated_on, datetime)
 
 
-@pytest.mark.parametrize("arguments,expected", STATEMENT_PRODUCT_DETAILS_ARGUMENTS)
+@pytest.mark.parametrize(("arguments", "expected"), STATEMENT_PRODUCT_DETAILS_ARGUMENTS)
 def test_statement_product(arguments: tuple, expected: tuple) -> None:
     (no_subcomps,) = arguments
     (e_subcomps,) = expected
