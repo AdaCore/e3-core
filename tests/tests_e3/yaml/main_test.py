@@ -15,7 +15,7 @@ except ImportError:
 
 
 @pytest.mark.parametrize(
-    "config,expected",
+    ("config", "expected"),
     [
         (
             {"param1": "full", "param2": "short"},

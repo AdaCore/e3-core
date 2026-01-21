@@ -157,7 +157,7 @@ def test_star_requirements() -> None:
 
 
 @pytest.mark.parametrize(
-    "arguments,expected",
+    ("arguments", "expected"),
     [
         ((None, None), "setuptools_scm-7.1.0-py3-none-any.whl"),
         ((["setuptools-scm"], None), "setuptools_scm-8.0.0-py3-none-any.whl"),
