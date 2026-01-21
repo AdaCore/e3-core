@@ -173,7 +173,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
 
         # Exclude all <os>-only line (unless that's for this OS)
         for regex in (
-            "{}-only".format(o)
+            f"{o}-only"
             for o in ("darwin", "linux", "solaris", "windows", "bsd", "aix")
             if o != os_name
         ):

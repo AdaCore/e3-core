@@ -519,10 +519,8 @@ class AnodContext:
             if dep.local_name in spec_instance.deps:
                 raise AnodError(
                     origin="expand_spec",
-                    message="The spec {} has two dependencies with the same "
-                    "local_name attribute ({})".format(
-                        spec_instance.name, dep.local_name
-                    ),
+                    message=f"The spec {spec_instance.name} has two dependencies"
+                    f" with the same local_name attribute ({dep.local_name})",
                 )
             spec_instance.deps[dep.local_name] = dep_instance
 
@@ -856,8 +854,8 @@ class AnodContext:
                 else:
                     raise AnodError(
                         origin="expand_spec",
-                        message="source {} does not exist "
-                        "(referenced by {})".format(s.name, result.uid),
+                        message=f"source {s.name} does not exist "
+                        f"(referenced by {result.uid})",
                     )
 
                 src_get_action = GetSource(obj)
@@ -910,27 +908,27 @@ class AnodContext:
             if decision.expected_choice == BuildOrDownload.BUILD:
                 msg = (
                     "A spec in the plan has a build_tree dependency"
-                    " on {spec}. Either explicitly add the line {plan_line}"
+                    f" on {action.data.name}. Either explicitly add the "
+                    f"line {decision.suggest_plan_fix(decision.expected_choice)}"
                     " or change the dependency to set"
-                    ' require="installation" if possible'.format(
-                        spec=action.data.name,
-                        plan_line=decision.suggest_plan_fix(decision.expected_choice),
-                    )
+                    ' require="installation" if possible'
                 )
             else:
-                msg = "This plan resolver requires an explicit {}".format(
-                    decision.suggest_plan_fix(decision.expected_choice)
+                msg = (
+                    "This plan resolver requires an explicit "
+                    f"{decision.suggest_plan_fix(decision.expected_choice)}"
                 )
         elif decision.choice is None and decision.expected_choice is None:
             left_decision = decision.suggest_plan_fix(Decision.LEFT)
             right_decision = decision.suggest_plan_fix(Decision.RIGHT)
             msg = (
                 "This plan resolver cannot decide whether what to do for"
-                " resolving {}.".format(decision.initiator)
+                f" resolving {decision.initiator}."
             )
             if left_decision is not None and right_decision is not None:
-                msg += " Please either add {} or {} in the plan".format(
-                    left_decision, right_decision
+                msg += (
+                    f" Please either add {left_decision}"
+                    f" or {right_decision} in the plan"
                 )
         elif decision.choice == Decision.BOTH:
             msg = f"cannot do both {decision.left} and {decision.right}"

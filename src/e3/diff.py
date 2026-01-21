@@ -77,9 +77,7 @@ def diff(
     # and ending of lines
     for k in (0, 1):
         if ignore_white_chars:
-            contents[k] = [
-                "{}\n".format(line.strip()) for line in contents[k] if line.strip()
-            ]
+            contents[k] = [f"{line.strip()}\n" for line in contents[k] if line.strip()]
         else:
             # Even if white spaces are not ignored we should ensure at
             # that we don't depend on platform specific newline

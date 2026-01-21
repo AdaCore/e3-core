@@ -33,7 +33,7 @@ class Action:
 
     @property
     def run_method(self) -> str:
-        return "do_{}".format(self.__class__.__name__.lower())
+        return f"do_{self.__class__.__name__.lower()}"
 
 
 class Root(Action):
@@ -226,21 +226,16 @@ class AnodAction(Action):
 
     def __str__(self) -> str:
         if self.data.env.is_cross:
-            result = "{} {} for {},{},{},{}".format(
-                self.data.kind,
-                self.data.name,
-                self.data.env.platform,
-                self.data.env.target.os.version,
-                self.data.env.target.machine,
-                self.data.env.target.os.mode,
+            result = (
+                f"{self.data.kind} {self.data.name} "
+                f"for {self.data.env.platform},{self.data.env.target.os.version}"
+                f",{self.data.env.target.machine},{self.data.env.target.os.mode}"
             )
             result = result.replace("unknown", "")
             result = result.rstrip(",")
         else:
-            result = "{} {} for native {}".format(
-                self.data.kind,
-                self.data.name,
-                self.data.env.platform,
+            result = (
+                f"{self.data.kind} {self.data.name} for native {self.data.env.platform}"
             )
         if self.data.qualifier:
             result += f" (qualifier={self.data.qualifier})"

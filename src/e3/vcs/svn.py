@@ -162,9 +162,8 @@ class SVNRepository:
         p = e3.os.process.Run(p_cmd, cwd=self.working_copy, **kwargs)
         if p.status != 0:
             raise SVNError(
-                "{} failed (exit status: {})".format(
-                    e3.os.process.command_line_image(p_cmd), p.status
-                ),
+                f"{e3.os.process.command_line_image(p_cmd)}"
+                f" failed (exit status: {p.status})",
                 origin="svn_cmd",
                 process=p,
             )

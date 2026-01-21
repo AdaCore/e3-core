@@ -127,7 +127,7 @@ def test_cmd_triplet() -> None:
     e.set_env(build_platform, "x86_64-linux,debian7", "x86-windows,2008")
     cmd_options = e.cmd_triplet()
     assert len(cmd_options) == 3
-    assert cmd_options[0] == "--build={}".format(build_platform)
+    assert cmd_options[0] == f"--build={build_platform}"
     assert cmd_options[1] == "--host=x86_64-linux,debian7"
     assert cmd_options[2].startswith("--target=x86-windows,2008")
 

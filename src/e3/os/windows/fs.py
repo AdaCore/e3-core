@@ -393,9 +393,7 @@ class NTFile:
 
         :return: a path
         """
-        return os.path.join(
-            self.volume_path, "tmp", "Trash", str("{:016X}".format(self.uid))
-        )
+        return os.path.join(self.volume_path, "tmp", "Trash", str(f"{self.uid:016X}"))
 
     @WithOpenFile(Access.DELETE)
     def rename(self, filename: str, replace: bool = False) -> None:
