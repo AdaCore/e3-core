@@ -94,7 +94,7 @@ def test_non_utf8_out() -> None:
 
 
 def test_rlimit() -> None:
-    """rlimit kill the child process after a timeout."""
+    """Rlimit kill the child process after a timeout."""
 
     def run_test() -> None:
         p = e3.os.process.Run(

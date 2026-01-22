@@ -92,7 +92,7 @@ class JSONFormatter(logging.Formatter):
         self.context = context
 
     def format(self, record: logging.LogRecord) -> str:
-        """convert record into JSON."""
+        """Convert record into JSON."""
         # Parent's format is called in order to setup additional attributes
         super(JSONFormatter, self).format(record)
 

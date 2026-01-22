@@ -263,7 +263,7 @@ def ls(
     path: str | Iterable[str] | os.PathLike[str] | Iterable[os.PathLike[str]],
     emit_log_record: bool = True,
 ) -> list[str]:
-    """list files.
+    """List files.
 
     :param path: glob pattern or glob pattern list
     :param emit_log_record: if True, emit a log (debug) record
