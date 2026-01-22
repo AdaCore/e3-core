@@ -35,7 +35,7 @@ def test_log() -> None:
 
 
 def test_json_log() -> None:
-    """test logger method wrappers and json logs."""
+    """Test logger method wrappers and json logs."""
     p = e3.os.process.Run(
         [
             sys.executable,
@@ -73,7 +73,7 @@ def test_json_log() -> None:
 
 
 def test_json_log_compat() -> None:
-    """make sure that code do not crash if json is not activated."""
+    """Make sure that code do not crash if json is not activated."""
     p = e3.os.process.Run(
         [
             sys.executable,
@@ -94,7 +94,7 @@ def test_json_log_compat() -> None:
 
 
 def test_json_log_exception() -> None:
-    """test exception attribute support."""
+    """Test exception attribute support."""
     p = e3.os.process.Run(
         [
             sys.executable,
@@ -123,7 +123,7 @@ def test_json_log_exception() -> None:
 
 
 def test_json_context() -> None:
-    """test context attribute when console_logs is used."""
+    """Test context attribute when console_logs is used."""
     p = e3.os.process.Run(
         [
             sys.executable,
@@ -151,7 +151,7 @@ def test_json_context() -> None:
 
 
 def test_json_formatter() -> None:
-    """test json formatter."""
+    """Test json formatter."""
     formatter = e3.log.JSONFormatter()
     record = LogRecord("_test_", 20, "module.py", 20, "Message", (), None)
     json_string = formatter.format(record)

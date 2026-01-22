@@ -253,7 +253,7 @@ def unpack_archive(
                     check_selected = set(selected_files)
 
                     def is_match(name: str, files: Sequence[str]) -> bool:
-                        """check if name match any of the expression in files.
+                        """Check if name match any of the expression in files.
 
                         :param name: file name
                         :param files: list of patterns to test against

@@ -449,12 +449,12 @@ class Decision(Action, metaclass=abc.ABCMeta):
 
     @property
     def left(self) -> str:
-        """return self.left_action.uid (this is a convenience property)."""
+        """Return self.left_action.uid (this is a convenience property)."""
         return self.left_action.uid
 
     @property
     def right(self) -> str:
-        """return self.right_action.uid (this is a convenience property)."""
+        """Return self.right_action.uid (this is a convenience property)."""
         return self.right_action.uid
 
     def add_trigger(self, trigger: Action, decision: Choice, plan_line: str) -> None:
