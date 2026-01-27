@@ -494,11 +494,9 @@ class PyPICandidate:
                 platforms_regex.append("win32")
 
             result = any(
-                (
-                    platform
-                    for platform in self.platform_tags
-                    if re.match("|".join(platforms_regex), platform)
-                )
+                platform
+                for platform in self.platform_tags
+                if re.match("|".join(platforms_regex), platform)
             )
         return result
 
@@ -513,11 +511,7 @@ class PyPICandidate:
         else:
             result = (
                 any(
-                    (
-                        tag
-                        for tag in self.py_tags
-                        if tag in ("py3", f"cp3{minor_version}")
-                    )
+                    tag for tag in self.py_tags if tag in ("py3", f"cp3{minor_version}")
                 )
                 or "abi3" in self.abi_tags
             )
@@ -698,11 +692,9 @@ class PyPIClosure:
             # First check if there is a generic wheel present or no. If there is
             # one then there is no need to package the sources.
             has_generic_wheel = any(
-                (
-                    c
-                    for c in self.pypi.candidate_cache[canonicalize_name(req.name)]
-                    if c.is_generic_wheel and c.version in req.specifier
-                )
+                c
+                for c in self.pypi.candidate_cache[canonicalize_name(req.name)]
+                if c.is_generic_wheel and c.version in req.specifier
             )
 
             for candidate in self.pypi.candidate_cache[canonicalize_name(req.name)]:

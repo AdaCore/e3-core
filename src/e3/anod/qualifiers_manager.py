@@ -135,7 +135,7 @@ class KeyValueDeclaration(QualifierDeclaration):
 
         # Check that default value is valid
         if default is not None and choices is not None and default not in choices:
-            choices_str = ", ".join((f"'{choice}'" for choice in choices))
+            choices_str = ", ".join(f"'{choice}'" for choice in choices)
             raise AnodError(
                 f"{self.origin}: default value '{default}' "
                 f"should be in ({choices_str})."
@@ -162,7 +162,7 @@ class KeyValueDeclaration(QualifierDeclaration):
             )
 
         if self.choices is not None and value not in self.choices:
-            choices_str = ", ".join((f"'{choice}'" for choice in self.choices))
+            choices_str = ", ".join(f"'{choice}'" for choice in self.choices)
             raise AnodError(
                 f"{self.origin}: Invalid value for qualifier {self.name}: '{value}' "
                 f"not in ({choices_str})"
@@ -276,9 +276,9 @@ class KeySetDeclaration(QualifierDeclaration):
         if default is not None and choices is not None:
             wrong_values = default - set(choices)
             if wrong_values:
-                choices_str = ", ".join((f"'{choice}'" for choice in choices))
+                choices_str = ", ".join(f"'{choice}'" for choice in choices)
                 wrong_values_str = ", ".join(
-                    (f"'{value}'" for value in sorted(wrong_values))
+                    f"'{value}'" for value in sorted(wrong_values)
                 )
                 raise AnodError(
                     f"{self.origin}: In '{self.name}', default value(s) "
@@ -314,7 +314,7 @@ class KeySetDeclaration(QualifierDeclaration):
             )
         else:
             try:
-                result = all((isinstance(el, str) for el in value))
+                result = all(isinstance(el, str) for el in value)
                 if not result:
                     raise AnodError(
                         f"{self.origin}: Invalid value for qualifier {self.name}: "
@@ -336,9 +336,9 @@ class KeySetDeclaration(QualifierDeclaration):
             wrong_values = value_set - set(self.choices)
 
             if wrong_values:
-                choices_str = ", ".join((f"'{choice}'" for choice in self.choices))
+                choices_str = ", ".join(f"'{choice}'" for choice in self.choices)
                 wrong_values_str = ", ".join(
-                    (f"'{value}'" for value in sorted(wrong_values))
+                    f"'{value}'" for value in sorted(wrong_values)
                 )
                 raise AnodError(
                     f"{self.origin}: Invalid value(s) for qualifier {self.name}: "
@@ -359,7 +359,7 @@ class KeySetDeclaration(QualifierDeclaration):
             list_repr = []
             if not self.repr_omit_key:
                 list_repr.append(self.repr_name)
-            list_repr.extend((str(v) for v in sorted(value)))
+            list_repr.extend(str(v) for v in sorted(value))
 
             # And join them with a dash.
             str_repr = "-".join(list_repr)

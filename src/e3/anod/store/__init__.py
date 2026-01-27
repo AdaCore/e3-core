@@ -2192,10 +2192,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
         all_results = []
 
         for index, store_queries_chunk in enumerate(
-            (
-                queries_done[i : i + chunk_size]
-                for i in range(0, queries_num, chunk_size)
-            )
+            queries_done[i : i + chunk_size] for i in range(0, queries_num, chunk_size)
         ):
             start_time = time.time()
             logger.debug(f" Query chunk {index + 1}/{chunk_num}")

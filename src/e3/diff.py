@@ -236,7 +236,7 @@ def patch(
                     # This is the start of patch. Decide whether to discard it or
                     # not
                     path_list = [header1[1], header2[1]]
-                    discard = any((discard_patch(fn) for fn in path_list))
+                    discard = any(discard_patch(fn) for fn in path_list)
 
                     if not discard:
                         files_to_patch += 1
@@ -268,7 +268,7 @@ def patch(
                 if m is not None:
                     # This is the start of a git patch
                     path_list = [m.group(1), m.group(2)]
-                    discard = any((discard_patch(fn) for fn in path_list))
+                    discard = any(discard_patch(fn) for fn in path_list)
 
                     if not discard:
                         files_to_patch += 1

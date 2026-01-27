@@ -584,7 +584,7 @@ def test_misc_from_json_dict() -> None:
         PackageChecksum.from_json_dict({})
     with pytest.raises(ValueError, match="Unsupported checksum algorithm"):
         PackageChecksum.from_json_dict(
-            ({"algorithm": "invalid", "checksumValue": "not checked"})
+            {"algorithm": "invalid", "checksumValue": "not checked"}
         )
     homepage: PackageHomePage | None = PackageHomePage.from_json_dict(
         {PackageHomePage.get_json_entry_key(): "homepage"}
