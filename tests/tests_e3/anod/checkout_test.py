@@ -47,6 +47,8 @@ class TestCheckout:
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
     def test_git_clone(self, git, compute_changelog, e3_feature) -> None:
         """Test CheckoutManager with Git repositories."""
+        logger = logging.getLogger("test_git_clone")
+
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
         os.environ["GIT_COMMITTER_NAME"] = "e3-core@example.net"
@@ -68,16 +70,16 @@ class TestCheckout:
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file1.txt"))
 
-        logging.info("Check that we can switch from one git url to another one")
+        logger.info("Check that we can switch from one git url to another one")
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file1.txt", "data2.txt"))
 
-        logging.info("Check that in case of no changes unchanged is returned")
+        logger.info("Check that in case of no changes unchanged is returned")
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.unchanged
 
-        logging.info("Check that changes are detected in git reposotories")
+        logger.info("Check that changes are detected in git repositories")
         with open(os.path.join("git2", "file3.txt"), "w") as fd:
             fd.write("new file!")
         r = GitRepository(os.path.abspath("git2"))
@@ -87,7 +89,7 @@ class TestCheckout:
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
 
-        logging.info("Check that local modifications are discarded")
+        logger.info("Check that local modifications are discarded")
         with open(os.path.join("myrepo", "file3.txt"), "w") as fd:
             fd.write("new file modified!")
         result = m.update(vcs="git", url=url4, revision=main_branch)
@@ -123,6 +125,8 @@ class TestCheckout:
     @pytest.mark.parametrize("compute_changelog", [True, False])
     def test_svn_checkout(self, svn, compute_changelog) -> None:
         """Test CheckoutManager with Subversion repositories."""
+        logger = logging.getLogger("test_svn_checkout")
+
         url = SVNRepository.create("svn", initial_content_path=self.repo_data)
         url2 = SVNRepository.create("svn2", initial_content_path=self.repo_data2)
         r = SVNRepository(working_copy=os.path.abspath("svn_checkout"))
@@ -131,41 +135,41 @@ class TestCheckout:
         m = CheckoutManager(
             name="myrepo", working_dir=".", compute_changelog=compute_changelog
         )
-        logging.info("update of non existing url")
+        logger.info("update of non existing url")
         result = m.update(vcs="svn", url=url + "wrong_url")
         assert result == ReturnValue.failure
 
-        logging.info("update of existing url")
+        logger.info("update of existing url")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.success
 
-        logging.info("update of existing url with no changes")
+        logger.info("update of existing url with no changes")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.unchanged
 
         # Update the repository
-        logging.info("Do a checkin in svn repository")
+        logger.info("Do a checkin in svn repository")
         with open(os.path.join("svn_checkout", "file3.txt"), "w") as fd:
             fd.write("new file!")
         r.svn_cmd(["add", "file3.txt"])
         r.svn_cmd(["commit", "file3.txt", "-m", "checkin"])
 
-        logging.info("Check that we see the update")
+        logger.info("Check that we see the update")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("svn_checkout", "file3.txt"))
 
-        logging.info("Do a local modification in the working dir")
+        logger.info("Do a local modification in the working dir")
         with open(os.path.join("myrepo", "file3.txt"), "w") as fd:
             fd.write("new file modified!")
 
-        logging.info("And then do an update and check that cleanup was done")
+        logger.info("And then do an update and check that cleanup was done")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.unchanged
         with open(os.path.join("myrepo", "file3.txt")) as fd:
             assert fd.read().strip() == "new file!"
 
-        logging.info("Check that we can switch from one svn url to another")
+        logger.info("Check that we can switch from one svn url to another")
         result = m.update(vcs="svn", url=url2)
         assert result == ReturnValue.success
         assert os.path.isfile(os.path.join("myrepo", "file1.txt", "data2.txt"))

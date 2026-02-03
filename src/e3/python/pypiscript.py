@@ -10,7 +10,7 @@ import argparse
 import os
 import re
 import yaml
-import logging
+from e3.log import getLogger
 from sys import version_info as python_version_info
 
 DESCRIPTION = """
@@ -57,8 +57,11 @@ file.
 platforms is the list of platforms for which wheel should be fetched
 """
 
+logger = getLogger("pypiscript", "e3.python")
+
 
 def main() -> None:
+
     m = Main()
     m.argument_parser.formatter_class = argparse.RawDescriptionHelpFormatter
     m.argument_parser.description = DESCRIPTION.strip()
@@ -132,7 +135,7 @@ def main() -> None:
     update_version_file = config.get("update_wheel_version_file", False)
 
     for name, url in config.get("wheels", {}).items():
-        logging.info(f"Fetch {name} sources")
+        logger.info(f"Fetch {name} sources")
         if "#" in url:
             url, rev = url.split("#", 1)
         else:
@@ -159,7 +162,7 @@ def main() -> None:
             if os.path.isfile(version_file):
                 with open(version_file) as fd:
                     version = fd.read().strip()
-                logging.info(f"Wheel {name} has version {version}")
+                logger.info(f"Wheel {name} has version {version}")
                 split_version = version.split(".")
                 if len(split_version) == 2:
                     # We have a major and minor but no patch so add it automatically
@@ -167,7 +170,7 @@ def main() -> None:
                     with open(version_file, "w") as fd:
                         fd.write(version)
 
-                    logging.info(f"Wheel {name} version updated to {version}")
+                    logger.info(f"Wheel {name} version updated to {version}")
 
         local_wheels.append(
             Wheel.build(
@@ -190,11 +193,11 @@ def main() -> None:
         allowed_yanked=m.args.allowed_yanked,
     ) as pypi:
         for wheel in local_wheels:
-            logging.info(f"Register wheel {wheel.path}")
+            logger.info(f"Register wheel {wheel.path}")
             pypi.add_wheel(wheel.path)
 
         for req in toplevel_reqs:
-            logging.info(f"Add top-level requirement {str(req)}")
+            logger.info(f"Add top-level requirement {str(req)}")
             pypi.add_requirement(req)
 
         packages: set[str] = set()

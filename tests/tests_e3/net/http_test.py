@@ -67,6 +67,8 @@ class ServerErrorHandler(BaseHTTPRequestHandler):
 
 class MultiPartPostHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
+        logger = logging.getLogger("MultiPartPostHandler")
+
         if "Content-Type" not in self.headers:
             self.send_response(200)
             self.end_headers()
@@ -77,10 +79,10 @@ class MultiPartPostHandler(BaseHTTPRequestHandler):
             content, self.headers["Content-Type"]
         )
 
-        logging.debug("POST received")
+        logger.debug("POST received")
         self.server.test_payloads = {}
         for part in decoder.parts:
-            logging.debug(list(part.headers.keys()))
+            logger.debug(list(part.headers.keys()))
             # With python 3.x requests_toolbelt returns bytes
             m = Message()
             m["content-type"] = part.headers[b"Content-Disposition"].decode("utf-8")
@@ -90,7 +92,7 @@ class MultiPartPostHandler(BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
         self.wfile.write(b"OK")
-        logging.debug("POST finish")
+        logger.debug("POST finish")
 
 
 class AuthorizationHeaderHandler(ContentDispoHandler):
@@ -189,7 +191,8 @@ class TestHTTP:
     def test_fallback(self, socket_enabled) -> None:
         def func(server, base_url) -> None:
             def inner_func(server2, base_url2) -> None:
-                logging.info(f"servers: {base_url}, {base_url2}")
+                logger = logging.getLogger("inner_func")
+                logger.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
                     session.set_max_retries(connect=4)
                     result = session.download_file(base_url + "dummy", dest=".")
@@ -204,7 +207,8 @@ class TestHTTP:
     def test_content_abort(self, socket_enabled) -> None:
         def func(server, base_url) -> None:
             def inner_func(server2, base_url2) -> None:
-                logging.info(f"servers: {base_url}, {base_url2}")
+                logger = logging.getLogger("inner_func")
+                logger.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
                     session.DEFAULT_TIMEOUT = (10.0, 0.2)
                     session.set_max_retries(connect=4)

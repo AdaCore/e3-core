@@ -141,7 +141,8 @@ class Main:
             :param frame: the interrupted stack frame
             """
             del sig, frame
-            logging.critical("SIGTERM received")
+            logger = logging.getLogger("")
+            logger.critical("SIGTERM received")
             raise SystemExit("SIGTERM received")
 
         if sys.platform != "win32":  # unix-only

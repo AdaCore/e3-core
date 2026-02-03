@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-import logging
+from e3.log import getLogger
 from itertools import chain
 from typing import TYPE_CHECKING
 
@@ -15,6 +15,9 @@ if TYPE_CHECKING:
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
     from e3.job import Job, ProcessJob
+
+
+logger = getLogger("walk", "e3.job")
 
 
 class Walk:
@@ -325,7 +328,7 @@ class Walk:
 
         if job.should_skip:
             if job.status not in (ReturnValue.force_fail, ReturnValue.skip):
-                logging.info(
+                logger.info(
                     "[%-10s %-9s %4ds] %s",
                     job.queue_name,
                     self.job_status[job.uid].name,
@@ -334,7 +337,7 @@ class Walk:
                 )
             return False
 
-        logging.info(
+        logger.info(
             "[%-10s %-9s %4ds] %s",
             job.queue_name,
             job.status.name,
