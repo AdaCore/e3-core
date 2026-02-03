@@ -31,13 +31,13 @@ def test_patch() -> None:
         expected = fd.readlines()
 
     # By default empty line, leading and trailing whitespaces are ignored
-    assert e3.diff.diff(expected + [""], output) == ""
+    assert e3.diff.diff([*expected, ""], output) == ""
     assert e3.diff.diff([" " + line + " " for line in expected], output) == ""
     assert e3.diff.diff(expected, output, ignore_white_chars=False) == ""
 
     # we can also ignore specific pattern
-    assert "-to ignore" in e3.diff.diff(expected + ["to ignore"], output)
-    assert e3.diff.diff(expected + ["to ignore"], output, ignore="ig.*re") == ""
+    assert "-to ignore" in e3.diff.diff([*expected, "to ignore"], output)
+    assert e3.diff.diff([*expected, "to ignore"], output, ignore="ig.*re") == ""
 
     e3.fs.cp(file_patch2, current_dir)
     e3.diff.patch("patch2.txt", current_dir, discarded_files=["dummy_to_patch.new.txt"])

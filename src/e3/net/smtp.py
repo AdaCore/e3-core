@@ -63,7 +63,7 @@ def sendmail(
             ):
                 if os.path.exists(sendmail_bin):
                     p = e3.os.process.Run(
-                        [sendmail_bin] + to_emails,
+                        [sendmail_bin, *to_emails],
                         input="|" + mail_as_string,
                         output=None,
                     )

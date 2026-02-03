@@ -483,7 +483,7 @@ class Anod:
                 self.log.info(f"No {shlib_ext} files to check in {prefix}")
                 ldd_output = ""
             else:
-                ldd_output = e3.os.process.Run(["ldd"] + lib_files).out or ""
+                ldd_output = e3.os.process.Run(["ldd", *lib_files]).out or ""
 
                 # When only one path is specified, ldd does not add the name of the
                 # file in the output. This would break the parsing below.

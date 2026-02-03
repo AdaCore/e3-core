@@ -59,7 +59,8 @@ class Wheel:
         :return: a Wheel object
         """
         with tempfile.TemporaryDirectory() as build_dir:
-            cmd = python_script("pip") + [
+            cmd = [
+                *python_script("pip"),
                 "wheel",
                 ".",
                 "-q",
@@ -84,7 +85,7 @@ class Wheel:
     def install(self) -> None:
         """Install a wheel."""
         p = Run(
-            python_script("pip") + ["install", "-U", "--force-reinstall", self.path]
+            [*python_script("pip"), "install", "-U", "--force-reinstall", self.path]
         )
         if p.status != 0:
             raise WheelError(f"Error during installation of {self.path}:\n{p.out}")
