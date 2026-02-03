@@ -315,8 +315,9 @@ class Run:
                 # nothing to do
                 paths = env["PATH"] if env and "PATH" in env else None
                 return [
-                    which(cmd_line[0], paths=paths, default=cmd_line[0])
-                ] + cmd_line[1:]
+                    which(cmd_line[0], paths=paths, default=cmd_line[0]),
+                    *cmd_line[1:],
+                ]
 
             prog = which(cmd_line[0], default=None)
             if prog is None:
@@ -340,7 +341,7 @@ class Run:
                 ]
                 # Pass the program path to the interpreter
                 if len(cmd_line) > 1:
-                    cmd_line = [prog] + list(cmd_line[1:])
+                    cmd_line = [prog, *list(cmd_line[1:])]
                 else:
                     cmd_line = [prog]
 
@@ -359,7 +360,7 @@ class Run:
                         interpreter_cmds[0] in ("/bin/bash", "/bin/sh")
                         and "SHELL" in os.environ
                     ):
-                        return [os.environ["SHELL"]] + cmd_line
+                        return [os.environ["SHELL"], *cmd_line]
                 return interpreter_cmds + cmd_line
 
         # First resolve output, error and input
@@ -845,7 +846,7 @@ def kill_process_tree(pid: int | Any, timeout: int = 3) -> bool:
         e3.log.debug(err)
         return True
 
-    all_processes = [parent_process] + children
+    all_processes = [parent_process, *children]
     for p in all_processes:
         try:
             logger.debug("kill process %s (%s)", p, p.cmdline())

@@ -1713,9 +1713,9 @@ class Document:
 
         for pkg in sorted(self.packages.values(), key=lambda package: package.name):
             if pkg.spdx_id in pkg_ids:
-                packages = ["", "", "# Package", ""] + pkg.to_tagvalue() + packages
+                packages = ["", "", "# Package", "", *pkg.to_tagvalue(), *packages]
             else:
-                packages += ["# Package", ""] + pkg.to_tagvalue() + ["", ""]
+                packages += ["# Package", "", *pkg.to_tagvalue(), "", ""]
 
         output += packages
         return output

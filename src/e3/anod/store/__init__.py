@@ -904,7 +904,7 @@ class _StoreWrite(_Store):
         return self._insert_or_update(
             table,
             f"UPDATE {table} SET {','.join(elm_to_set)} WHERE {id_field}=?",
-            values + [rowid],
+            [*values, rowid],
         )
 
 
@@ -1167,7 +1167,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                     _Store.TableName.resources, rid, ["path"], [resource_path]  # type: ignore[arg-type]
                 )
                 path = resource_path
-            resource = self._tuple_to_resource(tuple([rid, resource_id, path] + rest))  # type: ignore[arg-type, operator]
+            resource = self._tuple_to_resource((rid, resource_id, path, *rest))  # type: ignore[arg-type, operator]
         else:  # Create the resource entry
             resource = self._tuple_to_resource(
                 self._insert(  # type: ignore[arg-type]

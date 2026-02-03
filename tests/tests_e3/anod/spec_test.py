@@ -249,7 +249,7 @@ def test_spec_check_dll_closure_single_file(ldd) -> None:  # type: ignore[no-unt
     test_spec.sandbox = SandBox(root_dir=os.getcwd())
 
     # Get the ldd output of the current executable.
-    ldd_output = ldd_output_to_posix(Run(["ldd"] + [sys.executable]).out or "")
+    ldd_output = ldd_output_to_posix(Run(["ldd", sys.executable]).out or "")
 
     # Extract the first dll with a path from the ldd output.
     for line in ldd_output.splitlines():

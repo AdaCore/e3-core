@@ -95,8 +95,8 @@ def test_pypi_closure_tool() -> None:
             )
         )
     p = Run(
-        python_script("e3-pypi-closure")
-        + [
+        [
+            *python_script("e3-pypi-closure"),
             "--python3-version=10",
             "--local-clones=.",
             "config.yml",

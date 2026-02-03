@@ -123,12 +123,12 @@ def test_df() -> None:
 
 def test_anod_ldd_output_to_posix(ldd) -> None:  # type: ignore[no-untyped-def]
     # Get the ldd output of the current executable.
-    ldd_output = e3.os.process.Run(["ldd"] + [sys.executable]).out or ""
+    ldd_output = e3.os.process.Run(["ldd", sys.executable]).out or ""
     e3.os.fs.ldd_output_to_posix(ldd_output)
     # Give several files to ldd so that the file names are also covered by the
     # test (not only the dll files)
     ldd_output = (
-        e3.os.process.Run(["ldd"] + [sys.executable, e3.os.fs.which("ldd")]).out or ""
+        e3.os.process.Run(["ldd", sys.executable, e3.os.fs.which("ldd")]).out or ""
     )
     e3.os.fs.ldd_output_to_posix(ldd_output)
 
