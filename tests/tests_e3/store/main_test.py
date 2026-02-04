@@ -13,7 +13,7 @@ def mock_download() -> MagicMock:
         "content-disposition": 'attachment; filename="foo.tar.gz"',
         "Content-Length": str(len(FAKE_BODY_CONTENT)),
     }
-    mock_response.iter_content = lambda chunk_size: iter([FAKE_BODY_CONTENT])
+    mock_response.iter_content = lambda _chunk_size: iter([FAKE_BODY_CONTENT])
     return mock_response
 
 

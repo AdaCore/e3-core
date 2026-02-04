@@ -85,7 +85,7 @@ def test_apply_patch() -> None:
     sb = e3.anod.package.SourceBuilder(
         name="d-src",
         fullname=lambda: "d-src.tgz",
-        prepare_src=lambda x, y: None,
+        prepare_src=lambda _x, _y: None,
         checkout=["d-git", "e-git"],
     )
 
@@ -96,9 +96,9 @@ def test_apply_patch() -> None:
     sb = e3.anod.package.SourceBuilder(
         name="d-src",
         fullname=lambda: "d-src.tgz",
-        prepare_src=lambda x, y: None,
+        prepare_src=lambda _x, _y: None,
         checkout=["d-git", "e-git"],
-        apply_patch=lambda x, y, z: 42,
+        apply_patch=lambda _x, _y, _z: 42,
     )
 
     assert sb.apply_patch(None, None, None) == 42

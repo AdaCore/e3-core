@@ -59,7 +59,7 @@ def test_patch_ignore_all(caplog) -> None:
     e3.fs.cp(file_to_patch, current_dir)
     e3.fs.cp(file_patch2, current_dir)
     with pytest.raises(e3.diff.EmptyDiffError):
-        e3.diff.patch("patch2.txt", current_dir, discarded_files=lambda x: True)
+        e3.diff.patch("patch2.txt", current_dir, discarded_files=lambda _x: True)
 
 
 def test_discarded() -> None:
