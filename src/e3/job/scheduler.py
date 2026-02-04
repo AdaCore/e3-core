@@ -64,7 +64,7 @@ class Scheduler:
         self.job_provider = job_provider
         self.job_timeout = job_timeout
         if collect is None:
-            self.collect: Callable[[Job], bool] = lambda x: False
+            self.collect: Callable[[Job], bool] = lambda _x: False
         else:
             self.collect = collect
 
