@@ -133,6 +133,8 @@ def test_python_func() -> None:
 def test_relocate_python_distrib() -> None:
     env = e3.env.Env()
 
+    logger = logging.getLogger("test_relocate_python_distrib")
+
     # Create a venv and add pip manually to ensure no upgrade is done.
     # Create a venv and add pip manually to ensure no upgrade is done.
     if sys.platform == "win32":
@@ -150,7 +152,7 @@ def test_relocate_python_distrib() -> None:
     # result in a failure as absolute location to Python interpreter will
     # be wrong
     e3.fs.mv("my_env", "moved_env")
-    logging.info(e3.fs.ls("./moved_env/*/*"))
+    logger.info(e3.fs.ls("./moved_env/*/*"))
 
     if sys.platform == "win32":
         script_dir = "./Scripts"
@@ -183,7 +185,7 @@ def test_relocate_python_distrib() -> None:
 
     # Move the environment, relocate it but make it relocatable this time.
     e3.fs.mv("moved_env", "moved_env2")
-    logging.info("Make venv non location specific")
+    logger.info("Make venv non location specific")
     e3.sys.relocate_python_distrib(python_distrib_dir=os.path.abspath("./moved_env2"))
 
     # Moving the venv should result in a working environment providing PATH is

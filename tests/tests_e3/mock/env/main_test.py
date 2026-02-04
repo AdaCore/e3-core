@@ -37,13 +37,15 @@ def run_on_windows_2022() -> None:
     env = Env()
     version = env.build.os.version
 
+    logger = logging.getLogger("run_on_windows_2022")
+
     assert "windows" in env.platform, ASSERT_PLATFORM_ERROR % {
         "platform": env.platform,
     }
     if version == "2022":
-        logging.info(LOG_RUNNING_IN_WIN_2022)
+        logger.info(LOG_RUNNING_IN_WIN_2022)
     else:
-        logging.error(
+        logger.error(
             LOG_ERROR_WIN_VERSION % {"exp_version": " 2022", "version": version}
         )
 
