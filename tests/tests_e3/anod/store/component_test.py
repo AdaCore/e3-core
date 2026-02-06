@@ -487,7 +487,7 @@ def test_component_download(store) -> None:
 
 def test_component_meta_file() -> None:
     """Check component meta file APIs."""
-    c, att_1, att_2 = create_component_with_attachments()
+    c, _att_1, _att_2 = create_component_with_attachments()
     cwd: Path = Path.cwd()
 
     with pytest.raises(StoreError, match="non existing metafile"):
