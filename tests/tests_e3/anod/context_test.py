@@ -547,20 +547,20 @@ class TestContext:
         for uid, action in ac.tree:
             if uid.endswith("spec12.build"):
                 assert ac.tree.get_tag(uid)
-                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                _, cuid, ctag = reverse_dag.get_context(uid)[0]
                 assert cuid == uid
                 assert ctag["plan_args"]["weathers"] == "foo"
                 assert ctag["plan_line"] == "plan.txt:2"
             elif uid.endswith("spec3.build"):
                 assert not ac.tree.get_tag(uid)
-                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                _, cuid, ctag = reverse_dag.get_context(uid)[0]
                 assert cuid != uid
                 assert cuid.endswith("spec10.build")
                 assert ctag["plan_args"]["weathers"] == "foo"
                 assert ctag["plan_line"] == "plan.txt:3"
             elif uid.endswith("spec11.build"):
                 assert ac.tree.get_tag(uid), ac.tree.tags
-                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                _cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
                 assert cuid == uid
                 assert ctag["plan_args"]["weathers"] == "bar"
                 assert ctag["plan_line"] == "plan.txt:4"
@@ -667,7 +667,7 @@ class TestContext:
         for uid, _ in ac.tree:
             if uid.endswith("spec12.build"):
                 assert ac.tree.get_tag(uid)
-                cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
+                _cdist, cuid, ctag = reverse_dag.get_context(uid)[0]
                 assert cuid == uid
                 assert ctag["plan_args"]["weathers"] == "foo"
                 assert ctag["plan_line"] == "plan.txt:2"

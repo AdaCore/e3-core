@@ -148,7 +148,7 @@ def create_valid_run_details() -> tuple:
 
 def test_build_definition_as_dict() -> None:
     """Test dict representation of build definition."""
-    build_type, rd, resolved_dependencies, bd = create_valid_build_definition()
+    build_type, rd, _resolved_dependencies, bd = create_valid_build_definition()
     # Check class attributes.
     dict_repr = bd.as_dict()
     assert dict_repr.get(Predicate.BuildDefinition.ATTR_BUILD_TYPE) == build_type
@@ -176,7 +176,7 @@ def test_build_definition_as_json() -> None:
 def test_build_definition_init() -> None:
     """Test initialization of build definition."""
     # Check class attributes.
-    build_type, rd, resolved_dependencies, bd = create_valid_build_definition()
+    build_type, rd, _resolved_dependencies, bd = create_valid_build_definition()
     assert bd.build_type == build_type
     assert bd.external_parameters == EXTERNAL_PARAMETERS
     assert bd.internal_parameters == INTERNAL_PARAMETERS
@@ -215,13 +215,13 @@ def test_build_definition_load_json() -> None:
 
 def test_builder_as_dict() -> None:
     (
-        uri,
-        digest,
-        rc_annotations,
-        name,
-        dl_loc,
-        media_type,
-        content,
+        _uri,
+        _digest,
+        _rc_annotations,
+        _name,
+        _dl_loc,
+        _media_type,
+        _content,
         desc,
     ) = create_valid_resource_descriptor()
     build_id: TypeURI = TypeURI(VALID_URIS[1])
@@ -319,7 +319,7 @@ def test_buildmetadata_as_dict() -> None:
 
 def test_buildmetadata_as_json() -> None:
     """Test the JSON representation of a BuildMetadata."""
-    start_time, invocation_id, finish_time, bm = create_valid_build_metadata()
+    _start_time, _invocation_id, _finish_time, bm = create_valid_build_metadata()
     json_repr: str = bm.as_json()
     # Check that the JSON string is valid.
     assert json.loads(json_repr)
@@ -462,13 +462,13 @@ def test_predicate_load_json() -> None:
 
 def test_resource_descriptor_add_digest() -> None:
     (
-        uri,
+        _uri,
         digest,
-        rc_annotations,
-        name,
-        dl_loc,
-        media_type,
-        content,
+        _rc_annotations,
+        _name,
+        _dl_loc,
+        _media_type,
+        _content,
         desc,
     ) = create_valid_resource_descriptor()
     assert desc.digest == digest
