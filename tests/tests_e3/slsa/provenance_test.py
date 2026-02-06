@@ -119,7 +119,7 @@ def create_valid_resource_descriptor() -> tuple:
     name: str = "Resource descriptor"
     dl_loc: str = VALID_URIS[1]
     media_type: str = "Media Type"
-    content = "12.34".encode("utf-8")
+    content = b"12.34"
 
     desc: ResourceDescriptor = ResourceDescriptor(
         uri=uri,
@@ -522,7 +522,7 @@ def test_resource_descriptor_content() -> None:
     """Test setting a resource descriptor content."""
     desc = ResourceDescriptor()
     # Set a valid content.
-    desc.content = "12.34".encode("utf-8")
+    desc.content = b"12.34"
     desc.content = None
     # Try an invalid content.
     with pytest.raises(TypeError) as invalid_content:
@@ -557,7 +557,7 @@ def test_resource_descriptor_dir_hash() -> None:
         for filename in filenames:
             fpath: Path = Path(d, filename)
             with fpath.open("wb") as f:
-                f.write(f"{filename} file content\n".encode("utf-8"))
+                f.write(f"{filename} file content\n".encode())
 
     # Check all algorithms.
     for algo in hashlib.algorithms_guaranteed:
