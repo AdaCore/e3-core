@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 
     CmdLine = list[str]
     AnyCmdLine = Union[list[CmdLine], CmdLine]
-    STDOUT_VALUE = Literal[-1]
-    PIPE_VALUE = Literal[-2]
+    PIPE_VALUE = Literal[-1]
+    STDOUT_VALUE = Literal[-2]
     DEVNULL_VALUE = Literal[-3]
 
     # Make STDOUT subprocess constant visible in e3.os.process
