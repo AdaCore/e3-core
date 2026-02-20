@@ -16,3 +16,4 @@ docs/build
 docs/source/requirement_coverage.rst
 docs/source/requirement_coverage.yaml
 pytest-report.*
+CLAUDE.md
