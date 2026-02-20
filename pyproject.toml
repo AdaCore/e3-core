@@ -95,7 +95,7 @@ s3 = "e3.event.handler.s3:S3Handler"
 
 [project.entry-points."e3.store"]
 http-simple-store = "e3.store.backends.http_simple_store:HTTPSimpleStore"
-          
+
 [project.entry-points."e3.store.cache.backend"]
 file-cache = "e3.store.cache.backends.filecache:FileCache"
 
@@ -161,3 +161,38 @@ module = [
   "e3.yaml.*"
 ]
 disallow_untyped_defs = false
+
+[tool.ruff]
+line-length = 88
+[tool.ruff.lint]
+select = ["ALL"]
+
+ignore = [
+  # Probably not useful for us
+  "C901", # too complex function (MCCabe complexity)
+  "FLY002", # consider f-string instead of join (sometimes less readable)
+  "PLR0912", # too many branches in a function
+  "SIM108", # ternary operator - can reduce readability
+  "TRY003", # long message outside the exception class, difficult to change
+
+  # Decision not to follow
+  "G004", # we accept f-string in logging statements
+  "ERA001", # too many false positive with this rule
+  "PERF203", # `try`-`except` within a loop incurs performance overhead for Python < 3.11
+  "PGH003", # allow type: ignore - can be done by mypy if we wanted to
+  "S101", # use of assert statement, used for mypy
+  "T201", # print statement are allowed
+
+  # Recommendations from ruff
+  "COM812", # Avoid enforcing trailing commas - use of formatter instead
+  "D203", # 1 blank line required before class docstring, we follow pep257
+  "D213", # We use pep257 convention for multi-line docstrings
+
+]
+
+[tool.ruff.lint.pep8-naming]
+extend-ignore-names = [
+  "CaasSkipUpdate",
+  "get_ticket_crm_IT",
+  "P",
+]
