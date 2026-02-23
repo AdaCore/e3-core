@@ -455,7 +455,7 @@ def test_component_download(store) -> None:
         store=store,
     )
     c.files.append(f1)
-    cwd = os.getcwd()
+    cwd = str(Path.cwd())
     assert c.download(cwd) is True
     f1_downloaded = os.path.join("f1.txt")
     assert os.path.isfile(f1_downloaded)

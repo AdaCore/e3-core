@@ -11,6 +11,7 @@ import os
 import pickle
 from collections import namedtuple
 from pathlib import Path
+
 from typing import TYPE_CHECKING
 
 import e3.log
@@ -681,7 +682,7 @@ class Env(AbstractBaseEnv):
         self.environ = os.environ.copy()
 
         # Store cwd
-        self.cwd = os.getcwd()
+        self.cwd = str(Path.cwd())
 
         if filename is None:
             self._context.append(pickle.dumps(self._instance))

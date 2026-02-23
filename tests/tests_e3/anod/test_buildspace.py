@@ -5,11 +5,12 @@ from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 import pytest
+from pathlib import Path
 
 
 def test_reset() -> None:
     """Verify that BuildSpace reset() delete expected content."""
-    bs = BuildSpace(root_dir=os.getcwd())
+    bs = BuildSpace(root_dir=str(Path.cwd()))
     bs.create()
     for name in bs.dirs:
         touch(os.path.join(bs.subdir(name), "a"))
@@ -26,14 +27,14 @@ def test_reset() -> None:
 
 def test_subdir() -> None:
     """Check error handling of subdir."""
-    bs = BuildSpace(root_dir=os.getcwd())
+    bs = BuildSpace(root_dir=str(Path.cwd()))
     with pytest.raises(ValueError):
         bs.subdir("foo")
 
 
 def test_reset_tmp_dir() -> None:
     """Check that the tmp_dir is reset when the build space is created."""
-    bs = BuildSpace(root_dir=os.getcwd())
+    bs = BuildSpace(root_dir=str(Path.cwd()))
     marker = os.path.join(bs.subdir(name="tmp"), "deleteme")
     mkdir(bs.tmp_dir)
     touch(marker)

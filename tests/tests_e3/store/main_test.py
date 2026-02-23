@@ -34,7 +34,7 @@ def test_simple_store(caplog) -> None:
         metadata = store.get_resource_metadata(query)
         assert {metadata.url, metadata.sha} == set(query.values())
 
-        current_dir = os.getcwd()
+        current_dir = str(Path.cwd())
         path = store.download_resource_content(metadata, current_dir)
         assert path is None
         assert "expecting da39a3ee5e6b4b0d3255bfef95601890afd80709 got" in caplog.text
@@ -47,7 +47,7 @@ def test_simple_store(caplog) -> None:
 
 def test_store_with_cache() -> None:
     """Test HTTPSimpleStore with a FileCache."""
-    fc = FileCache({"cache_dir": os.path.join(os.getcwd(), "cache")})
+    fc = FileCache({"cache_dir": os.path.join(str(Path.cwd()), "cache")})
 
     with patch("e3.net.http.requests.Session.request") as mock_request:
         mock_request.return_value = mock_download()
@@ -59,7 +59,7 @@ def test_store_with_cache() -> None:
 
         store = HTTPSimpleStore({}, fc)
         metadata = store.get_resource_metadata(query)
-        current_dir = os.getcwd()
+        current_dir = str(Path.cwd())
         path = store.download_resource(metadata, current_dir)
         assert path is not None
         with Path(path).open() as f:

@@ -7,6 +7,7 @@ import e3.os.process
 import e3.platform
 
 import pytest
+from pathlib import Path
 
 
 def test_autodetect() -> None:
@@ -189,7 +190,7 @@ def test_discriminants() -> None:
 
 def test_tmp() -> None:
     e = e3.env.Env()
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
     os.environ["TMPDIR"] = current_dir
     assert e.tmp_dir == current_dir
 

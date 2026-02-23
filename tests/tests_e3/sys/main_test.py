@@ -97,11 +97,11 @@ def test_python_func() -> None:
         e3.fs.mkdir("Scripts")
         e3.os.fs.touch("Scripts/run.exe")
         assert e3.os.fs.unixpath(
-            e3.sys.python_script("run.exe", os.getcwd())[0]
-        ) == e3.os.fs.unixpath(os.path.join(os.getcwd(), "Scripts", "run.exe"))
+            e3.sys.python_script("run.exe", str(Path.cwd()))[0]
+        ) == e3.os.fs.unixpath(os.path.join(str(Path.cwd()), "Scripts", "run.exe"))
         assert e3.os.fs.unixpath(
-            e3.sys.python_script("run", os.getcwd())[0]
-        ) == e3.os.fs.unixpath(os.path.join(os.getcwd(), "Scripts", "run.exe"))
+            e3.sys.python_script("run", str(Path.cwd()))[0]
+        ) == e3.os.fs.unixpath(os.path.join(str(Path.cwd()), "Scripts", "run.exe"))
     else:
         assert "/foo/bin" in os.environ["PATH"].split(os.pathsep)
         assert e3.sys.python_script("run", "/foo") == [
@@ -117,14 +117,14 @@ def test_python_func() -> None:
     # Check support for python3
     if sys.platform == "win32":
         e3.os.fs.touch("python3.exe")
-        assert e3.sys.interpreter(os.getcwd()) == os.path.join(
-            os.getcwd(), "python3.exe"
+        assert e3.sys.interpreter(str(Path.cwd())) == os.path.join(
+            str(Path.cwd()), "python3.exe"
         )
     else:
         e3.fs.mkdir("bin")
         e3.os.fs.touch(os.path.join("bin", "python3"))
-        assert e3.sys.interpreter(os.getcwd()) == os.path.join(
-            os.getcwd(), "bin", "python3"
+        assert e3.sys.interpreter(str(Path.cwd())) == os.path.join(
+            str(Path.cwd()), "bin", "python3"
         )
 
 

@@ -15,7 +15,7 @@ import pytest
 
 
 def test_cp() -> None:
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
     hash_test = os.path.join(current_dir, "hash_test")
     e3.fs.cp(__file__, hash_test)
     assert e3.hash.sha1(__file__) == e3.hash.sha1(hash_test)
@@ -251,7 +251,7 @@ def test_mv() -> None:
 def test_tree_state() -> None:
     import time
 
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
     d = os.path.dirname(os.path.dirname(__file__))
     state = e3.fs.get_filetree_state(d)
     assert isinstance(state, str)
@@ -312,7 +312,7 @@ def test_tree_state() -> None:
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
 def test_sync_tree_with_symlinks() -> None:
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
     a = os.path.join(current_dir, "a")
     b = os.path.join(current_dir, "b")
     m1 = os.path.join(current_dir, "m1")
@@ -428,7 +428,7 @@ def test_sync_tree_links() -> None:
     e3.fs.mkdir("c")
     with Path("a/content").open("w") as f:
         f.write("content")
-    os.symlink(os.path.join(os.getcwd(), "a", "content"), "a/link")
+    os.symlink(os.path.join(str(Path.cwd()), "a", "content"), "a/link")
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
 
     with Path("b/link").open() as f:
@@ -475,8 +475,8 @@ def test_sync_tree_top_source_is_link() -> None:
         # Symlinks are supported on Windows, but the user must have sufficient
         # permissions.
         os.symlink(
-            os.path.join(os.getcwd(), "a"),
-            os.path.join(os.getcwd(), "b"),
+            os.path.join(str(Path.cwd()), "a"),
+            os.path.join(str(Path.cwd()), "b"),
             target_is_directory=True,
         )
     except Exception as e:
@@ -488,13 +488,13 @@ def test_sync_tree_top_source_is_link() -> None:
     # Sync tree in "c", source top is "b", which is a symlink to "a".
     e3.fs.mkdir("c")
     e3.fs.sync_tree(
-        os.path.join(os.getcwd(), "b"),
-        os.path.join(os.getcwd(), "c", "a"),
+        os.path.join(str(Path.cwd()), "b"),
+        os.path.join(str(Path.cwd()), "c", "a"),
         preserve_timestamps=False,
     )
 
     # Make sure `c/a` is not a symlink
-    assert not os.path.islink(os.path.join(os.getcwd(), "c", "a"))
+    assert not os.path.islink(os.path.join(str(Path.cwd()), "c", "a"))
     with Path("c/a/content").open() as f:
         assert f.read() == "content"
 

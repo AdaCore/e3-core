@@ -70,7 +70,7 @@ def setup_sbx(request) -> None:
     a finalizer is put in place to automatically delete that
     directory upon test tear-down.
     """
-    sbx_dirs.set_dirs(root_dir=os.getcwd())
+    sbx_dirs.set_dirs(root_dir=str(Path.cwd()))
     request.addfinalizer(sbx_dirs.delete_sbx)
 
     sbx_dirs.delete_sbx()

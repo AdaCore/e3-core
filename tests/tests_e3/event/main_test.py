@@ -8,6 +8,7 @@ import e3.fs
 import e3.os.fs
 
 import mock
+from pathlib import Path
 
 
 def test_smtp_event() -> None:
@@ -25,8 +26,8 @@ def test_smtp_event() -> None:
     e3.fs.mkdir("pkg")
     e3.archive.create_archive(
         filename="pkg.tar.gz",
-        from_dir=os.path.join(os.getcwd(), "pkg"),
-        dest=os.getcwd(),
+        from_dir=os.path.join(str(Path.cwd()), "pkg"),
+        dest=str(Path.cwd()),
     )
 
     e3.os.fs.touch("unknown")

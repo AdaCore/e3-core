@@ -114,7 +114,7 @@ def test_mv() -> None:
 
 
 def test_df() -> None:
-    cwd = os.getcwd()
+    cwd = str(Path.cwd())
     statfs = e3.os.fs.df(cwd)
     assert isinstance(statfs, numbers.Integral)
     statfs = e3.os.fs.df(cwd, True)
