@@ -8,6 +8,7 @@ from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 import pytest
+from pathlib import Path
 
 if sys.platform == "win32":
     from e3.os.windows.fs import NTFile
@@ -25,7 +26,7 @@ if sys.platform == "win32":
     reason="windows specific test",
 )
 def test_read_attributes() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_read_attr_file.txt")
     touch(test_file_path)
@@ -40,7 +41,7 @@ def test_read_attributes() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_file_info() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_read_attr_file.txt")
     touch(test_file_path)
@@ -53,7 +54,7 @@ def test_file_info() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_write_attributes() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_write_attr_file.txt")
     touch(test_file_path)
@@ -78,7 +79,7 @@ def test_write_attributes() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_uid() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_uid.txt")
     touch(test_file_path)
@@ -94,7 +95,7 @@ def test_uid() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_open_file_in_dir() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_dir_path = os.path.join(work_dir, "dir")
     mkdir(test_dir_path)
@@ -108,7 +109,7 @@ def test_open_file_in_dir() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_volume_path() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_vpath.txt")
     touch(test_file_path)
@@ -123,7 +124,7 @@ def test_volume_path() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_move_to_trash() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_mv_to_trash.txt")
     touch(test_file_path)
@@ -141,7 +142,7 @@ def test_move_to_trash() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_dispose() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_dispose.txt")
     touch(test_file_path)
@@ -157,7 +158,7 @@ def test_dispose() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_rename() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_file_path = os.path.join(work_dir, "test_rename.txt")
     touch(test_file_path)
@@ -173,7 +174,7 @@ def test_rename() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_iterate_on_dir() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_dir_path = os.path.join(work_dir, "dir")
     mkdir(test_dir_path)
@@ -215,7 +216,7 @@ def test_iterate_on_dir() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_is_dir_empty() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_dir_path = os.path.join(work_dir, "dir")
     deleted_file_path = os.path.join(test_dir_path, "deleted2.txt")
@@ -243,7 +244,7 @@ def test_is_dir_empty() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_unlink() -> None:
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
 
     test_dir_path = os.path.join(work_dir, "dir")
     deleted_file_path = os.path.join(test_dir_path, "deleted2.txt")

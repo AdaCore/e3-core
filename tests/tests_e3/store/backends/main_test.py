@@ -1,10 +1,11 @@
 import os
 
 from e3.store.cache.backends.filecache import FileCache
+from pathlib import Path
 
 
 def test_cache() -> None:
-    fc = FileCache({"cache_dir": os.path.join(os.getcwd(), "cache")})
+    fc = FileCache({"cache_dir": os.path.join(str(Path.cwd()), "cache")})
     fc.set("a", 1)
     assert fc.get("a") == 1
     fc.set("b", 2, timeout=-2)

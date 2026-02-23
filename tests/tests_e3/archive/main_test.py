@@ -10,6 +10,7 @@ import e3.os.fs
 
 import pytest
 from unittest.mock import patch
+from pathlib import Path
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
@@ -132,7 +133,7 @@ def test_unpack_fileobj(ext) -> None:
 def test_unsupported() -> None:
     """Test unsupported archive format."""
     with pytest.raises(e3.archive.ArchiveError) as err:
-        e3.archive.create_archive("foo.foo", os.getcwd(), "dest")
+        e3.archive.create_archive("foo.foo", str(Path.cwd()), "dest")
     assert 'unknown format "foo.foo"' in str(err)
 
 
@@ -298,7 +299,7 @@ def test_remove_root_dir() -> None:
 
     # Create an archive with two root dirs (from and dest)
     e3.archive.create_archive(
-        "pkg.zip", os.path.abspath(os.getcwd()), "dest", no_root_dir=True
+        "pkg.zip", os.path.abspath(str(Path.cwd())), "dest", no_root_dir=True
     )
     e3.fs.mkdir("result")
 

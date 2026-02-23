@@ -5,10 +5,11 @@ import e3.anod.sandbox
 import e3.anod.spec
 
 import pytest
+from pathlib import Path
 
 
 def test_simple_driver() -> None:
-    sandbox = e3.anod.sandbox.SandBox(root_dir=os.getcwd())
+    sandbox = e3.anod.sandbox.SandBox(root_dir=str(Path.cwd()))
 
     class Simple(e3.anod.spec.Anod):
         @e3.anod.spec.Anod.primitive()
@@ -32,7 +33,7 @@ def test_deps_driver() -> None:
         def build(self):
             return self.deps["parent"].parent_info
 
-    sandbox = e3.anod.sandbox.SandBox(root_dir=os.getcwd())
+    sandbox = e3.anod.sandbox.SandBox(root_dir=str(Path.cwd()))
     anod_instance = Deps(qualifier="", kind="build")
     anod_instance.sandbox = sandbox
 

@@ -409,7 +409,7 @@ class Run:
 
             cmdlogger.debug(
                 "Run: cd %s; %s",
-                cwd if cwd is not None else os.getcwd(),
+                cwd if cwd is not None else Path.cwd(),
                 self.command_line_image(),
             )
 

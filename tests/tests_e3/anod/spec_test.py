@@ -190,7 +190,7 @@ def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
     ldd_output, ignored = arguments
     (errors,) = expected
     test_spec: Anod = Anod("", kind="install")
-    test_spec.sandbox = SandBox(root_dir=os.getcwd())
+    test_spec.sandbox = SandBox(root_dir=str(Path.cwd()))
 
     if ldd_output is None:
         # Use the current executable lib directory.
@@ -246,7 +246,7 @@ def test_spec_check_dll_closure_single_file(ldd) -> None:  # type: ignore[no-unt
     path: str | None = None
 
     test_spec: Anod = Anod("", kind="install")
-    test_spec.sandbox = SandBox(root_dir=os.getcwd())
+    test_spec.sandbox = SandBox(root_dir=str(Path.cwd()))
 
     # Get the ldd output of the current executable.
     ldd_output = ldd_output_to_posix(Run(["ldd", sys.executable]).out or "")
@@ -330,7 +330,7 @@ def test_primitive() -> None:
     with_primitive3 = WithPrimitive("error2", "build")
     with_primitive4 = WithPrimitive("error3", "build")
 
-    Anod.sandbox = SandBox(root_dir=os.getcwd())
+    Anod.sandbox = SandBox(root_dir=str(Path.cwd()))
     Anod.sandbox.spec_dir = os.path.join(os.path.dirname(__file__), "data")
     Anod.sandbox.create_dirs()
     # Activate the logging

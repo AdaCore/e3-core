@@ -31,7 +31,7 @@ def test_run_stdout_stderr() -> None:
     Verify that Run is working when stdout is redirected to a file and
     stderr not redirected to stdout.
     """
-    prog_filename = os.path.join(os.getcwd(), "prog")
+    prog_filename = os.path.join(str(Path.cwd()), "prog")
     with Path(prog_filename).open("wb") as f:
         f.write(b"import sys\n")
         f.write(b'print("stdout", file=sys.stdout)\n')
@@ -49,7 +49,7 @@ def test_run_stdout_stderr() -> None:
 
 def test_run_shebang(caplog) -> None:
     """Verify that the parse shebang option works."""
-    prog_filename = os.path.join(os.getcwd(), "prog")
+    prog_filename = os.path.join(str(Path.cwd()), "prog")
     with Path(prog_filename).open("wb") as f:
         f.write(b"#!/usr/bin/env python\n")
         f.write(b"import sys\n")
@@ -552,7 +552,7 @@ def test_shell_override() -> None:
     On windows, we ensure that /bin/bash /bin/sh shebangs are replaced by
     SHELL env var.
     """
-    work_dir = os.getcwd()
+    work_dir = str(Path.cwd())
     os.environ["SHELL"] = sys.executable
     test_file_path = os.path.join(work_dir, "shebang_test.sh")
     with Path(test_file_path).open("w") as fd:

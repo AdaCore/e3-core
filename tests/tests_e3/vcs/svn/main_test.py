@@ -26,7 +26,7 @@ def file_url(path, unix=False) -> str:
     reason="test using SVN: not available in our windows CI image at the moment.",
 )
 def test_svn_repo(svn) -> None:
-    cwd = os.getcwd()
+    cwd = str(Path.cwd())
 
     # --- create local project
     project_path = os.path.join(cwd, "test_project")

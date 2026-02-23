@@ -13,7 +13,7 @@ from contextlib import closing
 
 def test_git_non_utf8(git) -> None:
     """Test with non utf-8 encoding in changelog."""
-    working_tree = os.path.join(os.getcwd(), "working_tree")
+    working_tree = os.path.join(str(Path.cwd()), "working_tree")
     repo = GitRepository(working_tree)
     repo.init()
     os.chdir(working_tree)
@@ -44,8 +44,8 @@ def test_git_non_utf8(git) -> None:
 
 
 def test_git_repo(git) -> None:
-    working_tree = os.path.join(os.getcwd(), "working_tree")
-    working_tree2 = os.path.join(os.getcwd(), "working_tree2")
+    working_tree = os.path.join(str(Path.cwd()), "working_tree")
+    working_tree2 = os.path.join(str(Path.cwd()), "working_tree2")
     repo = GitRepository(working_tree)
     repo.init()
     os.chdir(working_tree)

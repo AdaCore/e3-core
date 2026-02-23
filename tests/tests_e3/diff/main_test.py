@@ -20,7 +20,7 @@ def test_patch() -> None:
     file_patch = os.path.join(test_dir, "patch.txt")
     file_patch2 = os.path.join(test_dir, "patch2.txt")
 
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
 
     e3.fs.cp(file_to_patch, current_dir)
     e3.diff.patch(file_patch, current_dir)
@@ -55,7 +55,7 @@ def test_patch_ignore_all(caplog) -> None:
     file_to_patch = os.path.join(test_dir, "file_to_patch.orig.txt")
     file_patch2 = os.path.join(test_dir, "patch2.txt")
 
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
 
     e3.fs.cp(file_to_patch, current_dir)
     e3.fs.cp(file_patch2, current_dir)
@@ -67,7 +67,7 @@ def test_discarded() -> None:
     test_dir = os.path.dirname(__file__)
     orig = os.path.join(test_dir, "data.txt")
     new = os.path.join(test_dir, "data_new.txt")
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
 
     e3.fs.cp(orig, current_dir)
     e3.fs.cp(os.path.join(test_dir, "data_patch_universal.txt"), current_dir)
@@ -101,7 +101,7 @@ def test_patch_invalid() -> None:
     file_to_patch = os.path.join(test_dir, "file_to_patch.orig.txt")
     file_patch2 = os.path.join(test_dir, "patch2.txt")
 
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
 
     e3.fs.cp(file_to_patch, current_dir)
     e3.fs.cp(file_patch2, current_dir)
@@ -118,7 +118,7 @@ def test_patch_git_format() -> None:
     file_to_patch = os.path.join(test_dir, "git_file.txt")
     patch_file = os.path.join(test_dir, "git_diff.patch")
 
-    cwd = os.getcwd()
+    cwd = str(Path.cwd())
 
     e3.fs.cp(file_to_patch, cwd)
     e3.fs.cp(patch_file, cwd)
@@ -134,7 +134,7 @@ def test_patch_git_format_ignore() -> None:
     file_to_patch = os.path.join(test_dir, "git_file.txt")
     patch_file = os.path.join(test_dir, "*.patch")
 
-    cwd = os.getcwd()
+    cwd = str(Path.cwd())
 
     e3.fs.cp(file_to_patch, cwd)
     e3.fs.cp(patch_file, cwd)
@@ -169,7 +169,7 @@ def test_patch_git_with_headers() -> None:
     test_dir = os.path.dirname(__file__)
     patch_file = os.path.join(test_dir, "git_patch_with_header")
 
-    cwd = os.getcwd()
+    cwd = str(Path.cwd())
 
     e3.fs.cp(patch_file, cwd)
 
@@ -201,7 +201,7 @@ def test_patch_git_with_headers() -> None:
 def test_patch_git_binary() -> None:
     test_dir = os.path.dirname(__file__)
     patch_file = os.path.join(test_dir, "unicorn.patch")
-    cwd = os.getcwd()
+    cwd = str(Path.cwd())
     e3.fs.cp(patch_file, cwd)
     e3.diff.patch("unicorn.patch", cwd)
     assert os.path.isfile("unicorn.zip")

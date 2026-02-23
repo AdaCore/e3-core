@@ -17,7 +17,7 @@ def test_source_builder_default_prepare_src() -> None:
 
     assert sb.fullname() == "a-src.tgz"
 
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
     a_wd = os.path.join(current_dir, "a_wd")
 
     # create a fake working dir of a-git
@@ -58,7 +58,7 @@ def test_source_builder_custom_prepare_src() -> None:
         prepare_src=prepare_src,
     )
 
-    sb.prepare_src(None, os.getcwd())
+    sb.prepare_src(None, str(Path.cwd()))
     assert os.path.exists("my_generated_source_file")
 
 
@@ -76,7 +76,7 @@ def test_apply_patch() -> None:
             "+new line\n"
         )
 
-    current_dir = os.getcwd()
+    current_dir = str(Path.cwd())
     touch("a_file")
     sb.apply_patch(None, "my_patch", current_dir)
 
