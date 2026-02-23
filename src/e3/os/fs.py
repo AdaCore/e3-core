@@ -363,7 +363,7 @@ def touch(filename: str | Path) -> None:
     if os.path.exists(filename):
         os.utime(filename, None)
     else:
-        with open(filename, "w+"):
+        with Path(filename).open("w+"):
             pass
 
 

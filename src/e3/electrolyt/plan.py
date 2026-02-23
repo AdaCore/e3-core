@@ -5,6 +5,7 @@ import inspect
 import types
 from datetime import datetime, timezone
 from functools import partial
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from e3.collection.toggleable_bool import ToggleableBooleanGroup
@@ -87,7 +88,7 @@ class Plan:
 
         :param filename: path to the python code
         """
-        with open(filename, "rb") as fd:
+        with Path(filename).open("rb") as fd:
             source_code = fd.read()
         self.load_chunk(source_code, filename)
 

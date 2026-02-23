@@ -1,3 +1,4 @@
+from pathlib import Path
 import logging
 import os
 import threading
@@ -130,7 +131,7 @@ class TestHTTP:
             with HTTPSession() as session:
                 session.set_max_retries(base_url, connect=5)
                 result = session.download_file(base_url + "dummy", dest=".")
-                with open(result, "rb") as fd:
+                with Path(result).open("rb") as fd:
                     content = fd.read()
                 assert content == b"OK"
                 assert server.tries == 2
@@ -141,7 +142,7 @@ class TestHTTP:
         def func(server, base_url) -> None:
             with HTTPSession() as session:
                 result = session.download_file(base_url + "dummy", dest=".")
-                with open(result, "rb") as fd:
+                with Path(result).open("rb") as fd:
                     content = fd.read()
                 assert content == b"Dummy!"
                 assert os.path.basename(result) == "dummy.txt"
@@ -226,9 +227,9 @@ class TestHTTP:
             def func(server, url) -> None:
                 with HTTPSession(base_urls=[nok_url, url]) as session:
                     session.DEFAULT_TIMEOUT = (3.0, 3.0)
-                    with open("./data.txt", "wb") as fd:
+                    with Path("./data.txt").open("wb") as fd:
                         fd.write(b"Hello!")
-                    with open("./data.txt", "rb") as fd:
+                    with Path("./data.txt").open("rb") as fd:
                         session.request(
                             "POST",
                             "dummy",
@@ -264,7 +265,7 @@ class TestHTTP:
                     exception_on_error=True,
                     headers={"Authorization": "Bearer toto"},
                 )
-                with open(result, "rb") as fd:
+                with Path(result).open("rb") as fd:
                     content = fd.read()
                 assert content == b"Dummy!"
                 assert os.path.basename(result) == "dummy.txt"

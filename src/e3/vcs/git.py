@@ -21,6 +21,7 @@ import os
 import sys
 import tempfile
 from contextlib import closing
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.fs
@@ -320,7 +321,7 @@ class GitRepository:
                         diff_size = diff_fd.tell()
                         e3.log.debug("diff size for %s: %d", result["sha"], diff_size)
 
-                    with open(tempfile_name, "rb") as f:
+                    with Path(tempfile_name).open("rb") as f:
                         content = f.read(max_diff_size)
 
                         # Diff content is not always in utf-8 format thus use

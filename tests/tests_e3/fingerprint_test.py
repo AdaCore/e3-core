@@ -1,3 +1,4 @@
+from pathlib import Path
 import json
 import os
 
@@ -167,7 +168,7 @@ def test_fingerprint_save_and_load() -> None:
     # Trying to load from a file with invalid contents (bad JSON)
 
     f_bad_filename = fingerprint_path("f_bad_JSON")
-    with open(f_bad_filename, "w") as f:
+    with Path(f_bad_filename).open("w") as f:
         f.write("yello{")
 
     f3 = Fingerprint.load_from_file(f_bad_filename)
@@ -178,7 +179,7 @@ def test_fingerprint_save_and_load() -> None:
     # that comes from a fingerprint...
 
     f_not_filename = fingerprint_path("not_a_fingerprint")
-    with open(f_not_filename, "w") as f:
+    with Path(f_not_filename).open("w") as f:
         json.dump([1, 2, 3], f)
 
     f4 = Fingerprint.load_from_file(f_not_filename)
@@ -196,10 +197,10 @@ def test_fingerprint_save_and_load() -> None:
         # truncated data again.
 
         f2.save_to_file(f_key_missing_filename)
-        with open(f_key_missing_filename) as f:
+        with Path(f_key_missing_filename).open() as f:
             data = json.load(f)
         del data[key]
-        with open(f_key_missing_filename, "w") as f:
+        with Path(f_key_missing_filename).open("w") as f:
             json.dump(data, f)
 
         f5 = Fingerprint.load_from_file(f_key_missing_filename)
@@ -217,11 +218,11 @@ def test_fingerprint_save_and_load() -> None:
     f_bad_version = fingerprint_path("bad_version")
 
     f2.save_to_file(f_bad_version)
-    with open(f_bad_version) as f:
+    with Path(f_bad_version).open() as f:
         data = json.load(f)
         data["fingerprint_version"] = "1.0"
         data["elements"]["fingerprint_version"] = "1.0"
-    with open(f_bad_version, "w") as f:
+    with Path(f_bad_version).open("w") as f:
         json.dump(data, f)
 
     f = Fingerprint.load_from_file(f_bad_version)

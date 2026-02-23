@@ -5,6 +5,7 @@ import json
 import os
 import time
 import uuid
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.env
@@ -183,7 +184,7 @@ class Event:
         }
         mkdir(event_dir)
         json_filename = os.path.join(event_dir, f"{self.uid}-{unique_id()}.json")
-        with open(json_filename, "w") as fd:
+        with Path(json_filename).open("w") as fd:
             json.dump(result, fd)
         return json_filename
 
@@ -194,7 +195,7 @@ class Event:
         :param json_filename: file from which event is loaded
         :return: an event
         """
-        with open(json_filename) as fd:
+        with Path(json_filename).open() as fd:
             event_dict = json.load(fd)
 
         result = Event(name="unknown")

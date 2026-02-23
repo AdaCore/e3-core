@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 import os
 
 import e3.electrolyt.plan as plan
@@ -526,7 +527,7 @@ class TestContext:
             '    anod_foo("spec666")',
             "    foo()",
         ]
-        with open("plan.txt", "w") as f:
+        with Path("plan.txt").open("w") as f:
             f.write("\n".join(content))
         myplan = plan.Plan({}, plan_ext=".txt")
         myplan.load("plan.txt")
@@ -643,7 +644,7 @@ class TestContext:
             "def myserver():",
             '    anod_build(spec("spec12").myname(), weathers="foo")',
         ]
-        with open("plan.txt", "w") as f:
+        with Path("plan.txt").open("w") as f:
             f.write("\n".join(content))
         myplan = plan.Plan({}, plan_ext=".txt")
         myplan.load("plan.txt")
@@ -710,7 +711,7 @@ class TestContext:
 
         # Create a simple plan
         content = ["def myserver():", '    anod_source("spec1", weathers="foo")']
-        with open("plan.txt", "w") as f:
+        with Path("plan.txt").open("w") as f:
             f.write("\n".join(content))
         myplan = plan.Plan({})
         myplan.load("plan.txt")
@@ -768,7 +769,7 @@ class TestContext:
             '    anod_build("spec3", weathers="A")',
             '    anod_build("spec3", weathers="B")',
         ]
-        with open("plan.plan", "w") as f:
+        with Path("plan.plan").open("w") as f:
             f.write("\n".join(content))
         myplan = plan.Plan({})
         myplan.load("plan.plan")
@@ -798,7 +799,7 @@ class TestContext:
         cm.register_action("plan_action", plan_action)
         # Create a simple plan
         content = ["def myserver():", '    plan_action("any")']
-        with open("plan.txt", "w") as f:
+        with Path("plan.txt").open("w") as f:
             f.write("\n".join(content))
         myplan = plan.Plan({})
         myplan.load("plan.txt")

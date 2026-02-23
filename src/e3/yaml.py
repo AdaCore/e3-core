@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import re
 from collections import OrderedDict
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import yaml
@@ -62,7 +63,7 @@ class OrderedDictYAMLLoader(Loader):
         else:
             file_name = node.value
 
-        with open(file_name, "rb") as inputfile:
+        with Path(file_name).open("rb") as inputfile:
             return yaml.load(inputfile, OrderedDictYAMLLoader)
 
     def construct_yaml_map(self, node: Node) -> Generator[OrderedDict, None, None]:
@@ -113,7 +114,7 @@ class OrderedDictYAMLLoader(Loader):
 
 def load_ordered(filename: str) -> OrderedDict:
     """Load a .yaml file, keep the file order."""
-    with open(filename) as f:
+    with Path(filename).open() as f:
         return yaml.load(f, OrderedDictYAMLLoader)
 
 
@@ -342,7 +343,7 @@ def load_with_regexp_table(filename: str, selectors: list[str], data: dict) -> d
     elements.
     """
     e3.log.debug("load %s with %s", filename, selectors)
-    with open(filename) as f:
+    with Path(filename).open() as f:
         conf_data = yaml.load(f.read(), OrderedDictYAMLLoader)
 
     assert isinstance(

@@ -1,3 +1,4 @@
+from pathlib import Path
 import e3.electrolyt.host as host
 
 
@@ -16,7 +17,7 @@ def test_host_db() -> None:
 
 
 def test_host_db_yaml() -> None:
-    with open("db.yaml", "w") as f:
+    with Path("db.yaml").open("w") as f:
         f.write(
             "computer2:\n"
             "   build_platform: x86-windows\n"
@@ -34,7 +35,7 @@ def test_host_db_yaml() -> None:
 
 
 def test_host_db_yaml_alias() -> None:
-    with open("db.yaml", "w") as f:
+    with Path("db.yaml").open("w") as f:
         f.write(
             "computer2: &computer2_alias\n"
             "   build_platform: x86-windows\n"

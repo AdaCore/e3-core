@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 
 import e3.diff
@@ -24,10 +25,10 @@ def test_patch() -> None:
     e3.fs.cp(file_to_patch, current_dir)
     e3.diff.patch(file_patch, current_dir)
 
-    with open("file_to_patch.orig.txt") as fd:
+    with Path("file_to_patch.orig.txt").open() as fd:
         output = fd.readlines()
 
-    with open(file_after_patch) as fd:
+    with Path(file_after_patch).open() as fd:
         expected = fd.readlines()
 
     # By default empty line, leading and trailing whitespaces are ignored
@@ -74,9 +75,9 @@ def test_discarded() -> None:
         "data_patch_universal.txt", current_dir, discarded_files=["*file_to_patch*"]
     )
 
-    with open(new) as fd:
+    with Path(new).open() as fd:
         expected = fd.read()
-    with open("data.txt") as fd:
+    with Path("data.txt").open() as fd:
         result = fd.read()
     assert result == expected
 
@@ -86,9 +87,9 @@ def test_discarded() -> None:
         "data_patch_universal.txt", current_dir, discarded_files=["*file_to_patch*"]
     )
 
-    with open(new) as fd:
+    with Path(new).open() as fd:
         expected = fd.read()
-    with open("data.txt") as fd:
+    with Path("data.txt").open() as fd:
         result = fd.read()
     assert result == expected
 
@@ -105,7 +106,7 @@ def test_patch_invalid() -> None:
     e3.fs.cp(file_to_patch, current_dir)
     e3.fs.cp(file_patch2, current_dir)
 
-    with open("patch2.txt", "a") as f:
+    with Path("patch2.txt").open("a") as f:
         f.write("invalid")
 
     with pytest.raises(e3.diff.DiffError):
@@ -123,7 +124,7 @@ def test_patch_git_format() -> None:
     e3.fs.cp(patch_file, cwd)
 
     e3.diff.patch("git_diff.patch", cwd)
-    with open(os.path.join(cwd, "git_file.txt")) as fd:
+    with Path(os.path.join(cwd, "git_file.txt")).open() as fd:
         content = fd.read()
     assert "That's nice it's working !" in content
 
@@ -139,7 +140,7 @@ def test_patch_git_format_ignore() -> None:
     e3.fs.cp(patch_file, cwd)
 
     e3.diff.patch("git_diff.patch", cwd, discarded_files=["a/*"])
-    with open(os.path.join(cwd, "git_file.txt")) as fd:
+    with Path(os.path.join(cwd, "git_file.txt")).open() as fd:
         content = fd.read()
     assert "That's nice it's working !" in content
 
@@ -147,19 +148,19 @@ def test_patch_git_format_ignore() -> None:
     with pytest.raises(e3.diff.EmptyDiffError):
         e3.diff.patch("git_diff.patch", cwd, discarded_files=["git_file.txt"])
 
-    with open(os.path.join(cwd, "git_file.txt")) as fd:
+    with Path(os.path.join(cwd, "git_file.txt")).open() as fd:
         content = fd.read()
     assert "That's nice it's working !" not in content
 
     e3.fs.cp(file_to_patch, cwd)
     e3.diff.patch("git_diff_show.patch", cwd)
-    with open(os.path.join(cwd, "git_file.txt")) as fd:
+    with Path(os.path.join(cwd, "git_file.txt")).open() as fd:
         content = fd.read()
     assert "That's nice it's working !" in content
 
     e3.fs.cp(file_to_patch, cwd)
     e3.diff.patch("git_diff_no_prefix.patch", cwd)
-    with open(os.path.join(cwd, "git_file.txt")) as fd:
+    with Path(os.path.join(cwd, "git_file.txt")).open() as fd:
         content = fd.read()
     assert "That's nice it's working !" in content
 

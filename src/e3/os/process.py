@@ -324,7 +324,7 @@ class Run:
                 # Not found. Do not modify the command line
                 return cmd_line
 
-            with open(prog) as f:
+            with Path(prog).open() as f:
                 try:
                     header = f.read()[0:2]
                 except UnicodeDecodeError:
@@ -669,7 +669,7 @@ class File:
                 else:
                     open_mode = "r"
 
-                self.fd = open(name, open_mode)
+                self.fd = Path(name).open(open_mode)
                 if open_mode == "a+":
                     self.fd.seek(0, 2)
                 self.to_close = True

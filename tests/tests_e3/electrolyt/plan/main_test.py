@@ -1,3 +1,4 @@
+from pathlib import Path
 import e3.electrolyt.entry_point as entry_point
 import e3.electrolyt.host as host
 import e3.electrolyt.plan as plan
@@ -19,7 +20,7 @@ def _get_new_plancontext(machine_name, ignore_disabled=True):
 
 def _get_plan(data, content):
     myplan = plan.Plan(data, entry_point_cls={"ms_preset": entry_point.EntryPoint})
-    with open("plan.txt", "w") as f:
+    with Path("plan.txt").open("w") as f:
         f.write("\n".join(content))
     myplan.load("plan.txt")
     return myplan

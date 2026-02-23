@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import sys
 
@@ -83,12 +84,12 @@ def test_svn_repo(svn) -> None:
     local_change = svn_b.update()
     assert local_change
     assert os.path.exists(foo_path)
-    with open(hello_b_path) as f:
+    with Path(hello_b_path).open() as f:
         assert "kitty" in f.read()
     # update and cancel all changes
     svn_b.update(force_and_clean=True)
     assert not os.path.exists(foo_path)
-    with open(hello_b_path) as f:
+    with Path(hello_b_path).open() as f:
         assert "bye" in f.read()
 
     # checkout into an existing path (not versioned)

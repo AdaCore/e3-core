@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 
 from os.path import abspath, dirname, join as path_join, isfile, isdir
 from typing import TYPE_CHECKING
@@ -54,7 +55,7 @@ class PypiSimulator:
         if not isdir(name):
             mkdir(name)
 
-        with open(path_join(name, "setup.py"), "w") as fd:
+        with Path(path_join(name, "setup.py")).open("w") as fd:
             fd.write("from setuptools import setup, find_packages\n")
             fd.write(f"setup(name='{name}',\n")
             fd.write(f"      version='{version}',\n")
@@ -62,7 +63,7 @@ class PypiSimulator:
 
         mkdir(path_join(name, name))
 
-        with open(path_join(name, name, "__init__.py"), "w") as fd:
+        with Path(path_join(name, name, "__init__.py")).open("w") as fd:
             fd.write(f"# This is package {name}")
 
         pkg = Wheel.build(
@@ -72,7 +73,7 @@ class PypiSimulator:
         )
         assert isfile(pkg.path)
 
-        with open(pkg.path, "rb") as f:
+        with Path(pkg.path).open("rb") as f:
             result = f.read()
 
         context.status_code = 200
@@ -107,7 +108,7 @@ class PypiSimulator:
             )
 
         try:
-            with open(path) as html_file:
+            with Path(path).open() as html_file:
                 result = html_file.read()
 
         except Exception as e:
@@ -136,7 +137,7 @@ class PypiSimulator:
         else:
             touch(f"{package_name}/{package_name}.dist-info/METADATA")
         shutil.make_archive(package, format="zip", root_dir=package_name, base_dir=".")
-        with open(f"{package}.zip", "rb") as fd:
+        with Path(f"{package}.zip").open("rb") as fd:
             result = fd.read()
         cp(f"{package}.zip", "/tmp")
         context.status_code = 200

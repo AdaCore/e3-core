@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import hashlib
 import os
+from pathlib import Path
 
 import e3.error
 
@@ -23,7 +24,7 @@ def __compute_hash(
     if not os.path.isfile(path):
         raise HashError(kind, f"cannot find {path}")
 
-    with open(path, "rb") as f:
+    with Path(path).open("rb") as f:
         result = getattr(hashlib, kind)()
         while True:
             data = f.read(1024 * 1024)

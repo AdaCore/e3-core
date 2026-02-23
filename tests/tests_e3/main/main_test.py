@@ -1,3 +1,4 @@
+from pathlib import Path
 import re
 import sys
 
@@ -15,7 +16,7 @@ def test_main() -> None:
 
 
 def test_mainprog() -> None:
-    with open("mymain.py", "w") as f:
+    with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
                 (
@@ -40,7 +41,7 @@ def test_mainprog() -> None:
 # impacted by timeout issue.
 def to_rework_modules_logging_limitations() -> None:
     """Ensure that by default DEBUG logging info is not enabled for some modules."""
-    with open("mymain.py", "w") as f:
+    with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
                 (
@@ -75,7 +76,7 @@ def to_rework_modules_logging_limitations() -> None:
 
 
 def test_mainprog_with_console_logs() -> None:
-    with open("mymain.py", "w") as f:
+    with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
                 (
@@ -107,7 +108,7 @@ def test_mainprog_with_console_logs() -> None:
     reason="This test is only for windows platform",
 )
 def test_x86_64_windows_default() -> None:
-    with open("mymain.py", "w") as f:
+    with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
                 (
@@ -124,7 +125,7 @@ def test_x86_64_windows_default() -> None:
 
 
 def test_default_env_callback() -> None:
-    with open("mymain.py", "w") as f:
+    with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
                 (
@@ -153,7 +154,7 @@ def test_default_env_callback() -> None:
     reason="Signal handler not set on windows. Bug in signal handling in solaris",
 )
 def test_sigterm() -> None:
-    with open("mymain.py", "w") as f:
+    with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
                 (

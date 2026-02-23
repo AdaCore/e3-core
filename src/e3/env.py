@@ -10,7 +10,7 @@ import abc
 import os
 import pickle
 from collections import namedtuple
-
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.log
@@ -686,7 +686,7 @@ class Env(AbstractBaseEnv):
         if filename is None:
             self._context.append(pickle.dumps(self._instance))
         else:
-            with open(filename, "wb+") as fd:
+            with Path(filename).open("wb+") as fd:
                 pickle.dump(self._instance, fd)
 
     def restore(self, filename: str | None = None) -> None:
@@ -706,7 +706,7 @@ class Env(AbstractBaseEnv):
             self._instance = pickle.loads(self._context[-1])
             self._context = self._context[:-1]
         elif filename is not None:
-            with open(filename, "rb") as fd:
+            with Path(filename).open("rb") as fd:
                 self._instance = pickle.load(fd)
         else:
             return

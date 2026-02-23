@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 
 from e3.anod.driver import AnodDriver
@@ -140,20 +141,20 @@ def test_configure_opts() -> None:
 
 
 def test_text_replace() -> None:
-    with open("myfile", "w") as f:
+    with Path("myfile").open("w") as f:
         f.write("what who when")
 
     # Replace using bytes
     text_replace("myfile", [(b"who", b"replaced")])
-    with open("myfile") as f:
+    with Path("myfile").open() as f:
         assert f.read() == "what replaced when"
 
     # Replace using unicode string
     text_replace("myfile", [("replaced", "who")])
-    with open("myfile") as f:
+    with Path("myfile").open() as f:
         assert f.read() == "what who when"
 
     # Performing it again should not change anything
     text_replace("myfile", [(b"replaced", b"who")])
-    with open("myfile") as f:
+    with Path("myfile").open() as f:
         assert f.read() == "what who when"

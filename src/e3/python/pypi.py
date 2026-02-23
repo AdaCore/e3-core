@@ -8,6 +8,7 @@ from e3.python.wheel import Wheel
 from e3.fs import cp, mkdir
 from operator import attrgetter
 import os
+from pathlib import Path
 import requests
 from urllib.parse import urlparse
 from resolvelib import BaseReporter, Resolver
@@ -308,7 +309,7 @@ class PyPI:
     def save_cache(self) -> None:
         """Dump cache to disk."""
         mkdir(self.cache_dir)
-        with open(self.pypi_cache_file, "w") as fd:
+        with Path(self.pypi_cache_file).open("w") as fd:
             fd.write(
                 json.dumps(
                     {k: [el.as_dict() for el in v] for k, v in self.cache.items()},
@@ -319,7 +320,7 @@ class PyPI:
     def load_cache(self) -> None:
         """Load cache from disk."""
         if os.path.isfile(self.pypi_cache_file):
-            with open(self.pypi_cache_file) as fd:
+            with Path(self.pypi_cache_file).open() as fd:
                 self.cache = {
                     k: [PyPILink.from_dict(el) for el in v]
                     for k, v in json.load(fd).items()
@@ -376,7 +377,7 @@ class PyPICandidate:
                 cp(self.url.replace("file://", "", 1), download_path)
             else:
                 answer = requests.get(self.url, stream=True)
-                with open(download_path, "wb") as fd:
+                with Path(download_path).open("wb") as fd:
                     fd.write(answer.content)
         return download_path
 

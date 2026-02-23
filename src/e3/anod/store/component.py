@@ -7,6 +7,7 @@ import json
 import os
 
 from dateutil import parser as dateutil_parser
+from pathlib import Path
 from typing import overload, TypedDict, TYPE_CHECKING
 
 from e3.anod.store.file import File
@@ -275,7 +276,7 @@ class Component(object):
         :param name: file basename
         """
         as_name: str = name or self.name
-        with open(self.metadata_path(dest_dir, as_name), "w") as fd:
+        with Path(self.metadata_path(dest_dir, as_name)).open("w") as fd:
             fd.write(json.dumps(self.as_dict(), indent=2))
 
     def submit_attachment(self: ComponentType, key: str, file: File) -> ComponentDict:
@@ -372,7 +373,7 @@ class Component(object):
                 return None
             raise StoreError(f"non existing metafile {meta_path}")
         try:
-            with open(meta_path, "r") as fd:
+            with Path(meta_path).open("r") as fd:
                 data = json.load(fd)
             return cls.load(data=data, store=store)
         except Exception as e:

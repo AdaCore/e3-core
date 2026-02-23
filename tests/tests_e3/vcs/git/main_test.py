@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import subprocess
 
@@ -19,10 +20,10 @@ def test_git_non_utf8(git) -> None:
     new_file = os.path.join(working_tree, "new.txt")
     commit_msg = os.path.join(working_tree, "commit.txt")
 
-    with open(commit_msg, "wb") as fd:
+    with Path(commit_msg).open("wb") as fd:
         fd.write(b"\x03\xff")
 
-    with open(new_file, "wb") as fd:
+    with Path(new_file).open("wb") as fd:
         fd.write(b"\x03\xff")
 
     repo.git_cmd(["add", "new.txt"])
@@ -34,7 +35,7 @@ def test_git_non_utf8(git) -> None:
         repo.write_log(fd)
         tmp_filename = fd.name
     try:
-        with open(tmp_filename) as fd:
+        with Path(tmp_filename).open() as fd:
             commits = list(repo.parse_log(fd, max_diff_size=1024))
     finally:
         rm(tmp_filename)
@@ -74,9 +75,9 @@ def test_git_repo(git) -> None:
     repo.git_cmd(["notes", "--ref", "review", "add", "HEAD", "-F", commit_note])
 
     # try with gerrit notes
-    with open("log.txt", "w") as f:
+    with Path("log.txt").open("w") as f:
         repo.write_log(f, with_gerrit_notes=True)
-    with open("log.txt") as f:
+    with Path("log.txt").open() as f:
         commits = list(repo.parse_log(f))
         assert "nobody@example.com" in commits[0]["notes"]["Code-Review+2"]
 
@@ -84,16 +85,16 @@ def test_git_repo(git) -> None:
     repo.git_cmd(
         ["notes", "--ref", "review", "add", "HEAD", "-f", "-m", "invalid-note"]
     )
-    with open("log.txt", "w") as f:
+    with Path("log.txt").open("w") as f:
         repo.write_log(f, with_gerrit_notes=True)
-    with open("log.txt") as f:
+    with Path("log.txt").open() as f:
         commits = list(repo.parse_log(f))
         assert commits[0]["notes"] is None
 
     # try again without gerrit notes
-    with open("log.txt", "w") as f:
+    with Path("log.txt").open("w") as f:
         repo.write_log(f)
-    with open("log.txt") as f:
+    with Path("log.txt").open() as f:
         commits = list(repo.parse_log(f))
         assert "new file" in commits[0]["message"]
         assert commits[0]["email"] == "e3-core@example.net"
@@ -108,18 +109,18 @@ def test_git_repo(git) -> None:
 
     echo_to_file(new_file, "new line\n", append=True)
 
-    with open("commit1.diff", "wb") as f:
+    with Path("commit1.diff").open("wb") as f:
         repo.write_local_diff(f)
 
-    with open("commit1.diff", "rb") as f:
+    with Path("commit1.diff").open("rb") as f:
         assert b"+new line" in f.read()
 
     echo_to_file(new_file, 10000 * "*")
 
     repo.git_cmd(["commit", "-a", "-m", "file update"])
-    with open("log2.txt", "w") as f:
+    with Path("log2.txt").open("w") as f:
         repo.write_log(f)
-    with open("log2.txt") as f:
+    with Path("log2.txt").open() as f:
         commits = list(repo.parse_log(f, max_diff_size=1000))
         # assert b'diff too long' not in commits[1]['diff']
         assert "file update" in commits[0]["message"]

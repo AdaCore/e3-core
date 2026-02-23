@@ -4,6 +4,7 @@ import os
 import sys
 
 import yaml
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.log
@@ -62,7 +63,7 @@ class SandBox:
         # specs_dir path can be changed by a configuration in user.yaml
         user_yaml = os.path.join(self.root_dir, "user.yaml")
         if os.path.exists(user_yaml):
-            with open(user_yaml) as f:
+            with Path(user_yaml).open() as f:
                 self.user_config = yaml.safe_load(f)
 
             # Accept both specs_dir and module_dir key (in that order) to
@@ -136,10 +137,10 @@ class SandBox:
         cmd_line = [sys.executable, os.path.abspath(__file__)]
         cmd_line += sys.argv[1:]
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
-        with open(sandbox_conf, "w") as f:
+        with Path(sandbox_conf).open("w") as f:
             yaml.safe_dump({"cmd_line": cmd_line}, f)
 
     def get_configuration(self) -> dict:
         sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
-        with open(sandbox_conf) as f:
+        with Path(sandbox_conf).open() as f:
             return yaml.safe_load(f)

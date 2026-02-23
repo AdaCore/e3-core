@@ -598,7 +598,7 @@ class Anod:
             config_selectors.update(self.env.to_dict())
 
             return load_with_config(filename, config_selectors)
-        with open(filename) as f:
+        with Path(filename).open() as f:
             return yaml.safe_load(f.read())
 
     def __getitem__(self, key: str) -> Any:

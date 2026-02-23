@@ -1,3 +1,4 @@
+from pathlib import Path
 import ast
 import logging
 import os
@@ -165,7 +166,7 @@ def test_relocate_python_distrib() -> None:
     # Add some additional files in either bin or Scripts to check that relocation
     # works even when other content has been added to a Python distrib.
     e3.fs.mkdir(os.path.join("./moved_env", script_dir, "dummy_dir"))
-    with open(os.path.join("./moved_env", script_dir, "dummy_sh.sh"), "w") as fd:
+    with Path(os.path.join("./moved_env", script_dir, "dummy_sh.sh")).open("w") as fd:
         fd.write("#!/bin/bash\necho")
 
     try:

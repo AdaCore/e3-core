@@ -6,6 +6,7 @@ import types
 import yaml
 
 from packaging.version import Version
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.hash
@@ -74,7 +75,7 @@ class AnodSpecRepository:
         # Read the API version file
         version_file = os.path.join(self.spec_dir, "VERSION")
         if os.path.isfile(version_file):
-            with open(version_file) as f:
+            with Path(version_file).open() as f:
                 content = f.read().strip()
                 if ":" not in content:
                     raise SandBoxError(
@@ -138,7 +139,7 @@ class AnodSpecRepository:
         # Load config/repositories.yaml
         repo_file = os.path.join(self.spec_dir, "config", "repositories.yaml")
         if os.path.isfile(repo_file):
-            with open(repo_file) as fd:
+            with Path(repo_file).open() as fd:
                 self.repos = yaml.safe_load(fd)
 
         if extra_repositories_config:
@@ -167,7 +168,7 @@ class AnodSpecRepository:
         }
 
         if os.path.exists(prolog_file):
-            with open(prolog_file) as f:
+            with Path(prolog_file).open() as f:
                 exec(compile(f.read(), prolog_file, "exec"), self.prolog_dict)
 
     def __contains__(self, item: str) -> bool:
@@ -239,7 +240,7 @@ class AnodModule:
         anod_module = types.ModuleType(mod_name)
 
         try:
-            with open(self.path) as fd:
+            with Path(self.path).open() as fd:
                 # Inject the prolog into the new module dict
                 anod_module.__dict__.update(repository.prolog_dict)
 
