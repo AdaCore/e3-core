@@ -1,3 +1,4 @@
+from pathlib import Path
 from datetime import datetime as dt, timezone as tz
 import sys
 import json
@@ -24,7 +25,7 @@ def test_log() -> None:
     )
     assert p.status == 0
 
-    with open("log.txt") as f:
+    with Path("log.txt").open() as f:
         line = f.readline()
         # Get datetime in the log
         log_datetime, _, _ = line.partition(": ")
@@ -58,7 +59,7 @@ def test_json_log() -> None:
 
     assert p.status == 0
 
-    with open("log.json") as f:
+    with Path("log.json").open() as f:
         lines = f.readlines()
 
     record = json.loads(lines[0])
@@ -115,7 +116,7 @@ def test_json_log_exception() -> None:
 
     assert p.status == 0
 
-    with open("log.json") as f:
+    with Path("log.json").open() as f:
         lines = f.readlines()
 
     record = json.loads(lines[0])
@@ -142,7 +143,7 @@ def test_json_context() -> None:
 
     assert p.status == 0
 
-    with open("log.json") as f:
+    with Path("log.json").open() as f:
         lines = f.readlines()
 
     record = json.loads(lines[0])

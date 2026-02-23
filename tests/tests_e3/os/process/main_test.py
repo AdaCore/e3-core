@@ -32,7 +32,7 @@ def test_run_stdout_stderr() -> None:
     stderr not redirected to stdout.
     """
     prog_filename = os.path.join(os.getcwd(), "prog")
-    with open(prog_filename, "wb") as f:
+    with Path(prog_filename).open("wb") as f:
         f.write(b"import sys\n")
         f.write(b'print("stdout", file=sys.stdout)\n')
         f.write(b'print("stderr", file=sys.stderr)\n')
@@ -50,7 +50,7 @@ def test_run_stdout_stderr() -> None:
 def test_run_shebang(caplog) -> None:
     """Verify that the parse shebang option works."""
     prog_filename = os.path.join(os.getcwd(), "prog")
-    with open(prog_filename, "wb") as f:
+    with Path(prog_filename).open("wb") as f:
         f.write(b"#!/usr/bin/env python\n")
         f.write(b"import sys\n")
         f.write(b'print("running %s" % sys.argv[1])\n')
@@ -59,7 +59,7 @@ def test_run_shebang(caplog) -> None:
     assert p.out.replace("\r", "") == "running atest\n"
 
     # Create a shebang spawning a file that does not exist
-    with open(prog_filename, "wb") as f:
+    with Path(prog_filename).open("wb") as f:
         f.write(b"#!doesnot exist\n")
         f.write(b'print("running python prog")\n')
 
@@ -178,7 +178,7 @@ p1 = Run(["sleep", "10"], timeout=1)
 p2.wait()
 """
 
-    with open("tmp-test_rlimic_ctrl_c.py", "w") as f:
+    with Path("tmp-test_rlimic_ctrl_c.py").open("w") as f:
         f.write(script_to_run)
 
     start = time.perf_counter()
@@ -268,7 +268,7 @@ def test_enable_commands_handler() -> None:
     finally:
         e3.os.process.disable_commands_handler(h)
 
-    with open(log_file, "rb") as fd:
+    with Path(log_file).open("rb") as fd:
         lines = fd.readlines()
     assert len(lines) == 2
 
@@ -276,7 +276,7 @@ def test_enable_commands_handler() -> None:
 @pytest.mark.xfail(sys.platform != "win32", reason="unix implem not complete")
 def test_wait_for_processes() -> None:
     for v in (1, 2):
-        with open("p%d.py" % v, "w") as f:
+        with Path("p%d.py" % v).open("w") as f:
             f.write(
                 "import os\n"
                 "while True:\n"
@@ -328,13 +328,13 @@ def test_run_pipe() -> None:
     assert p.status == 0
     assert p.out.strip() == "dummies"
 
-    with open("dummy", "w") as f:
+    with Path("dummy").open("w") as f:
         f.write("dummy")
     p = e3.os.process.Run(cmd_right, input="dummy")
     assert p.status == 0
     assert p.out.strip() == "dummies"
 
-    with open("bunny", "w") as f:
+    with Path("bunny").open("w") as f:
         f.write("bunny")
     # Ensure we have support for Path
     p = e3.os.process.Run(cmd_right, input=Path("bunny"))
@@ -374,7 +374,7 @@ def test_file_redirection() -> None:
         output=p_out,
         error=e3.os.process.STDOUT,
     )
-    with open(p_out) as fd:
+    with Path(p_out).open() as fd:
         content = fd.read().strip()
     assert result.status == 0
     assert content == "dummy"
@@ -384,7 +384,7 @@ def test_output_append() -> None:
     p_out = "p.out"
     e3.os.process.Run([sys.executable, "-c", 'print("line1")'], output=p_out)
     e3.os.process.Run([sys.executable, "-c", 'print("line2")'], output="+" + p_out)
-    with open(p_out) as fd:
+    with Path(p_out).open() as fd:
         content = fd.read().strip()
     assert content == "line1\nline2"
 
@@ -463,7 +463,8 @@ def test_kill_process_tree() -> None:
             f"""\
             import e3.os.process, os, sys, time
             child_cmd = "import os, time;"
-            child_cmd += "f = open('{pid_file}', 'w');"
+            child_cmd += "from pathlib import Path;"
+            child_cmd += "f = Path('{pid_file}').open('w');"
             child_cmd += "f.write(str(os.getpid()));"
             child_cmd += "f.close();"
             child_cmd += "time.sleep(60);"
@@ -472,13 +473,13 @@ def test_kill_process_tree() -> None:
             """
         )
 
-        with open(gen_prog_name, "w") as f:
+        with Path(gen_prog_name).open("w") as f:
             f.write(prog)
 
         parent_process = e3.os.process.Run([sys.executable, gen_prog_name], bg=True)
         for _ in range(100):
             try:
-                with open(pid_file) as f:
+                with Path(pid_file).open() as f:
                     child_pid = f.read()
                     if child_pid:
                         break
@@ -554,7 +555,7 @@ def test_shell_override() -> None:
     work_dir = os.getcwd()
     os.environ["SHELL"] = sys.executable
     test_file_path = os.path.join(work_dir, "shebang_test.sh")
-    with open(test_file_path, "w") as fd:
+    with Path(test_file_path).open("w") as fd:
         fd.write("#!/bin/bash\nimport sys; print(sys.executable)\n")
     p = e3.os.process.Run([test_file_path], parse_shebang=True)
     assert p.out.strip() == sys.executable

@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 from collections import OrderedDict
 
@@ -68,7 +69,7 @@ case_param2:
     parse_it = e3.yaml.CaseParser(config).parse(d)
     assert parse_it == expected
 
-    with open("tmp", "w") as f:
+    with Path("tmp").open("w") as f:
         f.write(yaml_case_content)
 
     parse_it2 = e3.yaml.load_with_config("tmp", config)
@@ -99,11 +100,11 @@ def test_case_parser_err() -> None:
 
 def test_include() -> None:
     """Test yaml !include."""
-    with open("1.yaml", "w") as f:
+    with Path("1.yaml").open("w") as f:
         f.write("b: !include 2.yaml\n")
         f.write("c: !include {}\n".format(os.path.join(os.getcwd(), "2.yaml")))
 
-    with open("2.yaml", "w") as f:
+    with Path("2.yaml").open("w") as f:
         f.write("a: 4\n")
 
     d = e3.yaml.load_ordered("1.yaml")
@@ -119,7 +120,7 @@ def test_include() -> None:
 
 def test_duplicatekey() -> None:
     """Duplicated key should be rejected by load_ordered."""
-    with open("dup.yaml", "w") as f:
+    with Path("dup.yaml").open("w") as f:
         f.write("b: 2\nb: 9")
 
     with pytest.raises(yaml.constructor.ConstructorError) as err:
@@ -129,14 +130,14 @@ def test_duplicatekey() -> None:
 
 def test_yaml_err() -> None:
     """Test load_ordered error handling."""
-    with open("err.yaml", "w") as f:
+    with Path("err.yaml").open("w") as f:
         f.write("[1]: 2\n")
 
     with pytest.raises(yaml.constructor.ConstructorError) as err:
         e3.yaml.load_ordered("err.yaml")
     assert "found unacceptable key" in str(err.value)
 
-    with open("err2.yaml", "w") as f:
+    with Path("err2.yaml").open("w") as f:
         f.write("--- !!map [not, a, map]\n")
 
     with pytest.raises(yaml.constructor.ConstructorError) as err:
@@ -150,7 +151,7 @@ def test_load_with_config_err() -> None:
         e3.yaml.load_with_config("/does/not/exist", {})
     assert "cannot read" in str(err.value)
 
-    with open("err.yaml", "w") as f:
+    with Path("err.yaml").open("w") as f:
         f.write('"o" "o" "o"')
 
     with pytest.raises(e3.yaml.YamlError) as err:
@@ -160,7 +161,7 @@ def test_load_with_config_err() -> None:
 
 def test_load_with_regexp() -> None:
     """Test load_with_regexp."""
-    with open("regexp1.yaml", "w") as f:
+    with Path("regexp1.yaml").open("w") as f:
         f.write(
             "key1: [['ppc-vx6-.*', 'qemu-toto', 'FALSE'],"
             " ['ppc-vx6-.*', 'qemu.*', '%(data)s']]\n"

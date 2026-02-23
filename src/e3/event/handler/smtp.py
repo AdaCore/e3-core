@@ -6,6 +6,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.net.smtp
@@ -87,7 +88,7 @@ class SMTPHandler(EventHandler):
                 attachment = MIMEBase(*ctype.split("/", 1))
             else:
                 attachment = MIMEBase("application", "octet-stream")
-            with open(filename, "rb") as data_f:
+            with Path(filename).open("rb") as data_f:
                 attachment.set_payload(data_f.read())
 
             result["attachments"][name] = {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from pathlib import Path
 import yaml
 
 from e3.env import BaseEnv
@@ -80,7 +81,7 @@ class HostDB:
 
         :param filename: path the yaml file
         """
-        with open(filename) as fd:
+        with Path(filename).open() as fd:
             content = yaml.safe_load(fd)
 
         for hostname, hostinfo in content.items():

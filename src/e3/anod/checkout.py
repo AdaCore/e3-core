@@ -5,6 +5,7 @@ import json
 import os
 import tempfile
 from contextlib import closing
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.log
@@ -91,7 +92,7 @@ class CheckoutManager:
 
         result, old_commit, new_commit = update(url=url, revision=revision)
 
-        with open(self.metadata_file, "w") as fd:
+        with Path(self.metadata_file).open("w") as fd:
             json.dump(
                 {
                     "name": self.name,
@@ -298,12 +299,12 @@ class CheckoutManager:
                     g.write_log(fd, rev_range=f"{old_commit}..{new_commit}")
                     tmp_filename = fd.name
                 try:
-                    with open(tmp_filename, encoding="utf8") as fd:
+                    with Path(tmp_filename).open(encoding="utf8") as fd:
                         commits = list(g.parse_log(fd, max_diff_size=1024))
                 finally:
                     rm(tmp_filename)
 
-                with open(self.changelog_file, "w") as fd:
+                with Path(self.changelog_file).open("w") as fd:
                     json.dump(commits, fd)
 
         except GitError:

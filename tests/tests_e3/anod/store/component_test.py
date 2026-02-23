@@ -442,7 +442,7 @@ def test_component_download(store) -> None:
     )
     assert c.download(None) is None
 
-    with open("f1.txt", "w") as f:
+    with Path("f1.txt").open("w") as f:
         f.write("XXXX")
     f1 = File(
         build_id=bid.id,
@@ -461,7 +461,7 @@ def test_component_download(store) -> None:
     assert os.path.isfile(f1_downloaded)
 
     c.files[0].internal = True
-    with open("f2.txt", "w") as f:
+    with Path("f2.txt").open("w") as f:
         f.write("AAAAA")
     f2 = File(
         build_id=bid.id,
@@ -530,7 +530,7 @@ def test_component_latest(store) -> None:
 
     # First create a component
     bid = BuildInfo.latest(store=store, setup="test")
-    with open("test1.txt", "w") as fd:
+    with Path("test1.txt").open("w") as fd:
         fd.write("1")
 
     binary = File(

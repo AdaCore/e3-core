@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import os
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.log
@@ -271,7 +272,7 @@ def text_replace(
     """
     output = io.BytesIO()
     nb_substitution = [0 for _ in pattern]
-    with open(filename, "rb") as f:
+    with Path(filename).open("rb") as f:
         for line in f:
             for pattern_index, (regexp, replacement) in enumerate(pattern):
                 if isinstance(replacement, str):
@@ -284,7 +285,7 @@ def text_replace(
             output.write(line)
     if any(nb for nb in nb_substitution):
         # file changed, update it
-        with open(filename, "wb") as f:
+        with Path(filename).open("wb") as f:
             f.write(output.getvalue())
     output.close()
     return nb_substitution

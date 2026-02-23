@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 import os
 import pytest
 import time
@@ -6,7 +7,7 @@ from e3.collection.trie import Trie
 
 
 def load_words() -> list[str]:
-    with open(os.path.join(os.path.dirname(__file__), "word_list.txt")) as fd:
+    with Path(os.path.join(os.path.dirname(__file__), "word_list.txt")).open() as fd:
         return [word for word in fd.read().splitlines() if word.strip()]
 
 

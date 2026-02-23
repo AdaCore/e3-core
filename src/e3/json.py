@@ -8,6 +8,7 @@ import os
 import e3.error
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -93,7 +94,7 @@ def dump_to_json_file(path: str, obj: Any) -> None:
     :param path: path to the json file
     :param obj: a Python object that can serialized to JSON
     """
-    with open(path, "w") as fd:
+    with Path(path).open("w") as fd:
         json.dump(obj, fd, indent=2)
 
 
@@ -110,7 +111,7 @@ def load_from_json_file(
     :return: a Python object
     """
     if os.path.isfile(path):
-        with open(path) as fd:
+        with Path(path).open() as fd:
             content = json.load(fd)
         return content
     if ignore_non_existing:

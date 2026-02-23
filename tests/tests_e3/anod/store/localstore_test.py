@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 
 import os
 import pytest
@@ -26,7 +27,7 @@ def test_basic(store: StoreRW) -> None:
     bid = BuildInfo.latest(store=store, setup=DEFAULT_SETUP)
 
     # A Component must contains some files
-    with open("foo.txt", "w") as f:
+    with Path("foo.txt").open("w") as f:
         f.write("foo")
 
     binary = File(
@@ -38,7 +39,7 @@ def test_basic(store: StoreRW) -> None:
         resource_path=os.path.abspath("foo.txt"),
     )
 
-    with open("foo_attachment.txt", "w") as f:
+    with Path("foo_attachment.txt").open("w") as f:
         f.write("foo_attachment")
 
     att = File(
@@ -50,7 +51,7 @@ def test_basic(store: StoreRW) -> None:
         resource_path=os.path.abspath("foo_attachment.txt"),
     )
 
-    with open("foo_readme.txt", "w") as f:
+    with Path("foo_readme.txt").open("w") as f:
         f.write("foo_readme")
 
     readme = File(
@@ -62,7 +63,7 @@ def test_basic(store: StoreRW) -> None:
         resource_path=os.path.abspath("foo_readme.txt"),
     )
 
-    with open("foo_source.txt", "w") as f:
+    with Path("foo_source.txt").open("w") as f:
         f.write("foo_source")
 
     source = File(
@@ -153,7 +154,7 @@ def test_add_build_info_from_store(store: StoreRW) -> None:
     src_build_id = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
     store.mark_build_ready(src_build_id)
 
-    with open("foo.txt", "w") as f:
+    with Path("foo.txt").open("w") as f:
         f.write("foo")
 
     File(
@@ -181,7 +182,7 @@ def test_insert_files_with_same_resource_id(store: StoreRW) -> None:
     store.mark_build_ready(build_id)
 
     # Same file content ==> Same resource ID
-    with open("f.txt", "w") as f:
+    with Path("f.txt").open("w") as f:
         f.write("foo")
 
     f0 = File(
@@ -242,11 +243,11 @@ def test_component_with_attachments_list(store: StoreRW) -> None:
     bid = BuildInfo.latest(store=store, setup=DEFAULT_SETUP)
 
     # A Component must contains some files
-    with open("foo.txt", "w") as f:
+    with Path("foo.txt").open("w") as f:
         f.write("foo")
-    with open("foo_attachment.txt", "w") as f:
+    with Path("foo_attachment.txt").open("w") as f:
         f.write("foo_attachment")
-    with open("foo_source.txt", "w") as f:
+    with Path("foo_source.txt").open("w") as f:
         f.write("foo_source")
 
     binary = File(
@@ -314,9 +315,9 @@ def test_exceptions(store: StoreRW) -> None:
 
 
 def test_bulk_update(store: StoreRW) -> None:
-    with open("file1.txt", "w") as f:
+    with Path("file1.txt").open("w") as f:
         f.write("Carpette is a cat")
-    with open("file2.txt", "w") as f:
+    with Path("file2.txt").open("w") as f:
         f.write("Carpette is a nice cat")
 
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0", mark_ready=True)

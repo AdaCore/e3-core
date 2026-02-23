@@ -3,6 +3,7 @@ from __future__ import annotations
 import fnmatch
 import re
 from difflib import unified_diff
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.error
@@ -58,7 +59,7 @@ def diff(
         contents[0] = a
     else:
         try:
-            with open(a) as f:
+            with Path(a).open() as f:
                 contents[0] = f.readlines()
         except OSError:
             contents[0] = []
@@ -68,7 +69,7 @@ def diff(
         contents[1] = b
     else:
         try:
-            with open(b) as f:
+            with Path(b).open() as f:
                 contents[1] = f.readlines()
         except OSError:
             contents[1] = []
@@ -120,7 +121,7 @@ def patch(
     # with default prefixes.
     is_git_patch = False
 
-    with open(patch_file) as f:
+    with Path(patch_file).open() as f:
         content = f.read()
         if re.search(r"^diff --git a/.* b/", content, flags=re.M):
             is_git_patch = True
@@ -185,8 +186,8 @@ def patch(
         """
         assert filtered_patch is not None
         files_to_patch = 0
-        with open(patch_file, newline="") as f, open(
-            filtered_patch, "w", newline=""
+        with Path(patch_file).open(newline="") as f, Path(filtered_patch).open(
+            "w", newline=""
         ) as fdout:
             # Two line headers that mark beginning of patches
             header1: tuple | tuple[str, str] = ()
@@ -259,8 +260,8 @@ def patch(
         """
         assert filtered_patch is not None
         files_to_patch = 0
-        with open(patch_file, newline="") as f, open(
-            filtered_patch, "w", newline=""
+        with Path(patch_file).open(newline="") as f, Path(filtered_patch).open(
+            "w", newline=""
         ) as fdout:
             discard = False
             for line in f:

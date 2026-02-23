@@ -9,7 +9,7 @@ import pytest
 
 
 def test_hash() -> None:
-    with open("to-hash.txt", "wb") as f:
+    with Path("to-hash.txt").open("wb") as f:
         f.write(b"content\n")
     assert e3.hash.md5(f.name) == "f75b8179e4bbe7e2b4a074dcef62de95"
     assert e3.hash.sha1(f.name) == "7fe70820e08a1aac0ef224d9c66ab66831cc4ab1"

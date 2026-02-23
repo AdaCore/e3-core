@@ -152,7 +152,7 @@ def echo_to_file(
     :param content: string to be written
     :param append: if True append to the file, otherwise overwrite.
     """
-    with open(filename, "a+" if append else "w+") as fd:
+    with Path(filename).open("a+" if append else "w+") as fd:
         if append:
             fd.seek(0, 2)
 
@@ -224,7 +224,7 @@ def get_filetree_state(
         return state.encode("utf-8")
 
     def get_content(file_path: str) -> bytes:
-        with open(file_path, "rb") as f:
+        with Path(file_path).open("rb") as f:
             return f.read()
 
     path = os.path.abspath(path)
@@ -758,7 +758,7 @@ def sync_tree(
     def cmp_files(src: FileInfo, dst: FileInfo) -> bool:
         """Fast compare two files."""
         bufsize = 8 * 1024
-        with open(src.path, "rb") as fp1, open(dst.path, "rb") as fp2:
+        with Path(src.path).open("rb") as fp1, Path(dst.path).open("rb") as fp2:
             while True:
                 b1 = fp1.read(bufsize)
                 b2 = fp2.read(bufsize)
@@ -913,14 +913,14 @@ def sync_tree(
                         src.basename,
                     )
 
-                with open(src.path, "rb") as fsrc:
-                    with open(dst.path, "wb") as fdst:
+                with Path(src.path).open("rb") as fsrc:
+                    with Path(dst.path).open("wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
             except OSError:
                 if dst.stat is not None:
                     rm(dst.path, glob=False)
-                with open(src.path, "rb") as fsrc:
-                    with open(dst.path, "wb") as fdst:
+                with Path(src.path).open("rb") as fsrc:
+                    with Path(dst.path).open("wb") as fdst:
                         shutil.copyfileobj(fsrc, fdst)
             copystat(src, dst)
 

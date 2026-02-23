@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import sys
 
@@ -470,7 +471,7 @@ def test_source_deps(setup_sbx) -> None:
 
     # Create source dependencies for each actions
     for uid in ("1", "2", "3", "4", "5"):
-        with open(source_fullpath(uid), "w") as f:
+        with Path(source_fullpath(uid)).open("w") as f:
             f.write(f"contents of sources for action {uid}\n")
 
     # Now, execute our planned actions
@@ -514,7 +515,7 @@ def test_source_deps(setup_sbx) -> None:
     # Now change the sources of action '5', and run the actions
     # again. Only '5' should be executed.
 
-    with open(source_fullpath("5"), "a") as f:
+    with Path(source_fullpath("5")).open("a") as f:
         f.write("Some more sources\n")
 
     r3 = FingerprintWalk(actions)
@@ -563,7 +564,7 @@ def test_source_deps(setup_sbx) -> None:
     # be re-run, as well as their dependences ('4', in this case).
 
     for uid in ("1", "2"):
-        with open(source_fullpath(uid), "a") as f:
+        with Path(source_fullpath(uid)).open("a") as f:
             f.write("Additional information\n")
 
     r5 = FingerprintWalk(actions)
@@ -592,7 +593,7 @@ def test_source_deps(setup_sbx) -> None:
     # Change the sources of '1'. We expect '1' be re-run, and
     # as a consequence of that, '2' and '4' also should be rerun.
 
-    with open(source_fullpath("1"), "a") as f:
+    with Path(source_fullpath("1")).open("a") as f:
         f.write("# Small comment\n")
 
     r5 = FingerprintWalk(actions)
@@ -800,7 +801,7 @@ def test_computing_fingerprint_after_job_done(setup_sbx) -> None:
 
     # Create the contents of the file that the download_uid job
     # will be "downloading" from the store.
-    with open(source_store_fullpath(download_uid), "w") as f:
+    with Path(source_store_fullpath(download_uid)).open("w") as f:
         f.write("Hello world")
 
     # Now, execute the plan for the first time.
@@ -846,7 +847,7 @@ def test_computing_fingerprint_after_job_done(setup_sbx) -> None:
     # being downloaded has changed. This time, we expect job '2'
     # to be re-executed.
 
-    with open(source_store_fullpath(download_uid), "w") as f:
+    with Path(source_store_fullpath(download_uid)).open("w") as f:
         f.write("Hello brave new world")
 
     r3 = FingerprintWalk(actions)
@@ -959,7 +960,7 @@ def test_corrupted_fingerprint(setup_sbx) -> None:
     #    As a result of that, nodes '4' and '5', which directly
     #    or indirectly depend on node '3', do not need to be rerun.
 
-    with open(r1.fingerprint_filename("3"), "w") as f:
+    with Path(r1.fingerprint_filename("3")).open("w") as f:
         f.write("{")
 
     r2 = FingerprintWalk(actions)

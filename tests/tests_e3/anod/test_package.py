@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 
 import e3.anod.error
@@ -67,7 +68,7 @@ def test_apply_patch() -> None:
         name="d-src", fullname=lambda: "d-src.tgz", checkout=["d-git"]
     )
 
-    with open("my_patch", "w") as f:
+    with Path("my_patch").open("w") as f:
         f.write(
             "--- a_file\t2017-04-11 16:34:44.000000000 +0200\n"
             "+++ a_file\t2017-04-11 16:34:40.000000000 +0200\n"
@@ -79,7 +80,7 @@ def test_apply_patch() -> None:
     touch("a_file")
     sb.apply_patch(None, "my_patch", current_dir)
 
-    with open("a_file") as f:
+    with Path("a_file").open() as f:
         assert f.read().strip() == "new line"
 
     sb = e3.anod.package.SourceBuilder(
@@ -110,5 +111,5 @@ def test_apply_patch() -> None:
     tsb = e3.anod.package.ThirdPartySourceBuilder(name="third-src.tgz")
     tsb.apply_patch(None, "my_patch", current_dir)
 
-    with open("a_file") as f:
+    with Path("a_file").open() as f:
         assert f.read().strip() == "new line"

@@ -150,11 +150,11 @@ def test_echo() -> None:
     e3.fs.echo_to_file(dest_file, "foo")
     e3.fs.echo_to_file(dest_file, "foo")
     e3.fs.echo_to_file(dest_file, "bar", append=True)
-    with open(dest_file) as foobar_f:
+    with Path(dest_file).open() as foobar_f:
         assert foobar_f.read() == "foobar"
 
     e3.fs.echo_to_file(dest_file, ["line1", "line2"])
-    with open(dest_file) as fd:
+    with Path(dest_file).open() as fd:
         assert fd.read().strip() == "line1\nline2"
 
 
@@ -286,7 +286,7 @@ def test_tree_state() -> None:
     state6 = e3.fs.get_filetree_state("toto")
     assert isinstance(state6, str)
 
-    with open("toto", "wb") as f:
+    with Path("toto").open("wb") as f:
         f.write(b"hello world.")
 
     # check that get_filetree_state accept unicode
@@ -302,7 +302,7 @@ def test_tree_state() -> None:
 
     # check that get_filetree_state with hash_content is working with directory
     # and is different that the previous call without hash_content to true
-    with open("toto2", "wb") as f:
+    with Path("toto2").open("wb") as f:
         f.write(b"hello world 2.")
 
     state9 = e3.fs.get_filetree_state(current_dir, hash_content=True)
@@ -323,10 +323,10 @@ def test_sync_tree_with_symlinks() -> None:
     e3.fs.mkdir(m2)
     e3.fs.mkdir(m3)
 
-    with open(a, "w") as f:
+    with Path(a).open("w") as f:
         f.write("a")
 
-    with open(b, "w") as f:
+    with Path(b).open("w") as f:
         f.write("b")
 
     e3.fs.cp(a, os.path.join(m1, "c"))
@@ -385,17 +385,17 @@ def test_sync_tree_preserve_timestamps() -> None:
     """Run sync_tree without preserving timestamps."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
-    with open("a/content", "w") as f:
+    with Path("a/content").open("w") as f:
         f.write("content")
-    with open("a/content2", "w") as f:
+    with Path("a/content2").open("w") as f:
         f.write("content2")
-    with open("b/content", "w") as f:
+    with Path("b/content").open("w") as f:
         f.write("content")
-    with open("b/content2", "w") as f:
+    with Path("b/content2").open("w") as f:
         f.write("content1")
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
 
-    with open("b/content2") as f:
+    with Path("b/content2").open() as f:
         assert f.read() == "content2"
 
 
@@ -403,13 +403,13 @@ def test_sync_tree_no_delete() -> None:
     """Run sync_tree without deleting."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
-    with open("a/content", "w") as f:
+    with Path("a/content").open("w") as f:
         f.write("content")
-    with open("a/content2", "w") as f:
+    with Path("a/content2").open("w") as f:
         f.write("content2")
-    with open("b/content", "w") as f:
+    with Path("b/content").open("w") as f:
         f.write("content")
-    with open("b/content2", "w") as f:
+    with Path("b/content2").open("w") as f:
         f.write("content1")
 
     e3.os.fs.touch("b/todelete")
@@ -426,12 +426,12 @@ def test_sync_tree_links() -> None:
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
     e3.fs.mkdir("c")
-    with open("a/content", "w") as f:
+    with Path("a/content").open("w") as f:
         f.write("content")
     os.symlink(os.path.join(os.getcwd(), "a", "content"), "a/link")
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
 
-    with open("b/link") as f:
+    with Path("b/link").open() as f:
         assert f.read() == "content"
 
 
@@ -468,7 +468,7 @@ def test_sync_tree_dir_links() -> None:
 def test_sync_tree_top_source_is_link() -> None:
     """Check handling of source top is a link."""
     e3.fs.mkdir("a")
-    with open("a/content", "w") as f:
+    with Path("a/content").open("w") as f:
         f.write("content")
 
     try:
@@ -495,7 +495,7 @@ def test_sync_tree_top_source_is_link() -> None:
 
     # Make sure `c/a` is not a symlink
     assert not os.path.islink(os.path.join(os.getcwd(), "c", "a"))
-    with open("c/a/content") as f:
+    with Path("c/a/content").open() as f:
         assert f.read() == "content"
 
 
@@ -558,7 +558,7 @@ def test_safe_copy() -> None:
     # Check that a directory in the target dir is replaced by a file when
     # needed.
     e3.fs.mkdir("a")
-    with open("a/f", "w") as f:
+    with Path("a/f").open("w") as f:
         f.write("file")
     e3.fs.mkdir("b")
     e3.fs.mkdir("b/f")
@@ -571,7 +571,7 @@ def test_safe_copy() -> None:
     e3.os.fs.touch("c/f")
     os.chmod("c/f", 0o000)
     e3.fs.sync_tree("a", "c")
-    with open("c/f") as f:
+    with Path("c/f").open() as f:
         assert f.read() == "file"
 
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 
 import os
 import pytest
@@ -71,7 +72,7 @@ def test_file(store) -> None:
     buildinfo = store.create_build_id("test", "20241028", "1.0")
     touch("test.txt")
     assert os.path.isfile("test.txt")
-    with open("test.txt", "w") as fd:
+    with Path("test.txt").open("w") as fd:
         fd.write("m")
     path_abs = os.path.abspath("test.txt")
 
@@ -106,7 +107,7 @@ def test_file(store) -> None:
     assert "build" in f and f["build"]["_id"] == f["build_id"]
 
     touch("test-tp.txt")
-    with open("test-tp.txt", "w") as fd:
+    with Path("test-tp.txt").open("w") as fd:
         fd.write("n")
 
     tmp = File(
@@ -143,7 +144,7 @@ def test_component(store) -> None:
 
     # First create a component
     bid = BuildInfo.latest(store=store, setup="test")
-    with open("test1.txt", "w") as fd:
+    with Path("test1.txt").open("w") as fd:
         fd.write("1")
 
     binary1 = File(
@@ -155,7 +156,7 @@ def test_component(store) -> None:
         resource_path=os.path.abspath("test1.txt"),
     )
 
-    with open("source.txt", "w") as fd:
+    with Path("source.txt").open("w") as fd:
         fd.write("s")
 
     source = File(
@@ -166,10 +167,10 @@ def test_component(store) -> None:
         resource_path="source.txt",
     )
 
-    with open("att.txt", "w") as fd:
+    with Path("att.txt").open("w") as fd:
         fd.write("a")
 
-    with open("readme.txt", "w") as fd:
+    with Path("readme.txt").open("w") as fd:
         fd.write("x")
 
     att = File(
@@ -235,7 +236,7 @@ def test_component(store) -> None:
     # Sources should be submited BEFORE pushing the component
     src = store.submit_file(source.as_dict())
 
-    with open("test2.txt", "w") as fd:
+    with Path("test2.txt").open("w") as fd:
         fd.write("2")
 
     binary2 = File(
@@ -281,7 +282,7 @@ def test_component(store) -> None:
     assert tmp[0]["build_id"] == bid.id
     assert tmp[0]["build"] == bid.as_dict()
 
-    with open("att2.txt", "w") as fd:
+    with Path("att2.txt").open("w") as fd:
         fd.write("a")
 
     # Test pushing component with the other attachment format (list)
@@ -293,7 +294,7 @@ def test_component(store) -> None:
         resource_path="att2.txt",
     )
 
-    with open("test2.txt", "w") as fd:
+    with Path("test2.txt").open("w") as fd:
         fd.write("3")
 
     binary3 = File(
@@ -329,10 +330,10 @@ def test_component(store) -> None:
 
 
 def test_bulk_query(store) -> None:
-    with open("file1.txt", "w") as f:
+    with Path("file1.txt").open("w") as f:
         f.write("Carpette is a cat")
 
-    with open("file2.txt", "w") as f:
+    with Path("file2.txt").open("w") as f:
         f.write("Carpette is a nice cat")
 
     bid = BuildInfo.create(store, "test", "1.0")

@@ -4,6 +4,7 @@ import base64
 import json
 import tempfile
 import os
+from pathlib import Path
 
 
 class DSSEError(Exception):
@@ -63,14 +64,14 @@ class DSSE:
         public_key = p.raw_out
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            with open(os.path.join(temp_dir, "pub.crt"), "wb") as fd:
+            with Path(os.path.join(temp_dir, "pub.crt")).open("wb") as fd:
                 fd.write(public_key)
 
-            with open(os.path.join(temp_dir, "pae"), "wb") as fd:
+            with Path(os.path.join(temp_dir, "pae")).open("wb") as fd:
                 fd.write(self.pae)
 
             for s in self.signatures:
-                with open(os.path.join(temp_dir, "sig"), "wb") as fd:
+                with Path(os.path.join(temp_dir, "sig")).open("wb") as fd:
                     fd.write(base64.b64decode(s["sig"]))
 
                 p = Run(

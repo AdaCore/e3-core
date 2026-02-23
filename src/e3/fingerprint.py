@@ -23,6 +23,8 @@ import hashlib
 import json
 import os
 
+from pathlib import Path
+
 import e3.log
 from e3.env import Env
 from e3.error import E3Error
@@ -197,7 +199,7 @@ class Fingerprint:
         # one piece of metadata we want to save.
         data = {"fingerprint_version": FINGERPRINT_VERSION, "elements": self.elements}
 
-        with open(filename, "w") as f:
+        with Path(filename).open("w") as f:
             json.dump(data, f, indent=2)
 
     @classmethod
@@ -215,7 +217,7 @@ class Fingerprint:
         if not os.path.isfile(filename):
             return None
 
-        with open(filename) as f:
+        with Path(filename).open() as f:
             try:
                 data = json.load(f)
             except ValueError as e:

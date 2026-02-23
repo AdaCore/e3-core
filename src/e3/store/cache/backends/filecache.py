@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 import time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.log
@@ -60,7 +61,7 @@ class FileCache(Cache):
     def get(self, uid: str, default: Any = None) -> Any:
         cache_file = self.uid_to_file(uid)
         try:
-            with open(cache_file, "rb") as fd:
+            with Path(cache_file).open("rb") as fd:
                 if not self._is_expired(fd):
                     return pickle.load(fd)
         except OSError as err:

@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 from unittest.mock import patch, MagicMock
 from e3.store.backends.http_simple_store import HTTPSimpleStore
@@ -61,7 +62,7 @@ def test_store_with_cache() -> None:
         current_dir = os.getcwd()
         path = store.download_resource(metadata, current_dir)
         assert path is not None
-        with open(path) as f:
+        with Path(path).open() as f:
             assert "a body content" in f.read()
 
         # Calling twice should return the same result (from cache)
@@ -70,7 +71,7 @@ def test_store_with_cache() -> None:
 
         # invalidate the cache
         cached_data = store.cache_backend.get(metadata.uid)
-        with open(cached_data.local_path, "a") as f:
+        with Path(cached_data.local_path).open("a") as f:
             f.write("-invalid")
         # the cache entry will be deleted and we should have the right result
         path3 = store.download_resource(metadata, current_dir)

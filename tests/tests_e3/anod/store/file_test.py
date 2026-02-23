@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 
 import json
 import os
@@ -31,7 +32,7 @@ def test_file_metadata(store) -> None:  # type: ignore[no-untyped-def]
         "list": '["one", "two"]',
     }
     bid = BuildInfo.create(store=store, setup=DEFAULT_SETUP, version="1.0")
-    with open("toto.txt", "w") as fio:
+    with Path("toto.txt").open("w") as fio:
         fio.write("XXXX")
     binary = File(
         build_id=bid.id,
@@ -115,7 +116,7 @@ def test_file_metadata(store) -> None:  # type: ignore[no-untyped-def]
 def test_update_metadata(store) -> None:
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
-    with open("my-src", "w") as fd:
+    with Path("my-src").open("w") as fd:
         fd.write("Random content")
 
     rid = resource_id("my-src")
@@ -155,7 +156,7 @@ def test_update_metadata(store) -> None:
 def test_push(store) -> None:
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")
 
-    with open("myfile.txt", "x") as f:
+    with Path("myfile.txt").open("x") as f:
         f.write("xxxxx")
 
     f = File(
@@ -185,7 +186,7 @@ def test_push(store) -> None:
 def test_download(store) -> None:
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
-    with open("my-src", "w") as fd:
+    with Path("my-src").open("w") as fd:
         fd.write("Random content")
 
     resource_id1 = resource_id("my-src")
@@ -218,7 +219,7 @@ def test_download(store) -> None:
     mtime2 = os.path.getmtime(source.downloaded_as)
     assert mtime1 == mtime2
 
-    with open(source.downloaded_as, "r") as fd:
+    with Path(source.downloaded_as).open("r") as fd:
         content = fd.read()
         assert content == "Random content"
 
@@ -230,7 +231,7 @@ def test_download(store) -> None:
     with pytest.raises(StoreError):
         source.download(dest_dir="non-existent")
 
-    with open("my-src", "w") as fd:
+    with Path("my-src").open("w") as fd:
         fd.write("New content")
 
     resource_id2 = resource_id("my-src")
@@ -255,7 +256,7 @@ def test_download(store) -> None:
     mtime2 = os.path.getmtime(source.downloaded_as)
     assert mtime1 != mtime2
 
-    with open(source.downloaded_as, "r") as fd:
+    with Path(source.downloaded_as).open("r") as fd:
         content = fd.read()
         assert content == "New content"
 
@@ -322,7 +323,7 @@ def test_corrupted_meta_file(store) -> None:
     mkdir("sandbox")
     source.download(dest_dir="sandbox", as_name="new_name")
     meta_file = os.path.join("sandbox", "new_name_meta.json")
-    with open(meta_file, "w") as fd:
+    with Path(meta_file).open("w") as fd:
         fd.write("{{")
     source.download(dest_dir="sandbox", as_name="new_name")
     source2 = File.load_from_meta_file(dest_dir="sandbox", name="new_name", store=store)
@@ -332,7 +333,7 @@ def test_corrupted_meta_file(store) -> None:
         File.load_from_meta_file(dest_dir="notexist", name="notexist_name", store=store)
 
     meta_file = File.metadata_path(dest_dir="sandbox", name="new_name")
-    with open(meta_file, "r+") as f:
+    with Path(meta_file).open("r+") as f:
         data = json.load(f)
         del data["_id"]
         f.write(json.dumps(data, indent=2))
@@ -346,7 +347,7 @@ def test_upload_thirdparty(store) -> None:
     store.mark_build_ready(bid)
     del bid
 
-    with open("test.txt", "w") as fd:
+    with Path("test.txt").open("w") as fd:
         fd.write("This is a test")
 
     result = File.upload_thirdparty(store=store, path="test.txt")
@@ -359,13 +360,13 @@ def test_upload_thirdparty(store) -> None:
     with pytest.raises(StoreError):
         File.upload_thirdparty(store=store, path="test.txt")
 
-    with open("test.txt", "w") as fd:
+    with Path("test.txt").open("w") as fd:
         fd.write("This is a new content")
     result = File.upload_thirdparty(store=store, path="test.txt", force=True)
 
     downloaded = result.download(dest_dir="downloads")
     assert downloaded
-    with open(result.downloaded_as, "r") as fd:
+    with Path(result.downloaded_as).open("r") as fd:
         content = fd.read()
         assert content == "This is a new content"
 
@@ -377,7 +378,7 @@ def test_upload_thirdparty_from_dir(store) -> None:
 
     mkdir("test")
     today = datetime.now().strftime("%Y%m%d")
-    with open("test/test.txt", "w") as fd:
+    with Path("test/test.txt").open("w") as fd:
         fd.write("This is a test")
 
     result = File.upload_thirdparty_from_dir(store=store, path="test", prefix="foo")

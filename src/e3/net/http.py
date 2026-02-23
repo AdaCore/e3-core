@@ -8,6 +8,7 @@ import socket
 import tempfile
 from collections import deque
 from email.message import Message
+from pathlib import Path
 
 import requests
 import requests.adapters
@@ -339,7 +340,7 @@ class HTTPSession:
 
                 logger.info("downloading %s size=%s", path, content_length)
 
-                with open(path, "wb") as fd:
+                with Path(path).open("wb") as fd:
                     for chunk in chunks:
                         fd.write(chunk)
 

@@ -5,8 +5,9 @@ import os
 import re
 import struct
 import sys
-from typing import TYPE_CHECKING
 from enum import Enum
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import e3.log
 
@@ -261,7 +262,7 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
         #!/path/to/python shebang should return false, as we don't need to
         return interpreter path.
         """
-        with open(file_script, "rb") as f:
+        with Path(file_script).open("rb") as f:
             content = f.read()
         return re.search(b"#!python", content, flags=re.MULTILINE) is not None
 
@@ -367,7 +368,7 @@ def relocate_python_distrib(
         if not os.path.isfile(script_path):
             continue
 
-        with open(script_path, "rb") as fd:
+        with Path(script_path).open("rb") as fd:
             content = fd.read()
 
         # By default shebang is found in file first line
@@ -417,7 +418,7 @@ def relocate_python_distrib(
             else:  # win32: no cover
                 shebang = b"#!/usr/bin/env " + shebang
 
-        with open(script_path, "wb") as fd:
+        with Path(script_path).open("wb") as fd:
             fd.write(launcher)
             fd.write(shebang)
             fd.write(payload)

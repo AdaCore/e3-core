@@ -631,7 +631,7 @@ class File(object):
                 return None
             raise StoreError(f"non existing metafile {meta_path}")
         try:
-            with open(meta_path, "r") as fd:
+            with Path(meta_path).open("r") as fd:
                 data = json.load(fd)
             return cls.load(data=data, store=store)
         except Exception as e:
@@ -649,7 +649,7 @@ class File(object):
             be saved
         :param name: file basename
         """
-        with open(self.metadata_path(dest_dir=dest_dir, name=name), "w") as fd:
+        with Path(self.metadata_path(dest_dir=dest_dir, name=name)).open("w") as fd:
             fd.write(json.dumps(self.as_dict(), indent=2))
 
     @classmethod
