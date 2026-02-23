@@ -54,7 +54,7 @@ class CheckoutManager:
         """
         self.name = name
         self.compute_changelog = compute_changelog
-        self.working_dir = os.path.abspath(os.path.join(working_dir, self.name))
+        self.working_dir = os.path.abspath(Path(working_dir, self.name))
         self.metadata_file = self.working_dir + "_checkout.json"
         self.changelog_file = self.working_dir + "_changelog.json"
 
@@ -140,8 +140,8 @@ class CheckoutManager:
                 "--delete-excluded",
             ] + [f"--exclude={el}" for el in VCS_IGNORE_LIST]
 
-            if os.path.isdir(os.path.join(url, ".git")) and os.path.isfile(
-                os.path.join(url, ".gitignore")
+            if os.path.isdir(Path(url, ".git")) and os.path.isfile(
+                Path(url, ".gitignore")
             ):
                 rsync_cmd.append("--filter=:- .gitignore")
 
@@ -153,7 +153,7 @@ class CheckoutManager:
             # directory - either as a file or as a directory. We check both
             # because, if a normal git clone, ".git" is a directory; if a
             # git clone with `git submodule init`, ".git" is a file.
-            if os.path.exists(os.path.join(url, ".git")):
+            if os.path.exists(Path(url, ".git")):
                 # It seems that this is a git repository. Get the list of files to
                 # ignore
                 try:

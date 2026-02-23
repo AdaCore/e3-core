@@ -2,12 +2,11 @@ from e3.anod.context import AnodContext
 from e3.anod.loader import AnodSpecRepository
 from e3.anod.queries import SourceClosure, get_build_node
 import os
+from pathlib import Path
 
 
 class TestSourceClosure:
-    spec_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "source_closure_specs")
-    )
+    spec_dir = os.path.abspath(Path(os.path.dirname(__file__), "source_closure_specs"))
 
     def get_source_closure(
         self, name, expand_packages=True, other_builds=None

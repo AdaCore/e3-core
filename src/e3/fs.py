@@ -66,11 +66,7 @@ def cp(
         logger.warning("recursive copy always preserves file attributes")
 
     # Compute file list and number of file to copy
-    file_list: list[str] | list[Path]
-    if isinstance(source, Path):
-        file_list = [source]
-    else:
-        file_list = ls(source, emit_log_record=False)
+    file_list = ls(source, emit_log_record=False)
     file_number = len(file_list)
 
     if file_number == 0:
@@ -85,7 +81,7 @@ def cp(
     for f in file_list:
         try:
             if os.path.isdir(target):
-                f_dest = os.path.join(target, os.path.basename(f))
+                f_dest = str(Path(target, os.path.basename(f)))
             else:
                 f_dest = os.fspath(target)
 
@@ -121,9 +117,9 @@ def directory_content(
     result = []
     for root, dirs, files in os.walk(path):
         for f in files:
-            result.append(os.path.join(root, f))
+            result.append(str(Path(root, f)))
         for d in dirs:
-            result.append(os.path.join(root, d) + os.sep)
+            result.append(str(Path(root, d)) + os.sep)
     if not include_root_dir:
         result = [
             (
@@ -244,7 +240,7 @@ def get_filetree_state(
                 if ignore_hidden and path.startswith("."):
                     continue
 
-                full_path = os.path.join(root, path)
+                full_path = str(Path(root, path))
                 result.update(compute_state(full_path))
 
                 if hash_content:
@@ -360,7 +356,7 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
                 dst += os.path.sep
             return dst.startswith(src)
 
-        real_dst = dst
+        real_dst = Path(dst)
         if os.path.isdir(dst):
             if same_file(src, dst):
                 # We might be on a case insensitive filesystem,
@@ -368,7 +364,7 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
                 os.rename(src, dst)
                 return
 
-            real_dst = os.path.join(dst, basename(src))
+            real_dst = Path(dst, basename(src))
             if os.path.exists(real_dst):
                 raise FSError(f"Destination path '{real_dst}' already exists")
         try:
@@ -400,7 +396,7 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
         elif nb_files == 1:
             source = file_list[0]
             if os.path.isdir(source) and os.path.isdir(target):
-                move_file(source, os.path.join(target, os.path.basename(source)))
+                move_file(source, str(Path(target, os.path.basename(source))))
             else:
                 move_file(source, os.fspath(target))
         elif not os.path.isdir(target):
@@ -408,7 +404,7 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
             raise FSError("mv", f"{target} should be a directory")
         else:
             for f in file_list:
-                f_dest = os.path.join(target, os.path.basename(f))
+                f_dest = str(Path(target, os.path.basename(f)))
                 move_file(f, f_dest)
     except Exception as e:
         logger.error(e)
@@ -867,13 +863,13 @@ def sync_tree(
                     # os.path.isdir(src.path) will always return False. That's why we
                     # do the check directly on the target path.
                     # limit recursion to 32 in order not to crash on link loops
-                    src_linkto_path = os.path.join(os.path.dirname(src.path), linkto)
+                    src_linkto_path = Path(os.path.dirname(src.path), linkto)
                     for _ in range(32):
                         if not os.path.exists(src_linkto_path):
                             break
 
                         src_linkto = FileInfo(
-                            src_linkto_path,
+                            str(src_linkto_path),
                             os.lstat(src_linkto_path),
                             os.path.basename(src_linkto_path),
                         )
@@ -881,10 +877,11 @@ def sync_tree(
                         if not islink(src_linkto):
                             break
 
-                        src_linkto_path = os.path.join(
+                        src_linkto_path = Path(
                             os.path.dirname(src_linkto.path),
                             e3.os.fs.readlink(src_linkto.path),
                         )
+
                     target_is_directory = os.path.isdir(src_linkto_path)
 
                 os.symlink(linkto, dst.path, target_is_directory=target_is_directory)
@@ -908,7 +905,7 @@ def sync_tree(
                         # on Windos with NTFS.
                         rm(dst.path, glob=False)
                     dst = FileInfo(
-                        os.path.join(os.path.dirname(dst.path), src.basename),
+                        str(Path(os.path.dirname(dst.path), src.basename)),
                         None,
                         src.basename,
                     )
@@ -935,7 +932,7 @@ def sync_tree(
         try:
             # Final dirname with right casing
             if dst.basename != src.basename:
-                dest_dir = os.path.join(os.path.dirname(dst.path), src.basename)
+                dest_dir = Path(os.path.dirname(dst.path), src.basename)
             else:
                 dest_dir = dst.path
 
@@ -1003,12 +1000,8 @@ def sync_tree(
         for name in all_names:
             rel_path = f"{entry.rel_path}/{name}"
 
-            source_full_path = os.path.join(
-                entry.source.path, source_names.get(name, name)
-            )
-            target_full_path = os.path.join(
-                entry.target.path, target_names.get(name, name)
-            )
+            source_full_path = Path(entry.source.path, source_names.get(name, name))
+            target_full_path = Path(entry.target.path, target_names.get(name, name))
             source_stat = None
             target_stat = None
 
@@ -1016,14 +1009,14 @@ def sync_tree(
                 source_stat = os.lstat(source_full_path)
 
             source_file = FileInfo(
-                source_full_path, source_stat, os.path.basename(source_full_path)
+                str(source_full_path), source_stat, os.path.basename(source_full_path)
             )
 
             if name in target_names:
                 target_stat = os.lstat(target_full_path)
 
             target_file = FileInfo(
-                target_full_path, target_stat, os.path.basename(target_full_path)
+                str(target_full_path), target_stat, os.path.basename(target_full_path)
             )
 
             result.append(FilesInfo(rel_path, source_file, target_file))

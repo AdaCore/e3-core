@@ -32,7 +32,7 @@ class SandBox:
             "meta",
             "bin",
             "tmp",
-            os.path.join("tmp", "cache"),
+            str(Path("tmp", "cache")),
             "src",
             "log",
             "vcs",
@@ -47,7 +47,7 @@ class SandBox:
         self.patch_dir: str = ""
         self.bin_dir: str = ""
         self.is_alternate_specs_dir = False
-        self.__specs_dir = os.path.join(self.root_dir, "specs")
+        self.__specs_dir = str(Path(self.root_dir, "specs"))
 
         # Contains the loaded version of user.yaml if present
         self.user_config: dict[str, Any] | None = None
@@ -57,13 +57,13 @@ class SandBox:
             setattr(
                 self,
                 (f"{d}_dir").replace(os.path.sep, "_"),
-                os.path.join(self.root_dir, d),
+                str(Path(self.root_dir, d)),
             )
 
         # specs_dir path can be changed by a configuration in user.yaml
-        user_yaml = os.path.join(self.root_dir, "user.yaml")
-        if os.path.exists(user_yaml):
-            with Path(user_yaml).open() as f:
+        user_yaml = Path(self.root_dir, "user.yaml")
+        if os.path.exists(str(user_yaml)):
+            with user_yaml.open() as f:
                 self.user_config = yaml.safe_load(f)
 
             # Accept both specs_dir and module_dir key (in that order) to
@@ -129,18 +129,18 @@ class SandBox:
         """
         if platform is None:
             platform = Env().platform
-        return BuildSpace(root_dir=os.path.join(self.root_dir, platform, name))
+        return BuildSpace(root_dir=str(Path(self.root_dir, platform, name)))
 
     def dump_configuration(self) -> None:
         # Compute command line for call to e3-sandbox create. Ensure that the
         # paths are made absolute (path to sandbox, script).
         cmd_line = [sys.executable, os.path.abspath(__file__)]
         cmd_line += sys.argv[1:]
-        sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
-        with Path(sandbox_conf).open("w") as f:
+        sandbox_conf = Path(self.meta_dir, "sandbox.yaml")
+        with sandbox_conf.open("w") as f:
             yaml.safe_dump({"cmd_line": cmd_line}, f)
 
     def get_configuration(self) -> dict:
-        sandbox_conf = os.path.join(self.meta_dir, "sandbox.yaml")
-        with Path(sandbox_conf).open() as f:
+        sandbox_conf = Path(self.meta_dir, "sandbox.yaml")
+        with sandbox_conf.open() as f:
             return yaml.safe_load(f)

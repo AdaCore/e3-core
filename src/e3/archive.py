@@ -17,6 +17,7 @@ import e3.fs
 import e3.log
 import e3.os.fs
 
+from pathlib import Path
 
 if TYPE_CHECKING:
     from typing import Literal, Text, Union, IO, Any
@@ -334,7 +335,7 @@ def unpack_archive(
                 # We cannot remove root dir but remove_root_dir is set to
                 # 'auto' so fallback on non remove_root_dir method
                 if not os.listdir(dest):
-                    e3.fs.mv(os.path.join(tmp_dest, "*"), dest)
+                    e3.fs.mv(Path(tmp_dest, "*"), dest)
                 else:
                     e3.fs.sync_tree(
                         tmp_dest,
@@ -344,16 +345,14 @@ def unpack_archive(
                         preserve_timestamps=preserve_timestamps,
                     )
             else:
-                root_dir = os.path.join(tmp_dest, os.listdir(tmp_dest)[0])
+                root_dir = Path(tmp_dest, os.listdir(tmp_dest)[0])
 
                 # Now check if the destination directory is empty. If this is
                 # the case a simple move will work, otherwise we need to do a
                 # sync_tree (which cost more)
 
                 if not os.listdir(dest):
-                    e3.fs.mv(
-                        [os.path.join(root_dir, f) for f in os.listdir(root_dir)], dest
-                    )
+                    e3.fs.mv([(root_dir / f) for f in os.listdir(root_dir)], dest)
                 else:
                     e3.fs.sync_tree(
                         root_dir,
@@ -410,9 +409,7 @@ def create_archive(
 
     # If fileobj is None, dest is not None
     filepath = (
-        os.path.abspath(os.path.join(cast(str, dest), filename))
-        if fileobj is None
-        else None
+        os.path.abspath(Path(cast(str, dest), filename)) if fileobj is None else None
     )
 
     ext = check_type(filename, force_extension=force_extension)
@@ -431,10 +428,10 @@ def create_archive(
                 os.path.abspath(root), os.path.abspath(from_dir)
             )
             for f in files:
-                zip_file_path = os.path.join(from_dir_rename, relative_root, f)
+                zip_file_path = Path(from_dir_rename, relative_root, f)
                 if no_root_dir:
-                    zip_file_path = os.path.join(relative_root, f)
-                zip_archive.write(os.path.join(root, f), zip_file_path)
+                    zip_file_path = Path(relative_root, f)
+                zip_archive.write(str(Path(root, f)), str(zip_file_path))
         zip_archive.close()
     else:
         if ext == "tar":

@@ -87,7 +87,7 @@ def get_rlimit(platform: str | None = None) -> str:
 
     return str(
         importlib.resources.files("e3.os").joinpath(
-            os.path.join("data", f"rlimit-{platform}")
+            str(Path("data", f"rlimit-{platform}"))
         )
     )
 

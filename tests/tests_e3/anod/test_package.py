@@ -17,19 +17,19 @@ def test_source_builder_default_prepare_src() -> None:
 
     assert sb.fullname() == "a-src.tgz"
 
-    current_dir = str(Path.cwd())
-    a_wd = os.path.join(current_dir, "a_wd")
+    current_dir = Path.cwd()
+    a_wd = current_dir / "a_wd"
 
     # create a fake working dir of a-git
     mkdir(a_wd)
-    touch(os.path.join(a_wd, "a_file"))
+    touch(a_wd / "a_file")
 
-    a_dest = os.path.join(current_dir, "a_dest")
+    a_dest = current_dir / "a_dest"
     mkdir(a_dest)
 
     sb.prepare_src(repos={"a-git": {"working_dir": a_wd}}, dest=a_dest)
 
-    assert os.path.exists(os.path.join(a_dest, "a_file"))
+    assert os.path.exists(a_dest / "a_file")
 
     # Check that this is working only when we have one repo
     for checkout in ([], ["a-git", "b-git"]):
@@ -49,7 +49,7 @@ def test_source_builder_custom_prepare_src() -> None:
     """Test SourceBuilder with a custom prepare_src function."""
 
     def prepare_src(repos, dest) -> None:
-        touch(os.path.join(dest, "my_generated_source_file"))
+        touch(Path(dest, "my_generated_source_file"))
 
     sb = e3.anod.package.SourceBuilder(
         name="b-src",

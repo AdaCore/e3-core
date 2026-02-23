@@ -238,7 +238,7 @@ class Component(object):
         :param name: file basename
         :return: a path to the metadata file
         """
-        return os.path.join(dest_dir, name + "_component.json")
+        return str(Path(dest_dir, name + "_component.json"))
 
     def remove_attachment(self: ComponentType, key: str | None = None) -> bool:
         """Remove an attachment by key.

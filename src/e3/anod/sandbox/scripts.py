@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
+from typing import TYPE_CHECKING
+
 from e3.anod.error import AnodError
 from e3.main import Main
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from argparse import _SubParsersAction
@@ -36,7 +37,7 @@ def anod() -> None:
     assert sys.modules["__main__"].__file__ is not None
 
     sandbox_dir = os.path.abspath(
-        os.path.join(os.path.dirname(sys.modules["__main__"].__file__), os.pardir)  # type: ignore
+        str(Path(os.path.dirname(sys.modules["__main__"].__file__), os.pardir))  # type: ignore
     )
 
     sandbox = e3.anod.sandbox.SandBox(root_dir=sandbox_dir)

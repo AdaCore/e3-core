@@ -59,7 +59,7 @@ class OrderedDictYAMLLoader(Loader):
                 self.name = getattr(self.stream, "name", None)
 
         if self.name is not None and os.path.isfile(self.name):
-            file_name = os.path.join(os.path.dirname(self.name), node.value)
+            file_name = str(Path(os.path.dirname(self.name), node.value))
         else:
             file_name = node.value
 

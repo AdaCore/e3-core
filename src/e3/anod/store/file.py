@@ -297,7 +297,7 @@ class File(object):
         :param name: Same as the File.name attribute.
         :return: The path to the metadata file.
         """
-        return os.path.join(dest_dir, name + "_meta.json")
+        return str(Path(dest_dir, name + "_meta.json"))
 
     def download(
         self: FileType,
@@ -378,7 +378,7 @@ class File(object):
             if not meta_name.endswith(file_ext):
                 basename += file_ext
 
-            downloaded_file = os.path.abspath(os.path.join(dest_dir, basename))
+            downloaded_file = os.path.abspath(str(Path(dest_dir, basename)))
 
         # Check for previous metadata
         prev_source = None
@@ -726,11 +726,11 @@ class File(object):
         for idx in range(10):
             if idx != 0:
                 new_filename = f"{prefix}-{today}-{idx}.tgz"
-                mv(os.path.join(dest, filename), os.path.join(dest, new_filename))
+                mv(Path(dest, filename), Path(dest, new_filename))
                 filename = new_filename
             previous = store.latest_thirdparty(filename)
             if previous is None:
-                cls.upload_thirdparty(store, os.path.join(dest, filename))
+                cls.upload_thirdparty(store, str(Path(dest, filename)))
                 break
         else:
             raise StoreError("Too many third party packages created today!")

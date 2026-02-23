@@ -98,10 +98,10 @@ def test_python_func() -> None:
         e3.os.fs.touch("Scripts/run.exe")
         assert e3.os.fs.unixpath(
             e3.sys.python_script("run.exe", str(Path.cwd()))[0]
-        ) == e3.os.fs.unixpath(os.path.join(str(Path.cwd()), "Scripts", "run.exe"))
+        ) == e3.os.fs.unixpath(Path.cwd() / "Scripts" / "run.exe")
         assert e3.os.fs.unixpath(
             e3.sys.python_script("run", str(Path.cwd()))[0]
-        ) == e3.os.fs.unixpath(os.path.join(str(Path.cwd()), "Scripts", "run.exe"))
+        ) == e3.os.fs.unixpath(Path.cwd() / "Scripts" / "run.exe")
     else:
         assert "/foo/bin" in os.environ["PATH"].split(os.pathsep)
         assert e3.sys.python_script("run", "/foo") == [
@@ -117,14 +117,12 @@ def test_python_func() -> None:
     # Check support for python3
     if sys.platform == "win32":
         e3.os.fs.touch("python3.exe")
-        assert e3.sys.interpreter(str(Path.cwd())) == os.path.join(
-            str(Path.cwd()), "python3.exe"
-        )
+        assert e3.sys.interpreter(str(Path.cwd())) == str(Path.cwd() / "python3.exe")
     else:
         e3.fs.mkdir("bin")
-        e3.os.fs.touch(os.path.join("bin", "python3"))
-        assert e3.sys.interpreter(str(Path.cwd())) == os.path.join(
-            str(Path.cwd()), "bin", "python3"
+        e3.os.fs.touch(Path("bin", "python3"))
+        assert e3.sys.interpreter(str(Path.cwd())) == str(
+            Path.cwd() / "bin" / "python3"
         )
 
 
@@ -165,12 +163,12 @@ def test_relocate_python_distrib() -> None:
 
     # Add some additional files in either bin or Scripts to check that relocation
     # works even when other content has been added to a Python distrib.
-    e3.fs.mkdir(os.path.join("./moved_env", script_dir, "dummy_dir"))
-    with Path(os.path.join("./moved_env", script_dir, "dummy_sh.sh")).open("w") as fd:
+    e3.fs.mkdir(Path("./moved_env", script_dir, "dummy_dir"))
+    with Path("./moved_env", script_dir, "dummy_sh.sh").open("w") as fd:
         fd.write("#!/bin/bash\necho")
 
     try:
-        p = e3.os.process.Run([os.path.join("./moved_env", script), "--help"])
+        p = e3.os.process.Run([str(Path("./moved_env", script)), "--help"])
         # On Windows we will get a status != 0 in case of error
         assert p.status != 0
     except FileNotFoundError:
@@ -181,7 +179,7 @@ def test_relocate_python_distrib() -> None:
     e3.sys.relocate_python_distrib(
         python_distrib_dir=os.path.abspath("./moved_env"), freeze=True
     )
-    p = e3.os.process.Run([os.path.join("./moved_env", script), "--help"])
+    p = e3.os.process.Run([str(Path("./moved_env", script)), "--help"])
     assert p.status == 0
 
     # Move the environment, relocate it but make it relocatable this time.
@@ -192,9 +190,9 @@ def test_relocate_python_distrib() -> None:
     # Moving the venv should result in a working environment providing PATH is
     # set correctly
     e3.fs.mv("moved_env2", "moved_env3")
-    env.add_path(os.path.abspath(os.path.join("moved_env3", "bin")))
-    env.add_path(os.path.abspath(os.path.join("moved_env3", "Scripts")))
+    env.add_path(os.path.abspath(Path("moved_env3", "bin")))
+    env.add_path(os.path.abspath(Path("moved_env3", "Scripts")))
     env.add_path(os.path.abspath("moved_env3"))
 
-    p = e3.os.process.Run([os.path.join("moved_env3", script), "--help"])
+    p = e3.os.process.Run([str(Path("moved_env3", script)), "--help"])
     assert p.status == 0, f"output was:\n{p.out}"

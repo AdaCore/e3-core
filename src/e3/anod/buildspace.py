@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import e3.error
 import e3.log
@@ -48,7 +49,7 @@ class BuildSpace:
         """
         # Start by verifying that the file used as build space markers
         # exists.
-        if not os.path.isfile(os.path.join(self.root_dir, ".buildspace")):
+        if not os.path.isfile(Path(self.root_dir, ".buildspace")):
             return False
         # Next, verify that all the necessary directories exist as well.
         for d in self.DIRS:
@@ -63,7 +64,7 @@ class BuildSpace:
     def subdir(self, name: str) -> str:
         if name not in self.DIRS:
             raise ValueError(f"invalid subdir {name}")
-        return os.path.join(self.root_dir, self.directory_mapping[name])
+        return str(Path(self.root_dir, self.directory_mapping[name]))
 
     def __getattr__(self, name: str) -> str:
         if name.endswith("_dir") and name[:-4] in self.DIRS:
@@ -90,7 +91,7 @@ class BuildSpace:
             mkdir(self.subdir(name=d), quiet=quiet)
 
         # Add a marker that identify a build space
-        touch(os.path.join(self.root_dir, ".buildspace"))
+        touch(Path(self.root_dir, ".buildspace"))
 
         self.initialized = True
 

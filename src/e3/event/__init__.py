@@ -183,10 +183,10 @@ class Event:
             "closed": self._closed,
         }
         mkdir(event_dir)
-        json_filename = os.path.join(event_dir, f"{self.uid}-{unique_id()}.json")
-        with Path(json_filename).open("w") as fd:
+        json_filename = Path(event_dir, f"{self.uid}-{unique_id()}.json")
+        with json_filename.open("w") as fd:
             json.dump(result, fd)
-        return json_filename
+        return str(json_filename)
 
     @classmethod
     def load(cls, json_filename: str) -> Event:

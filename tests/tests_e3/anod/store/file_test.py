@@ -211,7 +211,7 @@ def test_download(store) -> None:
     mkdir("sandbox")
     source.download(dest_dir="sandbox")
     mtime1 = os.path.getmtime(source.downloaded_as)
-    meta_file = os.path.join("sandbox", source.name + "_meta.json")
+    meta_file = Path("sandbox", source.name + "_meta.json")
     assert os.path.isfile(meta_file)
 
     sleep(1.0)
@@ -293,7 +293,7 @@ def test_download_as_name(store) -> None:
     mkdir("sandbox")
     source.download(dest_dir="sandbox", as_name="new_name")
     assert os.path.basename(source.downloaded_as) == "new_name.tar.gz"
-    assert os.path.isfile(os.path.join("sandbox", "new_name_meta.json"))
+    assert os.path.isfile(Path("sandbox", "new_name_meta.json"))
 
 
 def test_corrupted_meta_file(store) -> None:
@@ -322,8 +322,8 @@ def test_corrupted_meta_file(store) -> None:
 
     mkdir("sandbox")
     source.download(dest_dir="sandbox", as_name="new_name")
-    meta_file = os.path.join("sandbox", "new_name_meta.json")
-    with Path(meta_file).open("w") as fd:
+    meta_file = Path("sandbox", "new_name_meta.json")
+    with meta_file.open("w") as fd:
         fd.write("{{")
     source.download(dest_dir="sandbox", as_name="new_name")
     source2 = File.load_from_meta_file(dest_dir="sandbox", name="new_name", store=store)

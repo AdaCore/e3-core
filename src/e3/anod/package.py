@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.anod.error
@@ -80,8 +81,11 @@ class Package:
         :param anod_instance: the Anod instance that creates the package
         :return: the full path to the generated archive
         """
-        return os.path.join(
-            anod_instance.build_space.binary_dir, self.pkg_name(anod_instance) + ".zip"
+        return str(
+            Path(
+                anod_instance.build_space.binary_dir,
+                self.pkg_name(anod_instance) + ".zip",
+            )
         )
 
     def create_package(self, anod_instance: Anod) -> str:

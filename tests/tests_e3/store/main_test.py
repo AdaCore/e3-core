@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 from unittest.mock import patch, MagicMock
 from e3.store.backends.http_simple_store import HTTPSimpleStore
 from e3.store.cache.backends.filecache import FileCache
@@ -47,7 +46,7 @@ def test_simple_store(caplog) -> None:
 
 def test_store_with_cache() -> None:
     """Test HTTPSimpleStore with a FileCache."""
-    fc = FileCache({"cache_dir": os.path.join(str(Path.cwd()), "cache")})
+    fc = FileCache({"cache_dir": str(Path.cwd() / "cache")})
 
     with patch("e3.net.http.requests.Session.request") as mock_request:
         mock_request.return_value = mock_download()

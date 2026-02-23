@@ -10,8 +10,8 @@ def test_nvd_cve_search(socket_disabled) -> None:
     from requests_cache import NEVER_EXPIRE
     from warnings import catch_warnings, simplefilter as warn_filter
 
-    cache_db = os.path.join(str(Path.cwd()), "cache")
-    cp(os.path.join(os.path.dirname(__file__), "cache"), cache_db, recursive=True)
+    cache_db = Path.cwd() / "cache"
+    cp(Path(os.path.dirname(__file__), "cache"), cache_db, recursive=True)
 
     with catch_warnings(record=True) as w:
         # Used to always trigger python warnings if they appear

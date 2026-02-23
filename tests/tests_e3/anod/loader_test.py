@@ -5,11 +5,12 @@ from e3.anod.loader import AnodSpecRepository, SpecConfig
 from e3.fs import cp, sync_tree
 
 import pytest
+from pathlib import Path
 
 
 class TestLoader:
-    spec_dir = os.path.join(os.path.dirname(__file__), "data")
-    spec2_dir = os.path.join(os.path.dirname(__file__), "data2")
+    spec_dir = str(Path(os.path.dirname(__file__), "data"))
+    spec2_dir = str(Path(os.path.dirname(__file__), "data2"))
 
     def test_spec_does_not_exist(self) -> None:
         with pytest.raises(SandBoxError) as err:
@@ -49,7 +50,7 @@ class TestLoader:
 
     def test_spec_loader_prolog_with_repos(self) -> None:
         sync_tree(self.spec_dir, "specs_dir")
-        repositories_yaml = os.path.join("specs_dir", "config", "repositories.yaml")
+        repositories_yaml = str(Path("specs_dir", "config", "repositories.yaml"))
         cp(repositories_yaml + ".tmpl", repositories_yaml)
 
         spec_repo = AnodSpecRepository("specs_dir")

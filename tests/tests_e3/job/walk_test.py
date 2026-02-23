@@ -14,27 +14,27 @@ import pytest
 
 class SbxDirs:
     def __init__(self) -> None:
-        self.sbx_dir = "/dev/null"
-        self.fingerprint_dir = "/dev/null"
-        self.store_dir = "/dev/null"
-        self.sbx_tmp_dir = "/dev/null"
+        self.sbx_dir = Path("/dev/null")
+        self.fingerprint_dir = Path("/dev/null")
+        self.store_dir = Path("/dev/null")
+        self.sbx_tmp_dir = Path("/dev/null")
 
     def set_dirs(self, root_dir: str) -> None:
         # A directory where we have the equivalent of a sandbox;
         # basically, a place where we store some information as we
         # perform the actions
         # of a given DAG.
-        self.sbx_dir = os.path.join(root_dir, "sbx")
+        self.sbx_dir = Path(root_dir, "sbx")
 
         # A place where to store fingerprints...
-        self.fingerprint_dir = os.path.join(self.sbx_dir, "fingerprints")
+        self.fingerprint_dir = self.sbx_dir / "fingerprints"
 
         # A directory where download nodes will get their files from.
-        self.store_dir = os.path.join(self.sbx_dir, "store")
+        self.store_dir = self.sbx_dir / "store"
 
         # A place where to store anything else that we might need
         # between two runs via the Walk class.
-        self.sbx_tmp_dir = os.path.join(self.sbx_dir, "tmp")
+        self.sbx_tmp_dir = self.sbx_dir / "tmp"
 
     def delete_sbx(self) -> None:
         if os.path.exists(self.sbx_dir):
@@ -103,7 +103,7 @@ def source_fullpath(uid: str) -> str:
 
     :param uid: A unique Job ID.
     """
-    return os.path.join(sbx_dirs.sbx_tmp_dir, job_source_basename(uid))
+    return str(sbx_dirs.sbx_tmp_dir / job_source_basename(uid))
 
 
 def source_store_fullpath(uid: str) -> str:
@@ -112,7 +112,7 @@ def source_store_fullpath(uid: str) -> str:
     :param uid: A unique Job ID.
     """
     assert uid.startswith(DOWNLOAD_JOB_UID_PREFIX)
-    return os.path.join(sbx_dirs.store_dir, job_source_basename(uid))
+    return str(sbx_dirs.store_dir / job_source_basename(uid))
 
 
 class DryRunJob(EmptyJob):
@@ -207,7 +207,7 @@ class SimpleWalk(Walk):
 class FingerprintWalk(SimpleWalk):
     @classmethod
     def fingerprint_filename(cls, uid):
-        return os.path.join(sbx_dirs.fingerprint_dir, uid)
+        return str(sbx_dirs.fingerprint_dir / uid)
 
     def compute_fingerprint(self, uid, data, is_prediction=False) -> Fingerprint | None:
         if "fingerprint_after_job" in uid and is_prediction:

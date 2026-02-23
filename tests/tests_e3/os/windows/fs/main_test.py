@@ -1,14 +1,13 @@
 import contextlib
-import os
 import sys
 import time
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 import pytest
-from pathlib import Path
 
 if sys.platform == "win32":
     from e3.os.windows.fs import NTFile
@@ -26,9 +25,9 @@ if sys.platform == "win32":
     reason="windows specific test",
 )
 def test_read_attributes() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_read_attr_file.txt")
+    test_file_path = work_dir / "test_read_attr_file.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     assert "test_read_attr_file.txt" in str(ntfile)
@@ -41,9 +40,9 @@ def test_read_attributes() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_file_info() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_read_attr_file.txt")
+    test_file_path = work_dir / "test_read_attr_file.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     assert "test_read_attr_file.txt" in str(ntfile)
@@ -54,9 +53,9 @@ def test_file_info() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_write_attributes() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_write_attr_file.txt")
+    test_file_path = work_dir / "test_write_attr_file.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     ntfile.read_attributes()
@@ -79,15 +78,15 @@ def test_write_attributes() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_uid() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_uid.txt")
+    test_file_path = work_dir / "test_uid.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     ntfile.read_attributes()
     assert ntfile.uid > 0
 
-    ntfile2 = NTFile(os.path.join(work_dir, "non_existing.txt"))
+    ntfile2 = NTFile(work_dir / "non_existing.txt")
 
     with pytest.raises(NTException):
         print(ntfile2.uid)
@@ -95,11 +94,11 @@ def test_uid() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_open_file_in_dir() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_dir_path = os.path.join(work_dir, "dir")
+    test_dir_path = work_dir / "dir"
     mkdir(test_dir_path)
-    touch(os.path.join(test_dir_path, "toto.txt"))
+    touch(test_dir_path / "toto.txt")
 
     with contextlib.closing(NTFile(test_dir_path)) as ntfile:
         ntfile.open()
@@ -109,9 +108,9 @@ def test_open_file_in_dir() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_volume_path() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_vpath.txt")
+    test_file_path = work_dir / "test_vpath.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     assert ntfile.volume_path
@@ -124,9 +123,9 @@ def test_volume_path() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_move_to_trash() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_mv_to_trash.txt")
+    test_file_path = work_dir / "test_mv_to_trash.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     ntfile.open(Access.READ_DATA)
@@ -142,9 +141,9 @@ def test_move_to_trash() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_dispose() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_dispose.txt")
+    test_file_path = work_dir / "test_dispose.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     ntfile.open(Access.READ_DATA)
@@ -158,25 +157,25 @@ def test_dispose() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_rename() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_file_path = os.path.join(work_dir, "test_rename.txt")
+    test_file_path = work_dir / "test_rename.txt"
     touch(test_file_path)
     ntfile = NTFile(test_file_path)
     ntfile.open(Access.READ_DATA)
     try:
         with pytest.raises(NTException):
-            ntfile.rename(os.path.join(work_dir, "test_rename2.txt"))
+            ntfile.rename(str(work_dir / "test_rename2.txt"))
     finally:
         ntfile.close()
-    ntfile.rename(os.path.join(work_dir, "test_rename2.txt"))
+    ntfile.rename(str(work_dir / "test_rename2.txt"))
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_iterate_on_dir() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_dir_path = os.path.join(work_dir, "dir")
+    test_dir_path = work_dir / "dir"
     mkdir(test_dir_path)
 
     result = set()
@@ -195,7 +194,7 @@ def test_iterate_on_dir() -> None:
         ntfile.close()
 
     for n in range(40):
-        touch(os.path.join(test_dir_path, f"{n}.txt"))
+        touch(test_dir_path / f"{n}.txt")
     try:
         ntfile = NTFile(test_dir_path)
         status = ntfile.iterate_on_dir(fun, default_result=False)
@@ -204,7 +203,7 @@ def test_iterate_on_dir() -> None:
     finally:
         ntfile.close()
 
-    test_file = os.path.join(test_dir_path, "not-a-directory.txt")
+    test_file = test_dir_path / "not-a-directory.txt"
     touch(test_file)
     ntfile = NTFile(test_file)
     try:
@@ -216,11 +215,11 @@ def test_iterate_on_dir() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_is_dir_empty() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_dir_path = os.path.join(work_dir, "dir")
-    deleted_file_path = os.path.join(test_dir_path, "deleted2.txt")
-    deleted_file2_path = os.path.join(test_dir_path, "deleted.txt")
+    test_dir_path = work_dir / "dir"
+    deleted_file_path = test_dir_path / "deleted2.txt"
+    deleted_file2_path = test_dir_path / "deleted.txt"
     mkdir(test_dir_path)
 
     ntfile = NTFile(test_dir_path)
@@ -244,10 +243,10 @@ def test_is_dir_empty() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_unlink() -> None:
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
 
-    test_dir_path = os.path.join(work_dir, "dir")
-    deleted_file_path = os.path.join(test_dir_path, "deleted2.txt")
+    test_dir_path = work_dir / "dir"
+    deleted_file_path = test_dir_path / "deleted2.txt"
     mkdir(test_dir_path)
 
     ntfile = NTFile(test_dir_path)
@@ -295,9 +294,9 @@ def test_unlink() -> None:
     assert "NTFile.read_attributes_internal:" in str(err.value)
 
     # A directory that is not empty cannot be deleted
-    dir_to_delete = os.path.join(test_dir_path, "dir_to_delete")
+    dir_to_delete = test_dir_path / "dir_to_delete"
     mkdir(dir_to_delete)
-    touch(os.path.join(dir_to_delete, "afile.txt"))
+    touch(dir_to_delete / "afile.txt")
     ntfile = NTFile(dir_to_delete)
     try:
         with pytest.raises(NTException) as err:
@@ -307,9 +306,9 @@ def test_unlink() -> None:
 
     # A directory that is already opened and not empty cannot be
     # moved to trash
-    dir_to_delete = os.path.join(test_dir_path, "dir_to_delete")
+    dir_to_delete = test_dir_path / "dir_to_delete"
     mkdir(dir_to_delete)
-    touch(os.path.join(dir_to_delete, "afile.txt"))
+    touch(dir_to_delete / "afile.txt")
 
     ntfile = NTFile(dir_to_delete)
     ntfile2 = NTFile(dir_to_delete)

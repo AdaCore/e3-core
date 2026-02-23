@@ -21,10 +21,10 @@ def test_rsync_mode() -> None:
     GitRepository.create("git")
     for _ in range(1000):
         name = str(uuid.uuid1(clock_seq=int(1000 * time.time())))
-        touch(os.path.join("git", name + ".py"))
-        touch(os.path.join("git", name + ".pyc"))
-        touch(os.path.join("git", name + ".o"))
-        touch(os.path.join("git", name + ".ali"))
+        touch(Path("git", name + ".py"))
+        touch(Path("git", name + ".pyc"))
+        touch(Path("git", name + ".o"))
+        touch(Path("git", name + ".ali"))
 
     with Path("git/.gitignore").open("w") as fd:
         fd.write("*.pyc\n")
@@ -41,8 +41,8 @@ def test_rsync_mode() -> None:
 
 
 class TestCheckout:
-    repo_data = os.path.join(os.path.dirname(__file__), "vcs_data")
-    repo_data2 = os.path.join(os.path.dirname(__file__), "vcs_data2")
+    repo_data = str(Path(os.path.dirname(__file__), "vcs_data"))
+    repo_data2 = str(Path(os.path.dirname(__file__), "vcs_data2"))
 
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
@@ -69,33 +69,33 @@ class TestCheckout:
 
         result = m.update(vcs="git", url=url3, revision=main_branch)
         assert result == ReturnValue.success
-        assert os.path.isfile(os.path.join("myrepo", "file1.txt"))
+        assert os.path.isfile(Path("myrepo", "file1.txt"))
 
         logger.info("Check that we can switch from one git url to another one")
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.success
-        assert os.path.isfile(os.path.join("myrepo", "file1.txt", "data2.txt"))
+        assert os.path.isfile(Path("myrepo", "file1.txt", "data2.txt"))
 
         logger.info("Check that in case of no changes unchanged is returned")
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.unchanged
 
         logger.info("Check that changes are detected in git repositories")
-        with Path(os.path.join("git2", "file3.txt")).open("w") as fd:
+        with Path("git2", "file3.txt").open("w") as fd:
             fd.write("new file!")
         r = GitRepository(os.path.abspath("git2"))
         r.git_cmd(["add", "file3.txt"])
         r.git_cmd(["commit", "-m", "new file"])
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.success
-        assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
+        assert os.path.isfile(Path("myrepo", "file3.txt"))
 
         logger.info("Check that local modifications are discarded")
-        with Path(os.path.join("myrepo", "file3.txt")).open("w") as fd:
+        with Path("myrepo", "file3.txt").open("w") as fd:
             fd.write("new file modified!")
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.unchanged
-        with Path(os.path.join("myrepo", "file3.txt")).open() as fd:
+        with Path("myrepo", "file3.txt").open() as fd:
             assert fd.read().strip() == "new file!"
 
         result = m.update(vcs="git", url=url4 + "non-existing", revision=main_branch)
@@ -112,8 +112,8 @@ class TestCheckout:
             fd.write("/ignore_file.txt")
 
         result = m.update(vcs="external", url=os.path.abspath("git2"))
-        assert os.path.isfile(os.path.join(m.working_dir, "file4.txt"))
-        assert not os.path.isfile(os.path.join(m.working_dir, "ignore_file.txt"))
+        assert os.path.isfile(Path(m.working_dir, "file4.txt"))
+        assert not os.path.isfile(Path(m.working_dir, "ignore_file.txt"))
         assert result == ReturnValue.success
 
         result = m.update(vcs="external", url=os.path.abspath("git2"))
@@ -150,7 +150,7 @@ class TestCheckout:
 
         # Update the repository
         logger.info("Do a checkin in svn repository")
-        with Path(os.path.join("svn_checkout", "file3.txt")).open("w") as fd:
+        with Path("svn_checkout", "file3.txt").open("w") as fd:
             fd.write("new file!")
         r.svn_cmd(["add", "file3.txt"])
         r.svn_cmd(["commit", "file3.txt", "-m", "checkin"])
@@ -158,22 +158,22 @@ class TestCheckout:
         logger.info("Check that we see the update")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.success
-        assert os.path.isfile(os.path.join("svn_checkout", "file3.txt"))
+        assert os.path.isfile(Path("svn_checkout", "file3.txt"))
 
         logger.info("Do a local modification in the working dir")
-        with Path(os.path.join("myrepo", "file3.txt")).open("w") as fd:
+        with Path("myrepo", "file3.txt").open("w") as fd:
             fd.write("new file modified!")
 
         logger.info("And then do an update and check that cleanup was done")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.unchanged
-        with Path(os.path.join("myrepo", "file3.txt")).open() as fd:
+        with Path("myrepo", "file3.txt").open() as fd:
             assert fd.read().strip() == "new file!"
 
         logger.info("Check that we can switch from one svn url to another")
         result = m.update(vcs="svn", url=url2)
         assert result == ReturnValue.success
-        assert os.path.isfile(os.path.join("myrepo", "file1.txt", "data2.txt"))
+        assert os.path.isfile(Path("myrepo", "file1.txt", "data2.txt"))
 
     def test_shallow_since_checkout(self) -> None:
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
@@ -185,9 +185,9 @@ class TestCheckout:
 
         url = GitRepository.create("git3")
 
-        with Path(os.path.join("git3", "file3.txt")).open("w") as fd:
+        with Path("git3", "file3.txt").open("w") as fd:
             fd.write("first file!")
-        with Path(os.path.join("git3", "file4.txt")).open("w") as fd:
+        with Path("git3", "file4.txt").open("w") as fd:
             fd.write("second file!")
 
         m = CheckoutManager(name="myrepo", working_dir=".")
@@ -211,8 +211,8 @@ class TestCheckout:
             log = fd.readlines()
 
         assert result == ReturnValue.success
-        assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
-        assert os.path.isfile(os.path.join("myrepo", "file4.txt"))
+        assert os.path.isfile(Path("myrepo", "file3.txt"))
+        assert os.path.isfile(Path("myrepo", "file4.txt"))
         assert log == ["second commit"]
 
     def test_max_depth_checkout(self) -> None:
@@ -224,11 +224,11 @@ class TestCheckout:
 
         url = GitRepository.create("git4")
 
-        with Path(os.path.join("git4", "file3.txt")).open("w") as fd:
+        with Path("git4", "file3.txt").open("w") as fd:
             fd.write("first file!")
-        with Path(os.path.join("git4", "file4.txt")).open("w") as fd:
+        with Path("git4", "file4.txt").open("w") as fd:
             fd.write("second file!")
-        with Path(os.path.join("git4", "file5.txt")).open("w") as fd:
+        with Path("git4", "file5.txt").open("w") as fd:
             fd.write("third file!")
 
         m = CheckoutManager(name="myrepo", working_dir=".")
@@ -254,7 +254,7 @@ class TestCheckout:
             log = fd.read().splitlines()
 
         assert result == ReturnValue.success
-        assert os.path.isfile(os.path.join("myrepo", "file3.txt"))
-        assert os.path.isfile(os.path.join("myrepo", "file4.txt"))
-        assert os.path.isfile(os.path.join("myrepo", "file5.txt"))
+        assert os.path.isfile(Path("myrepo", "file3.txt"))
+        assert os.path.isfile(Path("myrepo", "file4.txt"))
+        assert os.path.isfile(Path("myrepo", "file5.txt"))
         assert log == ["third commit", "second commit"]

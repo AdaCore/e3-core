@@ -119,8 +119,8 @@ def main() -> None:
     m.parse_args()
     assert m.args is not None
 
-    vcs_cache_dir = os.path.abspath(os.path.join(m.args.cache_dir, "vcs"))
-    wheel_cache_dir = os.path.abspath(os.path.join(m.args.cache_dir, "wheels"))
+    vcs_cache_dir = os.path.abspath(Path(m.args.cache_dir, "vcs"))
+    wheel_cache_dir = os.path.abspath(Path(m.args.cache_dir, "wheels"))
     mkdir(vcs_cache_dir)
     mkdir(wheel_cache_dir)
     mkdir(m.args.target_dir)
@@ -142,13 +142,13 @@ def main() -> None:
         else:
             rev = "master"
         checkout_manager = CheckoutManager(
-            name=name, working_dir=os.path.join(vcs_cache_dir), compute_changelog=False
+            name=name, working_dir=str(Path(vcs_cache_dir)), compute_changelog=False
         )
 
         if m.args.local_clones is not None:
             checkout_manager.update(
                 vcs="external",
-                url=os.path.join(m.args.local_clones, url.split("/")[-1]),
+                url=str(Path(m.args.local_clones, url.split("/")[-1])),
                 revision=rev,
             )
         else:
@@ -159,16 +159,16 @@ def main() -> None:
             # Try to update the version file for the given repository. Update
             # is one only if there is file called VERSION and that the version
             # has the format MAJOR.MINOR
-            version_file = os.path.join(checkout_manager.working_dir, "VERSION")
+            version_file = Path(checkout_manager.working_dir, "VERSION")
             if os.path.isfile(version_file):
-                with Path(version_file).open() as fd:
+                with version_file.open() as fd:
                     version = fd.read().strip()
                 logger.info(f"Wheel {name} has version {version}")
                 split_version = version.split(".")
                 if len(split_version) == 2:
                     # We have a major and minor but no patch so add it automatically
                     version = f"{version}.{datetime.today().strftime('%Y%m%d%H%M')}"
-                    with Path(version_file).open("w") as fd:
+                    with version_file.open("w") as fd:
                         fd.write(version)
 
                     logger.info(f"Wheel {name} version updated to {version}")
@@ -216,10 +216,8 @@ def main() -> None:
             )
 
         with Path(
-            os.path.join(
-                m.args.target_dir,
-                config.get("frozen_requirement_file", "requirements.txt"),
-            )
+            m.args.target_dir,
+            config.get("frozen_requirement_file", "requirements.txt"),
         ).open("w") as fd:
             for req in pypi.requirements_closure():
                 if "discard_from_closure" not in config or not re.search(

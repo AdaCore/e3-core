@@ -209,10 +209,10 @@ def set_python_env(prefix: str) -> None:
     env = e3.env.Env()
     if sys.platform == "win32":  # unix: no cover
         env.add_path(prefix)
-        env.add_path(os.path.join(prefix, "Scripts"))
+        env.add_path(str(Path(prefix, "Scripts")))
     else:
-        env.add_path(os.path.join(prefix, "bin"))
-        env.add_dll_path(os.path.join(prefix, "lib"))
+        env.add_path(str(Path(prefix, "bin")))
+        env.add_dll_path(str(Path(prefix, "lib")))
 
 
 def interpreter(prefix: str | None = None) -> str:
@@ -228,19 +228,19 @@ def interpreter(prefix: str | None = None) -> str:
     if prefix is None:
         return sys.executable
     if sys.platform == "win32":  # unix: no cover
-        python3 = os.path.join(prefix, "python3.exe")
+        python3 = Path(prefix, "python3.exe")
         if os.path.exists(python3):
-            return python3
+            return str(python3)
         # Might be the python location when in a venv
-        python3 = os.path.join(prefix, "Scripts", "python.exe")
+        python3 = Path(prefix, "Scripts", "python.exe")
         if os.path.exists(python3):
-            return python3
-        return os.path.join(prefix, "python.exe")
+            return str(python3)
+        return str(Path(prefix, "python.exe"))
     # windows: no cover
-    python3 = os.path.join(prefix, "bin", "python3")
+    python3 = Path(prefix, "bin", "python3")
     if os.path.exists(python3):
-        return python3
-    return os.path.join(prefix, "bin", "python")
+        return str(python3)
+    return str(Path(prefix, "bin", "python"))
 
 
 def python_script(name: str, prefix: str | None = None) -> list[str]:
@@ -281,9 +281,9 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
         #    which call a python script called <basename>-script.py
         # 3- a .exe without a side python script
         script = (
-            os.path.join(prefix, name)
+            str(Path(prefix, name))
             if os.path.basename(prefix).lower() == "scripts"
-            else os.path.join(prefix, "Scripts", name)
+            else str(Path(prefix, "Scripts", name))
         )
 
         if script.endswith(".exe"):
@@ -305,7 +305,7 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
             return [script_exe]
         # Case in which the script is probably a Python file
         return [interpreter(prefix), script]
-    return [interpreter(prefix), os.path.join(prefix, "bin", name)]
+    return [interpreter(prefix), str(Path(prefix, "bin", name))]
 
 
 def is_console() -> bool:
@@ -354,21 +354,21 @@ def relocate_python_distrib(
         python_distrib_dir = sys.prefix
 
     if platform == "win32":  # unix: no cover
-        script_dir = os.path.join(python_distrib_dir, "Scripts")
+        script_dir = str(Path(python_distrib_dir, "Scripts"))
     else:  # win32: no cover
-        script_dir = os.path.join(python_distrib_dir, "bin")
+        script_dir = str(Path(python_distrib_dir, "bin"))
 
     # The python interpreter of the selected distribution
     python_binary = interpreter(prefix=python_distrib_dir)
 
     # Search all scripts
     for fname in os.listdir(script_dir):
-        script_path = os.path.join(script_dir, fname)
+        script_path = Path(script_dir, fname)
 
         if not os.path.isfile(script_path):
             continue
 
-        with Path(script_path).open("rb") as fd:
+        with script_path.open("rb") as fd:
             content = fd.read()
 
         # By default shebang is found in file first line
@@ -418,7 +418,7 @@ def relocate_python_distrib(
             else:  # win32: no cover
                 shebang = b"#!/usr/bin/env " + shebang
 
-        with Path(script_path).open("wb") as fd:
+        with script_path.open("wb") as fd:
             fd.write(launcher)
             fd.write(shebang)
             fd.write(payload)

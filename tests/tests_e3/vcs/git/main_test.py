@@ -13,23 +13,23 @@ from contextlib import closing
 
 def test_git_non_utf8(git) -> None:
     """Test with non utf-8 encoding in changelog."""
-    working_tree = os.path.join(str(Path.cwd()), "working_tree")
-    repo = GitRepository(working_tree)
+    working_tree = Path.cwd() / "working_tree"
+    repo = GitRepository(str(working_tree))
     repo.init()
     os.chdir(working_tree)
-    new_file = os.path.join(working_tree, "new.txt")
-    commit_msg = os.path.join(working_tree, "commit.txt")
+    new_file = working_tree / "new.txt"
+    commit_msg = working_tree / "commit.txt"
 
-    with Path(commit_msg).open("wb") as fd:
+    with commit_msg.open("wb") as fd:
         fd.write(b"\x03\xff")
 
-    with Path(new_file).open("wb") as fd:
+    with new_file.open("wb") as fd:
         fd.write(b"\x03\xff")
 
     repo.git_cmd(["add", "new.txt"])
     repo.git_cmd(["config", "user.email", "e3-core@example.net"])
     repo.git_cmd(["config", "user.name", "e3 core"])
-    repo.git_cmd(["commit", "-F", commit_msg])
+    repo.git_cmd(["commit", "-F", str(commit_msg)])
 
     with closing(tempfile.NamedTemporaryFile(mode="w", delete=False)) as fd:
         repo.write_log(fd)
@@ -44,15 +44,15 @@ def test_git_non_utf8(git) -> None:
 
 
 def test_git_repo(git) -> None:
-    working_tree = os.path.join(str(Path.cwd()), "working_tree")
-    working_tree2 = os.path.join(str(Path.cwd()), "working_tree2")
-    repo = GitRepository(working_tree)
+    working_tree = Path.cwd() / "working_tree"
+    working_tree2 = Path.cwd() / "working_tree2"
+    repo = GitRepository(str(working_tree))
     repo.init()
     os.chdir(working_tree)
-    new_file = os.path.join(working_tree, "new.txt")
+    new_file = str(working_tree / "new.txt")
     echo_to_file(new_file, "new\n")
 
-    commit_note = unixpath(os.path.join(working_tree, "commit_note.txt"))
+    commit_note = unixpath(working_tree / "commit_note.txt")
     echo_to_file(
         commit_note,
         "\n".join(
@@ -130,7 +130,7 @@ def test_git_repo(git) -> None:
         assert commits[1]["diff"] != commits[0]["diff"]
 
     repo2 = GitRepository(working_tree2)
-    giturl = "file://{}".format(working_tree.replace("\\", "/"))
+    giturl = "file://{}".format(str(working_tree).replace("\\", "/"))
     repo2.init(url=giturl, remote="tree1")
     repo2.update(url=giturl, refspec=main_branch)
     assert repo2.rev_parse() == repo.rev_parse()
