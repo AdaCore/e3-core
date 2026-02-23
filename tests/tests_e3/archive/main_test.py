@@ -26,7 +26,7 @@ def test_unpack(ext) -> None:
 
     try:
         e3.archive.create_archive(archive_name, os.path.abspath(dir_to_pack), str(dest))
-        assert os.path.exists(dest / archive_name)
+        assert (dest / archive_name).exists()
 
         with pytest.raises(e3.archive.ArchiveError):
             e3.archive.unpack_archive(str(dest / archive_name), str(dest / "dest"))
@@ -34,7 +34,7 @@ def test_unpack(ext) -> None:
         e3.fs.mkdir(dest / "dest")
         e3.archive.unpack_archive(str(dest / archive_name), str(dest / "dest"))
 
-        assert os.path.exists(dest / "dest" / test_dir / os.path.basename(__file__))
+        assert (dest / "dest" / test_dir / os.path.basename(__file__)).exists()
 
         e3.fs.mkdir(dest / "dest2")
         e3.archive.unpack_archive(
@@ -46,7 +46,7 @@ def test_unpack(ext) -> None:
             remove_root_dir=True,
         )
 
-        assert os.path.exists(dest / "dest2" / os.path.basename(__file__))
+        assert (dest / "dest2" / os.path.basename(__file__)).exists()
 
         # Test wildcard if not .zip format
         # ??? not supported?
@@ -59,7 +59,7 @@ def test_unpack(ext) -> None:
                 remove_root_dir=True,
             )
 
-            assert os.path.exists(dest / "dest3" / os.path.basename(__file__))
+            assert (dest / "dest3" / os.path.basename(__file__)).exists()
 
         e3.archive.create_archive(
             "e3" + ext,
@@ -78,7 +78,7 @@ def test_unpack(ext) -> None:
             str(dest / "dest4" / "e3rename"),
             remove_root_dir=True,
         )
-        assert os.path.exists(dest / "dest4" / "e3rename" / os.path.basename(__file__))
+        assert (dest / "dest4" / "e3rename" / os.path.basename(__file__)).exists()
 
     finally:
         e3.fs.rm(dest, True)
@@ -115,7 +115,7 @@ def test_unpack_fileobj(ext) -> None:
             remove_root_dir=True,
         )
 
-        assert os.path.exists(dest / "dest2" / os.path.basename(__file__))
+        assert (dest / "dest2" / os.path.basename(__file__)).exists()
 
     finally:
         e3.fs.rm(dest, True)
@@ -151,7 +151,7 @@ def test_unpack_cmd() -> None:
 
     # use cp to 'extract' the archive
     e3.archive.unpack_archive(str(dest / archive_name), all_dest, unpack_cmd=e3.fs.cp)
-    assert os.path.exists(Path(all_dest, archive_name))
+    assert Path(all_dest, archive_name).exists()
 
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
@@ -245,9 +245,9 @@ def test_unpack_files() -> None:
     e3.archive.unpack_archive(
         str(dest / archive_name), str(result_dir), selected_files=["d/a"]
     )
-    assert os.path.exists(result_dir / "d" / "a" / "c")
-    assert os.path.exists(result_dir / "d" / "a" / "d")
-    assert not os.path.exists(result_dir / "d" / "b")
+    assert (result_dir / "d" / "a" / "c").exists()
+    assert (result_dir / "d" / "a" / "d").exists()
+    assert not (result_dir / "d" / "b").exists()
 
 
 def test_unpack_error() -> None:
@@ -276,7 +276,7 @@ def test_zip_no_root_dir() -> None:
     )
     e3.fs.mkdir("result")
     e3.archive.unpack_archive(str(Path("dest", "pkg.zip")), "result")
-    assert os.path.exists(Path("result", "afile"))
+    assert Path("result", "afile").exists()
 
 
 def test_remove_root_dir() -> None:
@@ -303,15 +303,15 @@ def test_remove_root_dir() -> None:
     e3.archive.unpack_archive(
         str(Path("dest", "pkg.zip")), "result", remove_root_dir="auto"
     )
-    assert os.path.exists(Path("result", "from", "a"))
-    assert os.path.exists(Path("result", "dest"))
+    assert Path("result", "from", "a").exists()
+    assert Path("result", "dest").exists()
 
     # Running it again with use sync_tree
     e3.fs.rm(Path("result", "from", "a"))
     e3.archive.unpack_archive(
         str(Path("dest", "pkg.zip")), "result", remove_root_dir="auto"
     )
-    assert os.path.exists(Path("result", "from", "a"))
+    assert Path("result", "from", "a").exists()
 
 
 @patch("tempfile.mkdtemp", wraps=tempfile.mkdtemp)
@@ -326,7 +326,7 @@ def test_tmp_dir_root(mock_mkdtemp) -> None:
         tmp_dir_root="custom_tmp_dir_root",
     )
     mock_mkdtemp.assert_called_once_with(prefix="", dir="custom_tmp_dir_root")
-    assert os.path.exists("result/test.sh")
+    assert Path("result/test.sh").exists()
 
 
 def test_empty() -> None:

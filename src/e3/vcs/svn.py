@@ -228,7 +228,7 @@ class SVNRepository:
 
         def is_clean_svn_dir(dir_path: str) -> tuple[bool, bool]:
             """Return a tuple (True if dir is SVN directory, True if clean)."""
-            if os.path.exists(Path(dir_path, ".svn")):
+            if Path(dir_path, ".svn").exists():
                 try:
                     status = self.svn_cmd(
                         ["status"], output=PIPE
@@ -259,7 +259,7 @@ class SVNRepository:
             update_cmd: SVNCmd = ["update"]
             self.svn_cmd(update_cmd + options)
             return not is_clean
-        if os.path.exists(self.working_copy):
+        if Path(self.working_copy).exists():
             if not is_empty_dir(self.working_copy) and not force_and_clean:
                 raise SVNError(
                     f"not empty {self.working_copy} url {url}",

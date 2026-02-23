@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 import sys
 
 from e3.fs import echo_to_file, mkdir, rm
@@ -65,7 +64,7 @@ def test_svn_repo(svn) -> None:
     assert not local_change
     # verify the content of the working dir A and its revision
     assert svn_a.url == project_url
-    assert os.path.exists(working_copy_a_path / hello_relative_path), "checkout failed"
+    assert (working_copy_a_path / hello_relative_path).exists(), "checkout failed"
     assert svn_a.current_revision == "1"
     # modify the working dir, commit the change,
     # update the working dir and verify the new current revision
@@ -88,12 +87,12 @@ def test_svn_repo(svn) -> None:
     echo_to_file(hello_b_path, "kitty")
     local_change = svn_b.update()
     assert local_change
-    assert os.path.exists(foo_path)
+    assert foo_path.exists()
     with hello_b_path.open() as f:
         assert "kitty" in f.read()
     # update and cancel all changes
     svn_b.update(force_and_clean=True)
-    assert not os.path.exists(foo_path)
+    assert not foo_path.exists()
     with hello_b_path.open() as f:
         assert "bye" in f.read()
 
@@ -118,14 +117,14 @@ def test_svn_repo(svn) -> None:
         svn_c.update(url=project_url)
     svn_c.update(url=project_url, force_and_clean=True)
     # verify that the working dir C is clean
-    assert not os.path.exists(bar_path)
+    assert not bar_path.exists()
 
     # modify a working dir and update it with a new project
     svn_d = SVNRepository(str(working_copy_c_path))
     touch(bar_path)
     svn_d.update()  # update with the last URL used for this dir
     svn_d.update(url=project_url)  # update with the same URL
-    assert os.path.exists(bar_path)
+    assert bar_path.exists()
     project2_url = project_url + "2"
     p = Run(
         [

@@ -360,7 +360,7 @@ def touch(filename: str | Path) -> None:
 
     :param filename: file to update
     """
-    if os.path.exists(filename):
+    if Path(filename).exists():
         os.utime(filename, None)
     else:
         with Path(filename).open("w+"):

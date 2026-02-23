@@ -335,7 +335,7 @@ class HTTPSession:
 
                 # create dest subdir if they do not exist
                 dest_dir = os.path.dirname(path)
-                if dest_dir and not os.path.exists(dest_dir):
+                if dest_dir and not Path(dest_dir).exists():
                     mkdir(dest_dir)
 
                 logger.info("downloading %s size=%s", path, content_length)

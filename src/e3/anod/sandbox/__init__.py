@@ -62,7 +62,7 @@ class SandBox:
 
         # specs_dir path can be changed by a configuration in user.yaml
         user_yaml = Path(self.root_dir, "user.yaml")
-        if os.path.exists(str(user_yaml)):
+        if user_yaml.exists():
             with user_yaml.open() as f:
                 self.user_config = yaml.safe_load(f)
 

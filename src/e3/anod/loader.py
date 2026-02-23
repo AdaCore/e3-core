@@ -165,7 +165,7 @@ class AnodSpecRepository:
             "spec": self.load,
         }
 
-        if os.path.exists(prolog_file):
+        if prolog_file.exists():
             with prolog_file.open() as f:
                 exec(compile(f.read(), prolog_file, "exec"), self.prolog_dict)
 

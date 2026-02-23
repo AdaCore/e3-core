@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 
 import e3.anod.error
 import e3.anod.package
@@ -29,7 +28,7 @@ def test_source_builder_default_prepare_src() -> None:
 
     sb.prepare_src(repos={"a-git": {"working_dir": a_wd}}, dest=a_dest)
 
-    assert os.path.exists(a_dest / "a_file")
+    assert (a_dest / "a_file").exists()
 
     # Check that this is working only when we have one repo
     for checkout in ([], ["a-git", "b-git"]):
@@ -59,7 +58,7 @@ def test_source_builder_custom_prepare_src() -> None:
     )
 
     sb.prepare_src(None, str(Path.cwd()))
-    assert os.path.exists("my_generated_source_file")
+    assert Path("my_generated_source_file").exists()
 
 
 def test_apply_patch() -> None:

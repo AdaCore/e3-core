@@ -172,7 +172,6 @@ def test_patch_git_format_ignore() -> None:
 
 
 def test_patch_git_with_headers() -> None:
-    test_dir = os.path.dirname(__file__)
     test_dir = Path(os.path.dirname(__file__))
     patch_file = test_dir / "git_patch_with_header"
 

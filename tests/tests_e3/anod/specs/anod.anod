@@ -11,5 +11,5 @@ class Anod_(e3.anod.spec.Anod):
         prefix = self['INSTALL_DIR']
         prefix_bin = Path(prefix, 'bin')
 
-        if os.path.exists(prefix_bin):
+        if prefix_bin.exists():
             self.env.add_path(str(prefix_bin))

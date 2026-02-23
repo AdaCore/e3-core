@@ -365,7 +365,7 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
                 return
 
             real_dst = Path(dst, basename(src))
-            if os.path.exists(real_dst):
+            if real_dst.exists():
                 raise FSError(f"Destination path '{real_dst}' already exists")
         try:
             os.rename(src, real_dst)
@@ -455,7 +455,7 @@ def rm(
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
-        if not os.path.exists(error_path):
+        if not Path(error_path).exists():
             return
 
         if func in (os.remove, os.unlink):
@@ -496,7 +496,7 @@ def rm(
             raise FSError(origin="rm", message=f"unknown function: {func.__name__!r}")
 
         # If the file still exists, let the user know through a debug message.
-        if os.path.exists(error_path):
+        if Path(error_path).exists():
             logger.debug(
                 f"error when running {func.__name__!r} on {error_path}. "
                 "Element could not be removed."
@@ -865,7 +865,7 @@ def sync_tree(
                     # limit recursion to 32 in order not to crash on link loops
                     src_linkto_path = Path(os.path.dirname(src.path), linkto)
                     for _ in range(32):
-                        if not os.path.exists(src_linkto_path):
+                        if not src_linkto_path.exists():
                             break
 
                         src_linkto = FileInfo(
@@ -969,7 +969,7 @@ def sync_tree(
         """
         if entry is None:
             target_stat = None
-            if os.path.exists(target_root_dir):
+            if Path(target_root_dir).exists():
                 target_stat = os.lstat(target_root_dir)
 
             entry = FilesInfo(
@@ -1053,7 +1053,7 @@ def sync_tree(
         preserve_timestamps,
     )
 
-    if not os.path.exists(source):
+    if not Path(source).exists():
         raise FSError(origin="sync_tree", message=f"{source} does not exist")
 
     # Use realpath here, or a FileNotFoundError is raised instead of an FSError

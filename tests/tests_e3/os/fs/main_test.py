@@ -89,9 +89,9 @@ def test_rm() -> None:
         # Use the high-level rm function to force the deletion
         e3.fs.rm(bc / "d")
 
-        assert not os.path.exists(bc / "d")
+        assert not (bc / "d").exists()
         e3.os.fs.safe_rmdir(bc)
-        assert not os.path.exists(bc)
+        assert not bc.exists()
 
     finally:
         e3.fs.rm(base, True)
@@ -140,7 +140,7 @@ def test_maxpath() -> None:
 
 def test_touch() -> None:
     e3.os.fs.touch("a")
-    assert os.path.exists("a")
+    assert Path("a").exists()
 
     now = time.time()
     os.utime("a", (now - 10000, now))
