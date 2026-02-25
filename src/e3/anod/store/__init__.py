@@ -497,6 +497,9 @@ class _Store(_StoreContextManager):
         if internal is None:
             internal = kind != "binary"
 
+        raw_resource_path = resource["path"]
+        resource_path = Path(raw_resource_path).resolve()
+
         return {
             "_id": str(fid),
             "kind": kind,
@@ -510,8 +513,19 @@ class _Store(_StoreContextManager):
             "build": buildinfo,
             "resource": resource,
             "internal": bool(internal),
-            "unpack_dir": None,
-            "downloaded_as": resource["path"] or None,
+            "unpack_dir": (
+                str(resource_path)
+                # Path("") is equivalent to Path("."). During a file insertion, if
+                # `resource_path` is not provided, an empty string is stored to the
+                # database. So we have to takes into account `resource_path.is_dir()`
+                # only if raw_`resource_path` is not empty because `Path(".").is_dir()`
+                # is always true.
+                if raw_resource_path and resource_path.is_dir()
+                else None
+            ),
+            # No false positive in that case: if `raw_resource_path` is empty,
+            # `resource_path.is_file()` is always false.
+            "downloaded_as": str(resource_path) if resource_path.is_file() else None,
         }
 
     def _tuple_list_to_buildinfo_list(
@@ -1839,17 +1853,30 @@ class LocalStore(StoreRW, LocalStoreInterface):
         # the build id associated with the source.
         self._raw_add_build_info(file_info["build"])
 
+        # Resource path can be a file or a directory.
         downloaded_as = file_info.get("downloaded_as")
         resource_path = os.path.abspath(downloaded_as) if downloaded_as else ""
+
+        unpack_dir = file_info.get("unpack_dir")
+        if not resource_path and unpack_dir:
+            resource_path = str(Path(unpack_dir).resolve())
 
         resource_tmp = self._select(
             _Store.TableName.resources, ["resource_id"], [resource_id]  # type: ignore[arg-type]
         )
         if resource_tmp:
-            row_id, resource_id, path, *_ = resource_tmp[0]
+            row_id, resource_id, rpath, *_ = resource_tmp[0]
+
+            # Ignore mypy error: `rpath` is shown as a `str | int` but its garantee to
+            # be a string.
+            path = Path(rpath)  # type: ignore[arg-type]
+
             # Check if the path is still valid, if not, we got a new valid path,
             # so we just need to update the database.
-            if Path(str(path)).is_file():  # add cast to str to help mypy
+            #
+            # Note: if no path has been provided, `path` variable will be an empty
+            # string and so `path.is_dir()` will return true, which is what is expected.
+            if path.exists():
                 resource = self._tuple_to_resource(resource_tmp[0])  # type: ignore[arg-type]
             else:
                 resource = self._tuple_to_resource(
@@ -1872,8 +1899,14 @@ class LocalStore(StoreRW, LocalStoreInterface):
             )
 
         file_info["resource"] = resource
-        if resource["path"]:
-            file_info["downloaded_as"] = resource["path"]
+
+        resource_path = resource["path"]  # type: ignore[assignment]
+        if resource_path:
+            path = Path(resource_path)
+            if path.is_file():
+                file_info["downloaded_as"] = resource_path
+            elif path.is_dir():
+                file_info["unpack_dir"] = resource_path
         return True
 
     def raw_add_file(self, file_info: FileDict) -> None:
