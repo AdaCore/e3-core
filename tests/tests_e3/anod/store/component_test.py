@@ -455,9 +455,9 @@ def test_component_download(store) -> None:
         store=store,
     )
     c.files.append(f1)
-    cwd = str(Path.cwd())
-    assert c.download(cwd) is True
-    f1_downloaded = os.path.join("f1.txt")
+    cwd = Path.cwd()
+    assert c.download(str(cwd)) is True
+    f1_downloaded = Path("f1.txt")
     assert os.path.isfile(f1_downloaded)
 
     c.files[0].internal = True
@@ -474,15 +474,15 @@ def test_component_download(store) -> None:
         store=store,
     )
     c.files.append(f2)
-    assert c.download(cwd) is True
-    f2_downloaded = os.path.join("f2.txt")
+    assert c.download(str(cwd)) is True
+    f2_downloaded = Path("f2.txt")
     assert os.path.isfile(f2_downloaded)
 
     c.files.append(f2)
     with pytest.raises(
         StoreError, match="cannot download: multiple external files found"
     ):
-        c.download(cwd)
+        c.download(str(cwd))
 
 
 def test_component_meta_file() -> None:

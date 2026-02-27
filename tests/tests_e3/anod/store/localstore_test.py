@@ -218,7 +218,7 @@ def test_insert_files_with_same_resource_id(store: StoreRW) -> None:
 
         # Create a new directory and move f.txt into it.
         mkdir("fff")
-        new_path = os.path.join("fff", "f.txt")
+        new_path = Path("fff", "f.txt")
         mv("f.txt", new_path)
 
         # Create f2.txt and push it to the "online" store.

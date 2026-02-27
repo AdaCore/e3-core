@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-from os.path import abspath, dirname, join as path_join, isfile, isdir
+from os.path import abspath, dirname, isfile, isdir
 from typing import TYPE_CHECKING
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
@@ -42,7 +42,7 @@ class PypiSimulator:
     PYPIHOSTED_URL = "https://files.pythonhosted.org"
     SIMPLE_MATCHER = regex_compile(f"{PYPI_URL}/simple/(?P<package>.*)/")
     DOWNLOAD_MATCHER = regex_compile(f"{PYPIHOSTED_URL}/(?P<path>.*)")
-    DATA_DIR = path_join(dirname(abspath(__file__)), "pypi_data")
+    DATA_DIR = Path(dirname(abspath(__file__)), "pypi_data")
 
     def __init__(self, requests_mock: Any) -> None:
         self.requests_mock = requests_mock
@@ -55,15 +55,15 @@ class PypiSimulator:
         if not isdir(name):
             mkdir(name)
 
-        with Path(path_join(name, "setup.py")).open("w") as fd:
+        with Path(name, "setup.py").open("w") as fd:
             fd.write("from setuptools import setup, find_packages\n")
             fd.write(f"setup(name='{name}',\n")
             fd.write(f"      version='{version}',\n")
             fd.write("       packages=find_packages())\n")
 
-        mkdir(path_join(name, name))
+        mkdir(Path(name, name))
 
-        with Path(path_join(name, name, "__init__.py")).open("w") as fd:
+        with Path(name, name, "__init__.py").open("w") as fd:
             fd.write(f"# This is package {name}")
 
         pkg = Wheel.build(
@@ -94,7 +94,7 @@ class PypiSimulator:
 
         package = m.group("package")
 
-        path = path_join(self.DATA_DIR, "simple", f"{package}.html")
+        path = self.DATA_DIR / "simple" / f"{package}.html"
         if not isfile(path):
             context.status_code = 404
             return json.dumps(
@@ -108,7 +108,7 @@ class PypiSimulator:
             )
 
         try:
-            with Path(path).open() as html_file:
+            with path.open() as html_file:
                 result = html_file.read()
 
         except Exception as e:
@@ -130,7 +130,7 @@ class PypiSimulator:
         m = self.DOWNLOAD_MATCHER.match(request.url)
         package = m.group("path").split("/")[-1].split("#")[0]
         package_name = "-".join(package.split("-", 2)[0:2])
-        metadata_file = os.path.join(self.DATA_DIR, "metadata", package_name)
+        metadata_file = self.DATA_DIR / "metadata" / package_name
         mkdir(f"{package_name}/{package_name}.dist-info")
         if os.path.isfile(metadata_file):
             cp(metadata_file, f"{package_name}/{package_name}.dist-info/METADATA")

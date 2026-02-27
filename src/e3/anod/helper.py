@@ -221,7 +221,7 @@ class Configure:
 
         # Compute the relative path for configure
         configure_path = unixpath(
-            os.path.relpath(os.path.join(self.src_dir, "configure"), self.exec_dir)
+            os.path.relpath(Path(self.src_dir, "configure"), self.exec_dir)
         )
 
         # In case the configure is run from its location ensure to

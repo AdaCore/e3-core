@@ -327,7 +327,7 @@ def mv(source: str | Path, target: str | Path) -> None:
     """
     # Compute file list and number of file to copy
     if os.path.isdir(source) and os.path.isdir(target):
-        shutil.move(source, os.path.join(target, os.path.basename(source)))
+        shutil.move(source, Path(target, os.path.basename(source)))
     else:
         shutil.move(source, target)
 
@@ -427,8 +427,8 @@ def which(prog: str | Path, paths: str | None = None, default: Any = "") -> Any:
             paths = os.environ["PATH"]
 
         for pathdir in paths.split(os.pathsep):
-            exe_file = os.path.join(pathdir, prog)
-            for progname in possible_names(exe_file):
+            exe_file = Path(pathdir, prog)
+            for progname in possible_names(str(exe_file)):
                 if is_exe(progname):
                     return progname
 

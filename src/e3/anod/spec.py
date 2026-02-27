@@ -581,14 +581,14 @@ class Anod:
         """
         # Compute data file location and check for existence
         if Version(self.api_version) >= Version("1.5"):
-            filename = os.path.join(self.name, suffix if suffix else "config")
+            filename = str(Path(self.name, suffix if suffix else "config"))
         else:
             filename = "{}{}".format(self.name, "-" + suffix if suffix else "")
         assert filename in self.data_files, "invalid data file: {} ({})".format(
             filename,
             ", ".join(self.data_files),
         )
-        filename = os.path.join(self.spec_dir, filename + ".yaml")
+        full_filename = Path(self.spec_dir, filename + ".yaml")
 
         if extended:
             # Ensure selectors is a dict
@@ -597,8 +597,8 @@ class Anod:
             # Add environment information to selectors
             config_selectors.update(self.env.to_dict())
 
-            return load_with_config(filename, config_selectors)
-        with Path(filename).open() as f:
+            return load_with_config(str(full_filename), config_selectors)
+        with full_filename.open() as f:
             return yaml.safe_load(f.read())
 
     def __getitem__(self, key: str) -> Any:

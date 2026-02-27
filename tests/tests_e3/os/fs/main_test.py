@@ -78,18 +78,18 @@ def test_chmod() -> None:
 def test_rm() -> None:
     base = tempfile.mkdtemp()
     try:
-        bc = os.path.join(base, "b", "c")
+        bc = Path(base, "b", "c")
         os.makedirs(bc)
-        e3.os.fs.touch(os.path.join(bc, "d"))
+        e3.os.fs.touch(bc / "d")
         e3.os.fs.chmod("a-w", bc)
 
         with pytest.raises(OSError):
-            e3.os.fs.safe_remove(os.path.join(bc, "d"))
+            e3.os.fs.safe_remove(bc / "d")
 
         # Use the high-level rm function to force the deletion
-        e3.fs.rm(os.path.join(bc, "d"))
+        e3.fs.rm(bc / "d")
 
-        assert not os.path.exists(os.path.join(bc, "d"))
+        assert not os.path.exists(bc / "d")
         e3.os.fs.safe_rmdir(bc)
         assert not os.path.exists(bc)
 
@@ -104,13 +104,13 @@ def test_mv() -> None:
 
     os.makedirs("c")
     e3.os.fs.mv("b", "c")
-    assert os.path.isdir(os.path.join("c", "b"))
+    assert os.path.isdir(Path("c", "b"))
 
     e3.os.fs.touch("d")
     os.makedirs("dest")
     e3.os.fs.mv("d", "dest")
 
-    assert os.path.isfile(os.path.join("dest", "d"))
+    assert os.path.isfile(Path("dest", "d"))
 
 
 def test_df() -> None:

@@ -276,10 +276,10 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]) ->
         outcome = rep.outcome.upper()
         test_name = rep.nodeid.replace("/", ".").replace("::", "--")
         if rep.longreprtext:
-            with Path(os.path.join(results_dir, f"{test_name}.diff")).open("w") as f:
+            with Path(results_dir, f"{test_name}.diff").open("w") as f:
                 f.write(rep.longreprtext)
 
-        with Path(os.path.join(results_dir, "results")).open("a") as f:
+        with Path(results_dir, "results").open("a") as f:
             f.write(f"{test_name}:{outcome}\n")
     else:
         # If we detect a failure in an item that is not a "proper" test call, it's most

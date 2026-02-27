@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 from collections import OrderedDict
 
 import e3.log
@@ -102,7 +101,7 @@ def test_include() -> None:
     """Test yaml !include."""
     with Path("1.yaml").open("w") as f:
         f.write("b: !include 2.yaml\n")
-        f.write("c: !include {}\n".format(os.path.join(str(Path.cwd()), "2.yaml")))
+        f.write(f"c: !include {Path.cwd() / '2.yaml'}\n")
 
     with Path("2.yaml").open("w") as f:
         f.write("a: 4\n")

@@ -239,7 +239,7 @@ class PyPI:
     @property
     def pypi_cache_file(self) -> str:
         """Get location of file containing result of pypi requests."""
-        return os.path.join(self.cache_dir, "pypi-cache.json")
+        return str(Path(self.cache_dir, "pypi-cache.json"))
 
     def fetch_project_links(
         self, name: str, *, ignore_errors: bool = False
@@ -288,7 +288,7 @@ class PyPI:
                         identifier=identifier.split("@", 1)[0],
                         link=link,
                         extras=extras,
-                        cache_dir=os.path.join(self.cache_dir, "resources"),
+                        cache_dir=str(Path(self.cache_dir, "resources")),
                     )
                     # Discard prerelease unless explicitely allowed
                     if (
@@ -370,16 +370,16 @@ class PyPICandidate:
 
         :return: the location of the file
         """
-        download_path = os.path.join(self.cache_dir, self.filename)
+        download_path = Path(self.cache_dir, self.filename)
         if not os.path.isfile(download_path):
             mkdir(self.cache_dir)
             if self.url.startswith("file://"):
                 cp(self.url.replace("file://", "", 1), download_path)
             else:
                 answer = requests.get(self.url, stream=True)
-                with Path(download_path).open("wb") as fd:
+                with download_path.open("wb") as fd:
                     fd.write(answer.content)
-        return download_path
+        return str(download_path)
 
     def requirements(self, env: dict[str, str]) -> set[Requirement]:
         """Return the list of requirements for the package.
@@ -709,7 +709,7 @@ class PyPIClosure:
                     ) and candidate.is_compatible_with_platforms(self.platforms):
                         result.add(candidate)
                         candidate.download()
-        return [os.path.join(el.cache_dir, el.filename) for el in result]
+        return [str(Path(el.cache_dir, el.filename)) for el in result]
 
     def _requirements_closure(self) -> dict:
         all_reqs: dict[Requirement, set[str]] = {}

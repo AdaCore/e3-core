@@ -13,6 +13,7 @@ from e3.fs import mkdir, sync_tree
 from e3.job import Job
 from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
+from pathlib import Path
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -117,8 +118,8 @@ class ElectrolytJob(Job):
             logger.error("%s vcs type not supported", repo_vcs)
             self.__status = STATUS.failure
             return
-        repo_dir = os.path.join(self.sandbox.vcs_dir, repo_name)
-        g = GitRepository(repo_dir)
+        repo_dir = Path(self.sandbox.vcs_dir, repo_name)
+        g = GitRepository(str(repo_dir))
         if e3.log.default_output_stream is not None:
             g.log_stream = e3.log.default_output_stream
         g.init()
@@ -128,21 +129,21 @@ class ElectrolytJob(Job):
     def do_createsource(self) -> None:
         """Prepare src from vcs to cache using sourcebuilders."""
         source_name = self.data.source_name
-        tmp_cache_dir = os.path.join(self.sandbox.tmp_dir, "cache")
+        tmp_cache_dir = Path(self.sandbox.tmp_dir, "cache")
         src = self.sandbox.vcs_dir
         src_builder = get_source_builder(
             self.data.anod_instance, source_name, local_sources_only=True
         )
         if src_builder is not None:
             repo_dict = {}
-            src_dir = os.path.join(src, src_builder.checkout[0])
-            dest_dir = os.path.join(tmp_cache_dir, source_name)
+            src_dir = Path(src, src_builder.checkout[0])
+            dest_dir = tmp_cache_dir / source_name
             # ??? missing repository state
-            repo_dict[source_name] = {"working_dir": src_dir}
+            repo_dict[source_name] = {"working_dir": str(src_dir)}
             mkdir(dest_dir)
             if TYPE_CHECKING:
                 assert src_builder.prepare_src is not None
-            src_builder.prepare_src(repo_dict, dest_dir)
+            src_builder.prepare_src(repo_dict, str(dest_dir))
             self.__status = STATUS.success
             logger.debug("%s created in cache/tmp", source_name)
         return
@@ -162,13 +163,13 @@ class ElectrolytJob(Job):
         anod_instance = AnodDriver(anod_instance=spec, store=self.store)
         anod_instance.activate(self.sandbox, self.spec_repo)
         source = self.data.source
-        src_dir = os.path.join(self.sandbox.tmp_dir, "cache", source.name)
+        src_dir = Path(self.sandbox.tmp_dir, "cache", source.name)
         if not source.dest:
-            dest_dir = spec.build_space.src_dir
+            dest_dir = Path(spec.build_space.src_dir)
         else:
-            dest_dir = os.path.join(spec.build_space.src_dir, source.dest)
+            dest_dir = Path(spec.build_space.src_dir, source.dest)
         if not os.path.isdir(src_dir):  # defensive code
-            logger.critical("source directory %s does not exist", src_dir)
+            logger.critical("source directory %s does not exist", str(src_dir))
             self.__status = STATUS.failure
             return
         sync_tree(src_dir, dest_dir, ignore=source.ignore)

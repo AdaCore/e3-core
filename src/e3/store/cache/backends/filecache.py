@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import errno
-import os
 import sys
 import tempfile
 import time
@@ -29,7 +28,7 @@ class FileCache(Cache):
         self.cache_dir = cache_configuration["cache_dir"]
 
     def clear(self) -> None:
-        rm(os.path.join(self.cache_dir, "*.cache"))
+        rm(Path(self.cache_dir, "*.cache"))
 
     def delete(self, uid: str) -> None:
         rm(self.uid_to_file(uid))
@@ -43,7 +42,7 @@ class FileCache(Cache):
         This backend assumes that the uid is a safe value for a file name.
         :param uid: the resource uid
         """
-        return os.path.join(self.cache_dir, uid + self.cache_suffix)
+        return str(Path(self.cache_dir, uid + self.cache_suffix))
 
     @staticmethod
     def _is_expired(fd: IO[bytes]) -> bool:

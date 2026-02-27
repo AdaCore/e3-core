@@ -19,75 +19,66 @@ def test_unpack(ext) -> None:
 
     test_dir = os.path.basename(dir_to_pack)
 
-    dest = "dest"
+    dest = Path("dest")
     e3.fs.mkdir(dest)
 
     archive_name = "e3-core" + ext
 
     try:
-        e3.archive.create_archive(archive_name, os.path.abspath(dir_to_pack), dest)
-        assert os.path.exists(os.path.join(dest, archive_name))
+        e3.archive.create_archive(archive_name, os.path.abspath(dir_to_pack), str(dest))
+        assert os.path.exists(dest / archive_name)
 
         with pytest.raises(e3.archive.ArchiveError):
-            e3.archive.unpack_archive(
-                os.path.join(dest, archive_name), os.path.join(dest, "dest")
-            )
+            e3.archive.unpack_archive(str(dest / archive_name), str(dest / "dest"))
 
-        e3.fs.mkdir(os.path.join(dest, "dest"))
+        e3.fs.mkdir(dest / "dest")
+        e3.archive.unpack_archive(str(dest / archive_name), str(dest / "dest"))
+
+        assert os.path.exists(dest / "dest" / test_dir / os.path.basename(__file__))
+
+        e3.fs.mkdir(dest / "dest2")
         e3.archive.unpack_archive(
-            os.path.join(dest, archive_name), os.path.join(dest, "dest")
-        )
-
-        assert os.path.exists(
-            os.path.join(dest, "dest", test_dir, os.path.basename(__file__))
-        )
-
-        e3.fs.mkdir(os.path.join(dest, "dest2"))
-        e3.archive.unpack_archive(
-            os.path.join(dest, archive_name),
-            os.path.join(dest, "dest2"),
+            str(dest / archive_name),
+            str(dest / "dest2"),
             selected_files=(
-                e3.os.fs.unixpath(os.path.join(test_dir, os.path.basename(__file__))),
+                e3.os.fs.unixpath(Path(test_dir, os.path.basename(__file__))),
             ),
             remove_root_dir=True,
         )
 
-        assert os.path.exists(os.path.join(dest, "dest2", os.path.basename(__file__)))
+        assert os.path.exists(dest / "dest2" / os.path.basename(__file__))
 
         # Test wildcard if not .zip format
         # ??? not supported?
         if ext != ".zip":
-            e3.fs.mkdir(os.path.join(dest, "dest3"))
+            e3.fs.mkdir(Path(dest, "dest3"))
             e3.archive.unpack_archive(
-                os.path.join(dest, archive_name),
-                os.path.join(dest, "dest3"),
-                selected_files=(os.path.join(test_dir, "*.py"),),
+                str(dest / archive_name),
+                str(dest / "dest3"),
+                selected_files=(Path(test_dir, "*.py"),),
                 remove_root_dir=True,
             )
 
-            assert os.path.exists(
-                os.path.join(dest, "dest3", os.path.basename(__file__))
-            )
+            assert os.path.exists(dest / "dest3" / os.path.basename(__file__))
 
         e3.archive.create_archive(
-            "e3" + ext, os.path.abspath(dir_to_pack), dest, from_dir_rename="e3rename"
+            "e3" + ext,
+            os.path.abspath(dir_to_pack),
+            str(dest),
+            from_dir_rename="e3rename",
         )
-        e3.fs.mkdir(os.path.join(dest, "dest4"))
-        e3.archive.unpack_archive(
-            os.path.join(dest, "e3" + ext), os.path.join(dest, "dest4")
-        )
-        assert os.path.join(dest, "dest4", "e3rename")
+        e3.fs.mkdir(dest / "dest4")
+        e3.archive.unpack_archive(str(dest / ("e3" + ext)), str(dest / "dest4"))
+        assert dest / "dest4" / "e3rename"
 
         # force use of sync_tree
-        e3.fs.rm(os.path.join(dest, "dest4", "e3rename", os.path.basename(__file__)))
+        e3.fs.rm(dest / "dest4" / "e3rename" / os.path.basename(__file__))
         e3.archive.unpack_archive(
-            os.path.join(dest, "e3" + ext),
-            os.path.join(dest, "dest4", "e3rename"),
+            str(dest / ("e3" + ext)),
+            str(dest / "dest4" / "e3rename"),
             remove_root_dir=True,
         )
-        assert os.path.exists(
-            os.path.join(dest, "dest4", "e3rename", os.path.basename(__file__))
-        )
+        assert os.path.exists(dest / "dest4" / "e3rename" / os.path.basename(__file__))
 
     finally:
         e3.fs.rm(dest, True)
@@ -99,7 +90,7 @@ def test_unpack_fileobj(ext) -> None:
 
     test_dir = os.path.basename(dir_to_pack)
 
-    dest = "dest"
+    dest = Path("dest")
     e3.fs.mkdir(dest)
 
     archive_name = "e3-core" + ext
@@ -113,18 +104,18 @@ def test_unpack_fileobj(ext) -> None:
         )
 
         fo.seek(0)
-        e3.fs.mkdir(os.path.join(dest, "dest2"))
+        e3.fs.mkdir(dest / "dest2")
         e3.archive.unpack_archive(
             filename=archive_name,
-            dest=os.path.join(dest, "dest2"),
+            dest=str(dest / "dest2"),
             fileobj=fo,
             selected_files=(
-                e3.os.fs.unixpath(os.path.join(test_dir, os.path.basename(__file__))),
+                e3.os.fs.unixpath(Path(test_dir, os.path.basename(__file__))),
             ),
             remove_root_dir=True,
         )
 
-        assert os.path.exists(os.path.join(dest, "dest2", os.path.basename(__file__)))
+        assert os.path.exists(dest / "dest2" / os.path.basename(__file__))
 
     finally:
         e3.fs.rm(dest, True)
@@ -148,21 +139,19 @@ def test_unpack_cmd() -> None:
     """Test custom unpack_cmd."""
     dir_to_pack = os.path.dirname(__file__)
 
-    dest = "dest"
+    dest = Path("dest")
     e3.fs.mkdir(dest)
 
     archive_name = "e3-core.tar"
 
-    e3.archive.create_archive(archive_name, os.path.abspath(dir_to_pack), dest)
+    e3.archive.create_archive(archive_name, os.path.abspath(dir_to_pack), str(dest))
 
     all_dest = "all_dest"
     e3.fs.mkdir(all_dest)
 
     # use cp to 'extract' the archive
-    e3.archive.unpack_archive(
-        os.path.join(dest, archive_name), all_dest, unpack_cmd=e3.fs.cp
-    )
-    assert os.path.exists(os.path.join(all_dest, archive_name))
+    e3.archive.unpack_archive(str(dest / archive_name), all_dest, unpack_cmd=e3.fs.cp)
+    assert os.path.exists(Path(all_dest, archive_name))
 
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
@@ -176,7 +165,7 @@ def test_unpack_cmd() -> None:
         t.store_result(f=filename, d=dest, s=selected_files)
 
     e3.archive.unpack_archive(
-        os.path.join(dest, archive_name),
+        str(dest / archive_name),
         all_dest,
         unpack_cmd=custom_unpack,
         selected_files=["bar"],
@@ -190,7 +179,7 @@ def test_unpack_cmd_fileobj() -> None:
     """Test custom unpack_cmd with fileobj."""
     dir_to_pack = os.path.dirname(__file__)
 
-    dest = "dest"
+    dest = Path("dest")
     e3.fs.mkdir(dest)
 
     archive_name = "e3-core.tar"
@@ -231,34 +220,34 @@ def test_unpack_cmd_fileobj() -> None:
 def test_unpack_files() -> None:
     """Test unpack_archive with selected_files."""
     e3.fs.mkdir("d")
-    e3.fs.mkdir(os.path.join("d/a"))
-    e3.fs.mkdir(os.path.join("d/a/c"))
-    e3.fs.mkdir(os.path.join("d/a/d"))
-    e3.fs.mkdir(os.path.join("d/b"))
+    e3.fs.mkdir(Path("d/a"))
+    e3.fs.mkdir(Path("d/a/c"))
+    e3.fs.mkdir(Path("d/a/d"))
+    e3.fs.mkdir(Path("d/b"))
 
-    dest = "dest"
+    dest = Path("dest")
     e3.fs.mkdir(dest)
 
-    result_dir = "result"
+    result_dir = Path("result")
     e3.fs.mkdir(result_dir)
 
     archive_name = "e3-core.tar"
-    e3.archive.create_archive(archive_name, os.path.abspath(os.path.join("d")), dest)
+    e3.archive.create_archive(archive_name, os.path.abspath(str(Path("d"))), str(dest))
 
     # No file starting with a path starting with 'a'.
     # Should raise ArchiveError
     with pytest.raises(e3.archive.ArchiveError):
         e3.archive.unpack_archive(
-            os.path.join(dest, archive_name), result_dir, selected_files=["a"]
+            str(dest / archive_name), str(result_dir), selected_files=["a"]
         )
 
     # unpacking d/a should work
     e3.archive.unpack_archive(
-        os.path.join(dest, archive_name), result_dir, selected_files=["d/a"]
+        str(dest / archive_name), str(result_dir), selected_files=["d/a"]
     )
-    assert os.path.exists(os.path.join(result_dir, "d", "a", "c"))
-    assert os.path.exists(os.path.join(result_dir, "d", "a", "d"))
-    assert not os.path.exists(os.path.join(result_dir, "d", "b"))
+    assert os.path.exists(result_dir / "d" / "a" / "c")
+    assert os.path.exists(result_dir / "d" / "a" / "d")
+    assert not os.path.exists(result_dir / "d" / "b")
 
 
 def test_unpack_error() -> None:
@@ -280,21 +269,21 @@ def test_unpack_error() -> None:
 def test_zip_no_root_dir() -> None:
     """Create a zip with no_root_dir."""
     e3.fs.mkdir("from")
-    e3.os.fs.touch(os.path.join("from", "afile"))
+    e3.os.fs.touch(Path("from", "afile"))
     e3.fs.mkdir("dest")
     e3.archive.create_archive(
         "pkg.zip", os.path.abspath("from"), "dest", no_root_dir=True
     )
     e3.fs.mkdir("result")
-    e3.archive.unpack_archive(os.path.join("dest", "pkg.zip"), "result")
-    assert os.path.exists(os.path.join("result", "afile"))
+    e3.archive.unpack_archive(str(Path("dest", "pkg.zip")), "result")
+    assert os.path.exists(Path("result", "afile"))
 
 
 def test_remove_root_dir() -> None:
     """Try create_archive no_root_dir and unpack_archive remove_root_dir."""
     e3.fs.mkdir("from")
-    e3.os.fs.touch(os.path.join("from", "a"))
-    e3.os.fs.touch(os.path.join("from", "b"))
+    e3.os.fs.touch(Path("from", "a"))
+    e3.os.fs.touch(Path("from", "b"))
     e3.fs.mkdir("dest")
 
     # Create an archive with two root dirs (from and dest)
@@ -306,23 +295,23 @@ def test_remove_root_dir() -> None:
     # unpacking the archive with remote_root_dir should fail
     with pytest.raises(e3.archive.ArchiveError) as err:
         e3.archive.unpack_archive(
-            os.path.join("dest", "pkg.zip"), "result", remove_root_dir=True
+            str(Path("dest", "pkg.zip")), "result", remove_root_dir=True
         )
     assert "does not have a unique root dir" in str(err)
 
     # In 'auto' mode, the fallback will extract the two root dirs
     e3.archive.unpack_archive(
-        os.path.join("dest", "pkg.zip"), "result", remove_root_dir="auto"
+        str(Path("dest", "pkg.zip")), "result", remove_root_dir="auto"
     )
-    assert os.path.exists(os.path.join("result", "from", "a"))
-    assert os.path.exists(os.path.join("result", "dest"))
+    assert os.path.exists(Path("result", "from", "a"))
+    assert os.path.exists(Path("result", "dest"))
 
     # Running it again with use sync_tree
-    e3.fs.rm(os.path.join("result", "from", "a"))
+    e3.fs.rm(Path("result", "from", "a"))
     e3.archive.unpack_archive(
-        os.path.join("dest", "pkg.zip"), "result", remove_root_dir="auto"
+        str(Path("dest", "pkg.zip")), "result", remove_root_dir="auto"
     )
-    assert os.path.exists(os.path.join("result", "from", "a"))
+    assert os.path.exists(Path("result", "from", "a"))
 
 
 @patch("tempfile.mkdtemp", wraps=tempfile.mkdtemp)
@@ -331,7 +320,7 @@ def test_tmp_dir_root(mock_mkdtemp) -> None:
     e3.fs.mkdir("custom_tmp_dir_root")
     e3.fs.mkdir("result")
     e3.archive.unpack_archive(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.zip"),
+        str(Path(os.path.dirname(os.path.abspath(__file__)), "test.zip")),
         "result",
         remove_root_dir=True,
         tmp_dir_root="custom_tmp_dir_root",
@@ -351,16 +340,16 @@ def test_empty() -> None:
 
     # Remove root dir should be a noop
     e3.archive.unpack_archive(
-        os.path.join("dest", "pkg.zip"), "result", remove_root_dir=True
+        str(Path("dest", "pkg.zip")), "result", remove_root_dir=True
     )
     assert os.listdir("result") == []
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test executable attribute")
 def test_zip_attributes() -> None:
-    zip_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.zip")
+    zip_file = Path(os.path.dirname(os.path.abspath(__file__)), "test.zip")
     e3.fs.mkdir("result")
-    e3.archive.unpack_archive(zip_file, "result", remove_root_dir=True)
+    e3.archive.unpack_archive(str(zip_file), "result", remove_root_dir=True)
     assert os.access("result/test.sh", os.X_OK)
 
 
@@ -375,6 +364,6 @@ def test_archive_with_readonly_dir() -> None:
     e3.archive.create_archive("pkg.tar.gz", os.path.abspath("from"), "dest")
     e3.os.fs.chmod("urwx", "from/readonly_dir")
     e3.archive.unpack_archive(
-        os.path.join("dest", "pkg.tar.gz"), "result", remove_root_dir=True
+        str(Path("dest", "pkg.tar.gz")), "result", remove_root_dir=True
     )
-    assert os.path.isfile(os.path.join("result", "readonly_dir", "file.txt"))
+    assert os.path.isfile(Path("result", "readonly_dir", "file.txt"))

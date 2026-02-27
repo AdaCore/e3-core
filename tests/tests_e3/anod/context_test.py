@@ -12,7 +12,7 @@ import pytest
 
 
 class TestContext:
-    spec_dir = os.path.join(os.path.dirname(__file__), "context_data")
+    spec_dir = str(Path(os.path.dirname(__file__), "context_data"))
 
     def create_context(self, reject_duplicates: bool = True) -> AnodContext:
         """Create a spec repository and anod context.

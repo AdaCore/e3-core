@@ -2,6 +2,7 @@ import os
 from e3.fs import cp
 from e3.anod.loader import spec
 from e3.anod.spec import Anod
+from pathlib import Path
 
 
 class CheckDirectory(spec('anod')):
@@ -12,7 +13,7 @@ class CheckDirectory(spec('anod')):
         def prepare_src(repos, dest):
             print('prepare_src')
             try:
-                cp(os.path.join(list(repos.values())[0]['working_dir'], 'checkdirectory.anod'), dest)
+                cp(Path(list(repos.values())[0]['working_dir'], 'checkdirectory.anod'), dest)
             except Exception as err:
                 print(err)
             print('end_prepare_src')
@@ -30,6 +31,6 @@ class CheckDirectory(spec('anod')):
     @Anod.primitive()
     def build(self):
         print('build check directory')
-        if os.path.isfile(os.path.join(self['SRC_DIR'], 'thedir/thedir2', 'checkdirectory.anod')):
+        if os.path.isfile(Path(self['SRC_DIR'], 'thedir/thedir2', 'checkdirectory.anod')):
             print('found file in destination directory')
 

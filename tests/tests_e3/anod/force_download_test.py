@@ -3,12 +3,11 @@ from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.loader import AnodSpecRepository
 import os
 import pytest
+from pathlib import Path
 
 
 class TestSourceClosure:
-    spec_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "force_download")
-    )
+    spec_dir = os.path.abspath(Path(os.path.dirname(__file__), "force_download"))
 
     def test_force_download_after_install(self) -> None:
         """Test two deps on the same spec with installation and download.

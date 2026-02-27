@@ -13,12 +13,12 @@ def test_reset() -> None:
     bs = BuildSpace(root_dir=str(Path.cwd()))
     bs.create()
     for name in bs.dirs:
-        touch(os.path.join(bs.subdir(name), "a"))
+        touch(Path(bs.subdir(name), "a"))
 
     # Reset delete all dirs except log and result by default
     bs.reset()
     for name in bs.dirs:
-        exists = os.path.exists(os.path.join(bs.subdir(name), "a"))
+        exists = os.path.exists(str(Path(bs.subdir(name), "a")))
         if name in ("log", "results"):
             assert exists
         else:
@@ -35,7 +35,7 @@ def test_subdir() -> None:
 def test_reset_tmp_dir() -> None:
     """Check that the tmp_dir is reset when the build space is created."""
     bs = BuildSpace(root_dir=str(Path.cwd()))
-    marker = os.path.join(bs.subdir(name="tmp"), "deleteme")
+    marker = Path(bs.subdir(name="tmp"), "deleteme")
     mkdir(bs.tmp_dir)
     touch(marker)
     assert os.path.exists(marker)

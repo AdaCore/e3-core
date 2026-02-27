@@ -15,27 +15,27 @@ import pytest
 
 
 def test_cp() -> None:
-    current_dir = str(Path.cwd())
-    hash_test = os.path.join(current_dir, "hash_test")
+    current_dir = Path.cwd()
+    hash_test = current_dir / "hash_test"
     e3.fs.cp(__file__, hash_test)
     assert e3.hash.sha1(__file__) == e3.hash.sha1(hash_test)
 
-    a = os.path.join(current_dir, "a")
-    a1 = os.path.join(a, "a1")
-    b1 = os.path.join(a, "b", "b1")
+    a = current_dir / "a"
+    a1 = a / "a1"
+    b1 = a / "b" / "b1"
 
     e3.fs.mkdir(a)
     e3.fs.echo_to_file(a1, "a1")
-    e3.fs.mkdir(os.path.join(a, "b"))
+    e3.fs.mkdir(a / "b")
     e3.fs.echo_to_file(b1, "b1")
 
-    dest = os.path.join(current_dir, "dest")
+    dest = current_dir / "dest"
     e3.fs.mkdir(dest)
     e3.fs.cp(a, dest, recursive=True)
-    assert os.path.exists(os.path.join(dest, "a", "a1"))
-    assert os.path.exists(os.path.join(dest, "a", "b", "b1"))
+    assert os.path.exists(dest / "a" / "a1")
+    assert os.path.exists(dest / "a" / "b" / "b1")
 
-    dest2 = os.path.join(current_dir, "dest2")
+    dest2 = current_dir / "dest2"
 
     with pytest.raises(e3.fs.FSError) as err:
         e3.fs.cp("*.non_existing", dest2)
@@ -47,20 +47,20 @@ def test_cp() -> None:
 
     e3.fs.mkdir(dest2)
     e3.fs.cp([a1, b1], dest2)  # type: ignore[arg-type]
-    assert os.path.exists(os.path.join(dest2, "a1"))
-    assert os.path.exists(os.path.join(dest2, "b1"))
+    assert os.path.exists(dest2 / "a1")
+    assert os.path.exists(dest2 / "b1")
 
-    dest3 = os.path.join(current_dir, "dest3")
+    dest3 = current_dir / "dest3"
     e3.fs.mkdir(dest3)
     e3.fs.cp(a, dest3, copy_attrs=False, recursive=True)
     e3.fs.cp(a1, dest3, copy_attrs=False)
 
-    assert os.path.exists(os.path.join(dest3, "a", "a1"))
-    assert os.path.exists(os.path.join(dest3, "a", "b", "b1"))
-    assert os.path.exists(os.path.join(dest3, "a1"))
+    assert os.path.exists(dest3 / "a" / "a1")
+    assert os.path.exists(dest3 / "a" / "b" / "b1")
+    assert os.path.exists(dest3 / "a1")
 
     with pytest.raises(e3.fs.FSError):
-        e3.fs.cp(a, os.path.join("does", "not", "exist"))
+        e3.fs.cp(a, Path("does", "not", "exist"))
 
 
 def test_pathlib() -> None:
@@ -122,19 +122,17 @@ def test_mv_with_iterables() -> None:
     e3.fs.mkdir("dst")
     e3.fs.mv(star("a"), "dst")
     for idx in range(10):
-        assert os.path.exists(os.path.join("dst", f"a{idx}"))
+        assert os.path.exists(Path("dst", f"a{idx}"))
 
     def dst_star(d):
         for dst_star_idx in range(10):
-            yield Path("dst") / f"{d}{dst_star_idx}"
+            yield Path("dst", f"{d}{dst_star_idx}")
 
-    assert e3.fs.ls(dst_star("a")) == [
-        os.path.join("dst", f"a{idx}") for idx in range(10)
-    ]
+    assert e3.fs.ls(dst_star("a")) == [str(Path("dst", f"a{idx}")) for idx in range(10)]
 
     e3.fs.rm(dst_star("a"))
     for idx in range(10):
-        assert not os.path.exists(os.path.join("dst", f"a{idx}"))
+        assert not os.path.exists(Path("dst", f"a{idx}"))
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
@@ -221,7 +219,7 @@ def test_mv() -> None:
 
     e3.fs.mv("a*", "b")
     for fname in ("a1", "a2", "a3"):
-        assert os.path.isfile(os.path.join("b", fname))
+        assert os.path.isfile(Path("b", fname))
 
     e3.os.fs.touch("a1")
     with pytest.raises(e3.fs.FSError) as err:
@@ -229,7 +227,7 @@ def test_mv() -> None:
     assert re.search("Destination path 'b.*a1' already exists", str(err))
 
     e3.fs.mv("1", "b")
-    assert os.path.isfile(os.path.join("b", "1"))
+    assert os.path.isfile(Path("b", "1"))
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.mv(("1*", " 2", "3"), "c")
@@ -237,7 +235,7 @@ def test_mv() -> None:
     e3.fs.mkdir("c")
     e3.fs.mv(("1*", "2", "3"), "c")
     for fname in ("2", "3", "11", "12", "13"):
-        assert os.path.isfile(os.path.join("c", fname))
+        assert os.path.isfile(Path("c", fname))
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.mv("d*", "b")
@@ -251,12 +249,12 @@ def test_mv() -> None:
 def test_tree_state() -> None:
     import time
 
-    current_dir = str(Path.cwd())
+    current_dir = Path.cwd()
     d = os.path.dirname(os.path.dirname(__file__))
     state = e3.fs.get_filetree_state(d)
     assert isinstance(state, str)
 
-    e3.fs.sync_tree(d, os.path.join(current_dir))
+    e3.fs.sync_tree(d, current_dir)
     state2 = e3.fs.get_filetree_state(current_dir)
     assert state != state2
 
@@ -271,7 +269,7 @@ def test_tree_state() -> None:
     e3.os.fs.touch("toto2")
     state4 = e3.fs.get_filetree_state(current_dir)
     assert state4 != state3
-    hidden = os.path.join(current_dir, ".h")
+    hidden = current_dir / ".h"
     e3.fs.mkdir(hidden)
     state5 = e3.fs.get_filetree_state(current_dir)
     assert state5 == state4
@@ -312,49 +310,49 @@ def test_tree_state() -> None:
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
 def test_sync_tree_with_symlinks() -> None:
-    current_dir = str(Path.cwd())
-    a = os.path.join(current_dir, "a")
-    b = os.path.join(current_dir, "b")
-    m1 = os.path.join(current_dir, "m1")
-    m2 = os.path.join(current_dir, "m2")
-    m3 = os.path.join(current_dir, "m3")
+    current_dir = Path.cwd()
+    a = current_dir / "a"
+    b = current_dir / "b"
+    m1 = current_dir / "m1"
+    m2 = current_dir / "m2"
+    m3 = current_dir / "m3"
 
     e3.fs.mkdir(m1)
     e3.fs.mkdir(m2)
     e3.fs.mkdir(m3)
 
-    with Path(a).open("w") as f:
+    with a.open("w") as f:
         f.write("a")
 
-    with Path(b).open("w") as f:
+    with b.open("w") as f:
         f.write("b")
 
-    e3.fs.cp(a, os.path.join(m1, "c"))
-    os.symlink(b, os.path.join(m2, "c"))
-    os.symlink(m2, os.path.join(m3, "c"))
+    e3.fs.cp(a, m1 / "c")
+    os.symlink(b, m2 / "c")
+    os.symlink(m2, m3 / "c")
 
     # we start with m2/c -> b
     # so m2/c and b points to the same content
-    assert e3.diff.diff(b, os.path.join(m2, "c")) == ""
-    assert e3.diff.diff(b, os.path.join(m1, "c"))
+    assert e3.diff.diff(str(b), str(m2 / "c")) == ""
+    assert e3.diff.diff(str(b), str(m1 / "c"))
     e3.fs.sync_tree(m1, m2)
 
     # after the sync tree m1/c = m2/c
-    assert e3.diff.diff(os.path.join(m1, "c"), os.path.join(m2, "c")) == ""
+    assert e3.diff.diff(str(m1 / "c"), str(m2 / "c")) == ""
 
     # and m2/c is not a symlink anymore so does not
     # have the same content as b
-    assert e3.diff.diff(b, os.path.join(m2, "c"))
+    assert e3.diff.diff(str(b), str(m2 / "c"))
 
     # we start with m3/c -> m2
-    assert os.path.exists(os.path.join(m3, "c", "c"))
+    assert os.path.exists(m3 / "c" / "c")
     e3.fs.sync_tree(m1, m3)
     # after the sync tree m1/c = m3/c
-    assert e3.diff.diff(os.path.join(m1, "c"), os.path.join(m3, "c")) == ""
+    assert e3.diff.diff(str(m1 / "c"), str(m3 / "c")) == ""
 
     # and m3/c is not a link to m2
-    assert not os.path.exists(os.path.join(m3, "c", "c"))
-    assert os.path.exists(os.path.join(m2, "c"))
+    assert not os.path.exists(m3 / "c" / "c")
+    assert os.path.exists(m2 / "c")
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="test relevant only on win32")
@@ -428,7 +426,7 @@ def test_sync_tree_links() -> None:
     e3.fs.mkdir("c")
     with Path("a/content").open("w") as f:
         f.write("content")
-    os.symlink(os.path.join(str(Path.cwd()), "a", "content"), "a/link")
+    os.symlink(Path.cwd() / "a" / "content", "a/link")
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
 
     with Path("b/link").open() as f:
@@ -475,8 +473,8 @@ def test_sync_tree_top_source_is_link() -> None:
         # Symlinks are supported on Windows, but the user must have sufficient
         # permissions.
         os.symlink(
-            os.path.join(str(Path.cwd()), "a"),
-            os.path.join(str(Path.cwd()), "b"),
+            Path.cwd() / "a",
+            Path.cwd() / "b",
             target_is_directory=True,
         )
     except Exception as e:
@@ -488,13 +486,13 @@ def test_sync_tree_top_source_is_link() -> None:
     # Sync tree in "c", source top is "b", which is a symlink to "a".
     e3.fs.mkdir("c")
     e3.fs.sync_tree(
-        os.path.join(str(Path.cwd()), "b"),
-        os.path.join(str(Path.cwd()), "c", "a"),
+        Path.cwd() / "b",
+        Path.cwd() / "c" / "a",
         preserve_timestamps=False,
     )
 
     # Make sure `c/a` is not a symlink
-    assert not os.path.islink(os.path.join(str(Path.cwd()), "c", "a"))
+    assert not os.path.islink(Path.cwd() / "c" / "a")
     with Path("c/a/content").open() as f:
         assert f.read() == "content"
 
@@ -663,8 +661,8 @@ def test_directory_content() -> None:
     """Test e3.fs.directory_content."""
     e3.fs.mkdir("test1")
     e3.fs.mkdir("test1/test2")
-    e3.os.fs.touch(os.path.join("test1", "test1.txt"))
-    e3.os.fs.touch(os.path.join("test1", "test2.txt"))
+    e3.os.fs.touch(Path("test1", "test1.txt"))
+    e3.os.fs.touch(Path("test1", "test2.txt"))
     assert e3.fs.directory_content("test1") == [
         "test1.txt",
         "test2.txt",

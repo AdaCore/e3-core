@@ -3,7 +3,6 @@ from e3.os.process import Run
 import base64
 import json
 import tempfile
-import os
 from pathlib import Path
 
 
@@ -64,14 +63,14 @@ class DSSE:
         public_key = p.raw_out
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            with Path(os.path.join(temp_dir, "pub.crt")).open("wb") as fd:
+            with Path(temp_dir, "pub.crt").open("wb") as fd:
                 fd.write(public_key)
 
-            with Path(os.path.join(temp_dir, "pae")).open("wb") as fd:
+            with Path(temp_dir, "pae").open("wb") as fd:
                 fd.write(self.pae)
 
             for s in self.signatures:
-                with Path(os.path.join(temp_dir, "sig")).open("wb") as fd:
+                with Path(temp_dir, "sig").open("wb") as fd:
                     fd.write(base64.b64decode(s["sig"]))
 
                 p = Run(
@@ -79,10 +78,10 @@ class DSSE:
                         "openssl",
                         "dgst",
                         "-verify",
-                        os.path.join(temp_dir, "pub.crt"),
+                        str(Path(temp_dir, "pub.crt")),
                         "-signature",
-                        os.path.join(temp_dir, "sig"),
-                        os.path.join(temp_dir, "pae"),
+                        str(Path(temp_dir, "sig")),
+                        str(Path(temp_dir, "pae")),
                     ],
                 )
                 if p.status == 0:

@@ -12,6 +12,7 @@ from ctypes import (
     sizeof,
 )
 from ctypes.wintypes import HANDLE
+from pathlib import Path
 
 import e3.log
 from e3.os.windows.native_api import (
@@ -34,7 +35,6 @@ from e3.os.windows.native_api import (
 if TYPE_CHECKING:
     from typing import Any
     from collections.abc import Callable
-    from pathlib import Path
 
 
 logger = e3.log.getLogger("os.windows.fs")
@@ -92,7 +92,7 @@ class NTFile:
         else:
             file_path = os.fspath(filename)
             assert "\\" not in file_path and "/" not in file_path
-            self.path = os.path.join(parent.path, filename)
+            self.path = str(Path(parent.path, filename))
             self.nt_filename = UnicodeString(str(filename))
             self.parent_handle = parent.handle
 
@@ -393,7 +393,7 @@ class NTFile:
 
         :return: a path
         """
-        return os.path.join(self.volume_path, "tmp", "Trash", str(f"{self.uid:016X}"))
+        return str(Path(self.volume_path, "tmp", "Trash", str(f"{self.uid:016X}")))
 
     @WithOpenFile(Access.DELETE)
     def rename(self, filename: str, replace: bool = False) -> None:

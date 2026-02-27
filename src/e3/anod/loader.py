@@ -73,9 +73,9 @@ class AnodSpecRepository:
         self.spec_dir = spec_dir
 
         # Read the API version file
-        version_file = os.path.join(self.spec_dir, "VERSION")
+        version_file = Path(self.spec_dir, "VERSION")
         if os.path.isfile(version_file):
-            with Path(version_file).open() as f:
+            with version_file.open() as f:
                 content = f.read().strip()
                 if ":" not in content:
                     raise SandBoxError(
@@ -93,15 +93,13 @@ class AnodSpecRepository:
         # Look for all spec files and data files
         spec_list = {
             os.path.basename(os.path.splitext(k)[0]): {"path": k, "data": []}
-            for k in ls(os.path.join(self.spec_dir, "*.anod"), emit_log_record=False)
+            for k in ls(Path(self.spec_dir, "*.anod"), emit_log_record=False)
         }
         logger.debug("found %s specs", len(spec_list))
 
         # API == 1.4
         if Version(self.api_version) < Version("1.5"):
-            yaml_files = ls(
-                os.path.join(self.spec_dir, "*.yaml"), emit_log_record=False
-            )
+            yaml_files = ls(Path(self.spec_dir, "*.yaml"), emit_log_record=False)
             data_list = [os.path.basename(k)[:-5] for k in yaml_files]
             logger.debug("found %s yaml files API 1.4 compatible", len(data_list))
 
@@ -118,7 +116,7 @@ class AnodSpecRepository:
         # Find yaml files that are API >= 1.5 compatible
         if Version(self.api_version) >= Version("1.5"):
             new_yaml_files = ls(
-                os.path.join(self.spec_dir, "*", "*.yaml"), emit_log_record=False
+                Path(self.spec_dir, "*", "*.yaml"), emit_log_record=False
             )
             for yml_f in new_yaml_files:
                 associated_spec = os.path.basename(os.path.dirname(yml_f))
@@ -129,7 +127,7 @@ class AnodSpecRepository:
                     suffix, _ = os.path.splitext(os.path.basename(yml_f))
 
                     spec_list[associated_spec]["data"].append(  # type: ignore
-                        os.path.join(associated_spec, suffix)
+                        str(Path(associated_spec, suffix))
                     )
 
         # Create AnodModule objects
@@ -137,9 +135,9 @@ class AnodSpecRepository:
             self.specs[name] = AnodModule(name, **value)  # type: ignore
 
         # Load config/repositories.yaml
-        repo_file = os.path.join(self.spec_dir, "config", "repositories.yaml")
+        repo_file = Path(self.spec_dir, "config", "repositories.yaml")
         if os.path.isfile(repo_file):
-            with Path(repo_file).open() as fd:
+            with repo_file.open() as fd:
                 self.repos = yaml.safe_load(fd)
 
         if extra_repositories_config:
@@ -160,7 +158,7 @@ class AnodSpecRepository:
         spec_config.repositories = self.repos
 
         # Declare spec prolog
-        prolog_file = os.path.join(spec_dir, "prolog.py")
+        prolog_file = Path(spec_dir, "prolog.py")
         self.prolog_dict = {
             "spec_config": spec_config,
             "__spec_repository": self,
@@ -168,7 +166,7 @@ class AnodSpecRepository:
         }
 
         if os.path.exists(prolog_file):
-            with Path(prolog_file).open() as f:
+            with prolog_file.open() as f:
                 exec(compile(f.read(), prolog_file, "exec"), self.prolog_dict)
 
     def __contains__(self, item: str) -> bool:

@@ -12,6 +12,7 @@ from __future__ import annotations
 import os.path
 import re
 import sys
+from pathlib import Path
 from subprocess import PIPE
 from typing import TYPE_CHECKING
 
@@ -227,7 +228,7 @@ class SVNRepository:
 
         def is_clean_svn_dir(dir_path: str) -> tuple[bool, bool]:
             """Return a tuple (True if dir is SVN directory, True if clean)."""
-            if os.path.exists(os.path.join(dir_path, ".svn")):
+            if os.path.exists(Path(dir_path, ".svn")):
                 try:
                     status = self.svn_cmd(
                         ["status"], output=PIPE

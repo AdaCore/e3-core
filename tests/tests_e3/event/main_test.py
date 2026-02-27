@@ -26,7 +26,7 @@ def test_smtp_event() -> None:
     e3.fs.mkdir("pkg")
     e3.archive.create_archive(
         filename="pkg.tar.gz",
-        from_dir=os.path.join(str(Path.cwd()), "pkg"),
+        from_dir=str(Path.cwd() / "pkg"),
         dest=str(Path.cwd()),
     )
 

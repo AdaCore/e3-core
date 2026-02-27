@@ -331,21 +331,21 @@ class HTTPSession:
                     tmpf.close()
                     filename = tmpf.name
 
-                path = os.path.join(dest, filename)
+                path = Path(dest, filename)
 
                 # create dest subdir if they do not exist
                 dest_dir = os.path.dirname(path)
-                if not os.path.exists(dest_dir):
+                if dest_dir and not os.path.exists(dest_dir):
                     mkdir(dest_dir)
 
                 logger.info("downloading %s size=%s", path, content_length)
 
-                with Path(path).open("wb") as fd:
+                with path.open("wb") as fd:
                     for chunk in chunks:
                         fd.write(chunk)
 
-                if validate is None or validate(path):
-                    return path
+                if validate is None or validate(str(path)):
+                    return str(path)
                 rm(path)
         except (requests.exceptions.RequestException, HTTPError) as e:
             # An error (timeout?) occurred while downloading the file

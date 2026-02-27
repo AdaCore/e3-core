@@ -136,7 +136,7 @@ def test_fingerprint_save_and_load() -> None:
     os.mkdir("fingerprints")
 
     def fingerprint_path(filename):
-        return os.path.join("fingerprints", filename)
+        return Path("fingerprints", filename)
 
     # Save and then load a minimal fingerprint...
     f_min = Fingerprint()

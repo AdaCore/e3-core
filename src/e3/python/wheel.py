@@ -7,6 +7,7 @@ from e3.os.process import Run
 from e3.fs import ls, mv
 from e3.error import E3Error
 from e3.sys import python_script
+from pathlib import Path
 
 
 class WheelError(E3Error):
@@ -76,11 +77,11 @@ class Wheel:
             if p.status != 0:
                 raise WheelError(f"Error during wheel creation:\n{p.out}")
 
-            tmp_whl_path = ls(os.path.join(build_dir, "*.whl"))[0]
-            dest_whl_path = os.path.join(dest_dir, os.path.basename(tmp_whl_path))
+            tmp_whl_path = ls(Path(build_dir, "*.whl"))[0]
+            dest_whl_path = Path(dest_dir, os.path.basename(tmp_whl_path))
             mv(tmp_whl_path, dest_whl_path)
 
-        return Wheel(path=dest_whl_path)
+        return Wheel(path=str(dest_whl_path))
 
     def install(self) -> None:
         """Install a wheel."""

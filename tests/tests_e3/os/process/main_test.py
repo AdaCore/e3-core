@@ -31,17 +31,17 @@ def test_run_stdout_stderr() -> None:
     Verify that Run is working when stdout is redirected to a file and
     stderr not redirected to stdout.
     """
-    prog_filename = os.path.join(str(Path.cwd()), "prog")
-    with Path(prog_filename).open("wb") as f:
+    prog_filename = Path.cwd() / "prog"
+    with prog_filename.open("wb") as f:
         f.write(b"import sys\n")
         f.write(b'print("stdout", file=sys.stdout)\n')
         f.write(b'print("stderr", file=sys.stderr)\n')
     e3.os.fs.chmod("a+x", prog_filename)
-    p = e3.os.process.Run([sys.executable, prog_filename], error=subprocess.PIPE)
+    p = e3.os.process.Run([sys.executable, str(prog_filename)], error=subprocess.PIPE)
     assert p.out.replace("\r", "") == "stdout\n"
     assert p.err.replace("\r", "") == "stderr\n"
     p = e3.os.process.Run(
-        [sys.executable, prog_filename], output="text.txt", error=subprocess.PIPE
+        [sys.executable, str(prog_filename)], output="text.txt", error=subprocess.PIPE
     )
     assert os.path.isfile("text.txt")
     assert p.err.replace("\r", "") == "stderr\n"
@@ -49,23 +49,23 @@ def test_run_stdout_stderr() -> None:
 
 def test_run_shebang(caplog) -> None:
     """Verify that the parse shebang option works."""
-    prog_filename = os.path.join(str(Path.cwd()), "prog")
-    with Path(prog_filename).open("wb") as f:
+    prog_filename = Path.cwd() / "prog"
+    with prog_filename.open("wb") as f:
         f.write(b"#!/usr/bin/env python\n")
         f.write(b"import sys\n")
         f.write(b'print("running %s" % sys.argv[1])\n')
     e3.os.fs.chmod("a+x", prog_filename)
-    p = e3.os.process.Run([prog_filename, "atest"], parse_shebang=True)
+    p = e3.os.process.Run([str(prog_filename), "atest"], parse_shebang=True)
     assert p.out.replace("\r", "") == "running atest\n"
 
     # Create a shebang spawning a file that does not exist
-    with Path(prog_filename).open("wb") as f:
+    with prog_filename.open("wb") as f:
         f.write(b"#!doesnot exist\n")
         f.write(b'print("running python prog")\n')
 
     e3.os.fs.chmod("a+x", prog_filename)
     with pytest.raises(OSError) as err:
-        e3.os.process.Run([prog_filename], parse_shebang=True)
+        e3.os.process.Run([str(prog_filename)], parse_shebang=True)
     assert "doesnot" in str(err)
     assert "doesnot exist" in caplog.text
 
@@ -552,12 +552,12 @@ def test_shell_override() -> None:
     On windows, we ensure that /bin/bash /bin/sh shebangs are replaced by
     SHELL env var.
     """
-    work_dir = str(Path.cwd())
+    work_dir = Path.cwd()
     os.environ["SHELL"] = sys.executable
-    test_file_path = os.path.join(work_dir, "shebang_test.sh")
-    with Path(test_file_path).open("w") as fd:
+    test_file_path = work_dir / "shebang_test.sh"
+    with test_file_path.open("w") as fd:
         fd.write("#!/bin/bash\nimport sys; print(sys.executable)\n")
-    p = e3.os.process.Run([test_file_path], parse_shebang=True)
+    p = e3.os.process.Run([str(test_file_path)], parse_shebang=True)
     assert p.out.strip() == sys.executable
 
 

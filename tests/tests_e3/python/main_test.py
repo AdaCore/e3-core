@@ -8,7 +8,7 @@ from e3.python.pypi import PyPIClosure, PyPIError
 
 import yaml
 from os import listdir
-from os.path import join as path_join, isfile, basename
+from os.path import isfile, basename
 import pytest
 
 
@@ -18,15 +18,15 @@ def generate_py_pkg_source(
     mkdir(name)
     if requires:
         requires_str = ",".join([f'"{el}"' for el in requires])
-    with Path(path_join(name, "setup.py")).open("w") as fd:
+    with Path(name, "setup.py").open("w") as fd:
         fd.write("from setuptools import setup, find_packages\n")
         fd.write(f"setup(name='{name}',\n")
         fd.write(f"      version='{version}',\n")
         if requires:
             fd.write(f"    install_requires=[{requires_str}],\n")
         fd.write("       packages=find_packages())\n")
-    mkdir(path_join(name, name))
-    with Path(path_join(name, name, "__init__.py")).open("w") as fd:
+    mkdir(Path(name, name))
+    with Path(name, name, "__init__.py").open("w") as fd:
         fd.write(f"# This is package {name}")
     return Wheel.build(
         source_dir=name, dest_dir=".", build_args=["--no-build-isolation", "--no-index"]

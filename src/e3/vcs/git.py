@@ -149,7 +149,7 @@ class GitRepository:
         # Git version 1.8.3.1 might crash when calling "git stash" when
         # .git/logs/refs is not created. Recent versions of git do not
         # exhibit this problem
-        e3.fs.mkdir(os.path.join(self.working_tree, ".git", "logs", "refs"))
+        e3.fs.mkdir(Path(self.working_tree, ".git", "logs", "refs"))
 
         if url is not None:
             self.git_cmd(["remote", "add", remote, url])
