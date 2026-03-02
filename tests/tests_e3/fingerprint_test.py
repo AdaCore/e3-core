@@ -142,7 +142,7 @@ def test_fingerprint_save_and_load() -> None:
     f_min = Fingerprint()
 
     f_min_filename = fingerprint_path("f_min")
-    assert not os.path.exists(f_min_filename)
+    assert not Path(f_min_filename).exists()
     f_min.save_to_file(f_min_filename)
 
     f_min_restored = Fingerprint.load_from_file(f_min_filename)
@@ -157,7 +157,7 @@ def test_fingerprint_save_and_load() -> None:
     f2.add("job2", "sha1job2")
 
     f2_filename = fingerprint_path("f2")
-    assert not os.path.exists(f2_filename)
+    assert not Path(f2_filename).exists()
     f2.save_to_file(f2_filename)
 
     f2_restored = Fingerprint.load_from_file(f2_filename)

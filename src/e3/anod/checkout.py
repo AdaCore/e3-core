@@ -153,7 +153,7 @@ class CheckoutManager:
             # directory - either as a file or as a directory. We check both
             # because, if a normal git clone, ".git" is a directory; if a
             # git clone with `git submodule init`, ".git" is a file.
-            if os.path.exists(Path(url, ".git")):
+            if Path(url, ".git").exists():
                 # It seems that this is a git repository. Get the list of files to
                 # ignore
                 try:

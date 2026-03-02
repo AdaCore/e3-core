@@ -32,8 +32,8 @@ def test_cp() -> None:
     dest = current_dir / "dest"
     e3.fs.mkdir(dest)
     e3.fs.cp(a, dest, recursive=True)
-    assert os.path.exists(dest / "a" / "a1")
-    assert os.path.exists(dest / "a" / "b" / "b1")
+    assert (dest / "a" / "a1").exists()
+    assert (dest / "a" / "b" / "b1").exists()
 
     dest2 = current_dir / "dest2"
 
@@ -47,17 +47,17 @@ def test_cp() -> None:
 
     e3.fs.mkdir(dest2)
     e3.fs.cp([a1, b1], dest2)  # type: ignore[arg-type]
-    assert os.path.exists(dest2 / "a1")
-    assert os.path.exists(dest2 / "b1")
+    assert (dest2 / "a1").exists()
+    assert (dest2 / "b1").exists()
 
     dest3 = current_dir / "dest3"
     e3.fs.mkdir(dest3)
     e3.fs.cp(a, dest3, copy_attrs=False, recursive=True)
     e3.fs.cp(a1, dest3, copy_attrs=False)
 
-    assert os.path.exists(dest3 / "a" / "a1")
-    assert os.path.exists(dest3 / "a" / "b" / "b1")
-    assert os.path.exists(dest3 / "a1")
+    assert (dest3 / "a" / "a1").exists()
+    assert (dest3 / "a" / "b" / "b1").exists()
+    assert (dest3 / "a1").exists()
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.cp(a, Path("does", "not", "exist"))
@@ -122,7 +122,7 @@ def test_mv_with_iterables() -> None:
     e3.fs.mkdir("dst")
     e3.fs.mv(star("a"), "dst")
     for idx in range(10):
-        assert os.path.exists(Path("dst", f"a{idx}"))
+        assert Path("dst", f"a{idx}").exists()
 
     def dst_star(d):
         for dst_star_idx in range(10):
@@ -132,7 +132,7 @@ def test_mv_with_iterables() -> None:
 
     e3.fs.rm(dst_star("a"))
     for idx in range(10):
-        assert not os.path.exists(Path("dst", f"a{idx}"))
+        assert not Path("dst", f"a{idx}").exists()
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
@@ -345,14 +345,14 @@ def test_sync_tree_with_symlinks() -> None:
     assert e3.diff.diff(str(b), str(m2 / "c"))
 
     # we start with m3/c -> m2
-    assert os.path.exists(m3 / "c" / "c")
+    assert (m3 / "c" / "c").exists()
     e3.fs.sync_tree(m1, m3)
     # after the sync tree m1/c = m3/c
     assert e3.diff.diff(str(m1 / "c"), str(m3 / "c")) == ""
 
     # and m3/c is not a link to m2
-    assert not os.path.exists(m3 / "c" / "c")
-    assert os.path.exists(m2 / "c")
+    assert not (m3 / "c" / "c").exists()
+    assert (m2 / "c").exists()
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="test relevant only on win32")
@@ -412,10 +412,10 @@ def test_sync_tree_no_delete() -> None:
 
     e3.os.fs.touch("b/todelete")
     e3.fs.sync_tree("a", "b", delete=False)
-    assert os.path.exists("b/todelete")
+    assert Path("b/todelete").exists()
 
     e3.fs.sync_tree("a", "b")
-    assert not os.path.exists("b/todelete")
+    assert not Path("b/todelete").exists()
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
@@ -528,8 +528,8 @@ def test_rm_list() -> None:
     e3.os.fs.touch("a")
     e3.os.fs.touch("b")
     e3.fs.rm(["a", "b"], glob=False)
-    assert not os.path.exists("a")
-    assert not os.path.exists("b")
+    assert not Path("a").exists()
+    assert not Path("b").exists()
 
 
 def test_rm_symlink() -> None:
@@ -541,14 +541,14 @@ def test_rm_symlink() -> None:
         return
 
     e3.fs.rm("b", recursive=True)
-    assert not os.path.exists("b")
-    assert os.path.exists("a")
+    assert not Path("b").exists()
+    assert Path("a").exists()
 
     e3.os.fs.touch("d")
     os.symlink("d", "e")
     e3.fs.rm("e", recursive=True)
-    assert not os.path.exists("e")
-    assert os.path.exists("d")
+    assert not Path("e").exists()
+    assert Path("d").exists()
 
 
 def test_safe_copy() -> None:
@@ -620,9 +620,9 @@ def test_sync_tree_with_file_list() -> None:
 
     e3.fs.mkdir("b")
     e3.fs.sync_tree("a", "b", file_list=["3", "7"])
-    assert os.path.exists("b/3")
-    assert os.path.exists("b/7")
-    assert not os.path.exists("b/5")
+    assert Path("b/3").exists()
+    assert Path("b/7").exists()
+    assert not Path("b/5").exists()
 
 
 def test_sync_tree_with_ignore() -> None:
@@ -633,21 +633,21 @@ def test_sync_tree_with_ignore() -> None:
 
     e3.fs.mkdir("b")
     e3.fs.sync_tree("a", "b", ignore=["/3", "/7"])
-    assert not os.path.exists("b/3")
-    assert not os.path.exists("b/7")
-    assert os.path.exists("b/5")
+    assert not Path("b/3").exists()
+    assert not Path("b/7").exists()
+    assert Path("b/5").exists()
 
     e3.os.fs.touch("b/7")
     e3.fs.sync_tree("a", "b", ignore=["/3", "/7"])
-    assert os.path.exists("b/7")
+    assert Path("b/7").exists()
     e3.fs.sync_tree("a", "b", ignore=["/3", "/7"], delete_ignore=True)
-    assert not os.path.exists("b/7")
+    assert not Path("b/7").exists()
 
     e3.os.fs.touch("a/test.py")
     e3.fs.sync_tree("a", "b", ignore="*.py", delete_ignore=True)
-    assert not os.path.exists("b/test.py")
+    assert not Path("b/test.py").exists()
     for x in range(10):
-        assert os.path.exists("b/" + str(x))
+        assert Path("b/" + str(x)).exists()
 
 
 def test_extension() -> None:

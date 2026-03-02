@@ -37,7 +37,7 @@ class SbxDirs:
         self.sbx_tmp_dir = self.sbx_dir / "tmp"
 
     def delete_sbx(self) -> None:
-        if os.path.exists(self.sbx_dir):
+        if self.sbx_dir.exists():
             rm(self.sbx_dir, True)
 
     def mkdirs(self) -> None:
@@ -219,7 +219,7 @@ class FingerprintWalk(SimpleWalk):
             pred_fingerprint = self.new_fingerprints[pred_uid]
             if pred_fingerprint is not None:
                 f.add(f"pred:{pred_uid}", pred_fingerprint.checksum())
-        if os.path.exists(source_fullpath(uid)):
+        if Path(source_fullpath(uid)).exists():
             f.add_file(source_fullpath(uid))
         return f
 
@@ -231,7 +231,7 @@ class FingerprintWalk(SimpleWalk):
 
         filename = self.fingerprint_filename(uid)
         if fingerprint is None:
-            if os.path.exists(filename):
+            if Path(filename).exists():
                 os.remove(filename)
         else:
             fingerprint.save_to_file(filename)
@@ -245,7 +245,7 @@ class FingerprintWalk(SimpleWalk):
             return self.new_fingerprints[uid]
 
         filename = self.fingerprint_filename(uid)
-        if os.path.exists(filename):
+        if Path(filename).exists():
             return Fingerprint.load_from_file(filename)
         return None
 
@@ -870,7 +870,7 @@ def test_computing_fingerprint_after_job_done(setup_sbx) -> None:
     # that the sources have not change, and so '2' can be skipped.
 
     rm(source_fullpath(download_uid))
-    assert not os.path.exists(source_fullpath(download_uid))
+    assert not Path(source_fullpath(download_uid)).exists()
 
     r4 = FingerprintWalk(actions)
 

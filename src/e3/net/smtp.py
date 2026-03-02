@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import smtplib
 from email.message import Message
+from pathlib import Path
 
 import e3.log
 import e3.os.process
@@ -61,7 +62,7 @@ def sendmail(
                 "/usr/lib/sendmail",
                 "/usr/sbin/sendmail",
             ):
-                if os.path.exists(sendmail_bin):
+                if Path(sendmail_bin).exists():
                     p = e3.os.process.Run(
                         [sendmail_bin, *to_emails],
                         input="|" + mail_as_string,

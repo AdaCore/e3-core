@@ -229,16 +229,16 @@ def interpreter(prefix: str | None = None) -> str:
         return sys.executable
     if sys.platform == "win32":  # unix: no cover
         python3 = Path(prefix, "python3.exe")
-        if os.path.exists(python3):
+        if python3.exists():
             return str(python3)
         # Might be the python location when in a venv
         python3 = Path(prefix, "Scripts", "python.exe")
-        if os.path.exists(python3):
+        if python3.exists():
             return str(python3)
         return str(Path(prefix, "python.exe"))
     # windows: no cover
     python3 = Path(prefix, "bin", "python3")
-    if os.path.exists(python3):
+    if python3.exists():
         return str(python3)
     return str(Path(prefix, "bin", "python"))
 

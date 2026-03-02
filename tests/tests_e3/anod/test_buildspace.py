@@ -18,7 +18,7 @@ def test_reset() -> None:
     # Reset delete all dirs except log and result by default
     bs.reset()
     for name in bs.dirs:
-        exists = os.path.exists(str(Path(bs.subdir(name), "a")))
+        exists = Path(bs.subdir(name), "a").exists()
         if name in ("log", "results"):
             assert exists
         else:
@@ -38,9 +38,9 @@ def test_reset_tmp_dir() -> None:
     marker = Path(bs.subdir(name="tmp"), "deleteme")
     mkdir(bs.tmp_dir)
     touch(marker)
-    assert os.path.exists(marker)
+    assert marker.exists()
     bs.create()
-    assert not os.path.exists(marker)
+    assert not marker.exists()
 
 
 def test_build_space_exists() -> None:
@@ -50,7 +50,7 @@ def test_build_space_exists() -> None:
 
     # First, verify the behavior when the buildspace directory
     # doesn't even exist.
-    assert not os.path.exists(bs_name), bs_name
+    assert not Path(bs_name).exists(), bs_name
     assert bs.exists() is False
 
     # Next, create the directory, but without anything in it.

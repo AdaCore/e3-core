@@ -43,10 +43,10 @@ class AutoIgnore(spec('anod')):
 
     @Anod.primitive()
     def build(self):
-        if os.path.exists(Path(self['SRC_DIR'], 'A/B/3/2')):
+        if Path(self['SRC_DIR'], 'A/B/3/2').exists():
             print('found 2')
-        if os.path.exists(Path(self['SRC_DIR'], 'A/B/3/2/1')):
+        if Path(self['SRC_DIR'], 'A/B/3/2/1').exists():
             print('found 1')
         for subdir in ('3', '3/2', '3/2/1'):
-            if os.path.exists(Path(self['SRC_DIR'], 'A/B', subdir, 'autoignore.anod')):
+            if Path(self['SRC_DIR'], 'A/B', subdir, 'autoignore.anod').exists():
                 print('found .anod in {}'.format(subdir))
