@@ -1,3 +1,5 @@
+"""Tests for e3.yaml."""
+
 from pathlib import Path
 from collections import OrderedDict
 

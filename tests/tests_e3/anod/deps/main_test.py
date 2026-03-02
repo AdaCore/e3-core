@@ -1,3 +1,5 @@
+"""Tests for e3.anod.deps."""
+
 import e3.anod.deps
 
 import pytest

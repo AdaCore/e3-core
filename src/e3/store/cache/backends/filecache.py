@@ -1,3 +1,5 @@
+"""File-based cache backend for store."""
+
 from __future__ import annotations
 
 import errno

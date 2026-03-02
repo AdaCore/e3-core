@@ -1,3 +1,5 @@
+"""Tests for e3.system."""
+
 import e3.os.process
 import e3.sys
 

@@ -1,3 +1,5 @@
+"""Tests for e3.anod.store build_info."""
+
 from __future__ import annotations
 
 import pytest

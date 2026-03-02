@@ -1,3 +1,5 @@
+"""Tests for e3.env."""
+
 import os
 import sys
 

@@ -1,3 +1,5 @@
+"""Tests for e3.os.fs."""
+
 import numbers
 import os
 import stat

@@ -1,3 +1,5 @@
+"""Tests for e3.electrolyt.plan."""
+
 from pathlib import Path
 import e3.electrolyt.entry_point as entry_point
 import e3.electrolyt.host as host

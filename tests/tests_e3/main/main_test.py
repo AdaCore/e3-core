@@ -1,3 +1,5 @@
+"""Tests for e3.main."""
+
 from pathlib import Path
 import re
 import sys

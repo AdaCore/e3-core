@@ -1,3 +1,5 @@
+"""Store interface for Anod binary and source packages."""
+
 from __future__ import annotations
 
 import abc

@@ -1,3 +1,5 @@
+"""Hash computation utilities (MD5, SHA1, SHA256, SHA512)."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

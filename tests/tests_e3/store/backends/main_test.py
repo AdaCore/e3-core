@@ -1,3 +1,5 @@
+"""Tests for e3.store.backends."""
+
 from e3.store.cache.backends.filecache import FileCache
 from pathlib import Path
 

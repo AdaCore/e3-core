@@ -1,3 +1,5 @@
+"""Trie data structure for efficient prefix/suffix matching."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

@@ -1,3 +1,5 @@
+"""System utilities and Python script handling."""
+
 from __future__ import annotations
 
 import ast

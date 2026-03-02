@@ -1,3 +1,5 @@
+"""Tests for e3.archive."""
+
 import os
 import sys
 import tempfile

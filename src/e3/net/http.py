@@ -1,3 +1,5 @@
+"""HTTP client with retry and authentication support."""
+
 from __future__ import annotations
 
 import contextlib

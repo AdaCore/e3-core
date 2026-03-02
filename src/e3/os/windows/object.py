@@ -1,3 +1,5 @@
+"""Windows object name utilities."""
+
 from __future__ import annotations
 
 import struct

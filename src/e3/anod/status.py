@@ -1,3 +1,5 @@
+"""Return values for Anod commands."""
+
 from __future__ import annotations
 
 from enum import IntEnum

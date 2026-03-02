@@ -1,3 +1,5 @@
+"""Tests for e3.job."""
+
 from pathlib import Path
 import os
 import sys

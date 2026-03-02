@@ -1,3 +1,5 @@
+"""NPM registry JSON parser."""
+
 from __future__ import annotations
 
 import json

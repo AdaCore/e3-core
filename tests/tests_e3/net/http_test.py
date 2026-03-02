@@ -1,3 +1,5 @@
+"""Tests for e3.net."""
+
 from pathlib import Path
 import logging
 import os

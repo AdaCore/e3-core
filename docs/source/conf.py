@@ -1,3 +1,5 @@
+"""E3-core Sphinx documentation configuration."""
+
 #
 # e3-core documentation build configuration file, created by
 # sphinx-quickstart on Fri May 19 23:56:17 2017.

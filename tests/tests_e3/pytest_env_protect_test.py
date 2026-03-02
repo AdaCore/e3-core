@@ -1,3 +1,5 @@
+"""Tests for pytest."""
+
 import os
 
 from e3.pytest import set_git_env_config

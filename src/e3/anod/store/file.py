@@ -1,3 +1,5 @@
+"""File resource management for Anod store."""
+
 from __future__ import annotations
 from datetime import datetime, timezone
 from dataclasses import dataclass

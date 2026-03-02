@@ -1,3 +1,5 @@
+"""Tests for e3.error."""
+
 from e3.error import E3Error
 
 

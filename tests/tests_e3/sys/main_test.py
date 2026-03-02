@@ -1,3 +1,5 @@
+"""Tests for e3.sys."""
+
 from pathlib import Path
 import ast
 import logging

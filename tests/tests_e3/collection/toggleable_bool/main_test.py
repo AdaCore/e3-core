@@ -1,3 +1,5 @@
+"""Tests for e3.collection.toggleable_bool."""
+
 from e3.collection.toggleable_bool import ToggleableBooleanGroup
 
 

@@ -1,3 +1,5 @@
+"""Tests for e3.log."""
+
 from pathlib import Path
 from datetime import datetime as dt, timezone as tz
 import sys

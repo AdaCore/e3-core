@@ -1,3 +1,5 @@
+"""Build space management for Anod sandboxes."""
+
 from __future__ import annotations
 
 import os

@@ -1,3 +1,5 @@
+"""Tests for e3.text."""
+
 import e3.text
 
 

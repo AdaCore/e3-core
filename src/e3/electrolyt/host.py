@@ -1,3 +1,5 @@
+"""Host database management for electrolyt."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

@@ -1,3 +1,5 @@
+"""Tests for e3.job."""
+
 import sys
 
 from e3.collection.dag import DAG

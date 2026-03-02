@@ -1,3 +1,5 @@
+"""Tests for e3.os.windows.process."""
+
 import sys
 
 import e3.os.process

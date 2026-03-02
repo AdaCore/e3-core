@@ -1,3 +1,5 @@
+"""Maven repository utilities."""
+
 from __future__ import annotations
 
 from defusedxml.ElementTree import XMLParser

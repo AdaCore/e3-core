@@ -1,3 +1,5 @@
+"""Tests for maven."""
+
 from __future__ import annotations
 
 from e3.maven import Maven

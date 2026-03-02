@@ -1,3 +1,5 @@
+"""Windows Native API (NT) wrappers using ctypes."""
+
 from __future__ import annotations
 
 import ctypes

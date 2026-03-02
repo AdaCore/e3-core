@@ -1,3 +1,5 @@
+"""Qualifier dictionary with custom operators for Anod specs."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
 

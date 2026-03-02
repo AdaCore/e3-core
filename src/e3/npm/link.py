@@ -1,3 +1,5 @@
+"""NPM package download link metadata."""
+
 from __future__ import annotations
 
 from dateutil.parser import parse as dateutil_parse

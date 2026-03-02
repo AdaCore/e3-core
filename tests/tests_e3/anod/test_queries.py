@@ -1,3 +1,5 @@
+"""Tests for e3.anod queries."""
+
 from e3.anod.context import AnodContext
 from e3.anod.loader import AnodSpecRepository
 from e3.anod.queries import SourceClosure, get_build_node

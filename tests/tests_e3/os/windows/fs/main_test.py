@@ -1,3 +1,5 @@
+"""Tests for e3.os.windows.fs."""
+
 import contextlib
 import sys
 import time

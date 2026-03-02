@@ -1,3 +1,5 @@
+"""Tests for e3.anod qualifier manager."""
+
 from e3.anod.error import AnodError
 from e3.anod.qualifier import Qualifier
 from e3.anod.qualifiers_manager import (

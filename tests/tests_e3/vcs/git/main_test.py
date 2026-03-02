@@ -1,3 +1,5 @@
+"""Tests for e3.vcs.git."""
+
 from pathlib import Path
 import os
 import subprocess

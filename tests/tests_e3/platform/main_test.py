@@ -1,3 +1,5 @@
+"""Tests for e3.platform."""
+
 import e3.env
 import e3.platform
 

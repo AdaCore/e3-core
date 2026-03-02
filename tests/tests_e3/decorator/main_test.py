@@ -1,3 +1,5 @@
+"""Tests for e3.decorator."""
+
 from random import random
 
 import e3.decorator

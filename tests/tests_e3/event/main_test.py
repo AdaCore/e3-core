@@ -1,3 +1,5 @@
+"""Tests for e3.event."""
+
 import email
 import json
 import os

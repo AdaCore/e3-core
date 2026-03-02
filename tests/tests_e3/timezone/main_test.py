@@ -1,3 +1,5 @@
+"""Tests for e3.timezone."""
+
 import e3.os.timezone
 
 
