@@ -594,7 +594,7 @@ def test_sync_tree_dir_vs_file() -> None:
     e3.fs.mkdir("b")
     e3.os.fs.touch("b/d")
     e3.fs.sync_tree("a", "b")
-    assert os.path.isdir("b/d")
+    assert Path("b/d").is_dir()
 
 
 def test_safe_mkdir() -> None:
@@ -604,7 +604,7 @@ def test_safe_mkdir() -> None:
     e3.fs.mkdir("b")
     Path("b").chmod(0o000)
     e3.fs.sync_tree("a", "b")
-    assert os.path.isdir("b/a")
+    assert Path("b/a").is_dir()
 
 
 def test_splitall() -> None:

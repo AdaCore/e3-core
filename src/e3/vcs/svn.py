@@ -242,7 +242,7 @@ class SVNRepository:
 
         def is_empty_dir(dir_path: str) -> bool:
             """Return True if the path is a directory and is empty."""
-            return os.path.isdir(dir_path) and not os.listdir(dir_path)
+            return Path(dir_path).is_dir() and not os.listdir(dir_path)
 
         options: SVNCmd = ["--ignore-externals"]
         if revision:

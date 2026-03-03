@@ -70,7 +70,7 @@ class AnodSpecRepository:
         """
         logger.debug("initialize spec repository (%s)", spec_dir)
 
-        if not os.path.isdir(spec_dir):
+        if not Path(spec_dir).is_dir():
             raise SandBoxError(f"spec directory {spec_dir} does not exist")
         self.spec_dir = spec_dir
 

@@ -326,7 +326,7 @@ def mv(source: str | Path, target: str | Path) -> None:
     :param source: target file or directory
     """
     # Compute file list and number of file to copy
-    if os.path.isdir(source) and os.path.isdir(target):
+    if Path(source).is_dir() and Path(target).is_dir():
         shutil.move(source, Path(target, os.path.basename(source)))
     else:
         shutil.move(source, target)
