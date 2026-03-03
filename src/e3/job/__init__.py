@@ -10,10 +10,10 @@ import e3.log
 from e3.anod.status import ReturnValue
 from e3.os.process import Run
 
-
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable
+    from typing import Any
+
     from e3.job.scheduler import Scheduler
 
     NotifyEndType = Callable[[str], None]

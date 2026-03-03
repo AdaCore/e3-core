@@ -6,19 +6,19 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import pytest
+
 from e3.fs import mkdir, rm
 from e3.os.fs import touch
-
-import pytest
 
 if sys.platform == "win32":
     from e3.os.windows.fs import NTFile
     from e3.os.windows.native_api import (
         Access,
+        FileAttribute,
         LargeFileTime,
         NTException,
         Share,
-        FileAttribute,
     )
 
 

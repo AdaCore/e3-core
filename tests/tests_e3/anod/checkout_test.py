@@ -1,19 +1,20 @@
 """Tests for e3.anod checkout."""
 
-from pathlib import Path
-import sys
 import logging
 import os
+import sys
+import time
+import uuid
+from pathlib import Path
+
 import pytest
 
 from e3.anod.checkout import CheckoutManager
 from e3.anod.status import ReturnValue
-from e3.vcs.svn import SVNRepository
-from e3.vcs.git import GitRepository
 from e3.fs import mkdir
 from e3.os.fs import touch
-import uuid
-import time
+from e3.vcs.git import GitRepository
+from e3.vcs.svn import SVNRepository
 
 
 def test_rsync_mode() -> None:

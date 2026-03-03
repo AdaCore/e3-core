@@ -1,16 +1,16 @@
 """Tests for e3.vcs.git."""
 
-from pathlib import Path
 import os
 import subprocess
+import tempfile
+from contextlib import closing
+from pathlib import Path
+
+import pytest
 
 from e3.fs import echo_to_file, rm
 from e3.os.fs import unixpath
 from e3.vcs.git import GitError, GitRepository
-
-import pytest
-import tempfile
-from contextlib import closing
 
 
 def test_git_non_utf8(git) -> None:

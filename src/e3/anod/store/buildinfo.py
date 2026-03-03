@@ -2,23 +2,23 @@
 
 from __future__ import annotations
 
+import time
+from datetime import datetime, timedelta, timezone
+from typing import TYPE_CHECKING
+
 from e3.anod.store.component import Component
 from e3.anod.store.file import File
 from e3.anod.store.interface import StoreError, StoreWriteInterface
 from e3.error import E3Error
-from datetime import datetime, timedelta, timezone
 from e3.log import getLogger
-import time
-from typing import TYPE_CHECKING
-
 
 if TYPE_CHECKING:
     from typing import TypedDict, TypeVar
 
     from e3.anod.store.interface import (
+        BuildDataDict,
         StoreReadInterface,
         StoreRWInterface,
-        BuildDataDict,
     )
 
     BuildInfoType = TypeVar("BuildInfoType", bound="BuildInfo")

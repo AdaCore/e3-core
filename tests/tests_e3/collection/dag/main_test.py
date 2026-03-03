@@ -1,8 +1,8 @@
 """Tests for e3.collection.dag."""
 
-from e3.collection.dag import DAG, DAGError, DAGIterator
-
 import pytest
+
+from e3.collection.dag import DAG, DAGError, DAGIterator
 
 
 def test_simple_dag() -> None:

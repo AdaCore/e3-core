@@ -2,21 +2,22 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 import subprocess
 import time
+from typing import TYPE_CHECKING
+
 import pytest
 
 import e3.fs
 import e3.os.fs
 import e3.os.process
 from e3.mock.os.process import (
-    mock_run,
     CommandResult,
-    MockRun,
-    UnexpectedCommandError,
     GlobChecker,
+    MockRun,
     SideEffect,
+    UnexpectedCommandError,
+    mock_run,
 )
 
 if TYPE_CHECKING:

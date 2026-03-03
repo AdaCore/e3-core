@@ -2,12 +2,12 @@
 
 from pathlib import Path
 
+import pytest
+
 import e3.anod.error
 import e3.anod.package
 from e3.fs import mkdir, rm
 from e3.os.fs import touch
-
-import pytest
 
 
 def test_source_builder_default_prepare_src() -> None:

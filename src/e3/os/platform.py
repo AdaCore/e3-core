@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 import e3.log
 from e3.platform_db import get_knowledge_base
 
-
 if TYPE_CHECKING:
     from typing import Any
 

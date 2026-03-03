@@ -22,7 +22,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-
 from pathlib import Path
 
 import e3.log
@@ -30,7 +29,6 @@ from e3.env import Env
 from e3.error import E3Error
 from e3.fs import get_filetree_state
 from e3.hash import sha256
-
 
 logger = e3.log.getLogger("fingerprint")
 

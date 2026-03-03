@@ -31,13 +31,13 @@ This predicate is the *RECOMMENDED* way to satisfy the
 from __future__ import annotations
 
 import base64
-import json
 import hashlib
-
+import json
 from datetime import datetime, timezone
-from dateutil import parser as date_parser
 from pathlib import Path
 from typing import Any
+
+from dateutil import parser as date_parser
 
 
 class Builder(object):

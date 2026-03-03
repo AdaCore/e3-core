@@ -7,6 +7,7 @@ from e3.anod.spec import Anod
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
+
     from e3.anod.package import Source, SourceBuilder
     from e3.collection.dag import DAG
 

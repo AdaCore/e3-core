@@ -2,14 +2,14 @@
 
 import email
 import json
+from pathlib import Path
+
+import mock
 
 import e3.archive
 import e3.event
 import e3.fs
 import e3.os.fs
-
-import mock
-from pathlib import Path
 
 
 def test_smtp_event() -> None:

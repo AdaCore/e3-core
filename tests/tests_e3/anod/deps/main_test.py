@@ -1,8 +1,8 @@
 """Tests for e3.anod.deps."""
 
-import e3.anod.deps
-
 import pytest
+
+import e3.anod.deps
 
 
 def test_buildvar() -> None:

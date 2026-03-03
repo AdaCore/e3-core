@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import os
 import struct
 from ctypes import (
@@ -15,6 +13,7 @@ from ctypes import (
 )
 from ctypes.wintypes import HANDLE
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.os.windows.native_api import (
@@ -28,15 +27,15 @@ from e3.os.windows.native_api import (
     NTException,
     ObjectAttributes,
     OpenOptions,
+    ReparseGUIDDataBuffer,
     Share,
     Status,
     UnicodeString,
-    ReparseGUIDDataBuffer,
 )
 
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable
+    from typing import Any
 
 
 logger = e3.log.getLogger("os.windows.fs")

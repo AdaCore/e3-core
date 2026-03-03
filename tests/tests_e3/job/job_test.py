@@ -1,10 +1,10 @@
 """Tests for e3.job."""
 
 import sys
+from typing import NoReturn
 
 from e3.anod.status import ReturnValue
 from e3.job import EmptyJob, ProcessJob
-from typing import NoReturn
 
 
 class InvalidProcessJob(ProcessJob):

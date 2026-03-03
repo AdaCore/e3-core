@@ -2,14 +2,14 @@
 
 import os
 import sys
+from pathlib import Path
+
+import pytest
 
 import e3.env
 import e3.fs
 import e3.os.process
 import e3.platform
-
-import pytest
-from pathlib import Path
 
 
 def test_autodetect() -> None:

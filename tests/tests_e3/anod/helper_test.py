@@ -1,7 +1,7 @@
 """Tests for e3.anod helper."""
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 from e3.anod.driver import AnodDriver
 from e3.anod.helper import Configure, Make, text_replace

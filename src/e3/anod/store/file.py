@@ -1,30 +1,30 @@
 """File resource management for Anod store."""
 
 from __future__ import annotations
-from datetime import datetime, timezone
-from dataclasses import dataclass
-from enum import Enum
-from typing import cast, overload, TYPE_CHECKING
+
 import json
 import os
-from pathlib import Path
 import tempfile
-from e3.fs import extension, rm, mv, cp, sync_tree
-from e3.anod.store.interface import StoreError, resource_id as store_resource_id
-from e3.archive import is_known_archive_format, create_archive, unpack_archive
-from e3.log import getLogger
-from e3.dsse import DSSE
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from pathlib import Path
+from typing import TYPE_CHECKING, cast, overload
 
-from e3.anod.store.interface import StoreRWInterface
+from e3.anod.store.interface import StoreError, StoreRWInterface
+from e3.anod.store.interface import resource_id as store_resource_id
+from e3.archive import create_archive, is_known_archive_format, unpack_archive
+from e3.dsse import DSSE
+from e3.fs import cp, extension, mv, rm, sync_tree
+from e3.log import getLogger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Any, Literal, TypedDict, TypeVar
 
-    from e3.archive import RemoveRootDirType
-
-    from e3.anod.store.interface import StoreReadInterface
     from e3.anod.store.buildinfo import BuildInfo, BuildInfoDict
+    from e3.anod.store.interface import StoreReadInterface
+    from e3.archive import RemoveRootDirType
 
     FileType = TypeVar("FileType", bound="File")
 

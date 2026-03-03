@@ -2,13 +2,13 @@
 
 import smtplib
 from email.utils import make_msgid
-
-import e3.net.smtp
-from e3.error import E3Error
+from typing import NoReturn
 
 import mock
 import pytest
-from typing import NoReturn
+
+import e3.net.smtp
+from e3.error import E3Error
 
 
 def test_sendmail() -> None:

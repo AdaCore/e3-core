@@ -14,12 +14,13 @@ from e3.error import E3Error
 logger = e3.log.getLogger("e3.anod.driver")
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, TypeVar
     from collections.abc import Callable
+    from typing import Any, Literal, TypeVar
+
+    from e3.anod.loader import AnodSpecRepository
+    from e3.anod.sandbox import SandBox
     from e3.anod.spec import Anod
     from e3.store.backends.base import Store
-    from e3.anod.sandbox import SandBox
-    from e3.anod.loader import AnodSpecRepository
 
     F = TypeVar("F", bound=Callable[..., Any])
 

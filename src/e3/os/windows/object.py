@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import struct
-from e3.os.windows.native_api import NT, ObjectInfo
-from ctypes.wintypes import HANDLE
 from ctypes import create_string_buffer
+from ctypes.wintypes import HANDLE
+
+from e3.os.windows.native_api import NT, ObjectInfo
 
 
 def object_name(handle: HANDLE) -> str:

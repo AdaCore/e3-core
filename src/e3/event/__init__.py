@@ -8,10 +8,11 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import stevedore
+
 import e3.env
 import e3.hash
 import e3.log
-import stevedore
 from e3.date import timestamp_as_string
 from e3.error import E3Error
 from e3.fs import mkdir
@@ -19,9 +20,9 @@ from e3.fs import mkdir
 logger = e3.log.getLogger("event")
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from types import TracebackType
     from typing import Any
-    from collections.abc import Callable
 
 
 def unique_id() -> str:

@@ -1,13 +1,13 @@
 """Tests for e3.anod buildspace."""
 
 import os
+from pathlib import Path
+
+import pytest
 
 from e3.anod.buildspace import BuildSpace
 from e3.fs import mkdir, rm
 from e3.os.fs import touch
-
-import pytest
-from pathlib import Path
 
 
 def test_reset() -> None:

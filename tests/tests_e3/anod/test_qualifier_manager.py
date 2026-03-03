@@ -1,16 +1,16 @@
 """Tests for e3.anod qualifier manager."""
 
+import pytest
+
 from e3.anod.error import AnodError
 from e3.anod.qualifier import Qualifier
 from e3.anod.qualifiers_manager import (
-    QualifiersManager,
-    KeyValueDeclaration,
     KeySetDeclaration,
+    KeyValueDeclaration,
+    QualifiersManager,
 )
 from e3.anod.spec import Anod
 from e3.env import BaseEnv
-
-import pytest
 
 
 def test_qualifier_operations() -> None:

@@ -14,8 +14,8 @@ def timezone() -> float:
     :return: offset from utc in hours
     """
     if sys.platform == "win32":  # unix: no cover
-        from ctypes import windll, Structure, pointer
-        from ctypes.wintypes import DWORD, WCHAR, LONG
+        from ctypes import Structure, pointer, windll
+        from ctypes.wintypes import DWORD, LONG, WCHAR
 
         class TIME_ZONE_INFORMATION(Structure):
             _fields_ = [

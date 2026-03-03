@@ -3,23 +3,20 @@
 from __future__ import annotations
 
 import os
-import sys
+import signal
 import subprocess
+import sys
 import textwrap
 import time
-import signal
-
 from pathlib import Path
+from subprocess import PIPE, STDOUT
+
+import pytest
 
 import e3.fs
 import e3.os.fs
 import e3.os.process
-
 from e3.env import Env
-
-import pytest
-
-from subprocess import STDOUT, PIPE
 
 try:
     import psutil

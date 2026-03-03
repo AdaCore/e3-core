@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from e3.error import E3Error
-
 from typing import TYPE_CHECKING
+
+from e3.error import E3Error
 
 if TYPE_CHECKING:
     from e3.os.process import Run

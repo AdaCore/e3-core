@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import abc
-from e3.log import getLogger
 from itertools import chain
 from typing import TYPE_CHECKING
 
 from e3.anod.status import ReturnValue
 from e3.job import EmptyJob
 from e3.job.scheduler import DEFAULT_JOB_MAX_DURATION, Scheduler
+from e3.log import getLogger
 
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable
+    from typing import Any
+
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
     from e3.job import Job, ProcessJob

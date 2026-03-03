@@ -11,15 +11,15 @@ has also been used for a better understanding of some VEX implementations.
 from __future__ import annotations
 
 import json
-import yaml
-
 from datetime import datetime, timezone
-from dateutil.parser import parse as date_parse
 from enum import Enum
-from packaging.version import Version
 from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import uuid4
+
+import yaml
+from dateutil.parser import parse as date_parse
+from packaging.version import Version
 
 from e3.json import JsonData
 

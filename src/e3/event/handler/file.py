@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from e3.event import EventHandler, unique_id
 from e3.fs import cp, mkdir

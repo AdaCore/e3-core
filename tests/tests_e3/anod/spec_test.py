@@ -3,8 +3,9 @@
 import os
 import subprocess
 import sys
-
 from pathlib import Path
+
+import pytest
 
 from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError, SpecError
@@ -15,8 +16,6 @@ from e3.fs import cp
 from e3.os.fs import ldd_output_to_posix
 from e3.os.process import Run
 from e3.platform_db.knowledge_base import OS_INFO
-
-import pytest
 
 CHECK_DLL_CLOSURE_ARGUMENTS = [
     (

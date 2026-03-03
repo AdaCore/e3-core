@@ -5,9 +5,8 @@ from __future__ import annotations
 import ctypes
 import sys
 import time
-from ctypes import POINTER, Structure, c_wchar_p
+from ctypes import POINTER, Structure, c_wchar_p, create_unicode_buffer, pointer, sizeof
 from ctypes import cast as ctypes_cast
-from ctypes import create_unicode_buffer, pointer, sizeof
 from ctypes.wintypes import (
     BOOL,
     BOOLEAN,

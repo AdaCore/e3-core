@@ -7,13 +7,14 @@ import datetime
 import json
 import os
 from pathlib import Path
-import pytest
 from typing import TYPE_CHECKING
 
-from e3.anod.store.interface import StoreError
+import pytest
+
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
+from e3.anod.store.interface import StoreError
 from e3.dsse import DSSE
 from e3.os.fs import touch
 from e3.slsa.provenance import Statement

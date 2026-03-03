@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
-import pytest
-
 from datetime import datetime, timezone
-from dateutil import parser as date_parser
 from pathlib import Path
 from time import sleep
 from typing import Any
+
+import pytest
+from dateutil import parser as date_parser
 
 from e3.slsa.provenance import (
     Builder,

@@ -23,7 +23,7 @@ from e3.fs import mkdir, rm
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import Any, IO, List, Optional, TextIO
+    from typing import IO, Any, List, Optional, TextIO
 
     SVNCmd = List[Optional[str]]
 

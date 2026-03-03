@@ -11,17 +11,15 @@ import os
 import pickle
 from collections import namedtuple
 from pathlib import Path
-
 from typing import TYPE_CHECKING
 
 import e3.log
 import e3.os.platform
 from e3.platform import Platform
 
-
 if TYPE_CHECKING:
-    from typing import Any, Iterable, TypeVar
     from argparse import Namespace
+    from typing import Any, Iterable, TypeVar
 
 logger = e3.log.getLogger("env")
 

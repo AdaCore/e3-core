@@ -1,13 +1,13 @@
 from __future__ import annotations
-from dataclasses import dataclass
-
-from typing import TYPE_CHECKING
 
 import abc
+from dataclasses import dataclass
 from functools import lru_cache
+from typing import TYPE_CHECKING
+
+import stevedore
 
 import e3.log
-import stevedore
 
 if TYPE_CHECKING:
     from typing import Any, Dict
@@ -65,11 +65,11 @@ def get_knowledge_base() -> KnowledgeBase:
         platform_info, build_targets, host_guess)
     """
     from e3.platform_db.knowledge_base import (
+        BUILD_TARGETS,
         CPU_INFO,
+        HOST_GUESS,
         OS_INFO,
         PLATFORM_INFO,
-        BUILD_TARGETS,
-        HOST_GUESS,
     )
 
     e3.log.debug("loading knownledge base")

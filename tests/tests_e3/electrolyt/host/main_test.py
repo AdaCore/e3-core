@@ -1,6 +1,7 @@
 """Tests for e3.electrolyt.host."""
 
 from pathlib import Path
+
 import e3.electrolyt.host as host
 
 

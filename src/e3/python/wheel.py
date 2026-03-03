@@ -1,15 +1,18 @@
 """Python wheel package utilities."""
 
 from __future__ import annotations
+
 import os
-import zipfile
 import tempfile
-from packaging.requirements import Requirement
-from e3.os.process import Run
-from e3.fs import ls, mv
-from e3.error import E3Error
-from e3.sys import python_script
+import zipfile
 from pathlib import Path
+
+from packaging.requirements import Requirement
+
+from e3.error import E3Error
+from e3.fs import ls, mv
+from e3.os.process import Run
+from e3.sys import python_script
 
 
 class WheelError(E3Error):

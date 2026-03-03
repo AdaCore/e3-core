@@ -1,19 +1,18 @@
 """Tests for e3.fs."""
 
-from pathlib import Path
 import os
 import re
-import sys
 import shutil
+import sys
+from pathlib import Path
+
+import pytest
 
 import e3.diff
 import e3.fs
 import e3.hash
 import e3.os.fs
-
 from e3.os.process import Run
-
-import pytest
 
 
 def test_cp() -> None:

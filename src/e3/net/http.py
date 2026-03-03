@@ -11,24 +11,24 @@ import tempfile
 from collections import deque
 from email.message import Message
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import requests
 import requests.adapters
 import requests.exceptions
+import requests_toolbelt.multipart
 import urllib3.exceptions
 from urllib3.util import Retry
 
-from typing import TYPE_CHECKING
-
 import e3.log
-import requests_toolbelt.multipart
 from e3.error import E3Error
-from e3.fs import rm, mkdir
+from e3.fs import mkdir, rm
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from types import TracebackType
     from typing import Any, Deque, Protocol, TypeVar
-    from collections.abc import Callable
+
     from requests.auth import AuthBase
     from requests.models import Response
 

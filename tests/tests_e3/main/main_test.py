@@ -1,13 +1,13 @@
 """Tests for e3.main."""
 
-from pathlib import Path
 import re
 import sys
+from pathlib import Path
+
+import pytest
 
 import e3.env
 import e3.os.process
-
-import pytest
 
 
 def test_main() -> None:

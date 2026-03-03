@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
+
 import pytest
 
-import logging
-from e3.log import getLogger
 from e3.env import Env
+from e3.log import getLogger
 from e3.mock.env import mock_env
 
 if TYPE_CHECKING:
     from typing import Callable
+
     from pytest import LogCaptureFixture
 
 logger = getLogger("test MockEnv")

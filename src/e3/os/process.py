@@ -15,9 +15,7 @@ import signal
 import subprocess
 import sys
 import time
-
 from pathlib import Path
-
 from typing import TYPE_CHECKING
 
 import e3.env
@@ -26,7 +24,7 @@ from e3.os.fs import which
 from e3.text import bytes_as_str
 
 if TYPE_CHECKING:
-    from typing import cast, Any, IO, Literal, NoReturn, Union
+    from typing import IO, Any, Literal, NoReturn, Union, cast
 
     CmdLine = list[str]
     AnyCmdLine = Union[list[CmdLine], CmdLine]
@@ -794,7 +792,7 @@ def is_running(pid: int) -> bool:
     :param pid: an integer (e.g the value of Run().pid)
     """
     if sys.platform == "win32":  # unix: no cover
-        from e3.os.windows.native_api import Access, NT
+        from e3.os.windows.native_api import NT, Access
         from e3.os.windows.process import process_exit_code
 
         if TYPE_CHECKING:

@@ -148,7 +148,7 @@ def sanity_check() -> int:
 
     print("HashlibCheck:", end=" ")
     try:
-        from e3.hash import sha1, md5
+        from e3.hash import md5, sha1
 
         sha1(__file__)
         md5(__file__)
@@ -166,8 +166,8 @@ def sanity_check() -> int:
 
 
 def main() -> None:
-    from e3.env import Env
     import e3.main
+    from e3.env import Env
 
     m = e3.main.Main(platform_args=True)
     m.argument_parser.add_argument(
@@ -326,6 +326,7 @@ def is_console() -> bool:
 
     if sys.platform == "win32":  # unix: no cover
         from msvcrt import get_osfhandle
+
         from e3.os.windows.object import object_name
 
         stdin_name = object_name(get_osfhandle(stdin_fd))  # type: ignore[arg-type]

@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import sys
-from typing import overload, TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
+
+import stevedore
 
 import e3.log
-import stevedore
 from e3.anod.error import SandBoxError
 from e3.main import Main
 
-
 if TYPE_CHECKING:
-    from typing import Literal
     from argparse import ArgumentParser
+    from typing import Literal
 
 logger = e3.log.getLogger("sandbox.main")
 

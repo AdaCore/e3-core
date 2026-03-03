@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import collections
-from typing import overload, TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 if TYPE_CHECKING:
-    from typing import Any, NamedTuple
     from collections.abc import Callable
-    from e3.anod.spec import Anod
+    from typing import Any, NamedTuple
+
     from e3.anod.context import AnodContext
     from e3.anod.package import SourceBuilder
+    from e3.anod.spec import Anod
 
     class SourceKey(NamedTuple):
         anod_uid: str

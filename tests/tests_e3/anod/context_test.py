@@ -1,16 +1,17 @@
 """Tests for e3.anod context."""
 
 from __future__ import annotations
-from pathlib import Path
+
 import os
+from pathlib import Path
+
+import pytest
 
 import e3.electrolyt.plan as plan
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError
 from e3.anod.loader import AnodSpecRepository
 from e3.env import BaseEnv
-
-import pytest
 
 
 class TestContext:

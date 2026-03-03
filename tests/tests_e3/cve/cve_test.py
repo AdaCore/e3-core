@@ -1,16 +1,18 @@
 """Tests for e3.cve."""
 
-from e3.cve import NVD
-from e3.fs import cp
-
 import os
 from pathlib import Path
+
+from e3.cve import NVD
+from e3.fs import cp
 
 
 def test_nvd_cve_search(socket_disabled) -> None:
     """Test the CVE DB research using cached data."""
+    from warnings import catch_warnings
+    from warnings import simplefilter as warn_filter
+
     from requests_cache import NEVER_EXPIRE
-    from warnings import catch_warnings, simplefilter as warn_filter
 
     cache_db = Path.cwd() / "cache"
     cp(Path(os.path.dirname(__file__), "cache"), cache_db, recursive=True)

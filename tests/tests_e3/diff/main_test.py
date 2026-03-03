@@ -1,12 +1,13 @@
 """Tests for e3.diff."""
 
-from pathlib import Path
 import os
+from pathlib import Path
 
+import pytest
+
+import e3.archive
 import e3.diff
 import e3.fs
-import e3.archive
-import pytest
 
 
 def test_non_existing() -> None:

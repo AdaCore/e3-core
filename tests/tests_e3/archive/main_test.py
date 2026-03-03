@@ -1,18 +1,18 @@
 """Tests for e3.archive."""
 
+import io
 import os
 import sys
 import tempfile
-import io
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 
 import e3.archive
 import e3.fs
 import e3.log
 import e3.os.fs
-
-import pytest
-from unittest.mock import patch
-from pathlib import Path
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))

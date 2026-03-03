@@ -6,8 +6,9 @@ import stevedore
 
 if TYPE_CHECKING:
     from typing import Any
-    from e3.store.cache.backends.base import Cache
+
     from e3.store.backends.base import Store
+    from e3.store.cache.backends.base import Cache
 
 
 def load_store(name: str, configuration: Any, cache: Cache) -> Store:

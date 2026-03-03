@@ -13,10 +13,10 @@ import e3.log
 from e3.collection.dag import DAGIterator
 from e3.job import Job
 
-
 if TYPE_CHECKING:
-    from typing import Any, FrozenSet
     from collections.abc import Callable
+    from typing import Any, FrozenSet
+
     from e3.collection.dag import DAG
 
     JobProviderCallback = Callable[

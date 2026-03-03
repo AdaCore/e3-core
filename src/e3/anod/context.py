@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
 import e3.log
-from e3.anod import qualifier_str_to_dict, qualifier_dict_to_str
+from e3.anod import qualifier_dict_to_str, qualifier_str_to_dict
 from e3.anod.action import (
     Build,
     BuildOrDownload,
     Checkout,
+    CheckVirus,
     CreateSource,
     CreateSourceOrDownload,
     CreateSources,
@@ -24,28 +26,28 @@ from e3.anod.action import (
     UploadBinaryComponent,
     UploadSource,
     UploadSourceComponent,
-    CheckVirus,
 )
 from e3.anod.deps import Dependency
 from e3.anod.error import AnodError
 from e3.anod.package import UnmanagedSourceBuilder
-from e3.anod.spec import has_primitive, fetch_attr
+from e3.anod.spec import fetch_attr, has_primitive
 from e3.collection.dag import DAG
 from e3.electrolyt.plan import PlanActionEnv
 from e3.env import BaseEnv
 from e3.error import E3Error
 
 if TYPE_CHECKING:
-    from typing import cast, NoReturn, Optional, Tuple, Iterable
     from collections.abc import Callable
+    from typing import Iterable, NoReturn, Optional, Tuple, cast
+
     from e3.anod.action import Action
-    from e3.anod.package import SourceBuilder
-    from e3.anod.spec import Anod, PRIMITIVE
     from e3.anod.loader import AnodSpecRepository
+    from e3.anod.package import SourceBuilder
     from e3.anod.sandbox import SandBox
+    from e3.anod.spec import PRIMITIVE, Anod
     from e3.collection.dag import VertexID
-    from e3.platform import Platform
     from e3.mypy import assert_never
+    from e3.platform import Platform
 
     # spec name, build env, target env, host env, qualifier, kind, source name
     CacheKeyType = Tuple[

@@ -1,13 +1,16 @@
 """Tests for e3.log."""
 
-from pathlib import Path
-from datetime import datetime as dt, timezone as tz
-import sys
 import json
+import sys
+from datetime import datetime as dt
+from datetime import timezone as tz
+from logging import LogRecord
+from pathlib import Path
+
 import dateutil.parser
+
 import e3.log
 import e3.os.process
-from logging import LogRecord
 
 
 def test_log() -> None:

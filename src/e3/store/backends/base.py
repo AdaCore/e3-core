@@ -11,6 +11,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from typing import Any
+
     from e3.store.cache.backends.base import Cache
 
 logger = e3.log.getLogger("store")

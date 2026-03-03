@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
-from difflib import get_close_matches
-from typing import TYPE_CHECKING
-from hashlib import sha1
-from e3.anod.error import AnodError
 import abc
 import re
+from difflib import get_close_matches
+from hashlib import sha1
+from typing import TYPE_CHECKING
 
+from e3.anod.error import AnodError
 
 if TYPE_CHECKING:
     from typing import AbstractSet, TypeAlias
+
     from e3.anod.spec import Anod
 
     QualifierValue: TypeAlias = str | bool | AbstractSet[str]

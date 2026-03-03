@@ -9,6 +9,7 @@ import tarfile
 import tempfile
 import zipfile
 from contextlib import closing
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import e3
@@ -17,12 +18,11 @@ import e3.fs
 import e3.log
 import e3.os.fs
 
-from pathlib import Path
-
 if TYPE_CHECKING:
-    from typing import Literal, Text, Union, IO, Any
     from collections.abc import Callable, Sequence
     from os import PathLike
+    from typing import IO, Any, Literal, Text, Union
+
     from e3.mypy import assert_never
 
     UnpackAutoRemoveDirType = Literal["auto"]

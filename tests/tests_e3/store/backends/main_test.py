@@ -1,7 +1,8 @@
 """Tests for e3.store.backends."""
 
-from e3.store.cache.backends.filecache import FileCache
 from pathlib import Path
+
+from e3.store.cache.backends.filecache import FileCache
 
 
 def test_cache() -> None:

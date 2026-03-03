@@ -10,10 +10,10 @@ import e3.log
 from e3.anod import qualifier_str_to_dict
 from e3.env import BaseEnv
 
-
 if TYPE_CHECKING:
     from typing import Any, Hashable, Literal
-    from e3.anod.spec import Anod, DEPENDENCY_PRIMITIVE
+
+    from e3.anod.spec import DEPENDENCY_PRIMITIVE, Anod
 
 logger = e3.log.getLogger("e3.anod.deps")
 

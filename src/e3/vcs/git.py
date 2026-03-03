@@ -33,9 +33,10 @@ from e3.text import bytes_as_str
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import Any, Final, IO, Literal, Optional, TextIO, Union
     from collections.abc import Iterator
-    from e3.os.process import Run, DEVNULL_VALUE, PIPE_VALUE
+    from typing import IO, Any, Final, Literal, Optional, TextIO, Union
+
+    from e3.os.process import DEVNULL_VALUE, PIPE_VALUE, Run
 
     Git_Cmd = Union[list[str], list[Optional[str]]]
     GIT_LOG_STREAM_VALUE = Literal[-4]

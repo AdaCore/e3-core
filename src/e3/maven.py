@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from defusedxml.ElementTree import XMLParser
 import hashlib
+
 import requests
+from defusedxml.ElementTree import XMLParser
 
 from e3.log import getLogger
 

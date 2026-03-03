@@ -1,10 +1,12 @@
 """Tests for e3.sys."""
 
-from pathlib import Path
 import ast
 import logging
 import os
 import sys
+from pathlib import Path
+
+import pytest
 
 import e3.env
 import e3.fs
@@ -12,8 +14,6 @@ import e3.os.fs
 import e3.os.process
 import e3.sys
 from e3.sys import RewriteImportNodeTransformer, RewriteImportRule, RewriteNodeError
-
-import pytest
 
 
 def test_filtering_import() -> None:

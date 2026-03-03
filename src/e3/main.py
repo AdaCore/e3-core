@@ -26,13 +26,12 @@ will also be provided::
 
 from __future__ import annotations
 
-from argparse import ArgumentParser
 import logging
 import os
 import signal
 import sys
 import threading
-
+from argparse import ArgumentParser
 from typing import TYPE_CHECKING
 
 import e3
@@ -40,10 +39,10 @@ import e3.log
 from e3.env import Env
 
 if TYPE_CHECKING:
-    from types import FrameType
-    from typing import NoReturn
     from argparse import Namespace
     from collections.abc import Callable
+    from types import FrameType
+    from typing import NoReturn
 
 
 class Main:
