@@ -194,7 +194,7 @@ def unpack_archive(
     logger.debug("unpack %s in %s", filename, dest)
     # First do some checks such as archive existence or destination directory
     # existence.
-    if fileobj is None and not os.path.isfile(filename):
+    if fileobj is None and not Path(filename).is_file():
         raise ArchiveError(origin="unpack_archive", message=f"cannot find {filename}")
 
     if not os.path.isdir(dest):

@@ -73,7 +73,7 @@ def test_build_info_ready(store) -> None:
 def test_file(store) -> None:
     buildinfo = store.create_build_id("test", "20241028", "1.0")
     touch("test.txt")
-    assert os.path.isfile("test.txt")
+    assert Path("test.txt").is_file()
     with Path("test.txt").open("w") as fd:
         fd.write("m")
     path_abs = os.path.abspath("test.txt")

@@ -10,7 +10,7 @@ from e3.python.pypi import PyPIClosure, PyPIError
 
 import yaml
 from os import listdir
-from os.path import isfile, basename
+from os.path import basename
 import pytest
 
 
@@ -37,11 +37,11 @@ def generate_py_pkg_source(
 
 def test_wheel() -> None:
     wheel1 = generate_py_pkg_source("src1")
-    assert isfile(wheel1.path)
+    assert Path(wheel1.path).is_file()
     assert not wheel1.requirements
 
     wheel2 = generate_py_pkg_source("src2", requires=["src1<=2.0.0"])
-    assert isfile(wheel2.path)
+    assert Path(wheel2.path).is_file()
     assert len(wheel2.requirements) == 1
 
     mkdir(".cache")
@@ -120,15 +120,15 @@ def test_pypi_closure_tool() -> None:
 def test_star_requirements() -> None:
     """Test package requirements ending with * with != operator."""
     wheel1 = generate_py_pkg_source("src1", version="1.0.4")
-    assert isfile(wheel1.path)
+    assert Path(wheel1.path).is_file()
     assert not wheel1.requirements
 
     wheel2 = generate_py_pkg_source("src2", requires=["src1!=1.0.*"])
-    assert isfile(wheel2.path)
+    assert Path(wheel2.path).is_file()
     assert len(wheel2.requirements) == 1
 
     wheel3 = generate_py_pkg_source("src1", version="1.1.4")
-    assert isfile(wheel3.path)
+    assert Path(wheel3.path).is_file()
     assert not wheel3.requirements
 
     mkdir(".cache")

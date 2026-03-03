@@ -3,7 +3,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-from os.path import abspath, dirname, isfile, isdir
+from os.path import abspath, dirname, isdir
 from typing import TYPE_CHECKING
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
@@ -12,7 +12,6 @@ import random
 import string
 import json
 import shutil
-import os
 from e3.fs import mkdir, cp
 from e3.os.fs import touch, which
 from e3.python.wheel import Wheel
@@ -73,7 +72,7 @@ class PypiSimulator:
             dest_dir=".",
             build_args=["--no-build-isolation", "--no-index"],
         )
-        assert isfile(pkg.path)
+        assert Path(pkg.path).is_file()
 
         with Path(pkg.path).open("rb") as f:
             result = f.read()
@@ -97,7 +96,7 @@ class PypiSimulator:
         package = m.group("package")
 
         path = self.DATA_DIR / "simple" / f"{package}.html"
-        if not isfile(path):
+        if not path.is_file():
             context.status_code = 404
             return json.dumps(
                 {
@@ -134,7 +133,7 @@ class PypiSimulator:
         package_name = "-".join(package.split("-", 2)[0:2])
         metadata_file = self.DATA_DIR / "metadata" / package_name
         mkdir(f"{package_name}/{package_name}.dist-info")
-        if os.path.isfile(metadata_file):
+        if Path(metadata_file).is_file():
             cp(metadata_file, f"{package_name}/{package_name}.dist-info/METADATA")
         else:
             touch(f"{package_name}/{package_name}.dist-info/METADATA")

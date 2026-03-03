@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 
 import e3.error
 
@@ -110,7 +109,7 @@ def load_from_json_file(
         exist, otherwise return default value
     :return: a Python object
     """
-    if os.path.isfile(path):
+    if Path(path).is_file():
         with Path(path).open() as fd:
             content = json.load(fd)
         return content

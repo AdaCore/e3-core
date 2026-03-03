@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime
 import json
-import os
 
 from dateutil import parser as dateutil_parser
 from pathlib import Path
@@ -368,7 +367,7 @@ class Component(object):
         :return: a component instance
         """
         meta_path = cls.metadata_path(dest_dir=dest_dir, name=name)
-        if not os.path.isfile(meta_path):
+        if not Path(meta_path).is_file():
             if ignore_errors:
                 return None
             raise StoreError(f"non existing metafile {meta_path}")

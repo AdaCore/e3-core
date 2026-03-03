@@ -51,7 +51,7 @@ class BuildSpace:
         """
         # Start by verifying that the file used as build space markers
         # exists.
-        if not os.path.isfile(Path(self.root_dir, ".buildspace")):
+        if not Path(self.root_dir, ".buildspace").is_file():
             return False
         # Next, verify that all the necessary directories exist as well.
         for d in self.DIRS:

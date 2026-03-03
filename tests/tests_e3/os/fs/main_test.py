@@ -112,7 +112,7 @@ def test_mv() -> None:
     os.makedirs("dest")
     e3.os.fs.mv("d", "dest")
 
-    assert os.path.isfile(Path("dest", "d"))
+    assert Path("dest", "d").is_file()
 
 
 def test_df() -> None:
@@ -154,6 +154,6 @@ def test_touch() -> None:
 
 def test_which() -> None:
     path_to_e3 = e3.os.fs.which("e3")
-    assert os.path.isfile(path_to_e3)
+    assert Path(path_to_e3).is_file()
 
     assert e3.os.fs.which(Path(path_to_e3)) == path_to_e3

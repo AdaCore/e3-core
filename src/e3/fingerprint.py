@@ -92,7 +92,7 @@ class Fingerprint:
         an element for which key is the basename of the file and value is
         is the sha256 of the content
         """
-        if os.path.isfile(filename):
+        if Path(filename).is_file():
             self.elements[os.path.abspath(filename)] = sha256(filename)
         else:
             self.elements[os.path.abspath(filename)] = ""
@@ -214,7 +214,7 @@ class Fingerprint:
         :param filename: The name of the file where to load the fingerprint
             from.
         """
-        if not os.path.isfile(filename):
+        if not Path(filename).is_file():
             return None
 
         with Path(filename).open() as f:

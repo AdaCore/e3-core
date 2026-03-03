@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import hashlib
-import os
 from pathlib import Path
 
 import e3.error
@@ -23,7 +22,7 @@ def __compute_hash(
     path: PathLike[str] | str,
     kind: Literal["md5", "sha1", "sha256", "sha512"],
 ) -> str:
-    if not os.path.isfile(path):
+    if not Path(path).is_file():
         raise HashError(kind, f"cannot find {path}")
 
     with Path(path).open("rb") as f:

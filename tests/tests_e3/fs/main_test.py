@@ -221,7 +221,7 @@ def test_mv() -> None:
 
     e3.fs.mv("a*", "b")
     for fname in ("a1", "a2", "a3"):
-        assert os.path.isfile(Path("b", fname))
+        assert Path("b", fname).is_file()
 
     e3.os.fs.touch("a1")
     with pytest.raises(e3.fs.FSError) as err:
@@ -229,7 +229,7 @@ def test_mv() -> None:
     assert re.search("Destination path 'b.*a1' already exists", str(err))
 
     e3.fs.mv("1", "b")
-    assert os.path.isfile(Path("b", "1"))
+    assert Path("b", "1").is_file()
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.mv(("1*", " 2", "3"), "c")
@@ -237,7 +237,7 @@ def test_mv() -> None:
     e3.fs.mkdir("c")
     e3.fs.mv(("1*", "2", "3"), "c")
     for fname in ("2", "3", "11", "12", "13"):
-        assert os.path.isfile(Path("c", fname))
+        assert Path("c", fname).is_file()
 
     with pytest.raises(e3.fs.FSError):
         e3.fs.mv("d*", "b")
@@ -563,7 +563,7 @@ def test_safe_copy() -> None:
     e3.fs.mkdir("b")
     e3.fs.mkdir("b/f")
     e3.fs.sync_tree("a", "b")
-    assert os.path.isfile("b/f")
+    assert Path("b/f").is_file()
 
     # Check that target file permission are changed to allow copying new
     # content.
