@@ -41,6 +41,10 @@ class OrderedDictYAMLLoader(Loader):
     """
 
     def __init__(self, stream: IO[str]) -> None:
+        """Initialize OrderedDictYAMLLoader.
+
+        :param stream: input stream
+        """
         self.name = None
         self.stream = stream
         super().__init__(stream)
@@ -50,6 +54,10 @@ class OrderedDictYAMLLoader(Loader):
         self.add_constructor("!include", type(self).yaml_include)  # type: ignore
 
     def yaml_include(self, node: Node) -> OrderedDict:
+        """Include another YAML file.
+
+        :param node: YAML node containing the filename
+        """
         # Get the path out of the yaml file
         if self.name is None:
             if not isinstance(self.stream, str):
@@ -64,12 +72,21 @@ class OrderedDictYAMLLoader(Loader):
             return yaml.load(inputfile, OrderedDictYAMLLoader)
 
     def construct_yaml_map(self, node: Node) -> Generator[OrderedDict, None, None]:
+        """Construct YAML map as OrderedDict.
+
+        :param node: YAML node
+        """
         data: OrderedDict = OrderedDict()
         yield data
         value = self.construct_mapping(node)
         data.update(value)
 
     def construct_mapping(self, node: Node, deep: bool = False) -> OrderedDict:
+        """Construct mapping preserving order.
+
+        :param node: YAML node
+        :param deep: whether to perform deep construction
+        """
         if isinstance(node, yaml.MappingNode):
             self.flatten_mapping(node)
         else:
@@ -110,7 +127,10 @@ class OrderedDictYAMLLoader(Loader):
 
 
 def load_ordered(filename: str) -> OrderedDict:
-    """Load a .yaml file, keep the file order."""
+    """Load a .yaml file, keep the file order.
+
+    :param filename: path to YAML file
+    """
     with Path(filename).open() as f:
         return yaml.load(f, OrderedDictYAMLLoader)
 
@@ -155,6 +175,11 @@ class CaseParser:
     """
 
     def __init__(self, initial_config: dict, case_prefix: str = "case_") -> None:
+        """Initialize CaseParser.
+
+        :param initial_config: initial configuration as dictionary
+        :param case_prefix: prefix for case keys
+        """
         self.__state = initial_config.copy()
         self.case_prefix = case_prefix
 

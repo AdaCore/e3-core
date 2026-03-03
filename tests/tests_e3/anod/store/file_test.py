@@ -116,6 +116,7 @@ def test_file_metadata(store) -> None:  # type: ignore[no-untyped-def]
 
 
 def test_update_metadata(store) -> None:
+    """Test update metadata."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     with Path("my-src").open("w") as fd:
@@ -156,6 +157,7 @@ def test_update_metadata(store) -> None:
 
 
 def test_push(store) -> None:
+    """Test push."""
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")
 
     with Path("myfile.txt").open("x") as f:
@@ -186,6 +188,7 @@ def test_push(store) -> None:
 
 
 def test_download(store) -> None:
+    """Test download."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     with Path("my-src").open("w") as fd:
@@ -269,6 +272,7 @@ def test_download(store) -> None:
 
 
 def test_download_as_name(store) -> None:
+    """Test download as name."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     touch("my-src")
@@ -299,6 +303,7 @@ def test_download_as_name(store) -> None:
 
 
 def test_corrupted_meta_file(store) -> None:
+    """Test corrupted meta file."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     touch("my-src")
@@ -345,6 +350,7 @@ def test_corrupted_meta_file(store) -> None:
 
 
 def test_upload_thirdparty(store) -> None:
+    """Test upload thirdparty."""
     bid = store.create_build_id("thirdparties", "20271031", "1.0")["_id"]
     store.mark_build_ready(bid)
     del bid
@@ -374,6 +380,7 @@ def test_upload_thirdparty(store) -> None:
 
 
 def test_upload_thirdparty_from_dir(store) -> None:
+    """Test upload thirdparty from dir."""
     bid = store.create_build_id("thirdparties", "20271031", "1.0")["_id"]
     store.mark_build_ready(bid)
     del bid
@@ -401,6 +408,7 @@ def test_upload_thirdparty_from_dir(store) -> None:
 
 
 def test_download_and_unpack(store) -> None:
+    """Test download and unpack."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
 
@@ -467,6 +475,7 @@ def test_download_and_unpack(store) -> None:
 
 
 def test_file_eq_neq() -> None:
+    """Test file eq neq."""
     ref_f = File(
         build_id="a" * 24,
         kind=FileKind.source,

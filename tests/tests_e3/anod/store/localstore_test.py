@@ -138,6 +138,7 @@ def test_basic(store: StoreRW) -> None:
 
 
 def test_add_build_info_from_store(store: StoreRW) -> None:
+    """Test add build info from store."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
 
@@ -180,6 +181,7 @@ def test_add_build_info_from_store(store: StoreRW) -> None:
 
 
 def test_insert_files_with_same_resource_id(store: StoreRW) -> None:
+    """Test insert files with same resource id."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
     store.mark_build_ready(build_id)
 
@@ -239,6 +241,7 @@ def test_insert_files_with_same_resource_id(store: StoreRW) -> None:
 
 
 def test_component_with_attachments_list(store: StoreRW) -> None:
+    """Test component with attachments list."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
 
@@ -308,6 +311,7 @@ def test_component_with_attachments_list(store: StoreRW) -> None:
 
 
 def test_exceptions(store: StoreRW) -> None:
+    """Test exceptions."""
     with LocalStore(db="empty.db", online_store=store) as local:
         with pytest.raises(
             StoreError,
@@ -317,6 +321,7 @@ def test_exceptions(store: StoreRW) -> None:
 
 
 def test_bulk_update(store: StoreRW) -> None:
+    """Test bulk update."""
     with Path("file1.txt").open("w") as f:
         f.write("Carpette is a cat")
     with Path("file2.txt").open("w") as f:

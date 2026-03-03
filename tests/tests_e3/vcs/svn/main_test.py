@@ -12,6 +12,7 @@ from e3.vcs.svn import SVNError, SVNRepository
 
 
 def file_url(path, unix=False) -> str:
+    """Convert a file path to a file:// URL for SVN."""
     if sys.platform == "win32":
         if len(path) > 1 and path[1] == ":":
             # svn info returns the URL with an uppercase letter drive
@@ -27,6 +28,7 @@ def file_url(path, unix=False) -> str:
     reason="test using SVN: not available in our windows CI image at the moment.",
 )
 def test_svn_repo(svn) -> None:
+    """Test svn repo."""
     cwd = Path.cwd()
 
     # --- create local project

@@ -114,6 +114,7 @@ def test_create_build_info_from_invalid_id(store) -> None:
 
 
 def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
+    """Test get build info list."""
     BuildInfo.create(
         store=store,
         setup=DEFAULT_SETUP,
@@ -199,6 +200,7 @@ def test_get_latest_build_not_found(store) -> None:
 
 
 def test_get_latest_build_ready(store) -> None:
+    """Test get labuild ready."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     bid = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
@@ -213,6 +215,7 @@ def test_get_latest_build_ready(store) -> None:
 
 
 def test_get_latest_build_ready_or_not(store) -> None:
+    """Test get labuild ready or not."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     bid = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
@@ -227,6 +230,7 @@ def test_get_latest_build_ready_or_not(store) -> None:
 
 
 def test_get_source_list(store) -> None:
+    """Test get source list."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
 
@@ -312,6 +316,7 @@ def test_get_source_list(store) -> None:
 
 
 def test_get_build_data(store) -> None:
+    """Test get build data."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
 
@@ -429,6 +434,7 @@ def test_get_build_data(store) -> None:
 
 
 def test_get_component_list(store) -> None:
+    """Test get component list."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
 
@@ -478,6 +484,7 @@ def test_get_component_list(store) -> None:
 
 
 def test_get_source_info(store) -> None:
+    """Test get source info."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     touch("test")
@@ -503,6 +510,7 @@ def test_get_source_info(store) -> None:
 
 
 def test_wait(store) -> None:
+    """Test wait."""
     with pytest.raises(E3Error):
         bid = BuildInfo.wait(
             store=store, timeout=0.1, setup=DEFAULT_SETUP, retry_delay=0.1
@@ -521,6 +529,7 @@ def test_wait(store) -> None:
 
 
 def test_build_info_eq_ne() -> None:
+    """Test build info eq ne."""
     ref_bi = BuildInfo(
         build_date="20170915",
         setup=DEFAULT_SETUP,
@@ -598,6 +607,7 @@ def test_build_info_eq_ne() -> None:
 
 
 def test_build_info_copy(store) -> None:
+    """Test build info copy."""
     OTHER_SETUP = f"{DEFAULT_SETUP}-other"
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")
     copy = bid.copy(OTHER_SETUP, mark_as_ready=False)

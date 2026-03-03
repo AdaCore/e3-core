@@ -7,6 +7,7 @@ import e3.platform
 
 
 def test_platform() -> None:
+    """Test platform."""
     a = e3.platform.Platform.get()
     b = e3.platform.Platform.get()
 
@@ -22,11 +23,13 @@ def test_platform() -> None:
 
 
 def test_is_host() -> None:
+    """Test is host."""
     p = e3.platform.Platform.get(machine=e3.env.Env().build.machine)
     assert p.is_host
 
 
 def test_immutable() -> None:
+    """Test immutable."""
     a = e3.platform.Platform.get()
 
     with pytest.raises(AttributeError):

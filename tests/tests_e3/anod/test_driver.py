@@ -11,6 +11,7 @@ import e3.anod.spec
 
 
 def test_simple_driver() -> None:
+    """Test simple driver."""
     sandbox = e3.anod.sandbox.SandBox(root_dir=str(Path.cwd()))
 
     class Simple(e3.anod.spec.Anod):
@@ -28,6 +29,8 @@ def test_simple_driver() -> None:
 
 
 def test_deps_driver() -> None:
+    """Test deps driver."""
+
     class Deps(e3.anod.spec.Anod):
         build_deps = [e3.anod.spec.Anod.Dependency(name="parent")]
 

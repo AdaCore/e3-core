@@ -29,6 +29,8 @@ class NPMLinksParser:
     def feed(self, data: str) -> NPMLinksParser:
         """Feed this parser with retrieved JSON data.
 
+        :param data: JSON data to parse
+
         .. seealso::
 
             :py:meth:`html.parser.HTMLParser.feed`

@@ -6,6 +6,7 @@ from e3.maven import Maven
 
 
 def test_maven(maven_central) -> None:
+    """Test maven."""
     mvn = Maven()
 
     maven_central.register_package(

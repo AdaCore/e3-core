@@ -15,9 +15,17 @@ if TYPE_CHECKING:
 
 class FileHandler(EventHandler):
     def __init__(self, log_dir: str) -> None:
+        """Initialize file handler.
+
+        :param log_dir: directory where to write event files
+        """
         self.log_dir = log_dir
 
     def send_event(self, event: Event) -> bool:
+        """Send event to file.
+
+        :param event: event to send
+        """
         d = event.as_dict()
         prefix = f"{event.name}-{event.uid}"
         event_file = Path(self.log_dir, f"{prefix}-{unique_id()}.json")
@@ -31,6 +39,10 @@ class FileHandler(EventHandler):
 
     @classmethod
     def decode_config(cls, config_str: str) -> dict[str, str]:
+        """Decode configuration string.
+
+        :param config_str: configuration string
+        """
         return {"log_dir": config_str}
 
     def encode_config(self) -> str:

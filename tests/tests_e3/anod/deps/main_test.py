@@ -6,6 +6,7 @@ import e3.anod.deps
 
 
 def test_buildvar() -> None:
+    """Test buildvar."""
     with pytest.raises(AssertionError):
         e3.anod.deps.BuildVar("foo", [1, 2])
 
@@ -15,6 +16,7 @@ def test_buildvar() -> None:
 
 
 def test_dependency() -> None:
+    """Test dependency."""
     d = e3.anod.deps.Dependency("dep", product_verison="20.0855369232", build="default")
 
     parent_env = e3.env.BaseEnv(build=e3.platform.Platform.get("arm-ios"))
@@ -42,6 +44,7 @@ def test_dependency() -> None:
 
 
 def test_dependency2() -> None:
+    """Test dependency2."""
     d = e3.anod.deps.Dependency("dep", product_verison="20.0855369232", host="default")
 
     parent_env = e3.env.BaseEnv(build=e3.platform.Platform.get("arm-ios"))
@@ -65,6 +68,7 @@ def test_dependency2() -> None:
 
 
 def test_dependency3() -> None:
+    """Test dependency3."""
     d = e3.anod.deps.Dependency(
         "dep", product_verison="20.0855369232", target="default"
     )

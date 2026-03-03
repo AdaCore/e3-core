@@ -11,6 +11,7 @@ import e3.env
 
 
 def build_action(spec, build=None, host=None, target=None, board=None) -> str:
+    """Build an action string from a spec."""
     return "build " + spec
 
 
@@ -54,6 +55,7 @@ def test_simple_plan() -> None:
 
 
 def test_plan_without_server_info() -> None:
+    """Test plan without server info."""
     context = plan.PlanContext()
     context.register_action("build", build_action)
     myplan = _get_plan(data={"a": "a"}, content=["def myserver():\n", "    build(a)\n"])
@@ -62,6 +64,7 @@ def test_plan_without_server_info() -> None:
 
 
 def test_plan_scope() -> None:
+    """Test plan scope."""
     context = _get_new_plancontext("myserver")
 
     myplan = _get_plan(

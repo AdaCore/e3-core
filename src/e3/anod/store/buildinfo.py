@@ -61,8 +61,9 @@ class BuildInfo(object):
     ) -> BuildInfoType:
         """Create a BuildInfo from the result of a Store build info request.
 
-        :param data: The dictionary returned by Store after a build info request.
+        :param data: dictionary returned by Store after a build info request
         :param store: a Store instance
+        :return: a BuildInfo instance
         """
         return cls(
             build_date=str(data["build_date"]),
@@ -86,12 +87,12 @@ class BuildInfo(object):
     ) -> None:
         """Initialize the BuildInfo object.
 
-        :param build_date: Same as the attribute.
-        :param setup: Same as the attribute.
-        :param creation_date: Same as the attribute.
-        :param build_id: Same as the attribute.
-        :param build_version: Same as the attribute.
-        :param isready: Same as the attribute.
+        :param build_date: the build date
+        :param setup: the build setup
+        :param creation_date: the build's creation date
+        :param id: the build's ID
+        :param build_version: the build version
+        :param isready: True if the build is ready, False otherwise
         :param store: a store instance
         """
         self.build_date = build_date

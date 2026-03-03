@@ -13,6 +13,7 @@ import e3.os.fs
 
 
 def test_smtp_event() -> None:
+    """Test smtp event."""
     e3.event.add_handler(
         "smtp",
         subject="test subject",

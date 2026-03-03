@@ -65,6 +65,7 @@ def create_component_with_attachments() -> tuple[Component, File, File]:
 
 
 def push_component(store, metadata: dict[str, object] | None = None) -> Component:
+    """Create and push a component to the store."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
     del build_id
@@ -116,6 +117,7 @@ def test_component_push(store) -> None:
 
 
 def test_component_eq_ne() -> None:
+    """Test component eq ne."""
     ref_build_id = "a" * 24
 
     ref_date = datetime.datetime.now(datetime.timezone.utc)
@@ -434,6 +436,7 @@ def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untype
 
 
 def test_component_download(store) -> None:
+    """Test component download."""
     bid = BuildInfo.create(store=store, setup=DEFAULT_SETUP, version="1.0")
     c = Component(
         build_id=bid.id,
@@ -528,6 +531,7 @@ def test_component_meta_file() -> None:
 
 
 def test_component_latest(store) -> None:
+    """Test component latest."""
     buildinfo = store.create_build_id("test", "20241029", "1.0")
     store.mark_build_ready(buildinfo["_id"])
 

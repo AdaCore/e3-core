@@ -111,6 +111,7 @@ class AuthorizationHeaderHandler(ContentDispoHandler):
 
 
 def run_server(handler, func) -> None:
+    """Run a test HTTP server in a daemon thread."""
     server = HTTPServer(("localhost", 0), handler)
     try:
         thread = threading.Thread(target=server.serve_forever)

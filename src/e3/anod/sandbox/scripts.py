@@ -15,6 +15,12 @@ if TYPE_CHECKING:
 def anod_cmdline(
     subparsers: _SubParsersAction, action_name: str, action_help: str
 ) -> None:
+    """Add anod command line parser to subparsers.
+
+    :param subparsers: subparsers object to add the parser to
+    :param action_name: name of the action
+    :param action_help: help text for the action
+    """
     parser = subparsers.add_parser(action_name, help=action_help)
     parser.set_defaults(action_name=action_name)
     parser.add_argument("spec", metavar="SPEC", help="The specification file name")

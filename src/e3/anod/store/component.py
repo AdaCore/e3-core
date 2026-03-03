@@ -95,7 +95,26 @@ class Component(object):
         store: StoreReadInterface | StoreRWInterface | None = None,
         metadata: dict[str, object] | None = None,
     ) -> None:
-        """Initialize a Component."""
+        """Initialize a Component.
+
+        :param build_id: the build ID
+        :param name: the component name
+        :param platform: the platform
+        :param version: the version
+        :param specname: the name of the spec that created the component
+        :param files: list of binary files
+        :param sources: list of sources
+        :param readme: readme file if present
+        :param attachments: attachments as a dict or list
+        :param releases: list of releases
+        :param is_valid: True if the component is valid
+        :param is_published: True if published
+        :param component_id: ID of the component if defined
+        :param creation_date: component creation date
+        :param build_info: build info
+        :param store: the store instance defined for this component
+        :param metadata: additional metadata dictionary
+        """
         self.component_id = component_id
         self.build_id = build_id
         self.name = name
@@ -650,6 +669,7 @@ class Component(object):
     def __ne__(self: ComponentType, other: object) -> bool:
         """Inverse of self.__eq__.
 
+        :param other: the object to compare with
         :return: True if not self.__eq__(other).
         """
         return not self.__eq__(other)

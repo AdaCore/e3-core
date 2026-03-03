@@ -11,6 +11,7 @@ import e3.hash
 
 
 def test_hash() -> None:
+    """Test hash."""
     with Path("to-hash.txt").open("wb") as f:
         f.write(b"content\n")
     assert e3.hash.md5(f.name) == "f75b8179e4bbe7e2b4a074dcef62de95"

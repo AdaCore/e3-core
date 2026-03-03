@@ -173,6 +173,11 @@ class UnicodeString(Structure):
     _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]
 
     def __init__(self, value: str | None = None, max_length: int = 0) -> None:
+        """Initialize a Unicode string structure.
+
+        :param value: string value to store
+        :param max_length: maximum length of the string buffer
+        """
         strbuf = None
         length = 0
         if value is not None or max_length > 0:
@@ -205,6 +210,10 @@ class FileTime(Structure):
     _fields_ = [("filetime_low", DWORD), ("filetime_high", DWORD)]
 
     def __init__(self, t: datetime) -> None:
+        """Initialize a FileTime structure.
+
+        :param t: datetime to convert to Windows file time
+        """
         # Transform date to Windows timestamp
         timestamp = (t - datetime(1970, 1, 1)).total_seconds()
 
@@ -244,6 +253,10 @@ class LargeFileTime(Structure):
     _fields_ = [("filetime", LARGE_INTEGER)]
 
     def __init__(self, t: datetime) -> None:
+        """Initialize a LargeFileTime structure.
+
+        :param t: datetime to convert to Windows file time
+        """
         # Transform date to Windows timestamp
         timestamp = (t - datetime(1970, 1, 1)).total_seconds()
 
@@ -527,6 +540,12 @@ if sys.platform == "win32":
 
 class NTException(E3Error):
     def __init__(self, status: int, message: str, origin: str | None = None) -> None:
+        """Initialize an NT exception.
+
+        :param status: NT status code
+        :param message: error message
+        :param origin: origin of the error
+        """
         self.status = status
         if self.status < 0:
             self.status += 2**32

@@ -141,6 +141,10 @@ class SandBox:
             yaml.safe_dump({"cmd_line": cmd_line}, f)
 
     def get_configuration(self) -> dict:
+        """Load sandbox configuration from metadata file.
+
+        :return: configuration dictionary loaded from sandbox.yaml
+        """
         sandbox_conf = Path(self.meta_dir, "sandbox.yaml")
         with sandbox_conf.open() as f:
             return yaml.safe_load(f)

@@ -111,6 +111,8 @@ class Scheduler:
         to a process spawned by a Job. On Unixes consequences of such leak is
         more a security concern than an operational one. On Windows, this can
         lead easily to file locking issues and thus might cause crashes.
+
+        :param job: job to collect
         """
         with Job.lock:
             return self.collect(job)
@@ -125,6 +127,11 @@ class Scheduler:
         """Protect call to job_provider.
 
         See safe_collect commment above.
+
+        :param uid: unique job identifier
+        :param data: job data
+        :param predecessors: set of predecessor job IDs
+        :param notify_end: notification function
         """
         with Job.lock:
             return self.job_provider(uid, data, predecessors, notify_end)
@@ -142,6 +149,13 @@ class Scheduler:
             predecessors: FrozenSet[str],
             notify_end: Callable[[str], None],
         ) -> Job:
+            """Create a job instance.
+
+            :param uid: unique job identifier
+            :param data: job data
+            :param predecessors: set of predecessor job IDs
+            :param notify_end: notification function
+            """
             del predecessors
             return job_class(uid, data, notify_end)
 
@@ -190,7 +204,10 @@ class Scheduler:
         )
 
     def run(self, dag: DAG) -> None:
-        """Launch the scheduler."""
+        """Launch the scheduler.
+
+        :param dag: DAG of jobs to execute
+        """
         self.init_state(dag)
 
         try:
@@ -210,7 +227,10 @@ class Scheduler:
         self.stop_time = datetime.now()
 
     def push(self, job: Job) -> None:
-        """Push a job into a queue."""
+        """Push a job into a queue.
+
+        :param job: job to push
+        """
         # We use a tuple here to ensure the stability of the queue
         # when two jobs have similar priorities.
         heapq.heappush(

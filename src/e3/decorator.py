@@ -116,6 +116,10 @@ class memoize:
         return self.func.__doc__ or ""
 
     def __get__(self, obj: Any, objtype: Any) -> Any:
-        """Support instance methods."""
+        """Support instance methods.
+
+        :param obj: instance object
+        :param objtype: object type
+        """
         del objtype
         return partial(self.__call__, obj)

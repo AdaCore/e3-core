@@ -12,12 +12,14 @@ if sys.platform == "win32":
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_invalid_handle() -> None:
+    """Test invalid handle."""
     with pytest.raises(WindowsError):
         process_exit_code(42)
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
 def test_wait_for_objects() -> None:
+    """Test wait for objects."""
     long_cmd = [sys.executable, "-c", "import time; time.sleep(40.0)"]
     short_cmd = [sys.executable, "-c", "pass"]
 

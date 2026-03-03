@@ -12,6 +12,7 @@ from e3.fingerprint import Fingerprint
 
 
 def test_fingerprint() -> None:
+    """Test fingerprint."""
     f1 = Fingerprint()
     f1.add("foo", "2")
 
@@ -50,6 +51,8 @@ def test_fingerprint() -> None:
 
 
 def test_add_order_not_important() -> None:
+    """Test add order not important."""
+
     def create_fingerprint(first, second, third):
         """Create a fingerprint with 3 elements added in the given order.
 
@@ -132,6 +135,7 @@ def test_fingerprint_eq() -> None:
 
 
 def test_fingerprint_save_and_load() -> None:
+    """Test fingerprint save and load."""
     # Create a directory where to store our fingerprints, allowing us
     # to use any fingerprint name without potentially colliding with
     # other files used by this testcase.

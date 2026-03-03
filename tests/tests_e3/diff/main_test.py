@@ -16,6 +16,7 @@ def test_non_existing() -> None:
 
 
 def test_patch() -> None:
+    """Test patch."""
     test_dir = Path(os.path.dirname(__file__))
     file_to_patch = test_dir / "file_to_patch.orig.txt"
     file_after_patch = test_dir / "file_to_patch.new.txt"
@@ -56,6 +57,7 @@ def test_patch() -> None:
 
 
 def test_patch_ignore_all(caplog) -> None:
+    """Test patch ignore all."""
     test_dir = Path(os.path.dirname(__file__))
     file_to_patch = test_dir / "file_to_patch.orig.txt"
     file_patch2 = test_dir / "patch2.txt"
@@ -69,6 +71,7 @@ def test_patch_ignore_all(caplog) -> None:
 
 
 def test_discarded() -> None:
+    """Test discarded."""
     test_dir = Path(os.path.dirname(__file__))
     orig = test_dir / "data.txt"
     new = test_dir / "data_new.txt"
@@ -106,6 +109,7 @@ def test_discarded() -> None:
 
 
 def test_patch_invalid() -> None:
+    """Test patch invalid."""
     test_dir = Path(os.path.dirname(__file__))
     file_to_patch = test_dir / "file_to_patch.orig.txt"
     file_patch2 = test_dir / "patch2.txt"
@@ -123,6 +127,7 @@ def test_patch_invalid() -> None:
 
 
 def test_patch_git_format() -> None:
+    """Test patch git format."""
     test_dir = Path(os.path.dirname(__file__))
     file_to_patch = test_dir / "git_file.txt"
     patch_file = test_dir / "git_diff.patch"
@@ -139,6 +144,7 @@ def test_patch_git_format() -> None:
 
 
 def test_patch_git_format_ignore() -> None:
+    """Test patch git format ignore."""
     test_dir = Path(os.path.dirname(__file__))
     file_to_patch = test_dir / "git_file.txt"
     patch_file = test_dir / "*.patch"
@@ -175,6 +181,7 @@ def test_patch_git_format_ignore() -> None:
 
 
 def test_patch_git_with_headers() -> None:
+    """Test patch git with headers."""
     test_dir = Path(os.path.dirname(__file__))
     patch_file = test_dir / "git_patch_with_header"
 
@@ -208,6 +215,7 @@ def test_patch_git_with_headers() -> None:
 
 
 def test_patch_git_binary() -> None:
+    """Test patch git binary."""
     test_dir = Path(os.path.dirname(__file__))
     patch_file = test_dir / "unicorn.patch"
     cwd = Path.cwd()

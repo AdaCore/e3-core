@@ -46,6 +46,7 @@ def test_git_non_utf8(git) -> None:
 
 
 def test_git_repo(git) -> None:
+    """Test git repo."""
     working_tree = Path.cwd() / "working_tree"
     working_tree2 = Path.cwd() / "working_tree2"
     repo = GitRepository(str(working_tree))

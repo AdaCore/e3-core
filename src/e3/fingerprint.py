@@ -122,12 +122,15 @@ class Fingerprint:
         """Implement != operator for two fingerprints.
 
         See __eq__ functions.
+
+        :param other: object to compare with
         """
         return not self == other
 
     def compare_to(self, other: object) -> dict[str, set[str]] | None:
         """Compare two fingerprints and return the differences.
 
+        :param other: another fingerprint to compare with
         :return: a dictionary that list the differences or None if the two
           Fingerprint are equals. The returned dictionary contains three
           items. 'updated' list the elements that are in both fingerprints but

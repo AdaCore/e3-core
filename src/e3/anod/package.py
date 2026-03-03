@@ -157,11 +157,17 @@ class Source:
         self.other_sources: list[Source] = []
 
     def set_builder(self, builder_function: SourceBuilder) -> None:
-        """Set the SourceBuilder associated to this Source object."""
+        """Set the SourceBuilder associated to this Source object.
+
+        :param builder_function: the source builder to associate
+        """
         self.builder = builder_function
 
     def set_other_sources(self, other_sources: list[Source]) -> None:
-        """Get the list of other sources to compute ``ignore`` property."""
+        """Get the list of other sources to compute ``ignore`` property.
+
+        :param other_sources: list of other Source objects
+        """
         self.other_sources = other_sources
 
     @property
@@ -235,6 +241,12 @@ class SourceBuilder:
         self.__apply_patch = apply_patch
 
     def fullname(self, *args: Any, **kwargs: Any) -> str:
+        """Return the full name of the source package.
+
+        :param args: arguments passed to the fullname callback
+        :param kwargs: keyword arguments passed to the fullname callback
+        :return: the full package name
+        """
         # ??? add support for the GPL mode
         return self.__fullname(*args, **kwargs)  # type: ignore
 
@@ -262,6 +274,11 @@ class SourceBuilder:
         # Set default function (a basic sync_tree call) that ignore
         # .svn, .git, .cvs, .cvsignore and .gitignore files
         def default_prepare_src(repos: dict[str, dict[str, str]], dest: str) -> None:
+            """Prepare source from a single repository.
+
+            :param repos: dictionary of repository information
+            :param dest: destination directory for the source
+            """
             sync_tree(
                 list(repos.values())[0]["working_dir"], dest, ignore=VCS_IGNORE_LIST
             )
@@ -276,7 +293,11 @@ class SourceBuilder:
         """
 
         def default_apply_patch(_: str, patch_file: str, dest: str) -> None:
-            """Apply a patch file using e3.diff.patch."""
+            """Apply a patch file using e3.diff.patch.
+
+            :param patch_file: path to the patch file
+            :param dest: destination directory to apply the patch
+            """
             e3.log.debug("applying patch %s on %s", patch_file, dest)
             e3.diff.patch(patch_file, dest)
 

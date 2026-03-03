@@ -113,6 +113,7 @@ class GitRepository:
             be discarded
         :param output: see e3.os.process.Run, by default it is the
             ``log_stream`` class attribute.
+        :param kwargs: additional keyword arguments passed to e3.os.process.Run
         """
         if self.__class__.git is None:
             git_binary = e3.os.process.which("git", default=None)
@@ -283,7 +284,10 @@ class GitRepository:
         """
 
         def to_commit(object_content: str) -> dict:
-            """Return commit information."""
+            """Return commit information.
+
+            :param object_content: raw commit content
+            """
             headers, body = object_content.split("\n\n", 1)
 
             # Retrieve sha, email, date, and (optionally) notes if some notes

@@ -33,7 +33,12 @@ if TYPE_CHECKING:
     from requests.models import Response
 
     class _Fileobj(Protocol):
-        def write(self, __b: bytes) -> object: ...
+        def write(self, __b: bytes) -> object:
+            """Write bytes to file.
+
+            :param __b: bytes to write
+            """
+            ...
 
     HTTPSessionType = TypeVar("HTTPSessionType", bound="HTTPSession")
 
@@ -119,6 +124,12 @@ class HTTPSession:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        """Exit context manager.
+
+        :param exc_type: exception type
+        :param exc_val: exception value
+        :param exc_tb: exception traceback
+        """
         self.session.__exit__(exc_type, exc_val, exc_tb)
 
     def set_max_retries(
@@ -167,6 +178,11 @@ class HTTPSession:
         data_streams is a dict associating a string key to either another
         string, a dict, a list or a file descriptor. String value are passed
         without any modifications. lists and dicts are automatically encoded
+
+        :param method: HTTP method
+        :param url: URL to request
+        :param data_streams: dict of data streams for POST requests
+
         in JSON. Finally file objects are streamed during the POST request
         (no complete read is done into memory to fetch file content). When
         using data_streams parameter, data parameter will be ignored and

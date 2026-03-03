@@ -66,6 +66,9 @@ class MavenLinksParser:
     def start(self, tag: str, attrs: dict[str, str | None]) -> None:
         """See XMLParser.start.
 
+        :param tag: XML tag name
+        :param attrs: XML tag attributes
+
         .. note::
 
             The `attrs` parameter is not used by this method implementation, but is
@@ -74,7 +77,10 @@ class MavenLinksParser:
         self.__should_retrieve_data = tag in ("version", "release", "latest")
 
     def data(self, text: str) -> None:
-        """See XMLParser.data."""
+        """See XMLParser.data.
+
+        :param text: text data from XML
+        """
         text = text.strip()
 
         if (
@@ -98,6 +104,8 @@ class MavenLinksParser:
 
         This class doesn't use the HTMLParser, but this method as the exact same
         function and logic that HTMLParser.feed.
+
+        :param data: XML data to parse
         """
         self.__parser.feed(data)
         return self
@@ -121,6 +129,7 @@ class Maven:
     ) -> list[MavenLink]:
         """Fetch list of resources for a given Maven package.
 
+        :param group: Maven group ID
         :param name: Maven package name
         :param headers: To add additionnal headers to the HTTP request. Can be mandatory
             depending on the situation.

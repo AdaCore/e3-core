@@ -39,6 +39,10 @@ class ToggleableBooleanGroup:
         self.series: list[ToggleableBoolean] = []
 
     def __getitem__(self, key: int) -> ToggleableBoolean:
+        """Get a toggleable boolean by index.
+
+        :param key: index of the toggleable boolean
+        """
         return self.series[key]
 
     def __len__(self) -> int:

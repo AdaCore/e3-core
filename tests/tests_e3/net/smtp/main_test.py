@@ -12,6 +12,7 @@ from e3.error import E3Error
 
 
 def test_sendmail() -> None:
+    """Test sendmail."""
     from_addr = "e3@example.net"
     to_addresses = ["info@example.net", "info@example.com"]
     msg_as_string = "test mail content"
@@ -46,6 +47,7 @@ def test_sendmail() -> None:
 
 
 def test_sendmail_onerror(caplog) -> None:
+    """Test sendmail onerror."""
     from_addr = "e3@example.net"
     to_addresses = ["info@example.net", "info@example.com"]
     msg_as_string = "test mail content"
@@ -100,6 +102,7 @@ def test_sendmail_onerror(caplog) -> None:
 
 
 def test_send_message() -> None:
+    """Test send message."""
     from_addr = "e3@example.net"
     to_addresses = ["info@example.net", "info@example.com"]
     msg_content = "test mail content"

@@ -40,8 +40,9 @@ def main(get_argument_parser: bool = False) -> ArgumentParser | None:
                 'foo = e3_contrib.sandbox_actions.SandBoxFoo']
         }
 
-    :param get_argument_parser: return e3.main.Main argument_parser instead
-        of running the action.
+    :param get_argument_parser: if True, return the argument parser instead
+        of running the action
+    :return: the argument parser if get_argument_parser is True, None otherwise
     """
     m = Main()
     m.parse_args(known_args_only=True)

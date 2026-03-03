@@ -214,6 +214,7 @@ def test_build_definition_load_json() -> None:
 
 
 def test_builder_as_dict() -> None:
+    """Test builder as dict."""
     (
         _uri,
         _digest,
@@ -242,6 +243,7 @@ def test_builder_as_dict() -> None:
 
 
 def test_builder_as_json() -> None:
+    """Test builder as json."""
     builder: Builder = create_valid_builder()[-1]
     json_repr: str = builder.as_json()
     # Check that the JSON string is valid.
@@ -249,6 +251,7 @@ def test_builder_as_json() -> None:
 
 
 def test_builder_init() -> None:
+    """Test builder init."""
     bid, deps, version, builder = create_valid_builder()
     assert builder.id == bid
     assert builder.builder_dependencies[0] == deps[0]
@@ -461,6 +464,7 @@ def test_predicate_load_json() -> None:
 
 
 def test_resource_descriptor_add_digest() -> None:
+    """Test resource descriptor add digest."""
     (
         _uri,
         digest,
@@ -544,6 +548,7 @@ def test_resource_descriptor_digest() -> None:
 
 
 def test_resource_descriptor_dir_hash() -> None:
+    """Test resource descriptor dir hash."""
     # Create a simple tree and try all algorithms on that tree.
     # The awaited checksum is the same as::
     #
@@ -990,6 +995,7 @@ def test_statement_load_file() -> None:
 
 
 def test_statement_recreate_file() -> None:
+    """Test statement recreate file."""
     template_file: Path = Path(Path(__file__).parent, "provenance-example.json")
     # Resource descriptors for the statement's subject.
     rd1: ResourceDescriptor = ResourceDescriptor(

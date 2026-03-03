@@ -14,6 +14,7 @@ import e3.os.process
 
 
 def test_log() -> None:
+    """Test log."""
     p = e3.os.process.Run(
         [
             sys.executable,

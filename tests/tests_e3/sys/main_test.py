@@ -17,6 +17,7 @@ from e3.sys import RewriteImportNodeTransformer, RewriteImportRule, RewriteNodeE
 
 
 def test_filtering_import() -> None:
+    """Test filtering import."""
     script = """
 import a, b, c
 import a1, b, c
@@ -80,6 +81,7 @@ from foo.bar2.module import name2
 
 
 def test_python_func() -> None:
+    """Test python func."""
     e3.sys.set_python_env("/foo")
     if sys.platform == "win32":
         assert "/foo" in os.environ["PATH"].split(os.pathsep)
@@ -132,6 +134,7 @@ def test_python_func() -> None:
     os.environ.get("TRAVIS", "") == "true", reason="Test not working on travis"
 )
 def test_relocate_python_distrib() -> None:
+    """Test relocate python distrib."""
     env = e3.env.Env()
 
     logger = logging.getLogger("test_relocate_python_distrib")

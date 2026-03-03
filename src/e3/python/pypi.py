@@ -178,14 +178,22 @@ class PyPILinksParser(HTMLParser):
     """HTML parser to parse links from the PyPI simple API."""
 
     def __init__(self, identifier: str, *, ignore_errors: bool = False) -> None:
-        """Initialize the parser."""
+        """Initialize the parser.
+
+        :param identifier: the project identifier
+        :param ignore_errors: if True, ignore parsing errors
+        """
         super().__init__()
         self.ignore_errors = ignore_errors
         self.identifier = identifier
         self.links: list[PyPILink] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        """See HTMLParser doc."""
+        """See HTMLParser doc.
+
+        :param tag: the tag name
+        :param attrs: the tag attributes
+        """
         if tag == "a":
             attr_dict = dict(attrs)
             assert attr_dict["href"] is not None
@@ -217,7 +225,11 @@ class PyPI:
         """Interface to a PYPI simple API.
 
         :param pypi_url: URL to pypi
-        :param allowed_yanked: list of projects for which yanked releases are accepted
+        :param allowed_yanked: list of projects for which yanked releases
+            are accepted
+        :param allowed_prerelease: list of projects for which prerelease
+            versions are accepted
+        :param cache_dir: directory where PyPI cache is stored
         """
         self.pypi_url = pypi_url
 
@@ -558,7 +570,10 @@ class PyPIProvider(AbstractProvider):
         self.env = env
 
     def identify(self, requirement_or_candidate: Requirement | PyPICandidate) -> str:
-        """See resolvelib documentation."""
+        """See resolvelib documentation.
+
+        :param requirement_or_candidate: a requirement or candidate to identify
+        """
         result: str = canonicalize_name(requirement_or_candidate.name)
         if requirement_or_candidate.extras:
             result += "@" + ",".join(sorted(requirement_or_candidate.extras))
@@ -572,7 +587,14 @@ class PyPIProvider(AbstractProvider):
         information: Mapping[Any, Iterator[RequirementInformation[Any, Any]]],
         backtrack_causes: Sequence[RequirementInformation],
     ) -> Preference:
-        """See resolvelib documentation."""
+        """See resolvelib documentation.
+
+        :param identifier: package identifier
+        :param resolutions: current resolved packages
+        :param candidates: available candidates
+        :param information: requirement information
+        :param backtrack_causes: causes for backtracking
+        """
         return sum(1 for _ in candidates[identifier])
 
     def find_matches(
@@ -581,7 +603,12 @@ class PyPIProvider(AbstractProvider):
         requirements: Mapping[str, Iterator[Requirement]],
         incompatibilities: Mapping[str, Iterator[PyPICandidate]],
     ) -> Matches:
-        """Return the list of candidates that match a given list of requirements."""
+        """Return the list of candidates that match a given list of requirements.
+
+        :param identifier: package identifier
+        :param requirements: requirements to satisfy
+        :param incompatibilities: incompatible candidates
+        """
         # Get requirements that must be satisfied
         reqs = list(requirements[identifier])
 
@@ -629,13 +656,20 @@ class PyPIProvider(AbstractProvider):
     def is_satisfied_by(
         self, requirement: Requirement, candidate: PyPICandidate
     ) -> bool:
-        """See resolvelib documentation."""
+        """See resolvelib documentation.
+
+        :param requirement: the requirement to check
+        :param candidate: the candidate to check
+        """
         if canonicalize_name(requirement.name) != candidate.name:
             return False
         return candidate.version in requirement.specifier
 
     def get_dependencies(self, candidate: PyPICandidate) -> Iterable[Requirement]:
-        """See resolvelib documentation."""
+        """See resolvelib documentation.
+
+        :param candidate: the candidate to get dependencies for
+        """
         return candidate.requirements(env=self.env)
 
 
@@ -673,7 +707,10 @@ class PyPIClosure:
         self.pypi.load_cache()
 
     def add_wheel(self, filename: str) -> None:
-        """Introduce a local wheel into the closure."""
+        """Introduce a local wheel into the closure.
+
+        :param filename: path to the wheel file
+        """
         name = os.path.basename(filename)[:-4].split("-")[0]
         self.pypi.cache[canonicalize_name(name)] = [
             PyPILink(
@@ -685,7 +722,10 @@ class PyPIClosure:
         ]
 
     def add_requirement(self, req: str | Requirement) -> None:
-        """Add a requirement in the closure."""
+        """Add a requirement in the closure.
+
+        :param req: requirement to add
+        """
         if isinstance(req, str):
             req = Requirement(req)
         self.requirements.add(req)
@@ -766,6 +806,12 @@ class PyPIClosure:
         _val: BaseException | None,
         _tb: TracebackType | None,
     ) -> None:
+        """Exit context manager.
+
+        :param _type: exception type
+        :param _val: exception value
+        :param _tb: exception traceback
+        """
         self.pypi.save_cache()
 
 
@@ -781,6 +827,8 @@ def fetch_from_registry(
     :param packages: The list of packages to look for.
     :param registry_url: The URL to a python registry to use.
         If the protocol is not defined on the URL, https will be used by default.
+    :param log_missing_packages: if True, log missing packages as errors
+    :param sanitize_packages: function to sanitize the list of package links
     :return: A filename to link mapping (dict).
     """
     url = (

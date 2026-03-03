@@ -16,6 +16,7 @@ from e3.os.fs import touch
 
 
 def test_create_and_get_build_info(store) -> None:
+    """Test create and get build info."""
     # Ensure the "build_info" is created between 'start' and 'end'.
     #
     # With the current implementation the buildinfo is created automatically when
@@ -56,6 +57,7 @@ def test_create_and_get_build_info(store) -> None:
 
 
 def test_build_info_ready(store) -> None:
+    """Test build info ready."""
     created = store.create_build_id("test", "20241028", "1.0")
     assert created["isready"] is False
 
@@ -71,6 +73,7 @@ def test_build_info_ready(store) -> None:
 
 
 def test_file(store) -> None:
+    """Test file."""
     buildinfo = store.create_build_id("test", "20241028", "1.0")
     touch("test.txt")
     assert Path("test.txt").is_file()
@@ -332,6 +335,7 @@ def test_component(store) -> None:
 
 
 def test_bulk_query(store) -> None:
+    """Test bulk query."""
     with Path("file1.txt").open("w") as f:
         f.write("Carpette is a cat")
 

@@ -6,6 +6,7 @@ import e3.electrolyt.host as host
 
 
 def test_host_db() -> None:
+    """Test host db."""
     db = host.HostDB()
     db.add_host(
         hostname="computer1",
@@ -20,6 +21,7 @@ def test_host_db() -> None:
 
 
 def test_host_db_yaml() -> None:
+    """Test host db yaml."""
     with Path("db.yaml").open("w") as f:
         f.write(
             "computer2:\n"
@@ -38,6 +40,7 @@ def test_host_db_yaml() -> None:
 
 
 def test_host_db_yaml_alias() -> None:
+    """Test host db yaml alias."""
     with Path("db.yaml").open("w") as f:
         f.write(
             "computer2: &computer2_alias\n"

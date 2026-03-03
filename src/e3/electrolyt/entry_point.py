@@ -111,8 +111,9 @@ def entry_point(
     :param db: dictionary where to register the entry point
     :param cls: class of entry point
     :param kind: entry point kind (machine name, mailserver preset, ...)
-    :param args: additional information to store with the entry point
-    :param kwargs: additional information to store with the entry point
+    :param args: additional positional arguments to pass to the entry point class
+    :param kwargs: additional keyword arguments to pass to the entry point class
+    :return: decorator function that wraps the entry point function
     """
 
     def entry_point_dec(  # type: ignore

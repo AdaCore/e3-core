@@ -6,17 +6,20 @@ from e3.collection.dag import DAG
 
 
 def test_empty_tree() -> None:
+    """Test empty tree."""
     t = DAG()
     assert t.as_tree() == ""
 
 
 def test_single_node_tree() -> None:
+    """Test single node tree."""
     t = DAG()
     t.add_vertex("foo")
     assert t.as_tree() == "foo"
 
 
 def test_multi_node_tree() -> None:
+    """Test multi node tree."""
     t = DAG()
     t.add_vertex("foo")
     t.add_vertex("bar", predecessors=["foo"])
@@ -36,6 +39,7 @@ foo
 
 
 def test_name_key_tree() -> None:
+    """Test name key tree."""
     t = DAG()
     t.add_vertex("foo1", data={"name": "foo-one"})
     t.add_vertex("foo2", data={"name": "foo-two"}, predecessors=["foo1"])

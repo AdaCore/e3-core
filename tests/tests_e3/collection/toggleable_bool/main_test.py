@@ -4,6 +4,7 @@ from e3.collection.toggleable_bool import ToggleableBooleanGroup
 
 
 def test_toggleable_bools() -> None:
+    """Test toggleable bools."""
     g = ToggleableBooleanGroup()
     for i, v in enumerate((True, True, False, True, False, False)):
         g.add(name=f"seed{i}", value=v)

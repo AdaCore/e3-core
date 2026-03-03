@@ -149,9 +149,9 @@ def df(path: str | Path, full: Literal[True]) -> tuple: ...
 def df(path: str | Path, full: bool = False) -> int | tuple:
     """Disk space available on the filesystem containing the given path.
 
-    :param path: a path
+    :param path: path to check disk space for
     :param full: if True return full disk information otherwise only
-        space left.
+        space left
 
     :return: either space left in Mo or a py:meth:`collections.namedtuple`
         with ``total``, ``used`` and ``free`` attributes. Each attribute is
@@ -175,6 +175,12 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
         )
 
         def GetDiskFreeSpaceEx_errcheck(result, func, args):  # type: ignore[no-untyped-def]
+            """Error check function for GetDiskFreeSpaceEx.
+
+            :param result: return value from the function
+            :param func: the function object
+            :param args: arguments passed to the function
+            """
             del func
             if not result:  # defensive code
                 raise ctypes.WinError()
@@ -212,15 +218,27 @@ def __safe_unlink_func() -> tuple[
         from e3.os.windows.fs import NTFile
 
         def win_rm(x: str | Path) -> None:
+            """Remove a file or directory on Windows.
+
+            :param x: path to file or directory to remove
+            """
             return NTFile(x).unlink()
 
         return win_rm, win_rm
     # windows: no cover
 
     def os_remove(x: str | Path) -> None:
+        """Remove a file using os.remove.
+
+        :param x: path to file to remove
+        """
         return os.remove(x)
 
     def os_rmdir(x: str | Path) -> None:
+        """Remove a directory using os.rmdir.
+
+        :param x: path to directory to remove
+        """
         return os.rmdir(x)
 
     return os_remove, os_rmdir
@@ -400,9 +418,17 @@ def which(prog: str | Path, paths: str | None = None, default: Any = "") -> Any:
     """
 
     def is_exe(file_path: str) -> bool:
+        """Check if file is executable.
+
+        :param file_path: path to file to check
+        """
         return Path(file_path).is_file() and os.access(file_path, os.X_OK)
 
     def possible_names(file_path: str) -> list[str]:
+        """Return possible executable names for a file.
+
+        :param file_path: base file path
+        """
         names = [file_path]
         if sys.platform == "win32":  # unix: no cover
             names.extend(

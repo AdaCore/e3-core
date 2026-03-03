@@ -16,6 +16,7 @@ import e3.os.process
 
 
 def test_cd() -> None:
+    """Test cd."""
     with pytest.raises(e3.os.fs.OSFSError) as err:
         e3.os.fs.cd("doesnotexist")
 
@@ -26,6 +27,7 @@ def test_cd() -> None:
     sys.platform == "win32", reason="not completely supported on windows"
 )
 def test_chmod() -> None:
+    """Test chmod."""
     os.umask(0o022)
     e3.os.fs.touch("a")
 
@@ -77,6 +79,7 @@ def test_chmod() -> None:
     sys.platform == "win32", reason="windows specific rm not yet added to e3-core"
 )
 def test_rm() -> None:
+    """Test rm."""
     base = tempfile.mkdtemp()
     try:
         bc = Path(base, "b", "c")
@@ -99,6 +102,7 @@ def test_rm() -> None:
 
 
 def test_mv() -> None:
+    """Test mv."""
     os.makedirs("a")
     e3.os.fs.mv("a", "b")
     assert Path("b").is_dir()
@@ -115,6 +119,7 @@ def test_mv() -> None:
 
 
 def test_df() -> None:
+    """Test df."""
     cwd = str(Path.cwd())
     statfs = e3.os.fs.df(cwd)
     assert isinstance(statfs, numbers.Integral)
@@ -123,6 +128,7 @@ def test_df() -> None:
 
 
 def test_anod_ldd_output_to_posix(ldd) -> None:  # type: ignore[no-untyped-def]
+    """Test converting ldd output to POSIX format."""
     # Get the ldd output of the current executable.
     ldd_output = e3.os.process.Run(["ldd", sys.executable]).out or ""
     e3.os.fs.ldd_output_to_posix(ldd_output)
@@ -135,11 +141,13 @@ def test_anod_ldd_output_to_posix(ldd) -> None:  # type: ignore[no-untyped-def]
 
 
 def test_maxpath() -> None:
+    """Test maxpath."""
     maxPath = e3.os.fs.max_path()
     assert isinstance(maxPath, numbers.Integral)
 
 
 def test_touch() -> None:
+    """Test touch."""
     e3.os.fs.touch("a")
     assert Path("a").exists()
 
@@ -152,6 +160,7 @@ def test_touch() -> None:
 
 
 def test_which() -> None:
+    """Test which."""
     path_to_e3 = e3.os.fs.which("e3")
     assert Path(path_to_e3).is_file()
 

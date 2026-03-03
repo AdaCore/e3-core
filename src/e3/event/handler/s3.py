@@ -27,6 +27,13 @@ class S3Handler(EventHandler):
         sse: str = "AES256",
         profile: str | None = None,
     ) -> None:
+        """Initialize S3 handler.
+
+        :param event_s3_url: S3 URL for event metadata
+        :param log_s3_url: S3 URL for log files
+        :param sse: server-side encryption method
+        :param profile: AWS profile name
+        """
         self.event_s3_url = event_s3_url
         self.log_s3_url = log_s3_url
         self.aws_profile = profile
@@ -34,6 +41,10 @@ class S3Handler(EventHandler):
 
     @classmethod
     def decode_config(cls, config_str: str) -> dict[str, str | None]:
+        """Decode configuration string.
+
+        :param config_str: configuration string
+        """
         event_s3_url, log_s3_url, sse, aws_profile = config_str.split(",", 3)
         return {
             "event_s3_url": event_s3_url,
@@ -65,7 +76,17 @@ class S3Handler(EventHandler):
         return ""
 
     def send_event(self, event: Event) -> bool:
+        """Send event to S3.
+
+        :param event: event to send
+        """
+
         def s3_cp(from_path: str, s3_url: str) -> bool:
+            """Copy file to S3.
+
+            :param from_path: local file path
+            :param s3_url: S3 destination URL
+            """
             cmd = ["s3", "cp", f"--sse={self.sse}"]
             if self.aws_profile:
                 cmd.append(f"--profile={self.aws_profile}")

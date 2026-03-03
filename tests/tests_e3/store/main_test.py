@@ -10,6 +10,7 @@ FAKE_BODY_CONTENT = b"a body content"
 
 
 def mock_download() -> MagicMock:
+    """Create a mocked HTTP download response."""
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.headers = {

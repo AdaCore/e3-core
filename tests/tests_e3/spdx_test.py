@@ -50,6 +50,7 @@ from e3.spdx import (
 
 
 def create_spdx() -> Document:
+    """Create a test SPDX document."""
     doc = Document(
         document_name="my-spdx-test",
         creators=[
@@ -150,6 +151,7 @@ def create_spdx() -> Document:
 
 
 def test_entities_ref_spdx() -> None:
+    """Test entities ref spdx."""
     org = Organization("AdaCore")
     assert org.to_tagvalue() == "Organization: AdaCore"
     assert "AdaCore" in str(org)
@@ -180,6 +182,7 @@ def test_entity_ref() -> None:
 
 
 def test_external_ref() -> None:
+    """Test external ref."""
     value = {
         "referenceType": "purl",
         "referenceLocator": "pkg:pypi/wheel@0.36.2",
@@ -507,6 +510,7 @@ def test_spdx_entry_str_gt() -> None:
 
 
 def test_spdx_from_json_dict() -> None:
+    """Test spdx from json dict."""
     doc = create_spdx()
     doc2: Document = Document.from_json_dict(doc.to_json_dict())
     spdx = doc.to_json_dict()
@@ -517,6 +521,7 @@ def test_spdx_from_json_dict() -> None:
 
 
 def test_creator() -> None:
+    """Test creator."""
     creator: Creator | None = Creator(Organization("AdaCore"))
     creator_dict: dict = creator.to_json_dict()
     creator2: Creator = Creator.from_json_dict(creator_dict)
@@ -547,6 +552,7 @@ def test_creator() -> None:
 
 
 def test_entity() -> None:
+    """Test entity."""
     entity: Entity | None = Entity.from_json_dict({"entity": "Person: me"})
     assert entity.value == "me"
     assert isinstance(entity, Person)
@@ -563,6 +569,7 @@ def test_entity() -> None:
 
 
 def test_misc_from_json_dict() -> None:
+    """Test misc from json dict."""
     created: Created = Created.from_json_dict(
         {Created.get_json_entry_key(): "2025-09-26"}
     )
@@ -623,6 +630,7 @@ def test_misc_from_json_dict() -> None:
 
 
 def test_spdx_without_main_package() -> None:
+    """Test spdx without main package."""
     doc_dict: dict = {
         "SPDXID": "SPDXRef-DOCUMENT",
         "creationInfo": {

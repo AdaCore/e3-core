@@ -21,6 +21,11 @@ def __compute_hash(
     path: PathLike[str] | str,
     kind: Literal["md5", "sha1", "sha256", "sha512"],
 ) -> str:
+    """Compute hash of a file.
+
+    :param path: path to a file
+    :param kind: hash algorithm to use
+    """
     if not Path(path).is_file():
         raise HashError(kind, f"cannot find {path}")
 

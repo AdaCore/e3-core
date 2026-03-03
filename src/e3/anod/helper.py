@@ -36,7 +36,7 @@ class Make:
         :param exec_dir: path to the directory from where the make should be
             called. If None use the anod instance buildspace build dir.
         :param jobs: number of jobs to run in parallel
-        :param make: make executable to use (by default make on the path)
+        :param make_exe: make executable to use (by default make on the path)
         """
         self.anod_instance = anod_instance
         self.exec_dir = exec_dir

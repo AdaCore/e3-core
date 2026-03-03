@@ -107,6 +107,10 @@ class SPDXEntry(metaclass=ABCMeta):
         pass
 
     def __format__(self, format_spec: str) -> str:
+        """Format the entry.
+
+        :param format_spec: format specification
+        """
         return self.__str__()
 
     def to_tagvalue(self) -> str:
@@ -122,12 +126,20 @@ class SPDXEntryStr(SPDXEntry):
     """Describe an SPDX Entry accepting a string."""
 
     def __init__(self, value: str) -> None:
+        """Initialize SPDX entry with string value.
+
+        :param value: entry value
+        """
         self.value = value
 
     def __str__(self) -> str:
         return self.value
 
     def __gt__(self, other: object) -> bool:
+        """Compare entries.
+
+        :param other: other entry to compare with
+        """
         if isinstance(other, self.__class__):
             return self.value > other.value
         return False
@@ -142,6 +154,10 @@ class SPDXEntryMaybeStr(SPDXEntry):
     """Describe an SPDX Entry accepting a string, NOASSERTION, or NONE."""
 
     def __init__(self, value: MAYBE_STR) -> None:
+        """Initialize SPDX entry with maybe string value.
+
+        :param value: entry value (string, NOASSERTION, or NONE)
+        """
         self.value = value
 
     def __str__(self) -> str:
@@ -166,6 +182,10 @@ class SPDXEntryBool(SPDXEntry):
     """Describe an SPDX Entry accepting a boolean."""
 
     def __init__(self, value: bool) -> None:
+        """Initialize SPDX entry with boolean value.
+
+        :param value: boolean value
+        """
         self.value: bool = value
 
     def __str__(self) -> str:
@@ -298,9 +318,14 @@ class SPDXID(SPDXEntryStr):
     json_entry_key = "SPDXID"
 
     def __init__(self, value: str) -> None:
-        # The format of the SPDXID should be "SPDXRef-"[idstring]
-        # where [idstring] is a unique string containing letters, numbers, .,
-        # and/or -.
+        """Initialize SPDXID.
+
+        :param value: SPDX ID value
+
+        The format of the SPDXID should be "SPDXRef-"[idstring]
+        where [idstring] is a unique string containing letters, numbers, .,
+        and/or -.
+        """
         if value.startswith(self.PREFIX):
             value = value[len(self.PREFIX) :]
         super().__init__(re.sub(SPDXID_R, "", value))
@@ -309,6 +334,10 @@ class SPDXID(SPDXEntryStr):
         return f"{self.PREFIX}{self.value}"
 
     def __eq__(self, o: object) -> bool:
+        """Check equality.
+
+        :param o: object to compare with
+        """
         return isinstance(o, SPDXID) and o.value == self.value
 
     def __hash__(self) -> int:
@@ -1672,6 +1701,10 @@ class Document:
         is_first_section = True
 
         def add_section(section: str) -> None:
+            """Add a section header.
+
+            :param section: section name
+            """
             nonlocal is_first_section
             nonlocal output
             if not is_first_section:

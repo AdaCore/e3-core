@@ -59,6 +59,7 @@ class ElectrolytJob(Job):
         :param uid: uid of the job
         :param data: object to be processed by the job
         :param notify_end: callback to call when job is finished
+        :param spec_repo: repository of anod specifications
         :param sandbox: Same as the attribute of the same name.
         :param store: Same as the attribute of the same name.
         :param force_status: Same as the attribute of the same name.
@@ -87,7 +88,10 @@ class ElectrolytJob(Job):
         return self.__status
 
     def run_anod_primitive(self, primitive: str) -> None:
-        """Run an anod primitive after setting up the sandbox."""
+        """Run an anod primitive after setting up the sandbox.
+
+        :param primitive: name of the anod primitive to run (build, install, test, etc.)
+        """
         self.data.anod_instance.sandbox = self.sandbox
         anod_driver = AnodDriver(
             anod_instance=self.data.anod_instance, store=self.store
@@ -195,6 +199,15 @@ class ElectrolytJob(Job):
 
 
 class ElectrolytJobFactory:
+    """Factory for creating and managing electrolyt jobs.
+
+    :ivar job_status: mapping of job uid to job status
+    :ivar sandbox: sandbox where jobs run
+    :ivar asr: anod spec repository
+    :ivar dry_run: whether to run in dry-run mode
+    :ivar store: store backend for packages
+    """
+
     def __init__(
         self,
         sandbox: SandBox,
@@ -202,6 +215,13 @@ class ElectrolytJobFactory:
         store: Store,
         dry_run: bool = False,
     ) -> None:
+        """Initialize the electrolyt job factory.
+
+        :param sandbox: sandbox where jobs will run
+        :param asr: anod specification repository
+        :param store: store backend for packages
+        :param dry_run: whether to run in dry-run mode
+        """
         self.job_status: dict[str, ReturnValue] = {}
         self.sandbox = sandbox
         self.asr = asr
@@ -211,6 +231,14 @@ class ElectrolytJobFactory:
     def get_job(
         self, uid: str, data: Action, predecessors: frozenset[str], notify_end: Callable
     ) -> ElectrolytJob:
+        """Create a new electrolyt job.
+
+        :param uid: unique identifier for the job
+        :param data: action to be executed by the job
+        :param predecessors: set of predecessor job uids
+        :param notify_end: callback to call when job is finished
+        :return: a new ElectrolytJob instance
+        """
         force_fail = any(
             k for k in predecessors if self.job_status[k] != STATUS.success
         )
@@ -226,7 +254,11 @@ class ElectrolytJobFactory:
         )
 
     def collect(self, job: Job) -> Literal[False]:
-        """Return False as the job is never requeued."""
+        """Return False as the job is never requeued.
+
+        :param job: the job to collect
+        :return: always False
+        """
         self.job_status[job.uid] = job.status
         logger.info(
             "%-48s [queue=%-10s status=%-10s]",
@@ -237,5 +269,9 @@ class ElectrolytJobFactory:
         return False
 
     def run(self, action_list: DAG) -> None:
+        """Run all actions in the given DAG.
+
+        :param action_list: DAG of actions to execute
+        """
         sch = Scheduler(self.get_job, self.collect)
         sch.run(action_list)

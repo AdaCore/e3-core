@@ -6,6 +6,7 @@ from e3.collection.dag import DAG, DAGError, DAGIterator
 
 
 def test_simple_dag() -> None:
+    """Test simple dag."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -19,6 +20,7 @@ def test_simple_dag() -> None:
 
 
 def test_add_vertex() -> None:
+    """Test add vertex."""
     d = DAG()
 
     # add_vertex should fail in case a dep does not exist
@@ -67,6 +69,7 @@ def test_add_vertex() -> None:
 
 
 def test_cycle_detection() -> None:
+    """Test cycle detection."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -99,6 +102,7 @@ def test_cycle_detection() -> None:
 
 
 def test_shortest_path() -> None:
+    """Test shorpath."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -121,6 +125,7 @@ def test_shortest_path() -> None:
 
 
 def test_dag_merge() -> None:
+    """Test dag merge."""
     d = DAG()
     d.add_vertex("b")
     d.add_vertex("a", predecessors=["b"])
@@ -139,6 +144,7 @@ def test_dag_merge() -> None:
 
 
 def test_dag_len() -> None:
+    """Test dag len."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -147,6 +153,7 @@ def test_dag_len() -> None:
 
 
 def test_dag_str() -> None:
+    """Test dag str."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -155,6 +162,7 @@ def test_dag_str() -> None:
 
 
 def test_iter_with_busy_state() -> None:
+    """Test iter with busy state."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b", predecessors=["a"])
@@ -166,6 +174,7 @@ def test_iter_with_busy_state() -> None:
 
 
 def test_inexisting() -> None:
+    """Test inexisting."""
     d = DAG()
     d.add_vertex("a")
     assert "a" in d
@@ -177,6 +186,7 @@ def test_inexisting() -> None:
 
 
 def test_cycle() -> None:
+    """Test cycle."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b")
@@ -191,6 +201,7 @@ def test_cycle() -> None:
 
 
 def test_reverse_dag() -> None:
+    """Test reverse dag."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b", predecessors=["a"])
@@ -206,6 +217,7 @@ def test_reverse_dag() -> None:
 
 
 def test_dot() -> None:
+    """Test dot."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("b", predecessors=["a"])
@@ -213,6 +225,7 @@ def test_dot() -> None:
 
 
 def test_pruned_dag() -> None:
+    """Test pruned dag."""
     d = DAG()
     d.add_vertex("a")
     d.add_vertex("a1")
@@ -256,6 +269,7 @@ def test_pruned_dag() -> None:
 
 
 def test_tagged_dag() -> None:
+    """Test tagged dag."""
     r"""Test add_tag/get_tag/get_context.
 
     With the following DAG::
