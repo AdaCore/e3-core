@@ -38,7 +38,7 @@ def test_chmod() -> None:
         e3.os.fs.chmod("666", "a")
     assert "not supported" in str(err)
 
-    os.chmod("a", 0o666)
+    Path("a").chmod(0o666)
     check_mode("a", 0o666)
 
     e3.os.fs.chmod("u-w", "a")
@@ -65,7 +65,7 @@ def test_chmod() -> None:
     e3.os.fs.chmod("a=rwx", "a")
     check_mode("a", 0o777)
 
-    os.chmod("a", 0o666)
+    Path("a").chmod(0o666)
 
     e3.os.fs.chmod("u=rwx,g=rwx", "a")
     check_mode("a", 0o776)
