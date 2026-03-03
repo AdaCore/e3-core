@@ -13,8 +13,6 @@ import re
 import shutil
 import stat
 import sys
-
-
 from pathlib import Path
 from typing import TYPE_CHECKING, overload
 
@@ -22,8 +20,8 @@ import e3.error
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import Any, Literal
     from collections.abc import Callable
+    from typing import Any, Literal
 
 CYGPATH_MATCH: re.Pattern[str] = re.compile(
     "/((cygdrive/|mnt/)?(?P<drive>[a-zA-Z])/)?(?P<path>.*)", re.IGNORECASE

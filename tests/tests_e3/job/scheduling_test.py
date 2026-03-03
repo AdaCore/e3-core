@@ -1,13 +1,13 @@
 """Tests for e3.job."""
 
 import sys
+from typing import NoReturn
+
+import pytest
 
 from e3.collection.dag import DAG
 from e3.job import Job, ProcessJob
 from e3.job.scheduler import Scheduler
-
-import pytest
-from typing import NoReturn
 
 
 class NopJob(Job):

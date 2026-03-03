@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from requests import Session
 from typing import TYPE_CHECKING
+
+from requests import Session
+
+from e3.log import getLogger
 
 from .link import NPMLink
 from .parser import NPMLinksParser
-
-from e3.log import getLogger
 
 if TYPE_CHECKING:
     from requests_cache import CachedSession

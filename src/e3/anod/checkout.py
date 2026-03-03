@@ -12,15 +12,16 @@ from typing import TYPE_CHECKING
 
 import e3.log
 from e3.anod.status import ReturnValue
+from e3.fs import VCS_IGNORE_LIST, get_filetree_state, rm, sync_tree
 from e3.os.fs import unixpath, which
 from e3.os.process import PIPE, Run
-from e3.fs import VCS_IGNORE_LIST, get_filetree_state, rm, sync_tree
 from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
 if TYPE_CHECKING:
-    from typing import Literal
     from collections.abc import Callable
+    from typing import Literal
+
     from e3.mypy import assert_never
 
 logger = e3.log.getLogger("e3.anod.checkout")

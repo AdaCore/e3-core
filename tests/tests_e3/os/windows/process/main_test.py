@@ -2,12 +2,12 @@
 
 import sys
 
-import e3.os.process
-
 import pytest
 
+import e3.os.process
+
 if sys.platform == "win32":
-    from e3.os.windows.process import wait_for_objects, process_exit_code
+    from e3.os.windows.process import process_exit_code, wait_for_objects
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")

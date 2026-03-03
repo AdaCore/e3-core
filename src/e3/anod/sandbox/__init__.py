@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import os
 import sys
-
-import yaml
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+import yaml
 
 import e3.log
 import e3.os.process

@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
 import e3.hash
 import e3.log
 from e3.net.http import HTTPSession
 from e3.store.backends.base import ResourceInfo, Store, StoreError
-
 
 logger = e3.log.getLogger("store.httpsimplestore")
 

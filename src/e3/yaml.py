@@ -18,7 +18,8 @@ from e3.text import format_with_dict
 if TYPE_CHECKING:
     # Conditonal imports do not work with mypy, unconditionaly use yaml.Loader
     # for type checking
-    from typing import Any, IO, Generator
+    from typing import IO, Any, Generator
+
     from yaml import Loader
     from yaml.nodes import Node
 else:

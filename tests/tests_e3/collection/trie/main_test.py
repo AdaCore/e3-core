@@ -1,10 +1,13 @@
 """Tests for e3.collection.trie."""
 
 from __future__ import annotations
-from pathlib import Path
+
 import os
-import pytest
 import time
+from pathlib import Path
+
+import pytest
+
 from e3.collection.trie import Trie
 
 

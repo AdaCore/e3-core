@@ -7,17 +7,15 @@ a simple example can be found at ./tests/tests_e3/spdx_test.py
 from __future__ import annotations
 
 import re
-
-from enum import Enum, auto
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field, fields
 from datetime import datetime, timezone
+from enum import Enum, auto
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
-    from typing import Literal, Union, Any
+    from typing import Any, Literal, Union
 
 NOASSERTION: Literal["NOASSERTION"] = "NOASSERTION"
 """Indicates that the preparer of the SPDX document is not making any assertion

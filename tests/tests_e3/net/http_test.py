@@ -1,15 +1,16 @@
 """Tests for e3.net."""
 
-from pathlib import Path
 import logging
 import os
 import threading
 import time
 from email.message import Message
 from io import BytesIO
+from pathlib import Path
 
 import requests_toolbelt.multipart
-from e3.net.http import HTTPSession, HTTPError
+
+from e3.net.http import HTTPError, HTTPSession
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer

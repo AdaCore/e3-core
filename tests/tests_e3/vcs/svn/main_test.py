@@ -1,14 +1,14 @@
 """Tests for e3.vcs.svn."""
 
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import pytest
 
 from e3.fs import echo_to_file, mkdir, rm
 from e3.os.fs import touch, unixpath
 from e3.os.process import Run
 from e3.vcs.svn import SVNError, SVNRepository
-
-import pytest
 
 
 def file_url(path, unix=False) -> str:

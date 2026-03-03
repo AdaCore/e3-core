@@ -1,13 +1,13 @@
 """Tests for e3.anod loader."""
 
 import os
+from pathlib import Path
+
+import pytest
 
 from e3.anod.error import SandBoxError
 from e3.anod.loader import AnodSpecRepository, SpecConfig
 from e3.fs import cp, sync_tree
-
-import pytest
-from pathlib import Path
 
 
 class TestLoader:

@@ -2,28 +2,28 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
 import sys
 import time
-import json
 from typing import TYPE_CHECKING
 
 from colorama import Fore, Style
 from tqdm import tqdm
 
 if TYPE_CHECKING:
-    from typing import (
-        Any,
-        IO,
-        TextIO,
-        TypeVar,
-        Mapping,
-    )
+    from argparse import ArgumentParser, Namespace, _ArgumentGroup
     from collections.abc import Iterator, Sequence
     from logging import _ExcInfoType
-    from argparse import ArgumentParser, _ArgumentGroup, Namespace
+    from typing import (
+        IO,
+        Any,
+        Mapping,
+        TextIO,
+        TypeVar,
+    )
 
     T = TypeVar("T")
 

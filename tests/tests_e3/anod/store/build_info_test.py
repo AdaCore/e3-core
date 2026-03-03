@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from e3.os.fs import touch
-from e3.anod.store.interface import StoreError
 from e3.anod.store.buildinfo import BuildInfo
+from e3.anod.store.interface import StoreError
 from e3.error import E3Error
+from e3.os.fs import touch
 
 DEFAULT_SETUP = "test"
 

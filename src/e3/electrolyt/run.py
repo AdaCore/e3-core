@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.error
@@ -13,14 +14,14 @@ from e3.fs import mkdir, sync_tree
 from e3.job import Job
 from e3.job.scheduler import Scheduler
 from e3.vcs.git import GitRepository
-from pathlib import Path
 
 if TYPE_CHECKING:
-    from typing import Literal
     from collections.abc import Callable
+    from typing import Literal
+
     from e3.anod.action import Action
-    from e3.anod.sandbox import SandBox
     from e3.anod.loader import AnodSpecRepository
+    from e3.anod.sandbox import SandBox
     from e3.collection.dag import DAG
     from e3.store.backends.base import Store
 

@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
-from unittest.mock import patch
-from contextlib import contextmanager
 import copy
 import fnmatch
+from contextlib import contextmanager
+from typing import TYPE_CHECKING, Protocol
+from unittest.mock import patch
 
 from e3.os.process import Run, to_cmd_lines
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
     from typing import Any, TypedDict
-    from collections.abc import Iterator, Iterable
+
     from typing_extensions import NotRequired, ParamSpec, TypeVar
+
     from e3.os.process import AnyCmdLine
 
     P = ParamSpec("P")

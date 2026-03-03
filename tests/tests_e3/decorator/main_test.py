@@ -2,9 +2,9 @@
 
 from random import random
 
-import e3.decorator
-
 import pytest
+
+import e3.decorator
 
 
 def test_memoize() -> None:

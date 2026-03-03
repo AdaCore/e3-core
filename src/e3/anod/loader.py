@@ -5,11 +5,11 @@ from __future__ import annotations
 import inspect
 import os
 import types
-import yaml
-
-from packaging.version import Version
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+import yaml
+from packaging.version import Version
 
 import e3.hash
 import e3.log
@@ -20,9 +20,10 @@ from e3.fs import ls
 logger = e3.log.getLogger("anod.loader")
 
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable
     from types import ModuleType
+    from typing import Any
+
     from e3.anod.spec import Anod
 
 

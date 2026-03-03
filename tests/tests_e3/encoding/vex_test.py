@@ -3,29 +3,28 @@
 from __future__ import annotations
 
 import json
-import pytest
-import yaml
-
 from datetime import datetime, timezone
-from dateutil.parser import parse as date_parse
 from pathlib import Path
 
+import pytest
+import yaml
+from dateutil.parser import parse as date_parse
+
 from e3.encoding.vex import (
+    ActionOrImpact,
     AuthorRole,
     Document,
-    Metadata,
-    ProductStatus,
-    ActionOrImpact,
     Justification,
+    Metadata,
     Product,
     ProductId,
+    ProductStatus,
     Statement,
     StatementMetadata,
     StatementStatus,
     SubProductId,
     Vulnerability,
 )
-
 
 METADATA_ARGUMENTS = [
     (

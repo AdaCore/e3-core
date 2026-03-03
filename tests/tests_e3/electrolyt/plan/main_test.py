@@ -1,11 +1,13 @@
 """Tests for e3.electrolyt.plan."""
 
 from pathlib import Path
+
+import pytest
+
 import e3.electrolyt.entry_point as entry_point
 import e3.electrolyt.host as host
 import e3.electrolyt.plan as plan
 import e3.env
-import pytest
 
 
 def build_action(spec, build=None, host=None, target=None, board=None) -> str:

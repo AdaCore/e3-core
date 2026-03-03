@@ -13,10 +13,11 @@ import stat
 import sys
 from collections import namedtuple
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
-from packaging.version import Version
 from pathlib import Path
 from platform import python_version
+from typing import TYPE_CHECKING
+
+from packaging.version import Version
 
 import e3
 import e3.error
@@ -27,8 +28,8 @@ from e3.collection.trie import Trie
 logger = e3.log.getLogger("fs")
 
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable, Sequence
+    from typing import Any
 
 
 class FSError(e3.error.E3Error):

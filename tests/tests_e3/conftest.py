@@ -1,27 +1,28 @@
 """Pytest configuration and fixtures."""
 
 from __future__ import annotations
-from pathlib import Path
 
+import hashlib
+import json
+import random
+import shutil
+import string
 from os.path import abspath, dirname
-from typing import TYPE_CHECKING
+from pathlib import Path
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
-import hashlib
-import random
-import string
-import json
-import shutil
-from e3.fs import mkdir, cp
-from e3.os.fs import touch, which
-from e3.python.wheel import Wheel
-from e3.maven import MavenLink
+from typing import TYPE_CHECKING
 
 import pytest
 
+from e3.fs import cp, mkdir
+from e3.maven import MavenLink
+from e3.os.fs import touch, which
+from e3.python.wheel import Wheel
+
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Set
+    from typing import Any
 
 
 from e3.pytest import require_tool

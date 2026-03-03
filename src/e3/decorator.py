@@ -6,13 +6,12 @@ to enable/disable a function, to memoize a function results...
 from __future__ import annotations
 
 from functools import partial
-
 from typing import TYPE_CHECKING
 from warnings import warn
 
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable
+    from typing import Any
 
 
 def enabled(func: Callable) -> Callable:

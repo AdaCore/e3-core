@@ -1,33 +1,34 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
-from enum import Enum
-import os
 import json
+import os
 import sqlite3
 import time
-from packaging.version import Version
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
+from enum import Enum
 from pathlib import Path
+from typing import TYPE_CHECKING
 
+from packaging.version import Version
+
+from e3.anod.store.interface import (
+    LocalStoreInterface,
+    StoreError,
+    StoreReadInterface,
+    StoreRWInterface,
+    StoreWriteInterface,
+    _StoreContextManager,
+)
 from e3.event import unique_id
 from e3.fs import cp
 from e3.log import getLogger
-from e3.anod.store.interface import (
-    StoreError,
-    StoreReadInterface,
-    StoreWriteInterface,
-    StoreRWInterface,
-    LocalStoreInterface,
-    _StoreContextManager,
-)
 
 if TYPE_CHECKING:
     from typing import Any, Literal, Union
 
-    from e3.anod.store.file import FileDict, ResourceDict
-    from e3.anod.store.component import ComponentDict, ComponentAttachmentDict
     from e3.anod.store.buildinfo import BuildInfoDict
+    from e3.anod.store.component import ComponentAttachmentDict, ComponentDict
+    from e3.anod.store.file import FileDict, ResourceDict
     from e3.anod.store.interface import BuildDataDict
 
 

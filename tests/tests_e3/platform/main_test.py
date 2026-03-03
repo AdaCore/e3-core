@@ -1,9 +1,9 @@
 """Tests for e3.platform."""
 
+import pytest
+
 import e3.env
 import e3.platform
-
-import pytest
 
 
 def test_platform() -> None:

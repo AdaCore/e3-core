@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from contextlib import contextmanager
+from typing import TYPE_CHECKING
 
 from e3.env import Env
 
-
 if TYPE_CHECKING:
-    from typing import TypedDict, Iterator
+    from typing import Iterator, TypedDict
+
     from typing_extensions import NotRequired
 
     class MockEnvConfig(TypedDict):

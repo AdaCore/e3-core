@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import hashlib
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import e3.error
 
 if TYPE_CHECKING:
-    from typing import Literal
     from os import PathLike
+    from typing import Literal
 
 
 class HashError(e3.error.E3Error):

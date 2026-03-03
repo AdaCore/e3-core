@@ -1,14 +1,14 @@
 """Tests for e3 fingerprint."""
 
-from pathlib import Path
 import json
 import os
+from pathlib import Path
+
+import pytest
 
 from e3.env import Env
 from e3.error import E3Error
 from e3.fingerprint import Fingerprint
-
-import pytest
 
 
 def test_fingerprint() -> None:

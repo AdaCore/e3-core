@@ -12,7 +12,6 @@ import e3.log
 from e3.archive import create_archive
 from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 
-
 if TYPE_CHECKING:
     from typing import (
         Any,
@@ -22,6 +21,7 @@ if TYPE_CHECKING:
         Literal,
         NoReturn,
     )
+
     from e3.anod.spec import Anod
 
     PrepareSrcCB = Callable[[Dict[str, Dict[str, str]], str], None]

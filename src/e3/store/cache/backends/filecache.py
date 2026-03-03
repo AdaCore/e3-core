@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.log
-from e3.fs import mkdir, rm, mv
+from e3.fs import mkdir, mv, rm
 from e3.store.cache.backends.base import DEFAULT_TIMEOUT, Cache
 
 try:
@@ -19,7 +19,7 @@ except ImportError:  # defensive code
     import pickle
 
 if TYPE_CHECKING:
-    from typing import Any, IO
+    from typing import IO, Any
 
 
 class FileCache(Cache):

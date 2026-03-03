@@ -1,18 +1,18 @@
 """Tests for e3.anod.store."""
 
 from __future__ import annotations
-from pathlib import Path
 
 import os
-import pytest
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-from e3.fs import mkdir, mv
+import pytest
 
 from e3.anod.store import LocalStore, StoreError
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
+from e3.fs import mkdir, mv
 
 if TYPE_CHECKING:
     from e3.anod.store import StoreRW

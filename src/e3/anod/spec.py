@@ -5,12 +5,11 @@ from __future__ import annotations
 import os
 import re
 import sys
-
-from packaging.version import Version
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import yaml
+from packaging.version import Version
 
 import e3.anod.deps
 import e3.anod.package
@@ -18,10 +17,10 @@ import e3.env
 import e3.log
 import e3.os.process
 import e3.text
-from e3.anod.error import AnodError, ShellError
 from e3.anod import qualifier_dict_to_str, qualifier_str_to_dict
-from e3.anod.qualifiers_manager import QualifiersManager
+from e3.anod.error import AnodError, ShellError
 from e3.anod.qualifier import Qualifier
+from e3.anod.qualifiers_manager import QualifiersManager
 from e3.fs import find
 from e3.os.fs import ldd_output_to_posix, which
 from e3.platform_db.knowledge_base import OS_INFO
@@ -49,16 +48,16 @@ spec_logger = e3.log.getLogger("anod.spec")
 
 
 if TYPE_CHECKING:
-    from typing import Any, IO, Literal, Union, Iterable
     from collections.abc import Callable, Sequence
+    from typing import IO, Any, Iterable, Literal, Union
+
+    import e3.anod.package
+    import e3.anod.sandbox
     from e3.anod.buildspace import BuildSpace
     from e3.anod.qualifiers_manager import QualifierValue
     from e3.anod.sandbox import SandBox
     from e3.env import BaseEnv
     from e3.os.process import DEVNULL_VALUE, PIPE_VALUE
-
-    import e3.anod.package
-    import e3.anod.sandbox
 
     BUILD_PRIMITIVE = Literal["build"]
     DOWNLOAD_PRIMITIVE = Literal["download"]

@@ -1,14 +1,14 @@
 """Tests for e3.yaml."""
 
-from pathlib import Path
 from collections import OrderedDict
+from pathlib import Path
 
-import e3.log
-import e3.yaml
+import pytest
 import yaml
 import yaml.constructor
 
-import pytest
+import e3.log
+import e3.yaml
 
 try:
     from io import StringIO

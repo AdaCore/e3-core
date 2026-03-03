@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING
 from e3.error import E3Error
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator, Sequence
     from typing import (
         Any,
         Hashable,
     )
-    from collections.abc import Callable, Iterator, Sequence
 
     VertexID = Hashable
 

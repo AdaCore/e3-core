@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dateutil.parser import parse as dateutil_parse
 from typing import TYPE_CHECKING
+
+from dateutil.parser import parse as dateutil_parse
 
 if TYPE_CHECKING:
     from datetime import datetime

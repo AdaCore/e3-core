@@ -6,14 +6,13 @@ import stat
 import sys
 import tempfile
 import time
-
 from pathlib import Path
+
+import pytest
 
 import e3.fs
 import e3.os.fs
 import e3.os.process
-
-import pytest
 
 
 def test_cd() -> None:

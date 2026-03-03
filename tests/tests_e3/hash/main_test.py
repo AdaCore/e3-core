@@ -5,9 +5,9 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import e3.hash
-
 import pytest
+
+import e3.hash
 
 
 def test_hash() -> None:

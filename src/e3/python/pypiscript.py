@@ -1,20 +1,23 @@
 """Script for generating PyPI package closures."""
 
 from __future__ import annotations
-from e3.python.pypi import PyPIClosure, fetch_from_registry
-from e3.python.wheel import Wheel
-from e3.anod.checkout import CheckoutManager
-from packaging.requirements import Requirement
-from e3.main import Main
-from e3.fs import mkdir, cp
-from datetime import datetime
+
 import argparse
 import os
-from pathlib import Path
 import re
-import yaml
-from e3.log import getLogger
+from datetime import datetime
+from pathlib import Path
 from sys import version_info as python_version_info
+
+import yaml
+from packaging.requirements import Requirement
+
+from e3.anod.checkout import CheckoutManager
+from e3.fs import cp, mkdir
+from e3.log import getLogger
+from e3.main import Main
+from e3.python.pypi import PyPIClosure, fetch_from_registry
+from e3.python.wheel import Wheel
 
 DESCRIPTION = """
 This script generates a directory containing the full closure of a set

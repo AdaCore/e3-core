@@ -1,11 +1,13 @@
 """DSSE (Dead Simple Signing Envelope) implementation."""
 
 from __future__ import annotations
-from e3.os.process import Run
+
 import base64
 import json
 import tempfile
 from pathlib import Path
+
+from e3.os.process import Run
 
 
 class DSSEError(Exception):

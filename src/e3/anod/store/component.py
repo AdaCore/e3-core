@@ -4,24 +4,24 @@ from __future__ import annotations
 
 import datetime
 import json
+from pathlib import Path
+from typing import TYPE_CHECKING, TypedDict, overload
 
 from dateutil import parser as dateutil_parser
-from pathlib import Path
-from typing import overload, TypedDict, TYPE_CHECKING
 
 from e3.anod.store.file import File
 from e3.anod.store.interface import StoreError, StoreRWInterface
-from e3.log import getLogger
 from e3.dsse import DSSE
+from e3.log import getLogger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Literal, TypeVar
 
-    from e3.archive import RemoveRootDirType
-    from e3.anod.store.interface import StoreReadInterface
     from e3.anod.store.buildinfo import BuildInfo, BuildInfoDict
     from e3.anod.store.file import FileDict
+    from e3.anod.store.interface import StoreReadInterface
+    from e3.archive import RemoveRootDirType
 
     ComponentType = TypeVar("ComponentType", bound="Component")
 

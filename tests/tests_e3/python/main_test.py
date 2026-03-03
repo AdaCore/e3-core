@@ -1,17 +1,19 @@
 """Tests for e3.python."""
 
 from __future__ import annotations
-from pathlib import Path
-from e3.python.wheel import Wheel
-from e3.os.process import Run
-from e3.sys import python_script
-from e3.fs import mkdir
-from e3.python.pypi import PyPIClosure, PyPIError
 
-import yaml
 from os import listdir
 from os.path import basename
+from pathlib import Path
+
 import pytest
+import yaml
+
+from e3.fs import mkdir
+from e3.os.process import Run
+from e3.python.pypi import PyPIClosure, PyPIError
+from e3.python.wheel import Wheel
+from e3.sys import python_script
 
 
 def generate_py_pkg_source(

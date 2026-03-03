@@ -6,12 +6,11 @@ import os
 import smtplib
 from email.message import Message
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import e3.log
 import e3.os.process
 from e3.error import E3Error
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

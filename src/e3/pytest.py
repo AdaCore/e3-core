@@ -2,18 +2,15 @@
 
 from __future__ import annotations
 
-from tempfile import mkdtemp, NamedTemporaryFile
-
 import logging
 import os
-
 from pathlib import Path
+from tempfile import NamedTemporaryFile, mkdtemp
 
+import e3.log
 from e3.env import Env
 from e3.fs import rm
 from e3.os.fs import cd, mv, which
-
-import e3.log
 
 try:
     import pytest
@@ -224,8 +221,8 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
     """
     # Only import packages from coverage if needed, the pytest plugin can
     # be used without coverage.
-    from coverage.sqldata import CoverageData
     from coverage.files import PathAliases
+    from coverage.sqldata import CoverageData
 
     paths = PathAliases()
     paths.add(origin_dir, new_dir)

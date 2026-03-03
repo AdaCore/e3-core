@@ -1,41 +1,45 @@
 """PyPI package dependency resolution and closure computation."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-import tarfile
+
 import json
-import e3.log
-import re
-from e3.python.wheel import Wheel
-from e3.fs import cp, mkdir
-from operator import attrgetter
 import os
+import re
+import tarfile
+from html.parser import HTMLParser
+from operator import attrgetter
 from pathlib import Path
-import requests
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
+
+import requests
+from packaging.requirements import Requirement
+from packaging.utils import (
+    InvalidSdistFilename,
+    InvalidWheelFilename,
+    canonicalize_name,
+    parse_sdist_filename,
+    parse_wheel_filename,
+)
+from packaging.version import InvalidVersion, Version
+from requests.exceptions import HTTPError
 from resolvelib import BaseReporter, Resolver
 from resolvelib.providers import AbstractProvider
 from resolvelib.resolvers import ResolutionImpossible
-from packaging.requirements import Requirement
-from packaging.utils import (
-    canonicalize_name,
-    parse_wheel_filename,
-    parse_sdist_filename,
-    InvalidWheelFilename,
-    InvalidSdistFilename,
-)
-from html.parser import HTMLParser
-from packaging.version import Version, InvalidVersion
+
+import e3.log
 from e3.error import E3Error
-from requests.exceptions import HTTPError
+from e3.fs import cp, mkdir
+from e3.python.wheel import Wheel
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
     from types import TracebackType
     from typing import Any
-    from collections.abc import Iterable, Mapping, Sequence, Iterator, Callable
-    from resolvelib.structs import Matches
+
     from resolvelib.providers import Preference
     from resolvelib.resolvers import RequirementInformation
+    from resolvelib.structs import Matches
 
 
 logger = e3.log.getLogger("e3.python.pypi")

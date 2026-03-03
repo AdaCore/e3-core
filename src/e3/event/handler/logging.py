@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import json
 import logging
+from typing import TYPE_CHECKING
 
 import e3.log
 from e3.event import EventHandler

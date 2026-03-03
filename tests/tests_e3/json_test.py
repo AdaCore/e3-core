@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-import pytest
-
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import pytest
+
 from e3.json import (
     JsonData,
-    JsonError,
     JsonDataInvalidJsonError,
+    JsonError,
     dump_to_json_file,
     load_from_json_file,
 )

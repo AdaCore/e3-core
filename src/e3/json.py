@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import json
-
-import e3.error
-
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+import e3.error
 
 if TYPE_CHECKING:
     from typing import Any, TypeVar

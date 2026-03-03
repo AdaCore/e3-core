@@ -1,18 +1,18 @@
 """Tests for e3.anod.store."""
 
 from __future__ import annotations
-from pathlib import Path
 
 import os
-import pytest
 from datetime import datetime, timezone
+from pathlib import Path
 
-from e3.os.fs import touch
+import pytest
 
-from e3.anod.store.file import File, FileKind
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
+from e3.anod.store.file import File, FileKind
 from e3.anod.store.interface import StoreError
+from e3.os.fs import touch
 
 
 def test_create_and_get_build_info(store) -> None:

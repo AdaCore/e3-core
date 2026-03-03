@@ -10,7 +10,7 @@ from e3.error import E3Error
 from e3.hash import sha1
 
 if TYPE_CHECKING:
-    from typing import Any, TypeVar, TypedDict, Literal
+    from typing import Any, Literal, TypedDict, TypeVar
 
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.component import ComponentDict

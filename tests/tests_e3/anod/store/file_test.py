@@ -1,25 +1,25 @@
 """Tests for e3.anod.store file."""
 
 from __future__ import annotations
-from pathlib import Path
 
 import json
 import os
-import pytest
 from datetime import datetime
+from pathlib import Path
 from time import sleep
 
-from e3.archive import create_archive
-from e3.anod.store import StoreError
-from e3.anod.store.interface import resource_id
-from e3.anod.store.file import File, FileKind
-from e3.anod.store.component import Component
-from e3.anod.store.buildinfo import BuildInfo
-from e3.dsse import DSSE
-from e3.slsa.provenance import Statement
+import pytest
 
+from e3.anod.store import StoreError
+from e3.anod.store.buildinfo import BuildInfo
+from e3.anod.store.component import Component
+from e3.anod.store.file import File, FileKind
+from e3.anod.store.interface import resource_id
+from e3.archive import create_archive
+from e3.dsse import DSSE
 from e3.fs import mkdir
 from e3.os.fs import touch
+from e3.slsa.provenance import Statement
 
 DEFAULT_SETUP = "test"
 

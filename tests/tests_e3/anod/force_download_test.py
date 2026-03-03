@@ -1,11 +1,13 @@
 """Tests for e3.anod force download."""
 
-from e3.env import BaseEnv
+import os
+from pathlib import Path
+
+import pytest
+
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.loader import AnodSpecRepository
-import os
-import pytest
-from pathlib import Path
+from e3.env import BaseEnv
 
 
 class TestSourceClosure:

@@ -2,9 +2,9 @@
 
 import sys
 
-import e3.os.process
-
 import pytest
+
+import e3.os.process
 
 if sys.platform == "win32":
     import e3.os.windows.native_api

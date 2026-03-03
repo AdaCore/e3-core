@@ -17,8 +17,9 @@ def process_exit_code(handle: int) -> int | None:
     :return: the exit code if process is finished or None otherwise
     :raise: WindowsError in case the handle is invalid
     """
-    from e3.os.windows.native_api import ProcessInfo, NT
     from ctypes import pointer, sizeof
+
+    from e3.os.windows.native_api import NT, ProcessInfo
 
     process_info = ProcessInfo.Basic()
     query_infoprocess: Callable = NT.QueryInformationProcess  # type: ignore
@@ -53,8 +54,9 @@ def wait_for_objects(
         of timeout
     :raise: WindowsError
     """
-    from e3.os.windows.native_api import NT, Wait
     from ctypes.wintypes import HANDLE
+
+    from e3.os.windows.native_api import NT, Wait
 
     if timeout == 0:
         timeout = Wait.INFINITE
