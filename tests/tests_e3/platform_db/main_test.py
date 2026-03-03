@@ -1,3 +1,5 @@
+"""Tests for e3.platform_db."""
+
 import stevedore
 from e3.platform_db import get_knowledge_base
 from importlib.metadata import EntryPoint

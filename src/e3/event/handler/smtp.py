@@ -1,3 +1,5 @@
+"""SMTP event handler."""
+
 from __future__ import annotations
 
 import json

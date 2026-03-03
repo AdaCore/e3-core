@@ -1,3 +1,5 @@
+"""Tests for e3.diff."""
+
 from pathlib import Path
 import os
 

@@ -1,3 +1,5 @@
+"""Repository checkout management for VCS operations (git, svn, external)."""
+
 from __future__ import annotations
 
 import hashlib

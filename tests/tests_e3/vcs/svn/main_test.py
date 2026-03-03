@@ -1,3 +1,5 @@
+"""Tests for e3.vcs.svn."""
+
 from pathlib import Path
 import sys
 

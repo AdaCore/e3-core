@@ -1,3 +1,5 @@
+"""Pytest plugin for E3."""
+
 from __future__ import annotations
 
 from tempfile import mkdtemp, NamedTemporaryFile

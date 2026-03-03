@@ -1,3 +1,5 @@
+"""Tests for e3 spdx."""
+
 from __future__ import annotations
 
 import json

@@ -1,3 +1,5 @@
+"""Tests for e3.os.process."""
+
 from __future__ import annotations
 
 import os

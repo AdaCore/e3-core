@@ -1,3 +1,5 @@
+"""Date and timestamp utilities."""
+
 from __future__ import annotations
 
 import calendar

@@ -1,3 +1,5 @@
+"""Tests for e3.anod buildspace."""
+
 import os
 
 from e3.anod.buildspace import BuildSpace

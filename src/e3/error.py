@@ -1,3 +1,5 @@
+"""E3 base exception class."""
+
 from __future__ import annotations
 
 

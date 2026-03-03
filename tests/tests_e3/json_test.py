@@ -1,3 +1,5 @@
+"""Tests for e3 json."""
+
 from __future__ import annotations
 
 import pytest

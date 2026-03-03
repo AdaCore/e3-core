@@ -1,3 +1,5 @@
+"""Tests for e3.collection.dag."""
+
 import pytest
 
 from e3.collection.dag import DAG

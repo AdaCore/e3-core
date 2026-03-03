@@ -1,3 +1,5 @@
+"""Test data prolog for Anod tests."""
+
 # Check that spec_config is in globals is need just because of
 # style checking. This is not required in practic
 if "spec_config" not in globals():

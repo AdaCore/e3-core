@@ -1,3 +1,5 @@
+"""Tests for e3.store."""
+
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from e3.store.backends.http_simple_store import HTTPSimpleStore

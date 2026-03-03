@@ -1,3 +1,5 @@
+"""Tests for DSSE function."""
+
 from e3.os.process import Run
 from e3.dsse import DSSE, DSSEError
 import pytest

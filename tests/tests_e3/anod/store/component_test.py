@@ -1,3 +1,5 @@
+"""Tests for e3.anod.store component."""
+
 # type: ignore
 from __future__ import annotations
 

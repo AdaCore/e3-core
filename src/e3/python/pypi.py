@@ -1,3 +1,5 @@
+"""PyPI package dependency resolution and closure computation."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import tarfile

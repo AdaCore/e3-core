@@ -1,3 +1,5 @@
+"""Binary and source package management for Anod."""
+
 from __future__ import annotations
 
 import os

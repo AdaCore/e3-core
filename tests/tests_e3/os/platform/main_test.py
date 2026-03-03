@@ -1,3 +1,5 @@
+"""Tests for e3.os.platform."""
+
 import e3.os.platform
 
 

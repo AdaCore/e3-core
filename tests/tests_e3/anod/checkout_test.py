@@ -1,3 +1,5 @@
+"""Tests for e3.anod checkout."""
+
 from pathlib import Path
 import sys
 import logging

@@ -1,3 +1,5 @@
+"""Platform information and detection."""
+
 from __future__ import annotations
 
 import collections

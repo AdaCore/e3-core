@@ -1,3 +1,5 @@
+"""Anod specification base class and API."""
+
 from __future__ import annotations
 
 import os

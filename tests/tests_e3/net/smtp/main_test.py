@@ -1,3 +1,5 @@
+"""Tests for e3.net.smtp."""
+
 import smtplib
 from email.utils import make_msgid
 

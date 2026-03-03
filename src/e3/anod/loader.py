@@ -1,3 +1,5 @@
+"""Anod specification loader."""
+
 from __future__ import annotations
 
 import inspect

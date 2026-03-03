@@ -1,3 +1,5 @@
+"""Script for generating PyPI package closures."""
+
 from __future__ import annotations
 from e3.python.pypi import PyPIClosure, fetch_from_registry
 from e3.python.wheel import Wheel

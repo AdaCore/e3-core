@@ -1,3 +1,5 @@
+"""Tests for e3.fs."""
+
 from pathlib import Path
 import os
 import re

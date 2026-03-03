@@ -1,3 +1,5 @@
+"""Tests for e3.anod.store release components."""
+
 from __future__ import annotations
 
 import os

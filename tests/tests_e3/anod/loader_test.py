@@ -1,3 +1,5 @@
+"""Tests for e3.anod loader."""
+
 import os
 
 from e3.anod.error import SandBoxError

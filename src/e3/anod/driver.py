@@ -1,3 +1,5 @@
+"""Anod driver for executing primitives."""
+
 from __future__ import annotations
 
 from functools import wraps

@@ -1,3 +1,5 @@
+"""Tests for e3.python."""
+
 from __future__ import annotations
 from pathlib import Path
 from e3.python.wheel import Wheel

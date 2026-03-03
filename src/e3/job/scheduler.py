@@ -1,3 +1,5 @@
+"""Job scheduler for parallel execution of interdependent jobs."""
+
 from __future__ import annotations
 
 import heapq

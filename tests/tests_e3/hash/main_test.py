@@ -1,3 +1,5 @@
+"""Tests for e3.hash."""
+
 from __future__ import annotations
 
 import os

@@ -1,3 +1,5 @@
+"""AWS S3 event handler."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

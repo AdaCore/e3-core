@@ -1,3 +1,5 @@
+"""Tests for e3.anod package."""
+
 from pathlib import Path
 
 import e3.anod.error

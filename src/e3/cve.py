@@ -1,3 +1,6 @@
+"""CVE (Common Vulnerabilities and Exposures) and \
+   NVD (National Vulnerability Database) utilities."""
+
 from __future__ import annotations
 
 from functools import cached_property

@@ -1,3 +1,5 @@
+"""DAG walk and execution framework."""
+
 from __future__ import annotations
 
 import abc

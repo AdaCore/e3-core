@@ -1,3 +1,5 @@
+"""Main entry point for e3-sandbox command."""
+
 from __future__ import annotations
 
 import sys

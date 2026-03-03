@@ -1,3 +1,5 @@
+"""Build information management for Anod store."""
+
 from __future__ import annotations
 
 from e3.anod.store.component import Component

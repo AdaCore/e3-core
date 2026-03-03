@@ -1,3 +1,5 @@
+"""Tests for e3.net.token."""
+
 import base64
 import hashlib
 import json
