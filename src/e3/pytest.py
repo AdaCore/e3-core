@@ -270,7 +270,7 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]) ->
     rep = outcome.get_result()
     results_dir = os.environ.get("RESULTS_DIR")
 
-    if not results_dir or not os.path.isdir(results_dir):
+    if not results_dir or not Path(results_dir).is_dir():
         return
 
     # we only look at actual test calls, not setup/teardown

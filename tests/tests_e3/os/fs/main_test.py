@@ -102,11 +102,11 @@ def test_rm() -> None:
 def test_mv() -> None:
     os.makedirs("a")
     e3.os.fs.mv("a", "b")
-    assert os.path.isdir("b")
+    assert Path("b").is_dir()
 
     os.makedirs("c")
     e3.os.fs.mv("b", "c")
-    assert os.path.isdir(Path("c", "b"))
+    assert Path("c", "b").is_dir()
 
     e3.os.fs.touch("d")
     os.makedirs("dest")

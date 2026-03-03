@@ -197,7 +197,7 @@ def unpack_archive(
     if fileobj is None and not Path(filename).is_file():
         raise ArchiveError(origin="unpack_archive", message=f"cannot find {filename}")
 
-    if not os.path.isdir(dest):
+    if not Path(dest).is_dir():
         raise ArchiveError(
             origin="unpack_archive", message=f"dest dir {dest} does not exist"
         )

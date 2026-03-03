@@ -118,7 +118,7 @@ class CheckoutManager:
         If <url>/.git is a directory then git ls-files will be called to get
         the list of files to ignore.
         """
-        if os.path.isdir(self.working_dir):
+        if Path(self.working_dir).is_dir():
             old_commit = get_filetree_state(self.working_dir, ignore_hidden=False)
         else:
             old_commit = ""
@@ -142,7 +142,7 @@ class CheckoutManager:
                 "--delete-excluded",
             ] + [f"--exclude={el}" for el in VCS_IGNORE_LIST]
 
-            if os.path.isdir(Path(url, ".git")) and Path(url, ".gitignore").is_file():
+            if Path(url, ".git").is_dir() and Path(url, ".gitignore").is_file():
                 rsync_cmd.append("--filter=:- .gitignore")
 
             p = Run(rsync_cmd, cwd=url, output=None)
@@ -325,7 +325,7 @@ class CheckoutManager:
         old_commit, new_commit = None, None
         result = ReturnValue.success
 
-        if os.path.isdir(self.working_dir):  # a possible checkout exists
+        if Path(self.working_dir).is_dir():  # a possible checkout exists
             try:
                 old_commit = working_copy.current_revision
             except SVNError:

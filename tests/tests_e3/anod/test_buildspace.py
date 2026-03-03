@@ -71,6 +71,6 @@ def test_build_space_exists() -> None:
     # we picked does exist, then delete it, before observing
     # whether BuildSpace.exists now return False or not.
     one_subdir = bs.subdir(bs.DIRS[0])
-    assert os.path.isdir(one_subdir)
+    assert Path(one_subdir).is_dir()
     rm(one_subdir, recursive=True)
     assert bs.exists() is False

@@ -75,17 +75,17 @@ def cp(
     elif file_number > 1:
         # If we have more than one file to copy then check that target is a
         # directory
-        if not os.path.isdir(target):
+        if not Path(target).is_dir():
             raise FSError(origin="cp", message="target should be a directory")
 
     for f in file_list:
         try:
-            if os.path.isdir(target):
+            if Path(target).is_dir():
                 f_dest = str(Path(target, os.path.basename(f)))
             else:
                 f_dest = os.fspath(target)
 
-            if recursive and os.path.isdir(f):
+            if recursive and Path(f).is_dir():
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
             elif preserve_symlinks and os.path.islink(f):  # windows: no cover
                 linkto = os.readlink(f)
@@ -225,7 +225,7 @@ def get_filetree_state(
 
     path = os.path.abspath(path)
     result = hashlib.sha1()  # nosec
-    if os.path.isdir(path):
+    if Path(path).is_dir():
         for root, dirs, files in os.walk(path):
             if ignore_hidden:
                 ignore_dirs = []
@@ -293,14 +293,14 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
     This function behaves quite like mkdir -p command shell. So if the
     directory already exist no error is raised.
     """
-    if os.path.isdir(path):
+    if Path(path).is_dir():
         return
     if not quiet:
         logger.debug("mkdir %s (mode=%s)", path, oct(mode))
     try:
         os.makedirs(path, mode)
     except Exception as e:  # defensive code
-        if os.path.isdir(path):
+        if Path(path).is_dir():
             # Take care of cases where in parallel execution environment
             # the directory is created after the initial test on its
             # existence and the call to makedirs
@@ -357,7 +357,7 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
             return dst.startswith(src)
 
         real_dst = Path(dst)
-        if os.path.isdir(dst):
+        if Path(dst).is_dir():
             if same_file(src, dst):
                 # We might be on a case insensitive filesystem,
                 # perform the rename anyway.
@@ -374,7 +374,7 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
                 linkto = os.readlink(src)
                 os.symlink(linkto, real_dst)
                 os.unlink(src)
-            elif os.path.isdir(src):
+            elif Path(src).is_dir():
                 if destinsrc(src, dst):
                     raise FSError(
                         f"Cannot move a directory '{src}' into itself '{dst}'."
@@ -395,11 +395,11 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
             raise FSError(origin="mv", message=f'cannot find files matching "{source}"')
         elif nb_files == 1:
             source = file_list[0]
-            if os.path.isdir(source) and os.path.isdir(target):
+            if Path(source).is_dir() and Path(target).is_dir():
                 move_file(source, str(Path(target, os.path.basename(source))))
             else:
                 move_file(source, os.fspath(target))
-        elif not os.path.isdir(target):
+        elif not Path(target).is_dir():
             # More than one file to move but the target is not a directory
             raise FSError("mv", f"{target} should be a directory")
         else:
@@ -515,7 +515,7 @@ def rm(
 
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
-            if recursive and os.path.isdir(f) and not os.path.islink(f):
+            if recursive and Path(f).is_dir() and not os.path.islink(f):
                 if Version(python_version()) >= Version("3.12"):
                     shutil.rmtree(f, onexc=onerror)
                 else:
@@ -882,7 +882,7 @@ def sync_tree(
                             e3.os.fs.readlink(src_linkto.path),
                         )
 
-                    target_is_directory = os.path.isdir(src_linkto_path)
+                    target_is_directory = src_linkto_path.is_dir()
 
                 os.symlink(linkto, dst.path, target_is_directory=target_is_directory)
             copystat(src, dst)

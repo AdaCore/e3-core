@@ -3,7 +3,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-from os.path import abspath, dirname, isdir
+from os.path import abspath, dirname
 from typing import TYPE_CHECKING
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
@@ -53,7 +53,7 @@ class PypiSimulator:
     def download_file(
         self, name: str, version: str, request: Any, context: Any
     ) -> bytes:
-        if not isdir(name):
+        if not Path(name).is_dir():
             mkdir(name)
 
         with Path(name, "setup.py").open("w") as fd:

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-
 from typing import TYPE_CHECKING
 
 import e3.error
@@ -170,7 +168,7 @@ class ElectrolytJob(Job):
             dest_dir = Path(spec.build_space.src_dir)
         else:
             dest_dir = Path(spec.build_space.src_dir, source.dest)
-        if not os.path.isdir(src_dir):  # defensive code
+        if not src_dir.is_dir():  # defensive code
             logger.critical("source directory %s does not exist", str(src_dir))
             self.__status = STATUS.failure
             return

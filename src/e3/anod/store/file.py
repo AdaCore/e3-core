@@ -385,7 +385,7 @@ class File(object):
         # Check for previous metadata
         prev_source = None
         if dest_dir is not None:
-            if not os.path.isdir(dest_dir):
+            if not Path(dest_dir).is_dir():
                 raise StoreError(f"non existent dir: {dest_dir}")
             prev_source = self.load_from_meta_file(
                 dest_dir=dest_dir,
@@ -410,12 +410,12 @@ class File(object):
                     f"{self.unpack_dir}"
                 )
 
-            if not os.path.isdir(self.unpack_dir):
+            if not Path(self.unpack_dir).is_dir():
                 raise StoreError(
                     f"unpacked resource directory {self.unpack_dir} does not exist"
                 )
 
-            if unpack_dir is None or not os.path.isdir(unpack_dir):
+            if unpack_dir is None or not Path(str(unpack_dir)).is_dir():
                 raise StoreError(f"target directory {unpack_dir} does not exist")
 
             try:

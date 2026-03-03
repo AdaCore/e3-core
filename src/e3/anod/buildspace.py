@@ -55,7 +55,7 @@ class BuildSpace:
             return False
         # Next, verify that all the necessary directories exist as well.
         for d in self.DIRS:
-            if not os.path.isdir(self.subdir(name=d)):
+            if not Path(self.subdir(name=d)).is_dir():
                 return False
         return True
 
