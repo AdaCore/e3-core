@@ -81,7 +81,7 @@ class E3ZipFile(zipfile.ZipFile):
                     member = self.getinfo(member)
                 attr = member.external_attr >> 16 & 0x1FF
                 if attr != 0:
-                    os.chmod(result, attr)
+                    Path(result).chmod(attr)
             except AttributeError:  # defensive code
                 pass
         return result

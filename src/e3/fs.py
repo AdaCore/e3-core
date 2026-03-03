@@ -464,27 +464,27 @@ def rm(
             # This function is only called when deleting a file inside a
             # directory to remove, it is safe to change the parent directory
             # permission since the parent directory will also be removed.
-            os.chmod(os.path.dirname(error_path), 0o700)
+            Path(os.path.dirname(error_path)).chmod(0o700)
 
             # ??? It seems that this might be needed on windows
-            os.chmod(error_path, 0o700)
+            Path(error_path).chmod(0o700)
             e3.os.fs.safe_remove(error_path)
 
         elif func == os.rmdir:
             # Cannot remove error_path, call chmod and redo an attempt
-            os.chmod(error_path, 0o700)
+            Path(error_path).chmod(0o700)
 
             # Also change the parent directory permission if it will also
             # be removed.
             if recursive and error_path not in file_list:
                 # If error_path not in the list of directories to remove it
                 # means that we are already in a subdirectory.
-                os.chmod(os.path.dirname(error_path), 0o700)
+                Path(os.path.dirname(error_path)).chmod(0o700)
             e3.os.fs.safe_rmdir(error_path)
 
         elif func in (os.listdir, os.open):
             # Cannot read the directory content, probably a permission issue
-            os.chmod(error_path, 0o700)
+            Path(error_path).chmod(0o700)
 
             # And continue to delete the subdir
             if Version(python_version()) >= Version("3.12"):
@@ -819,7 +819,7 @@ def sync_tree(
                 else:
                     os.utime(dst.path, None)
             if hasattr(os, "chmod"):
-                os.chmod(dst.path, mode)
+                Path(dst.path).chmod(mode)
             if hasattr(os, "chflags") and hasattr(src.stat, "st_flags"):
                 try:
                     getattr(os, "chflags")(dst.path, src.stat.st_flags)  # noqa: B009

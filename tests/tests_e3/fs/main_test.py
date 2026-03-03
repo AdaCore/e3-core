@@ -510,17 +510,17 @@ def test_rm_on_error() -> None:
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/b")
     e3.os.fs.touch("a/b/c")
-    os.chmod("a/b/c", 0o000)
-    os.chmod("a/b", 0o000)
+    Path("a/b/c").chmod(0o000)
+    Path("a/b").chmod(0o000)
 
     e3.fs.mkdir("a/d")
     e3.os.fs.touch("a/d/e")
-    os.chmod("a/d/e", 0o000)
-    os.chmod("a/d", 0o500)
+    Path("a/d/e").chmod(0o000)
+    Path("a/d").chmod(0o500)
 
     e3.fs.mkdir("a/f")
     e3.fs.mkdir("a/f/g")
-    os.chmod("a/f", 0o500)
+    Path("a/f").chmod(0o500)
 
     e3.fs.rm("a", True)
 
@@ -569,7 +569,7 @@ def test_safe_copy() -> None:
     # content.
     e3.fs.mkdir("c")
     e3.os.fs.touch("c/f")
-    os.chmod("c/f", 0o000)
+    Path("c/f").chmod(0o000)
     e3.fs.sync_tree("a", "c")
     with Path("c/f").open() as f:
         assert f.read() == "file"
@@ -602,7 +602,7 @@ def test_safe_mkdir() -> None:
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/a")
     e3.fs.mkdir("b")
-    os.chmod("b", 0o000)
+    Path("b").chmod(0o000)
     e3.fs.sync_tree("a", "b")
     assert os.path.isdir("b/a")
 

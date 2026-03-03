@@ -136,7 +136,7 @@ def chmod(mode: str, filename: str | Path) -> int:
                 else:
                     current_mode = current_mode | action_mask
 
-    os.chmod(filename, current_mode)
+    Path(filename).chmod(current_mode)
     return current_mode
 
 
@@ -246,9 +246,9 @@ def force_remove_file(path: str | Path) -> None:
         chmod("u+w", dir_path)
 
         # ??? It seems that this might be needed on windows
-        os.chmod(path, 0o700)
+        Path(path).chmod(0o700)
         safe_remove(path)
-        os.chmod(dir_path, orig_mode)
+        Path(dir_path).chmod(orig_mode)
 
 
 def ldd_output_to_posix(ldd_output: str) -> str:
