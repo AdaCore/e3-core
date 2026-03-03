@@ -368,4 +368,4 @@ def test_archive_with_readonly_dir() -> None:
     e3.archive.unpack_archive(
         str(Path("dest", "pkg.tar.gz")), "result", remove_root_dir=True
     )
-    assert os.path.isfile(Path("result", "readonly_dir", "file.txt"))
+    assert Path("result", "readonly_dir", "file.txt").is_file()

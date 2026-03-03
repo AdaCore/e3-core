@@ -295,11 +295,11 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
             script_exe = script + ".exe"
             script_py = script + "-script.py"
 
-        if os.path.isfile(script_py):
+        if Path(script_py).is_file():
             # If we have a side <basename>-script.py always use it, instead of
             # the .exe
             return [interpreter(prefix), script_py]
-        if os.path.isfile(script_exe):
+        if Path(script_exe).is_file():
             # A .exe without side python script
             if has_relative_python_shebang(script_exe):  # all: no cover
                 # relocatable python distribution
@@ -367,7 +367,7 @@ def relocate_python_distrib(
     for fname in os.listdir(script_dir):
         script_path = Path(script_dir, fname)
 
-        if not os.path.isfile(script_path):
+        if not script_path.is_file():
             continue
 
         with script_path.open("rb") as fd:

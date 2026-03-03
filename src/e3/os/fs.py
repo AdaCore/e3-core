@@ -402,7 +402,7 @@ def which(prog: str | Path, paths: str | None = None, default: Any = "") -> Any:
     """
 
     def is_exe(file_path: str) -> bool:
-        return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
+        return Path(file_path).is_file() and os.access(file_path, os.X_OK)
 
     def possible_names(file_path: str) -> list[str]:
         names = [file_path]

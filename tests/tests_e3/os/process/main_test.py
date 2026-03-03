@@ -45,7 +45,7 @@ def test_run_stdout_stderr() -> None:
     p = e3.os.process.Run(
         [sys.executable, str(prog_filename)], output="text.txt", error=subprocess.PIPE
     )
-    assert os.path.isfile("text.txt")
+    assert Path("text.txt").is_file()
     assert p.err.replace("\r", "") == "stderr\n"
 
 

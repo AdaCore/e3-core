@@ -460,7 +460,7 @@ def test_component_download(store) -> None:
     cwd = Path.cwd()
     assert c.download(str(cwd)) is True
     f1_downloaded = Path("f1.txt")
-    assert os.path.isfile(f1_downloaded)
+    assert f1_downloaded.is_file()
 
     c.files[0].internal = True
     with Path("f2.txt").open("w") as f:
@@ -478,7 +478,7 @@ def test_component_download(store) -> None:
     c.files.append(f2)
     assert c.download(str(cwd)) is True
     f2_downloaded = Path("f2.txt")
-    assert os.path.isfile(f2_downloaded)
+    assert f2_downloaded.is_file()
 
     c.files.append(f2)
     with pytest.raises(

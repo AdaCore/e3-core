@@ -79,7 +79,7 @@ class CheckoutManager:
         git ignore setting is taken into account.
         """
         # Reset changelog file
-        if os.path.isfile(self.changelog_file):
+        if Path(self.changelog_file).is_file():
             rm(self.changelog_file)
 
         update: Callable[[str, str | None], tuple[ReturnValue, str | None, str | None]]
@@ -142,9 +142,7 @@ class CheckoutManager:
                 "--delete-excluded",
             ] + [f"--exclude={el}" for el in VCS_IGNORE_LIST]
 
-            if os.path.isdir(Path(url, ".git")) and os.path.isfile(
-                Path(url, ".gitignore")
-            ):
+            if os.path.isdir(Path(url, ".git")) and Path(url, ".gitignore").is_file():
                 rsync_cmd.append("--filter=:- .gitignore")
 
             p = Run(rsync_cmd, cwd=url, output=None)

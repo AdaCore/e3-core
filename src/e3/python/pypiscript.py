@@ -162,7 +162,7 @@ def main() -> None:
             # is one only if there is file called VERSION and that the version
             # has the format MAJOR.MINOR
             version_file = Path(checkout_manager.working_dir, "VERSION")
-            if os.path.isfile(version_file):
+            if version_file.is_file():
                 with version_file.open() as fd:
                     version = fd.read().strip()
                 logger.info(f"Wheel {name} has version {version}")

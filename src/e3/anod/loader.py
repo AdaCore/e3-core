@@ -76,7 +76,7 @@ class AnodSpecRepository:
 
         # Read the API version file
         version_file = Path(self.spec_dir, "VERSION")
-        if os.path.isfile(version_file):
+        if version_file.is_file():
             with version_file.open() as f:
                 content = f.read().strip()
                 if ":" not in content:
@@ -138,7 +138,7 @@ class AnodSpecRepository:
 
         # Load config/repositories.yaml
         repo_file = Path(self.spec_dir, "config", "repositories.yaml")
-        if os.path.isfile(repo_file):
+        if repo_file.is_file():
             with repo_file.open() as fd:
                 self.repos = yaml.safe_load(fd)
 

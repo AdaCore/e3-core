@@ -2,7 +2,6 @@
 
 import email
 import json
-import os
 
 import e3.archive
 import e3.event
@@ -76,7 +75,7 @@ def test_smtp_event() -> None:
     # Test sending an event in two steps: save in temporary files and then
     # reread the file and send the event.
     filename = e.dump(event_dir=".")
-    assert os.path.isfile(filename)
+    assert Path(filename).is_file()
 
     with mock.patch("smtplib.SMTP_SSL") as mock_smtp:
         e3.event.send_event_from_file(filename)

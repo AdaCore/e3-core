@@ -182,28 +182,28 @@ def test_patch_git_with_headers() -> None:
     e3.fs.cp(patch_file, cwd)
 
     e3.diff.patch("git_patch_with_header", str(cwd))
-    assert os.path.isfile("file1")
-    assert os.path.isfile("file2")
+    assert Path("file1").is_file()
+    assert Path("file2").is_file()
 
     e3.fs.rm("file1")
     e3.fs.rm("file2")
     e3.diff.patch("git_patch_with_header", str(cwd), discarded_files=["file1"])
-    assert not os.path.isfile("file1")
-    assert os.path.isfile("file2")
+    assert not Path("file1").is_file()
+    assert Path("file2").is_file()
 
     e3.fs.rm("file1")
     e3.fs.rm("file2")
     e3.diff.patch("git_patch_with_header", str(cwd), discarded_files=["file2"])
-    assert os.path.isfile("file1")
-    assert not os.path.isfile("file2")
+    assert Path("file1").is_file()
+    assert not Path("file2").is_file()
 
     e3.fs.rm("file1")
     e3.fs.rm("file2")
     with pytest.raises(e3.diff.EmptyDiffError):
         e3.diff.patch("git_patch_with_header", str(cwd), discarded_files=["file*"])
 
-    assert not os.path.isfile("file1")
-    assert not os.path.isfile("file2")
+    assert not Path("file1").is_file()
+    assert not Path("file2").is_file()
 
 
 def test_patch_git_binary() -> None:
@@ -212,6 +212,6 @@ def test_patch_git_binary() -> None:
     cwd = Path.cwd()
     e3.fs.cp(patch_file, cwd)
     e3.diff.patch("unicorn.patch", str(cwd))
-    assert os.path.isfile("unicorn.zip")
+    assert Path("unicorn.zip").is_file()
     e3.archive.unpack_archive("unicorn.zip", dest=".")
-    assert os.path.isfile("unicorn.txt")
+    assert Path("unicorn.txt").is_file()

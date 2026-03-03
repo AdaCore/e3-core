@@ -8,6 +8,7 @@ import sqlite3
 import time
 from packaging.version import Version
 from typing import TYPE_CHECKING
+from pathlib import Path
 
 from e3.event import unique_id
 from e3.fs import cp
@@ -1152,7 +1153,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             raise StoreError("Trying to submit file without 'resource_id' field")
 
         resource_path = os.path.abspath(downloaded_as)
-        if not os.path.isfile(resource_path):
+        if not Path(resource_path).is_file():
             raise StoreError(f"{resource_path}: not found or is not a file")
 
         resource_tmp = self._select(
@@ -1162,7 +1163,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             rid, resource_id, path, *rest = resource_tmp[0]
             # Check if the path is still valid, if not, we got a new valid path,
             # so we just need to update the database.
-            if not os.path.isfile(path):
+            if not Path(str(path)).is_file():  # add cast to str to help mypy
                 self._update(
                     _Store.TableName.resources, rid, ["path"], [resource_path]  # type: ignore[arg-type]
                 )
@@ -1847,7 +1848,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             row_id, resource_id, path, *_ = resource_tmp[0]
             # Check if the path is still valid, if not, we got a new valid path,
             # so we just need to update the database.
-            if os.path.isfile(path):
+            if Path(str(path)).is_file():  # add cast to str to help mypy
                 resource = self._tuple_to_resource(resource_tmp[0])  # type: ignore[arg-type]
             else:
                 resource = self._tuple_to_resource(

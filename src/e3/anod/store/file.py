@@ -432,7 +432,7 @@ class File(object):
             if (
                 prev_source is None
                 or prev_source.resource_id != self.resource_id
-                or not os.path.isfile(downloaded_file)
+                or not Path(downloaded_file).is_file()
             ):
                 if self.downloaded_as is not None:
                     # The resource is already on the local file system. Just copy it.
@@ -628,7 +628,7 @@ class File(object):
         :return: a File instance
         """
         meta_path = cls.metadata_path(dest_dir=dest_dir, name=name)
-        if not os.path.isfile(meta_path):
+        if not Path(meta_path).is_file():
             if ignore_errors:
                 return None
             raise StoreError(f"non existing metafile {meta_path}")

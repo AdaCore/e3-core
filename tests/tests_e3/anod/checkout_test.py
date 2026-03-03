@@ -71,12 +71,12 @@ class TestCheckout:
 
         result = m.update(vcs="git", url=url3, revision=main_branch)
         assert result == ReturnValue.success
-        assert os.path.isfile(Path("myrepo", "file1.txt"))
+        assert Path("myrepo", "file1.txt").is_file()
 
         logger.info("Check that we can switch from one git url to another one")
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.success
-        assert os.path.isfile(Path("myrepo", "file1.txt", "data2.txt"))
+        assert Path("myrepo", "file1.txt", "data2.txt").is_file()
 
         logger.info("Check that in case of no changes unchanged is returned")
         result = m.update(vcs="git", url=url4, revision=main_branch)
@@ -90,7 +90,7 @@ class TestCheckout:
         r.git_cmd(["commit", "-m", "new file"])
         result = m.update(vcs="git", url=url4, revision=main_branch)
         assert result == ReturnValue.success
-        assert os.path.isfile(Path("myrepo", "file3.txt"))
+        assert Path("myrepo", "file3.txt").is_file()
 
         logger.info("Check that local modifications are discarded")
         with Path("myrepo", "file3.txt").open("w") as fd:
@@ -114,8 +114,8 @@ class TestCheckout:
             fd.write("/ignore_file.txt")
 
         result = m.update(vcs="external", url=os.path.abspath("git2"))
-        assert os.path.isfile(Path(m.working_dir, "file4.txt"))
-        assert not os.path.isfile(Path(m.working_dir, "ignore_file.txt"))
+        assert Path(m.working_dir, "file4.txt").is_file()
+        assert not Path(m.working_dir, "ignore_file.txt").is_file()
         assert result == ReturnValue.success
 
         result = m.update(vcs="external", url=os.path.abspath("git2"))
@@ -160,7 +160,7 @@ class TestCheckout:
         logger.info("Check that we see the update")
         result = m.update(vcs="svn", url=url)
         assert result == ReturnValue.success
-        assert os.path.isfile(Path("svn_checkout", "file3.txt"))
+        assert Path("svn_checkout", "file3.txt").is_file()
 
         logger.info("Do a local modification in the working dir")
         with Path("myrepo", "file3.txt").open("w") as fd:
@@ -175,7 +175,7 @@ class TestCheckout:
         logger.info("Check that we can switch from one svn url to another")
         result = m.update(vcs="svn", url=url2)
         assert result == ReturnValue.success
-        assert os.path.isfile(Path("myrepo", "file1.txt", "data2.txt"))
+        assert Path("myrepo", "file1.txt", "data2.txt").is_file()
 
     def test_shallow_since_checkout(self) -> None:
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
@@ -213,8 +213,8 @@ class TestCheckout:
             log = fd.readlines()
 
         assert result == ReturnValue.success
-        assert os.path.isfile(Path("myrepo", "file3.txt"))
-        assert os.path.isfile(Path("myrepo", "file4.txt"))
+        assert Path("myrepo", "file3.txt").is_file()
+        assert Path("myrepo", "file4.txt").is_file()
         assert log == ["second commit"]
 
     def test_max_depth_checkout(self) -> None:
@@ -256,7 +256,7 @@ class TestCheckout:
             log = fd.read().splitlines()
 
         assert result == ReturnValue.success
-        assert os.path.isfile(Path("myrepo", "file3.txt"))
-        assert os.path.isfile(Path("myrepo", "file4.txt"))
-        assert os.path.isfile(Path("myrepo", "file5.txt"))
+        assert Path("myrepo", "file3.txt").is_file()
+        assert Path("myrepo", "file4.txt").is_file()
+        assert Path("myrepo", "file5.txt").is_file()
         assert log == ["third commit", "second commit"]

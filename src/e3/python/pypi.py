@@ -321,7 +321,7 @@ class PyPI:
 
     def load_cache(self) -> None:
         """Load cache from disk."""
-        if os.path.isfile(self.pypi_cache_file):
+        if Path(self.pypi_cache_file).is_file():
             with Path(self.pypi_cache_file).open() as fd:
                 self.cache = {
                     k: [PyPILink.from_dict(el) for el in v]
@@ -373,7 +373,7 @@ class PyPICandidate:
         :return: the location of the file
         """
         download_path = Path(self.cache_dir, self.filename)
-        if not os.path.isfile(download_path):
+        if not download_path.is_file():
             mkdir(self.cache_dir)
             if self.url.startswith("file://"):
                 cp(self.url.replace("file://", "", 1), download_path)
