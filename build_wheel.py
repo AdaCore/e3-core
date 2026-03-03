@@ -80,7 +80,7 @@ def main() -> None:
         sys.exit(1)
 
     # Find the path to version file
-    with project.open("rb") as f:
+    with open(project, "rb") as f:
         version_config = (
             tomllib.load(f)
             .get("tool", {})
@@ -103,7 +103,7 @@ def main() -> None:
     # Read the version
     root_dir = project.parent
     version_abspath = root_dir / version_path
-    with version_abspath.open() as f:
+    with open(version_abspath) as f:
         version_content = f.read()
 
     # Extract the <major>.<minor>(.<patch>)? part.
@@ -165,7 +165,7 @@ def main() -> None:
 
     if not main.args.dry_run:
         # Replace the version in the file
-        with version_abspath.open("w") as f:
+        with open(version_abspath, "w") as f:
             f.write(version_content.replace(version, build_version))
 
         try:

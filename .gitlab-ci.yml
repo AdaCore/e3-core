@@ -78,11 +78,11 @@ check:
   before_script:
     - !reference [.linux-common, before_script]
     - git config --global --add
-      url."${GITLAB_REMOTE}/it/black.git".insteadOf
-      https://github.com/ambv/black
-    - git config --global --add
       url."${GITLAB_REMOTE}/it/flake8.git".insteadOf
       https://github.com/pycqa/flake8
+    - git config --global --add
+      url."${GITLAB_REMOTE}/it/ruff-pre-commit.git".insteadOf
+      https://github.com/astral-sh/ruff-pre-commit
     - python -m pip install pre-commit
     - pre-commit install
   script:
