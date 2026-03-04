@@ -23,9 +23,9 @@ def test_wait_for_objects() -> None:
 
     p = e3.os.process.Run(long_cmd, bg=True)
 
-    assert (
-        wait_for_objects([int(p.internal._handle)], timeout=1) is None
-    ), "timeout was expected"
+    assert wait_for_objects([int(p.internal._handle)], timeout=1) is None, (
+        "timeout was expected"
+    )
     p.kill()
 
     p0 = e3.os.process.Run(long_cmd, bg=True)

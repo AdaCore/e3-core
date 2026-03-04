@@ -21,9 +21,7 @@ def object_name(handle: HANDLE) -> str:
     header_size = struct.calcsize("HHP")
     buf_size = 32768 + header_size
     buf = create_string_buffer(buf_size)
-    status = NT.QueryObject(
-        handle, ObjectInfo.Name.class_id, buf, buf_size, 0
-    )  # type: ignore
+    status = NT.QueryObject(handle, ObjectInfo.Name.class_id, buf, buf_size, 0)  # type: ignore
     if status < 0:
         return ""
 

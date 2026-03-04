@@ -203,8 +203,8 @@ class TestScheduler:
         s = Scheduler(c.get_job, tokens=2, collect=c.collect)
         s.run(dag)
 
-        assert (
-            not c.results["2"][1].should_skip and not c.results["2"][0]
-        ), 'job "2" is run and should be marked as failed'
+        assert not c.results["2"][1].should_skip and not c.results["2"][0], (
+            'job "2" is run and should be marked as failed'
+        )
         assert c.results["3"][1].should_skip, 'job "3" should be skipped'
         assert c.results["4"][1].should_skip, 'job "4" should be skipped'

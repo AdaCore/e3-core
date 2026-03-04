@@ -140,9 +140,9 @@ class Fingerprint:
         if other is None:
             other = Fingerprint()
 
-        assert isinstance(
-            other, Fingerprint
-        ), "can compare only with Fingerprint objects"
+        assert isinstance(other, Fingerprint), (
+            "can compare only with Fingerprint objects"
+        )
 
         self_key_set = set(self.elements.keys())
         other_key_set = set(other.elements.keys())

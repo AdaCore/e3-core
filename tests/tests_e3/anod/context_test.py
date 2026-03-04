@@ -57,9 +57,9 @@ class TestContext:
         ac.load("spec1", env=None, qualifier="", kind="build")
 
         # One source should have been registered
-        assert (
-            len(ac.sources) == 1 and "spec1-src" in ac.sources
-        ), "spec1-src source from spec1.anod has not been registered"
+        assert len(ac.sources) == 1 and "spec1-src" in ac.sources, (
+            "spec1-src source from spec1.anod has not been registered"
+        )
 
         # One spec instance should have been registered in the cache
         assert len(ac.cache) == 1, "caching of anod instances broken"

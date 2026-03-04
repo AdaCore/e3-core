@@ -348,9 +348,7 @@ def test_spdx() -> None:
                     },
                 ],
                 "copyrightText": "2023 AdaCore",
-                "description": "My SPDX test main package\n"
-                "made of several\n"
-                "lines.",
+                "description": "My SPDX test main package\nmade of several\nlines.",
                 "downloadLocation": "NOASSERTION",
                 "packageFileName": "main-pkg.zip",
                 "licenseConcluded": "GPL-3.0-or-later",

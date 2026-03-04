@@ -695,7 +695,6 @@ class PyPIClosure:
         result = set()
 
         for req in reqs:
-
             # First check if there is a generic wheel present or no. If there is
             # one then there is no need to package the sources.
             has_generic_wheel = any(

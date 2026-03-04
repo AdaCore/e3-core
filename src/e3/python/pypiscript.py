@@ -67,7 +67,6 @@ logger = getLogger("pypiscript", "e3.python")
 
 
 def main() -> None:
-
     m = Main()
     m.argument_parser.formatter_class = argparse.RawDescriptionHelpFormatter
     m.argument_parser.description = DESCRIPTION.strip()

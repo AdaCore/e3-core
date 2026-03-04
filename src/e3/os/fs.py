@@ -198,9 +198,9 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
     return free // (1024 * 1024)
 
 
-def __safe_unlink_func() -> (
-    tuple[Callable[[str | Path], None], Callable[[str | Path], None]]
-):
+def __safe_unlink_func() -> tuple[
+    Callable[[str | Path], None], Callable[[str | Path], None]
+]:
     """Provide a safe unlink function on windows.
 
     Note that all this is done to ensure that rm is working fine on Windows 7

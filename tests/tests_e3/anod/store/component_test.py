@@ -329,13 +329,13 @@ def test_component_metadata(store) -> None:  # type: ignore[no-untyped-def]
     latest_comp: Component = comp_list[0]
     assert "provenance" in latest_comp.metadata, "Missing provenance metadata"
     latest_statement: DSSE = latest_comp.get_metadata_statement("provenance")
-    assert isinstance(
-        latest_statement, DSSE
-    ), f"Invalid provenance metadata type ({latest_statement.__class__.__name__}!r)"
+    assert isinstance(latest_statement, DSSE), (
+        f"Invalid provenance metadata type ({latest_statement.__class__.__name__}!r)"
+    )
     # Now compare the retrieved statement
-    assert (
-        Statement.load_json(latest_statement.body) == statement
-    ), "Statement metadata has been modified"
+    assert Statement.load_json(latest_statement.body) == statement, (
+        "Statement metadata has been modified"
+    )
     # Check initial metadata values
     for key, value in metadata.items():
         if isinstance(value, dict):
@@ -344,9 +344,9 @@ def test_component_metadata(store) -> None:  # type: ignore[no-untyped-def]
                 value, sort_keys=True
             )
         else:
-            assert (
-                latest_comp.metadata[key] == value
-            ), "Missing key/value pair in metadata"
+            assert latest_comp.metadata[key] == value, (
+                "Missing key/value pair in metadata"
+            )
 
     # More code coverage for the get_metadata_statement() method
     assert latest_comp.get_metadata_statement("none") is None

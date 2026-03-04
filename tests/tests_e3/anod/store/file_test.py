@@ -75,13 +75,13 @@ def test_file_metadata(store) -> None:  # type: ignore[no-untyped-def]
     latest_file = latest_comp.files[0]
     assert "provenance" in latest_file.metadata, "Missing provenance metadata"
     latest_statement: DSSE = latest_file.get_metadata_statement("provenance")
-    assert isinstance(
-        latest_statement, DSSE
-    ), f"Invalid provenance metadata type ({latest_statement.__class__.__name__}!r)"
+    assert isinstance(latest_statement, DSSE), (
+        f"Invalid provenance metadata type ({latest_statement.__class__.__name__}!r)"
+    )
     # Now compare the retrieved statement
-    assert (
-        Statement.load_json(latest_statement.body) == statement
-    ), "Statement metadata has been modified"
+    assert Statement.load_json(latest_statement.body) == statement, (
+        "Statement metadata has been modified"
+    )
     # Check initial metadata values
     for key, value in metadata.items():
         print(latest_file.metadata, type(latest_file.metadata))
@@ -91,9 +91,9 @@ def test_file_metadata(store) -> None:  # type: ignore[no-untyped-def]
                 value, sort_keys=True
             )
         else:
-            assert (
-                latest_file.metadata[key] == value
-            ), "Missing key/value pair in metadata"
+            assert latest_file.metadata[key] == value, (
+                "Missing key/value pair in metadata"
+            )
 
     # More code coverage for the get_metadata_statement() method
     assert latest_file.get_metadata_statement("none") is None

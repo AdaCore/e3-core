@@ -151,9 +151,9 @@ class File(object):
         """
         if resource_path:
             resource_path = os.fspath(resource_path)
-        assert file_id is None or isinstance(
-            file_id, str
-        ), f"invalid file_id: {file_id}"
+        assert file_id is None or isinstance(file_id, str), (
+            f"invalid file_id: {file_id}"
+        )
         self.file_id = file_id
         assert isinstance(build_id, str), f"invalid build_id: {build_id}"
         self.build_id = build_id
@@ -161,9 +161,9 @@ class File(object):
         self.kind = kind
         assert isinstance(name, str), f"invalid name: {name}"
         self.name = name
-        assert resource_id is None or isinstance(
-            resource_id, str
-        ), f"invalid resource_id: {resource_id}"
+        assert resource_id is None or isinstance(resource_id, str), (
+            f"invalid resource_id: {resource_id}"
+        )
         self.resource_id = resource_id
         assert isinstance(filename, str), f"invalid filename: {filename}"
         self.filename = filename
@@ -194,7 +194,8 @@ class File(object):
             is also updated accordingly.
         """
         res = self.load(
-            data=self.store.submit_file(self.as_dict()), store=self.store  # type: ignore[union-attr]
+            data=self.store.submit_file(self.as_dict()),
+            store=self.store,  # type: ignore[union-attr]
         )
         self.__update(res)
         return res
@@ -406,8 +407,7 @@ class File(object):
 
             if unpack_cmd is not None:
                 raise StoreError(
-                    f"unpack_cmd not supported on unpacked resource "
-                    f"{self.unpack_dir}"
+                    f"unpack_cmd not supported on unpacked resource {self.unpack_dir}"
                 )
 
             if not Path(self.unpack_dir).is_dir():
@@ -481,7 +481,8 @@ class File(object):
             self.downloaded_as = downloaded_file
             if save_metadata:
                 self.save_to_meta_file(
-                    dest_dir=dest_dir, name=meta_name  # type: ignore[arg-type]
+                    dest_dir=dest_dir,
+                    name=meta_name,  # type: ignore[arg-type]
                 )
         return not skip
 
