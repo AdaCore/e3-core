@@ -550,6 +550,13 @@ class File(object):
         if internal is None:
             internal = kind != "binary"
 
+        resource_path = Path(data["resource"]["path"]).resolve()
+
+        if resource_path.is_dir():
+            data.setdefault("unpack_dir", str(resource_path))
+        elif resource_path.is_file():
+            data.setdefault("downloaded_as", str(resource_path))
+
         try:
             result = cls(
                 file_id=data["_id"],
@@ -566,15 +573,11 @@ class File(object):
                 unpack_dir=data.get("unpack_dir"),
                 build_info=build_info,
                 store=store,
-                resource=(
-                    Resource(
-                        id=data["resource"]["id"],
-                        path=data["resource"]["path"],
-                        size=data["resource"]["size"],
-                        creation_date=data["resource"]["creation_date"],
-                    )
-                    if "resource" in data
-                    else None
+                resource=Resource(
+                    id=data["resource"]["id"],
+                    path=str(resource_path),
+                    size=data["resource"]["size"],
+                    creation_date=data["resource"]["creation_date"],
                 ),
             )
         except Exception as e:
