@@ -10,8 +10,9 @@ repos:
           - flake8-docstrings
           - flake8-rst-docstrings
         name: flake8-7.1.1
-  - repo: https://github.com/ambv/black
-    rev: 25.1.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.4
     hooks:
-      - id: black
-        name: black-25.1.0
+      # Name is set for the version to be displayed at hook execution
+      - id: ruff-format
+        name: ruff-format-v0.15.4
