@@ -325,7 +325,6 @@ class KeySetDeclaration(QualifierDeclaration):
                         f"got {type(value)}({value})"
                     )
             except TypeError as e:
-
                 raise AnodError(
                     f"{self.origin}: Invalid value for qualifier {self.name}: "
                     f"requires a str or Iterable[str], "

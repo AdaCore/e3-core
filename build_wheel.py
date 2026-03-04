@@ -4,6 +4,7 @@
 The number of commits since the last major/minor version change is automatically
 added to the version of the package as the patch version.
 """
+
 from __future__ import annotations
 
 import re
@@ -95,7 +96,7 @@ def main() -> None:
     version_path = (
         version_config["file"]
         if "file" in version_config
-        else f'src/{version_config["attr"].replace(".", "/")}.py'
+        else f"src/{version_config['attr'].replace('.', '/')}.py"
     )
     logger.debug(f"Version path: {version_path}")
 

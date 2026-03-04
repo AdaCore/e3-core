@@ -588,7 +588,8 @@ class Component(object):
             instance is also updated accordingly.
         """
         result = self.load(
-            data=self.store.submit_component(self.as_dict()), store=self.store  # type: ignore[union-attr]
+            data=self.store.submit_component(self.as_dict()),
+            store=self.store,  # type: ignore[union-attr]
         )
         self.__update(result)
         return result

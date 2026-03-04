@@ -45,12 +45,8 @@ class OrderedDictYAMLLoader(Loader):
         self.stream = stream
         super().__init__(stream)
 
-        self.add_constructor(
-            "tag:yaml.org,2002:map", type(self).construct_yaml_map
-        )  # type: ignore
-        self.add_constructor(
-            "tag:yaml.org,2002:omap", type(self).construct_yaml_map
-        )  # type: ignore
+        self.add_constructor("tag:yaml.org,2002:map", type(self).construct_yaml_map)  # type: ignore
+        self.add_constructor("tag:yaml.org,2002:omap", type(self).construct_yaml_map)  # type: ignore
         self.add_constructor("!include", type(self).yaml_include)  # type: ignore
 
     def yaml_include(self, node: Node) -> OrderedDict:
@@ -347,9 +343,9 @@ def load_with_regexp_table(filename: str, selectors: list[str], data: dict) -> d
     with Path(filename).open() as f:
         conf_data = yaml.load(f.read(), OrderedDictYAMLLoader)
 
-    assert isinstance(
-        conf_data, dict
-    ), f"top level object in {filename} should be a dict"
+    assert isinstance(conf_data, dict), (
+        f"top level object in {filename} should be a dict"
+    )
 
     result = {}
 
@@ -358,9 +354,9 @@ def load_with_regexp_table(filename: str, selectors: list[str], data: dict) -> d
         assert isinstance(key_data, list), f"value for key {key} is not a list"
 
         for line in key_data:
-            assert isinstance(
-                line, list
-            ), f"value for key {key} should be a list of list"
+            assert isinstance(line, list), (
+                f"value for key {key} should be a list of list"
+            )
             assert len(line) == len(selectors) + 1
 
             has_matched = True

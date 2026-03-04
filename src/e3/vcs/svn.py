@@ -230,9 +230,7 @@ class SVNRepository:
             """Return a tuple (True if dir is SVN directory, True if clean)."""
             if Path(dir_path, ".svn").exists():
                 try:
-                    status = self.svn_cmd(
-                        ["status"], output=PIPE
-                    ).out.strip()  # type: ignore
+                    status = self.svn_cmd(["status"], output=PIPE).out.strip()  # type: ignore
                 except SVNError:  # defensive code
                     return False, False
                 if "warning: W" in status:

@@ -188,9 +188,10 @@ def patch(
         """
         assert filtered_patch is not None
         files_to_patch = 0
-        with Path(patch_file).open(newline="") as f, Path(filtered_patch).open(
-            "w", newline=""
-        ) as fdout:
+        with (
+            Path(patch_file).open(newline="") as f,
+            Path(filtered_patch).open("w", newline="") as fdout,
+        ):
             # Two line headers that mark beginning of patches
             header1: tuple | tuple[str, str] = ()
             header2: tuple | tuple[str, str] = ()
@@ -262,9 +263,10 @@ def patch(
         """
         assert filtered_patch is not None
         files_to_patch = 0
-        with Path(patch_file).open(newline="") as f, Path(filtered_patch).open(
-            "w", newline=""
-        ) as fdout:
+        with (
+            Path(patch_file).open(newline="") as f,
+            Path(filtered_patch).open("w", newline="") as fdout,
+        ):
             discard = False
             for line in f:
                 m = re.match("diff --git ([^ \n\t]+) ([^ \n\t]+)\r?\n?$", line)

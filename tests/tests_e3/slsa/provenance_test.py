@@ -87,9 +87,9 @@ def create_valid_build_metadata() -> tuple[datetime, str, datetime, BuildMetadat
     return start_time, invocation_id, finish_time, bm
 
 
-def create_valid_builder() -> (
-    tuple[TypeURI, list[ResourceDescriptor], dict[str, str], Builder]
-):
+def create_valid_builder() -> tuple[
+    TypeURI, list[ResourceDescriptor], dict[str, str], Builder
+]:
     """Create a valid builder object.
 
     :return: A tuple made of:
