@@ -587,9 +587,10 @@ class Component(object):
         :return: A newly created Component instance of the final component. The current
             instance is also updated accordingly.
         """
+        assert isinstance(self.store, StoreRWInterface), "push need a RW Store"
         result = self.load(
             data=self.store.submit_component(self.as_dict()),
-            store=self.store,  # type: ignore[union-attr]
+            store=self.store,
         )
         self.__update(result)
         return result

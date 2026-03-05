@@ -193,9 +193,12 @@ class File(object):
         :return: A newly created File instance of the final file. The current instance
             is also updated accordingly.
         """
+        assert isinstance(self.store, StoreRWInterface), (
+            "push need a RW StoreRWInterface"
+        )
         res = self.load(
             data=self.store.submit_file(self.as_dict()),
-            store=self.store,  # type: ignore[union-attr]
+            store=self.store,
         )
         self.__update(res)
         return res
