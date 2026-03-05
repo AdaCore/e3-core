@@ -681,8 +681,8 @@ class _Store(_StoreContextManager):
         for req_tuple in req:
             internal, *file_tuple = req_tuple
             res.append(
-                self._tuple_to_file(  # type: ignore[index]
-                    file_tuple,
+                self._tuple_to_file(
+                    file_tuple,  # type: ignore[arg-type]
                     buildinfo=component_buildinfo,
                     internal=internal,  # type: ignore[arg-type]
                 )
@@ -726,7 +726,7 @@ class _Store(_StoreContextManager):
             name, internal, *file_tuple = req_tuple
             # We are sure here that 'name' is a string.
             res[name] = self._tuple_to_file(  # type: ignore[index]
-                file_tuple,
+                file_tuple,  # type: ignore[arg-type]
                 buildinfo=component_buildinfo,
                 internal=internal,  # type: ignore[arg-type]
             )
@@ -787,8 +787,8 @@ class _Store(_StoreContextManager):
                 name
                 for _, name, _ in self._select(
                     _Store.TableName.component_releases,
-                    ["component_id"],
-                    [comp_id],  # type: ignore[arg-type]
+                    ["component_id"],  # type: ignore[arg-type]
+                    [comp_id],
                 )
             ]
 
@@ -1085,9 +1085,9 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         _, _, _, _, _, isready, *_ = self._update(
             _Store.TableName.buildinfos,
             bid,
-            ["isready"],
+            ["isready"],  # type: ignore[arg-type]
             [1],
-            id_field="build_id",  # type: ignore[arg-type, misc]
+            id_field="build_id",  # type: ignore[misc]
         )
         self.connection.commit()
         return bool(isready)
@@ -1182,8 +1182,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
         resource_tmp = self._select(
             _Store.TableName.resources,
-            ["resource_id"],
-            [resource_id],  # type: ignore[arg-type]
+            ["resource_id"],  # type: ignore[arg-type]
+            [resource_id],
         )
         if resource_tmp:
             rid, resource_id, path, *rest = resource_tmp[0]
@@ -1193,8 +1193,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 self._update(
                     _Store.TableName.resources,
                     rid,
-                    ["path"],
-                    [resource_path],  # type: ignore[arg-type]
+                    ["path"],  # type: ignore[arg-type]
+                    [resource_path],
                 )
                 path = resource_path
             resource = self._tuple_to_resource((rid, resource_id, path, *rest))  # type: ignore[arg-type, operator]
@@ -1877,8 +1877,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
         resource_tmp = self._select(
             _Store.TableName.resources,
-            ["resource_id"],
-            [resource_id],  # type: ignore[arg-type]
+            ["resource_id"],  # type: ignore[arg-type]
+            [resource_id],
         )
         if resource_tmp:
             row_id, resource_id, rpath, *_ = resource_tmp[0]
@@ -1899,8 +1899,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
                     self._update(
                         _Store.TableName.resources,
                         row_id,
-                        ["path"],
-                        [resource_path],  # type: ignore[arg-type]
+                        ["path"],  # type: ignore[arg-type]
+                        [resource_path],
                     )
                 )
         else:  # Create the resource entry
