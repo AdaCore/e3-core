@@ -17,6 +17,8 @@ class Qualifier(dict):
     def __sub__(self, other: Iterable[str]) -> Qualifier:
         """Create a new dict qualifier with some keys filtered-out.
 
+        :param other: iterable of keys to filter out
+
         Examples:
         .. code::
 
@@ -32,6 +34,8 @@ class Qualifier(dict):
         its priority is higher as defined by Python standard. This allows more
         natural expression that mix `+` and `-` operators (both operators have the
         same priority).
+
+        :param other: dictionary to merge with
         """
         if other is None:
             return Qualifier(self)
@@ -39,6 +43,8 @@ class Qualifier(dict):
 
     def __and__(self, other: Iterable[str]) -> Qualifier:
         """Create a new dict qualifier with the subset other of the keys.
+
+        :param other: iterable of keys to keep
 
         Examples:
         .. code::

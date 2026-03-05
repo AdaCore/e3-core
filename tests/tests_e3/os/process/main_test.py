@@ -236,6 +236,7 @@ def test_rlimit_foreground_option() -> None:
 
 
 def test_not_found() -> None:
+    """Test not found."""
     with pytest.raises(OSError) as err:
         e3.os.process.Run(["e3-bin-not-found"])
     assert "e3-bin-not-found not found" in str(err.value)
@@ -259,6 +260,7 @@ def test_not_found() -> None:
 
 
 def test_enable_commands_handler() -> None:
+    """Test enable commands handler."""
     log_file = "cmds.log"
     h = e3.os.process.enable_commands_handler(log_file)
     try:
@@ -274,6 +276,7 @@ def test_enable_commands_handler() -> None:
 
 @pytest.mark.xfail(sys.platform != "win32", reason="unix implem not complete")
 def test_wait_for_processes() -> None:
+    """Test wait for processes."""
     for v in (1, 2):
         with Path("p%d.py" % v).open("w") as f:
             f.write(
@@ -317,6 +320,7 @@ def test_wait_for_processes() -> None:
 
 
 def test_run_pipe() -> None:
+    """Test run pipe."""
     cmd_left = [sys.executable, "-c", 'print("dummy")']
     cmd_right = [
         sys.executable,
@@ -342,6 +346,7 @@ def test_run_pipe() -> None:
 
 
 def test_command_line_image() -> None:
+    """Test command line image."""
     result = e3.os.process.command_line_image(["echo", ""])
     assert result == "echo ''"
     result = e3.os.process.command_line_image([["echo", "dummy"], ["grep", "m"]])
@@ -349,6 +354,7 @@ def test_command_line_image() -> None:
 
 
 def test_poll() -> None:
+    """Test poll."""
     result = e3.os.process.Run(
         [sys.executable, "-c", 'import time; time.sleep(1); print("process")'], bg=True
     )
@@ -366,6 +372,7 @@ def test_poll() -> None:
 
 
 def test_file_redirection() -> None:
+    """Test file redirection."""
     p_out = "p.out"
     result = e3.os.process.Run(
         [sys.executable, "-c", 'print("dummy")'],
@@ -380,6 +387,7 @@ def test_file_redirection() -> None:
 
 
 def test_output_append() -> None:
+    """Test output append."""
     p_out = "p.out"
     e3.os.process.Run([sys.executable, "-c", 'print("line1")'], output=p_out)
     e3.os.process.Run([sys.executable, "-c", 'print("line2")'], output="+" + p_out)
@@ -389,6 +397,7 @@ def test_output_append() -> None:
 
 
 def test_pipe_input() -> None:
+    """Test pipe input."""
     p = e3.os.process.Run(
         [sys.executable, "-c", "import sys; print(sys.stdin.read())"], input="|dummy"
     )
@@ -396,6 +405,7 @@ def test_pipe_input() -> None:
 
 
 def test_is_running() -> None:
+    """Test is running."""
     p = e3.os.process.Run([sys.executable, "-c", "import time; time.sleep(1)"], bg=True)
     assert e3.os.process.is_running(p.pid)
     p.kill(recursive=False)
@@ -429,6 +439,7 @@ def test_is_running_non_existant() -> None:
 
 @pytest.mark.xfail(reason="unstable test, p.status can be 0")
 def test_interrupt() -> None:
+    """Test interrupt."""
     t0 = time.time()
     p = e3.os.process.Run(
         [sys.executable, "-c", "import time; time.sleep(30)"], bg=True
@@ -444,6 +455,7 @@ def test_interrupt() -> None:
 
 @pytest.mark.skipif(psutil is None, reason="require psutil")
 def test_kill_process_tree() -> None:
+    """Test kill process tree."""
     wait_timeout = 3
     p1 = e3.os.process.Run(
         [sys.executable, "-c", "import time; time.sleep(10); import sys; sys.exit(2)"],
@@ -517,6 +529,7 @@ def test_kill_process_tree() -> None:
 
 
 def test_run_with_env() -> None:
+    """Test run with env."""
     os.environ["EXT_VAR"] = "bar"
     cmd = [
         sys.executable,
@@ -532,6 +545,7 @@ def test_run_with_env() -> None:
 
 
 def test_no_rlimit(caplog) -> None:
+    """Test no rlimit."""
     fake_rlimit = e3.os.process.get_rlimit(platform="null")
     old_get_rlimit = e3.os.process.get_rlimit
     e3.os.process.get_rlimit = lambda: fake_rlimit  # type: ignore

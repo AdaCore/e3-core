@@ -94,6 +94,14 @@ class Builder(object):
         builder_dependencies: list[ResourceDescriptor],
         version: dict[str, str],
     ) -> None:
+        """Initialize a builder.
+
+        :param build_id: URI indicating the transitive closure of the trusted
+            build platform
+        :param builder_dependencies: Dependencies used by the orchestrator
+        :param version: Map of names of components of the build platform to
+            their version
+        """
         self.__id: TypeURI = (
             build_id if isinstance(build_id, TypeURI) else TypeURI(build_id)
         )
@@ -151,6 +159,10 @@ class Builder(object):
 
     @id.setter
     def id(self, value: str | TypeURI) -> None:
+        """Set the build platform ID.
+
+        :param value: The new build platform ID
+        """
         self.__id = value if isinstance(value, TypeURI) else TypeURI(value)
 
     @property
@@ -262,6 +274,12 @@ class BuildMetadata(object):
         started_on: datetime,
         finished_on: datetime,
     ) -> None:
+        """Initialize build metadata.
+
+        :param invocation_id: Identifier of this particular build invocation
+        :param started_on: The timestamp of this build invocation start time
+        :param finished_on: The timestamp of this build invocation finish time
+        """
         self.__invocation_id: str = invocation_id
         self.__started_on: datetime = self.__validate_timestamp(started_on)
         self.__finished_on: datetime = self.__validate_timestamp(finished_on)
@@ -285,6 +303,10 @@ class BuildMetadata(object):
 
     @finished_on.setter
     def finished_on(self, value: datetime | str) -> None:
+        """Set the timestamp of when the build completed.
+
+        :param value: The new timestamp
+        """
         self.__finished_on = self.__validate_timestamp(value)
 
     @property
@@ -309,6 +331,10 @@ class BuildMetadata(object):
 
     @started_on.setter
     def started_on(self, value: datetime | str) -> None:
+        """Set the timestamp of when the build started.
+
+        :param value: The new timestamp
+        """
         self.__started_on = self.__validate_timestamp(value)
 
     # --------------------------- Public methods ---------------------------- #
@@ -393,7 +419,10 @@ class BuildMetadata(object):
 
     @staticmethod
     def __validate_timestamp(timestamp: datetime | str) -> datetime:
-        """Validate a timestamp."""
+        """Validate a timestamp.
+
+        :param timestamp: The timestamp to validate
+        """
         valid_timestamp: datetime | None = None
         if isinstance(timestamp, str):
             valid_timestamp = date_parser.parse(timestamp)
@@ -447,6 +476,13 @@ class Statement(object):
         predicate_type: TypeURI | str = PREDICATE_TYPE_VALUE,
         predicate: Predicate | None = None,
     ) -> None:
+        """Initialize a statement.
+
+        :param statement_type: The URI identifier for the schema of the Statement
+        :param subject: Set of software artifacts that the attestation applies to
+        :param predicate_type: URI identifying the type of predicate
+        :param predicate: Additional parameters of the Predicate
+        """
         self.__type: TypeURI = (
             TypeURI(statement_type)
             if isinstance(statement_type, str)
@@ -670,6 +706,19 @@ class ResourceDescriptor(object):
         content: bytes | None = None,
         resource_annotations: dict[str, Any] | None = None,
     ) -> None:
+        """Initialize a resource descriptor.
+
+        :param uri: A URI used to identify the resource or artifact globally
+        :param digest: A set of cryptographic digests of the contents
+        :param name: Machine-readable identifier for distinguishing between
+            descriptors
+        :param download_location: The location of the described resource or
+            artifact
+        :param media_type: The MIME Type of the described resource or artifact
+        :param content: The contents of the resource or artifact
+        :param resource_annotations: Additional information or metadata about
+            the resource
+        """
         self.__annotations: dict[str, Any] = resource_annotations or {}
         self.__content: bytes | None = content
         self.__digest: dict[str, str] = digest if digest is not None else {}
@@ -717,6 +766,10 @@ class ResourceDescriptor(object):
 
     @annotations.setter
     def annotations(self, value: dict[str, Any]) -> None:
+        """Set resource descriptor annotations.
+
+        :param value: The new annotations
+        """
         if isinstance(value, dict):
             self.__annotations = value
         else:
@@ -747,6 +800,10 @@ class ResourceDescriptor(object):
 
     @content.setter
     def content(self, value: bytes | None) -> None:
+        """Set the contents of the resource or artifact.
+
+        :param value: The new content
+        """
         if isinstance(value, bytes) or value is None:
             self.__content = value
         else:
@@ -773,6 +830,10 @@ class ResourceDescriptor(object):
 
     @digest.setter
     def digest(self, value: dict[str, str]) -> None:
+        """Set the cryptographic digests.
+
+        :param value: The new digest set
+        """
         if isinstance(value, dict):
             self.__digest = value
         else:
@@ -795,6 +856,10 @@ class ResourceDescriptor(object):
 
     @download_location.setter
     def download_location(self, value: ResourceURI | str | None) -> None:
+        """Set the artifact download location.
+
+        :param value: The new download location
+        """
         if isinstance(value, ResourceURI) or value is None:
             self.__download_location = value
         elif isinstance(value, str):
@@ -834,6 +899,10 @@ class ResourceDescriptor(object):
 
     @name.setter
     def name(self, value: str | None) -> None:
+        """Set the machine-readable identifier.
+
+        :param value: The new name
+        """
         if isinstance(value, str) or value is None:
             self.__name = value
         else:
@@ -857,6 +926,10 @@ class ResourceDescriptor(object):
 
     @media_type.setter
     def media_type(self, value: str | None) -> None:
+        """Set the media type.
+
+        :param value: The new media type
+        """
         if isinstance(value, str) or value is None:
             self.__media_type = value
         else:
@@ -872,6 +945,10 @@ class ResourceDescriptor(object):
 
     @uri.setter
     def uri(self, value: ResourceURI | str | None) -> None:
+        """Set the URI.
+
+        :param value: The new URI
+        """
         if isinstance(value, ResourceURI) or value is None:
             self.__uri = value
         elif isinstance(value, str):
@@ -945,6 +1022,9 @@ class ResourceDescriptor(object):
     @staticmethod
     def dir_hash(path: Path, algorithm: str) -> str:
         r"""Directory hash.
+
+        :param path: The path to the directory to hash
+        :param algorithm: The hashing algorithm to use
 
         The `directory Hash1
         <https://cs.opensource.google/go/x/mod/+/refs/tags/v0.5.0:sumdb/dirhash/hash.go>`_
@@ -1165,6 +1245,17 @@ class Predicate(object):
             internal_parameters: object,
             resolved_dependencies: list[ResourceDescriptor],
         ) -> None:
+            """Initialize a build definition.
+
+            :param build_type: Identifies the template for how to perform the
+                build
+            :param external_parameters: The parameters that are under external
+                control
+            :param internal_parameters: The parameters that are under the
+                control of the entity
+            :param resolved_dependencies: Unordered collection of artifacts
+                needed at build time
+            """
             self.__build_type: TypeURI = (
                 TypeURI(build_type) if isinstance(build_type, str) else build_type
             )
@@ -1353,6 +1444,12 @@ class Predicate(object):
             metadata: BuildMetadata,
             by_products: list[ResourceDescriptor],
         ) -> None:
+            """Initialize run details.
+
+            :param builder: Run details builder description
+            :param metadata: The metadata for this run details object
+            :param by_products: Run details additional artifacts
+            """
             self.__builder: Builder = builder
             self.__metadata: BuildMetadata = metadata
             self.__by_products: list[ResourceDescriptor] = by_products
@@ -1480,6 +1577,12 @@ class Predicate(object):
         build_definition: Predicate.BuildDefinition,
         run_details: Predicate.RunDetails,
     ) -> None:
+        """Initialize a predicate.
+
+        :param build_definition: The input to the build
+        :param run_details: Details specific to this particular execution of
+            the build
+        """
         self.__build_definition: Predicate.BuildDefinition = build_definition
         self.__run_details: Predicate.RunDetails = run_details
 
@@ -1598,6 +1701,10 @@ class TypeURI(object):
     """
 
     def __init__(self, uri: str) -> None:
+        """Initialize a TypeURI.
+
+        :param uri: The URI string to initialize this TypeURI with
+        """
         # Validate this uri.
         from urllib.parse import ParseResult, urlparse
 
@@ -1612,7 +1719,10 @@ class TypeURI(object):
         self.__uri = uri
 
     def __eq__(self, other: object) -> bool:
-        """Check if this type uri is equal to *other*."""
+        """Check if this type uri is equal to *other*.
+
+        :param other: The object to compare this with
+        """
         if isinstance(other, TypeURI):
             return self.uri == other.uri
         if isinstance(other, str):
@@ -1659,4 +1769,8 @@ class ResourceURI(TypeURI):
     """
 
     def __init__(self, uri: str) -> None:
+        """Initialize a ResourceURI.
+
+        :param uri: The URI string to initialize this ResourceURI with
+        """
         super(ResourceURI, self).__init__(uri)

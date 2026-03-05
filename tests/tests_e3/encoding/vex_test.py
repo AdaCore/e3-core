@@ -159,6 +159,7 @@ def create_metadata(
     version: int,
     spec_version: str | None,
 ) -> Metadata:
+    """Create a VEX metadata object."""
     md: Metadata = Metadata(
         author=author,
         author_role=author_role,
@@ -170,6 +171,7 @@ def create_metadata(
 
 
 def create_product_id(_id: str = "Product ID") -> tuple[str, str, ProductId]:
+    """Create a VEX product ID."""
     version: str = "23.2"
     pid: ProductId = ProductId(_id=_id, version=version)
     return _id, version, pid
@@ -178,6 +180,7 @@ def create_product_id(_id: str = "Product ID") -> tuple[str, str, ProductId]:
 def create_sub_product_id(
     _id: str = "Sub Product ID", no_status: bool = False
 ) -> tuple[str, str, SubProductId]:
+    """Create a VEX sub-product ID."""
     version: str = "23.2"
     spid: SubProductId = SubProductId(
         _id=_id,
@@ -189,6 +192,7 @@ def create_sub_product_id(
 
 
 def create_product(no_subcomps: bool = False) -> Product:
+    """Create a VEX product with optional subcomponents."""
     p1: ProductId = create_product_id(_id="gnat-23.2-x86_64-linux")[-1]
     p2: ProductId = create_product_id(_id="gnat-23.2-x86-linux")[-1]
     subcomponents: list[SubProductId] | None = None
@@ -213,6 +217,7 @@ def create_statement(
     first: datetime | str | None = None,
     last: datetime | str | None = None,
 ) -> Statement:
+    """Create a VEX statement."""
     metadata: StatementMetadata = StatementMetadata(
         _id=_id,
         version=version,
@@ -252,6 +257,7 @@ def create_vulnerability(
     source: str | None = "nvd@nist.gov",
     url: str | None = "https://nvd.nist.gov/vuln/detail/CVE-2022-38533",
 ) -> tuple[str, str, Vulnerability]:
+    """Create a VEX vulnerability object."""
     return (
         _id,
         description,
@@ -276,6 +282,7 @@ def create_vulnerability(
 
 
 def test_document_author_role_from_value() -> None:
+    """Test document author role from value."""
     role: AuthorRole = AuthorRole.from_value(None, AuthorRole.VENDOR)
     assert role == AuthorRole.VENDOR
     role = AuthorRole.from_value(None)
@@ -295,6 +302,7 @@ def test_document_author_role_from_value() -> None:
 
 @pytest.mark.parametrize(("arguments", "expected"), METADATA_ARGUMENTS)
 def test_document(arguments: tuple, expected: tuple) -> None:
+    """Test document."""
     author, author_role, tooling, version, spec_version, exc = arguments
     e_exc = expected[-1]
     if exc is None:
@@ -392,6 +400,7 @@ def test_document(arguments: tuple, expected: tuple) -> None:
 
 @pytest.mark.parametrize(("arguments", "expected"), METADATA_ARGUMENTS)
 def test_document_metadata(arguments: tuple, expected: tuple) -> None:
+    """Test document metadata."""
     author, author_role, tooling, version, spec_version, exc = arguments
     e_author, e_author_role, e_tooling, e_version, e_spec_version, e_exc = expected
     if exc is None:
@@ -437,6 +446,7 @@ def test_document_metadata(arguments: tuple, expected: tuple) -> None:
 
 
 def test_document_status_from_value() -> None:
+    """Test document status from value."""
     status: ProductStatus = ProductStatus.from_value(None, ProductStatus.FIXED)
     assert status == ProductStatus.FIXED
     status = ProductStatus.from_value(None)
@@ -459,6 +469,7 @@ def test_document_status_from_value() -> None:
 
 @pytest.mark.parametrize(("arguments", "expected"), STATEMENT_METADATA_ARGUMENTS)
 def test_statement(arguments: tuple, expected: tuple) -> None:
+    """Test statement."""
     _id, version, first, last = arguments
     statement: Statement = create_statement(_id, version, first, last)
     st2: Statement = Statement.from_dict(statement.as_dict())
@@ -466,6 +477,7 @@ def test_statement(arguments: tuple, expected: tuple) -> None:
 
 
 def test_statement_action_or_impact() -> None:
+    """Test statement action or impact."""
     # Check if we could use parametrize here too.
     impact: ActionOrImpact = ActionOrImpact()
     assert not impact
@@ -479,6 +491,7 @@ def test_statement_action_or_impact() -> None:
 
 
 def test_statement_justification_from_value() -> None:
+    """Test statement justification from value."""
     role: Justification = Justification.from_value(
         None, Justification.COMPONENT_NOT_PRESENT
     )
@@ -500,6 +513,7 @@ def test_statement_justification_from_value() -> None:
 
 @pytest.mark.parametrize(("arguments", "expected"), STATEMENT_METADATA_ARGUMENTS)
 def test_statement_metadata_init(arguments: tuple, expected: tuple) -> None:
+    """Test statement metadata init."""
     _id, version, first, last = arguments
     e_id, e_version, e_first, e_last = expected
     metadata: StatementMetadata = StatementMetadata(
@@ -525,6 +539,7 @@ def test_statement_metadata_init(arguments: tuple, expected: tuple) -> None:
 
 @pytest.mark.parametrize(("arguments", "expected"), STATEMENT_PRODUCT_DETAILS_ARGUMENTS)
 def test_statement_product(arguments: tuple, expected: tuple) -> None:
+    """Test statement product."""
     (no_subcomps,) = arguments
     (e_subcomps,) = expected
     pd: Product = create_product(no_subcomps=no_subcomps)
@@ -544,6 +559,7 @@ def test_statement_product(arguments: tuple, expected: tuple) -> None:
 
 
 def test_statement_product_id() -> None:
+    """Test statement product id."""
     _id, version, pid = create_product_id()
     assert pid._id == _id
     assert pid.version == version
@@ -553,6 +569,7 @@ def test_statement_product_id() -> None:
 
 @pytest.mark.parametrize("arguments", STATEMENT_STATUS_PARAMETERS)
 def test_statement_status(arguments: tuple) -> None:
+    """Test statement status."""
     st, impact, action, justification, notes, exc = arguments
 
     if exc is None:
@@ -609,6 +626,7 @@ def test_statement_status(arguments: tuple) -> None:
 
 @pytest.mark.parametrize("arguments", STATEMENT_VULN_PARAMETERS)
 def test_statement_vulnerability(arguments: tuple) -> None:
+    """Test statement vulnerability."""
     score, vector, version, source, url = arguments
     _id, description, vuln = create_vulnerability(
         score=score,

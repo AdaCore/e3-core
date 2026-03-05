@@ -167,12 +167,16 @@ class Job(metaclass=abc.ABCMeta):
         """Call whenever a job is started.
 
         This allow the user to do some logging on job startup
+
+        :param scheduler: the scheduler running the job
         """
 
     def on_finish(self, scheduler: Scheduler) -> None:  # noqa: B027 (empty by design)
         """Call whenever a job is finished.
 
         This allow the user to do some logging on job termination
+
+        :param scheduler: the scheduler running the job
         """
 
 
@@ -188,7 +192,10 @@ class EmptyJob(Job):
     ) -> None:
         """Initialize the EmptyJob.
 
-        :param status: The job's status.
+        :param uid: unique job identifier
+        :param data: job data
+        :param notify_end: notification function
+        :param status: The job's status
         """
         super().__init__(uid, data, notify_end)
         self.should_skip = True
@@ -212,6 +219,12 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
     """
 
     def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]) -> None:
+        """Initialize ProcessJob.
+
+        :param uid: unique job identifier
+        :param data: job data
+        :param notify_end: notification function
+        """
         super().__init__(uid, data, notify_end)
         self.proc_handle: Run | None = None
 

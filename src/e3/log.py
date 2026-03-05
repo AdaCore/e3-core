@@ -92,7 +92,10 @@ class JSONFormatter(logging.Formatter):
         self.context = context
 
     def format(self, record: logging.LogRecord) -> str:
-        """Convert record into JSON."""
+        """Convert record into JSON.
+
+        :param record: logging record
+        """
         # Parent's format is called in order to setup additional attributes
         super(JSONFormatter, self).format(record)
 
@@ -116,6 +119,9 @@ class E3LoggerAdapter(logging.LoggerAdapter):
 
         It is called by super method log. It is overwritten here because
         the standard process method will get rid of extra attribute
+
+        :param msg: log message
+        :param kwargs: keyword arguments
         """
         return msg, kwargs
 
@@ -125,6 +131,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """Integrate additional keywords using standard interface.
 
         :param level: see logging module
+        :param msg: log message
         :param args: see logging module
         :param anod_uui: Anod UUI
         :param kwargs: other parameter supported by std logger._log method
@@ -141,6 +148,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """Wrap standard logger.info method.
 
         It allows adding extra keyword parameters
+
+        :param msg: log message
+        :param args: see logging module
+        :param anod_uui: Anod UUI
+        :param kwargs: other parameters supported by std logger._log method
         """
         self.log(logging.INFO, msg, *args, anod_uui=anod_uui, **kwargs)
 
@@ -150,6 +162,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """Wrap standard logger.debug method.
 
         It allows adding extra keyword parameters
+
+        :param msg: log message
+        :param args: see logging module
+        :param anod_uui: Anod UUI
+        :param kwargs: other parameters supported by std logger._log method
         """
         self.log(logging.DEBUG, msg, *args, anod_uui=anod_uui, **kwargs)
 
@@ -159,6 +176,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """Wrap standard logger.warning method.
 
         It allows adding extra keyword parameters
+
+        :param msg: log message
+        :param args: see logging module
+        :param anod_uui: Anod UUI
+        :param kwargs: other parameters supported by std logger._log method
         """
         self.log(logging.WARNING, msg, *args, anod_uui=anod_uui, **kwargs)
 
@@ -168,6 +190,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """Wrap standard logger.error method.
 
         It allows adding extra keyword parameters
+
+        :param msg: log message
+        :param args: see logging module
+        :param anod_uui: Anod UUI
+        :param kwargs: other parameters supported by std logger._log method
         """
         self.log(logging.ERROR, msg, *args, anod_uui=anod_uui, **kwargs)
 
@@ -177,6 +204,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """Wrap of standard logger.critical method.
 
         It allows adding extra keyword parameters
+
+        :param msg: log message
+        :param args: see logging module
+        :param anod_uui: Anod UUI
+        :param kwargs: other parameters supported by std logger._log method
         """
         self.log(logging.CRITICAL, msg, *args, anod_uui=anod_uui, **kwargs)
 
@@ -191,6 +223,12 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         """Wrap standard logger.exception method.
 
         It allows adding extra keyword parameters
+
+        :param msg: log message
+        :param args: see logging module
+        :param exc_info: exception info (default: True)
+        :param anod_uui: Anod UUI
+        :param kwargs: other parameters supported by std logger._log method
         """
         self.log(
             logging.ERROR, msg, *args, exc_info=exc_info, anod_uui=anod_uui, **kwargs
@@ -231,6 +269,10 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
         logging.StreamHandler.__init__(self)
 
     def emit(self, record: logging.LogRecord) -> None:
+        """Emit a record with colors.
+
+        :param record: logging record
+        """
         msg = self.format(record)
 
         # Handle logging on several lines: indent all lines after the first one
@@ -263,6 +305,10 @@ def getLogger(name: str | None = None, prefix: str = "e3") -> E3LoggerAdapter:
         """Handler doing nothing."""
 
         def emit(self, _: logging.LogRecord) -> None:
+            """Emit method that does nothing.
+
+            :param _: logging record (ignored)
+            """
             pass
 
     logger = logging.getLogger(f"{prefix}.{name}")
@@ -291,6 +337,9 @@ def add_log_handlers(
     :param filename: use of a FileHandler, using the specified filename,
         instead of a StreamHandler. Set default_output_stream to write in this
         file.
+    :param set_default_output: if True, set default_output_stream to the
+        file handler stream when filename is not None
+    :param json_format: if True, use JSON formatter for log output
     """
     global default_output_stream
     handler: TqdmHandler | logging.StreamHandler | logging.FileHandler

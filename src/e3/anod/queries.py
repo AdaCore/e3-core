@@ -125,8 +125,8 @@ class SourceClosure:
         """Compute the source closure (internal function).
 
         :param spec: an anod instance to inspect
-        :param publish: whether the sources found should be marked internal
-            or not.
+        :param publish: whether the sources found should be marked as publishable
+            or not
         """
         # If this is an installation add the corresponding package
         if spec.kind == "install":
@@ -171,9 +171,7 @@ class SourceClosure:
     def resolve_source(self, source_name: str, data: Any) -> None:
         """Associate source information to a given source.
 
-        :param source_name: the source name. The closure resolution is
-            done locally so we can assume that for all occurences of a
-            given source name the same data should be associated
+        :param source_name: the source name
         :param data: data associated with the source
         """
         for src_key in self.source_list:

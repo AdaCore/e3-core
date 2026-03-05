@@ -157,6 +157,12 @@ class NVD:
         return self
 
     def __exit__(self, _type: Any, _value: Any, _tb: Any) -> None:
+        """Exit context manager.
+
+        :param _type: exception type
+        :param _value: exception value
+        :param _tb: traceback
+        """
         self.close()
 
     def close(self) -> None:

@@ -8,6 +8,7 @@ import e3.decorator
 
 
 def test_memoize() -> None:
+    """Test memoize."""
     # First generate a function returning random values so that we
     # can see whether the cache is used or not
 
@@ -47,6 +48,8 @@ def test_memoize() -> None:
 
 
 def test_enabled() -> None:
+    """Test enabled."""
+
     @e3.decorator.enabled
     def foo() -> int:
         return 22
@@ -55,6 +58,8 @@ def test_enabled() -> None:
 
 
 def test_disabled() -> None:
+    """Test disabled."""
+
     @e3.decorator.disabled
     def foo() -> int:
         return 22

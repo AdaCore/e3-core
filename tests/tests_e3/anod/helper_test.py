@@ -11,6 +11,8 @@ from e3.env import BaseEnv
 
 
 def test_make() -> None:
+    """Test make."""
+
     class AnodMake(Anod):
         def shell(self, *cmd, **kwargs):
             """Mock for Anod.shell that does not spawn processes."""
@@ -51,6 +53,8 @@ def test_make() -> None:
 
 
 def test_configure() -> None:
+    """Test configure."""
+
     class AnodConf(Anod):
         @Anod.primitive()
         def build(self):
@@ -143,6 +147,7 @@ def test_configure_opts() -> None:
 
 
 def test_text_replace() -> None:
+    """Test text replace."""
     with Path("myfile").open("w") as f:
         f.write("what who when")
 

@@ -83,6 +83,7 @@ class Plan:
             This can be used to set a value depending on the day of the week,
             e.g. by setting the constant to True on weekend:
             lambda d: d.isoweekday() in [6, 7]
+        :return: a toggleable boolean with the given name
         """
         return self.toggleable_bool_group.add(name, date(self.plan_date))
 
@@ -102,7 +103,7 @@ class Plan:
     def load_chunk(self, source_code: bytes, filename: str = "<unknown>") -> None:
         """Load a chunk of Python code.
 
-        :param source_code: python source code
+        :param source_code: python source code to load
         :param filename: filename associated with the Python code
         """
         code_ast = ast.parse(source_code, filename)
@@ -147,15 +148,15 @@ class PlanContext:
     ) -> None:
         """Initialize an execution context or a scope.
 
-        :param stack: stack of PlanAction object that keep track of scopes. Used
+        :param stack: stack of PlanActionEnv object that keep track of scopes. Used
             only internally. User instantiation of PlanContext should be done
-            with stack set to None.
+            with stack set to None
         :param plan: the plan to execute
         :param ignore_disabled: when true, discard all lines in
             blocks "with defaults(enabled=False):"
         :param server: a BaseEnv object that represent the host default env.
             server parameter is taken into account only during creation of
-            the initial context.
+            the initial context
         :param build: see e3.env.BaseEnv.set_env
         :param host: see e3.env.BaseEnv.set_env
         :param target: see e3.env.BaseEnv.set_env

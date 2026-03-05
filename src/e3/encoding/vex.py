@@ -50,9 +50,9 @@ class ActionOrImpact(JsonData):
     ) -> None:
         """Initialize an action or impact object.
 
-        :param str | None statement: The action or impact statement. If
+        :param statement: The action or impact statement. If
             :const:`None`, it means that this object has no impact (or no action).
-        :param datetime | None timestamp: The time this action or impact has
+        :param timestamp: The time this action or impact has
             been defined. If :const:`None` and *statement* is defined, the timestamp
             is set to the current time.
         """  # noqa RST304
@@ -136,9 +136,10 @@ class AuthorRole(Enum):
     ) -> AuthorRole:
         """Create an author role enum from a given *value*.
 
+        :param value: the value to convert to an AuthorRole
+        :param default: default AuthorRole to use if value is None
         :return: An author role enum set according to *value* and *default*.
-
-        :raise: :exc:`python:ValueError` If *value* is not one of the possible
+        :raise ValueError: If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
             **and** *value* is :const:`None`.
         """  # noqa RST304
@@ -191,7 +192,7 @@ class Document(JsonData):
     def add_statement(self, new_statement: Statement) -> None:
         """Add a new statement to this VEX document.
 
-        If *statement* has an *_id* set to :const:`None`, the value of the statement
+        If *new_statement* has an *_id* set to :const:`None`, the value of the statement
         *_id* is updated to ``<document id>/<statement vuln id>``.
 
         :param new_statement: The statement to add to this VEX document.
@@ -230,6 +231,7 @@ class Document(JsonData):
 
         :param path: The path of a VEX document to initialise this document
             with.
+        :return: a new Document instance loaded from the file
         """  # noqa RST304
         with path.open() as f:
             vex_dict: dict = yaml.safe_load(f)
@@ -241,8 +243,7 @@ class Document(JsonData):
 
         :param path: The path of the saved file.
         :param output_format: The file format. May be any of :attr:`FORMATS`.
-
-        :raise: :exc:`python:ValueError` If *output_format* is not one of the
+        :raise ValueError: If *output_format* is not one of the
             possible :attr:`FORMATS`.
         """  # noqa RST304
         if output_format not in self.FORMATS:
@@ -335,9 +336,10 @@ class Justification(Enum):
     ) -> Justification:
         """Create a justification enum from a given *value*.
 
+        :param value: the value to convert to a Justification
+        :param default: default Justification to use if value is None
         :return: A justification enum set according to *value* and *default*.
-
-        :raise: :exc:`python:ValueError` If *value* is not one of the possible
+        :raise ValueError: If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
             **and** *value* is :const:`None`.
         """  # noqa RST304
@@ -559,7 +561,6 @@ class Product(JsonData):
 
         :param _id: The ID of the subcomponent to look for.
         :param version: The version of the subcomponent to look for.
-
         :return: A matching subcomponent ID, or :const:`None` if no such subcomponent
             could be found.
         """  # noqa RST304
@@ -639,9 +640,10 @@ class ProductStatus(Enum):
     ) -> ProductStatus:
         """Create a product status enum from a given *value*.
 
+        :param value: the value to convert to a ProductStatus
+        :param default: default ProductStatus to use if value is None
         :return: A product status enum set according to *value* and *default*.
-
-        :raise: :exc:`python:ValueError` If *value* is not one of the possible
+        :raise ValueError: If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
             **and** *value* is :const:`None`.
         """  # noqa RST304
@@ -765,7 +767,7 @@ class StatementMetadata(JsonData):
     ) -> None:
         """Initialize a statement metadata object.
 
-        :param version: The version of this statement.
+        :param version: The version of this statement. Defaults to 1 if not provided.
         :param _id: The ID of this VEX metadata statement. It may be set to
             :const:`None` to be set later on, according to the document metadata.
         :param first_issued_on: The time this statement was first issued. If
@@ -923,10 +925,10 @@ class SubProductId(ProductId):
     ) -> None:
         """Initialize a Sub-product ID.
 
-        :ivar str _id: see :class:`ProductId`
-        :ivar str version: see :class:`ProductId`
-        :ivar list[str] platforms: The list of platform for this sub-product ID.
-        :ivar StatementStatus | None status: The status of the sub product. If
+        :param _id: see :class:`ProductId`
+        :param version: see :class:`ProductId`
+        :param platforms: The list of platform for this sub-product ID.
+        :param status: The status of the sub product. If
             :const:`None`, the status of the parent statement is assumed.
         """  # noqa RST304
         super().__init__(_id=_id, version=version)

@@ -623,6 +623,7 @@ def test_source_deps(setup_sbx) -> None:
 
 
 def test_predecessor_with_no_fingerprint(setup_sbx) -> None:
+    """Test predecessor with no fingerprint."""
     actions = DAG()
     actions.add_vertex("1")
     actions.add_vertex("2.no_fingerprint", predecessors=["1"])

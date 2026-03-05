@@ -931,7 +931,10 @@ class _StoreWrite(_Store):
 
 class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
     def create_thirdparty(self, file_info: FileDict) -> FileDict:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param file_info: the file information dictionary to create as a thirdparty
+        """
         file_info["kind"] = "thirdparty"
         file_info["revision"] = ""
         return self.submit_file(file_info)
@@ -961,7 +964,10 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             )
 
     def submit_component(self, component_info: ComponentDict) -> ComponentDict:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param component_info: the component information dictionary to submit
+        """
         # Upload only readmes, binaries and attachments, as sources are supposed to be
         # already there.
 
@@ -1075,13 +1081,19 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         )
 
     def submit_file(self, file_info: FileDict) -> FileDict:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param file_info: the file information dictionary to submit
+        """
         res = self._submit_file(file_info)
         self.connection.commit()
         return res
 
     def mark_build_ready(self, bid: str) -> bool:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param bid: the build ID to mark as ready
+        """
         _, _, _, _, _, isready, *_ = self._update(
             _Store.TableName.buildinfos,
             bid,
@@ -1093,7 +1105,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         return bool(isready)
 
     def create_build_id(self, setup: str, date: str, version: str) -> BuildInfoDict:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param setup: the build setup name
+        :param date: the build date
+        :param version: the build version
+        """
         req_tuple = self._insert(
             _Store.TableName.buildinfos,
             ["build_id", "build_date", "setup", "build_version"],  # type: ignore[arg-type]
@@ -1103,7 +1120,11 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         return self._tuple_to_buildinfo(req_tuple)  # type: ignore[arg-type]
 
     def copy_build_id(self, bid: str, dest_setup: str) -> BuildInfoDict:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param bid: the source build ID to copy
+        :param dest_setup: the destination setup name
+        """
         req_tuple = self._insert_or_update(
             _Store.TableName.buildinfos,
             f"INSERT INTO {_Store.TableName.buildinfos}("
@@ -1117,7 +1138,11 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         return self._tuple_to_buildinfo(req_tuple)  # type: ignore[arg-type]
 
     def update_file_metadata(self, file_info: FileDict) -> FileDict:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param file_info: the file information dictionary containing the
+            updated metadata
+        """
         # Retrieve Buildinfo. At this point of the code, it should be already created.
         buildinfo = file_info.get("build")
         build_id = file_info.get("build_id", buildinfo["_id"] if buildinfo else None)
@@ -1146,7 +1171,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
     def _add_component_attachment(
         self, component_id: str, file_id: str, name: str
     ) -> None:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param component_id: the component ID
+        :param file_id: the file ID of the attachment
+        :param name: the attachment name
+        """
         self._insert(
             _Store.TableName.component_files,
             ["kind", "file_id", "component_id", "attachment_name"],  # type: ignore[arg-type]
@@ -1156,7 +1186,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
     def add_component_attachment(
         self, component_id: str, file_id: str, name: str
     ) -> None:
-        """See e3.anod.store.interface.StoreWriteInterface."""
+        """See e3.anod.store.interface.StoreWriteInterface.
+
+        :param component_id: the component ID
+        :param file_id: the file ID of the attachment
+        :param name: the attachment name
+        """
         self._add_component_attachment(component_id, file_id, name)
         self.connection.commit()
 
@@ -1167,6 +1202,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
         Same as self.submit_file except that it does not commit the change.
         Mainly for optimization purpose.
+
+        :param file_info: the file information dictionary to submit
         """
         downloaded_as = file_info.get("downloaded_as", "")
         resource_id: _Store.DB_IDType | None = file_info.get("resource_id", "")
@@ -1244,7 +1281,10 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
 class StoreReadOnly(_Store, StoreReadInterface):
     def get_build_info(self, bid: str) -> BuildInfoDict:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param bid: the build ID
+        """
         return self._get_buildinfo(["build_id"], [bid], only_one=True)
 
     def get_latest_build_info(
@@ -1254,7 +1294,13 @@ class StoreReadOnly(_Store, StoreReadInterface):
         version: str | None = "all",
         ready_only: bool = True,
     ) -> BuildInfoDict:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param setup: the build setup name
+        :param date: the build date (default: "all")
+        :param version: the build version (default: "all")
+        :param ready_only: if True, only return builds marked as ready (default: True)
+        """
         dyn_where_rules: list[_Store.BuildInfoField] = ["setup"]
         dyn_where_values: list[str] = [setup]
         static_where_rules: list[str] = []
@@ -1282,7 +1328,13 @@ class StoreReadOnly(_Store, StoreReadInterface):
         version: str = "all",
         platform: str = "all",
     ) -> list[ComponentDict]:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param name: the release name
+        :param component: the component name filter (default: "all")
+        :param version: the version filter (default: "all")
+        :param platform: the platform filter (default: "all")
+        """
         res = self._tuple_list_to_comp_list(
             self._select_inner_join(  # type: ignore[arg-type]
                 _Store.TableName.component_releases,
@@ -1322,7 +1374,15 @@ class StoreReadOnly(_Store, StoreReadInterface):
         specname: str | None = None,
         build_id: str = "all",
     ) -> list[ComponentDict]:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param setup: the build setup name
+        :param date: the build date filter (default: None)
+        :param platform: the platform filter (default: "all")
+        :param component: the component name filter (default: "all")
+        :param specname: the spec name filter (default: None)
+        :param build_id: the build ID filter (default: "all")
+        """
         where_rules = [f"{_Store.TableName.buildinfos}.setup=?"]
         where_values = [setup]
         if date and date != "all":
@@ -1383,7 +1443,12 @@ class StoreReadOnly(_Store, StoreReadInterface):
         component: str = "all",
         platform: str = "all",
     ) -> list[ComponentDict]:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param bid: the build ID
+        :param component: the component name filter (default: "all")
+        :param platform: the platform filter (default: "all")
+        """
         where_rules: list[_Store.ComponentField] = ["build_id"]
         where_values: list[str] = [bid]
         if component and component != "all":
@@ -1397,7 +1462,10 @@ class StoreReadOnly(_Store, StoreReadInterface):
         )
 
     def get_build_data(self, bid: str) -> BuildDataDict:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param bid: the build ID
+        """
         fields: list[Literal["build_id"]] = ["build_id"]
         return {
             "sources": self._tuple_list_to_file_list(
@@ -1426,7 +1494,13 @@ class StoreReadOnly(_Store, StoreReadInterface):
         version: str | None = "all",
         nb_days: int = 1,
     ) -> list[BuildInfoDict]:
-        """See e3.anod.store.interface.StoreReadInterface.get_build_info_list."""
+        """See e3.anod.store.interface.StoreReadInterface.get_build_info_list.
+
+        :param date: the build date filter (default: "all")
+        :param setup: the build setup name filter (default: "all")
+        :param version: the build version filter (default: "all")
+        :param nb_days: number of days to look back from the date (default: 1)
+        """
         date = date or "all"
 
         static_where_rules: tuple[str, ...]
@@ -1475,7 +1549,12 @@ class StoreReadOnly(_Store, StoreReadInterface):
         bid: str,
         kind: str = "source",
     ) -> FileDict:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param name: the source name
+        :param bid: the build ID
+        :param kind: the source kind (default: "source")
+        """
         # When looking for sources (kind="source"), the build ID doesn't matter that
         # much.
         #
@@ -1528,7 +1607,11 @@ class StoreReadOnly(_Store, StoreReadInterface):
         return self._tuple_to_file(req[0])  # type: ignore[arg-type]
 
     def download_resource(self, rid: str, path: str) -> str:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param rid: the resource ID
+        :param path: the destination path for the downloaded resource
+        """
         _, _, resource_path, *_ = self._select_one(
             _Store.TableName.resources, rid, field_name="resource_id"
         )
@@ -1538,7 +1621,12 @@ class StoreReadOnly(_Store, StoreReadInterface):
     def latest_thirdparty(
         self, name: str, tp_id: str = "all", rid: str = "all"
     ) -> FileDict | None:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param name: the thirdparty name
+        :param tp_id: the thirdparty ID filter (default: "all")
+        :param rid: the resource ID filter (default: "all")
+        """
         return self._get_file(
             name=name,
             kind="thirdparty",
@@ -1548,7 +1636,10 @@ class StoreReadOnly(_Store, StoreReadInterface):
         )
 
     def bulk_query(self, queries: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """See e3.anod.store.interface.StoreReadInterface."""
+        """See e3.anod.store.interface.StoreReadInterface.
+
+        :param queries: list of query dictionaries to execute
+        """
         results = []
         for query in queries:
             result = {"query": query, "response": None, "msg": ""}
@@ -1734,6 +1825,10 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.download_resource`
+
+        :param resource_id: the resource ID to download
+        :param path: the destination path for the downloaded resource
+        :param online_store: optional online store interface to use for download
         """
         online_store = online_store or self.online_store
 
@@ -1751,6 +1846,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_build_info`
 
+        :param build_info: the build information dictionary to add
         :return: True if some change should be committed to the database, False
             otherwise.
         """
@@ -1777,6 +1873,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_build_info`
+
+        :param build_info: the build information dictionary to add
         """
         if self._raw_add_build_info(build_info):
             self.connection.commit()
@@ -1789,6 +1887,9 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.add_build_info_from_store`
+
+        :param from_store: the store to retrieve the build info from
+        :param bid: the build ID to add
         """
         try:
             _ = self.get_build_info(bid)
@@ -1805,6 +1906,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_file`
 
+        :param file_info: the file information dictionary to add
         :return: True if some change should be committed to the database, False
             otherwise.
         """
@@ -1934,6 +2036,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_file`
+
+        :param file_info: the file information dictionary to add
         """
         if self._raw_add_file(file_info):
             self.connection.commit()
@@ -1952,6 +2056,13 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.add_source_from_store`
+
+        :param from_store: the store to retrieve the source from
+        :param name: the source name
+        :param bid: the build ID (default: None)
+        :param setup: the build setup name (default: None)
+        :param date: the build date (default: "all")
+        :param kind: the source kind (default: "source")
         """
         if not bid:
             assert setup is not None
@@ -1976,6 +2087,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_component`
 
+        :param component_info: the component information dictionary to add
         :return: True if some change should be committed to the database, False
             otherwise.
         """
@@ -2114,6 +2226,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.raw_add_component`
+
+        :param component_info: the component information dictionary to add
         """
         if self._raw_add_component(component_info):
             self.connection.commit()
@@ -2132,6 +2246,13 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.add_component_from_store`
+
+        :param from_store: the store to retrieve the component from
+        :param setup: the build setup name
+        :param name: the component name (default: "all")
+        :param platform: the platform (default: "all")
+        :param date: the build date (default: None)
+        :param specname: the spec name (default: None)
         """
         comps = from_store.latest_components(
             setup=setup, date=date, component=name, platform=platform, specname=specname
@@ -2152,6 +2273,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.save`
+
+        :param filename: optional path to save the database to (default: None)
         """
         # Make sure everything is flushed to the database.
         self.connection.commit()
@@ -2166,6 +2289,9 @@ class LocalStore(StoreRW, LocalStoreInterface):
         .. seealso::
 
             :py:meth:`e3.anod.store.interface.LocalStore.bulk_update_from_store`
+
+        :param from_store: the store to retrieve data from
+        :param queries: list of query dictionaries to execute
         """
         # List of queries done from store
         queries_done = []

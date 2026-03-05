@@ -263,6 +263,7 @@ class AnodContext:
         :param root: parent node of the decision node
         :param left: left decision (child of Decision node)
         :param right: right decision (child of Decision node)
+        :return: the created decision node
         """
         decision_action = decision_class(root, left, right)
         self.add(decision_action, left, right)
@@ -993,7 +994,13 @@ class AnodContext:
 
     @classmethod
     def always_create_source_resolver(cls, action: Action, decision: Decision) -> bool:
-        """Force source creation when scheduling a plan."""
+        """Force source creation when scheduling a plan.
+
+        :param action: action to consider
+        :param decision: decision to resolve
+        :return: True if the action should be scheduled, False otherwise
+        :raise SchedulingError: in case no decision can be taken
+        """
         if isinstance(action, CreateSource):
             return True
         if isinstance(action, DownloadSource):

@@ -67,6 +67,7 @@ logger = getLogger("pypiscript", "e3.python")
 
 
 def main() -> None:
+    """Run the e3-pypi-closure script."""
     m = Main()
     m.argument_parser.formatter_class = argparse.RawDescriptionHelpFormatter
     m.argument_parser.description = DESCRIPTION.strip()

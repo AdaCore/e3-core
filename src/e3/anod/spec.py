@@ -83,6 +83,7 @@ if TYPE_CHECKING:
 def check_api_version(version: str) -> None:
     """Make sure there are no API mismatch.
 
+    :param version: the API version to check
     :raise: AnodError if the API is not supported
     """
     if version.strip() not in SUPPORTED_API:
@@ -138,6 +139,10 @@ def fetch_attr(instance: Any, name: str, default_value: Any) -> Any:
     attributes present in the class (so class attributes or properties) and
     this does not hide AttributeError exceptions that getting an existing
     attribute might raise.
+
+    :param instance: the object instance
+    :param name: the attribute name
+    :param default_value: the default value to return if attribute is missing
     """
     # Singleton used to determine whether call to ``gettattr()`` returns the
     # default value (i.e. attribute is missing) or just returns the attribute
@@ -404,6 +409,8 @@ class Anod:
 
         Binding an Anod instance to a sandbox will set the
         build_space attribute.
+
+        :param sandbox: the sandbox to bind to
         """
         self.__build_space = sandbox.get_build_space(
             name=self.build_space_name, platform=self.env.platform
@@ -610,6 +617,8 @@ class Anod:
         self.build_space.pkg_dir values.
 
         Also, directly access items returned by the ``pre`` callback.
+
+        :param key: the attribute name to access
         """
         if self.__build_space is None:
             return "unknown"
@@ -635,7 +644,9 @@ class Anod:
         """Return a qualifier value.
 
         Requires that qualifiers_manager attribute has been initialized and its parse
-        method called.
+        method called
+
+        :param qualifier_name: the qualifier name.
 
         :return: The qualifier value:
             - A string for key value qualifiers
@@ -678,6 +689,14 @@ class Anod:
         """
 
         def primitive_dec(f, pre=pre, post=post, version=version):  # type: ignore
+            """Decorate a primitive function with pre/post/version callbacks.
+
+            :param f: the function to decorate
+            :param pre: pre-callback function
+            :param post: post-callback (obsolete)
+            :param version: version callback function
+            """
+
             def primitive_func(self, *args, **kwargs):  # type: ignore
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
@@ -720,7 +739,7 @@ class Anod:
     def package(self) -> e3.anod.package.Package | None:
         """Return binary package creation recipe.
 
-        If None don't create a binary package, needs a component name set.
+        If None do not create a binary package, needs a component name set.
         """
         return None
 
@@ -728,7 +747,7 @@ class Anod:
     def component(self) -> str | None:
         """Return component name.
 
-        If None, don't created a component (nor a binary package).
+        If None, do not create a component (nor a binary package).
         :return: None if the name generator is disabled and the generated name
         otherwise (possibly None if no component is required)
         """

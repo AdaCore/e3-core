@@ -237,7 +237,7 @@ class File(object):
         using this file's contents (see e3.anod.store.interface.resource_id for
         more info on that).
 
-        :param path: the file path on the current computer.
+        :param path: the file path on the current computer
         """
         if self.resource_id is None:
             self.resource_id = store_resource_id(path)
@@ -258,7 +258,7 @@ class File(object):
         """Set metadata statement.
 
         :param name: statement name
-        :param data: data associated with it
+        :param data: DSSE envelope associated with the statement
         """
         if not isinstance(data, DSSE):
             raise StoreError(
@@ -270,7 +270,7 @@ class File(object):
         """Get metadata statement.
 
         :param name: statement name
-        :return: a DSSE envelope
+        :return: a DSSE envelope or None if not found
         """
         result_data = self.metadata.get(name)
         if result_data is None:
@@ -299,9 +299,9 @@ class File(object):
     def metadata_path(cls: type[FileType], dest_dir: str, name: str) -> str:
         """Return the path to the metadata file associated to a File.
 
-        :param dest_dir: The directory where the File is to be downloaded to.
-        :param name: Same as the File.name attribute.
-        :return: The path to the metadata file.
+        :param dest_dir: directory where the File is to be downloaded to
+        :param name: the File name attribute
+        :return: the path to the metadata file
         """
         return str(Path(dest_dir, name + "_meta.json"))
 
@@ -528,9 +528,9 @@ class File(object):
     ) -> FileType:
         """Load and create a File class instance from a dictionary.
 
-        :param data: The dictionary representing a file.
-        :param store: The store class to use if store operations are needed.
-        :return: The File instance.
+        :param data: dictionary representing a file
+        :param store: the store class to use if store operations are needed
+        :return: the File instance
         """
         from e3.anod.store.buildinfo import BuildInfo
 
@@ -654,8 +654,7 @@ class File(object):
     def save_to_meta_file(self: FileType, dest_dir: str, name: str) -> None:
         """Dump as json file component information.
 
-        :param dest_dir: directory in which the metadata file should
-            be saved
+        :param dest_dir: directory in which the metadata file should be saved
         :param name: file basename
         """
         with Path(self.metadata_path(dest_dir=dest_dir, name=name)).open("w") as fd:
@@ -667,14 +666,12 @@ class File(object):
     ) -> FileType:
         """Upload the given file to Store as a third party.
 
-        :param store: A store read-write object.
-        :param path: The patch to the file to upload.
-        :param force: If True, do not raise an error if the file to upload
-            already exists in Store.
+        :param store: a store read-write object
+        :param path: the path to the file to upload
+        :param force: if True, do not raise an error if the file already exists
 
-        :raise: StoreError if the file already exists in Store (unless
-            force is True).
-        :return: A File instance corresponding to the uploaded file on Store.
+        :raise StoreError: if the file already exists in Store (unless force is True)
+        :return: a File instance corresponding to the uploaded file on Store
         """
         from e3.anod.store.buildinfo import BuildInfo
 
@@ -713,16 +710,16 @@ class File(object):
     ) -> str:
         """Generate a third party package from local directory and upload it.
 
-        :param store: The store class used to interact with the store system.
-        :param path: local directory from which an archive will be created
-        :param prefix: prefix of the third party package name to create
-        :param build_dir: where the generated packages will be stored
-
         This is meant to generate a tarball from a directory on the local
         filesystem and upload it as third party to Store. The date of the
         day is added to the package name. If the package already exists, a
         suffix is automatically added. If too many packages have been created
         that day with the same name the function will raise StoreError.
+
+        :param store: the store class used to interact with the store system
+        :param path: local directory from which an archive will be created
+        :param prefix: prefix of the third party package name to create
+        :param build_dir: where the generated packages will be stored
 
         :return: name of the uploaded package
         """

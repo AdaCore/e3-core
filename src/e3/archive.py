@@ -67,6 +67,12 @@ class E3ZipFile(zipfile.ZipFile):
         path: str | PathLike[str] | None,
         pwd: bytes | None,
     ) -> str:
+        """Extract a member from the archive with attribute preservation.
+
+        :param member: member name or ZipInfo object
+        :param path: directory to extract to
+        :param pwd: password for encrypted files
+        """
         result = super()._extract_member(member, path, pwd)  # type: ignore
 
         if sys.platform != "win32":

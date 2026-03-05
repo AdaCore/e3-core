@@ -11,6 +11,12 @@ if TYPE_CHECKING:
 
 
 def load_cache(name: str = "file-cache", configuration: Any = None) -> Cache:
+    """Load a cache backend by name.
+
+    :param name: name of the cache backend to load
+    :param configuration: configuration for the cache backend
+    :return: a cache backend instance
+    """
     plugin: stevedore.DriverManager = stevedore.DriverManager(
         namespace="e3.store.cache.backend", name=name
     )

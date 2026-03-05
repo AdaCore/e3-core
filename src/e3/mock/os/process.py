@@ -75,7 +75,10 @@ class GlobChecker(ArgumentChecker):
         self.pattern = pattern
 
     def check(self, arg: str) -> bool:
-        """See ArgumentChecker."""
+        """See ArgumentChecker.
+
+        :param arg: argument to check against pattern
+        """
         return fnmatch.fnmatch(arg, self.pattern)
 
     def __repr__(self) -> str:

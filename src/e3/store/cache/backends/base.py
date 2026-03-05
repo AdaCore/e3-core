@@ -13,7 +13,16 @@ DEFAULT_TIMEOUT = 3600 * 24
 
 
 class Cache(metaclass=abc.ABCMeta):
+    """Base class for cache backends.
+
+    :ivar cache_configuration: configuration for the cache backend
+    """
+
     def __init__(self, cache_configuration: Any) -> None:
+        """Initialize the cache backend.
+
+        :param cache_configuration: configuration for the cache backend
+        """
         self.cache_configuration = cache_configuration
 
     @abc.abstractmethod

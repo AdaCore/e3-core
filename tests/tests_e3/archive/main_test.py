@@ -17,6 +17,7 @@ import e3.os.fs
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
 def test_unpack(ext) -> None:
+    """Test unpack."""
     dir_to_pack = os.path.dirname(__file__)
 
     test_dir = os.path.basename(dir_to_pack)
@@ -88,6 +89,7 @@ def test_unpack(ext) -> None:
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".zip"))
 def test_unpack_fileobj(ext) -> None:
+    """Test unpack fileobj."""
     dir_to_pack = os.path.dirname(__file__)
 
     test_dir = os.path.basename(dir_to_pack)
@@ -349,6 +351,7 @@ def test_empty() -> None:
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test executable attribute")
 def test_zip_attributes() -> None:
+    """Test zip attributes."""
     zip_file = Path(os.path.dirname(os.path.abspath(__file__)), "test.zip")
     e3.fs.mkdir("result")
     e3.archive.unpack_archive(str(zip_file), "result", remove_root_dir=True)

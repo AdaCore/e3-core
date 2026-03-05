@@ -79,6 +79,10 @@ class Trie:
         return self.END_MARKER in cursor
 
     def __contains__(self, word: str) -> bool:
+        """Check whether word is in the trie.
+
+        :param word: a word
+        """
         return self.contains(word)
 
     def match(self, word: str, delimiter: str | None = None) -> bool:

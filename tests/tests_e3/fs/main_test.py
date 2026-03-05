@@ -16,6 +16,7 @@ from e3.os.process import Run
 
 
 def test_cp() -> None:
+    """Test cp."""
     current_dir = Path.cwd()
     hash_test = current_dir / "hash_test"
     e3.fs.cp(__file__, hash_test)
@@ -113,6 +114,7 @@ def test_pathlib() -> None:
 
 
 def test_mv_with_iterables() -> None:
+    """Test mv with iterables."""
     for idx in range(10):
         e3.os.fs.touch(f"a{idx}")
 
@@ -138,6 +140,7 @@ def test_mv_with_iterables() -> None:
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
 def test_cp_symlink() -> None:
+    """Test cp symlink."""
     e3.os.fs.touch("c")
     os.symlink("c", "c_sym")
     e3.fs.cp("c_sym", "d", preserve_symlinks=True)
@@ -145,6 +148,7 @@ def test_cp_symlink() -> None:
 
 
 def test_echo() -> None:
+    """Test echo."""
     dest_file = "echo_test"
     e3.fs.echo_to_file(dest_file, "foo")
     e3.fs.echo_to_file(dest_file, "foo")
@@ -158,6 +162,7 @@ def test_echo() -> None:
 
 
 def test_find() -> None:
+    """Test find."""
     d = os.path.dirname(__file__)
     parent_d = os.path.dirname(d)
 
@@ -186,6 +191,7 @@ def test_find() -> None:
 
 
 def test_ls(caplog) -> None:
+    """Test ls."""
     e3.os.fs.touch("a")
     e3.fs.ls("a", emit_log_record=True)
     assert "ls a" in caplog.text
@@ -200,12 +206,14 @@ def test_ls(caplog) -> None:
 
 
 def test_mkdir(caplog) -> None:
+    """Test mkdir."""
     e3.fs.mkdir("subdir")
     for record in caplog.records:
         assert "mkdir" in record.msg
 
 
 def test_mkdir_exists(caplog) -> None:
+    """Test mkdir exists."""
     os.makedirs("subdir")
     e3.fs.mkdir("subdir")
     for record in caplog.records:
@@ -213,6 +221,7 @@ def test_mkdir_exists(caplog) -> None:
 
 
 def test_mv() -> None:
+    """Test mv."""
     for fname in ("a1", "a2", "a3", "1", "2", "3", "11", "12", "13"):
         e3.os.fs.touch(fname)
 
@@ -248,6 +257,7 @@ def test_mv() -> None:
 
 
 def test_tree_state() -> None:
+    """Test tree state."""
     import time
 
     current_dir = Path.cwd()
@@ -311,6 +321,7 @@ def test_tree_state() -> None:
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test using symlink")
 def test_sync_tree_with_symlinks() -> None:
+    """Test sync tree with symlinks."""
     current_dir = Path.cwd()
     a = current_dir / "a"
     b = current_dir / "b"
@@ -358,6 +369,7 @@ def test_sync_tree_with_symlinks() -> None:
 
 @pytest.mark.skipif(sys.platform != "win32", reason="test relevant only on win32")
 def test_sync_tree_case_insensitive() -> None:
+    """Test sync tree case insensitive."""
     e3.fs.mkdir("test/a")
     e3.fs.mkdir("test/b")
     e3.os.fs.touch("test/a/initial.txt")
@@ -506,6 +518,7 @@ def test_sync_tree_does_not_exist() -> None:
 
 
 def test_rm_on_error() -> None:
+    """Test rm on error."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/b")
     e3.os.fs.touch("a/b/c")
@@ -534,6 +547,7 @@ def test_rm_list() -> None:
 
 
 def test_rm_symlink() -> None:
+    """Test rm symlink."""
     e3.fs.mkdir("a")
     try:
         os.symlink("a", "b")
@@ -607,6 +621,7 @@ def test_safe_mkdir() -> None:
 
 
 def test_splitall() -> None:
+    """Test splitall."""
     assert e3.fs.splitall("a/b") == ("a", "b")
     assert e3.fs.splitall("/a") == ("/", "a")
     assert e3.fs.splitall("/a/b") == ("/", "a", "b")
@@ -652,6 +667,7 @@ def test_sync_tree_with_ignore() -> None:
 
 
 def test_extension() -> None:
+    """Test extension."""
     assert e3.fs.extension("/home/file1.2.txt") == ".txt"
     assert e3.fs.extension("file2.tar.gz") == ".tar.gz"
     assert e3.fs.extension("file2.tar") == ".tar"

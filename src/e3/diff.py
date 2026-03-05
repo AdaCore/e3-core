@@ -131,6 +131,7 @@ def patch(
     def apply_patch(fname: str) -> None:
         """Run the patch command.
 
+        :param fname: patch file name
         :raise DiffError: when the patch command fails
         """
         if is_git_patch:
@@ -202,7 +203,7 @@ def patch(
             def write_line(line: str) -> None:
                 """Write line in filtered patch.
 
-                :param l: the line to write
+                :param line: the line to write
                 """
                 if not discard:
                     fdout.write(line)

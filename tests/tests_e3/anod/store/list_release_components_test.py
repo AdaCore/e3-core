@@ -13,6 +13,7 @@ DEFAULT_SETUP = "test"
 
 
 def test_list_release_components(store) -> None:
+    """Test list release components."""
     # Use store to simplify the initialization phase.
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)

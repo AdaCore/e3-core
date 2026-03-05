@@ -169,7 +169,10 @@ class DAG:
         return iter(self.__vertex_predecessors.items())
 
     def get_predecessors(self, vertex_id: VertexID) -> frozenset[VertexID]:
-        """Get set of predecessors for a given vertex."""
+        """Get set of predecessors for a given vertex.
+
+        :param vertex_id: vertex identifier
+        """
         return self.__vertex_predecessors.get(vertex_id, frozenset())
 
     def set_predecessors(
@@ -178,6 +181,9 @@ class DAG:
         """Set predecessors for a given vertex.
 
         Invalidate the global dictionary of vertex successors.
+
+        :param vertex_id: vertex identifier
+        :param predecessors: set of predecessor vertex identifiers
         """
         self.__vertex_predecessors[vertex_id] = predecessors
         # Reset successors and cycle check results which are now invalid
@@ -189,6 +195,8 @@ class DAG:
 
         If the global dictionary of vertex successors has not been
         computed or if it has been invalidated then recompute it.
+
+        :param vertex_id: vertex identifier
         """
         if self.__vertex_successors == {}:
             successors: dict[VertexID, set[VertexID]] = {
@@ -582,15 +590,24 @@ class DAG:
         )
 
     def __contains__(self, vertex_id: VertexID) -> bool:
-        """Check if a vertex is present in the DAG."""
+        """Check if a vertex is present in the DAG.
+
+        :param vertex_id: vertex identifier
+        """
         return vertex_id in self.vertex_data
 
     def __getitem__(self, vertex_id: VertexID) -> Any:
-        """Get data associated with a vertex."""
+        """Get data associated with a vertex.
+
+        :param vertex_id: vertex identifier
+        """
         return self.vertex_data[vertex_id]
 
     def __or__(self, other: DAG) -> DAG:
-        """Merge two dags."""
+        """Merge two dags.
+
+        :param other: another DAG to merge with this one
+        """
         assert isinstance(other, DAG)
 
         result = DAG()

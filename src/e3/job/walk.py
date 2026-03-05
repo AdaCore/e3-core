@@ -204,11 +204,12 @@ class Walk:
         This method always returns an EmptyJob. Deriving classes may
         override this method if they need something more specific.
 
-        :param uid: A unique Job ID.
-        :param data: Data associated to the job to create.
-        :param predecessors: A list of predecessor jobs, or None.
-        :param reason: If not None, the reason for creating a failed job.
-        :notify_end: Same as the notify_end parameter in Job.__init__.
+        :param uid: A unique Job ID
+        :param data: Data associated to the job to create
+        :param predecessors: A list of predecessor jobs, or None
+        :param reason: If not None, the reason for creating a failed job
+        :param notify_end: Same as the notify_end parameter in Job.__init__
+        :param status: The status of the skipped job
         """
         return EmptyJob(uid, data, notify_end, status=status)
 
@@ -222,10 +223,10 @@ class Walk:
     ) -> ProcessJob:
         """Create a ProcessJob.
 
-        :param uid: A unique Job ID.
-        :param data: Data associated to the job to create.
-        :param predecessors: A list of predecessor jobs, or None.
-        :notify_end: Same as the notify_end parameter in Job.__init__.
+        :param uid: A unique Job ID
+        :param data: Data associated to the job to create
+        :param predecessors: A list of predecessor jobs, or None
+        :param notify_end: Same as the notify_end parameter in Job.__init__
         """
 
     @abc.abstractmethod
@@ -250,6 +251,11 @@ class Walk:
         whether any of the predecessors might have failed, in which case
         the failed job (creating using the create_skipped_job method)
         is returned.
+
+        :param uid: unique job identifier
+        :param data: job data
+        :param predecessors: set of predecessor job IDs
+        :param notify_end: notification function
         """
         # Get the latest fingerprint
         self.prev_fingerprints[uid] = self.load_previous_fingerprint(uid)

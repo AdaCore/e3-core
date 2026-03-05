@@ -6,6 +6,7 @@ from e3.store.cache.backends.filecache import FileCache
 
 
 def test_cache() -> None:
+    """Test cache."""
     fc = FileCache({"cache_dir": str(Path.cwd() / "cache")})
     fc.set("a", 1)
     assert fc.get("a") == 1

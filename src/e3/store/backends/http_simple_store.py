@@ -13,11 +13,27 @@ logger = e3.log.getLogger("store.httpsimplestore")
 
 
 class HTTPSimpleStoreResourceInfo(ResourceInfo):
+    """Resource information for HTTP simple store.
+
+    :ivar url: URL of the resource
+    :ivar sha: SHA1 hash of the resource
+    """
+
     def __init__(self, url: str, sha: str) -> None:
+        """Initialize HTTP simple store resource info.
+
+        :param url: URL of the resource
+        :param sha: SHA1 hash of the resource
+        """
         self.url = url
         self.sha = sha
 
     def verify(self, resource_path: str) -> bool:
+        """Verify the integrity of a resource.
+
+        :param resource_path: path to the resource to verify
+        :return: True if the resource SHA1 matches, False otherwise
+        """
         resource_sha = e3.hash.sha1(resource_path)
         if resource_sha != self.sha:
             logger.critical(

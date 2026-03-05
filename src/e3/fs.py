@@ -213,6 +213,10 @@ def get_filetree_state(
     """
 
     def compute_state(file_path: str) -> bytes:
+        """Compute file state as bytes.
+
+        :param file_path: path to the file
+        """
         f_stat = os.lstat(file_path)
 
         state = ":".join(
@@ -221,6 +225,10 @@ def get_filetree_state(
         return state.encode("utf-8")
 
     def get_content(file_path: str) -> bytes:
+        """Get file content as bytes.
+
+        :param file_path: path to the file
+        """
         with Path(file_path).open("rb") as f:
             return f.read()
 
@@ -328,10 +336,18 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
         The only difference is that we use e3.fs.rm function instead of
         rmtree. This ensure moving a directory with read-only files will
         work.
+
+        :param src: source file or directory
+        :param dst: destination file or directory
         """
         logger.debug(f"mv {src} {dst}")
 
         def same_file(src: str, dst: str) -> bool:
+            """Check if two paths point to the same file.
+
+            :param src: source path
+            :param dst: destination path
+            """
             if hasattr(os.path, "samefile"):
                 try:
                     return os.path.samefile(src, dst)
@@ -345,10 +361,19 @@ def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) 
                 )
 
         def basename(path: str) -> str:
+            """Get base name of a path.
+
+            :param path: file path
+            """
             sep = os.path.sep + (os.path.altsep or "")
             return os.path.basename(path.rstrip(sep))
 
         def destinsrc(src: str, dst: str) -> bool:
+            """Check if destination is inside source.
+
+            :param src: source directory
+            :param dst: destination directory
+            """
             src = os.path.abspath(src)
             dst = os.path.abspath(dst)
             if not src.endswith(os.path.sep):
@@ -631,11 +656,19 @@ def sync_tree(
     if sys.platform == "win32":
 
         def path_key(p: str) -> str:
+            """Normalize path for case-insensitive comparison.
+
+            :param p: path to normalize
+            """
             return p.lower()
 
     else:
 
         def path_key(p: str) -> str:
+            """Normalize path for case-sensitive comparison.
+
+            :param p: path to normalize
+            """
             return p
 
     # normalize the list of file to synchronize

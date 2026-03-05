@@ -23,9 +23,18 @@ if TYPE_CHECKING:
 
 
 class FileCache(Cache):
+    """File-based cache backend implementation.
+
+    :ivar cache_dir: directory where cache files are stored
+    """
+
     cache_suffix = ".cache"
 
     def __init__(self, cache_configuration: Any) -> None:
+        """Initialize the file cache backend.
+
+        :param cache_configuration: configuration dict containing cache_dir
+        """
         super().__init__(cache_configuration)
         self.cache_dir = cache_configuration["cache_dir"]
 
@@ -42,7 +51,9 @@ class FileCache(Cache):
         """Convert a resource uid to a cache file path.
 
         This backend assumes that the uid is a safe value for a file name.
+
         :param uid: the resource uid
+        :return: path to the cache file for the given uid
         """
         return str(Path(self.cache_dir, uid + self.cache_suffix))
 
@@ -51,6 +62,9 @@ class FileCache(Cache):
         """Determine if an open cache file has expired.
 
         Automatically delete the file if it has passed its expiry time.
+
+        :param fd: open file descriptor to check
+        :return: True if the cache file has expired, False otherwise
         """
         exp = pickle.load(fd)
         if exp is not None and exp < time.time():
@@ -60,6 +74,12 @@ class FileCache(Cache):
         return False
 
     def get(self, uid: str, default: Any = None) -> Any:
+        """Fetch a given resource from the cache.
+
+        :param uid: the resource uid
+        :param default: the default value if not found
+        :return: the cached value or default if not found or expired
+        """
         cache_file = self.uid_to_file(uid)
         try:
             with Path(cache_file).open("rb") as fd:
@@ -71,6 +91,13 @@ class FileCache(Cache):
         return default
 
     def set(self, uid: str, value: Any, timeout: int = DEFAULT_TIMEOUT) -> bool:
+        """Set a value in the cache.
+
+        :param uid: the cache entry uid
+        :param value: the object to cache
+        :param timeout: timeout to use for caching this value
+        :return: True if the value is set, False in case of failure
+        """
         # Make sure that the cache dir exists
         self._create_cache_dir()
         dest_file = self.uid_to_file(uid)

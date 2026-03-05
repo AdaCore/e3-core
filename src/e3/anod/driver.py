@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
 
 def primitive_check() -> Callable[[F], F]:
+    """Check that a primitive exists and the Anod instance is activated."""
+
     def decorator(func: F) -> F:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -52,6 +54,11 @@ class AnodDriver:
         self.store = store
 
     def activate(self, sandbox: SandBox, spec_repository: AnodSpecRepository) -> None:
+        """Activate the Anod instance by binding it to a sandbox.
+
+        :param sandbox: the sandbox to bind to
+        :param spec_repository: the specification repository
+        """
         self.anod_instance.bind_to_sandbox(sandbox)
 
         self.anod_instance.log = e3.log.getLogger("spec." + self.anod_instance.uid)
@@ -76,6 +83,10 @@ class AnodDriver:
 
     @staticmethod
     def unknown_action() -> Literal[False]:
+        """Handle unknown actions.
+
+        :return: False
+        """
         logger.critical("unknown action")
         return False
 

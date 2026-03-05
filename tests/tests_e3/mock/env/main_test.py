@@ -53,6 +53,7 @@ def run_on_windows_2022() -> None:
 
 
 def echo_hello() -> None:
+    """Echo hello based on platform."""
     env = Env()
 
     if "windows" in env.platform:

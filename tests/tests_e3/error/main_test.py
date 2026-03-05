@@ -4,6 +4,7 @@ from e3.error import E3Error
 
 
 def test_e3error() -> None:
+    """Test e3error."""
     err = None
 
     try:

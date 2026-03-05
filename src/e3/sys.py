@@ -117,17 +117,26 @@ class RewriteImportNodeTransformer(ast.NodeTransformer):
         self.rules = rules
 
     def visit_ImportFrom(self, node: ast.stmt) -> ast.stmt:
+        """Visit ImportFrom node.
+
+        :param node: AST node to visit
+        """
         for rule in self.rules:
             node = rule.rewrite_node(node)
         return node
 
     def visit_Import(self, node: ast.stmt) -> ast.stmt:
+        """Visit Import node.
+
+        :param node: AST node to visit
+        """
         for rule in self.rules:
             node = rule.rewrite_node(node)
         return node
 
 
 def version() -> str:
+    """Return the e3-core package version."""
     import importlib.metadata
 
     return importlib.metadata.version("e3-core")
@@ -166,6 +175,7 @@ def sanity_check() -> int:
 
 
 def main() -> None:
+    """Run the e3 command line tool."""
     import e3.main
     from e3.env import Env
 
@@ -260,6 +270,8 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
         When producing relocatable python distribution we change the shebang
         to #!python. In that case prefix the command line with the current
         python interpreter.
+
+        :param file_script: path to script file
 
         #!/path/to/python shebang should return false, as we don't need to
         return interpreter path.

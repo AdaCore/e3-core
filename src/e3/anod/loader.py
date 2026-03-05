@@ -175,6 +175,7 @@ class AnodSpecRepository:
     def __contains__(self, item: str) -> bool:
         """Check by name if a spec is present in the repository.
 
+        :param item: the spec name to check
         :return: True if present, False otherwise
         """
         return item in self.specs and self.specs[item].module is not None

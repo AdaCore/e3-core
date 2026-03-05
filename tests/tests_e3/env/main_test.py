@@ -13,6 +13,7 @@ import e3.platform
 
 
 def test_autodetect() -> None:
+    """Test autodetect."""
     sys_platform = (
         sys.platform.replace("linux2", "linux")
         .replace("win32", "windows")
@@ -37,6 +38,7 @@ def test_autodetect() -> None:
 
 
 def test_platform() -> None:
+    """Test platform."""
     e = e3.env.BaseEnv()
     e.set_host("x86-linux")
     assert e.platform == "x86-linux"
@@ -45,6 +47,7 @@ def test_platform() -> None:
 
 
 def test_is_canadian() -> None:
+    """Test is canadian."""
     e = e3.env.BaseEnv()
     e.set_build("sparc-solaris")
     assert not e.is_canadian
@@ -55,6 +58,7 @@ def test_is_canadian() -> None:
 
 
 def test_set_host() -> None:
+    """Test set host."""
     e = e3.env.BaseEnv()
     e.set_build("x86-linux")
 
@@ -81,6 +85,7 @@ def test_set_host() -> None:
 
 
 def test_set_target() -> None:
+    """Test set target."""
     e = e3.env.BaseEnv()
     e.set_build("x86-linux")
     e.set_host("x86_64-linux")
@@ -98,6 +103,7 @@ def test_set_target() -> None:
 
 
 def test_set_env() -> None:
+    """Test set env."""
     e = e3.env.BaseEnv()
     e.set_env("x86-linux,rhEs5", "x86_64-linux,debian7", "x86-windows,2008")
     assert e.build.platform == "x86-linux"
@@ -122,6 +128,7 @@ def test_set_env() -> None:
 
 
 def test_cmd_triplet() -> None:
+    """Test cmd triplet."""
     if e3.env.Env().build.platform == "x86-linux":
         build_platform = "x86_64-linux,rhES5"
     else:
@@ -136,6 +143,7 @@ def test_cmd_triplet() -> None:
 
 
 def test_get_attr() -> None:
+    """Test get attr."""
     e = e3.env.BaseEnv()
     e.set_env("x86-linux,rhES5", "x86_64-linux,debian7", "x86-windows,2008")
     assert e.get_attr("host.os.name") == "linux"
@@ -155,6 +163,7 @@ def test_get_attr() -> None:
 
 
 def test_add_path() -> None:
+    """Test add path."""
     e = e3.env.Env()
     saved_path = os.environ["PATH"]
     e.store()
@@ -167,6 +176,7 @@ def test_add_path() -> None:
 
 
 def test_add_dll_path() -> None:
+    """Test add dll path."""
     e = e3.env.Env()
     saved_path = os.environ.get(e.dll_path_var)
     e.store()
@@ -179,6 +189,7 @@ def test_add_dll_path() -> None:
 
 
 def test_discriminants() -> None:
+    """Test discriminants."""
     e = e3.env.Env()
     e.store()
     assert "native" in e.discriminants
@@ -191,6 +202,7 @@ def test_discriminants() -> None:
 
 
 def test_tmp() -> None:
+    """Test tmp."""
     e = e3.env.Env()
     current_dir = str(Path.cwd())
     os.environ["TMPDIR"] = current_dir
@@ -198,10 +210,12 @@ def test_tmp() -> None:
 
 
 def test_to_dict() -> None:
+    """Test to dict."""
     assert e3.env.Env().to_dict()["is_cross"] is False
 
 
 def test_store() -> None:
+    """Test store."""
     c = e3.env.Env()
 
     c.abc = "foo"
@@ -233,6 +247,7 @@ def test_store() -> None:
 
 
 def test_from_platform_name() -> None:
+    """Test from platform name."""
     e = e3.env.BaseEnv.from_platform_name("arm-linux-linux")
     assert e.target.platform == "arm-linux"
     assert e.build.platform == "x86-linux"
@@ -257,6 +272,7 @@ def test_from_platform_name() -> None:
 
 
 def test_copy() -> None:
+    """Test copy."""
     e = e3.env.BaseEnv()
     new_e = e.copy(target="arm-elf")
 

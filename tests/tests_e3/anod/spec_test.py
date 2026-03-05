@@ -145,6 +145,8 @@ CHECK_DLL_CLOSURE_ARGUMENTS = [
 
 
 def test_simple_spec() -> None:
+    """Test simple spec."""
+
     class Simple(Anod):
         test_qualifier_format = (("with_bar", False),)
 
@@ -301,6 +303,8 @@ def test_spec_wrong_dep() -> None:
 
 
 def test_primitive() -> None:
+    """Test primitive."""
+
     class NoPrimitive(Anod):
         @staticmethod
         def build():
@@ -362,6 +366,7 @@ def test_primitive() -> None:
 
 
 def test_api_version() -> None:
+    """Test api version."""
     # __version__ is supported
     check_api_version(__version__)
 
@@ -370,6 +375,8 @@ def test_api_version() -> None:
 
 
 def test_spec_qualifier() -> None:
+    """Test spec qualifier."""
+
     class GeneratorEnabled(Anod):
         enable_name_generator = True
 
@@ -390,6 +397,8 @@ def test_spec_qualifier() -> None:
 
 
 def test_missing_property() -> None:
+    """Test missing property."""
+
     class NoProperty(Anod):
         def source_pkg_build(self) -> list:  # type: ignore[override]
             return []

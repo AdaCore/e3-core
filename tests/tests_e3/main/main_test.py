@@ -11,6 +11,7 @@ import e3.os.process
 
 
 def test_main() -> None:
+    """Test main."""
     assert (
         e3.env.Env().build.platform
         in e3.os.process.Run(["e3", "--platform-info=build"]).out
@@ -18,6 +19,7 @@ def test_main() -> None:
 
 
 def test_mainprog() -> None:
+    """Test mainprog."""
     with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
@@ -78,6 +80,7 @@ def to_rework_modules_logging_limitations() -> None:
 
 
 def test_mainprog_with_console_logs() -> None:
+    """Test mainprog with console logs."""
     with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
@@ -110,6 +113,7 @@ def test_mainprog_with_console_logs() -> None:
     reason="This test is only for windows platform",
 )
 def test_x86_64_windows_default() -> None:
+    """Test x86 64 windows default."""
     with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
@@ -127,6 +131,7 @@ def test_x86_64_windows_default() -> None:
 
 
 def test_default_env_callback() -> None:
+    """Test default env callback."""
     with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(
@@ -156,6 +161,7 @@ def test_default_env_callback() -> None:
     reason="Signal handler not set on windows. Bug in signal handling in solaris",
 )
 def test_sigterm() -> None:
+    """Test sigterm."""
     with Path("mymain.py").open("w") as f:
         f.write(
             "\n".join(

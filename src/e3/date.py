@@ -9,11 +9,21 @@ from typing import overload
 
 
 @overload
-def timestamp_as_string(value: None) -> None: ...
+def timestamp_as_string(value: None) -> None:
+    """Convert a timestamp into a human readable date/time.
+
+    :param value: None
+    """
+    ...
 
 
 @overload
-def timestamp_as_string(value: float) -> str: ...
+def timestamp_as_string(value: float) -> str:
+    """Convert a timestamp into a human readable date/time.
+
+    :param value: a timestamp
+    """
+    ...
 
 
 def timestamp_as_string(value: float | None) -> str | None:

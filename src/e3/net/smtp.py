@@ -128,6 +128,7 @@ def send_message(
     :param to_emails: A list of addresses to send this email to
     :param subject: the e-mail's subject
     :param content: the e-mail's content
+    :param smtp_servers: list of SMTP servers to try
     """
     msg = Message()
     msg["To"] = ", ".join(to_emails)

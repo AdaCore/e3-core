@@ -26,7 +26,13 @@ class SMTPHandler(EventHandler):
         to_addr: str,
         smtp_servers: str | list[str],
     ) -> None:
-        """Initialize a SMTP event manager."""
+        """Initialize a SMTP event manager.
+
+        :param subject: email subject
+        :param from_addr: sender email address
+        :param to_addr: recipient email address
+        :param smtp_servers: SMTP server(s) to use
+        """
         self.default_subject = subject
         self.from_addr = from_addr
         self.to_addr = to_addr
@@ -37,6 +43,10 @@ class SMTPHandler(EventHandler):
 
     @classmethod
     def decode_config(cls, config_str: str) -> dict[str, str | list[str]]:
+        """Decode configuration string.
+
+        :param config_str: configuration string
+        """
         subject, from_addr, to_addr, smtp_servers = config_str.split(",", 3)
         return {
             "subject": subject,

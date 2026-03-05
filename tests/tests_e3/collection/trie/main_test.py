@@ -12,6 +12,7 @@ from e3.collection.trie import Trie
 
 
 def load_words() -> list[str]:
+    """Load word list from file."""
     with Path(os.path.dirname(__file__), "word_list.txt").open() as fd:
         return [word for word in fd.read().splitlines() if word.strip()]
 
@@ -21,6 +22,7 @@ ENGLISH_WORD_LIST = load_words()
 
 @pytest.mark.xfail(reason="unstable test, duration might be too short")
 def test_simple_word_matching() -> None:
+    """Test simple word matching."""
     t = Trie(word_list=ENGLISH_WORD_LIST[:10])
 
     start = time.time()
@@ -45,6 +47,7 @@ def test_simple_word_matching() -> None:
 
 
 def test_prefix_matching() -> None:
+    """Test prefix matching."""
     t = Trie(word_list=ENGLISH_WORD_LIST)
     assert t.match("across l'univers")
     assert t.match("across l'univers", delimiter=" ")
@@ -53,6 +56,7 @@ def test_prefix_matching() -> None:
 
 
 def test_suffix_matching() -> None:
+    """Test suffix matching."""
     t = Trie(word_list=ENGLISH_WORD_LIST, use_suffix=True)
     assert t.match("je parle a lot")
     assert t.match("je parlealot")

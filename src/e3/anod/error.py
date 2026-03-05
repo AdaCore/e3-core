@@ -31,5 +31,11 @@ class ShellError(AnodError):
         origin: str | None = None,
         process: "Run" | None = None,
     ) -> None:
+        """Initialize a ShellError.
+
+        :param message: error message
+        :param origin: origin of the error
+        :param process: the Run process that failed
+        """
         super().__init__(message, origin)
         self.process = process

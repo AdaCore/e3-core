@@ -88,6 +88,12 @@ class Event:
         _val: BaseException | None,
         _tb: TracebackType | None,
     ) -> None:
+        """Exit context manager and close event.
+
+        :param _type: exception type
+        :param _val: exception value
+        :param _tb: traceback
+        """
         self.close()
 
     def set_formatter(self, key: str, fun: Callable[[str, Any], dict]) -> None:
@@ -100,14 +106,21 @@ class Event:
         self._formatters[key] = fun
 
     def __setattr__(self, name: str, value: Any) -> None:
-        """Store all attributes in the self._data dict."""
+        """Store all attributes in the self._data dict.
+
+        :param name: attribute name
+        :param value: attribute value
+        """
         # Once the event is closed disallow attributes modifications
         if self._closed:
             raise EventError(f"event {self.name} ({self.uid}) closed")
         self._data[name] = value
 
     def __getattr__(self, name: str) -> Any:
-        """Attributes are retrieved in the _data internal dict."""
+        """Attributes are retrieved in the _data internal dict.
+
+        :param name: attribute name
+        """
         try:
             return self._data[name]
         except KeyError as e:
@@ -362,6 +375,8 @@ def send_event_from_file(filename: str) -> bool:
     """Send event from a file using default manager.
 
     See EventManager.send_event_from_file
+
+    :param filename: path to event file
     """
     return default_manager.send_event_from_file(filename)
 
@@ -370,6 +385,8 @@ def add_handler(name: str, *args: Any, **kwargs: Any) -> None:
     """Add handler in the default manager.
 
     See EventManager.add_handler
+
+    :param name: handler name
     """
     return default_manager.add_handler(name, *args, **kwargs)
 

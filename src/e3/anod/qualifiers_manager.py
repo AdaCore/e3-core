@@ -86,7 +86,10 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def value(self, value: QualifierValue | None) -> QualifierValue:
-        """Compute the value of qualifier given the user input."""
+        """Compute the value of qualifier given the user input.
+
+        :param value: the user input value
+        """
 
     @abc.abstractmethod
     def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
@@ -153,7 +156,10 @@ class KeyValueDeclaration(QualifierDeclaration):
         return self._default
 
     def value(self, value: QualifierValue | None) -> QualifierValue:
-        """See QualifierDeclaration.value."""
+        """See QualifierDeclaration.value.
+
+        :param value: the user input value
+        """
         # Temporary until full switch to dict
         if isinstance(value, bool):
             value = ""
@@ -173,7 +179,12 @@ class KeyValueDeclaration(QualifierDeclaration):
         return value
 
     def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
-        """See QualifierDeclaration.repr."""
+        """See QualifierDeclaration.repr.
+
+        :param value: the effective value associated with the qualifier
+        :param hash_pool: if not None and repr_in_hash is True, the representation
+            is added to that list
+        """
         if not value:
             # An empty value for a key_value qualifier should lead to an empty
             # representation
@@ -215,7 +226,10 @@ class TagDeclaration(QualifierDeclaration):
         return False
 
     def value(self, value: QualifierValue | None) -> QualifierValue:
-        """See QualifierDeclaration.value."""
+        """See QualifierDeclaration.value.
+
+        :param value: the user input value
+        """
         # As soon as a tag qualifier is passed, its value is True
         if isinstance(value, str):
             return True
@@ -229,7 +243,12 @@ class TagDeclaration(QualifierDeclaration):
         )
 
     def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
-        """See QualifierDeclaration.repr."""
+        """See QualifierDeclaration.repr.
+
+        :param value: the effective value associated with the qualifier
+        :param hash_pool: if not None and repr_in_hash is True, the representation
+            is added to that list
+        """
         if hash_pool is not None and self.repr_in_hash:
             if value:
                 hash_pool.append(self.repr_name)
@@ -299,7 +318,10 @@ class KeySetDeclaration(QualifierDeclaration):
         return self._default
 
     def value(self, value: QualifierValue | None) -> QualifierValue:
-        """See QualifierDeclaration.value."""
+        """See QualifierDeclaration.value.
+
+        :param value: the user input value
+        """
         if isinstance(value, bool):
             raise AnodError(
                 f"{self.origin}: Invalid value for qualifier {self.name}: "
@@ -350,7 +372,12 @@ class KeySetDeclaration(QualifierDeclaration):
         return value_set
 
     def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
-        """See QualifierDeclaration.repr."""
+        """See QualifierDeclaration.repr.
+
+        :param value: the effective value associated with the qualifier
+        :param hash_pool: if not None and repr_in_hash is True, the representation
+            is added to that list
+        """
         assert isinstance(value, frozenset)
         if not value:
             # An empty value for key_set qualifier should lead to an empty
@@ -920,6 +947,7 @@ class QualifiersManager:
     def __getitem__(self, key: str) -> QualifierValue:
         """Return the parsed value of the requested qualifier.
 
+        :param key: the qualifier name
         :return: The qualifier value after the parsing.
         """
         return self.qualifier_values[key]

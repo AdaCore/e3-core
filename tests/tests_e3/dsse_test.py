@@ -7,6 +7,7 @@ from e3.os.process import Run
 
 
 def test_dsse() -> None:
+    """Test dsse."""
     # Generate a temporary x509 keypairs
     p = Run(
         [

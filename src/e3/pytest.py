@@ -51,6 +51,10 @@ def require_tool(toolname: str) -> Callable:
     """
 
     def wrapper(request: pytest.FixtureRequest) -> None:
+        """Check if tool is available.
+
+        :param request: pytest fixture request
+        """
         if not which(toolname):
             if IN_CI_MODE:
                 pytest.fail(f"{toolname} not available")
@@ -63,6 +67,11 @@ def require_tool(toolname: str) -> Callable:
 def pytest_addoption(
     parser: pytest.Parser, pluginmanager: pytest.PytestPluginManager
 ) -> None:
+    """Pytest hook to add e3-specific command line options.
+
+    :param parser: pytest parser to add options to
+    :param pluginmanager: pytest plugin manager
+    """
     group = parser.getgroup("e3")
     group.addoption("--e3", action="store_true", help="Use e3 fixtures and reporting")
     group.addoption("--e3-cov-rewrite", nargs=2, help="Use e3 fixtures and reporting")
@@ -100,6 +109,8 @@ def env_protect(request: pytest.FixtureRequest) -> None:
     * store/restore env between tests
     * create a temporary directory and do a cd to it before each
       test. The directory is automatically removed when test ends
+
+    :param request: pytest fixture request
     """
     if request.config.getoption("e3"):
         Env().store()
@@ -123,6 +134,10 @@ def env_protect(request: pytest.FixtureRequest) -> None:
 
 
 def pytest_configure(config: pytest.Config) -> None:
+    """Pytest hook to configure e3-specific settings.
+
+    :param config: pytest configuration object
+    """
     if (
         config.getoption("e3")
         and hasattr(config.option, "cov_source")
@@ -139,7 +154,11 @@ def pytest_configure(config: pytest.Config) -> None:
 
 @pytest.hookimpl(trylast=True)
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
-    """Manage the exit code depending on if errors were detected or not."""
+    """Manage the exit code depending on if errors were detected or not.
+
+    :param session: pytest session
+    :param exitstatus: pytest exit status
+    """
     if not session.config.getoption("e3"):
         return
 
@@ -260,6 +279,9 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]) ->
 
     When the variable results_dir is set to an existing directory, the testsuite
     will generate results file in "anod" format.
+
+    :param item: pytest test item
+    :param call: pytest call information
     """
     global test_errors
     # execute all other hooks to obtain the report object

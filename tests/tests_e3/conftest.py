@@ -32,6 +32,7 @@ ldd = require_tool("ldd")
 
 
 def svn_wrapper(request: pytest.FixtureRequest) -> None:
+    """Pytest fixture to skip tests if SVN is not available."""
     if not which("svn"):
         pytest.skip("svn is not available")
 
@@ -157,6 +158,7 @@ class PypiSimulator:
 
 @pytest.fixture(scope="function")
 def pypi_server(requests_mock) -> PypiSimulator:
+    """Pytest fixture providing a mock PyPI server."""
     requests_mock.stop()
     return PypiSimulator(requests_mock)
 
@@ -408,5 +410,6 @@ class MavenCentralSimulator:
 
 @pytest.fixture(scope="function")
 def maven_central(requests_mock) -> MavenCentralSimulator:
+    """Pytest fixture providing a mock Maven Central server."""
     requests_mock.stop()
     return MavenCentralSimulator(requests_mock)

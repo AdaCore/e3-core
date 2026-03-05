@@ -48,12 +48,27 @@ class WithOpenFile:
         shared_access: int | None = None,
         open_options: int | None = None,
     ) -> None:
+        """Initialize file open parameters.
+
+        :param desired_access: desired access mode
+        :param shared_access: share access mode
+        :param open_options: open options
+        """
         self.desired_access = desired_access
         self.shared_access = shared_access
         self.open_options = open_options
 
     def __call__(self, f: Callable) -> Any:
+        """Decorate function to open file if needed.
+
+        :param f: function to wrap
+        """
+
         def wrapper(obj, *args, **kwargs):  # type: ignore
+            """Handle file open/close.
+
+            :param obj: NTFile object
+            """
             should_open = not obj.handle
             if should_open:
                 obj.open(self.desired_access, self.shared_access, self.open_options)
@@ -546,6 +561,8 @@ class NTFile:
         def check_file(filename: str, parent: NTFile | None) -> tuple[bool, bool]:
             """Check if file is pending deletion.
 
+            :param filename: name of file to check
+            :param parent: parent NTFile object
             :return: if file is pending deletion return True and continue
                 iteration, otherwise return False and interrupt iterate_on_dir.
             """

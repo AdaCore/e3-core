@@ -174,6 +174,8 @@ class SVNRepository:
         """Return a specific item shown by svn info.
 
         The --show-item option is only available from 1.9.
+
+        :param item: item name to retrieve
         :raise: SVNError
         """
         info = self.svn_cmd(["info"], output=PIPE).out
@@ -227,7 +229,10 @@ class SVNRepository:
         """
 
         def is_clean_svn_dir(dir_path: str) -> tuple[bool, bool]:
-            """Return a tuple (True if dir is SVN directory, True if clean)."""
+            """Return a tuple (True if dir is SVN directory, True if clean).
+
+            :param dir_path: path to directory
+            """
             if Path(dir_path, ".svn").exists():
                 try:
                     status = self.svn_cmd(["status"], output=PIPE).out.strip()  # type: ignore
@@ -239,7 +244,10 @@ class SVNRepository:
             return False, False
 
         def is_empty_dir(dir_path: str) -> bool:
-            """Return True if the path is a directory and is empty."""
+            """Return True if the path is a directory and is empty.
+
+            :param dir_path: path to directory
+            """
             return Path(dir_path).is_dir() and not os.listdir(dir_path)
 
         options: SVNCmd = ["--ignore-externals"]

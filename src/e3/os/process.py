@@ -76,6 +76,10 @@ def subprocess_setup() -> None:
 
 
 def get_rlimit(platform: str | None = None) -> str:
+    """Get the path to the rlimit file for the given platform.
+
+    :param platform: platform name (e.g. 'x86_64-linux'). If None, use build platform
+    """
     if platform is None:
         platform = e3.env.Env().build.platform
     if platform == "x86_64-windows64":
@@ -151,6 +155,10 @@ def quote_arg(arg: str) -> str:
 
 
 def to_cmd_lines(cmds: AnyCmdLine) -> list[CmdLine]:
+    """Normalize command line(s) to a list of command lines.
+
+    :param cmds: a command line or list of command lines
+    """
     if isinstance(cmds[0], str):
         # Turn the simple command into a special case of
         # the multiple-commands case.  This will allow us
@@ -191,6 +199,10 @@ def enable_commands_handler(filename: str | Path, mode: str = "a") -> logging.Ha
         """Keep only e3.os.process.cmdline records."""
 
         def filter(self, record: logging.LogRecord) -> bool:
+            """Filter log records to keep only command line logs.
+
+            :param record: log record to filter
+            """
             return True if record.name == "e3." + CMD_LOGGER_NAME else False
 
     # Here we don't attach the handler directly to the cmdline logger. Indeed
@@ -523,7 +535,11 @@ class Run:
         self.input_file.close()
 
     def __error(self, error: Exception, cmds: list[CmdLine]) -> None:
-        """Set pid to -1 and status to 127 before closing files."""
+        """Set pid to -1 and status to 127 before closing files.
+
+        :param error: the exception that occurred
+        :param cmds: command lines that were attempted
+        """
         self.close_files()
         logger.error(error)
 
@@ -744,6 +760,11 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
         fd_r, fd_w = os.pipe()
 
         def handler(signum: int, frame: Any) -> None:
+            """Signal handler for SIGCHLD.
+
+            :param signum: signal number
+            :param frame: current stack frame
+            """
             del signum, frame
             os.write(fd_w, b"a")
 
@@ -853,7 +874,10 @@ def kill_process_tree(pid: int | Any, timeout: int = 3) -> bool:
             pass
 
     def on_terminate(p: psutil.Process) -> None:
-        """Log info when a process terminate."""
+        """Log info when a process terminate.
+
+        :param p: the process that terminated
+        """
         logger.debug("process %s killed", p)
 
     try:

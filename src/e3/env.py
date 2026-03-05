@@ -57,6 +57,12 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         host: Platform | None = None,
         target: Platform | None = None,
     ) -> None:
+        """Initialize environment.
+
+        :param build: build platform
+        :param host: host platform
+        :param target: target platform
+        """
         if not self._initialized:
             self.build = Platform.get() if build is None else build
             self.host = self.build if host is None else host
@@ -512,6 +518,8 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         """Return a BaseEnv object from a platform name.
 
         That's the reverse of platform property
+
+        :param platform: platform name string
         """
         # Is it a native platform?
         found = False
@@ -581,12 +589,21 @@ class BaseEnv(AbstractBaseEnv):
         super().__init__(build, host, target)
 
     def __setattr__(self, name: str, value: Any) -> None:
+        """Set an attribute.
+
+        :param name: attribute name
+        :param value: attribute value
+        """
         if name in ("_instance", "_context"):
             object.__setattr__(self, name, value)
         else:
             self._instance[name] = value
 
     def __getattr__(self, name: str) -> None:
+        """Get an attribute.
+
+        :param name: attribute name
+        """
         try:
             return self._instance[name]
         except KeyError as e:
@@ -653,6 +670,11 @@ class Env(AbstractBaseEnv):
         return "build" in Env._instance
 
     def __setattr__(self, name: str, value: Any) -> None:
+        """Set an attribute.
+
+        :param name: attribute name
+        :param value: attribute value
+        """
         if name == "_instance":
             Env._instance = value
         elif name == "_context":
@@ -661,6 +683,10 @@ class Env(AbstractBaseEnv):
             self._instance[name] = value
 
     def __getattr__(self, name: str) -> Any:
+        """Get an attribute.
+
+        :param name: attribute name
+        """
         try:
             return self._instance[name]
         except KeyError as e:
