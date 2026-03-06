@@ -716,8 +716,8 @@ class FilesAnalyzed(SPDXEntryBool):
         :return: The :class:`FilesAnalyzed` initialized with the value of *obj*.
         """  # noqa RST304
         if cls.get_json_entry_key() in obj:
-            return FilesAnalyzed(obj.get(cls.get_json_entry_key(), False))
-        return FilesAnalyzed(False)
+            return FilesAnalyzed(value=obj.get(cls.get_json_entry_key(), False))
+        return FilesAnalyzed(value=False)
 
 
 class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):

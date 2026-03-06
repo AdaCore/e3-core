@@ -98,7 +98,7 @@ def test_rm() -> None:
         assert not bc.exists()
 
     finally:
-        e3.fs.rm(base, True)
+        e3.fs.rm(base, recursive=True)
 
 
 def test_mv() -> None:
@@ -123,7 +123,7 @@ def test_df() -> None:
     cwd = str(Path.cwd())
     statfs = e3.os.fs.df(cwd)
     assert isinstance(statfs, numbers.Integral)
-    statfs = e3.os.fs.df(cwd, True)
+    statfs = e3.os.fs.df(cwd, full=True)
     assert all(isinstance(elt, numbers.Integral) for elt in statfs)
 
 

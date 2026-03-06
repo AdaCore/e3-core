@@ -100,7 +100,7 @@ class Package:
         pkg_path = self.pkg_path(anod_instance)
 
         # Reset binary dir
-        rm(anod_instance.build_space.binary_dir, True)
+        rm(anod_instance.build_space.binary_dir, recursive=True)
         mkdir(anod_instance.build_space.binary_dir)
 
         # Create the zip archive

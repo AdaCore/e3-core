@@ -446,7 +446,7 @@ class NTFile:
 
         :raise: NTException
         """
-        self.rename(self.trash_path, True)
+        self.rename(self.trash_path, replace=True)
 
     @WithOpenFile(Access.DELETE, Share.DELETE)
     def dispose(self) -> None:
@@ -486,6 +486,10 @@ class NTFile:
 
         query_dir_file: Callable = NT.QueryDirectoryFile  # type: ignore
 
+        # NtQueryDirectoryFile parameters
+        return_single_entry = False
+        restart_scan = True
+
         status = query_dir_file(
             self.handle,
             None,
@@ -495,9 +499,9 @@ class NTFile:
             b,
             b_size,
             FileInfo.Names.class_id,
-            False,
+            return_single_entry,
             None,
-            True,
+            restart_scan,
         )
         if status == Status.NO_MORE_FILES:  # defensive code
             # In theory this case should not occurs at it means that the
@@ -527,6 +531,7 @@ class NTFile:
                     break
                 pos += off
 
+            restart_scan = False
             status = query_dir_file(
                 self.handle,
                 None,
@@ -536,9 +541,9 @@ class NTFile:
                 b,
                 b_size,
                 FileInfo.Names.class_id,
-                False,
+                return_single_entry,
                 None,
-                False,
+                restart_scan,
             )
         return result
 
@@ -574,7 +579,7 @@ class NTFile:
             self.is_dir_empty_last_seen_file = filename
             return False, True
 
-        return self.iterate_on_dir(check_file, True)
+        return self.iterate_on_dir(check_file, default_result=True)
 
     def unlink(self) -> None:
         """Remove file safely.

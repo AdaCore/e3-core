@@ -127,7 +127,7 @@ def env_protect(request: pytest.FixtureRequest) -> None:
 
         def restore_env() -> None:
             Env().restore()
-            rm(tempd, True)
+            rm(tempd, recursive=True)
 
         e3.log.activate(level=logging.DEBUG, e3_debug=True)
         request.addfinalizer(restore_env)

@@ -84,7 +84,7 @@ def test_unpack(ext) -> None:
         assert (dest / "dest4" / "e3rename" / os.path.basename(__file__)).exists()
 
     finally:
-        e3.fs.rm(dest, True)
+        e3.fs.rm(dest, recursive=True)
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".zip"))
@@ -122,7 +122,7 @@ def test_unpack_fileobj(ext) -> None:
         assert (dest / "dest2" / os.path.basename(__file__)).exists()
 
     finally:
-        e3.fs.rm(dest, True)
+        e3.fs.rm(dest, recursive=True)
 
 
 def test_unsupported() -> None:
