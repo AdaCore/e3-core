@@ -21,6 +21,7 @@ def test_maven(maven_central) -> None:
     )
     with maven_central:
         links = mvn.fetch_project_links("test.e3.mvn", "e3mvn")
+        assert all(link.sha1_checksum and link.md5_checksum for link in links)
 
     assert len(links) == 4
     assert all(
@@ -34,17 +35,21 @@ def test_maven(maven_central) -> None:
         for link in links
     )
 
-    assert all(link.sha1_checksum and link.md5_checksum for link in links)
-
     for link in links:
         data = maven_central.get_package_data(
             link.package_group, link.package_name, link.version
         )
-        assert link.sha1_checksum == data["sha1"]
-        assert link.md5_checksum == data["md5"]
+        # We have to start a maven_central context since checksum are retrieved with an
+        # HTTP HEAD request.
+        with maven_central:
+            assert link.sha1_checksum == data["sha1"]
+            assert link.md5_checksum == data["md5"]
 
         data = maven_central.get_pom_data(
             link.package_group, link.package_name, link.version
         )
-        assert link.pom_sha1_checksum == data["sha1"]
-        assert link.pom_md5_checksum == data["md5"]
+        # We have to start a maven_central context since checksum are retrieved with an
+        # HTTP HEAD request.
+        with maven_central:
+            assert link.pom_sha1_checksum == data["sha1"]
+            assert link.pom_md5_checksum == data["md5"]

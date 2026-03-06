@@ -33,19 +33,73 @@ class MavenLink:
         )
         self.pom_url = f"{self.url[:-4]}.pom"
 
-        # To get the expected checksum of the current file, we need to make an
-        # additonnal HEAD request. This is because maven send the checksum directly on
-        # the HTTP headers.
-        hdrs = requests.head(self.url).headers
-        self.sha1_checksum = hdrs.get("x-checksum-sha1")
-        self.md5_checksum = hdrs.get("x-checksum-md5")
+        self.__pkg_checksum = False
+        self.__pom_checksum = False
 
-        # To get the expected checksum of the POM file, we need to make an additonnal
-        # HEAD request. This is because maven sends the checksum directly on the HTTP
-        # headers.
-        hdrs = requests.head(self.pom_url).headers
-        self.pom_sha1_checksum = hdrs.get("x-checksum-sha1")
-        self.pom_md5_checksum = hdrs.get("x-checksum-md5")
+    def __init_pkg_checksum(self) -> None:
+        """Retrieve package checksums.
+
+        This private method is used to initialise lazily the package checksum.
+        """
+        if not self.__pkg_checksum:
+            # To obtain the expected checksum for the current file, we need to perform
+            # an additional HEAD request. This is because Maven sends the checksum
+            # directly in the HTTP headers.
+            hdrs = requests.head(self.url).headers
+            self.__sha1_checksum = hdrs.get("x-checksum-sha1")
+            self.__md5_checksum = hdrs.get("x-checksum-md5")
+            self.__pkg_checksum = True
+
+    def __init_pom_checksum(self) -> None:
+        """Retrieve POM checksums.
+
+        This private method is used to lazily initialise the checksum of the package's
+        POM file.
+        """
+        if not self.__pom_checksum:
+            # To obtain the expected checksum for the current file, we need to perform
+            # an additional HEAD request. This is because Maven sends the checksum
+            # directly in the HTTP headers.
+            hdrs = requests.head(self.pom_url).headers
+            self.__pom_sha1_checksum = hdrs.get("x-checksum-sha1")
+            self.__pom_md5_checksum = hdrs.get("x-checksum-md5")
+            self.__pom_checksum = True
+
+    @property
+    def sha1_checksum(self) -> str | None:
+        """Retrieve the SHA1 checksum of a package if any.
+
+        :return: The SHA1 checksum if possible, otherwise None.
+        """
+        self.__init_pkg_checksum()
+        return self.__sha1_checksum
+
+    @property
+    def md5_checksum(self) -> str | None:
+        """Retrieve the MD5 checksum of a package if any.
+
+        :return: The MD5 checksum if possible, otherwise None.
+        """
+        self.__init_pkg_checksum()
+        return self.__md5_checksum
+
+    @property
+    def pom_sha1_checksum(self) -> str | None:
+        """Retrieve the SHA1 checksum of a package's POM file if any.
+
+        :return: The SHA1 checksum if possible, otherwise None.
+        """
+        self.__init_pom_checksum()
+        return self.__pom_sha1_checksum
+
+    @property
+    def pom_md5_checksum(self) -> str | None:
+        """Retrieve the MD5 checksum of a package's POM file if any.
+
+        :return: The MD5 checksum if possible, otherwise None.
+        """
+        self.__init_pom_checksum()
+        return self.__pom_md5_checksum
 
 
 class MavenLinksParser:
