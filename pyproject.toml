@@ -174,7 +174,8 @@ ignore = [
   "PLR0912", # too many branches in a function
   "SIM108", # ternary operator - can reduce readability
   "TRY003", # long message outside the exception class, difficult to change
-
+  "FBT002", # It could be a backward compatibility issue with this rule
+  "PTH100", # Ignore this rule as os.path.abspath() and resolve () it is not strictly equivalent
   # Decision not to follow
   "G004", # we accept f-string in logging statements
   "ERA001", # too many false positive with this rule
