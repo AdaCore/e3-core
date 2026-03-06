@@ -1,3 +1,5 @@
+"""Plugin-based event system for notifying external services."""
+
 from __future__ import annotations
 
 import abc

@@ -1,3 +1,5 @@
+"""Build system with dependency management and binary packaging."""
+
 from __future__ import annotations
 
 # The following two functions are used during transition of qualifiers

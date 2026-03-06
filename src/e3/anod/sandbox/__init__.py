@@ -1,3 +1,5 @@
+"""Isolated build environments for anod."""
+
 from __future__ import annotations
 
 import os
