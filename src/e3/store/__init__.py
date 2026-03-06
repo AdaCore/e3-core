@@ -1,3 +1,5 @@
+"""Interface for downloading and caching resources."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
