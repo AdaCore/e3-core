@@ -207,6 +207,8 @@ class SourceBuilder:
         prepare_src: PrepareSrcCB | None = None,
         apply_patch: Literal[1] | ApplyPatchCB | None = None,
         kind: str = "source",
+        *,
+        anod_instance: Anod | None = None,
     ) -> None:
         """Define a builder for the source package.
 
@@ -229,6 +231,7 @@ class SourceBuilder:
             If apply_patch is set to DEFAULT_PATCH_CMD, use the default
             apply_patch command
         :param kind: type of source 'source' or 'thirdparty'
+        :param anod_instance: the Anod instance that declared this SourceBuilder.
         """
         self.name = name
         self.checkout = checkout if checkout is not None else []
@@ -239,6 +242,7 @@ class SourceBuilder:
         self.__fullname = fullname
         self.__prepare_src = prepare_src
         self.__apply_patch = apply_patch
+        self.anod_instance = anod_instance
 
     def fullname(self, *args: Any, **kwargs: Any) -> str:
         """Return the full name of the source package.
