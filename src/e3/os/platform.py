@@ -173,6 +173,9 @@ class SystemInfo:
             if "redhat" in name or "red hat" in name:  # os-specific
                 name = "rhES"
                 version_number = cls.ld_info["major_version"]
+            elif "opensuse" in name:  # os-specific
+                name = "opensuse"
+                version_number = cls.ld_info["major_version"]
             elif "suse" in name or "sles" in name:  # os-specific
                 name = "suse"
                 version_number = cls.ld_info["major_version"]
