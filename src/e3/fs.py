@@ -899,7 +899,7 @@ def sync_tree(
                     # limit recursion to 32 in order not to crash on link loops
                     src_linkto_path = Path(os.path.dirname(src.path), linkto)
                     for _ in range(32):
-                        if not src_linkto_path.exists():
+                        if not src_linkto_path.exists(follow_symlinks=False):
                             break
 
                         src_linkto = FileInfo(
