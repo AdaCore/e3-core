@@ -1,6 +1,5 @@
 """Tests for e3.cve."""
 
-import os
 from pathlib import Path
 
 from e3.cve import NVD
@@ -15,7 +14,7 @@ def test_nvd_cve_search(socket_disabled) -> None:
     from requests_cache import NEVER_EXPIRE
 
     cache_db = Path.cwd() / "cache"
-    cp(Path(os.path.dirname(__file__), "cache"), cache_db, recursive=True)
+    cp(Path(__file__).parent / "cache", cache_db, recursive=True)
 
     with catch_warnings(record=True) as w:
         # Used to always trigger python warnings if they appear

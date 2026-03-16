@@ -9,7 +9,7 @@ from e3.anod.queries import SourceClosure, get_build_node
 
 
 class TestSourceClosure:
-    spec_dir = os.path.abspath(Path(os.path.dirname(__file__), "source_closure_specs"))
+    spec_dir = os.path.abspath(Path(__file__).parent / "source_closure_specs")
 
     def get_source_closure(
         self, name, expand_packages=True, other_builds=None

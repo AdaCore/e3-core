@@ -233,7 +233,7 @@ def unpack_archive(
     # Otherwise extract directly to the final destination
     if remove_root_dir:
         if tmp_dir_root is None:
-            tmp_dir_root = os.path.dirname(os.path.abspath(dest))
+            tmp_dir_root = str(Path(os.path.abspath(dest)).parent)
         tmp_dest = tempfile.mkdtemp(prefix="", dir=tmp_dir_root)
     else:
         tmp_dest = dest

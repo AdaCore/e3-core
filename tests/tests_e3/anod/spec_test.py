@@ -1,6 +1,5 @@
 """Tests for e3.anod spec."""
 
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -336,7 +335,7 @@ def test_primitive() -> None:
     with_primitive4 = WithPrimitive("error3", "build")
 
     Anod.sandbox = SandBox(root_dir=str(Path.cwd()))
-    Anod.sandbox.spec_dir = str(Path(os.path.dirname(__file__), "data"))
+    Anod.sandbox.spec_dir = str(Path(__file__).parent / "data")
     Anod.sandbox.create_dirs()
     # Activate the logging
     AnodDriver(anod_instance=with_primitive, store=None).activate(Anod.sandbox, None)

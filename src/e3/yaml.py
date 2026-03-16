@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import re
 from collections import OrderedDict
 from pathlib import Path
@@ -64,7 +63,7 @@ class OrderedDictYAMLLoader(Loader):
                 self.name = getattr(self.stream, "name", None)
 
         if self.name is not None and Path(self.name).is_file():
-            file_name = str(Path(os.path.dirname(self.name), node.value))
+            file_name = str(Path(self.name).parent / node.value)
         else:
             file_name = node.value
 

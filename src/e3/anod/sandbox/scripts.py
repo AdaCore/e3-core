@@ -45,7 +45,7 @@ def anod() -> None:
     assert sys.modules["__main__"].__file__ is not None
 
     sandbox_dir = os.path.abspath(
-        str(Path(os.path.dirname(sys.modules["__main__"].__file__), os.pardir))  # type: ignore
+        str(Path(sys.modules["__main__"].__file__).parent / os.pardir)  # type: ignore
     )
 
     sandbox = e3.anod.sandbox.SandBox(root_dir=sandbox_dir)

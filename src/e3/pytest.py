@@ -246,7 +246,7 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
     paths = PathAliases()
     paths.add(origin_dir, new_dir)
 
-    old_cov_file = NamedTemporaryFile(dir=os.path.dirname(cov_db))
+    old_cov_file = NamedTemporaryFile(dir=str(Path(cov_db).parent))
     old_cov_file.close()
     try:
         mv(cov_db, old_cov_file.name)

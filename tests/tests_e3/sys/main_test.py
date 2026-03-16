@@ -114,8 +114,8 @@ def test_python_func() -> None:
         ]
 
     assert e3.os.fs.unixpath(
-        os.path.dirname(e3.sys.python_script("run")[0])
-    ) == e3.os.fs.unixpath(os.path.dirname(sys.executable))
+        str(Path(e3.sys.python_script("run")[0]).parent)
+    ) == e3.os.fs.unixpath(str(Path(sys.executable).parent))
     assert e3.os.fs.unixpath(e3.sys.interpreter()) == e3.os.fs.unixpath(sys.executable)
 
     # Check support for python3

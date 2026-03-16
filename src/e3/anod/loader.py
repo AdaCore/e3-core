@@ -122,7 +122,7 @@ class AnodSpecRepository:
                 Path(self.spec_dir, "*", "*.yaml"), emit_log_record=False
             )
             for yml_f in new_yaml_files:
-                associated_spec = os.path.basename(os.path.dirname(yml_f))
+                associated_spec = Path(yml_f).parent.name
 
                 # Keep only the yaml files associated with an .anod file
                 if associated_spec in spec_list:
@@ -287,7 +287,7 @@ class AnodModule:
                 self.anod_class = value
                 self.module = anod_module
                 self.anod_class.data_files = self.data  # type: ignore
-                self.anod_class.spec_dir = os.path.dirname(self.path)  # type: ignore
+                self.anod_class.spec_dir = str(Path(self.path).parent)  # type: ignore
                 self.anod_class.api_version = repository.api_version  # type: ignore
                 return value
 

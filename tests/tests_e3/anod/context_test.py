@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
@@ -15,7 +14,7 @@ from e3.env import BaseEnv
 
 
 class TestContext:
-    spec_dir = str(Path(os.path.dirname(__file__), "context_data"))
+    spec_dir = str(Path(__file__).parent / "context_data")
 
     def create_context(self, reject_duplicates: bool = True) -> AnodContext:
         """Create a spec repository and anod context.

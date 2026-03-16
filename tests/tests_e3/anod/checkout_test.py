@@ -44,8 +44,8 @@ def test_rsync_mode() -> None:
 
 
 class TestCheckout:
-    repo_data = str(Path(os.path.dirname(__file__), "vcs_data"))
-    repo_data2 = str(Path(os.path.dirname(__file__), "vcs_data2"))
+    repo_data = str(Path(__file__).parent / "vcs_data")
+    repo_data2 = str(Path(__file__).parent / "vcs_data2")
 
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])

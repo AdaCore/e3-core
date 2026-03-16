@@ -163,8 +163,8 @@ def test_echo() -> None:
 
 def test_find() -> None:
     """Test find."""
-    d = os.path.dirname(__file__)
-    parent_d = os.path.dirname(d)
+    d = str(Path(__file__).parent)
+    parent_d = str(Path(d).parent)
 
     result = {os.path.abspath(f) for f in e3.fs.find(parent_d)}
     assert os.path.abspath(__file__) in result
@@ -261,7 +261,7 @@ def test_tree_state() -> None:
     import time
 
     current_dir = Path.cwd()
-    d = os.path.dirname(os.path.dirname(__file__))
+    d = str(Path(__file__).parent.parent)
     state = e3.fs.get_filetree_state(d)
     assert isinstance(state, str)
 

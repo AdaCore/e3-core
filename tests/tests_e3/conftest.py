@@ -7,7 +7,7 @@ import json
 import random
 import shutil
 import string
-from os.path import abspath, dirname
+from os.path import abspath
 from pathlib import Path
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
@@ -45,7 +45,7 @@ class PypiSimulator:
     PYPIHOSTED_URL = "https://files.pythonhosted.org"
     SIMPLE_MATCHER = regex_compile(f"{PYPI_URL}/simple/(?P<package>.*)/")
     DOWNLOAD_MATCHER = regex_compile(f"{PYPIHOSTED_URL}/(?P<path>.*)")
-    DATA_DIR = Path(dirname(abspath(__file__)), "pypi_data")
+    DATA_DIR = Path(abspath(__file__)).parent / "pypi_data"
 
     def __init__(self, requests_mock: Any) -> None:
         self.requests_mock = requests_mock

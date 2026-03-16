@@ -725,7 +725,7 @@ class File(object):
         """
         today = datetime.now().strftime("%Y%m%d")
         filename = f"{prefix}-{today}.tgz"
-        dest = build_dir or os.path.dirname(path)
+        dest = build_dir or str(Path(path).parent)
         create_archive(
             filename=filename, from_dir=path, from_dir_rename=prefix, dest=dest
         )
