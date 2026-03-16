@@ -50,10 +50,10 @@ def require_tool(toolname: str) -> Callable:
     :param toolname: name of a tool, e.g. git
     """
 
-    def wrapper(request: pytest.FixtureRequest) -> None:
+    def wrapper(request: pytest.FixtureRequest) -> None:  # noqa: ARG001
         """Check if tool is available.
 
-        :param request: pytest fixture request
+        :param request: pytest fixture request (unused but required by pytest)
         """
         if not which(toolname):
             if IN_CI_MODE:
@@ -65,12 +65,13 @@ def require_tool(toolname: str) -> Callable:
 
 
 def pytest_addoption(
-    parser: pytest.Parser, pluginmanager: pytest.PytestPluginManager
+    parser: pytest.Parser,
+    pluginmanager: pytest.PytestPluginManager,  # noqa: ARG001
 ) -> None:
     """Pytest hook to add e3-specific command line options.
 
     :param parser: pytest parser to add options to
-    :param pluginmanager: pytest plugin manager
+    :param pluginmanager: pytest plugin manager (unused but required by pytest hook)
     """
     group = parser.getgroup("e3")
     group.addoption("--e3", action="store_true", help="Use e3 fixtures and reporting")
@@ -153,11 +154,11 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:  # noqa: ARG001
     """Manage the exit code depending on if errors were detected or not.
 
     :param session: pytest session
-    :param exitstatus: pytest exit status
+    :param exitstatus: pytest exit status (unused but required by pytest hook)
     """
     if not session.config.getoption("e3"):
         return
@@ -246,6 +247,10 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
     paths = PathAliases()
     paths.add(origin_dir, new_dir)
 
+    # Check if coverage file exists before trying to move it
+    if not Path(cov_db).exists():
+        return
+
     old_cov_file = NamedTemporaryFile(dir=str(Path(cov_db).parent))
     old_cov_file.close()
     try:
@@ -274,14 +279,14 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]) -> None:  # type: ignore
+def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]) -> None:  # type: ignore  # noqa: ARG001
     """Generate results file.
 
     When the variable results_dir is set to an existing directory, the testsuite
     will generate results file in "anod" format.
 
-    :param item: pytest test item
-    :param call: pytest call information
+    :param item: pytest test item (unused but required by pytest hook)
+    :param call: pytest call information (unused but required by pytest hook)
     """
     global test_errors
     # execute all other hooks to obtain the report object
