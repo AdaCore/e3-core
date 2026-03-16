@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import time
 from pathlib import Path
 
@@ -13,7 +12,7 @@ from e3.collection.trie import Trie
 
 def load_words() -> list[str]:
     """Load word list from file."""
-    with Path(os.path.dirname(__file__), "word_list.txt").open() as fd:
+    with (Path(__file__).parent / "word_list.txt").open() as fd:
         return [word for word in fd.read().splitlines() if word.strip()]
 
 

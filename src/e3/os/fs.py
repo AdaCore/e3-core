@@ -257,7 +257,7 @@ def force_remove_file(path: str | Path) -> None:
     except OSError:
         # The permission of the parent directory does not allow us to remove
         # the file, temporary get write permission in the directory
-        dir_path = os.path.dirname(path)
+        dir_path = str(Path(path).parent)
         orig_mode = os.stat(dir_path).st_mode
         chmod("u+w", dir_path)
 

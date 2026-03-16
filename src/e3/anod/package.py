@@ -107,7 +107,7 @@ class Package:
         create_archive(
             filename=os.path.basename(pkg_path),
             from_dir=anod_instance.build_space.pkg_dir,
-            dest=os.path.dirname(pkg_path),
+            dest=str(Path(pkg_path).parent),
             from_dir_rename=pkg_name,
         )
         return pkg_path

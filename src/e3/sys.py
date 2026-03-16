@@ -282,9 +282,9 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
 
     if prefix is None:
         if sys.platform == "win32":  # unix: no cover
-            prefix = os.path.dirname(sys.executable)
+            prefix = str(Path(sys.executable).parent)
         else:
-            prefix = os.path.dirname(os.path.dirname(sys.executable))
+            prefix = str(Path(sys.executable).parent.parent)
 
     if sys.platform == "win32":  # unix: no cover
         # On Windows a script present in a distribution might be installed

@@ -490,7 +490,7 @@ def rm(
             # This function is only called when deleting a file inside a
             # directory to remove, it is safe to change the parent directory
             # permission since the parent directory will also be removed.
-            Path(os.path.dirname(error_path)).chmod(0o700)
+            Path(error_path).parent.chmod(0o700)
 
             # ??? It seems that this might be needed on windows
             Path(error_path).chmod(0o700)
@@ -505,7 +505,7 @@ def rm(
             if recursive and error_path not in file_list:
                 # If error_path not in the list of directories to remove it
                 # means that we are already in a subdirectory.
-                Path(os.path.dirname(error_path)).chmod(0o700)
+                Path(error_path).parent.chmod(0o700)
             e3.os.fs.safe_rmdir(error_path)
 
         elif func in (os.listdir, os.open):
@@ -897,7 +897,7 @@ def sync_tree(
                     # os.path.isdir(src.path) will always return False. That's why we
                     # do the check directly on the target path.
                     # limit recursion to 32 in order not to crash on link loops
-                    src_linkto_path = Path(os.path.dirname(src.path), linkto)
+                    src_linkto_path = Path(src.path).parent / linkto
                     for _ in range(32):
                         if not src_linkto_path.exists(follow_symlinks=False):
                             break
@@ -912,9 +912,8 @@ def sync_tree(
                             break
 
                         src_linkto_path = Path(
-                            os.path.dirname(src_linkto.path),
-                            e3.os.fs.readlink(src_linkto.path),
-                        )
+                            src_linkto.path
+                        ).parent / e3.os.fs.readlink(src_linkto.path)
 
                     target_is_directory = src_linkto_path.is_dir()
 
@@ -939,7 +938,7 @@ def sync_tree(
                         # on Windos with NTFS.
                         rm(dst.path, glob=False)
                     dst = FileInfo(
-                        str(Path(os.path.dirname(dst.path), src.basename)),
+                        str(Path(dst.path).parent / src.basename),
                         None,
                         src.basename,
                     )
@@ -966,7 +965,7 @@ def sync_tree(
         try:
             # Final dirname with right casing
             if dst.basename != src.basename:
-                dest_dir = Path(os.path.dirname(dst.path), src.basename)
+                dest_dir = Path(dst.path).parent / src.basename
             else:
                 dest_dir = dst.path
 
@@ -982,7 +981,7 @@ def sync_tree(
             # in case of error to change parent directory
             # permissions. The permissions will be then
             # set correctly at the end of rsync.
-            e3.os.fs.chmod("a+wx", os.path.dirname(dst.path))
+            e3.os.fs.chmod("a+wx", str(Path(dst.path).parent))
 
             if isdir(dst):
                 if dst.basename != src.basename:

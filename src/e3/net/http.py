@@ -5,7 +5,6 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
-import os
 import socket
 import tempfile
 from collections import deque
@@ -352,7 +351,7 @@ class HTTPSession:
                 path = Path(dest, filename)
 
                 # create dest subdir if they do not exist
-                dest_dir = os.path.dirname(path)
+                dest_dir = str(Path(path).parent)
                 if dest_dir and not Path(dest_dir).exists():
                     mkdir(dest_dir)
 

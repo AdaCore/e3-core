@@ -1,6 +1,5 @@
 """Tests for e3.anod loader."""
 
-import os
 from pathlib import Path
 
 import pytest
@@ -11,8 +10,8 @@ from e3.fs import cp, sync_tree
 
 
 class TestLoader:
-    spec_dir = str(Path(os.path.dirname(__file__), "data"))
-    spec2_dir = str(Path(os.path.dirname(__file__), "data2"))
+    spec_dir = str(Path(__file__).parent / "data")
+    spec2_dir = str(Path(__file__).parent / "data2")
 
     def test_spec_does_not_exist(self) -> None:
         with pytest.raises(SandBoxError) as err:

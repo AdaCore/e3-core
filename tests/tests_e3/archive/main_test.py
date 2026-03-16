@@ -18,7 +18,7 @@ import e3.os.fs
 @pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
 def test_unpack(ext) -> None:
     """Test unpack."""
-    dir_to_pack = os.path.dirname(__file__)
+    dir_to_pack = str(Path(__file__).parent)
 
     test_dir = os.path.basename(dir_to_pack)
 
@@ -90,7 +90,7 @@ def test_unpack(ext) -> None:
 @pytest.mark.parametrize("ext", (".tar.gz", ".zip"))
 def test_unpack_fileobj(ext) -> None:
     """Test unpack fileobj."""
-    dir_to_pack = os.path.dirname(__file__)
+    dir_to_pack = str(Path(__file__).parent)
 
     test_dir = os.path.basename(dir_to_pack)
 
@@ -141,7 +141,7 @@ def test_unpackerror() -> None:
 
 def test_unpack_cmd() -> None:
     """Test custom unpack_cmd."""
-    dir_to_pack = os.path.dirname(__file__)
+    dir_to_pack = str(Path(__file__).parent)
 
     dest = Path("dest")
     e3.fs.mkdir(dest)
@@ -181,7 +181,7 @@ def test_unpack_cmd() -> None:
 
 def test_unpack_cmd_fileobj() -> None:
     """Test custom unpack_cmd with fileobj."""
-    dir_to_pack = os.path.dirname(__file__)
+    dir_to_pack = str(Path(__file__).parent)
 
     dest = Path("dest")
     e3.fs.mkdir(dest)
@@ -324,7 +324,7 @@ def test_tmp_dir_root(mock_mkdtemp) -> None:
     e3.fs.mkdir("custom_tmp_dir_root")
     e3.fs.mkdir("result")
     e3.archive.unpack_archive(
-        str(Path(os.path.dirname(os.path.abspath(__file__)), "test.zip")),
+        str(Path(os.path.abspath(__file__)).parent / "test.zip"),
         "result",
         remove_root_dir=True,
         tmp_dir_root="custom_tmp_dir_root",
@@ -352,7 +352,7 @@ def test_empty() -> None:
 @pytest.mark.skipif(sys.platform == "win32", reason="test executable attribute")
 def test_zip_attributes() -> None:
     """Test zip attributes."""
-    zip_file = Path(os.path.dirname(os.path.abspath(__file__)), "test.zip")
+    zip_file = Path(os.path.abspath(__file__)).parent / "test.zip"
     e3.fs.mkdir("result")
     e3.archive.unpack_archive(str(zip_file), "result", remove_root_dir=True)
     assert os.access("result/test.sh", os.X_OK)

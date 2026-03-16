@@ -1,6 +1,5 @@
 """Tests for e3.anod driver."""
 
-import os
 from pathlib import Path
 
 import pytest
@@ -42,7 +41,7 @@ def test_deps_driver() -> None:
     anod_instance = Deps(qualifier="", kind="build")
     anod_instance.sandbox = sandbox
 
-    spec_dir = str(Path(os.path.dirname(__file__), "data"))
+    spec_dir = str(Path(__file__).parent / "data")
     spec_repo = e3.anod.loader.AnodSpecRepository(spec_dir)
 
     e3.anod.driver.AnodDriver(anod_instance=anod_instance, store=None).activate(
