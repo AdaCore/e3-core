@@ -167,6 +167,8 @@ line-length = 88
 [tool.ruff.lint]
 select = ["ALL"]
 
+per-file-ignores = { "tests/**/*.py" = ["ARG001"]} # Because of the tests fixture, some are incorrectly marked as unused arguments
+
 ignore = [
   # Probably not useful for us
   "C901", # too complex function (MCCabe complexity)
