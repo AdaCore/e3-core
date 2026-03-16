@@ -42,6 +42,80 @@ def test_hostname() -> None:
         s.reset_cache()
 
 
+def test_os_version_opensuse() -> None:
+    """Test that openSUSE Tumbleweed (rolling release) is distinguished from SLES."""
+    s = e3.os.platform.SystemInfo
+    try:
+        s.reset_cache()
+        s.uname = e3.os.platform.Uname(
+            system="Linux",
+            node="localhost",
+            release="6.12.6-1-default",
+            version="#1 SMP PREEMPT_DYNAMIC",
+            machine="x86_64",
+            processor="x86_64",
+        )
+        s.ld_info = {
+            "name": "openSUSE Tumbleweed",
+            "major_version": "20260308",
+            "version": "20260308",
+        }
+        version, kernel_version = s.os_version()
+        assert version == "opensuse20260308"
+        assert kernel_version == "6.12.6-1-default"
+    finally:
+        s.reset_cache()
+
+
+def test_os_version_opensuse_leap() -> None:
+    """Test that openSUSE Leap (stable release) is detected as opensuse."""
+    s = e3.os.platform.SystemInfo
+    try:
+        s.reset_cache()
+        s.uname = e3.os.platform.Uname(
+            system="Linux",
+            node="localhost",
+            release="5.14.21-150600.23.47-default",
+            version="#1 SMP PREEMPT_DYNAMIC",
+            machine="x86_64",
+            processor="x86_64",
+        )
+        s.ld_info = {
+            "name": "openSUSE Leap",
+            "major_version": "15",
+            "version": "15.6",
+        }
+        version, kernel_version = s.os_version()
+        assert version == "opensuse15"
+        assert kernel_version == "5.14.21-150600.23.47-default"
+    finally:
+        s.reset_cache()
+
+
+def test_os_version_sles() -> None:
+    """Test that SLES is still detected as suse."""
+    s = e3.os.platform.SystemInfo
+    try:
+        s.reset_cache()
+        s.uname = e3.os.platform.Uname(
+            system="Linux",
+            node="localhost",
+            release="5.14.21-150500.55.83-default",
+            version="#1 SMP PREEMPT_DYNAMIC",
+            machine="x86_64",
+            processor="x86_64",
+        )
+        s.ld_info = {
+            "name": "SUSE Linux Enterprise Server",
+            "major_version": "15",
+            "version": "15.5",
+        }
+        version, _kernel_version = s.os_version()
+        assert version == "suse15"
+    finally:
+        s.reset_cache()
+
+
 def test_cpu() -> None:
     """Simple test for CPU."""
     cpu = e3.os.platform.CPU.get("x86_64")
