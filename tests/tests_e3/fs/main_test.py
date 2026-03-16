@@ -534,7 +534,7 @@ def test_rm_on_error() -> None:
     e3.fs.mkdir("a/f/g")
     Path("a/f").chmod(0o500)
 
-    e3.fs.rm("a", True)
+    e3.fs.rm("a", recursive=True)
 
 
 def test_rm_list() -> None:

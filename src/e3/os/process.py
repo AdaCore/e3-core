@@ -732,7 +732,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
 
         while True:
             try:
-                idx = wait_for_objects(handles, remain, False)
+                idx = wait_for_objects(handles, remain, wait_for_all=False)
                 if idx is None:
                     return None
 
@@ -818,7 +818,8 @@ def is_running(pid: int) -> bool:
 
         if TYPE_CHECKING:
             assert NT.OpenProcess is not None
-        handle = NT.OpenProcess(Access.PROCESS_QUERY_INFORMATION, False, pid)
+        inherit_handle = False
+        handle = NT.OpenProcess(Access.PROCESS_QUERY_INFORMATION, inherit_handle, pid)
 
         try:
             if not handle:

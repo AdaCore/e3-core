@@ -371,7 +371,7 @@ def unpack_archive(
     finally:
         # Always remove the temp directory before exiting
         if remove_root_dir:
-            e3.fs.rm(tmp_dest, True)
+            e3.fs.rm(tmp_dest, recursive=True)
 
 
 def create_archive(

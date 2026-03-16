@@ -40,7 +40,7 @@ class SbxDirs:
 
     def delete_sbx(self) -> None:
         if self.sbx_dir.exists():
-            rm(self.sbx_dir, True)
+            rm(self.sbx_dir, recursive=True)
 
     def mkdirs(self) -> None:
         os.mkdir(self.sbx_dir)
