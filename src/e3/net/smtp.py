@@ -142,4 +142,5 @@ def send_message(
         mail_as_string=msg.as_string(),
         smtp_servers=smtp_servers,
     ):
-        raise E3Error(f"error when sending email {subject}")
+        error_msg = f"error when sending email {subject}"
+        raise E3Error(error_msg)

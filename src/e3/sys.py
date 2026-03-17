@@ -92,9 +92,8 @@ class RewriteImportRule:
                         # don't import this name
                         pass
                     elif self.action == self.RuleAction.reject:
-                        raise RewriteNodeError(
-                            f"Rejected import found in ast: {ast.dump(node)}"
-                        )
+                        msg = f"Rejected import found in ast: {ast.dump(node)}"
+                        raise RewriteNodeError(msg)
                     else:  # defensive code
                         raise ValueError("unknown action %s", self.action)
                 else:

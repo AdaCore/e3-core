@@ -183,9 +183,8 @@ class File(object):
             self.bind_to_resource(resource_path)
 
         if self.resource and self.resource_id and self.resource.id != self.resource_id:
-            raise StoreError(
-                f"File({self.name=}).resource_id != File({self.name=}).resource.id"
-            )
+            msg = f"File({self.name=}).resource_id != File({self.name=}).resource.id"
+            raise StoreError(msg)
 
     def push(self: FileType) -> FileType:
         """Upload this file to Store, using self.store to do so.
@@ -261,9 +260,8 @@ class File(object):
         :param data: DSSE envelope associated with the statement
         """
         if not isinstance(data, DSSE):
-            raise StoreError(
-                f"Metadata statement should be a DSSE envelope. Got {type(data)}"
-            )
+            msg = f"Metadata statement should be a DSSE envelope. Got {type(data)}"  # type: ignore[unreachable]
+            raise StoreError(msg)
         self.metadata[name] = data.as_dict()
 
     def get_metadata_statement(self: FileType, name: str) -> DSSE | None:
@@ -364,7 +362,8 @@ class File(object):
             raise StoreError("Attempt to download a File without its resource_id set")
 
         if self.store is None:
-            raise StoreError(f"File {self.name} is not bind to Store instance")
+            msg = f"File {self.name} is not bind to Store instance"
+            raise StoreError(msg)
 
         # Compute name and filename
         file_ext = extension(self.filename)
@@ -390,7 +389,8 @@ class File(object):
         prev_source = None
         if dest_dir is not None:
             if not Path(dest_dir).is_dir():
-                raise StoreError(f"non existent dir: {dest_dir}")
+                msg = f"non existent dir: {dest_dir}"
+                raise StoreError(msg)
             prev_source = self.load_from_meta_file(
                 dest_dir=dest_dir,
                 name=cast(str, meta_name),
@@ -403,23 +403,23 @@ class File(object):
             # need to synchronize the source dir to the target dir. In that
             # case not all cases are working.
             if not remove_root_dir:
-                raise StoreError(
+                msg = (
                     f"remove_root_dir required to sync unpacked resource "
                     f"{self.unpack_dir}"
                 )
+                raise StoreError(msg)
 
             if unpack_cmd is not None:
-                raise StoreError(
-                    f"unpack_cmd not supported on unpacked resource {self.unpack_dir}"
-                )
+                msg = f"unpack_cmd not supported on unpacked resource {self.unpack_dir}"
+                raise StoreError(msg)
 
             if not Path(self.unpack_dir).is_dir():
-                raise StoreError(
-                    f"unpacked resource directory {self.unpack_dir} does not exist"
-                )
+                msg = f"unpacked resource directory {self.unpack_dir} does not exist"
+                raise StoreError(msg)
 
             if unpack_dir is None or not Path(str(unpack_dir)).is_dir():
-                raise StoreError(f"target directory {unpack_dir} does not exist")
+                msg = f"target directory {unpack_dir} does not exist"
+                raise StoreError(msg)
 
             try:
                 updated, deleted = sync_tree(
@@ -428,7 +428,8 @@ class File(object):
                 skip = not updated and not deleted
             except Exception as e:
                 logger.exception(e)
-                raise StoreError(f"cannot sync {self.unpack_dir}") from e
+                msg = f"cannot sync {self.unpack_dir}"
+                raise StoreError(msg) from e
 
         else:
             # Should we download or copy the file
@@ -471,9 +472,8 @@ class File(object):
                         skip = False
                     except Exception as e:
                         logger.exception(e)
-                        raise StoreError(
-                            f"cannot extract archive {downloaded_file}"
-                        ) from e
+                        msg = f"cannot extract archive {downloaded_file}"
+                        raise StoreError(msg) from e
 
         self.unpack_dir = unpack_dir
 
@@ -638,7 +638,8 @@ class File(object):
         if not Path(meta_path).is_file():
             if ignore_errors:
                 return None
-            raise StoreError(f"non existing metafile {meta_path}")
+            msg = f"non existing metafile {meta_path}"
+            raise StoreError(msg)
         try:
             with Path(meta_path).open("r") as fd:
                 data = json.load(fd)
@@ -647,9 +648,8 @@ class File(object):
             if ignore_errors:
                 return None
             logger.exception(e)
-            raise StoreError(
-                f"error while loading metadata file {meta_path} ({e})"
-            ) from e
+            msg = f"error while loading metadata file {meta_path} ({e})"
+            raise StoreError(msg) from e
 
     def save_to_meta_file(self: FileType, dest_dir: str, name: str) -> None:
         """Dump as json file component information.
@@ -695,7 +695,8 @@ class File(object):
 
         logger.debug(f"Previous third party: {previous}")
         if previous is not None and not force:
-            raise StoreError(f"Third party {filename} already exists.")
+            msg = f"Third party {filename} already exists."
+            raise StoreError(msg)
 
         result = cls.load(store.create_thirdparty(f.as_dict()), store=store)
         return result

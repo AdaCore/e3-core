@@ -226,10 +226,11 @@ def test_spec_check_dll_closure(ldd, arguments: tuple, expected: tuple) -> None:
                 # actually belongs to the ignored dlls.
                 for culprit_dll in culprit_dlls:
                     if culprit_dll in ignored:
-                        raise Exception(
+                        msg = (
                             f"Shared library {culprit_dll} is listed in the "
                             "dll closure errors, while it should be ignored"
-                        ) from ae
+                        )
+                        raise Exception(msg) from ae
             else:
                 raise ae
     elif errors:

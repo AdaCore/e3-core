@@ -49,7 +49,8 @@ class DSSE:
             base64_signature = base64.b64encode(p.raw_out).decode("utf-8")
             self.signatures.append({"keyid": key_id, "sig": base64_signature})
             return base64_signature
-        raise DSSEError(f"SSL error: {p.out}")
+        msg = f"SSL error: {p.out}"
+        raise DSSEError(msg)
 
     def verify(self, certificate: str) -> bool:
         """Preliminary check on the signature.
@@ -63,7 +64,8 @@ class DSSE:
         # First get the public key
         p = Run(["openssl", "x509", "-pubkey", "-noout", "-in", certificate])
         if p.status != 0 or p.raw_out is None:
-            raise DSSEError(f"Cannot fetch public key from {certificate}")
+            msg = f"Cannot fetch public key from {certificate}"
+            raise DSSEError(msg)
         public_key = p.raw_out
 
         with tempfile.TemporaryDirectory() as temp_dir:

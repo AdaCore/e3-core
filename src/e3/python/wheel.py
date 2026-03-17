@@ -80,7 +80,8 @@ class Wheel:
                 cmd += build_args
             p = Run(cmd, cwd=source_dir)
             if p.status != 0:
-                raise WheelError(f"Error during wheel creation:\n{p.out}")
+                msg = f"Error during wheel creation:\n{p.out}"
+                raise WheelError(msg)
 
             tmp_whl_path = ls(Path(build_dir, "*.whl"))[0]
             dest_whl_path = Path(dest_dir, os.path.basename(tmp_whl_path))
@@ -94,4 +95,5 @@ class Wheel:
             [*python_script("pip"), "install", "-U", "--force-reinstall", self.path]
         )
         if p.status != 0:
-            raise WheelError(f"Error during installation of {self.path}:\n{p.out}")
+            msg = f"Error during installation of {self.path}:\n{p.out}"
+            raise WheelError(msg)

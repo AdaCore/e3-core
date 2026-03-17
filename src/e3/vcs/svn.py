@@ -106,9 +106,8 @@ class SVNRepository:
             initial_content_path = e3.os.fs.unixpath(initial_content_path)
 
         if p.status != 0:
-            raise SVNError(
-                f"cannot create svn repository in {repo_path}", origin="create"
-            )
+            msg = f"cannot create svn repository in {repo_path}"
+            raise SVNError(msg, origin="create")
         if initial_content_path is not None:
             p = e3.os.process.Run(
                 [
@@ -122,9 +121,12 @@ class SVNRepository:
                 output=cls.log_stream,
             )
             if p.status != 0:
-                raise SVNError(
+                msg = (
                     f"cannot perform initial import of {initial_content_path}"
-                    f" into {repo_path}",
+                    f" into {repo_path}"
+                )
+                raise SVNError(
+                    msg,
                     origin="create",
                 )
         return cls.local_url(repo_path)
@@ -162,9 +164,12 @@ class SVNRepository:
 
         p = e3.os.process.Run(p_cmd, cwd=self.working_copy, **kwargs)
         if p.status != 0:
-            raise SVNError(
+            msg = (
                 f"{e3.os.process.command_line_image(p_cmd)}"
-                f" failed (exit status: {p.status})",
+                f" failed (exit status: {p.status})"
+            )
+            raise SVNError(
+                msg,
                 origin="svn_cmd",
                 process=p,
             )
@@ -182,7 +187,8 @@ class SVNRepository:
         m = re.search(rf"^{item}: *(.*)\n", info, flags=re.M)  # type: ignore
         if m is None:
             logger.debug("svn info result:\n%s", info)
-            raise SVNError(f"Cannot fetch item {item} from svn_info", origin="get_info")
+            msg = f"Cannot fetch item {item} from svn_info"
+            raise SVNError(msg, origin="get_info")
 
         return m.group(1).strip()  # type: ignore
 
@@ -267,8 +273,9 @@ class SVNRepository:
             return not is_clean
         if Path(self.working_copy).exists():
             if not is_empty_dir(self.working_copy) and not force_and_clean:
+                msg = f"not empty {self.working_copy} url {url}"
                 raise SVNError(
-                    f"not empty {self.working_copy} url {url}",
+                    msg,
                     origin="update",
                 )
             if is_svn_dir and not url:

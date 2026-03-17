@@ -205,21 +205,22 @@ class Maven:
             if sha1_checksum:
                 content_sha1 = hashlib.sha1(request.content).hexdigest()
                 if content_sha1 != sha1_checksum:
-                    raise RuntimeError(
+                    msg = (
                         f"'{group}/{name}' maven-metadata.xml sha1 checksum missmatch: "
                         f"expected {sha1_checksum}, got: {content_sha1}"
                     )
+                    raise RuntimeError(msg)
             elif md5_checksum:
                 content_md5 = hashlib.md5(request.content).hexdigest()
                 if content_md5 != md5_checksum:
-                    raise RuntimeError(
+                    msg = (
                         f"'{group}/{name}' maven-metadata.xml md5 checksum missmatch: "
                         f"expected {md5_checksum}, got: {content_md5}"
                     )
+                    raise RuntimeError(msg)
             else:
-                raise RuntimeError(
-                    f"'{group}/{name}' maven-metadata.xml: no checksum provided"
-                )
+                msg = f"'{group}/{name}' maven-metadata.xml: no checksum provided"
+                raise RuntimeError(msg)
 
             self.cache[name] = MavenLinksParser(group, name).feed(request.text).links
         return self.cache[name]

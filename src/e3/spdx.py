@@ -771,8 +771,10 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
                 return SHA256(obj["checksumValue"])
             if obj["algorithm"].upper() == SHA512.algorithm:
                 return SHA512(obj["checksumValue"])
-            raise ValueError(f"Unsupported checksum algorithm {obj['algorithm']}.")
-        raise ValueError(f"Invalid input checksum dict {obj!r}.")
+            msg = f"Unsupported checksum algorithm {obj['algorithm']}."
+            raise ValueError(msg)
+        msg = f"Invalid input checksum dict {obj!r}."
+        raise ValueError(msg)
 
 
 class PackageHomePage(SPDXEntryMaybeStr):
@@ -1661,10 +1663,11 @@ class Document:
             package.spdx_id = SPDXID(f"{package.spdx_id.value}-pkg")
 
         if package.spdx_id in self.packages:
-            raise InvalidSPDX(
+            msg = (
                 f"A package with the same SPDXID {package.spdx_id}"
                 " has already been added"
             )
+            raise InvalidSPDX(msg)
         if is_main_package:
             self.main_package_spdx_id = package.spdx_id
 

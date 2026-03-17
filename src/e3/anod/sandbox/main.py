@@ -59,10 +59,11 @@ def main(get_argument_parser: bool = False) -> ArgumentParser | None:
     )
 
     if len(ext.names()) != len(ext.entry_points_names()):
-        raise SandBoxError(
+        msg = (
             "an error occurred when loading sandbox_action entry points "
             f"{','.join(ext.entry_points_names())}"
-        )  # defensive code
+        )
+        raise SandBoxError(msg)  # defensive code
 
     if get_argument_parser:
         return m.argument_parser

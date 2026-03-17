@@ -69,7 +69,8 @@ class BuildSpace:
         :param name: the subdirectory name
         """
         if name not in self.DIRS:
-            raise ValueError(f"invalid subdir {name}")
+            msg = f"invalid subdir {name}"
+            raise ValueError(msg)
         return str(Path(self.root_dir, self.directory_mapping[name]))
 
     def __getattr__(self, name: str) -> str:
@@ -79,7 +80,8 @@ class BuildSpace:
         """
         if name.endswith("_dir") and name[:-4] in self.DIRS:
             return self.subdir(name[:-4])
-        raise AttributeError(f"unknown build space attribute: {name}")
+        msg = f"unknown build space attribute: {name}"
+        raise AttributeError(msg)
 
     def __getitem__(self, key: str) -> str | None:
         """Get a directory path using dictionary-style access.
@@ -88,7 +90,8 @@ class BuildSpace:
         """
         if key.isupper() and key.endswith("_DIR"):
             return getattr(self, key.lower(), None)
-        raise KeyError(f"invalid build space key: {key}")
+        msg = f"invalid build space key: {key}"
+        raise KeyError(msg)
 
     def create(self, quiet: bool = False) -> None:
         """Create a build space.

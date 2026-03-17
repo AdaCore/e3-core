@@ -401,7 +401,8 @@ def mv(
 
             real_dst = Path(dst, basename(src))
             if real_dst.exists():
-                raise FSError(f"Destination path '{real_dst}' already exists")
+                msg = f"Destination path '{real_dst}' already exists"
+                raise FSError(msg)
         try:
             os.rename(src, real_dst)
         except OSError as err:
@@ -411,9 +412,8 @@ def mv(
                 os.unlink(src)
             elif Path(src).is_dir():
                 if destinsrc(src, dst):
-                    raise FSError(
-                        f"Cannot move a directory '{src}' into itself '{dst}'."
-                    ) from err
+                    msg = f"Cannot move a directory '{src}' into itself '{dst}'."
+                    raise FSError(msg) from err
                 shutil.copytree(src, real_dst, symlinks=True)
                 rm(src, recursive=True)
             else:

@@ -431,14 +431,11 @@ class BuildMetadata(object):
 
         if isinstance(valid_timestamp, datetime):
             # When converting to JSON representation, the microseconds
-            # are lost. Just remove them.
-            valid_timestamp = valid_timestamp.astimezone(timezone.utc).replace(
-                microsecond=0
-            )
-        else:
-            raise TypeError(f"Invalid timestamp type {type(timestamp)}")
+            # are lost. Just return them.
+            return valid_timestamp.astimezone(timezone.utc).replace(microsecond=0)
 
-        return valid_timestamp
+        msg = f"Invalid timestamp type {type(timestamp)}"  # type: ignore[unreachable]
+        raise TypeError(msg)
 
 
 class Statement(object):
@@ -773,7 +770,8 @@ class ResourceDescriptor(object):
         if isinstance(value, dict):
             self.__annotations = value
         else:
-            raise TypeError(f"Invalid resource descriptor annotations type: {value}")
+            msg = f"Invalid resource descriptor annotations type: {value}"  # type: ignore[unreachable]
+            raise TypeError(msg)
 
     @property
     def content(self) -> bytes | None:
@@ -807,7 +805,8 @@ class ResourceDescriptor(object):
         if isinstance(value, bytes) or value is None:
             self.__content = value
         else:
-            raise TypeError(f"Invalid resource descriptor content type: {value}")
+            msg = f"Invalid resource descriptor content type: {value}"  # type: ignore[unreachable]
+            raise TypeError(msg)
 
     @property
     def digest(self) -> dict[str, str]:
@@ -837,7 +836,8 @@ class ResourceDescriptor(object):
         if isinstance(value, dict):
             self.__digest = value
         else:
-            raise TypeError(f"Invalid resource descriptor digest type: {value}")
+            msg = f"Invalid resource descriptor digest type: {value}"  # type: ignore[unreachable]
+            raise TypeError(msg)
 
     @property
     def download_location(self) -> ResourceURI | None:
@@ -865,9 +865,8 @@ class ResourceDescriptor(object):
         elif isinstance(value, str):
             self.__download_location = ResourceURI(value)
         else:
-            raise TypeError(
-                f"Invalid resource descriptor download location type: {value}"
-            )
+            msg = f"Invalid resource descriptor download location type: {value}"  # type: ignore[unreachable]
+            raise TypeError(msg)
 
     @property
     def is_valid(self) -> bool:
@@ -906,7 +905,8 @@ class ResourceDescriptor(object):
         if isinstance(value, str) or value is None:
             self.__name = value
         else:
-            raise TypeError(f"Invalid resource descriptor name: {value}")
+            msg = f"Invalid resource descriptor name: {value}"  # type: ignore[unreachable]
+            raise TypeError(msg)
 
     @property
     def media_type(self) -> str | None:
@@ -933,7 +933,8 @@ class ResourceDescriptor(object):
         if isinstance(value, str) or value is None:
             self.__media_type = value
         else:
-            raise TypeError(f"Invalid resource descriptor media type: {value}")
+            msg = f"Invalid resource descriptor media type: {value}"  # type: ignore[unreachable]
+            raise TypeError(msg)
 
     @property
     def uri(self) -> ResourceURI | None:
@@ -954,7 +955,8 @@ class ResourceDescriptor(object):
         elif isinstance(value, str):
             self.__uri = ResourceURI(value)
         else:
-            raise TypeError(f"Invalid resource descriptor uri type: {value}")
+            msg = f"Invalid resource descriptor uri type: {value}"  # type: ignore[unreachable]
+            raise TypeError(msg)
 
     def add_digest(self, algorithm: str, digest: str) -> None:
         """Add a new digest to the digest set.
@@ -968,10 +970,11 @@ class ResourceDescriptor(object):
         if algorithm not in self.__digest:
             self.__digest[algorithm] = digest
         else:
-            raise KeyError(
+            msg = (
                 f"Digest algorithm {algorithm} is already set to "
                 "{self.__digest[algorithm]}"
             )
+            raise KeyError(msg)
 
     def as_dict(self) -> dict:
         """Get the dictionary representation of this resource descriptor.
@@ -1047,10 +1050,11 @@ class ResourceDescriptor(object):
         """
         # First check that there is a valid algorithm for dir_hash.
         if algorithm not in hashlib.algorithms_guaranteed:
-            raise ValueError(
+            msg = (
                 f"Unsupported digest algorithm {algorithm} for dir_hash().\n"
                 f"Available algorithms are: {hashlib.algorithms_guaranteed}"
             )
+            raise ValueError(msg)
 
         need_length: bool = algorithm.startswith("shake_")
         folder_hash = getattr(hashlib, algorithm)()
@@ -1711,11 +1715,13 @@ class TypeURI(object):
         try:
             parsed: ParseResult = urlparse(uri)
             if not all([parsed.scheme, parsed.netloc]):
-                raise ValueError(f"Invalid URI {uri}.")
+                msg = f"Invalid URI {uri}."
+                raise ValueError(msg)
         except ValueError:
             raise
         except AttributeError as ae:
-            raise ValueError(f"Invalid URI {uri} : {ae}.") from ae
+            msg = f"Invalid URI {uri} : {ae}."
+            raise ValueError(msg) from ae
         self.__uri = uri
 
     def __eq__(self, other: object) -> bool:

@@ -400,10 +400,12 @@ class _Store(_StoreContextManager):
         """
         res = self._select(table, [field_name], [rid])  # type: ignore[arg-type, list-item]
         if not res:
-            raise StoreError(f"No element with {field_name}={rid} found")
+            msg = f"No element with {field_name}={rid} found"
+            raise StoreError(msg)
         if len(res) != 1:
+            msg = f"Database corrupted: multiple element with {field_name}={rid} found"
             raise StoreError(  # defensive code
-                f"Database corrupted: multiple element with {field_name}={rid} found"
+                msg
             )
         return res[0]
 
@@ -1008,10 +1010,11 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                         att["att_file"]
                     )
             else:
-                raise TypeError(
+                msg = (  # type: ignore[unreachable]
                     "Unknown attachments type: expected Sequence or dict, "
                     f"got {type(attachments)}"
                 )
+                raise TypeError(msg)
 
         # The buildinfo should already be created at this point. If not, raise an error.
         component_build_id = component_info.get("build", {}).get(
@@ -1220,7 +1223,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
         resource_path = os.path.abspath(downloaded_as)
         if not Path(resource_path).is_file():
-            raise StoreError(f"{resource_path}: not found or is not a file")
+            msg = f"{resource_path}: not found or is not a file"
+            raise StoreError(msg)
 
         resource_tmp = self._select(
             _Store.TableName.resources,
@@ -1608,7 +1612,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
             order_by=(_Store.TableName.buildinfos, "creation_date DESC"),
         )
         if not req:
-            raise StoreError(f"File({name=}, {kind=}, {bid=}) not found")
+            msg = f"File({name=}, {kind=}, {bid=}) not found"
+            raise StoreError(msg)
         return self._tuple_to_file(req[0])  # type: ignore[arg-type]
 
     def download_resource(self, rid: str, path: str) -> str:
@@ -2139,10 +2144,11 @@ class LocalStore(StoreRW, LocalStoreInterface):
                     self._raw_add_file(att["att_file"])
                     attachments_with_name[att["name"]] = att["att_file"]
             else:
-                raise TypeError(
+                msg = (  # type: ignore[unreachable]
                     "Unknown attachments type: expected Sequence or dict, "
                     f"got {type(attachments)}"
                 )
+                raise TypeError(msg)
 
         # Add the list of releases linked to this component.
         #   Note: The releases key can be present, but set to None.
@@ -2263,10 +2269,11 @@ class LocalStore(StoreRW, LocalStoreInterface):
             setup=setup, date=date, component=name, platform=platform, specname=specname
         )
         if not comps:
-            raise StoreError(
+            msg = (
                 "Cannot find any component matching the following criteria: "
                 f"{setup=}, {date=}, {name=}, {platform=}, {specname=}"
             )
+            raise StoreError(msg)
 
         for comp in comps:
             self._raw_add_component(comp)

@@ -76,7 +76,8 @@ def get_pip_env(platform: str, python_version: Version) -> dict[str, str]:
     elif platform.endswith("-windows") or platform.endswith("-windows64"):
         result["sys_platform"] = "win32"
     else:
-        raise PyPIError(f"Non supported platform {platform}")
+        msg = f"Non supported platform {platform}"
+        raise PyPIError(msg)
 
     result["platform_system"] = {
         "darwin": "Darwin",
@@ -770,7 +771,8 @@ class PyPIClosure:
             try:
                 result = resolver.resolve(self.requirements, max_rounds=500)
             except ResolutionImpossible as e:
-                raise PyPIError(f"Impossible resolution: {e}") from e
+                msg = f"Impossible resolution: {e}"
+                raise PyPIError(msg) from e
 
             for name, candidate in result.mapping.items():
                 # Skip intermediate nodes introduced to handle extras
