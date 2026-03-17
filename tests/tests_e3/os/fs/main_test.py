@@ -15,6 +15,10 @@ import e3.os.fs
 import e3.os.process
 
 
+# Access time tolerance in seconds
+ATIME_TOLERANCE_SECONDS = 100
+
+
 def test_cd() -> None:
     """Test cd."""
     with pytest.raises(e3.os.fs.OSFSError) as err:
@@ -156,7 +160,7 @@ def test_touch() -> None:
 
     e3.os.fs.touch("a")
 
-    assert os.stat("a").st_atime - now < 100
+    assert os.stat("a").st_atime - now < ATIME_TOLERANCE_SECONDS
 
 
 def test_which() -> None:

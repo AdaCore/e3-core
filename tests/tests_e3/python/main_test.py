@@ -15,6 +15,9 @@ from e3.python.pypi import PyPIClosure, PyPIError
 from e3.python.wheel import Wheel
 from e3.sys import python_script
 
+# Expected number of packages in PyPI closure tests
+EXPECTED_PACKAGE_CLOSURE_SIZE = 2
+
 
 def generate_py_pkg_source(
     name: str, requires: list[str] | None = None, version="1.0.0"
@@ -69,8 +72,8 @@ def test_wheel() -> None:
         pypi.add_requirement("src1>=0.6.0")
         pypi.add_requirement("src1!=0.4.2")
         pypi.add_requirement("src1~=1.0.0")
-        assert len(pypi.file_closure()) == 2
-        assert len(pypi.requirements_closure()) == 2
+        assert len(pypi.file_closure()) == EXPECTED_PACKAGE_CLOSURE_SIZE
+        assert len(pypi.requirements_closure()) == EXPECTED_PACKAGE_CLOSURE_SIZE
 
     with PyPIClosure(
         python3_version="3.10",
@@ -85,8 +88,8 @@ def test_wheel() -> None:
     ) as pypi:
         pypi.add_requirement("src2==1.0.0")
         pypi.add_requirement("src1")
-        assert len(pypi.file_closure()) == 2
-        assert len(pypi.requirements_closure()) == 2
+        assert len(pypi.file_closure()) == EXPECTED_PACKAGE_CLOSURE_SIZE
+        assert len(pypi.requirements_closure()) == EXPECTED_PACKAGE_CLOSURE_SIZE
 
 
 def test_pypi_closure_tool() -> None:
@@ -161,7 +164,7 @@ def test_star_requirements() -> None:
         pypi.add_wheel(wheel2.path)
         pypi.add_wheel(wheel3.path)
         pypi.add_requirement("src2==1.0.0")
-        assert len(pypi.requirements_closure()) == 2
+        assert len(pypi.requirements_closure()) == EXPECTED_PACKAGE_CLOSURE_SIZE
 
 
 @pytest.mark.parametrize(

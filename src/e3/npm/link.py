@@ -9,6 +9,9 @@ from dateutil.parser import parse as dateutil_parse
 if TYPE_CHECKING:
     from datetime import datetime
 
+# Number of parts in a scoped NPM package (@scope/name)
+NPM_SCOPE_PARTS = 2
+
 
 class NPMLink:
     def __init__(
@@ -33,7 +36,7 @@ class NPMLink:
             https://registry.npmjs.org/<YOUR PACKAGE>/<YOUR PACKAGE VERSION>.
         """
         tmp = name.rsplit("/", 1)
-        if len(tmp) == 2:
+        if len(tmp) == NPM_SCOPE_PARTS:
             pkg_scope, pkg_name = tmp
         else:
             pkg_name = tmp[0]

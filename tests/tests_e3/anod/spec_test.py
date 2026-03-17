@@ -16,6 +16,10 @@ from e3.os.fs import ldd_output_to_posix
 from e3.os.process import Run
 from e3.platform_db.knowledge_base import OS_INFO
 
+# Expected number of sources in spec tests
+EXPECTED_BUILD_SOURCES = 2
+EXPECTED_TEST_SOURCES_WITH_BAR = 2
+
 CHECK_DLL_CLOSURE_ARGUMENTS = [
     (
         (
@@ -162,13 +166,13 @@ def test_simple_spec() -> None:
             return result
 
     simple_build = Simple("", kind="build")
-    assert len(simple_build.build_source_list) == 2
+    assert len(simple_build.build_source_list) == EXPECTED_BUILD_SOURCES
 
     simple_test = Simple("", kind="test")
     assert len(simple_test.test_source_list) == 1
 
     simple_test_with_bar = Simple("with_bar=true", kind="test")
-    assert len(simple_test_with_bar.test_source_list) == 2
+    assert len(simple_test_with_bar.test_source_list) == EXPECTED_TEST_SOURCES_WITH_BAR
 
 
 def test_spec_buildvars() -> None:

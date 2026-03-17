@@ -65,6 +65,9 @@ platforms is the list of platforms for which wheel should be fetched
 
 logger = getLogger("pypiscript", "e3.python")
 
+# Number of parts in major.minor version
+VERSION_PARTS_MAJOR_MINOR = 2
+
 
 def main() -> None:  # noqa: PLR0915
     """Run the e3-pypi-closure script."""
@@ -170,7 +173,7 @@ def main() -> None:  # noqa: PLR0915
                     version = fd.read().strip()
                 logger.info(f"Wheel {name} has version {version}")
                 split_version = version.split(".")
-                if len(split_version) == 2:
+                if len(split_version) == VERSION_PARTS_MAJOR_MINOR:
                     # We have a major and minor but no patch so add it automatically
                     version = f"{version}.{datetime.today().strftime('%Y%m%d%H%M')}"
                     with version_file.open("w") as fd:

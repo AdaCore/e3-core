@@ -44,6 +44,9 @@ if TYPE_CHECKING:
 
 logger = e3.log.getLogger("e3.python.pypi")
 
+# HTTP status code for Not Found
+HTTP_NOT_FOUND = 404
+
 
 class PyPIError(E3Error):
     pass
@@ -848,7 +851,7 @@ def fetch_from_registry(
                 }
             )
         except HTTPError as err:
-            if err.response.status_code != 404:  # if other than NotFound
+            if err.response.status_code != HTTP_NOT_FOUND:  # if other than NotFound
                 raise err
             if log_missing_packages:
                 logger.error(f"Package {p!r} is missing on the given registry")

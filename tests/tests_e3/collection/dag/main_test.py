@@ -4,6 +4,10 @@ import pytest
 
 from e3.collection.dag import DAG, DAGError, DAGIterator
 
+# Expected values for DAG tests
+DAG_TWO_VERTICES = 2
+DAG_THREE_PREDECESSORS = 3
+
 
 def test_simple_dag() -> None:
     """Test simple dag."""
@@ -93,7 +97,7 @@ def test_cycle_detection() -> None:
         d.check()
 
     # Verify that some functions do not hang when a cycle is present
-    assert len(d.get_closure("b")) == 2
+    assert len(d.get_closure("b")) == DAG_TWO_VERTICES
     assert str(d)
     assert d.as_dot()
 
@@ -149,7 +153,7 @@ def test_dag_len() -> None:
     d.add_vertex("a")
     d.add_vertex("b")
     d.update_vertex("a", predecessors=["b"])
-    assert len(d) == 2
+    assert len(d) == DAG_TWO_VERTICES
 
 
 def test_dag_str() -> None:
@@ -245,7 +249,7 @@ def test_pruned_dag() -> None:
     for node, _ in d2:
         preds = d2.get_predecessors(node)
         if node == "d":
-            assert len(preds) == 3
+            assert len(preds) == DAG_THREE_PREDECESSORS
             assert "a" in preds
             assert "a1" in preds
             assert "a2" in preds

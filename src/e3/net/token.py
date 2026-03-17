@@ -7,6 +7,9 @@ import json
 
 from e3.date import utc_timestamp
 
+# Number of dots in a valid JWT (header.payload.signature)
+JWT_PARTS_COUNT = 2
+
 
 def get_payload(token: str) -> dict:
     """Get payload from a JSON Web Token.
@@ -15,7 +18,7 @@ def get_payload(token: str) -> dict:
     :return: decoded payload
     """
     data = {}
-    if token.count(".") == 2:
+    if token.count(".") == JWT_PARTS_COUNT:
         # Extract the payload
         signing_part, _ = token.rsplit(".", 1)
         _, payload = signing_part.split(".", 1)

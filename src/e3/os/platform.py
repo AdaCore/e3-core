@@ -24,6 +24,17 @@ Uname = namedtuple(
 
 logger = e3.log.getLogger("os.platform")
 
+# Windows version numbers
+WINDOWS_VERSION_VISTA = 6.2
+WINDOWS_VERSION_8_1 = 6.3
+WINDOWS_VERSION_10 = 10.0
+
+# Windows build numbers
+WINDOWS_BUILD_2016 = 17763
+WINDOWS_BUILD_2019 = 20348
+WINDOWS_BUILD_2022 = 26100
+WINDOWS_BUILD_11 = 22000
+
 
 class SystemInfo:
     """Gather info about the system.
@@ -241,29 +252,29 @@ class SystemInfo:
 
             effective_version, build_number, is_server = get_os_version()
 
-            if effective_version is None or effective_version <= 6.2:
+            if effective_version is None or effective_version <= WINDOWS_VERSION_VISTA:
                 if version == "Vista" and "64" in cls.uname.machine:  # os-specific
                     version = "Vista64"
             else:
-                if effective_version == 6.3:
+                if effective_version == WINDOWS_VERSION_8_1:
                     if is_server:
                         version = "2012R2"
                     else:
                         version = "8.1"
-                elif effective_version == 10.0:
+                elif effective_version == WINDOWS_VERSION_10:
                     if TYPE_CHECKING:
                         assert build_number is not None
                     if is_server:
-                        if build_number < 17763:
+                        if build_number < WINDOWS_BUILD_2016:
                             version = "2016"
-                        elif build_number < 20348:
+                        elif build_number < WINDOWS_BUILD_2019:
                             version = "2019"
-                        elif build_number < 26100:
+                        elif build_number < WINDOWS_BUILD_2022:
                             version = "2022"
                         else:
                             version = "2025"
                     else:
-                        if build_number > 22000:
+                        if build_number > WINDOWS_BUILD_11:
                             version = "11"
                             full_version = "11.0"
                         else:

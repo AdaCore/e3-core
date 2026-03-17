@@ -27,6 +27,12 @@ from e3.collection.trie import Trie
 
 logger = e3.log.getLogger("fs")
 
+# Windows WSL symbolic link reparse tag
+WSL_SYMLINK_TAG = 0xA000001D
+
+# Timestamp comparison tolerance (in seconds)
+TIMESTAMP_TOLERANCE = 0.001
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from typing import Any
@@ -777,7 +783,7 @@ def sync_tree(  # noqa: PLR0915
         return fi.stat is not None and (
             stat.S_ISLNK(fi.stat.st_mode)
             # Check for WSL links on Windows
-            or (sys.platform == "win32" and fi.stat.st_reparse_tag == 0xA000001D)
+            or (sys.platform == "win32" and fi.stat.st_reparse_tag == WSL_SYMLINK_TAG)
         )
 
     def isfile(fi: FileInfo) -> bool:
@@ -817,7 +823,7 @@ def sync_tree(  # noqa: PLR0915
             or stat.S_IFMT(src.stat.st_mode) != stat.S_IFMT(dst.stat.st_mode)
             or (
                 preserve_timestamps
-                and abs(src.stat.st_mtime - dst.stat.st_mtime) > 0.001
+                and abs(src.stat.st_mtime - dst.stat.st_mtime) > TIMESTAMP_TOLERANCE
             )
             or src.stat.st_size != dst.stat.st_size
             or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))

@@ -44,6 +44,9 @@ if TYPE_CHECKING:
 
 logger = e3.log.getLogger("net.http")
 
+# HTTP status codes
+HTTP_OK = 200
+
 
 def get_filename(content_disposition: str) -> str | None:
     """Return a filename from an HTTP Content-Disposition header.
@@ -240,7 +243,7 @@ class HTTPSession:
             try:
                 logger.debug("%s %s", method, final_url)
                 response = self.session.request(method, final_url, **kwargs)
-                if response.status_code != 200:
+                if response.status_code != HTTP_OK:
                     error_msgs.append(f"{message_prefix}{response.text}")
                     last_status = response.status_code
                     response.raise_for_status()

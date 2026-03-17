@@ -13,6 +13,10 @@ from e3.fs import rm
 from e3.job import EmptyJob, Job, ProcessJob
 from e3.job.walk import Walk
 
+# Job execution limits for walk tests
+NOT_READY_RUN_COUNT_THRESHOLD = 2
+MAX_REQUEUE_COUNT = 3
+
 
 class SbxDirs:
     def __init__(self) -> None:
@@ -153,7 +157,10 @@ class ControlledJob(ProcessJob):
         result = [sys.executable, "-c"]
         if self.uid.endswith("bad"):
             result.append("import sys; sys.exit(1)")
-        elif self.uid.endswith("notready:once") and self.run_count < 2:
+        elif (
+            self.uid.endswith("notready:once")
+            and self.run_count < NOT_READY_RUN_COUNT_THRESHOLD
+        ):
             result.append("import sys; sys.exit(%d)" % ReturnValue.notready.value)
         elif self.uid.endswith("notready:always"):
             result.append("import sys; sys.exit(%d)" % ReturnValue.notready.value)
@@ -184,7 +191,7 @@ class SimpleWalk(Walk):
         if job.uid not in self.requeued:
             self.requeued[job.uid] = 0
         self.requeued[job.uid] += 1
-        return self.requeued[job.uid] < 3
+        return self.requeued[job.uid] < MAX_REQUEUE_COUNT
 
     def create_job(self, uid, data, predecessors, notify_end) -> Job:
         if self.dry_run_mode:

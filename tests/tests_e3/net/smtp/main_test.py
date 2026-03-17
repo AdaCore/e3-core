@@ -11,6 +11,10 @@ import e3.net.smtp
 from e3.error import E3Error
 
 
+# Expected number of sendmail calls
+EXPECTED_SENDMAIL_CALLS = 2
+
+
 def test_sendmail() -> None:
     """Test sendmail."""
     from_addr = "e3@example.net"
@@ -29,7 +33,7 @@ def test_sendmail() -> None:
         )
 
         assert smtp_mock.sendmail.called
-        assert smtp_mock.sendmail.call_count == 2
+        assert smtp_mock.sendmail.call_count == EXPECTED_SENDMAIL_CALLS
         smtp_mock.sendmail.assert_called_with(from_addr, to_addresses, msg_as_string)
 
     with mock.patch("smtplib.SMTP_SSL") as mock_smtp:

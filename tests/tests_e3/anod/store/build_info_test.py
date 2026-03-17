@@ -11,6 +11,17 @@ from e3.os.fs import touch
 
 DEFAULT_SETUP = "test"
 
+# Expected number of build infos in list queries
+BUILD_INFOS_3_DAYS = 2
+BUILD_INFOS_5_DAYS = 3
+BUILD_INFOS_10_DAYS_DEFAULT = 4
+BUILD_INFOS_10_DAYS_ALL = 7
+
+# Expected counts for sources and components
+EXPECTED_SOURCES_COUNT = 4
+EXPECTED_COMPONENTS_FOR_COMP1 = 2
+EXPECTED_SINGLE_COMPONENT = 1
+
 
 def test_build_info_create(store) -> None:
     """Test creating a BuildInfo object from a build ID."""
@@ -171,11 +182,11 @@ def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
     bis: list[BuildInfo] = BuildInfo.list(
         store, setup=DEFAULT_SETUP, build_date="20250518", nb_days=3
     )
-    assert len(bis) == 2
+    assert len(bis) == BUILD_INFOS_3_DAYS
 
     # There should be only 3 matching build info in the last 5 days
     bis = BuildInfo.list(store, setup=DEFAULT_SETUP, build_date="20250518", nb_days=5)
-    assert len(bis) == 3
+    assert len(bis) == BUILD_INFOS_5_DAYS
 
     # Check with other setup
     bis = BuildInfo.list(store, setup="other", build_date="20250518", nb_days=10)
@@ -185,9 +196,9 @@ def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
 
     # Check with all setup (both using "all" or None)
     bis = BuildInfo.list(store, setup="all", build_date="20250518", nb_days=10)
-    assert len(bis) == 7
+    assert len(bis) == BUILD_INFOS_10_DAYS_ALL
     bis = BuildInfo.list(store, build_date="20250518", nb_days=10)
-    assert len(bis) == 7
+    assert len(bis) == BUILD_INFOS_10_DAYS_ALL
 
     bis = BuildInfo.list(store, setup=DEFAULT_SETUP, build_version="2.0")
     assert len(bis) == 1
@@ -312,7 +323,7 @@ def test_get_source_list(store) -> None:
     for src in src_list:
         assert src.name in names
         assert src.kind != "binary"
-    assert len(src_list) == 4
+    assert len(src_list) == EXPECTED_SOURCES_COUNT
 
 
 def test_get_build_data(store) -> None:
@@ -429,7 +440,7 @@ def test_get_build_data(store) -> None:
     bi = BuildInfo.latest(store, setup=DEFAULT_SETUP)
     data = bi.get_build_data()
 
-    assert len(data["sources"]) == 4
+    assert len(data["sources"]) == EXPECTED_SOURCES_COUNT
     assert len(data["components"]) == 1
 
 
@@ -473,7 +484,7 @@ def test_get_component_list(store) -> None:
 
     bi = BuildInfo.latest(store, setup=DEFAULT_SETUP)
     data = bi.get_component_list(name="comp1")
-    assert len(data) == 2
+    assert len(data) == EXPECTED_COMPONENTS_FOR_COMP1
     data = bi.get_component_list(name="comp1", platform="x86-linux")
     assert len(data) == 1
     data = bi.get_component_list(name="comp1", platform="x86_64-linux")

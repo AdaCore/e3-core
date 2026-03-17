@@ -54,6 +54,10 @@ class SleepCommandResult(CommandResult):
         time.sleep(self.seconds)
 
 
+# Expected number of process calls in mock tests
+EXPECTED_CALL_COUNT = 2
+
+
 def echo(msg: str) -> None:
     """Run echo "msg" with e3.os.process.Run.
 
@@ -74,7 +78,7 @@ def echo_world() -> None:
     echo("world")
 
     assert e3.os.process.Run.all_called
-    assert e3.os.process.Run.call_count == 2
+    assert e3.os.process.Run.call_count == EXPECTED_CALL_COUNT
 
 
 @mock_run()

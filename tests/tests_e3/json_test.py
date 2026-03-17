@@ -20,6 +20,10 @@ if TYPE_CHECKING:
 
     ComplexJsonDataSelf = TypeVar("ComplexJsonDataSelf", bound="ComplexJsonData")
 
+# Test values for JSON data tests
+TEST_INTEGER_VALUE = 1234
+TEST_FLOAT_VALUE = 98765.43210
+
 # Define some test classes.
 
 DICT_VALUES: dict = {
@@ -74,16 +78,16 @@ def test_simple_json_data() -> None:
     """Test a simple JSON data object."""
     simple: SimpleJsonData = SimpleJsonData(
         string="string",
-        integer=1234,
-        float_var=98765.43210,
+        integer=TEST_INTEGER_VALUE,
+        float_var=TEST_FLOAT_VALUE,
     )
     simple_dict: dict = simple.as_dict()
     assert simple.string == "string"
     assert simple_dict["string"] == "string"
-    assert simple.integer == 1234
-    assert simple_dict["integer"] == 1234
-    assert simple.float_var == 98765.43210
-    assert simple_dict["float_var"] == 98765.43210
+    assert simple.integer == TEST_INTEGER_VALUE
+    assert simple_dict["integer"] == TEST_INTEGER_VALUE
+    assert simple.float_var == TEST_FLOAT_VALUE
+    assert simple_dict["float_var"] == TEST_FLOAT_VALUE
 
     other_simple: SimpleJsonData = SimpleJsonData.from_dict(simple.as_dict())
     assert simple == other_simple

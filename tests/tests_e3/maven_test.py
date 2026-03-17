@@ -5,6 +5,10 @@ from __future__ import annotations
 from e3.maven import Maven
 
 
+# Expected number of Maven artifact links
+EXPECTED_ARTIFACT_LINKS = 4
+
+
 def test_maven(maven_central) -> None:
     """Test maven."""
     mvn = Maven()
@@ -23,7 +27,7 @@ def test_maven(maven_central) -> None:
         links = mvn.fetch_project_links("test.e3.mvn", "e3mvn")
         assert all(link.sha1_checksum and link.md5_checksum for link in links)
 
-    assert len(links) == 4
+    assert len(links) == EXPECTED_ARTIFACT_LINKS
     assert all(
         link.version
         in {

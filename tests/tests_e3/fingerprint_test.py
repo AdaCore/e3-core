@@ -11,6 +11,10 @@ from e3.error import E3Error
 from e3.fingerprint import Fingerprint
 
 
+# Length of SHA256 checksum in hexadecimal
+SHA256_CHECKSUM_LENGTH = 64
+
+
 def test_fingerprint() -> None:
     """Test fingerprint."""
     f1 = Fingerprint()
@@ -47,7 +51,7 @@ def test_fingerprint() -> None:
 
     f6 = Fingerprint()
     f6.add("unicode", "6")
-    assert len(f6.checksum()) == 64
+    assert len(f6.checksum()) == SHA256_CHECKSUM_LENGTH
 
 
 def test_add_order_not_important() -> None:

@@ -12,6 +12,13 @@ import e3.os.process
 import e3.platform
 
 
+# Expected values for environment tests
+CMD_TRIPLET_OPTIONS = 3
+TEST_ATTR_VALUE = 3
+TEST_DEFAULT_VALUE = 4
+TEST_CORES_COUNT = 23
+
+
 def test_autodetect() -> None:
     """Test autodetect."""
     sys_platform = (
@@ -136,7 +143,7 @@ def test_cmd_triplet() -> None:
     e = e3.env.BaseEnv()
     e.set_env(build_platform, "x86_64-linux,debian7", "x86-windows,2008")
     cmd_options = e.cmd_triplet()
-    assert len(cmd_options) == 3
+    assert len(cmd_options) == CMD_TRIPLET_OPTIONS
     assert cmd_options[0] == f"--build={build_platform}"
     assert cmd_options[1] == "--host=x86_64-linux,debian7"
     assert cmd_options[2].startswith("--target=x86-windows,2008")
@@ -151,10 +158,10 @@ def test_get_attr() -> None:
     assert e.get_attr("host.cpu.bits", forced_value="gotit") == "gotit"
 
     e.my_attr = 3
-    assert e.get_attr("my_attr") == 3
+    assert e.get_attr("my_attr") == TEST_ATTR_VALUE
 
     e.my_attr = None
-    assert e.get_attr("my_attr", default_value=4) == 4
+    assert e.get_attr("my_attr", default_value=TEST_DEFAULT_VALUE) == TEST_DEFAULT_VALUE
 
     assert e.my_attr is None
 
@@ -282,14 +289,14 @@ def test_copy() -> None:
 def test_force_cores() -> None:
     """Test that forcing the number of cores works in all cases."""
     e = e3.env.BaseEnv()
-    e.set_build(cores=23)
-    assert e.build.cpu.cores == 23
+    e.set_build(cores=TEST_CORES_COUNT)
+    assert e.build.cpu.cores == TEST_CORES_COUNT
 
-    e.set_build(name="x86_64-linux", cores=23)
-    assert e.build.cpu.cores == 23
+    e.set_build(name="x86_64-linux", cores=TEST_CORES_COUNT)
+    assert e.build.cpu.cores == TEST_CORES_COUNT
 
-    e.set_build(name="x86_64-windows64", cores=23)
-    assert e.build.cpu.cores == 23
+    e.set_build(name="x86_64-windows64", cores=TEST_CORES_COUNT)
+    assert e.build.cpu.cores == TEST_CORES_COUNT
 
 
 def test_build_os_propagation() -> None:

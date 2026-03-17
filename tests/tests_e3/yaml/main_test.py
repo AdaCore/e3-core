@@ -15,6 +15,9 @@ try:
 except ImportError:
     from io import StringIO
 
+# Expected number of keys in YAML result
+EXPECTED_YAML_KEYS = 2
+
 
 @pytest.mark.parametrize(
     ("config", "expected"),
@@ -178,7 +181,7 @@ def test_load_with_regexp() -> None:
         filename="regexp1.yaml", selectors=selectors, data=data
     )
 
-    assert len(result) == 2
+    assert len(result) == EXPECTED_YAML_KEYS
     assert result["key1"] == "TRUE"
     assert result["key2"][0] == "TRUE"
     assert result["key2"][1] == "TRUE"

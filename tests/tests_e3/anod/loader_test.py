@@ -116,7 +116,7 @@ class TestLoader:
 
         # See comments in tests/tests_e3/anod/data/withconfig.anod
 
-        assert anod_instance.test1() == 9
+        assert anod_instance.test1() == EXPECTED_TEST1_RESULT
         with pytest.raises(KeyError) as err:
             anod_instance.test2()
         assert "foo" in str(err.value)
@@ -136,3 +136,7 @@ class TestLoader:
         with pytest.raises(SandBoxError) as err:
             spec_repo.load("reuse_anod")
         assert "must not use Anod" in str(err)
+
+
+# Expected value from withconfig.anod test
+EXPECTED_TEST1_RESULT = 9

@@ -22,6 +22,9 @@ from e3.slsa.provenance import Statement
 if TYPE_CHECKING:
     from e3.anod.store.component import ComponentDict
 
+# Expected number of attachments in component tests
+EXPECTED_ATTACHMENTS_COUNT = 2
+
 DEFAULT_SETUP = "test"
 
 
@@ -275,7 +278,7 @@ def test_component_attachment(caplog) -> None:  # type: ignore[no-untyped-def]
 
     # Get all attachments of type "toto_att"
     attachments = c.get_attachments("toto_att")
-    assert len(attachments) == 2
+    assert len(attachments) == EXPECTED_ATTACHMENTS_COUNT
     assert attachments[att2_key].as_dict() == att_2.as_dict()
 
     # Try to add an existing attachment. The key should be None as we did not
@@ -427,7 +430,7 @@ def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untype
     c_dict: ComponentDict = c.submit_attachment("test", att_file)
     # Make sure this attachment has been added.
     comp: Component = Component.load(c_dict, store)
-    assert len(comp.attachments) == 2
+    assert len(comp.attachments) == EXPECTED_ATTACHMENTS_COUNT
 
     attachment: File
     for attachment in comp.attachments.values():
