@@ -95,7 +95,7 @@ def test_anod_name_generator() -> None:
     assert base.get_qualifier("debug") == "bar"
 
 
-def test_qualifiers_manager_errors() -> None:
+def test_qualifiers_manager_errors() -> None:  # noqa: PLR0915
     """Test qualifiers manager errors."""
 
     class AnodDummy(Anod):

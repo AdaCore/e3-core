@@ -416,7 +416,7 @@ class Anod:
             name=self.build_space_name, platform=self.env.platform
         )
 
-    def check_shared_libraries_closure(
+    def check_shared_libraries_closure(  # noqa: PLR0915
         self,
         prefix: str | None = None,
         ignored_libs: list[str] | None = None,

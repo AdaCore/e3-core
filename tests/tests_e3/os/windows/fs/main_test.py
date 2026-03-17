@@ -255,7 +255,7 @@ def test_is_dir_empty() -> None:
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
-def test_unlink() -> None:
+def test_unlink() -> None:  # noqa: PLR0915
     """Test unlink."""
     work_dir = Path.cwd()
 

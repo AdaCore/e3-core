@@ -318,7 +318,10 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
         raise FSError(origin="mkdir", message=f"can't create {path}") from e
 
 
-def mv(source: str | Path | Iterable[str] | Iterable[Path], target: str | Path) -> None:
+def mv(
+    source: str | Path | Iterable[str] | Iterable[Path],
+    target: str | Path,
+) -> None:  # noqa: PLR0915
     """Move files.
 
     :param source: a glob pattern, a sequence/iterator of glob patterns, a path,
@@ -611,7 +614,7 @@ VCS_IGNORE_LIST = (
 )
 
 
-def sync_tree(
+def sync_tree(  # noqa: PLR0915
     source: str | Path,
     target: str | Path,
     ignore: str | Sequence[str] | None = None,

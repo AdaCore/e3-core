@@ -66,7 +66,7 @@ platforms is the list of platforms for which wheel should be fetched
 logger = getLogger("pypiscript", "e3.python")
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0915
     """Run the e3-pypi-closure script."""
     m = Main()
     m.argument_parser.formatter_class = argparse.RawDescriptionHelpFormatter

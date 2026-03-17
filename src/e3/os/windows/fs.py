@@ -581,7 +581,7 @@ class NTFile:
 
         return self.iterate_on_dir(check_file, default_result=True)
 
-    def unlink(self) -> None:
+    def unlink(self) -> None:  # noqa: PLR0915
         """Remove file safely.
 
         :raise: NTException
