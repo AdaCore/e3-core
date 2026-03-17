@@ -142,7 +142,7 @@ def test_file(store) -> None:
     assert tmp["name"] == "test-tp.txt"
 
 
-def test_component(store) -> None:
+def test_component(store) -> None:  # noqa: PLR0915
     """Check that we can add a component to the offline db."""
     buildinfo = store.create_build_id("test", "20241029", "1.0")
     store.mark_build_ready(buildinfo["_id"])
@@ -334,7 +334,7 @@ def test_component(store) -> None:
     assert isinstance(tmp[0]["attachments"], dict) and "myatt2" in tmp[0]["attachments"]
 
 
-def test_bulk_query(store) -> None:
+def test_bulk_query(store) -> None:  # noqa: PLR0915
     """Test bulk query."""
     with Path("file1.txt").open("w") as f:
         f.write("Carpette is a cat")

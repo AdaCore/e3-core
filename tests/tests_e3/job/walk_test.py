@@ -462,7 +462,7 @@ class TestWalk:
             assert r2.requeued == {}
 
 
-def test_source_deps(setup_sbx) -> None:
+def test_source_deps(setup_sbx) -> None:  # noqa: PLR0915
     """Try runs with source dependencies changing between runs."""
     actions = DAG()
     actions.add_vertex("1")
@@ -678,7 +678,7 @@ def test_predecessor_with_no_fingerprint(setup_sbx) -> None:
     assert r2.requeued == {}
 
 
-def test_dry_run(setup_sbx) -> None:
+def test_dry_run(setup_sbx) -> None:  # noqa: PLR0915
     """Simulate the use actions with "dry run" behavior."""
     actions = DAG()
     actions.add_vertex("1")

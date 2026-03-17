@@ -103,7 +103,7 @@ def diff(
     )
 
 
-def patch(
+def patch(  # noqa: PLR0915
     patch_file: str,
     working_dir: str,
     discarded_files: list[str] | Callable[[str], bool] | None = None,

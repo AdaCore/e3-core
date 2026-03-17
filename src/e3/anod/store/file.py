@@ -305,7 +305,7 @@ class File(object):
         """
         return str(Path(dest_dir, name + "_meta.json"))
 
-    def download(
+    def download(  # noqa: PLR0915
         self: FileType,
         dest_dir: str | None,
         as_name: str | None = None,

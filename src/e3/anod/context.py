@@ -472,7 +472,7 @@ class AnodContext:
             assert_never()
         return result
 
-    def add_spec(
+    def add_spec(  # noqa: PLR0915
         self,
         name: str,
         env: BaseEnv,

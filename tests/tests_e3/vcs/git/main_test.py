@@ -45,7 +45,7 @@ def test_git_non_utf8(git) -> None:
     assert "\\x03\\xff" in commits[0]["diff"]
 
 
-def test_git_repo(git) -> None:
+def test_git_repo(git) -> None:  # noqa: PLR0915
     """Test git repo."""
     working_tree = Path.cwd() / "working_tree"
     working_tree2 = Path.cwd() / "working_tree2"

@@ -48,7 +48,7 @@ def cd(path: str | Path) -> None:
         raise OSFSError(origin="cd", message=f"can't chdir to {path}\n") from e
 
 
-def chmod(mode: str, filename: str | Path) -> int:
+def chmod(mode: str, filename: str | Path) -> int:  # noqa: PLR0915
     """Chmod with interface similar to Unix tool.
 
     :param mode: should conform with posix specification for

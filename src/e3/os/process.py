@@ -244,7 +244,7 @@ class Run:
     :ivar pid: PID. Set to -1 if the command failed to run.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0915
         self,
         cmds: AnyCmdLine,
         cwd: str | Path | None = None,

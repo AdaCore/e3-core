@@ -141,7 +141,7 @@ class SystemInfo:
         return cls._platform
 
     @classmethod
-    def _get_os_version(cls) -> tuple[str, str, str]:
+    def _get_os_version(cls) -> tuple[str, str, str]:  # noqa: PLR0915
         """Compute all OS version information.
 
         :return: a tuple containing os version (maybe partial), kernel version and
