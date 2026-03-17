@@ -10,6 +10,10 @@ from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
 
+# Test return value for patch application
+TEST_PATCH_RETURN_VALUE = 42
+
+
 def test_source_builder_default_prepare_src() -> None:
     """Test SourceBuilder with the default prepare_src function."""
     sb = e3.anod.package.SourceBuilder(
@@ -103,7 +107,7 @@ def test_apply_patch() -> None:
         apply_patch=lambda _x, _y, _z: 42,
     )
 
-    assert sb.apply_patch(None, None, None) == 42
+    assert sb.apply_patch(None, None, None) == TEST_PATCH_RETURN_VALUE
 
     # Thirdparty source builders set the default patch command by default
 

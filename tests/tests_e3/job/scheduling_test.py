@@ -9,6 +9,9 @@ from e3.collection.dag import DAG
 from e3.job import Job, ProcessJob
 from e3.job.scheduler import Scheduler
 
+# Expected maximum concurrent jobs in scheduler tests
+MAX_CONCURRENT_JOBS = 2
+
 
 class NopJob(Job):
     def run(self) -> None:
@@ -37,7 +40,7 @@ class TestScheduler:
         dag.add_vertex("2")
         s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2)
         s.run(dag)
-        assert s.max_active_jobs == 2
+        assert s.max_active_jobs == MAX_CONCURRENT_JOBS
 
     def test_ordering(self) -> None:
         """Test that jobs are ordered correctly."""
@@ -83,7 +86,7 @@ class TestScheduler:
         dag.add_vertex("2")
         s = Scheduler(Scheduler.simple_provider(NopJob), tokens=2, collect=collect)
         s.run(dag)
-        assert s.max_active_jobs == 2
+        assert s.max_active_jobs == MAX_CONCURRENT_JOBS
         assert results["1"]
         assert results["2"]
 

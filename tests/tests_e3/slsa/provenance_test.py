@@ -61,6 +61,10 @@ VALID_URIS: list[str] = [
 ]
 
 
+# Invalid value for type comparison test
+INVALID_COMPARISON_VALUE = 2
+
+
 def create_valid_build_definition() -> tuple:
     """Create a valid build definition object."""
     build_type: TypeURI = TypeURI(VALID_URIS[0])
@@ -1121,7 +1125,7 @@ def test_typeuri_eq() -> None:
     # First test on some valid URIs.
     uri: ResourceURI = ResourceURI(VALID_URIS[0])
     assert ResourceURI(VALID_URIS[0]) == uri
-    assert uri != 2
+    assert uri != INVALID_COMPARISON_VALUE
 
 
 def test_typeuri_init() -> None:

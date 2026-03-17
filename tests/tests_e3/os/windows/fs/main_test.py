@@ -21,6 +21,9 @@ if sys.platform == "win32":
         Share,
     )
 
+# Expected number of directory entries in iteration test
+EXPECTED_DIR_ENTRIES = 40
+
 
 @pytest.mark.skipif(
     sys.platform != "win32",
@@ -211,7 +214,7 @@ def test_iterate_on_dir() -> None:
         ntfile = NTFile(test_dir_path)
         status = ntfile.iterate_on_dir(fun, default_result=False)
         assert status
-        assert len(result) == 40
+        assert len(result) == EXPECTED_DIR_ENTRIES
     finally:
         ntfile.close()
 

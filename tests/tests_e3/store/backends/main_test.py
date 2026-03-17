@@ -5,13 +5,17 @@ from pathlib import Path
 from e3.store.cache.backends.filecache import FileCache
 
 
+# Default value for cache get operation
+DEFAULT_CACHE_VALUE = 3
+
+
 def test_cache() -> None:
     """Test cache."""
     fc = FileCache({"cache_dir": str(Path.cwd() / "cache")})
     fc.set("a", 1)
     assert fc.get("a") == 1
     fc.set("b", 2, timeout=-2)
-    assert fc.get("b", 3) == 3
+    assert fc.get("b", DEFAULT_CACHE_VALUE) == DEFAULT_CACHE_VALUE
     fc.clear()
     assert fc.get("a", 0) == 0
 

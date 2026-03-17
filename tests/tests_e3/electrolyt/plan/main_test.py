@@ -9,6 +9,14 @@ import e3.electrolyt.host as host
 import e3.electrolyt.plan as plan
 import e3.env
 
+# Expected number of actions/entries in plan execution tests
+SIMPLE_PLAN_ACTIONS = 2
+MULTIPLATFORM_PLAN_ACTIONS = 5
+PLAN_ENTRY_POINTS = 3
+PLAN_WITH_REQUIRES = 5
+PLAN_WITH_DISABLED_IGNORED = 4
+PLAN_WITH_EXPLICIT_ENABLED = 2
+
 
 def build_action(spec, build=None, host=None, target=None, board=None) -> str:
     """Build an action string from a spec."""
@@ -46,7 +54,7 @@ def test_simple_plan() -> None:
     )
 
     actions = context.execute(myplan, "myserver")
-    assert len(actions) == 2
+    assert len(actions) == SIMPLE_PLAN_ACTIONS
     assert actions[0].spec == "a"
     assert actions[1].build.platform == "x86-linux"
     assert actions[1].target.platform == "x86-windows"
@@ -86,7 +94,7 @@ def test_plan_scope() -> None:
     )
 
     actions = context.execute(myplan, "myserver")
-    assert len(actions) == 5
+    assert len(actions) == MULTIPLATFORM_PLAN_ACTIONS
     assert actions[0].spec == "foo"
     assert actions[0].build.platform == actions[0].target.platform
     assert actions[1].target.platform == "x86-linux"
@@ -136,7 +144,7 @@ def test_entry_points() -> None:
 
     db = myplan.entry_points
 
-    assert len(db) == 3
+    assert len(db) == PLAN_ENTRY_POINTS
     assert db["foo"].kind == "ms_preset"
     assert db["foo"].name == "foo"
     assert db["foo"].fun.__name__ == "run_foo"
@@ -200,13 +208,13 @@ def test_plan_disable_lines() -> None:
     )
 
     actions = context.execute(myplan, "myserver")
-    assert len(actions) == 2
+    assert len(actions) == SIMPLE_PLAN_ACTIONS
     assert actions[0].spec == "foo"
     assert actions[1].spec == "bar3"
 
     context2 = _get_new_plancontext("myserver", ignore_disabled=False)
     actions2 = context2.execute(myplan, "myserver")
-    assert len(actions2) == 4
+    assert len(actions2) == PLAN_WITH_DISABLED_IGNORED
     assert actions2[0].spec == "foo"
     assert actions2[1].spec == "bar1"
     assert actions2[2].spec == "bar2"
@@ -234,7 +242,7 @@ def test_plan_disable_lines_with_conditional_constants() -> None:
 
     context2 = _get_new_plancontext("myserver", ignore_disabled=False)
     actions2 = context2.execute(myplan, "myserver")
-    assert len(actions2) == 2
+    assert len(actions2) == PLAN_WITH_EXPLICIT_ENABLED
     assert actions2[0].spec == "foo"
     assert actions2[1].spec == "bar"
 

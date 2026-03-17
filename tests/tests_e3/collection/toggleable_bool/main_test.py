@@ -3,6 +3,10 @@
 from e3.collection.toggleable_bool import ToggleableBooleanGroup
 
 
+# Expected size of toggleable bool group
+EXPECTED_GROUP_SIZE = 6
+
+
 def test_toggleable_bools() -> None:
     """Test toggleable bools."""
     g = ToggleableBooleanGroup()
@@ -14,7 +18,7 @@ def test_toggleable_bools() -> None:
     for series in g.shuffle():
         result.append([bool(c) for c in series])
         assert series == list(g)
-        assert len(g) == 6
+        assert len(g) == EXPECTED_GROUP_SIZE
 
     assert result == [
         [True, True, False, True, False, False],

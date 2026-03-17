@@ -7,6 +7,10 @@ import pytest
 import e3.decorator
 
 
+# Test return value for memoize decorator
+TEST_MEMOIZE_RETURN_VALUE = 22
+
+
 def test_memoize() -> None:
     """Test memoize."""
     # First generate a function returning random values so that we
@@ -52,9 +56,9 @@ def test_enabled() -> None:
 
     @e3.decorator.enabled
     def foo() -> int:
-        return 22
+        return TEST_MEMOIZE_RETURN_VALUE
 
-    assert foo() == 22
+    assert foo() == TEST_MEMOIZE_RETURN_VALUE
 
 
 def test_disabled() -> None:
@@ -62,6 +66,6 @@ def test_disabled() -> None:
 
     @e3.decorator.disabled
     def foo() -> int:
-        return 22
+        return TEST_MEMOIZE_RETURN_VALUE
 
     assert foo() is None

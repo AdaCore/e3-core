@@ -36,6 +36,9 @@ if TYPE_CHECKING:
 
 logger = getLogger("e3.anod.store")
 
+# Length of YYYYMMDD date format
+DATE_FORMAT_LENGTH = 8
+
 
 class _Store(_StoreContextManager):
     if TYPE_CHECKING:
@@ -1509,7 +1512,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
         if not date or date == "all":
             static_where_rules = ()
         else:
-            assert len(date) == 8
+            assert len(date) == DATE_FORMAT_LENGTH
             year = date[:4]
             month = date[4:6]
             day = date[6:8]

@@ -7,6 +7,17 @@ from e3.anod.context import AnodContext
 from e3.anod.loader import AnodSpecRepository
 from e3.anod.queries import SourceClosure, get_build_node
 
+# Expected source closure sizes for different test specs
+EMPTY_CLOSURE_SIZE = 0
+SPEC2_SOURCE_CLOSURE_SIZE = 2
+SPEC2_PUBLISHED_SOURCES = 1
+SPEC3_SOURCE_CLOSURE_SIZE = 4
+SPEC3_PUBLISHED_SOURCES = 1
+SPEC3_UNPUBLISHED_SOURCES = 3
+SPEC4_SOURCE_CLOSURE_SIZE = 4
+SPEC4_PUBLISHED_SOURCES = 2
+SPEC4_UNPUBLISHED_SOURCES = 2
+
 
 class TestSourceClosure:
     spec_dir = os.path.abspath(Path(__file__).parent / "source_closure_specs")
@@ -31,7 +42,7 @@ class TestSourceClosure:
         """Simple test with null source closure."""
         sc = self.get_source_closure("spec1")
         sources = sc.get_source_list()
-        assert len(sources) == 0
+        assert len(sources) == EMPTY_CLOSURE_SIZE
 
     def test_simple_source_closure(self) -> None:
         """Simple test with one public and one private source."""
@@ -43,10 +54,13 @@ class TestSourceClosure:
         published_sources = [src for src, publish in sources if publish]
         unpublished_sources = [src for src, publish in sources if not publish]
 
-        assert len(sources) == 2
-        assert len(published_sources) == 1 and published_sources[0] == "spec2-src"
+        assert len(sources) == SPEC2_SOURCE_CLOSURE_SIZE
         assert (
-            len(unpublished_sources) == 1
+            len(published_sources) == SPEC2_PUBLISHED_SOURCES
+            and published_sources[0] == "spec2-src"
+        )
+        assert (
+            len(unpublished_sources) == SPEC2_PUBLISHED_SOURCES
             and unpublished_sources[0] == "spec2-internal-src"
         )
 
@@ -60,10 +74,10 @@ class TestSourceClosure:
         published_sources = [src for src, publish in sources if publish]
         unpublished_sources = [src for src, publish in sources if not publish]
 
-        assert len(sources) == 4
-        assert len(published_sources) == 1
+        assert len(sources) == SPEC3_SOURCE_CLOSURE_SIZE
+        assert len(published_sources) == SPEC3_PUBLISHED_SOURCES
         assert published_sources[0] == "spec3-src"
-        assert len(unpublished_sources) == 3
+        assert len(unpublished_sources) == SPEC3_UNPUBLISHED_SOURCES
 
         sc = self.get_source_closure("spec4")
 
@@ -75,10 +89,10 @@ class TestSourceClosure:
         published_sources.sort()
         unpublished_sources = [src for src, publish in sources if not publish]
 
-        assert len(sources) == 4
-        assert len(published_sources) == 2
+        assert len(sources) == SPEC4_SOURCE_CLOSURE_SIZE
+        assert len(published_sources) == SPEC4_PUBLISHED_SOURCES
         assert published_sources == ["spec2-src", "spec4-src"]
-        assert len(unpublished_sources) == 2
+        assert len(unpublished_sources) == SPEC4_UNPUBLISHED_SOURCES
 
     def test_recursive_source_closure_with_package(self) -> None:
         sc = self.get_source_closure("spec5", expand_packages=True)
@@ -91,10 +105,10 @@ class TestSourceClosure:
         published_sources.sort()
         unpublished_sources = [src for src, publish in sources if not publish]
 
-        assert len(sources) == 4
-        assert len(published_sources) == 2
+        assert len(sources) == SPEC4_SOURCE_CLOSURE_SIZE
+        assert len(published_sources) == SPEC4_PUBLISHED_SOURCES
         assert published_sources == ["spec2-src", "spec5-src"]
-        assert len(unpublished_sources) == 2
+        assert len(unpublished_sources) == SPEC4_UNPUBLISHED_SOURCES
 
         sc = self.get_source_closure("spec5", expand_packages=False)
 
@@ -119,10 +133,10 @@ class TestSourceClosure:
         published_sources.sort()
         unpublished_sources = [src for src, publish in sources if not publish]
 
-        assert len(sources) == 4
-        assert len(published_sources) == 2
+        assert len(sources) == SPEC4_SOURCE_CLOSURE_SIZE
+        assert len(published_sources) == SPEC4_PUBLISHED_SOURCES
         assert published_sources == ["spec2-package-src", "spec5-src"]
-        assert len(unpublished_sources) == 2
+        assert len(unpublished_sources) == SPEC4_UNPUBLISHED_SOURCES
 
     def test_recursive_source_closure_with_download(self) -> None:
         sc = self.get_source_closure("spec6")
@@ -135,7 +149,7 @@ class TestSourceClosure:
         published_sources.sort()
         unpublished_sources = [src for src, publish in sources if not publish]
 
-        assert len(sources) == 4
-        assert len(published_sources) == 2
+        assert len(sources) == SPEC4_SOURCE_CLOSURE_SIZE
+        assert len(published_sources) == SPEC4_PUBLISHED_SOURCES
         assert published_sources == ["spec2-src", "spec6-src"]
-        assert len(unpublished_sources) == 2
+        assert len(unpublished_sources) == SPEC4_UNPUBLISHED_SOURCES

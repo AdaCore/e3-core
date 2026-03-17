@@ -12,6 +12,10 @@ from e3.os.fs import touch
 DEFAULT_SETUP = "test"
 
 
+# Expected number of components in release
+EXPECTED_RELEASE_COMPONENTS = 2
+
+
 def test_list_release_components(store) -> None:
     """Test list release components."""
     # Use store to simplify the initialization phase.
@@ -67,7 +71,7 @@ def test_list_release_components(store) -> None:
     comp2.push()
 
     comp_list = store.list_release_components(name="release-1")
-    assert len(comp_list) == 2
+    assert len(comp_list) == EXPECTED_RELEASE_COMPONENTS
 
     tmp0 = Component.load(comp_list[0])
     tmp1 = Component.load(comp_list[1])

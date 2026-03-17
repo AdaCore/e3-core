@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 
 logger = e3.log.getLogger("env")
 
+# CPU architecture constants
+BITS_64 = 64
 
 # This global variable contains a list of tuples
 # (build platform, host platform) that should not be considered as canadian
@@ -95,7 +97,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             # compatibility we don't append 64 to darwin host (which is
             # always 64bits).
             suffix = self.host.os.name
-            if self.host.cpu.bits == 64 and self.host.os.name != "darwin":
+            if self.host.cpu.bits == BITS_64 and self.host.os.name != "darwin":
                 suffix += "64"
             return self.target.platform + "-" + suffix
         # In native concept the platform is equivalent to target.platform

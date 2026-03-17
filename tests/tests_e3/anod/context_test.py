@@ -12,6 +12,25 @@ from e3.anod.error import AnodError
 from e3.anod.loader import AnodSpecRepository
 from e3.env import BaseEnv
 
+# Expected tree/result sizes for dependency graph tests
+# These constants document the expected number of nodes in dependency graphs
+SPEC1_SOURCE_SCHEDULED_SIZE = 5  # spec1 source primitive scheduled
+SPEC2_BUILD_TREE_SIZE = 9  # spec2 build primitive full tree
+SPEC2_BUILD_SCHEDULED_SIZE = 5  # spec2 build primitive scheduled
+SPEC3_BUILD_TREE_SIZE = 7  # spec3 build+install primitive tree
+SPEC3_BUILD_SCHEDULED_SIZE = 5  # spec3 build primitive scheduled
+SPEC4_INSTALL_TREE_SIZE = 7  # spec4 install primitive tree
+SPEC4_INSTALL_SCHEDULED_SIZE = 5  # spec4 install primitive scheduled
+SPEC5_BUILD_TREE_SIZE = 5  # spec5 with link_to_build
+SPEC5_BUILD_SCHEDULED_SIZE = 3  # spec5 scheduled
+SPEC6_BUILD_TREE_SIZE = 11  # spec6 install primitive tree
+SPEC6_BUILD_SCHEDULED_SIZE = 5  # spec6 scheduled
+SPEC7_TEST_TREE_SIZE = 13  # spec7 test primitive tree
+SPEC7_TEST_SCHEDULED_SIZE = 5  # spec7 test scheduled
+SPEC_QUALIFIED_BUILD_TREE_SIZE = 7  # qualified build tree
+SPEC_BUILD_WITH_REMOTE_TREE_SIZE = 2  # build with remote deps tree
+SPEC_BUILD_WITH_REMOTE_SCHEDULED_SIZE = 2  # build with remote scheduled
+
 
 class TestContext:
     spec_dir = str(Path(__file__).parent / "context_data")
@@ -78,7 +97,7 @@ class TestContext:
 
         ac.add_anod_action("spec1", env=ac.default_env, primitive="source")
         result = ac.schedule(ac.always_create_source_resolver)
-        assert len(result) == 5, result.as_dot()
+        assert len(result) == SPEC1_SOURCE_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec1.source.spec1-src",
@@ -91,10 +110,10 @@ class TestContext:
         # Simple spec with sources associated to the build primitive
         ac = self.create_context()
         ac.add_anod_action("spec2", env=ac.default_env, primitive="build")
-        assert len(ac.tree) == 9, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC2_BUILD_TREE_SIZE, ac.tree.as_dot()
 
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 5, result.as_dot()
+        assert len(result) == SPEC2_BUILD_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec2.build",
@@ -126,7 +145,7 @@ class TestContext:
 
         ac = self.create_context()
         ac.add_anod_action("spec2", env=ac.default_env, primitive="build")
-        assert len(ac.tree) == 9, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC2_BUILD_TREE_SIZE, ac.tree.as_dot()
 
         with pytest.raises(SchedulingError) as err:
             ac.schedule(no_resolver)
@@ -140,9 +159,9 @@ class TestContext:
         # declared
         ac = self.create_context()
         ac.add_anod_action("spec3", env=ac.default_env, primitive="build")
-        assert len(ac.tree) == 7, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC3_BUILD_TREE_SIZE, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 5, result.as_dot()
+        assert len(result) == SPEC3_BUILD_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec3.build",
@@ -157,9 +176,9 @@ class TestContext:
         #   build primitive
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="build")
-        assert len(ac.tree) == 7, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC4_INSTALL_TREE_SIZE, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 5, result.as_dot()
+        assert len(result) == SPEC4_INSTALL_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec4.build",
@@ -172,9 +191,9 @@ class TestContext:
         # Same previous example but calling install primitive instead of build
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="install")
-        assert len(ac.tree) == 5, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC5_BUILD_TREE_SIZE, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 3, result.as_dot()
+        assert len(result) == SPEC5_BUILD_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec4.download_bin",
@@ -185,9 +204,9 @@ class TestContext:
         # Same as previous example but calling test primitive
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="test")
-        assert len(ac.tree) == 2, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC_BUILD_WITH_REMOTE_TREE_SIZE, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 2, result.as_dot()
+        assert len(result) == SPEC_BUILD_WITH_REMOTE_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec4.test",
@@ -198,9 +217,9 @@ class TestContext:
         # package declared)
         ac = self.create_context()
         ac.add_anod_action("spec5", env=ac.default_env, primitive="build")
-        assert len(ac.tree) == 3, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC5_BUILD_SCHEDULED_SIZE, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 3, result.as_dot()
+        assert len(result) == SPEC5_BUILD_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec5.build",
@@ -212,9 +231,9 @@ class TestContext:
         # ??? should we allow that ???
         ac = self.create_context()
         ac.add_anod_action("spec6", env=ac.default_env, primitive="install")
-        assert len(ac.tree) == 2, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC_BUILD_WITH_REMOTE_TREE_SIZE, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 2, result.as_dot()
+        assert len(result) == SPEC_BUILD_WITH_REMOTE_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec6.build",
@@ -231,9 +250,9 @@ class TestContext:
         ac.add_anod_action(
             "spec6", env=ac.default_env, primitive="install", qualifier="myqualif"
         )
-        assert len(ac.tree) == 2, ac.tree.as_dot()
+        assert len(ac.tree) == SPEC_BUILD_WITH_REMOTE_TREE_SIZE, ac.tree.as_dot()
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 2, result.as_dot()
+        assert len(result) == SPEC_BUILD_WITH_REMOTE_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec6.build",
@@ -244,7 +263,7 @@ class TestContext:
         ac = self.create_context()
         ac.add_anod_action("spec7", env=ac.default_env, primitive="build")
         result = ac.schedule(ac.always_download_source_resolver)
-        assert len(result) == 2, result.as_dot()
+        assert len(result) == SPEC_BUILD_WITH_REMOTE_SCHEDULED_SIZE, result.as_dot()
         assert set(result.vertex_data.keys()) == {
             "root",
             "x86-linux.spec7.build",
@@ -366,7 +385,7 @@ class TestContext:
         ac.add_anod_action("spec13", env=ac.default_env, primitive="install")
         result = ac.schedule(ac.always_download_source_resolver)
         keys = set(result.vertex_data.keys())
-        assert len(keys) == 3, keys
+        assert len(keys) == SPEC5_BUILD_SCHEDULED_SIZE, keys
         assert "x86-linux.spec13.download_bin" in keys
         assert "x86-linux.spec13.install" in keys
 
@@ -461,7 +480,7 @@ class TestContext:
         )
         result = ac.schedule(ac.always_download_source_resolver)
         keys = set(result.vertex_data.keys())
-        assert len(keys) == 2, keys
+        assert len(keys) == SPEC_BUILD_WITH_REMOTE_SCHEDULED_SIZE, keys
         assert "x86-linux.spec-unmanaged-source.source.wheel.whl" not in keys
 
     def test_add_anod_action_managed_source(self) -> None:
@@ -472,7 +491,7 @@ class TestContext:
         )
         result = ac.schedule(ac.always_download_source_resolver)
         keys = set(result.vertex_data.keys())
-        assert len(keys) == 5, keys
+        assert len(keys) == SPEC1_SOURCE_SCHEDULED_SIZE, keys
         assert "checkout.a-git" in keys
         assert "x86-linux.spec-managed-source.source.a-src" in keys
 

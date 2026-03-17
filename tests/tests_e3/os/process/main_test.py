@@ -23,6 +23,12 @@ try:
 except ImportError:
     psutil = None
 
+# Expected values for process tests
+CTRL_C_TEST_TIMEOUT_SECONDS = 30
+EXPECTED_LOG_LINES = 2
+INTERRUPT_TIMEOUT_SECONDS = 2
+EXIT_STATUS_NORMAL_TERMINATION = 2
+
 
 def test_run_stdout_stderr() -> None:
     """Check Run with partial redirection.
@@ -188,7 +194,9 @@ p2.wait()
     #   if the script_to_run write something on stdout, this will wait forever.
     p.wait()
     end = time.perf_counter()
-    assert int(end - start) < 30, f"CTRL-C failed: take {int(end - start)} seconds"
+    assert int(end - start) < CTRL_C_TEST_TIMEOUT_SECONDS, (
+        f"CTRL-C failed: take {int(end - start)} seconds"
+    )
 
 
 @pytest.mark.skipif(sys.platform != "linux", reason="A linux test")
@@ -271,7 +279,7 @@ def test_enable_commands_handler() -> None:
 
     with Path(log_file).open("rb") as fd:
         lines = fd.readlines()
-    assert len(lines) == 2
+    assert len(lines) == EXPECTED_LOG_LINES
 
 
 @pytest.mark.xfail(sys.platform != "win32", reason="unix implem not complete")
@@ -447,7 +455,7 @@ def test_interrupt() -> None:
     time.sleep(0.5)  # Make sure the process had the time to start
     p.interrupt()
     t1 = time.time()
-    assert t1 - t0 < 2, "process not interrupted after 2s?"
+    assert t1 - t0 < INTERRUPT_TIMEOUT_SECONDS, "process not interrupted after 2s?"
 
     p.wait()
     assert p.status != 0
@@ -462,7 +470,7 @@ def test_kill_process_tree() -> None:
         bg=True,
     )
     e3.os.process.kill_process_tree(p1.pid, timeout=wait_timeout)
-    assert p1.status != 2
+    assert p1.status != EXIT_STATUS_NORMAL_TERMINATION
     assert not p1.is_running()
 
     time.sleep(2.0)

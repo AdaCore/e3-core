@@ -14,6 +14,9 @@ from e3.anod.store.file import File, FileKind
 from e3.anod.store.interface import StoreError
 from e3.os.fs import touch
 
+# Expected number of components in store tests
+EXPECTED_COMPONENTS_COUNT = 2
+
 
 def test_create_and_get_build_info(store) -> None:
     """Test create and get build info."""
@@ -268,10 +271,10 @@ def test_component(store) -> None:  # noqa: PLR0915
     c2.push()
 
     tmp = store.list_components(bid.id)
-    assert len(tmp) == 2
+    assert len(tmp) == EXPECTED_COMPONENTS_COUNT
 
     tmp = store.latest_components("test")
-    assert len(tmp) == 2
+    assert len(tmp) == EXPECTED_COMPONENTS_COUNT
     assert tmp[0]["name"] == "comp2"
     assert tmp[0]["specname"] == "comp2"
     assert tmp[0]["platform"] == "x86_64-windows64"

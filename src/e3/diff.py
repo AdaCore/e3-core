@@ -17,6 +17,9 @@ if TYPE_CHECKING:
 
 logger = e3.log.getLogger("diff")
 
+# Git patch prefix length (e.g., "a/" or "b/")
+GIT_PREFIX_LENGTH = 2
+
 
 class DiffError(e3.error.E3Error):
     """Error returned when the patch command fails."""
@@ -161,8 +164,13 @@ def patch(  # noqa: PLR0915
         if path == "/dev/null":
             return False
 
-        if is_git_patch and len(path) >= 2 and path[0] in "ab" and path[1] in "/\\":
-            path = path[2:]
+        if (
+            is_git_patch
+            and len(path) >= GIT_PREFIX_LENGTH
+            and path[0] in "ab"
+            and path[1] in "/\\"
+        ):
+            path = path[GIT_PREFIX_LENGTH:]
 
         if callable(discarded_files):
             if discarded_files(path):

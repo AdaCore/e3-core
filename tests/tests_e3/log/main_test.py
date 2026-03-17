@@ -12,6 +12,11 @@ import dateutil.parser
 import e3.log
 import e3.os.process
 
+# Expected values for log tests
+LOG_TIME_TOLERANCE_SECONDS = 10
+DEFAULT_JSON_LOG_FIELDS = 5
+JSON_LOG_FIELDS_WITH_CUSTOM = 6
+
 
 def test_log() -> None:
     """Test log."""
@@ -38,7 +43,9 @@ def test_log() -> None:
 
         # Parse it and verify that it is it in GMT
         parsed_log_datetime = dateutil.parser.parse(log_datetime).replace(tzinfo=tz.utc)
-        assert (dt.now(tz=tz.utc) - parsed_log_datetime).seconds < 10
+        assert (
+            dt.now(tz=tz.utc) - parsed_log_datetime
+        ).seconds < LOG_TIME_TOLERANCE_SECONDS
 
 
 def test_json_log() -> None:
@@ -70,13 +77,13 @@ def test_json_log() -> None:
 
     record = json.loads(lines[0])
     # verify if we get default json fields
-    assert len(record.keys()) == 5
+    assert len(record.keys()) == DEFAULT_JSON_LOG_FIELDS
 
     # verify presence of custom size field
     for line in lines[1:]:
         record = json.loads(line)
         assert "anod_uui" in record
-        assert len(record.keys()) == 6
+        assert len(record.keys()) == JSON_LOG_FIELDS_WITH_CUSTOM
 
 
 def test_json_log_compat() -> None:
@@ -163,4 +170,4 @@ def test_json_formatter() -> None:
     record = LogRecord("_test_", 20, "module.py", 20, "Message", (), None)
     json_string = formatter.format(record)
     record_dict = json.loads(json_string)
-    assert (len(record_dict.keys())) == 5
+    assert (len(record_dict.keys())) == DEFAULT_JSON_LOG_FIELDS

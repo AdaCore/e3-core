@@ -17,6 +17,11 @@ try:
 except ImportError:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
+# Expected values for HTTP tests
+EXPECTED_RETRY_COUNT = 2
+HTTP_INTERNAL_SERVER_ERROR = 500
+HTTP_FORBIDDEN = 403
+
 
 class RetryHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
@@ -138,7 +143,7 @@ class TestHTTP:
                 with Path(result).open("rb") as fd:
                     content = fd.read()
                 assert content == b"OK"
-                assert server.tries == 2
+                assert server.tries == EXPECTED_RETRY_COUNT
 
         run_server(RetryHandler, func)
 
@@ -189,7 +194,7 @@ class TestHTTP:
                     )
                     raise AssertionError("exception not raised")
                 except HTTPError as e:
-                    assert e.status == 500
+                    assert e.status == HTTP_INTERNAL_SERVER_ERROR
 
         run_server(ServerErrorHandler, func)
 
@@ -203,7 +208,7 @@ class TestHTTP:
                     result = session.download_file(base_url + "dummy", dest=".")
                     assert result is not None
                     assert server.calls == 1
-                    assert server2.tries == 2
+                    assert server2.tries == EXPECTED_RETRY_COUNT
 
             run_server(RetryHandler, inner_func)
 
@@ -261,7 +266,7 @@ class TestHTTP:
                     )
                     raise AssertionError("exception not raised")
                 except HTTPError as e:
-                    assert e.status == 403
+                    assert e.status == HTTP_FORBIDDEN
                 # second test with authorization header
                 result = session.download_file(
                     base_url + "dummy",

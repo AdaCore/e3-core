@@ -3,6 +3,10 @@
 import e3.os.platform
 
 
+# CPU architecture bits
+BITS_64 = 64
+
+
 def test_system_info() -> None:
     """Compute SystemInfo and test the cache system."""
     s = e3.os.platform.SystemInfo
@@ -119,7 +123,7 @@ def test_os_version_sles() -> None:
 def test_cpu() -> None:
     """Simple test for CPU."""
     cpu = e3.os.platform.CPU.get("x86_64")
-    assert cpu.as_dict()["bits"] == 64
+    assert cpu.as_dict()["bits"] == BITS_64
 
 
 def test_os() -> None:
