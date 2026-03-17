@@ -21,7 +21,7 @@ from e3.os.process import Run
 logger = getLogger("build_wheel")
 
 
-def run(cmd: list[str], cwd: Path, fail_ok: bool | None = None) -> str:
+def run(cmd: list[str], cwd: Path, *, fail_ok: bool | None = None) -> str:
     """Run a command and check the status.
 
     :param cmd: the command
@@ -39,7 +39,7 @@ def run(cmd: list[str], cwd: Path, fail_ok: bool | None = None) -> str:
     return output
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0915
     """Entrypoint."""
     main = Main()
 
