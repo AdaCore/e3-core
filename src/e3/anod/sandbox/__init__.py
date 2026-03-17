@@ -134,6 +134,10 @@ class SandBox:
         return BuildSpace(root_dir=str(Path(self.root_dir, platform, name)))
 
     def dump_configuration(self) -> None:
+        """Save sandbox configuration to sandbox.yaml metadata file.
+
+        Stores the command line used to create the sandbox with absolute paths.
+        """
         # Compute command line for call to e3-sandbox create. Ensure that the
         # paths are made absolute (path to sandbox, script).
         cmd_line = [sys.executable, os.path.abspath(__file__)]

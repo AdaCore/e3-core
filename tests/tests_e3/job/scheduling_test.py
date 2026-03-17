@@ -15,10 +15,12 @@ MAX_CONCURRENT_JOBS = 2
 
 class NopJob(Job):
     def run(self) -> None:
+        """Run."""
         pass
 
     @property
     def priority(self) -> int:
+        """Priority."""
         try:
             result = -int(self.uid)
         except Exception:
@@ -29,6 +31,7 @@ class NopJob(Job):
 class SleepJob(ProcessJob):
     @property
     def cmdline(self) -> list[str]:
+        """Return command line configuration as dictionary."""
         return [sys.executable, "-c", "import time; time.sleep(6.0)"]
 
 

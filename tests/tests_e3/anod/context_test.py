@@ -56,6 +56,7 @@ class TestContext:
         return ac
 
     def test_context_init(self) -> None:
+        """Test context init."""
         # Create a context using:
         # 1. the local default configuration
         # 2. forcing a x86-linux configuration
@@ -67,6 +68,7 @@ class TestContext:
         self.create_context()
 
     def test_load(self) -> None:
+        """Test load."""
         # Load a simple build specification that declares a single source
         ac = self.create_context()
         ac.load("spec1", env=ac.default_env, qualifier="", kind="build")
@@ -83,6 +85,7 @@ class TestContext:
         assert len(ac.cache) == 1, "caching of anod instances broken"
 
     def test_add_anod_action(self) -> None:
+        """Test add anod action."""
         # Load spec1 with build primitive
         ac = self.create_context()
 
@@ -107,6 +110,7 @@ class TestContext:
         }
 
     def test_add_anod_action2(self) -> None:
+        """Test add anod action2."""
         # Simple spec with sources associated to the build primitive
         ac = self.create_context()
         ac.add_anod_action("spec2", env=ac.default_env, primitive="build")
@@ -140,6 +144,8 @@ class TestContext:
         )
 
     def test_add_anod_action2_no_source_resolver(self) -> None:
+        """Test add anod action2 no source resolver."""
+
         def no_resolver(action, decision):
             return AnodContext.decision_error(action, decision)
 
@@ -155,6 +161,7 @@ class TestContext:
         )
 
     def test_add_anod_action3(self) -> None:
+        """Test add anod action3."""
         # Simple spec with both install and build primitive and a package
         # declared
         ac = self.create_context()
@@ -171,6 +178,7 @@ class TestContext:
         }
 
     def test_add_anod_action4(self) -> None:
+        """Test add anod action4."""
         # Simple spec with:
         #   install primitive, package, component
         #   build primitive
@@ -188,6 +196,7 @@ class TestContext:
         }
 
     def test_add_anod_action4_2(self) -> None:
+        """Test add anod action4 2."""
         # Same previous example but calling install primitive instead of build
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="install")
@@ -201,6 +210,7 @@ class TestContext:
         }
 
     def test_add_anod_action4_3(self) -> None:
+        """Test add anod action4 3."""
         # Same as previous example but calling test primitive
         ac = self.create_context()
         ac.add_anod_action("spec4", env=ac.default_env, primitive="test")
@@ -213,6 +223,7 @@ class TestContext:
         }
 
     def test_add_anod_action5(self) -> None:
+        """Test add anod action5."""
         # Case in which a source component should be uploaded (i.e: no binary
         # package declared)
         ac = self.create_context()
@@ -227,6 +238,7 @@ class TestContext:
         }
 
     def test_add_anod_action6(self) -> None:
+        """Test add anod action6."""
         # Calling install on a spec without install primitive result in a build
         # ??? should we allow that ???
         ac = self.create_context()
@@ -240,6 +252,7 @@ class TestContext:
         }
 
     def test_add_anod_action6_2(self) -> None:
+        """Test add anod action6 2."""
         # Same as previous example. Just ensure that if the spec is called
         # twice with different qualifiers that have no effect on build space
         # name then the result is only one install. (and thus qualifier value
@@ -259,6 +272,7 @@ class TestContext:
         }
 
     def test_add_anod_action7(self) -> None:
+        """Test add anod action7."""
         # Ensure that build_deps = None is accepted
         ac = self.create_context()
         ac.add_anod_action("spec7", env=ac.default_env, primitive="build")
@@ -626,6 +640,7 @@ class TestContext:
                 )
 
     def test_dag_with_shared_knowledge(self) -> None:
+        """Test dag with shared knowledge."""
         # Create a new plan context
         ac = self.create_context()
         current_env = BaseEnv()
@@ -841,6 +856,7 @@ class TestContext:
         )
 
     def test_add_anod_action_missing_src_pkg_dep(self, caplog) -> None:
+        """Test add anod action missing src pkg dep."""
         ac = self.create_context()
         ac.add_anod_action("missing_src_pkg_dep", env=ac.default_env, primitive="build")
         assert (

@@ -25,6 +25,7 @@ class TestSourceClosure:
     def get_source_closure(
         self, name, expand_packages=True, other_builds=None
     ) -> SourceClosure:
+        """Get source closure."""
         asr = AnodSpecRepository(self.spec_dir)
         ac = AnodContext(asr)
         anod_instance = ac.add_anod_action(
@@ -65,6 +66,7 @@ class TestSourceClosure:
         )
 
     def test_recursive_source_closure(self) -> None:
+        """Test recursive source closure."""
         sc = self.get_source_closure("spec3")
 
         for key in sc.source_list:
@@ -95,6 +97,7 @@ class TestSourceClosure:
         assert len(unpublished_sources) == SPEC4_UNPUBLISHED_SOURCES
 
     def test_recursive_source_closure_with_package(self) -> None:
+        """Test recursive source closure with package."""
         sc = self.get_source_closure("spec5", expand_packages=True)
 
         for key in sc.source_list:
@@ -139,6 +142,7 @@ class TestSourceClosure:
         assert len(unpublished_sources) == SPEC4_UNPUBLISHED_SOURCES
 
     def test_recursive_source_closure_with_download(self) -> None:
+        """Test recursive source closure with download."""
         sc = self.get_source_closure("spec6")
 
         for key in sc.source_list:

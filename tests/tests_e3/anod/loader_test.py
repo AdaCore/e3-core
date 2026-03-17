@@ -14,17 +14,20 @@ class TestLoader:
     spec2_dir = str(Path(__file__).parent / "data2")
 
     def test_spec_does_not_exist(self) -> None:
+        """Test spec does not exist."""
         with pytest.raises(SandBoxError) as err:
             AnodSpecRepository("/foo/bar")
 
         assert str(err.value).startswith("spec directory /foo/bar does not exist")
 
     def test_spec_loader1(self) -> None:
+        """Test spec loader1."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         s = spec_repo.load("loader1")
         assert s.name == "loader1"
 
     def test_spec_loader2(self) -> None:
+        """Test spec loader2."""
         spec_repo = AnodSpecRepository(self.spec_dir)
 
         with pytest.raises(SandBoxError) as err:
@@ -40,6 +43,7 @@ class TestLoader:
         assert "invalid spec code" in str(err.value)
 
     def test_spec_loader_prolog(self) -> None:
+        """Test spec loader prolog."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         anod_class = spec_repo.load("prolog_test")
 
@@ -50,6 +54,7 @@ class TestLoader:
         assert anod_instance.prolog_test, "prolog not executed properly"
 
     def test_spec_loader_prolog_with_repos(self) -> None:
+        """Test spec loader prolog with repos."""
         sync_tree(self.spec_dir, "specs_dir")
         repositories_yaml = str(Path("specs_dir", "config", "repositories.yaml"))
         cp(repositories_yaml + ".tmpl", repositories_yaml)
@@ -98,6 +103,7 @@ class TestLoader:
         assert anod_instance2.parent_info == "from_parent2"
 
     def test_load_all(self) -> None:
+        """Test load all."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         with pytest.raises(SandBoxError):
             spec_repo.load_all()
@@ -109,6 +115,7 @@ class TestLoader:
         assert "unknown" not in spec_repo
 
     def test_load_config(self) -> None:
+        """Test load config."""
         spec_repo = AnodSpecRepository(self.spec_dir)
         spec_repo.api_version = "1.4"
         anod_class = spec_repo.load("withconfig")

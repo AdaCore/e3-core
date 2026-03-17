@@ -43,4 +43,5 @@ class LoggingHandler(EventHandler):
         return {"logger_name": logger_name, "level": int(level)}
 
     def encode_config(self) -> str:
+        """Encode configuration to string representation."""
         return f"{self.logger_name},{self.level}"

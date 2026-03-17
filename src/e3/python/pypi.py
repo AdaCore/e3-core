@@ -735,6 +735,7 @@ class PyPIClosure:
         self.requirements.add(req)
 
     def file_closure(self) -> list[str]:
+        """File closure."""
         reqs = self._requirements_closure()
         result = set()
 

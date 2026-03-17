@@ -179,6 +179,7 @@ class TestCheckout:
         assert Path("myrepo", "file1.txt", "data2.txt").is_file()
 
     def test_shallow_since_checkout(self) -> None:
+        """Test shallow since checkout."""
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
         os.environ["GIT_COMMITTER_NAME"] = "e3 core"
@@ -219,6 +220,7 @@ class TestCheckout:
         assert log == ["second commit"]
 
     def test_max_depth_checkout(self) -> None:
+        """Test max depth checkout."""
         os.environ["GIT_AUTHOR_EMAIL"] = "e3-core@example.net"
         os.environ["GIT_AUTHOR_NAME"] = "e3 core"
         os.environ["GIT_COMMITTER_NAME"] = "e3 core"

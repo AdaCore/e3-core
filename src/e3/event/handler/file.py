@@ -46,4 +46,5 @@ class FileHandler(EventHandler):
         return {"log_dir": config_str}
 
     def encode_config(self) -> str:
+        """Encode configuration to string representation."""
         return self.log_dir

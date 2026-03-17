@@ -47,6 +47,7 @@ class HTTPSimpleStoreResourceInfo(ResourceInfo):
 
     @property
     def uid(self) -> str:
+        """Return unique identifier."""
         return self.sha
 
 

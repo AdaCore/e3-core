@@ -73,6 +73,11 @@ class ElectrolytJob(Job):
         self.store = store
 
     def run(self) -> None:
+        """Execute the action by calling its run_method.
+
+        Updates status to failure if an exception occurs.
+        Skips execution if dry_run is enabled or status is already set.
+        """
         if self.__status == STATUS.unknown and not self.dry_run:
             try:
                 getattr(self, self.data.run_method)()

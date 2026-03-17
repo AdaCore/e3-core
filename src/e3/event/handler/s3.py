@@ -54,6 +54,7 @@ class S3Handler(EventHandler):
         }
 
     def encode_config(self) -> str:
+        """Encode configuration to string representation."""
         return "{},{},{},{}".format(
             self.event_s3_url,
             self.log_s3_url,

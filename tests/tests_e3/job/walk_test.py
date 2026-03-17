@@ -26,6 +26,7 @@ class SbxDirs:
         self.sbx_tmp_dir = Path("/dev/null")
 
     def set_dirs(self, root_dir: str) -> None:
+        """Set dirs."""
         # A directory where we have the equivalent of a sandbox;
         # basically, a place where we store some information as we
         # perform the actions
@@ -43,10 +44,12 @@ class SbxDirs:
         self.sbx_tmp_dir = self.sbx_dir / "tmp"
 
     def delete_sbx(self) -> None:
+        """Delete sbx."""
         if self.sbx_dir.exists():
             rm(self.sbx_dir, recursive=True)
 
     def mkdirs(self) -> None:
+        """Mkdirs."""
         os.mkdir(self.sbx_dir)
         os.mkdir(self.fingerprint_dir)
         os.mkdir(self.store_dir)
@@ -134,6 +137,7 @@ class DoNothingJob(Job):
     """A Job which inherits Job's implementation of the status attribute."""
 
     def run(self) -> None:
+        """Run."""
         pass
 
 
@@ -149,11 +153,13 @@ class ControlledJob(ProcessJob):
         self.run_count = 0
 
     def run(self) -> None:
+        """Run."""
         self.run_count += 1
         return super().run()
 
     @property
     def cmdline(self) -> list[str]:
+        """Return command line configuration as dictionary."""
         result = [sys.executable, "-c"]
         if self.uid.endswith("bad"):
             result.append("import sys; sys.exit(1)")
@@ -194,6 +200,7 @@ class SimpleWalk(Walk):
         return self.requeued[job.uid] < MAX_REQUEUE_COUNT
 
     def create_job(self, uid, data, predecessors, notify_end) -> Job:
+        """Create job."""
         if self.dry_run_mode:
             job = DryRunJob(uid, data, notify_end, status=ReturnValue.skip)
         elif uid.endswith("do-nothing"):
@@ -203,6 +210,7 @@ class SimpleWalk(Walk):
         return job
 
     def get_job(self, uid, data, predecessors, notify_end) -> Job:
+        """Get job."""
         # Normally, deriving classes of class Walk are not expected
         # to override this method. However, we need to do it here
         # as a way to record some information each time this method
@@ -216,9 +224,11 @@ class SimpleWalk(Walk):
 class FingerprintWalk(SimpleWalk):
     @classmethod
     def fingerprint_filename(cls, uid):
+        """Fingerprint filename."""
         return str(sbx_dirs.fingerprint_dir / uid)
 
     def compute_fingerprint(self, uid, data, is_prediction=False) -> Fingerprint | None:
+        """Compute fingerprint."""
         if "fingerprint_after_job" in uid and is_prediction:
             return None
         if "no_fingerprint" in uid:
@@ -233,6 +243,7 @@ class FingerprintWalk(SimpleWalk):
         return f
 
     def save_fingerprint(self, uid, fingerprint) -> None:
+        """Save fingerprint."""
         if self.dry_run_mode:
             # In dry-run mode, we don't do anything, so we should not
             # touch the fingerprint either.
@@ -246,6 +257,7 @@ class FingerprintWalk(SimpleWalk):
             fingerprint.save_to_file(filename)
 
     def load_previous_fingerprint(self, uid) -> Fingerprint | None:
+        """Load previous fingerprint."""
         # In dry-run mode, the fingerprints on file are let untouched,
         # so they might be out of date compared to this job's status
         # as part of this dry run. So, if we have already computed

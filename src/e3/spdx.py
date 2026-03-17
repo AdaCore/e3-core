@@ -145,6 +145,7 @@ class SPDXEntryStr(SPDXEntry):
         return False
 
     def to_json_dict(self) -> dict[str, Any]:
+        """Convert to JSON-serializable dictionary format."""
         # Force calling __str__ method to simplify overloading
         # e.g. for SPDXID
         return {self.json_entry_key: str(self)}
@@ -164,6 +165,7 @@ class SPDXEntryMaybeStr(SPDXEntry):
         return self.value
 
     def to_json_dict(self) -> dict[str, Any]:
+        """Convert to JSON-serializable dictionary format."""
         return {self.json_entry_key: self.value}
 
 
@@ -192,6 +194,7 @@ class SPDXEntryBool(SPDXEntry):
         return "true" if self.value else "false"
 
     def to_json_dict(self) -> dict[str, Any]:
+        """Convert to JSON-serializable dictionary format."""
         return {self.json_entry_key: self.value}
 
 
@@ -218,6 +221,7 @@ class SPDXSection:
         return output
 
     def to_json_dict(self) -> dict[str, Any]:
+        """Convert to JSON-serializable dictionary format."""
         result = {}
         for fd in fields(self):
             section_field = self.__dict__[fd.name]
@@ -482,11 +486,13 @@ class EntityRef(SPDXEntry):
         return self.value.to_tagvalue()
 
     def to_tagvalue(self) -> str:
+        """Convert to SPDX tag-value format string."""
         if self.value == NOASSERTION:
             return f"{self.entry_key}: {self.value}"
         return f"{self.entry_key}: {self.value.to_tagvalue()}"
 
     def to_json_dict(self) -> dict[str, Any]:
+        """Convert to JSON-serializable dictionary format."""
         if self.value == NOASSERTION:
             return {self.json_entry_key: self.value}
         return {self.json_entry_key: self.value.to_tagvalue()}
@@ -733,12 +739,14 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
     @property
     @abstractmethod
     def algorithm(self) -> str:
+        """Algorithm."""
         pass
 
     def __str__(self) -> str:
         return f"{self.algorithm}: {self.value}"
 
     def to_json_dict(self) -> dict[str, dict[str, str]]:
+        """Convert to JSON-serializable dictionary format."""
         return {
             self.json_entry_key: {
                 "algorithm": self.algorithm,
@@ -1139,12 +1147,15 @@ class PrimaryPackagePurpose(Enum):
 
     @classmethod
     def get_json_entry_key(cls) -> str:
+        """Return JSON entry key for this object."""
         return f"{cls.__name__[0].lower()}{cls.__name__[1:]}"
 
     def to_tagvalue(self) -> str:
+        """Convert to SPDX tag-value format string."""
         return f"{self.__class__.__name__}: {self.name}"
 
     def to_json_dict(self) -> dict[str, str]:
+        """Convert to JSON-serializable dictionary format."""
         return {self.get_json_entry_key(): self.name}
 
     @classmethod
@@ -1274,12 +1285,15 @@ class RelationshipType(Enum):
 
     @classmethod
     def get_json_entry_key(cls) -> str:
+        """Return JSON entry key for this object."""
         return f"{cls.__name__[0].lower()}{cls.__name__[1:]}"
 
     def to_tagvalue(self) -> str:
+        """Convert to SPDX tag-value format string."""
         return f"{self.__class__.__name__}: {self.name}"
 
     def to_json_dict(self) -> dict[str, str]:
+        """Convert to JSON-serializable dictionary format."""
         return {self.get_json_entry_key(): self.name}
 
     @classmethod
@@ -1335,6 +1349,7 @@ class Relationship(SPDXEntry):
         )
 
     def to_json_dict(self) -> dict[str, str]:
+        """Convert to JSON-serializable dictionary format."""
         return {
             "spdxElementId": str(self.spdx_element_id),
             "relationshipType": self.relationship_type.name,

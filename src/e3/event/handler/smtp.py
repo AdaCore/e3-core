@@ -56,6 +56,7 @@ class SMTPHandler(EventHandler):
         }
 
     def encode_config(self) -> str:
+        """Encode configuration to string representation."""
         return "{},{},{},{}".format(
             self.subject,
             self.from_addr,
@@ -65,6 +66,7 @@ class SMTPHandler(EventHandler):
 
     @property
     def subject(self) -> str:
+        """Subject."""
         return self.default_subject
 
     def send_event(self, event: Event) -> bool:
