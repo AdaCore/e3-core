@@ -168,7 +168,11 @@ class SourceClosure:
             if pkg_key.anod_uid == spec_uid:
                 self.package_list[pkg_key] = data
 
-    def resolve_source(self, source_name: str, data: Any) -> None:
+    def resolve_source(
+        self,
+        source_name: str,
+        data: Any,  # noqa: ANN401  # polymorphic source data
+    ) -> None:
         """Associate source information to a given source.
 
         :param source_name: the source name

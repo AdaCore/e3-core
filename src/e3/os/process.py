@@ -652,7 +652,11 @@ class Run:
 class File:
     """Can be a PIPE, a file object."""
 
-    def __init__(self, name: Any, mode: str = "r") -> None:
+    def __init__(
+        self,
+        name: Any,  # noqa: ANN401  # accepts various file types
+        mode: str = "r",
+    ) -> None:
         """Create a new File.
 
         :param name: can be PIPE, STDOUT, a filename string, bytes, an opened
@@ -759,7 +763,10 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
         # then select which support timeout arguments to wait.
         fd_r, fd_w = os.pipe()
 
-        def handler(signum: int, frame: Any) -> None:
+        def handler(
+            signum: int,
+            frame: Any,  # noqa: ANN401  # signal handler protocol
+        ) -> None:
             """Signal handler for SIGCHLD.
 
             :param signum: signal number
@@ -841,7 +848,10 @@ def is_running(pid: int) -> bool:
         return True
 
 
-def kill_process_tree(pid: int | Any, timeout: int = 3) -> bool:
+def kill_process_tree(
+    pid: int | Any,  # noqa: ANN401  # accepts int or psutil.Process
+    timeout: int = 3,
+) -> bool:
     """Kill a hierarchy of processes.
 
     :param pid: pid of the toplevel process

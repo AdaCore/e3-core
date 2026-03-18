@@ -92,7 +92,10 @@ class Walk:
         """
 
     def compute_fingerprint(
-        self, uid: str, data: Any, is_prediction: bool = False
+        self,
+        uid: str,
+        data: Any,  # noqa: ANN401  # polymorphic job data
+        is_prediction: bool = False,
     ) -> Fingerprint | None:
         """Compute the given action's Fingerprint.
 
@@ -193,7 +196,7 @@ class Walk:
     def create_skipped_job(
         self,
         uid: str,
-        data: Any,
+        data: Any,  # noqa: ANN401  # polymorphic job data
         predecessors: frozenset[str],
         reason: str | None,
         notify_end: Callable[[str], None],
@@ -217,7 +220,7 @@ class Walk:
     def create_job(
         self,
         uid: str,
-        data: Any,
+        data: Any,  # noqa: ANN401  # polymorphic job data
         predecessors: frozenset[str],
         notify_end: Callable[[str], None],
     ) -> ProcessJob:
@@ -241,7 +244,7 @@ class Walk:
     def get_job(
         self,
         uid: str,
-        data: Any,
+        data: Any,  # noqa: ANN401  # polymorphic job data
         predecessors: frozenset[str],
         notify_end: Callable[[str], None],
     ) -> Job:

@@ -20,7 +20,11 @@ class Host(BaseEnv):
     """
 
     def __init__(
-        self, hostname: str, platform: str, version: str, **kwargs: Any
+        self,
+        hostname: str,
+        platform: str,
+        version: str,
+        **kwargs: Any,  # noqa: ANN401  # user-defined host metadata
     ) -> None:
         """Initialize an host entry.
 
@@ -61,7 +65,13 @@ class HostDB:
         """
         return list(self.hosts.keys())
 
-    def add_host(self, hostname: str, platform: str, version: str, **data: Any) -> None:
+    def add_host(
+        self,
+        hostname: str,
+        platform: str,
+        version: str,
+        **data: Any,  # noqa: ANN401  # user-defined host metadata
+    ) -> None:
         """Add/Update a host entry.
 
         :param hostname: host name

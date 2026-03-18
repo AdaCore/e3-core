@@ -377,8 +377,11 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         return result
 
     def get_attr(
-        self, name: str, default_value: Any = None, forced_value: Any = None
-    ) -> Any:
+        self,
+        name: str,
+        default_value: Any = None,  # noqa: ANN401  # polymorphic default value
+        forced_value: Any = None,  # noqa: ANN401  # polymorphic forced value
+    ) -> Any:  # noqa: ANN401  # returns attribute value of any type
         """Return an attribute value.
 
         :param name: name of the attribute to check. Name can contain '.'
@@ -591,7 +594,11 @@ class BaseEnv(AbstractBaseEnv):
         self._context: list[Any] = []
         super().__init__(build, host, target)
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __setattr__(
+        self,
+        name: str,
+        value: Any,  # noqa: ANN401  # polymorphic attribute values
+    ) -> None:
         """Set an attribute.
 
         :param name: attribute name
@@ -672,7 +679,11 @@ class Env(AbstractBaseEnv):
     def _initialized(self) -> bool:
         return "build" in Env._instance
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __setattr__(
+        self,
+        name: str,
+        value: Any,  # noqa: ANN401  # polymorphic attribute values
+    ) -> None:
         """Set an attribute.
 
         :param name: attribute name
@@ -685,7 +696,7 @@ class Env(AbstractBaseEnv):
         else:
             self._instance[name] = value
 
-    def __getattr__(self, name: str) -> Any:
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
         """Get an attribute.
 
         :param name: attribute name

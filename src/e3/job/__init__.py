@@ -60,7 +60,12 @@ class Job(metaclass=abc.ABCMeta):
     lock = threading.RLock()
     index_counter = 0
 
-    def __init__(self, uid: str, data: Any, notify_end: NotifyEndType) -> None:
+    def __init__(
+        self,
+        uid: str,
+        data: Any,  # noqa: ANN401  # polymorphic job data
+        notify_end: NotifyEndType,
+    ) -> None:
         """Initialize worker.
 
         :param uid: unique work identifier
@@ -188,7 +193,7 @@ class EmptyJob(Job):
     def __init__(
         self,
         uid: str,
-        data: Any,
+        data: Any,  # noqa: ANN401  # polymorphic job data
         notify_end: Callable[[str], None],
         status: ReturnValue,
     ) -> None:
@@ -221,7 +226,12 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
     :vartype proc_handle: e3.os.process.Run | None
     """
 
-    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]) -> None:
+    def __init__(
+        self,
+        uid: str,
+        data: Any,  # noqa: ANN401  # polymorphic job data
+        notify_end: Callable[[str], None],
+    ) -> None:
         """Initialize ProcessJob.
 
         :param uid: unique job identifier

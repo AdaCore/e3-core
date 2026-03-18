@@ -13,7 +13,11 @@ if TYPE_CHECKING:
     from e3.store.cache.backends.base import Cache
 
 
-def load_store(name: str, configuration: Any, cache: Cache) -> Store:
+def load_store(
+    name: str,
+    configuration: Any,  # noqa: ANN401  # plugin-specific config
+    cache: Cache,
+) -> Store:
     """Load a store backend by name.
 
     :param name: name of the store backend to load

@@ -50,7 +50,11 @@ class StoreError(E3Error):
 
 
 class Store(metaclass=abc.ABCMeta):
-    def __init__(self, store_configuration: Any, cache_backend: Cache) -> None:
+    def __init__(
+        self,
+        store_configuration: Any,  # noqa: ANN401  # plugin-specific config
+        cache_backend: Cache,
+    ) -> None:
         """Initialize a Store object.
 
         :param store_configuration: configuration for this store

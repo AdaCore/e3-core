@@ -56,7 +56,10 @@ class _StoreContextManager(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(
+        self,
+        *args: Any,  # noqa: ANN401  # context manager protocol
+    ) -> None:
         """Exit a context.
 
         This method is called when exiting a "with" context. For example:
@@ -250,7 +253,10 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def bulk_query(self, queries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def bulk_query(
+        self,
+        queries: list[dict[str, Any]],  # noqa: ANN401  # query structure
+    ) -> list[dict[str, Any]]:  # noqa: ANN401  # response structure
         """Perform a list of queries (source and components) to Store.
 
         Each element of the queries list should conform to the following
@@ -474,8 +480,10 @@ class LocalStoreInterface(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def bulk_update_from_store(
-        self, from_store: StoreReadInterface, queries: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+        self,
+        from_store: StoreReadInterface,
+        queries: list[dict[str, Any]],  # noqa: ANN401  # query structure
+    ) -> list[dict[str, Any]]:  # noqa: ANN401  # response structure
         """Perform a list of update queries (source and components) to Store.
 
         Each element of the queries list should conform to the specifications define by

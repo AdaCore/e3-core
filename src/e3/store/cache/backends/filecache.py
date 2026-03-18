@@ -30,7 +30,10 @@ class FileCache(Cache):
 
     cache_suffix = ".cache"
 
-    def __init__(self, cache_configuration: Any) -> None:
+    def __init__(
+        self,
+        cache_configuration: Any,  # noqa: ANN401  # plugin-specific config
+    ) -> None:
         """Initialize the file cache backend.
 
         :param cache_configuration: configuration dict containing cache_dir
@@ -75,7 +78,11 @@ class FileCache(Cache):
             return True
         return False
 
-    def get(self, uid: str, default: Any = None) -> Any:
+    def get(
+        self,
+        uid: str,
+        default: Any = None,  # noqa: ANN401  # polymorphic default value
+    ) -> Any:  # noqa: ANN401  # cached value can be any type
         """Fetch a given resource from the cache.
 
         :param uid: the resource uid
@@ -92,7 +99,12 @@ class FileCache(Cache):
                 pass  # Cache file was removed after the exists check
         return default
 
-    def set(self, uid: str, value: Any, timeout: int = DEFAULT_TIMEOUT) -> bool:
+    def set(
+        self,
+        uid: str,
+        value: Any,  # noqa: ANN401  # cache stores any type of value
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> bool:
         """Set a value in the cache.
 
         :param uid: the cache entry uid

@@ -55,7 +55,7 @@ class AnodSpecRepository:
     def __init__(  # noqa: PLR0915
         self,
         spec_dir: str,
-        spec_config: Any = None,
+        spec_config: Any = None,  # noqa: ANN401  # plugin-specific configuration
         # Ideally should be spec_config: SpecConfig | None = None,
         # We keep it to Any to avoid mypy issues on other projects
         extra_repositories_config: dict | None = None,

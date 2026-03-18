@@ -126,7 +126,9 @@ class NVD:
             else:
                 break
 
-    def __enter__(self) -> Any:
+    def __enter__(
+        self,
+    ) -> Any:  # noqa: ANN401  # context manager protocol, returns self
         """Return an http requests Session supporting cache.
 
         Use requests_cache CachedSession when cache is requested.
@@ -156,7 +158,12 @@ class NVD:
             self._session = Session()
         return self
 
-    def __exit__(self, _type: Any, _value: Any, _tb: Any) -> None:
+    def __exit__(
+        self,
+        _type: Any,  # noqa: ANN401  # context manager protocol
+        _value: Any,  # noqa: ANN401  # context manager protocol
+        _tb: Any,  # noqa: ANN401  # context manager protocol
+    ) -> None:
         """Exit context manager.
 
         :param _type: exception type
