@@ -555,7 +555,8 @@ class AnodContext:
         # Initialize the resulting action based on the primitive name
         if primitive == "source":
             if not has_primitive(spec, "source"):
-                raise SchedulingError(f"spec {name} does not support primitive source")
+                msg = f"spec {name} does not support primitive source"
+                raise SchedulingError(msg)
 
             if source_name is not None:
                 result = CreateSource(spec, source_name)
@@ -596,17 +597,19 @@ class AnodContext:
 
         elif primitive == "build":
             if not has_primitive(spec, "build"):
-                raise SchedulingError(
+                msg = (
                     f"spec {name} does not support primitive build for"
                     f" platform {env.platform} and qualifier '{qualifier}'"
                 )
+                raise SchedulingError(msg)
             result = Build(spec)
         elif primitive == "test":
             result = Test(spec)
         elif primitive == "install":
             result = Install(spec)
         else:
-            raise SchedulingError(f"{primitive!r} is not an anod primitive")
+            msg = f"{primitive!r} is not an anod primitive"  # type: ignore[unreachable]
+            raise SchedulingError(msg)
 
         # If this action is directly linked with a plan line make sure
         # to register the link between the action and the plan even
@@ -637,12 +640,13 @@ class AnodContext:
             if plan_line is not None and plan_args is not None:
                 # We have an explicit call to install() in the plan but the
                 # spec has no binary package to download.
-                raise SchedulingError(
+                msg = (
                     f"error in plan at {plan_line}: "
                     "install should be replaced by build - "
                     f"the spec {spec.name} has a build primitive "
                     "but does not define a package"
                 )
+                raise SchedulingError(msg)
             # Case in which we have an install dependency but no install
             # primitive. In that case the real dependency is a build tree
             # dependency. In case there is no build primitive and no
@@ -681,7 +685,8 @@ class AnodContext:
             return result
 
         if not has_primitive(spec, primitive):
-            raise SchedulingError(f"spec {name} does not support primitive {primitive}")
+            msg = f"spec {name} does not support primitive {primitive}"
+            raise SchedulingError(msg)
 
         # Add the action in the DAG
         add_action(result)

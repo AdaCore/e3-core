@@ -107,15 +107,17 @@ class Dependency:
             self.parsed_qualifier = {}
 
         else:
-            raise e3.anod.error.SpecError(f"invalid qualifier type: {qualifier}")
+            msg = f"invalid qualifier type: {qualifier}"  # type: ignore[unreachable]
+            raise e3.anod.error.SpecError(msg)
 
         if require in self.ALLOWED_REQUIRE:
             self.kind = self.ALLOWED_REQUIRE[require]  # type: ignore[assignment]
         else:
-            raise e3.anod.error.SpecError(
+            msg = (
                 f"Invalid require parameter {require!r}. "
                 f"Allowed values are {', '.join(self.ALLOWED_REQUIRE)}"
             )
+            raise e3.anod.error.SpecError(msg)
 
         self.track = track
 

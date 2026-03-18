@@ -164,9 +164,8 @@ class Component(object):
             with *name*.
         """
         if not isinstance(data, DSSE):
-            raise StoreError(
-                f"Metadata statement should be a DSSE envelope. Got {type(data)}"
-            )
+            msg = f"Metadata statement should be a DSSE envelope. Got {type(data)}"  # type: ignore[unreachable]
+            raise StoreError(msg)
         self.metadata[name] = data.as_dict()
 
     def get_metadata_statement(self, name: str) -> DSSE | None:
@@ -319,11 +318,14 @@ class Component(object):
         :raise ValueError: If the file could not be added to the attachments
         """
         if not self.component_id:
-            raise ValueError(f"Invalid component {self.name!r} (no ID)")
+            msg = f"Invalid component {self.name!r} (no ID)"
+            raise ValueError(msg)
         elif not file.resource_id:
-            raise ValueError(f"Missing resource id for {file.name!r}")
+            msg = f"Missing resource id for {file.name!r}"
+            raise ValueError(msg)
         elif not file.downloaded_as:
-            raise FileNotFoundError(f"Invalid file {file.name!r}")
+            msg = f"Invalid file {file.name!r}"
+            raise FileNotFoundError(msg)
 
         if not isinstance(self.store, StoreRWInterface):
             raise StoreError("Not a writable store instance")
@@ -334,13 +336,15 @@ class Component(object):
 
         # As overwrite_existing is True, this may not happen.
         if att_key is None:
-            raise ValueError(f"Could not add {file.name!r} to attachments")
+            msg = f"Could not add {file.name!r} to attachments"
+            raise ValueError(msg)
 
         # Upload file to store.
         submitted_file: FileDict = self.store.submit_file(file.as_dict())
 
         if not submitted_file["_id"]:
-            raise StoreError(f"Invalid submitted file ID for {file.name!r}")
+            msg = f"Invalid submitted file ID for {file.name!r}"
+            raise StoreError(msg)
 
         self.store.add_component_attachment(
             component_id=self.component_id, file_id=submitted_file["_id"], name=att_key
@@ -389,7 +393,8 @@ class Component(object):
         if not Path(meta_path).is_file():
             if ignore_errors:
                 return None
-            raise StoreError(f"non existing metafile {meta_path}")
+            msg = f"non existing metafile {meta_path}"
+            raise StoreError(msg)
         try:
             with Path(meta_path).open("r") as fd:
                 data = json.load(fd)
@@ -398,9 +403,8 @@ class Component(object):
             if ignore_errors:
                 return None
             logger.exception(e)
-            raise StoreError(
-                f"error while loading component metadata file {meta_path} ({e})"
-            ) from None
+            msg = f"error while loading component metadata file {meta_path} ({e})"
+            raise StoreError(msg) from None
 
     def as_dict(self: ComponentType) -> ComponentDict:
         """Return a dictionary representation of self.

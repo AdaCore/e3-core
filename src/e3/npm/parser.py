@@ -22,9 +22,8 @@ class NPMLinksParser:
         :param key: The missing key.
         :raises KeyError: Always.
         """
-        raise KeyError(
-            f"NPM links parser failed: key {key!r} is missing from the HTTP answer"
-        )
+        msg = f"NPM links parser failed: key {key!r} is missing from the HTTP answer"
+        raise KeyError(msg)
 
     def feed(self, data: str) -> NPMLinksParser:
         """Feed this parser with retrieved JSON data.

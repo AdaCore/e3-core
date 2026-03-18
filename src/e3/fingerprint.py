@@ -64,8 +64,9 @@ class Fingerprint:
         if isinstance(value, str):
             self.elements[name] = value
         else:
+            msg = f"value for {name} should be a string got {value}"  # type: ignore[unreachable]
             raise E3Error(
-                f"value for {name} should be a string got {value}",
+                msg,
                 "fingerprint.add",
             )
 

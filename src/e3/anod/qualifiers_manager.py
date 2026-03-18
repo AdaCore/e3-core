@@ -34,7 +34,8 @@ def check_valid_name(name: str, value_kind: str, origin: str) -> str:
     :return: name if name is valid otherwise raise AnodError
     """
     if not isinstance(name, str) or not re.search(VALID_NAME, name):
-        raise AnodError(f"{origin}: Invalid {value_kind} '{name}'")
+        msg = f"{origin}: Invalid {value_kind} '{name}'"
+        raise AnodError(msg)
     return name
 
 
@@ -142,10 +143,11 @@ class KeyValueDeclaration(QualifierDeclaration):
         # Check that default value is valid
         if default is not None and choices is not None and default not in choices:
             choices_str = ", ".join(f"'{choice}'" for choice in choices)
-            raise AnodError(
+            msg = (
                 f"{self.origin}: default value '{default}' "
                 f"should be in ({choices_str})."
             )
+            raise AnodError(msg)
 
         self.choices = choices
         self._default = default
@@ -165,17 +167,19 @@ class KeyValueDeclaration(QualifierDeclaration):
             value = ""
 
         if not isinstance(value, str):
-            raise AnodError(
+            msg = (
                 f"{self.origin}: Invalid value for qualifier {self.name}: "
                 f"requires a str value, got {type(value)}({value})"
             )
+            raise AnodError(msg)
 
         if self.choices is not None and value not in self.choices:
             choices_str = ", ".join(f"'{choice}'" for choice in self.choices)
-            raise AnodError(
+            msg = (
                 f"{self.origin}: Invalid value for qualifier {self.name}: '{value}' "
                 f"not in ({choices_str})"
             )
+            raise AnodError(msg)
         return value
 
     def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
@@ -237,10 +241,11 @@ class TagDeclaration(QualifierDeclaration):
             return True
         if isinstance(value, bool):
             return value
-        raise AnodError(
+        msg = (
             f"{self.origin}: Invalid value for qualifier {self.name}: "
             f"requires a str, bool or None value, got {type(value)}({value})"
         )
+        raise AnodError(msg)
 
     def repr(self, value: QualifierValue, hash_pool: list[str] | None) -> str:
         """See QualifierDeclaration.repr.
@@ -302,10 +307,11 @@ class KeySetDeclaration(QualifierDeclaration):
                 wrong_values_str = ", ".join(
                     f"'{value}'" for value in sorted(wrong_values)
                 )
-                raise AnodError(
+                msg = (
                     f"{self.origin}: In '{self.name}', default value(s) "
                     f"({wrong_values_str}) should be in ({choices_str})"
                 )
+                raise AnodError(msg)
 
         self.choices = choices
         self._default: frozenset[str] | None = (
@@ -323,15 +329,17 @@ class KeySetDeclaration(QualifierDeclaration):
         :param value: the user input value
         """
         if isinstance(value, bool):
-            raise AnodError(
+            msg = (
                 f"{self.origin}: Invalid value for qualifier {self.name}: "
                 f"requires a str or Iterable[str], got bool"
             )
+            raise AnodError(msg)
         elif value is None:
-            raise AnodError(
+            msg = (
                 f"{self.origin}: Invalid value for qualifier {self.name}: "
                 f"requires a str or Iterable[str], got None"
             )
+            raise AnodError(msg)
         elif isinstance(value, str):
             # Make sure '' value is the empty set
             value_set = (
@@ -341,17 +349,19 @@ class KeySetDeclaration(QualifierDeclaration):
             try:
                 result = all(isinstance(el, str) for el in value)
                 if not result:
-                    raise AnodError(
+                    msg = (
                         f"{self.origin}: Invalid value for qualifier {self.name}: "
                         f"one of the element in the Iterable is not a str: "
                         f"got {type(value)}({value})"
                     )
+                    raise AnodError(msg)
             except TypeError as e:
-                raise AnodError(
+                msg = (
                     f"{self.origin}: Invalid value for qualifier {self.name}: "
                     f"requires a str or Iterable[str], "
                     f"got {type(value)}({value})"
-                ) from e
+                )
+                raise AnodError(msg) from e
 
             value_set = frozenset(value)
 
@@ -364,10 +374,11 @@ class KeySetDeclaration(QualifierDeclaration):
                 wrong_values_str = ", ".join(
                     f"'{value}'" for value in sorted(wrong_values)
                 )
-                raise AnodError(
+                msg = (
                     f"{self.origin}: Invalid value(s) for qualifier {self.name}: "
                     f"({wrong_values_str}) not in ({choices_str})"
                 )
+                raise AnodError(msg)
 
         return value_set
 
@@ -494,10 +505,11 @@ class QualifiersManager:
             build space name
         """
         if self.is_declaration_phase_finished:
-            raise AnodError(
+            msg = (
                 f"{self.origin}: build space name computation settings can only "
                 "be changed in 'declare_qualifiers_and_components'"
             )
+            raise AnodError(msg)
 
         self.add_target_info_to_bs = True
         if os_version_aliases:
@@ -508,10 +520,11 @@ class QualifiersManager:
     def remove_target_info(self) -> None:
         """Disable target os information in build space name computation."""
         if self.is_declaration_phase_finished:
-            raise AnodError(
+            msg = (
                 f"{self.origin}: build space name computation settings can only "
                 "be changed in 'declare_qualifiers_and_components'"
             )
+            raise AnodError(msg)
 
         self.add_target_info_to_bs = False
 
@@ -547,10 +560,11 @@ class QualifiersManager:
          shorter.
         """
         if self.is_declaration_phase_finished:
-            raise AnodError(
+            msg = (
                 f"{self.origin}: qualifier can only be declared in "
                 "declare_qualifiers_and_components"
             )
+            raise AnodError(msg)
 
         if not test_only or self.anod_instance.kind == "test":
             self.qualifier_decls[name] = TagDeclaration(
@@ -602,10 +616,11 @@ class QualifiersManager:
             qualifier name/alias. It only uses its value.
         """
         if self.is_declaration_phase_finished:
-            raise AnodError(
+            msg = (
                 f"{self.origin}: qualifier can only be declared in "
                 " declare_qualifiers_and_components"
             )
+            raise AnodError(msg)
         if not test_only or self.anod_instance.kind == "test":
             self.qualifier_decls[name] = KeyValueDeclaration(
                 origin=self.origin,
@@ -659,10 +674,11 @@ class QualifiersManager:
             qualifier name/alias. It only uses its value.
         """
         if self.is_declaration_phase_finished:
-            raise AnodError(
+            msg = (
                 f"{self.origin}: qualifier can only be declared in "
                 " declare_qualifiers_and_components"
             )
+            raise AnodError(msg)
 
         # Make sure {} is read as the empty set
         if default == {}:
@@ -734,10 +750,11 @@ class QualifiersManager:
         :param has_component: True if this build space name defines a component.
         """
         if self.is_declaration_phase_finished:
-            raise AnodError(
+            msg = (
                 f"{self.origin}: component/build space can only be declared in "
                 "declare_qualifiers_and_components"
             )
+            raise AnodError(msg)
 
         self.component_decls[
             check_valid_name(
@@ -811,7 +828,8 @@ class QualifiersManager:
         missing_keys = set(self.qualifier_decls.keys()) - set(result.keys())
         if missing_keys:
             missing_keys_str = ", ".join(missing_keys)
-            raise AnodError(f"{self.origin}: Missing qualifier(s): {missing_keys_str}")
+            msg = f"{self.origin}: Missing qualifier(s): {missing_keys_str}"
+            raise AnodError(msg)
 
         return result
 
@@ -865,16 +883,18 @@ class QualifiersManager:
                     self.compute_qualifier_values(qualifiers)
                 )
             except AnodError as e:
-                raise AnodError(
+                msg = (
                     f"{self.origin}: Invalid qualifier state {qualifiers} "
                     f"for build space/component {component_name}"
-                ) from e
+                )
+                raise AnodError(msg) from e
 
             if qualifier_values in self.component_names:
-                raise AnodError(
+                msg = (
                     f"{self.origin}: state {qualifiers} reused for "
                     "several build spaces/components"
                 )
+                raise AnodError(msg)
 
             if has_component:
                 self.component_names[qualifier_values] = component_name

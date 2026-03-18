@@ -234,7 +234,8 @@ class FileTime(Structure):
             )
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
-            raise ValueError(f"filetime '{self.filetime}' failed with {err}") from err
+            msg = f"filetime '{self.filetime}' failed with {err}"
+            raise ValueError(msg) from err
 
     def __str__(self) -> str:
         try:
@@ -272,7 +273,8 @@ class LargeFileTime(Structure):
             )
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
-            raise ValueError(f"filetime '{self.filetime}' failed with {err}") from err
+            msg = f"filetime '{self.filetime}' failed with {err}"
+            raise ValueError(msg) from err
 
     def __str__(self) -> str:
         try:

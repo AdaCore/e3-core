@@ -293,9 +293,8 @@ class PlanContext:
             # The number of entry points should not change when executing the
             # code in an entry point. If it does, it means that there is a
             # nested entry point, this is not supported.
-            raise PlanError(
-                f"the plan contains nested entry points in {entry_point_name}"
-            )
+            msg = f"the plan contains nested entry points in {entry_point_name}"
+            raise PlanError(msg)
 
         return self.action_list
 

@@ -115,7 +115,8 @@ class Event:
         """
         # Once the event is closed disallow attributes modifications
         if self._closed:
-            raise EventError(f"event {self.name} ({self.uid}) closed")
+            msg = f"event {self.name} ({self.uid}) closed"
+            raise EventError(msg)
         self._data[name] = value
 
     def __getattr__(self, name: str) -> Any:
@@ -145,7 +146,8 @@ class Event:
         :param name: name of the file to attach, by default 'log'
         """
         if self._closed:
-            raise EventError(f"event {self.name} ({self.uid}) closed")
+            msg = f"event {self.name} ({self.uid}) closed"
+            raise EventError(msg)
         self._attachments[name] = (path, e3.hash.sha1(path))
 
     def close(self) -> None:

@@ -137,9 +137,8 @@ class CommandResult:
         :param cmd: actual command
         """
         if len(cmd) != len(self.cmd):
-            raise UnexpectedCommandError(
-                f"wrong number of arguments {cmd}, expected {self.cmd}"
-            )
+            msg = f"wrong number of arguments {cmd}, expected {self.cmd}"
+            raise UnexpectedCommandError(msg)
 
         for i, arg in enumerate(cmd):
             checker = self.cmd[i]
@@ -149,9 +148,8 @@ class CommandResult:
             elif checker.check(arg):
                 continue
 
-            raise UnexpectedCommandError(
-                f"unexpected arguments {cmd}, expected {self.cmd}"
-            )
+            msg = f"unexpected arguments {cmd}, expected {self.cmd}"
+            raise UnexpectedCommandError(msg)
 
     def __call__(self, cmd: list[str], *args: Any, **kwargs: Any) -> None:
         """Allow to run code to emulate the command.
@@ -214,7 +212,8 @@ class MockRun(Run):
             result = results.pop(0) if results else None
             # Make sure we are expecting a command
             if result is None:
-                raise UnexpectedCommandError(f"unexpected command {cmd}")
+                msg = f"unexpected command {cmd}"
+                raise UnexpectedCommandError(msg)
 
             # Check received command
             result.check(cmd)

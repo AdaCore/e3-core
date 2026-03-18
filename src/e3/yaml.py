@@ -331,11 +331,11 @@ def load_with_config(filename: str | list[str], config: dict) -> Any:
             conf_data = load_ordered(f)
             result = parser.parse(conf_data)
         except OSError as err:
-            raise YamlError(f"cannot read: {f}", "load_with_config") from err
+            msg = f"cannot read: {f}"
+            raise YamlError(msg, "load_with_config") from err
         except (yaml.parser.ParserError, yaml.constructor.ConstructorError) as err:
-            raise YamlError(
-                f"{f} is an invalid yaml file: {err}", "load_with_config"
-            ) from err
+            msg = f"{f} is an invalid yaml file: {err}"
+            raise YamlError(msg, "load_with_config") from err
 
     return result
 

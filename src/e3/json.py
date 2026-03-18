@@ -114,4 +114,5 @@ def load_from_json_file(
         return content
     if ignore_non_existing:
         return default
-    raise JsonError(f"json file {path} does not exist")
+    msg = f"json file {path} does not exist"
+    raise JsonError(msg)

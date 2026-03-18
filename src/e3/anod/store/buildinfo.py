@@ -156,9 +156,8 @@ class BuildInfo(object):
         :return: True in case of success, False otherwise.
         """
         if not isinstance(self.store, StoreWriteInterface):
-            raise AttributeError(
-                f"self.store is not a StoreWriteInterface: {type(self.store)}"
-            )
+            msg = f"self.store is not a StoreWriteInterface: {type(self.store)}"
+            raise AttributeError(msg)
         self.isready = self.store.mark_build_ready(bid=self.id)
         return self.isready
 
@@ -198,9 +197,11 @@ class BuildInfo(object):
         """
         result = self.get_component_list(name=name, platform=platform)
         if len(result) == 0:
-            raise StoreError(f"cannot find component {name} ({platform})")
+            msg = f"cannot find component {name} ({platform})"
+            raise StoreError(msg)
         elif len(result) != 1:
-            raise StoreError(f"multiple component {name} ({platform}) found")
+            msg = f"multiple component {name} ({platform}) found"
+            raise StoreError(msg)
         return result[0]
 
     def get_component_list(
@@ -378,10 +379,11 @@ class BuildInfo(object):
                 break
 
             if datetime.now(timezone.utc) - start_time > timedelta(seconds=timeout):
-                raise E3Error(
+                msg = (
                     "timeout while waiting for build_id "
                     f"(setup={setup}, date={build_date})"
                 )
+                raise E3Error(msg)
 
             time.sleep(float(retry_delay))
 
@@ -400,11 +402,11 @@ class BuildInfo(object):
         :return: a BuildInfo object
         """
         if not isinstance(self.store, StoreWriteInterface):
-            raise AttributeError(
-                f"self.store is not a StoreWriteInterface: {type(self.store)}"
-            )
+            msg = f"self.store is not a StoreWriteInterface: {type(self.store)}"
+            raise AttributeError(msg)
         if self.setup == dest_setup:
-            raise StoreError(f"Cannot copy into the same setup: {self.setup}")
+            msg = f"Cannot copy into the same setup: {self.setup}"
+            raise StoreError(msg)
 
         data = self.store.copy_build_id(bid=self.id, dest_setup=dest_setup)
         result = self.load(data=data, store=self.store)

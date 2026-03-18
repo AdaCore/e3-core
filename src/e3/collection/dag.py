@@ -739,7 +739,8 @@ class DAG:
             if fun(self, node):
                 # Check if node can pruned
                 if node in self.tags and preserve_context:
-                    raise DAGError(f"suppressing {node} impact context")
+                    msg = f"suppressing {node} impact context"
+                    raise DAGError(msg)
 
                 # Node is pruned keep track of its predecessors
                 pruned_node_predecessors[node] = predecessors

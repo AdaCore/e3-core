@@ -129,9 +129,12 @@ class GitRepository:
 
         p = e3.os.process.Run(p_cmd, cwd=self.working_tree, output=output, **kwargs)
         if p.status != 0:
-            raise GitError(
+            msg = (
                 f"{e3.os.process.command_line_image(p_cmd)}"
-                f" failed (exit status: {p.status})",
+                f" failed (exit status: {p.status})"
+            )
+            raise GitError(
+                msg,
                 origin="git_cmd",
                 process=p,
             )

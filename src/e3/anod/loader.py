@@ -72,7 +72,8 @@ class AnodSpecRepository:
         logger.debug("initialize spec repository (%s)", spec_dir)
 
         if not Path(spec_dir).is_dir():
-            raise SandBoxError(f"spec directory {spec_dir} does not exist")
+            msg = f"spec directory {spec_dir} does not exist"
+            raise SandBoxError(msg)
         self.spec_dir = spec_dir
 
         # Read the API version file
@@ -81,9 +82,8 @@ class AnodSpecRepository:
             with version_file.open() as f:
                 content = f.read().strip()
                 if ":" not in content:
-                    raise SandBoxError(
-                        f"invalid VERSION file in spec dir {self.spec_dir}"
-                    )
+                    msg = f"invalid VERSION file in spec dir {self.spec_dir}"
+                    raise SandBoxError(msg)
                 self.api_version = content.split(":")[1].strip()
             check_api_version(self.api_version)
         else:
@@ -271,9 +271,8 @@ class AnodModule:
                 # Reject class named "Anod" this is reserved to the base
                 # class and can cause some issues when reused
                 if value.__name__ == "Anod":
-                    raise SandBoxError(
-                        f"{self.name}.anod must not use Anod as a class name", "load"
-                    )
+                    msg = f"{self.name}.anod must not use Anod as a class name"
+                    raise SandBoxError(msg, "load")
 
                 # This class is a child of Anod so register it.
                 # Note that even if we won't use directly the
@@ -292,7 +291,8 @@ class AnodModule:
                 return value
 
         logger.error(f"spec {self.name} does not contains an Anod subclass")
-        raise SandBoxError(f"cannot find Anod subclass in {self.path}", "load")
+        msg = f"cannot find Anod subclass in {self.path}"
+        raise SandBoxError(msg, "load")
 
 
 def spec(name: str) -> Callable[..., Anod]:

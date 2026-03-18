@@ -151,7 +151,8 @@ class AuthorRole(Enum):
             # The default value is either an AuthorRole or a string, better
             # return a AuthorRole.
             return cls.from_value(default)
-        raise ValueError(f"Invalid default value {default}")
+        msg = f"Invalid default value {default}"
+        raise ValueError(msg)
 
 
 class Document(JsonData):
@@ -247,10 +248,11 @@ class Document(JsonData):
             possible :attr:`FORMATS`.
         """  # noqa RST304
         if output_format not in self.FORMATS:
-            raise ValueError(
+            msg = (
                 f"Invalid output format {output_format}. Accepted output "
                 f"formats are: {', '.join(self.FORMATS)}"
             )
+            raise ValueError(msg)
 
         path.parent.mkdir(exist_ok=True, parents=True)
         with path.open("w") as f:
@@ -351,7 +353,8 @@ class Justification(Enum):
             # The default value is either a Justification object or a string,
             # better return a Justification.
             return cls.from_value(default)
-        raise ValueError(f"Invalid default value {default}")
+        msg = f"Invalid default value {default}"
+        raise ValueError(msg)
 
 
 class Metadata(JsonData):
@@ -445,11 +448,12 @@ class Metadata(JsonData):
         # If a spec_version different from SPEC_VERSION is used, make sure it
         # is smaller than our own version (hoping it is backward compatible).
         if Version(spec_version) > Version(Metadata.SPEC_VERSION):
-            raise ValueError(
+            msg = (
                 "VEX specification version currently supported is "
                 f"{self.SPEC_VERSION}. The specification version "
                 f"{spec_version} is not supported."
             )
+            raise ValueError(msg)
         else:
             self.spec_version = spec_version
 
@@ -655,7 +659,8 @@ class ProductStatus(Enum):
             # The default value is either a Product status or a string, better
             # return a ProductStatus.
             return cls.from_value(default)
-        raise ValueError(f"Invalid default value {default}")
+        msg = f"Invalid default value {default}"
+        raise ValueError(msg)
 
 
 class Statement(JsonData):
@@ -877,15 +882,17 @@ class StatementStatus(JsonData):
             pass
         elif self.status == ProductStatus.NOT_AFFECTED:
             if not self.justification and not self.impact:
-                raise ValueError(
+                msg = (
                     f"When status is {self.status.value}, either an impact "
                     "statement or a justification must be provided."
                 )
+                raise ValueError(msg)
         elif self.status == ProductStatus.AFFECTED and not self.action:
-            raise ValueError(
+            msg = (
                 f"When status is {self.status.value}, an action statement "
                 "must be provided."
             )
+            raise ValueError(msg)
 
     def as_dict(self) -> dict[str, Any]:
         return {

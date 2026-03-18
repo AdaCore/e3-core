@@ -32,7 +32,8 @@ def primitive_check() -> Callable[[F], F]:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not has_primitive(self.anod_instance, func.__name__):
-                raise AnodError(f"no primitive {func.__name__}")
+                msg = f"no primitive {func.__name__}"
+                raise AnodError(msg)
             elif self.anod_instance.build_space is None:
                 raise AnodError(".activate() has not been called")
             return func(self, *args, **kwargs)

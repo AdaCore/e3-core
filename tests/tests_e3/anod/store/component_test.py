@@ -435,7 +435,8 @@ def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untype
     attachment: File
     for attachment in comp.attachments.values():
         if attachment.name not in ("att1.txt", "att2.txt"):
-            raise ValueError(f"Unknown attachment {attachment.name}")
+            msg = f"Unknown attachment {attachment.name}"
+            raise ValueError(msg)
 
 
 def test_component_download(store) -> None:

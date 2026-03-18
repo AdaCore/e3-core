@@ -12,4 +12,5 @@ if TYPE_CHECKING:
 
         :param value: value that should never be reached
         """
-        raise AssertionError(f"Unhandled value: {value} ({type(value).__name__})")
+        msg = f"Unhandled value: {value} ({type(value).__name__})"
+        raise AssertionError(msg)
