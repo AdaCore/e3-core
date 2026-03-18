@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from os import listdir
-from os.path import basename
 from pathlib import Path
 
 import pytest
@@ -202,5 +201,5 @@ def test_yanked(pypi_server, arguments, expected) -> None:
                     pypi.requirements_closure()
             else:
                 pypi.add_requirement("setuptools_scm >= 6.2, <= 8")
-                all_filenames = [basename(f) for f in pypi.file_closure()]
+                all_filenames = [Path(f).name for f in pypi.file_closure()]
                 assert expected_wheel in all_filenames

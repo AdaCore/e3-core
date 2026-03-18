@@ -95,7 +95,7 @@ class AnodSpecRepository:
 
         # Look for all spec files and data files
         spec_list = {
-            os.path.basename(os.path.splitext(k)[0]): {"path": k, "data": []}
+            Path(os.path.splitext(k)[0]).name: {"path": k, "data": []}
             for k in ls(Path(self.spec_dir, "*.anod"), emit_log_record=False)
         }
         logger.debug("found %s specs", len(spec_list))
@@ -103,7 +103,7 @@ class AnodSpecRepository:
         # API == 1.4
         if Version(self.api_version) < Version("1.5"):
             yaml_files = ls(Path(self.spec_dir, "*.yaml"), emit_log_record=False)
-            data_list = [os.path.basename(k)[:-5] for k in yaml_files]
+            data_list = [Path(k).name[:-5] for k in yaml_files]
             logger.debug("found %s yaml files API 1.4 compatible", len(data_list))
 
             # Match yaml files with associated specifications
@@ -127,7 +127,7 @@ class AnodSpecRepository:
                 # Keep only the yaml files associated with an .anod file
                 if associated_spec in spec_list:
                     # We're recording the relative path without the extension
-                    suffix, _ = os.path.splitext(os.path.basename(yml_f))
+                    suffix, _ = os.path.splitext(Path(yml_f).name)
 
                     spec_list[associated_spec]["data"].append(  # type: ignore
                         str(Path(associated_spec, suffix))

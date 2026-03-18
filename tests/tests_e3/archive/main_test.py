@@ -20,7 +20,7 @@ def test_unpack(ext) -> None:
     """Test unpack."""
     dir_to_pack = str(Path(__file__).parent)
 
-    test_dir = os.path.basename(dir_to_pack)
+    test_dir = Path(dir_to_pack).name
 
     dest = Path("dest")
     e3.fs.mkdir(dest)
@@ -37,19 +37,17 @@ def test_unpack(ext) -> None:
         e3.fs.mkdir(dest / "dest")
         e3.archive.unpack_archive(str(dest / archive_name), str(dest / "dest"))
 
-        assert (dest / "dest" / test_dir / os.path.basename(__file__)).exists()
+        assert (dest / "dest" / test_dir / Path(__file__).name).exists()
 
         e3.fs.mkdir(dest / "dest2")
         e3.archive.unpack_archive(
             str(dest / archive_name),
             str(dest / "dest2"),
-            selected_files=(
-                e3.os.fs.unixpath(Path(test_dir, os.path.basename(__file__))),
-            ),
+            selected_files=(e3.os.fs.unixpath(Path(test_dir, Path(__file__).name)),),
             remove_root_dir=True,
         )
 
-        assert (dest / "dest2" / os.path.basename(__file__)).exists()
+        assert (dest / "dest2" / Path(__file__).name).exists()
 
         # Test wildcard if not .zip format
         # ??? not supported?
@@ -62,7 +60,7 @@ def test_unpack(ext) -> None:
                 remove_root_dir=True,
             )
 
-            assert (dest / "dest3" / os.path.basename(__file__)).exists()
+            assert (dest / "dest3" / Path(__file__).name).exists()
 
         e3.archive.create_archive(
             "e3" + ext,
@@ -75,13 +73,13 @@ def test_unpack(ext) -> None:
         assert dest / "dest4" / "e3rename"
 
         # force use of sync_tree
-        e3.fs.rm(dest / "dest4" / "e3rename" / os.path.basename(__file__))
+        e3.fs.rm(dest / "dest4" / "e3rename" / Path(__file__).name)
         e3.archive.unpack_archive(
             str(dest / ("e3" + ext)),
             str(dest / "dest4" / "e3rename"),
             remove_root_dir=True,
         )
-        assert (dest / "dest4" / "e3rename" / os.path.basename(__file__)).exists()
+        assert (dest / "dest4" / "e3rename" / Path(__file__).name).exists()
 
     finally:
         e3.fs.rm(dest, recursive=True)
@@ -92,7 +90,7 @@ def test_unpack_fileobj(ext) -> None:
     """Test unpack fileobj."""
     dir_to_pack = str(Path(__file__).parent)
 
-    test_dir = os.path.basename(dir_to_pack)
+    test_dir = Path(dir_to_pack).name
 
     dest = Path("dest")
     e3.fs.mkdir(dest)
@@ -113,13 +111,11 @@ def test_unpack_fileobj(ext) -> None:
             filename=archive_name,
             dest=str(dest / "dest2"),
             fileobj=fo,
-            selected_files=(
-                e3.os.fs.unixpath(Path(test_dir, os.path.basename(__file__))),
-            ),
+            selected_files=(e3.os.fs.unixpath(Path(test_dir, Path(__file__).name)),),
             remove_root_dir=True,
         )
 
-        assert (dest / "dest2" / os.path.basename(__file__)).exists()
+        assert (dest / "dest2" / Path(__file__).name).exists()
 
     finally:
         e3.fs.rm(dest, recursive=True)
@@ -174,7 +170,7 @@ def test_unpack_cmd() -> None:
         unpack_cmd=custom_unpack,
         selected_files=["bar"],
     )
-    assert os.path.basename(t.kwargs["f"]) == archive_name
+    assert Path(t.kwargs["f"]).name == archive_name
     assert t.kwargs["d"] == all_dest
     assert t.kwargs["s"] == ["bar"]
 

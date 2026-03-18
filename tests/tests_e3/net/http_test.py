@@ -1,7 +1,6 @@
 """Tests for e3.net."""
 
 import logging
-import os
 import threading
 import time
 from email.message import Message
@@ -165,7 +164,7 @@ class TestHTTP:
                 with Path(result).open("rb") as fd:
                     content = fd.read()
                 assert content == b"Dummy!"
-                assert os.path.basename(result) == "dummy.txt"
+                assert Path(result).name == "dummy.txt"
 
         run_server(ContentDispoHandler, func)
 
@@ -177,7 +176,7 @@ class TestHTTP:
                 fo = BytesIO()
                 result = session.download_file(base_url + "dummy", fileobj=fo)
                 assert fo.getvalue() == b"Dummy!"
-                assert os.path.basename(result) == "dummy.txt"
+                assert Path(result).name == "dummy.txt"
 
         run_server(ContentDispoHandler, func)
 
@@ -302,6 +301,6 @@ class TestHTTP:
                 with Path(result).open("rb") as fd:
                     content = fd.read()
                 assert content == b"Dummy!"
-                assert os.path.basename(result) == "dummy.txt"
+                assert Path(result).name == "dummy.txt"
 
         run_server(AuthorizationHeaderHandler, func)

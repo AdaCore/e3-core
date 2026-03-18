@@ -409,8 +409,8 @@ def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untype
     att_file: File = File(
         build_id=c.build_id,
         kind=FileKind.attachment,
-        name=os.path.basename(att1),
-        filename=os.path.basename(att1),
+        name=Path(att1).name,
+        filename=Path(att1).name,
         internal=True,
         resource_path=str(att1),
     )
@@ -422,8 +422,8 @@ def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untype
     att_file = File(
         build_id=c.build_id,
         kind=FileKind.attachment,
-        name=os.path.basename(att2),
-        filename=os.path.basename(att2),
+        name=Path(att2).name,
+        filename=Path(att2).name,
         internal=True,
         resource_path=str(att2),
     )

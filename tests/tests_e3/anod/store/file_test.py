@@ -298,7 +298,7 @@ def test_download_as_name(store) -> None:
 
     mkdir("sandbox")
     source.download(dest_dir="sandbox", as_name="new_name")
-    assert os.path.basename(source.downloaded_as) == "new_name.tar.gz"
+    assert Path(source.downloaded_as).name == "new_name.tar.gz"
     assert Path("sandbox", "new_name_meta.json").is_file()
 
 

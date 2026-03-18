@@ -343,7 +343,11 @@ def mv(source: str | Path, target: str | Path) -> None:
     """
     # Compute file list and number of file to copy
     if Path(source).is_dir() and Path(target).is_dir():
-        shutil.move(source, Path(target, os.path.basename(source)))
+        # Strip trailing separators before getting the name to preserve
+        # original behavior
+        sep = os.path.sep + (os.path.altsep or "")
+        source_str = str(source)
+        shutil.move(source, Path(target, Path(source_str.rstrip(sep)).name))
     else:
         shutil.move(source, target)
 

@@ -32,6 +32,7 @@ import signal
 import sys
 import threading
 from argparse import ArgumentParser
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3
@@ -80,7 +81,7 @@ class Main:
             self.name = name
         elif hasattr(main, "__file__"):
             assert main.__file__ is not None
-            self.name = os.path.splitext(os.path.basename(main.__file__))[0]
+            self.name = os.path.splitext(Path(main.__file__).name)[0]
         else:
             self.name = "unknown"
 
