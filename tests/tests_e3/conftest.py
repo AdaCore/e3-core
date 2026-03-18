@@ -55,6 +55,7 @@ class PypiSimulator:
     def download_file(
         self, name: str, version: str, request: Any, context: Any
     ) -> bytes:
+        """Download file."""
         if not Path(name).is_dir():
             mkdir(name)
 
@@ -83,6 +84,7 @@ class PypiSimulator:
         return result
 
     def get_metadata(self, request: Any, context: Any) -> dict:
+        """Get metadata."""
         m = self.SIMPLE_MATCHER.match(request.url)
         if not m:
             context.status_code = 400
@@ -130,6 +132,7 @@ class PypiSimulator:
         return result
 
     def get_resource(self, request: Any, context: Any) -> str:
+        """Get resource."""
         m = self.DOWNLOAD_MATCHER.match(request.url)
         package = m.group("path").split("/")[-1].split("#")[0]
         package_name = "-".join(package.split("-", 2)[0:2])

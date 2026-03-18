@@ -77,6 +77,7 @@ class ActionOrImpact(JsonData):
         return self.statement is not None
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return {
             "statement": self.statement,
             "timestamp": (
@@ -88,6 +89,7 @@ class ActionOrImpact(JsonData):
 
     @classmethod
     def from_dict(cls, obj: dict) -> ActionOrImpact:
+        """Deserialize object from dictionary representation."""
         return cls(
             statement=obj["statement"],
             timestamp=date_parse(obj["timestamp"]) if obj["timestamp"] else None,
@@ -210,6 +212,7 @@ class Document(JsonData):
         self.statements.append(new_statement)
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return {
             "metadata": self.metadata.as_dict(),
             "statements": [st.as_dict() for st in self.statements],
@@ -217,6 +220,7 @@ class Document(JsonData):
 
     @classmethod
     def from_dict(cls, obj: dict) -> Document:
+        """Deserialize object from dictionary representation."""
         return cls(
             metadata=Metadata.from_dict(obj["metadata"]),
             statements=[Statement.from_dict(s) for s in obj["statements"]],
@@ -458,6 +462,7 @@ class Metadata(JsonData):
             self.spec_version = spec_version
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return {
             "_id": self._id,
             "version": self.version,
@@ -471,6 +476,7 @@ class Metadata(JsonData):
 
     @classmethod
     def from_dict(cls, obj: dict) -> Metadata:
+        """Deserialize object from dictionary representation."""
         return cls(
             _id=obj["_id"],
             author=obj["author"],
@@ -533,6 +539,7 @@ class Product(JsonData):
         self.supplier: str = supplier
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         dict_representation: dict = {
             "supplier": self.supplier,
             "products": [product.as_dict() for product in self.products],
@@ -550,6 +557,7 @@ class Product(JsonData):
 
     @classmethod
     def from_dict(cls, obj: dict) -> Product:
+        """Deserialize object from dictionary representation."""
         return cls(
             products=[ProductId.from_dict(product) for product in obj["products"]],
             supplier=obj["supplier"],
@@ -612,6 +620,7 @@ class ProductId(JsonData):
         self.version = version
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         dict_representation: dict = {
             "_id": self._id,
             "version": self.version,
@@ -703,6 +712,7 @@ class Statement(JsonData):
         self.product: Product = product
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return {
             "metadata": self.metadata.as_dict(),
             "vulnerability": self.vulnerability.as_dict(),
@@ -712,6 +722,7 @@ class Statement(JsonData):
 
     @classmethod
     def from_dict(cls, obj: dict) -> Statement:
+        """Deserialize object from dictionary representation."""
         return cls(
             metadata=StatementMetadata.from_dict(obj["metadata"]),
             status=StatementStatus.from_dict(obj["status"]),
@@ -794,6 +805,7 @@ class StatementMetadata(JsonData):
         )
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return {
             "_id": self._id,
             "version": self.version,
@@ -803,6 +815,7 @@ class StatementMetadata(JsonData):
 
     @classmethod
     def from_dict(cls, obj: dict) -> StatementMetadata:
+        """Deserialize object from dictionary representation."""
         return cls(
             _id=obj["_id"],
             version=obj["version"],
@@ -895,6 +908,7 @@ class StatementStatus(JsonData):
             raise ValueError(msg)
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return {
             "status": self.status.value,
             "justification": self.justification.value,
@@ -905,6 +919,7 @@ class StatementStatus(JsonData):
 
     @classmethod
     def from_dict(cls, obj: dict) -> StatementStatus:
+        """Deserialize object from dictionary representation."""
         return cls(
             status=obj["status"],
             impact=ActionOrImpact.from_dict(obj["impact"]) if "impact" in obj else None,
@@ -943,6 +958,7 @@ class SubProductId(ProductId):
         self.status: StatementStatus | None = status
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         dict_repr: dict = super().as_dict()
         dict_repr.update(
             {
@@ -959,6 +975,7 @@ class SubProductId(ProductId):
 
     @classmethod
     def from_dict(cls, obj: dict) -> SubProductId:
+        """Deserialize object from dictionary representation."""
         return cls(
             _id=obj["_id"],
             version=obj["version"],
@@ -1041,6 +1058,7 @@ class Vulnerability(JsonData):
         self.url: str | None = url
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         dict_repr: dict = {
             "_id": self._id,
             "component": self.component,

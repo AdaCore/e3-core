@@ -51,6 +51,10 @@ if sys.platform == "win32":
     class E3ZipInfo(zipfile.ZipInfo):
         @classmethod
         def from_file(cls, *args, **kwargs):  # type: ignore[no-untyped-def]
+            """Create a ZipInfo from a file with adjusted executable permissions.
+
+            Sets execute permissions (0o555) in external_attr for the file.
+            """
             result = super().from_file(*args, **kwargs)
             result.external_attr = (0o555 << 16) | result.external_attr
             return result

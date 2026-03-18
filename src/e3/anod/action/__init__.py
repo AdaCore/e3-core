@@ -36,6 +36,7 @@ class Action:
 
     @property
     def run_method(self) -> str:
+        """Return the name of the method to execute for this action."""
         return f"do_{self.__class__.__name__.lower()}"
 
 
@@ -584,6 +585,11 @@ class CreateSourceOrDownload(Decision):
 
     @classmethod
     def description(cls, decision: Choice) -> str:
+        """Return the action description for the given decision.
+
+        :param decision: LEFT for CreateSource, RIGHT for DownloadSource
+        :return: action name as string
+        """
         return "CreateSource" if decision == Decision.LEFT else "DownloadSource"
 
 
@@ -607,9 +613,19 @@ class BuildOrDownload(Decision):
 
     @classmethod
     def description(cls, decision: Choice) -> str:
+        """Return the action description for the given decision.
+
+        :param decision: LEFT for Build, RIGHT for DownloadBinary
+        :return: action name as string
+        """
         return "Build" if decision == Decision.LEFT else "DownloadBinary"
 
     def suggest_plan_fix(self, choice: Choice) -> str:
+        """Suggest an anod command to fix the plan based on the chosen action.
+
+        :param choice: which action to use (LEFT or RIGHT)
+        :return: anod command string with spec name, qualifier, and platforms
+        """
         action = self.left_action if choice == Decision.LEFT else self.right_action
         spec_instance = action.data
 

@@ -25,6 +25,7 @@ HTTP_FORBIDDEN = 403
 
 class RetryHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
+        """Handle HTTP GET request."""
         if hasattr(self.server, "tries"):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
@@ -38,6 +39,7 @@ class RetryHandler(BaseHTTPRequestHandler):
 
 class RetryAbortHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
+        """Handle HTTP GET request."""
         if hasattr(self.server, "tries"):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
@@ -51,6 +53,7 @@ class RetryAbortHandler(BaseHTTPRequestHandler):
 
 class ContentDispoHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
+        """Handle HTTP GET request."""
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.send_header("content-disposition", 'attachment;filename="dummy.txt"')
@@ -61,6 +64,7 @@ class ContentDispoHandler(BaseHTTPRequestHandler):
 
 class ServerErrorHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
+        """Handle HTTP GET request."""
         if not hasattr(self.server, "calls"):
             self.server.calls = 1
         else:
@@ -70,12 +74,14 @@ class ServerErrorHandler(BaseHTTPRequestHandler):
         self.wfile.close()
 
     def do_POST(self) -> None:
+        """Handle HTTP POST request."""
         self.send_response(500)
         self.end_headers()
 
 
 class MultiPartPostHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
+        """Handle HTTP POST request."""
         logger = logging.getLogger("MultiPartPostHandler")
 
         if "Content-Type" not in self.headers:
@@ -106,6 +112,7 @@ class MultiPartPostHandler(BaseHTTPRequestHandler):
 
 class AuthorizationHeaderHandler(ContentDispoHandler):
     def do_GET(self) -> None:
+        """Handle HTTP GET request."""
         if self.headers.get("Authorization") != "Bearer toto":
             self.send_response(403)
             self.end_headers()
@@ -136,6 +143,8 @@ class TestHTTP:
             pass
 
     def test_retry(self, socket_enabled) -> None:
+        """Test retry."""
+
         def func(server, base_url) -> None:
             with HTTPSession() as session:
                 session.set_max_retries(base_url, connect=5)
@@ -148,6 +157,8 @@ class TestHTTP:
         run_server(RetryHandler, func)
 
     def test_content_dispo(self, socket_enabled) -> None:
+        """Test content dispo."""
+
         def func(server, base_url) -> None:
             with HTTPSession() as session:
                 result = session.download_file(base_url + "dummy", dest=".")
@@ -159,6 +170,8 @@ class TestHTTP:
         run_server(ContentDispoHandler, func)
 
     def test_content_dispo_fileobj(self, socket_enabled) -> None:
+        """Test content dispo fileobj."""
+
         def func(server, base_url) -> None:
             with HTTPSession() as session:
                 fo = BytesIO()
@@ -169,6 +182,8 @@ class TestHTTP:
         run_server(ContentDispoHandler, func)
 
     def test_content_validation(self, socket_enabled) -> None:
+        """Test content validation."""
+
         def validate(path) -> bool:
             return False
 
@@ -182,6 +197,8 @@ class TestHTTP:
         run_server(ContentDispoHandler, func)
 
     def test_error(self, socket_enabled) -> None:
+        """Test error."""
+
         def func(server, base_url) -> None:
             with HTTPSession() as session:
                 # first test with no exception on error
@@ -199,6 +216,8 @@ class TestHTTP:
         run_server(ServerErrorHandler, func)
 
     def test_fallback(self, socket_enabled) -> None:
+        """Test fallback."""
+
         def func(server, base_url) -> None:
             def inner_func(server2, base_url2) -> None:
                 logger = logging.getLogger("inner_func")
@@ -215,6 +234,8 @@ class TestHTTP:
         run_server(ServerErrorHandler, func)
 
     def test_content_abort(self, socket_enabled) -> None:
+        """Test content abort."""
+
         def func(server, base_url) -> None:
             def inner_func(server2, base_url2) -> None:
                 logger = logging.getLogger("inner_func")
@@ -232,6 +253,8 @@ class TestHTTP:
         run_server(ServerErrorHandler, func)
 
     def test_post_stream_data(self, socket_enabled) -> None:
+        """Test post stream data."""
+
         def outter_func(nok_server, nok_url) -> None:
             def func(server, url) -> None:
                 with HTTPSession(base_urls=[nok_url, url]) as session:
@@ -257,6 +280,8 @@ class TestHTTP:
         run_server(ServerErrorHandler, outter_func)
 
     def test_authorization_header(self, socket_enabled) -> None:
+        """Test authorization header."""
+
         def func(server, base_url) -> None:
             with HTTPSession() as session:
                 # first test with no authorization header

@@ -250,6 +250,7 @@ class Configure:
         }
 
     def __call__(self) -> Run:
+        """Call."""
         cmdline = self.cmdline()
         cmd = cmdline["cmd"]
         options = cmdline["options"]

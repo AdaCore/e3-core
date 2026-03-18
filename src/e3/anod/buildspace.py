@@ -61,6 +61,10 @@ class BuildSpace:
 
     @property
     def dirs(self) -> list[str]:
+        """Return the list of all build space directory paths.
+
+        :return: list of absolute directory paths
+        """
         return list(self.directory_mapping.values())
 
     def subdir(self, name: str) -> str:

@@ -39,9 +39,11 @@ class FileCache(Cache):
         self.cache_dir = cache_configuration["cache_dir"]
 
     def clear(self) -> None:
+        """Clear."""
         rm(Path(self.cache_dir, "*.cache"))
 
     def delete(self, uid: str) -> None:
+        """Delete."""
         rm(self.uid_to_file(uid))
 
     def _create_cache_dir(self) -> None:

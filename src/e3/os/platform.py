@@ -289,11 +289,13 @@ class SystemInfo:
 
     @classmethod
     def os_version(cls) -> tuple[str, str]:
+        """Os version."""
         version, kernel_version, _ = cls._get_os_version()
         return version, kernel_version
 
     @classmethod
     def full_os_version(cls) -> str:
+        """Full os version."""
         _, _, version = cls._get_os_version()
         return version
 
@@ -340,6 +342,7 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
     __slots__ = ()
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return self._asdict()
 
     @classmethod
@@ -402,6 +405,7 @@ class OS(
     __slots__ = ()
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize object to dictionary representation."""
         return self._asdict()
 
     @classmethod

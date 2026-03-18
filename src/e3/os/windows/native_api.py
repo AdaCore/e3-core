@@ -224,10 +224,12 @@ class FileTime(Structure):
 
     @property
     def filetime(self) -> int:
+        """Filetime."""
         return self.filetime_low + self.filetime_high * 2**32
 
     @property
     def as_datetime(self) -> datetime:
+        """Convert to datetime object."""
         try:
             return datetime.fromtimestamp(
                 self.filetime // 10_000_000 - W32_EPOCH_OFFSET
@@ -267,6 +269,7 @@ class LargeFileTime(Structure):
 
     @property
     def as_datetime(self) -> datetime:
+        """Convert to datetime object."""
         try:
             return datetime.fromtimestamp(
                 self.filetime // 10_000_000 - W32_EPOCH_OFFSET
@@ -426,6 +429,7 @@ class NT:
 
     @classmethod
     def init_api(cls) -> None:
+        """Init api."""
         if sys.platform == "win32":
             kernel32 = ctypes.windll.kernel32
             ntdll = ctypes.windll.ntdll

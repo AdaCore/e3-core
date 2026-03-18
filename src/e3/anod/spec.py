@@ -318,6 +318,10 @@ class Anod:
 
     @property
     def qualifier(self) -> str:
+        """Return the qualifier string representation (deprecated in API 1.7+).
+
+        :return: qualifier string from parsed_qualifier dict
+        """
         if Version(self.api_version) >= Version("1.7"):
             logger.warning(f"qualifier attribute is obsolete (spec: {self.name})")
         return qualifier_dict_to_str(self.parsed_qualifier)
@@ -395,6 +399,11 @@ class Anod:
 
     @property
     def build_space(self) -> BuildSpace:
+        """Return the build space associated with this spec instance.
+
+        :return: BuildSpace object
+        :raise AnodError: if build space has not been set
+        """
         if self.__build_space is None:
             raise AnodError("build space not set")
         return self.__build_space

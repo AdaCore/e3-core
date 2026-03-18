@@ -166,12 +166,14 @@ class NVD:
         self.close()
 
     def close(self) -> None:
+        """Close connection and cleanup resources."""
         if self._session is not None:
             self._session.close()
             self._session = None
 
     @property
     def session(self) -> Session:
+        """Return or create HTTP session."""
         if self._session is None:
             from warnings import warn
 

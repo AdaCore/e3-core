@@ -204,6 +204,7 @@ class EmptyJob(Job):
         self.__status = status
 
     def run(self) -> None:
+        """Do nothing (empty job implementation)."""
         pass
 
     @property

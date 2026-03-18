@@ -439,6 +439,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
 
     @property
     def dll_path_var(self) -> str:
+        """Dll path var."""
         env_var_name = {"windows": "PATH", "darwin": "DYLD_FALLBACK_LIBRARY_PATH"}
         return env_var_name.get(self.host.os.name.lower(), "LD_LIBRARY_PATH")
 

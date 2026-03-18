@@ -49,6 +49,7 @@ class SimpleJsonData(JsonData):
         self.float_var: float = float_var
 
     def as_dict(self) -> dict[str, object]:
+        """Convert to dictionary representation."""
         return {
             "string": self.string,
             "integer": self.integer,
@@ -64,10 +65,12 @@ class ComplexJsonData(JsonData):
         self.an_object = an_object
 
     def as_dict(self) -> dict[str, object]:
+        """Convert to dictionary representation."""
         return {"data": self.data.as_dict(), "an_object": self.an_object.value}
 
     @classmethod
     def from_dict(cls: type[ComplexJsonDataSelf], obj: dict) -> ComplexJsonDataSelf:
+        """Deserialize object from dictionary representation."""
         return cls(
             data=SimpleJsonData.from_dict(obj["data"]),
             an_object=AnObject(obj["an_object"]),
