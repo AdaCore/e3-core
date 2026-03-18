@@ -11,20 +11,33 @@ from os.path import abspath
 from pathlib import Path
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Protocol
 
 import pytest
 
 from e3.fs import cp, mkdir
 from e3.maven import MavenLink
 from e3.os.fs import touch, which
+from e3.pytest import require_tool
 from e3.python.wheel import Wheel
 
 if TYPE_CHECKING:
     from collections.abc import Set
     from requests_mock import Mocker
 
-from e3.pytest import require_tool
+
+class RequestsMockRequest(Protocol):
+    """Protocol for requests_mock request object."""
+
+    url: str
+    method: str
+
+
+class RequestsMockContext(Protocol):
+    """Protocol for requests_mock context object."""
+
+    status_code: int
+
 
 git = require_tool("git")
 ldd = require_tool("ldd")
@@ -53,7 +66,11 @@ class PypiSimulator:
         self.requests_mock.stop()
 
     def download_file(
-        self, name: str, version: str, request: Any, context: Any
+        self,
+        name: str,
+        version: str,
+        request: RequestsMockRequest,
+        context: RequestsMockContext,
     ) -> bytes:
         """Download file."""
         if not Path(name).is_dir():
@@ -83,7 +100,9 @@ class PypiSimulator:
         context.status_code = 200
         return result
 
-    def get_metadata(self, request: Any, context: Any) -> dict:
+    def get_metadata(
+        self, request: RequestsMockRequest, context: RequestsMockContext
+    ) -> dict:
         """Get metadata."""
         m = self.SIMPLE_MATCHER.match(request.url)
         if not m:
@@ -131,7 +150,9 @@ class PypiSimulator:
         context.status_code = 200
         return result
 
-    def get_resource(self, request: Any, context: Any) -> str:
+    def get_resource(
+        self, request: RequestsMockRequest, context: RequestsMockContext
+    ) -> str:
         """Get resource."""
         m = self.DOWNLOAD_MATCHER.match(request.url)
         package = m.group("path").split("/")[-1].split("#")[0]
@@ -155,7 +176,12 @@ class PypiSimulator:
         self.requests_mock.get(self.DOWNLOAD_MATCHER, content=self.get_resource)
         return self
 
-    def __exit__(self, type_t: Any, value: Any, traceback: Any) -> None:
+    def __exit__(
+        self,
+        type_t: type[BaseException] | None,
+        value: BaseException | None,
+        traceback: object,
+    ) -> None:
         self.requests_mock.stop()
 
 
@@ -273,7 +299,9 @@ class MavenCentralSimulator:
                 },
             }
 
-    def _get_file(self, request: Any, context: Any) -> str:
+    def _get_file(
+        self, request: RequestsMockRequest, context: RequestsMockContext
+    ) -> str:
         """Get a Maven package file.
 
         This function is also used to simulate a HEAD request.
@@ -335,7 +363,9 @@ class MavenCentralSimulator:
             return ""
         return data["content"]
 
-    def _get_metadata(self, request: Any, context: Any) -> str:
+    def _get_metadata(
+        self, request: RequestsMockRequest, context: RequestsMockContext
+    ) -> str:
         """Get a Maven package metadata.
 
         :param request: The mocked request received. See request_mock for more
@@ -407,7 +437,12 @@ class MavenCentralSimulator:
         self.__requests_mock.get(self.FILE_MATCHER, text=self._get_file)
         return self
 
-    def __exit__(self, type_t: Any, value: Any, traceback: Any) -> None:
+    def __exit__(
+        self,
+        type_t: type[BaseException] | None,
+        value: BaseException | None,
+        traceback: object,
+    ) -> None:
         self.__requests_mock.stop()
 
 

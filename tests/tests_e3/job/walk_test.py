@@ -4,6 +4,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
+from typing import TypeVar
 
 import pytest
 
@@ -13,6 +14,9 @@ from e3.fingerprint import Fingerprint
 from e3.fs import rm
 from e3.job import EmptyJob, Job, ProcessJob
 from e3.job.walk import Walk
+
+# TypeVar for polymorphic job data
+JobDataT = TypeVar("JobDataT")
 
 # Job execution limits for walk tests
 NOT_READY_RUN_COUNT_THRESHOLD = 2
@@ -148,7 +152,9 @@ class ControlledJob(ProcessJob):
     the "cmd" line method for more details on this.
     """
 
-    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]) -> None:
+    def __init__(
+        self, uid: str, data: JobDataT, notify_end: Callable[[str], None]
+    ) -> None:
         super().__init__(uid, data, notify_end)
         self.run_count = 0
 
@@ -202,7 +208,7 @@ class SimpleWalk(Walk):
     def create_job(
         self,
         uid: str,
-        data: Any,
+        data: JobDataT,
         predecessors: frozenset[str],
         notify_end: Callable[[str], None],
     ) -> Job:
@@ -218,7 +224,7 @@ class SimpleWalk(Walk):
     def get_job(
         self,
         uid: str,
-        data: Any,
+        data: JobDataT,
         predecessors: frozenset[str],
         notify_end: Callable[[str], None],
     ) -> Job:

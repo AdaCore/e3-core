@@ -1,7 +1,6 @@
 """Tests for e3.anod driver."""
 
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -35,7 +34,7 @@ def test_deps_driver() -> None:
         build_deps = [e3.anod.spec.Anod.Dependency(name="parent")]
 
         @e3.anod.spec.Anod.primitive()
-        def build(self) -> Any:
+        def build(self) -> str:
             return self.deps["parent"].parent_info
 
     sandbox = e3.anod.sandbox.SandBox(root_dir=str(Path.cwd()))

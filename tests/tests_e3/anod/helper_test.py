@@ -15,12 +15,16 @@ def test_make() -> None:
     """Test make."""
 
     class AnodMake(Anod):
-        def shell(self, *cmd, **kwargs) -> Any:
+        def shell(
+            self,
+            *cmd: str,
+            **kwargs: Any,
+        ) -> object:
             """Mock for Anod.shell that does not spawn processes."""
             return (cmd, kwargs)
 
         @Anod.primitive()
-        def build(self) -> Any:
+        def build(self) -> object:
             m1 = Make(self, makefile="/tmp/makefile")
             m1.set_var("prefix", "/foo")
             m2 = Make(self, exec_dir="/tmp/exec_dir", jobs=2)
@@ -109,12 +113,16 @@ def test_configure_opts() -> None:
     """Check configure options."""
 
     class AnodConf(Anod):
-        def shell(self, *cmd, **kwargs) -> Any:
+        def shell(
+            self,
+            *cmd: str,
+            **kwargs: Any,
+        ) -> object:
             """Mock for Anod.shell that does not spawn processes."""
             return (cmd, kwargs)
 
         @Anod.primitive()
-        def build(self) -> Any:
+        def build(self) -> object:
             c = Configure(self)
             c.add("--with-opt")
             c.add_env("OPT", "VAL")

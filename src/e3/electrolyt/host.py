@@ -24,7 +24,7 @@ class Host(BaseEnv):
         hostname: str,
         platform: str,
         version: str,
-        **kwargs: Any,  # noqa: ANN401  # user-defined host metadata
+        **kwargs: Any,
     ) -> None:
         """Initialize an host entry.
 

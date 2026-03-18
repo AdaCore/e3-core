@@ -315,8 +315,8 @@ class EventManager:
     def add_handler(
         self,
         name: str,
-        *args: Any,  # noqa: ANN401  # handler-specific arguments
-        **kwargs: Any,  # noqa: ANN401  # handler-specific arguments
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Add an handler instance to the manager.
 

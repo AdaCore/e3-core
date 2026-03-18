@@ -5,7 +5,6 @@ import sys
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -196,7 +195,7 @@ def test_iterate_on_dir() -> None:
 
     result = set()
 
-    def fun(name: str, ntfile_instance: Any) -> tuple[bool, bool]:
+    def fun(name: str, ntfile_instance: object) -> tuple[bool, bool]:
         del ntfile_instance
         result.add(name)
         return True, False

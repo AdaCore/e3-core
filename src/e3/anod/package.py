@@ -260,8 +260,8 @@ class SourceBuilder:
 
     def fullname(
         self,
-        *args: Any,  # noqa: ANN401  # generic callback accepts any signature
-        **kwargs: Any,  # noqa: ANN401  # generic callback accepts any signature
+        *args: Any,
+        **kwargs: Any,
     ) -> str:
         """Return the full name of the source package.
 

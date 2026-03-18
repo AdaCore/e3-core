@@ -5,8 +5,8 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any
-from unittest.mock import patch
+from typing import IO
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -162,7 +162,7 @@ def test_unpack_cmd() -> None:
 
     t = TestResult()
 
-    def custom_unpack(filename: str, dest: str, selected_files: Any) -> None:
+    def custom_unpack(filename: str, dest: str, selected_files: list[str]) -> None:
         t.store_result(f=filename, d=dest, s=selected_files)
 
     e3.archive.unpack_archive(
@@ -203,7 +203,7 @@ def test_unpack_cmd_fileobj() -> None:
 
     t = TestResult()
 
-    def custom_unpack(filename: str, dest: str, fileobj: Any) -> None:
+    def custom_unpack(filename: str, dest: str, fileobj: IO[bytes]) -> None:
         t.store_result(f=filename, d=dest, fo=fileobj)
 
     fo.seek(0)
@@ -316,7 +316,7 @@ def test_remove_root_dir() -> None:
 
 
 @patch("tempfile.mkdtemp", wraps=tempfile.mkdtemp)
-def test_tmp_dir_root(mock_mkdtemp: Any) -> None:
+def test_tmp_dir_root(mock_mkdtemp: MagicMock) -> None:
     """Try to unpack an archive with remove_root_dir and a custom tmp_dir root."""
     e3.fs.mkdir("custom_tmp_dir_root")
     e3.fs.mkdir("result")
