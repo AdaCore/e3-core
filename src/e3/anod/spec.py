@@ -481,7 +481,7 @@ class Anod:
             *ldd_output*) is not in the same directory as the analysed element.
         :raise FileNotFoundError: if *ldd_output* is not provided and ``ldd``
             application cannot be found in the ``PATH``.
-        """  # noqa RST304
+        """  # noqa: RST304
         ignored: list[str] = ignored_libs or []
         result: dict[str, list[tuple[str, str]]] = {}
         errors: dict[str, list[str]] = {}
