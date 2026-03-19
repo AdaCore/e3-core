@@ -96,7 +96,7 @@ def cp(
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
             elif preserve_symlinks and os.path.islink(f):  # windows: no cover
                 linkto = os.readlink(f)
-                os.symlink(linkto, f_dest)
+                Path(f_dest).symlink_to(linkto)
             elif copy_attrs:
                 shutil.copy2(f, f_dest)
             else:
@@ -408,7 +408,7 @@ def mv(
         except OSError as err:
             if os.path.islink(src):
                 linkto = os.readlink(src)
-                os.symlink(linkto, real_dst)
+                Path(real_dst).symlink_to(linkto)
                 os.unlink(src)
             elif Path(src).is_dir():
                 if destinsrc(src, dst):
@@ -926,7 +926,9 @@ def sync_tree(  # noqa: PLR0915
 
                     target_is_directory = src_linkto_path.is_dir()
 
-                os.symlink(linkto, dst.path, target_is_directory=target_is_directory)
+                Path(dst.path).symlink_to(
+                    linkto, target_is_directory=target_is_directory
+                )
             copystat(src, dst)
         else:
             if isdir(dst):
