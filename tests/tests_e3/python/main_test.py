@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from os import listdir
 from pathlib import Path
 
 import pytest
@@ -116,7 +115,7 @@ def test_pypi_closure_tool() -> None:
         ]
     )
     assert p.status == 0, p.out
-    file_list = set(listdir("dist"))
+    file_list = {p.name for p in Path("dist").iterdir()}
     assert file_list == {
         "requirements.txt",
         "src1-1.0.0-py3-none-any.whl",

@@ -376,9 +376,7 @@ def relocate_python_distrib(
     python_binary = interpreter(prefix=python_distrib_dir)
 
     # Search all scripts
-    for fname in os.listdir(script_dir):
-        script_path = Path(script_dir, fname)
-
+    for script_path in Path(script_dir).iterdir():
         if not script_path.is_file():
             continue
 
