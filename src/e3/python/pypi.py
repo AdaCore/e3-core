@@ -715,7 +715,7 @@ class PyPIClosure:
 
         :param filename: path to the wheel file
         """
-        name = os.path.basename(filename)[:-4].split("-")[0]
+        name = Path(filename).name[:-4].split("-")[0]
         self.pypi.cache[canonicalize_name(name)] = [
             PyPILink(
                 identifier=name,

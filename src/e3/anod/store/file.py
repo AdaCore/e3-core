@@ -675,7 +675,7 @@ class File(object):
         """
         from e3.anod.store.buildinfo import BuildInfo
 
-        filename = os.path.basename(path)
+        filename = Path(path).name
         bi = BuildInfo.latest(store=store, setup="thirdparties", ready_only=False)
         f = cls(
             bi.id,

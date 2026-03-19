@@ -88,7 +88,7 @@ def cp(
     for f in file_list:
         try:
             if Path(target).is_dir():
-                f_dest = str(Path(target, os.path.basename(f)))
+                f_dest = str(Path(target, Path(f).name))
             else:
                 f_dest = os.fspath(target)
 
@@ -375,7 +375,7 @@ def mv(
             :param path: file path
             """
             sep = os.path.sep + (os.path.altsep or "")
-            return os.path.basename(path.rstrip(sep))
+            return os.path.basename(path.rstrip(sep))  # noqa: PTH119
 
         def destinsrc(src: str, dst: str) -> bool:
             """Check if destination is inside source.
@@ -439,7 +439,7 @@ def mv(
             raise FSError("mv", f"{target} should be a directory")
         else:
             for f in file_list:
-                f_dest = str(Path(target, os.path.basename(f)))
+                f_dest = str(Path(target, Path(f).name))
                 move_file(f, f_dest)
     except Exception as e:
         logger.error(e)
@@ -728,7 +728,7 @@ def sync_tree(  # noqa: PLR0915
             or ignore_path_suffixes.match(pk)
             or (
                 ignore_base_regexp is not None
-                and bool(re.match(ignore_base_regexp, os.path.basename(pk)))
+                and bool(re.match(ignore_base_regexp, Path(pk).name))
             )
         )
 
@@ -914,7 +914,7 @@ def sync_tree(  # noqa: PLR0915
                         src_linkto = FileInfo(
                             str(src_linkto_path),
                             os.lstat(src_linkto_path),
-                            os.path.basename(src_linkto_path),
+                            src_linkto_path.name,
                         )
 
                         if not islink(src_linkto):
@@ -1051,14 +1051,14 @@ def sync_tree(  # noqa: PLR0915
                 source_stat = os.lstat(source_full_path)
 
             source_file = FileInfo(
-                str(source_full_path), source_stat, os.path.basename(source_full_path)
+                str(source_full_path), source_stat, source_full_path.name
             )
 
             if name in target_names:
                 target_stat = os.lstat(target_full_path)
 
             target_file = FileInfo(
-                str(target_full_path), target_stat, os.path.basename(target_full_path)
+                str(target_full_path), target_stat, target_full_path.name
             )
 
             result.append(FilesInfo(rel_path, source_file, target_file))

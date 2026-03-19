@@ -105,7 +105,7 @@ class Package:
 
         # Create the zip archive
         create_archive(
-            filename=os.path.basename(pkg_path),
+            filename=Path(pkg_path).name,
             from_dir=anod_instance.build_space.pkg_dir,
             dest=str(Path(pkg_path).parent),
             from_dir_rename=pkg_name,

@@ -295,7 +295,7 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
         # 3- a .exe without a side python script
         script = (
             str(Path(prefix, name))
-            if os.path.basename(prefix).lower() == "scripts"
+            if Path(prefix).name.lower() == "scripts"
             else str(Path(prefix, "Scripts", name))
         )
 
@@ -426,7 +426,7 @@ def relocate_python_distrib(
         if freeze:
             shebang = b"#!" + python_binary.encode("utf-8")
         else:
-            shebang = os.path.basename(python_binary).encode("utf-8")
+            shebang = Path(python_binary).name.encode("utf-8")
             if platform == "win32":  # unix: no cover
                 shebang = b"#!" + shebang
             else:  # win32: no cover

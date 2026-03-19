@@ -425,7 +425,7 @@ def create_archive(
     ext = check_type(filename, force_extension=force_extension)
 
     if from_dir_rename is None:
-        from_dir_rename = os.path.basename(from_dir)
+        from_dir_rename = Path(from_dir).name
 
     if ext == "zip":
         zip_archive = zipfile.ZipFile(

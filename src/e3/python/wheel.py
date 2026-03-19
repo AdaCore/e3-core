@@ -32,10 +32,7 @@ class Wheel:
     @property
     def metadata_path(self) -> str:
         """Relative path in a wheel package to the metadata."""
-        return (
-            "-".join(os.path.basename(self.path).split("-")[0:2])
-            + ".dist-info/METADATA"
-        )
+        return "-".join(Path(self.path).name.split("-")[0:2]) + ".dist-info/METADATA"
 
     @property
     def requirements(self) -> set[Requirement]:
@@ -84,7 +81,7 @@ class Wheel:
                 raise WheelError(msg)
 
             tmp_whl_path = ls(Path(build_dir, "*.whl"))[0]
-            dest_whl_path = Path(dest_dir, os.path.basename(tmp_whl_path))
+            dest_whl_path = Path(dest_dir, Path(tmp_whl_path).name)
             mv(tmp_whl_path, dest_whl_path)
 
         return Wheel(path=str(dest_whl_path))

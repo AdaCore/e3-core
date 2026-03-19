@@ -211,7 +211,7 @@ def main() -> None:  # noqa: PLR0915
 
         packages: set[str] = set()
         for f in pypi.file_closure():
-            pkg_name = os.path.basename(f).split("-")[0].replace("_", "-")
+            pkg_name = Path(f).name.split("-")[0].replace("_", "-")
             if "discard_from_closure" not in config or not re.search(
                 config["discard_from_closure"], pkg_name
             ):
