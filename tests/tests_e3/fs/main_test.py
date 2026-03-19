@@ -142,7 +142,7 @@ def test_mv_with_iterables() -> None:
 def test_cp_symlink() -> None:
     """Test cp symlink."""
     e3.os.fs.touch("c")
-    os.symlink("c", "c_sym")
+    Path("c_sym").symlink_to("c")
     e3.fs.cp("c_sym", "d", preserve_symlinks=True)
     assert os.path.islink("d")
 
@@ -340,8 +340,8 @@ def test_sync_tree_with_symlinks() -> None:
         f.write("b")
 
     e3.fs.cp(a, m1 / "c")
-    os.symlink(b, m2 / "c")
-    os.symlink(m2, m3 / "c")
+    Path(m2 / "c").symlink_to(b)
+    Path(m3 / "c").symlink_to(m2)
 
     # we start with m2/c -> b
     # so m2/c and b points to the same content
@@ -439,7 +439,7 @@ def test_sync_tree_links() -> None:
     e3.fs.mkdir("c")
     with Path("a/content").open("w") as f:
         f.write("content")
-    os.symlink(Path.cwd() / "a" / "content", "a/link")
+    Path("a/link").symlink_to(Path.cwd() / "a" / "content")
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
 
     with Path("b/link").open() as f:
@@ -485,9 +485,8 @@ def test_sync_tree_top_source_is_link() -> None:
     try:
         # Symlinks are supported on Windows, but the user must have sufficient
         # permissions.
-        os.symlink(
+        Path(Path.cwd() / "b").symlink_to(
             Path.cwd() / "a",
-            Path.cwd() / "b",
             target_is_directory=True,
         )
     except Exception as e:
@@ -550,7 +549,7 @@ def test_rm_symlink() -> None:
     """Test rm symlink."""
     e3.fs.mkdir("a")
     try:
-        os.symlink("a", "b")
+        Path("b").symlink_to("a")
     except Exception:
         # This means symlinks are not supported on that system or not allowed
         return
@@ -560,7 +559,7 @@ def test_rm_symlink() -> None:
     assert Path("a").exists()
 
     e3.os.fs.touch("d")
-    os.symlink("d", "e")
+    Path("e").symlink_to("d")
     e3.fs.rm("e", recursive=True)
     assert not Path("e").exists()
     assert Path("d").exists()
@@ -593,7 +592,7 @@ def test_safe_copy_links() -> None:
     """sync_tree should replace directory by symlinks when needed."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("a/d")
-    os.symlink("f", "a/l")
+    Path("a/l").symlink_to("f")
     e3.fs.mkdir("b")
     e3.fs.mkdir("b/l")
     e3.fs.sync_tree("a", "b")
