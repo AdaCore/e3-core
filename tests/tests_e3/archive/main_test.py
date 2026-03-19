@@ -342,7 +342,7 @@ def test_empty() -> None:
     e3.archive.unpack_archive(
         str(Path("dest", "pkg.zip")), "result", remove_root_dir=True
     )
-    assert os.listdir("result") == []
+    assert list(Path("result").iterdir()) == []
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="test executable attribute")

@@ -1024,7 +1024,9 @@ def sync_tree(  # noqa: PLR0915
             yield entry
 
         try:
-            source_names = {path_key(k): k for k in os.listdir(entry.source.path)}
+            source_names = {
+                path_key(p.name): p.name for p in Path(entry.source.path).iterdir()
+            }
         except Exception:  # defensive code
             e3.log.debug("cannot get sources list", exc_info=True)
             # Don't crash in case a source directory cannot be read
@@ -1033,7 +1035,9 @@ def sync_tree(  # noqa: PLR0915
         target_names = {}
         if isdir(entry.target):
             try:
-                target_names = {path_key(k): k for k in os.listdir(entry.target.path)}
+                target_names = {
+                    path_key(p.name): p.name for p in Path(entry.target.path).iterdir()
+                }
             except Exception:
                 e3.log.debug("cannot get targets list", exc_info=True)
                 target_names = {}

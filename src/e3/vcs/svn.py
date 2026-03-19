@@ -258,7 +258,7 @@ class SVNRepository:
 
             :param dir_path: path to directory
             """
-            return Path(dir_path).is_dir() and not os.listdir(dir_path)
+            return Path(dir_path).is_dir() and not any(Path(dir_path).iterdir())
 
         options: SVNCmd = ["--ignore-externals"]
         if revision:

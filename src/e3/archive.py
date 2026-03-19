@@ -331,7 +331,7 @@ def unpack_archive(  # noqa: PLR0915
         if remove_root_dir:
             # First check that we have only one dir in our temp destination,
             # and no other files or directories. If not raise an error.
-            nb_files = len(os.listdir(tmp_dest))
+            nb_files = len(list(Path(tmp_dest).iterdir()))
             if nb_files == 0:
                 # Nothing to do...
                 return
@@ -344,7 +344,7 @@ def unpack_archive(  # noqa: PLR0915
 
                 # We cannot remove root dir but remove_root_dir is set to
                 # 'auto' so fallback on non remove_root_dir method
-                if not os.listdir(dest):
+                if not any(Path(dest).iterdir()):
                     e3.fs.mv(Path(tmp_dest, "*"), dest)
                 else:
                     e3.fs.sync_tree(
@@ -355,14 +355,14 @@ def unpack_archive(  # noqa: PLR0915
                         preserve_timestamps=preserve_timestamps,
                     )
             else:
-                root_dir = Path(tmp_dest, os.listdir(tmp_dest)[0])
+                root_dir = Path(tmp_dest, next(Path(tmp_dest).iterdir()).name)
 
                 # Now check if the destination directory is empty. If this is
                 # the case a simple move will work, otherwise we need to do a
                 # sync_tree (which cost more)
 
-                if not os.listdir(dest):
-                    e3.fs.mv([(root_dir / f) for f in os.listdir(root_dir)], dest)
+                if not any(Path(dest).iterdir()):
+                    e3.fs.mv(list(Path(root_dir).iterdir()), dest)
                 else:
                     e3.fs.sync_tree(
                         root_dir,
