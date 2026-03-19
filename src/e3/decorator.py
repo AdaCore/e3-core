@@ -45,7 +45,10 @@ def disabled(func: Callable) -> Callable:
     """
     del func
 
-    def empty_func(*args: Any, **kargs: Any) -> None:
+    def empty_func(
+        *args: Any,  # noqa: ANN401
+        **kargs: Any,  # noqa: ANN401  # generic wrapper accepts any signature
+    ) -> None:
         del args, kargs
 
     return empty_func
@@ -92,7 +95,11 @@ class memoize:
             stacklevel=2,  # warn from the caller site
         )
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    def __call__(
+        self,
+        *args: Any,  # noqa: ANN401  # generic decorator caches any function signature
+        **kwargs: Any,  # noqa: ANN401
+    ) -> Any:  # noqa: ANN401
         """Return the cache value if exist, else call func."""
         if kwargs:
             if len(kwargs) == 1 and kwargs.get("reset_cache"):
@@ -115,7 +122,11 @@ class memoize:
         """Return the function's docstring."""
         return self.func.__doc__ or ""
 
-    def __get__(self, obj: Any, objtype: Any) -> Any:
+    def __get__(
+        self,
+        obj: Any,  # noqa: ANN401  # descriptor protocol for any class type
+        objtype: Any,  # noqa: ANN401
+    ) -> Any:  # noqa: ANN401
         """Support instance methods.
 
         :param obj: instance object

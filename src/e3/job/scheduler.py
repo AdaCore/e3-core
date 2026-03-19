@@ -120,7 +120,7 @@ class Scheduler:
     def safe_job_provider(
         self,
         uid: str,
-        data: Any,
+        data: Any,  # noqa: ANN401  # polymorphic job data
         predecessors: FrozenSet[str],
         notify_end: Callable[[str], None],
     ) -> Job:
@@ -145,7 +145,7 @@ class Scheduler:
 
         def provider(
             uid: str,
-            data: Any,
+            data: Any,  # noqa: ANN401  # polymorphic job data
             predecessors: FrozenSet[str],
             notify_end: Callable[[str], None],
         ) -> Job:

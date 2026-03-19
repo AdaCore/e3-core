@@ -187,7 +187,7 @@ class CaseParser:
         # not modified.
         self.keys: set[str] = set()
 
-    def __parse_case(self, case_key: str, data: dict) -> Any:
+    def __parse_case(self, case_key: str, data: dict) -> Any:  # noqa: ANN401
         """Parse a case statement.
 
         :param case_key: the variable on which the case is evaluated
@@ -206,7 +206,10 @@ class CaseParser:
             return result[2]
         return None
 
-    def __format_value(self, value: Any) -> Any:
+    def __format_value(
+        self,
+        value: Any,  # noqa: ANN401  # YAML values are polymorphic
+    ) -> Any:  # noqa: ANN401
         """Format a value.
 
         :param value: the value to be formatted
@@ -225,7 +228,13 @@ class CaseParser:
 
         return value
 
-    def __update_state(self, key: str, value: Any, cursor: Any, prefix: tuple) -> None:
+    def __update_state(
+        self,
+        key: str,
+        value: Any,  # noqa: ANN401  # YAML values are polymorphic
+        cursor: Any,  # noqa: ANN401  # YAML structure cursor (dict/list/etc)
+        prefix: tuple,
+    ) -> None:
         """Update state.
 
         :param key: the key to modify. Leading or trailing '+' in the key name
@@ -262,7 +271,10 @@ class CaseParser:
                     e3.log.debug("prepend %s -> %s", real_key_str, real_value)
                     cursor[real_key] = real_value + cursor[real_key]
 
-    def parse(self, data: Any) -> Any:
+    def parse(
+        self,
+        data: Any,  # noqa: ANN401  # YAML structure (dict/list/str/int/None)
+    ) -> Any:  # noqa: ANN401
         """Parse.
 
         :param data: a python object. Note that dictionaries in that structure
@@ -273,7 +285,12 @@ class CaseParser:
         """
         return self.__parse(data, self.__state, ())
 
-    def __parse(self, data: Any, cursor: Any, prefix: tuple) -> Any:
+    def __parse(
+        self,
+        data: Any,  # noqa: ANN401  # YAML structure (dict/list/str/int/None)
+        cursor: Any,  # noqa: ANN401  # YAML structure cursor
+        prefix: tuple,
+    ) -> Any:  # noqa: ANN401
         """Parse (internal).
 
         :param data: a python object. Note that dictionaries in that structure
@@ -309,7 +326,7 @@ class CaseParser:
         return cursor
 
 
-def load_with_config(filename: str | list[str], config: dict) -> Any:
+def load_with_config(filename: str | list[str], config: dict) -> Any:  # noqa: ANN401
     """Load yaml config files with case statement handling.
 
     :param filename: a path or list of path. When a list of path

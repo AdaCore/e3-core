@@ -329,7 +329,10 @@ class _Store(_StoreContextManager):
     def __enter__(self) -> _Store:
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(
+        self,
+        *args: Any,  # noqa: ANN401  # context manager protocol
+    ) -> None:
         self.close()
 
     def close(self) -> None:

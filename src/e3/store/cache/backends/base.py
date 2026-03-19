@@ -18,7 +18,10 @@ class Cache(metaclass=abc.ABCMeta):
     :ivar cache_configuration: configuration for the cache backend
     """
 
-    def __init__(self, cache_configuration: Any) -> None:
+    def __init__(
+        self,
+        cache_configuration: Any,  # noqa: ANN401  # plugin-specific config
+    ) -> None:
         """Initialize the cache backend.
 
         :param cache_configuration: configuration for the cache backend
@@ -26,7 +29,11 @@ class Cache(metaclass=abc.ABCMeta):
         self.cache_configuration = cache_configuration
 
     @abc.abstractmethod
-    def get(self, uid: str, default: Any = None) -> Any:
+    def get(
+        self,
+        uid: str,
+        default: Any = None,  # noqa: ANN401  # polymorphic default value
+    ) -> Any:  # noqa: ANN401  # cached value can be any type
         """Fetch a given resource from the cache.
 
         If the resource does not exist, return default, which itself defaults
@@ -50,7 +57,12 @@ class Cache(metaclass=abc.ABCMeta):
         return self.get(uid) is not None
 
     @abc.abstractmethod
-    def set(self, uid: str, value: Any, timeout: int = DEFAULT_TIMEOUT) -> bool:
+    def set(
+        self,
+        uid: str,
+        value: Any,  # noqa: ANN401  # cache stores any type of value
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> bool:
         """Set a value in the cache.
 
         :param uid: the cache entry uid

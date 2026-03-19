@@ -58,7 +58,7 @@ class WithOpenFile:
         self.shared_access = shared_access
         self.open_options = open_options
 
-    def __call__(self, f: Callable) -> Any:
+    def __call__(self, f: Callable) -> Any:  # noqa: ANN401
         """Decorate function to open file if needed.
 
         :param f: function to wrap
@@ -472,7 +472,11 @@ class NTFile:
         None,
         OpenOptions.SYNCHRONOUS_IO_NON_ALERT,
     )
-    def iterate_on_dir(self, fun: Callable, default_result: Any = None) -> Any:
+    def iterate_on_dir(
+        self,
+        fun: Callable,
+        default_result: Any = None,  # noqa: ANN401  # polymorphic default/return
+    ) -> Any:  # noqa: ANN401  # polymorphic default/return
         """Iterate on directory.
 
         :param fun: function called on each entry (. are .. are skipped)

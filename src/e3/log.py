@@ -114,7 +114,11 @@ class JSONFormatter(logging.Formatter):
 class E3LoggerAdapter(logging.LoggerAdapter):
     """LoggerAdapter to add custom keywords."""
 
-    def process(self, msg: Any, kwargs: Any) -> tuple[Any, Any]:
+    def process(
+        self,
+        msg: Any,  # noqa: ANN401  # standard LoggerAdapter.process signature
+        kwargs: Any,  # noqa: ANN401
+    ) -> tuple[Any, Any]:  # noqa: ANN401
         """Allow to handle extra parameter.
 
         It is called by super method log. It is overwritten here because
@@ -126,7 +130,12 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         return msg, kwargs
 
     def log(  # type: ignore[override]
-        self, level: int, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+        self,
+        level: int,
+        msg: Any,  # noqa: ANN401  # standard logging signature
+        *args: Any,  # noqa: ANN401
+        anod_uui: int = 0,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Integrate additional keywords using standard interface.
 
@@ -143,7 +152,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         super(E3LoggerAdapter, self).log(level, msg, *args, **kwargs)
 
     def info(  # type: ignore[override]
-        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+        self,
+        msg: Any,  # noqa: ANN401  # standard logging signature
+        *args: Any,  # noqa: ANN401
+        anod_uui: int = 0,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Wrap standard logger.info method.
 
@@ -157,7 +170,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         self.log(logging.INFO, msg, *args, anod_uui=anod_uui, **kwargs)
 
     def debug(  # type: ignore[override]
-        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+        self,
+        msg: Any,  # noqa: ANN401  # standard logging signature
+        *args: Any,  # noqa: ANN401
+        anod_uui: int = 0,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Wrap standard logger.debug method.
 
@@ -171,7 +188,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         self.log(logging.DEBUG, msg, *args, anod_uui=anod_uui, **kwargs)
 
     def warning(  # type: ignore[override]
-        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+        self,
+        msg: Any,  # noqa: ANN401  # standard logging signature
+        *args: Any,  # noqa: ANN401
+        anod_uui: int = 0,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Wrap standard logger.warning method.
 
@@ -185,7 +206,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         self.log(logging.WARNING, msg, *args, anod_uui=anod_uui, **kwargs)
 
     def error(  # type: ignore[override]
-        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+        self,
+        msg: Any,  # noqa: ANN401  # standard logging signature
+        *args: Any,  # noqa: ANN401
+        anod_uui: int = 0,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Wrap standard logger.error method.
 
@@ -199,7 +224,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         self.log(logging.ERROR, msg, *args, anod_uui=anod_uui, **kwargs)
 
     def critical(  # type: ignore[override]
-        self, msg: Any, *args: Any, anod_uui: int = 0, **kwargs: Any
+        self,
+        msg: Any,  # noqa: ANN401  # standard logging signature
+        *args: Any,  # noqa: ANN401
+        anod_uui: int = 0,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Wrap of standard logger.critical method.
 
@@ -214,11 +243,11 @@ class E3LoggerAdapter(logging.LoggerAdapter):
 
     def exception(  # type: ignore[override]
         self,
-        msg: Any,
-        *args: Any,
+        msg: Any,  # noqa: ANN401  # standard logging signature
+        *args: Any,  # noqa: ANN401
         exc_info: _ExcInfoType = True,
         anod_uui: int = 0,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Wrap standard logger.exception method.
 
@@ -235,7 +264,10 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         )
 
 
-def progress_bar(it: Iterator[T] | Sequence[T], **kwargs: Any) -> tqdm[T]:
+def progress_bar(
+    it: Iterator[T] | Sequence[T],
+    **kwargs: Any,  # noqa: ANN401  # tqdm accepts many kwargs
+) -> tqdm[T]:
     """Create a tqdm progress bar.
 
     :param it: an interator

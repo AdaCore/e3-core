@@ -244,7 +244,11 @@ class SourceBuilder:
         self.__apply_patch = apply_patch
         self.anod_instance = anod_instance
 
-    def fullname(self, *args: Any, **kwargs: Any) -> str:
+    def fullname(
+        self,
+        *args: Any,  # noqa: ANN401  # generic callback accepts any signature
+        **kwargs: Any,  # noqa: ANN401  # generic callback accepts any signature
+    ) -> str:
         """Return the full name of the source package.
 
         :param args: arguments passed to the fullname callback

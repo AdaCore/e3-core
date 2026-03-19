@@ -25,7 +25,11 @@ class Action:
 
     __slots__ = ("data", "uid")
 
-    def __init__(self, uid: str, data: Any) -> None:
+    def __init__(
+        self,
+        uid: str,
+        data: Any,  # noqa: ANN401  # polymorphic data, typed in subclasses
+    ) -> None:
         """Initialize an Action.
 
         :param uid: an unique identifier

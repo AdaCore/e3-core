@@ -60,7 +60,7 @@ class Dependency:
             "build_tree", "installation", "download", "source_pkg", "test"
         ] = "build_tree",
         track: bool = False,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401  # accepts various dependency parameters
     ) -> None:
         """Initialize a Dependency object.
 

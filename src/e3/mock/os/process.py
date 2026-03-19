@@ -90,7 +90,11 @@ class SideEffect(Protocol):
     """Function to be called when a mocked command is called."""
 
     def __call__(
-        self, result: CommandResult, cmd: list[str], *args: Any, **kwargs: Any
+        self,
+        result: CommandResult,
+        cmd: list[str],
+        *args: Any,  # noqa: ANN401  # mock accepts any Run signature
+        **kwargs: Any,  # noqa: ANN401  # mock accepts any Run signature
     ) -> None:
         """Run when the mocked command is called.
 
@@ -151,7 +155,12 @@ class CommandResult:
             msg = f"unexpected arguments {cmd}, expected {self.cmd}"
             raise UnexpectedCommandError(msg)
 
-    def __call__(self, cmd: list[str], *args: Any, **kwargs: Any) -> None:
+    def __call__(
+        self,
+        cmd: list[str],
+        *args: Any,  # noqa: ANN401  # mock accepts any Run signature
+        **kwargs: Any,  # noqa: ANN401  # mock accepts any Run signature
+    ) -> None:
         """Allow to run code to emulate the command.
 
         This function is called when a command is supposed to be run by Run. It
@@ -191,7 +200,12 @@ class MockRun(Run):
 
         self.config.setdefault("results", []).extend(result)
 
-    def __call__(self, cmds: AnyCmdLine, *args: Any, **kwargs: Any) -> Run:
+    def __call__(
+        self,
+        cmds: AnyCmdLine,
+        *args: Any,  # noqa: ANN401  # mock accepts any Run signature
+        **kwargs: Any,  # noqa: ANN401  # mock accepts any Run signature
+    ) -> Run:
         """Emulate how e3.os.process.Run.__init__ works.
 
         Once e3.os.process.Run is patched, this function will be called instead.

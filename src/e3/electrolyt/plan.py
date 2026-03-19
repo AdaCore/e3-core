@@ -144,7 +144,7 @@ class PlanContext:
         target: str | None = None,
         enabled: bool = True,
         default_push_to_store: bool = False,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401  # user-defined scope metadata
     ) -> None:
         """Initialize an execution context or a scope.
 
@@ -298,7 +298,12 @@ class PlanContext:
 
         return self.action_list
 
-    def _add_action(self, name: str, *args: Any, **kwargs: Any) -> None:
+    def _add_action(
+        self,
+        name: str,
+        *args: Any,  # noqa: ANN401  # generic action accepts any signature
+        **kwargs: Any,  # noqa: ANN401  # generic action accepts any signature
+    ) -> None:
         """Process action calls in plans.
 
         :param name: action name

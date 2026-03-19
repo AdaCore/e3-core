@@ -107,7 +107,11 @@ class Event:
         """
         self._formatters[key] = fun
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __setattr__(
+        self,
+        name: str,
+        value: Any,  # noqa: ANN401  # polymorphic event attributes
+    ) -> None:
         """Store all attributes in the self._data dict.
 
         :param name: attribute name
@@ -119,7 +123,7 @@ class Event:
             raise EventError(msg)
         self._data[name] = value
 
-    def __getattr__(self, name: str) -> Any:
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
         """Attributes are retrieved in the _data internal dict.
 
         :param name: attribute name
@@ -308,7 +312,12 @@ class EventManager:
         """
         return stevedore.DriverManager("e3.event.handler", name).driver
 
-    def add_handler(self, name: str, *args: Any, **kwargs: Any) -> None:
+    def add_handler(
+        self,
+        name: str,
+        *args: Any,  # noqa: ANN401  # handler-specific arguments
+        **kwargs: Any,  # noqa: ANN401  # handler-specific arguments
+    ) -> None:
         """Add an handler instance to the manager.
 
         args and kwargs are passed to the handler __init__ method
@@ -385,7 +394,11 @@ def send_event_from_file(filename: str) -> bool:
     return default_manager.send_event_from_file(filename)
 
 
-def add_handler(name: str, *args: Any, **kwargs: Any) -> None:
+def add_handler(
+    name: str,
+    *args: Any,  # noqa: ANN401  # handler-specific arguments
+    **kwargs: Any,  # noqa: ANN401  # handler-specific arguments
+) -> None:
     """Add handler in the default manager.
 
     See EventManager.add_handler

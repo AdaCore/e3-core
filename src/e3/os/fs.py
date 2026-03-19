@@ -408,7 +408,11 @@ def unixpath(path: str | Path) -> str:
     return os.fspath(path)
 
 
-def which(prog: str | Path, paths: str | None = None, default: Any = "") -> Any:
+def which(
+    prog: str | Path,
+    paths: str | None = None,
+    default: Any = "",  # noqa: ANN401  # polymorphic default/return
+) -> Any:  # noqa: ANN401  # polymorphic default/return
     """Locate executable.
 
     :param prog: program to find

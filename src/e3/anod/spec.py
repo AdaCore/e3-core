@@ -132,7 +132,11 @@ def has_primitive(anod_instance: Anod, name: Literal["download"] | PRIMITIVE) ->
     return False
 
 
-def fetch_attr(instance: Any, name: str, default_value: Any) -> Any:
+def fetch_attr(
+    instance: Any,  # noqa: ANN401  # works with any object instance
+    name: str,
+    default_value: Any,  # noqa: ANN401  # polymorphic default value
+) -> Any:  # noqa: ANN401  # returns attribute value or default
     """Return an attribute or the default value if missing.
 
     Unlike `getattr(instance, name, default_value)`, this works only on
@@ -220,7 +224,11 @@ class Anod:
     ExternalSourceBuilder = e3.anod.package.ExternalSourceBuilder
     ThirdPartySourceBuilder = e3.anod.package.ThirdPartySourceBuilder
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+    def __new__(
+        cls,
+        *args: Any,  # noqa: ANN401  # generic constructor
+        **kwargs: Any,  # noqa: ANN401  # generic constructor
+    ) -> Any:  # noqa: ANN401  # generic constructor
         """Replace `method` by property when decorator is missing."""
         should_be_property = (
             "enable_name_generator",
@@ -584,7 +592,7 @@ class Anod:
         extended: bool = False,
         suffix: str | None = None,
         selectors: dict | None = None,
-    ) -> Any:
+    ) -> Any:  # noqa: ANN401  # YAML structure (dict/list/str/int/None)
         """Load a YAML config file associated with the current module.
 
         This function looks for a YAML starting with the spec basename. The
@@ -618,7 +626,7 @@ class Anod:
         with full_filename.open() as f:
             return yaml.safe_load(f.read())
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: str) -> Any:  # noqa: ANN401
         """Access build_space attributes and pre callback values directly.
 
         Allow accessing all build_space attributes directly by using
@@ -785,7 +793,7 @@ class Anod:
         parse_shebang: bool = True,
         output: DEVNULL_VALUE | PIPE_VALUE | str | IO | None = None,
         python_executable: None = None,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401  # subprocess accepts many kwargs
     ) -> e3.os.process.Run:
         """Run a subprocess using e3.os.process.Run.
 

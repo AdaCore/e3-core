@@ -12,7 +12,10 @@ if TYPE_CHECKING:
     from e3.store.cache.backends.base import Cache
 
 
-def load_cache(name: str = "file-cache", configuration: Any = None) -> Cache:
+def load_cache(
+    name: str = "file-cache",
+    configuration: Any = None,  # noqa: ANN401  # plugin-specific config
+) -> Cache:
     """Load a cache backend by name.
 
     :param name: name of the cache backend to load

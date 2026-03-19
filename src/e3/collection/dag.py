@@ -49,7 +49,9 @@ class DAGIterator:
     def __iter__(self) -> DAGIterator:
         return self
 
-    def __next__(self) -> tuple[None, None] | tuple[VertexID, Any]:
+    def __next__(
+        self,
+    ) -> tuple[None, None] | tuple[VertexID, Any]:  # noqa: ANN401 polymorphic data
         """Retrieve next_element with with_predecessors=False.
 
         The intermediate function is needed in Python 3.x
@@ -61,7 +63,11 @@ class DAGIterator:
 
     def next_element(
         self,
-    ) -> tuple[VertexID | None, Any, frozenset[VertexID]]:
+    ) -> tuple[
+        VertexID | None,
+        Any,  # noqa: ANN401  # polymorphic vertex data
+        frozenset[VertexID],
+    ]:
         """Retrieve next element in topological order.
 
         :return: a vertex id, data, predecessors. (None, None, frozenset()) is
@@ -130,8 +136,8 @@ class DAG:
 
     def __init__(self) -> None:
         """Initialize a DAG."""
-        self.vertex_data: dict[VertexID, Any] = {}
-        self.tags: dict[VertexID, Any] = {}
+        self.vertex_data: dict[VertexID, Any] = {}  # noqa: ANN401 polymorphic data
+        self.tags: dict[VertexID, Any] = {}  # noqa: ANN401  # polymorphic tags
 
         self.__vertex_predecessors: dict[VertexID, frozenset[VertexID]] = {}
         self.__vertex_successors: dict[VertexID, frozenset[VertexID]] = {}
@@ -211,7 +217,11 @@ class DAG:
 
         return self.__vertex_successors.get(vertex_id, frozenset())
 
-    def add_tag(self, vertex_id: VertexID, data: Any) -> None:
+    def add_tag(
+        self,
+        vertex_id: VertexID,
+        data: Any,  # noqa: ANN401  # polymorphic tags
+    ) -> None:
         """Tag a vertex.
 
         :param vertex_id: ID of the vertex to tag
@@ -219,7 +229,7 @@ class DAG:
         """
         self.tags[vertex_id] = data
 
-    def get_tag(self, vertex_id: VertexID) -> Any:
+    def get_tag(self, vertex_id: VertexID) -> Any:  # noqa: ANN401  # polymorphic tags
         """Retrieve a tag associated with a vertex.
 
         :param vertex_id: ID of the vertex
@@ -233,7 +243,7 @@ class DAG:
         max_distance: int | None = None,
         max_element: int | None = None,
         reverse_order: bool = False,
-    ) -> list[tuple[int, VertexID, Any]]:
+    ) -> list[tuple[int, VertexID, Any]]:  # noqa: ANN401  # polymorphic tags
         r"""Get tag context.
 
         Returns the list of predecessors tags along with their vertex id and
@@ -315,7 +325,7 @@ class DAG:
     def add_vertex(
         self,
         vertex_id: VertexID,
-        data: Any = None,
+        data: Any = None,  # noqa: ANN401  # polymorphic vertex data
         predecessors: Sequence[VertexID] | None = None,
     ) -> None:
         """Add a new vertex into the DAG.
@@ -339,7 +349,7 @@ class DAG:
     def update_vertex(
         self,
         vertex_id: VertexID,
-        data: Any = None,
+        data: Any = None,  # noqa: ANN401  # polymorphic vertex data
         predecessors: (
             Sequence[VertexID] | set[VertexID] | frozenset[VertexID] | None
         ) = None,
@@ -596,7 +606,7 @@ class DAG:
         """
         return vertex_id in self.vertex_data
 
-    def __getitem__(self, vertex_id: VertexID) -> Any:
+    def __getitem__(self, vertex_id: VertexID) -> Any:  # noqa: ANN401
         """Get data associated with a vertex.
 
         :param vertex_id: vertex identifier

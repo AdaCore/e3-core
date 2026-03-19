@@ -86,7 +86,10 @@ class JsonData(ABC):
         return cls.from_dict(dict_repr)
 
 
-def dump_to_json_file(path: str, obj: Any) -> None:
+def dump_to_json_file(
+    path: str,
+    obj: Any,  # noqa: ANN401  # JSON-serializable object, standard json.dump signature
+) -> None:
     """Dump a Python object to a json file.
 
     :param path: path to the json file
@@ -97,8 +100,10 @@ def dump_to_json_file(path: str, obj: Any) -> None:
 
 
 def load_from_json_file(
-    path: str, default: Any = None, ignore_non_existing: bool = True
-) -> Any:
+    path: str,
+    default: Any = None,  # noqa: ANN401  # polymorphic default value
+    ignore_non_existing: bool = True,
+) -> Any:  # noqa: ANN401  # JSON-deserialized object (dict, list, str, int, etc.)
     """Load a Python object from a JSON file.
 
     :param path: json file path
