@@ -396,7 +396,7 @@ def mv(
             if same_file(src, dst):
                 # We might be on a case insensitive filesystem,
                 # perform the rename anyway.
-                os.rename(src, dst)
+                Path(src).rename(dst)
                 return
 
             real_dst = Path(dst, basename(src))
@@ -404,7 +404,7 @@ def mv(
                 msg = f"Destination path '{real_dst}' already exists"
                 raise FSError(msg)
         try:
-            os.rename(src, real_dst)
+            Path(src).rename(real_dst)
         except OSError as err:
             if os.path.islink(src):
                 linkto = os.readlink(src)
@@ -985,7 +985,7 @@ def sync_tree(  # noqa: PLR0915
                 # This ensure sync_tree is efficient in case content of the directory
                 # is similar between src and dst.
                 if dst.basename != src.basename:
-                    os.rename(dst.path, dest_dir)
+                    Path(dst.path).rename(dest_dir)
             else:
                 Path(dest_dir).mkdir(parents=True)
         except OSError:
@@ -996,7 +996,7 @@ def sync_tree(  # noqa: PLR0915
 
             if isdir(dst):
                 if dst.basename != src.basename:
-                    os.rename(dst.path, dest_dir)
+                    Path(dst.path).rename(dest_dir)
             else:
                 Path(dest_dir).mkdir(parents=True)
 
