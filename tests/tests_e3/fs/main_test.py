@@ -214,7 +214,7 @@ def test_mkdir(caplog) -> None:
 
 def test_mkdir_exists(caplog) -> None:
     """Test mkdir exists."""
-    os.makedirs("subdir")
+    Path("subdir").mkdir(parents=True)
     e3.fs.mkdir("subdir")
     for record in caplog.records:
         assert "mkdir" not in record.msg

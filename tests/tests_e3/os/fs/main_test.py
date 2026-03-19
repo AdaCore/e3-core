@@ -87,7 +87,7 @@ def test_rm() -> None:
     base = tempfile.mkdtemp()
     try:
         bc = Path(base, "b", "c")
-        os.makedirs(bc)
+        bc.mkdir(parents=True)
         e3.os.fs.touch(bc / "d")
         e3.os.fs.chmod("a-w", bc)
 
@@ -107,16 +107,16 @@ def test_rm() -> None:
 
 def test_mv() -> None:
     """Test mv."""
-    os.makedirs("a")
+    Path("a").mkdir(parents=True)
     e3.os.fs.mv("a", "b")
     assert Path("b").is_dir()
 
-    os.makedirs("c")
+    Path("c").mkdir(parents=True)
     e3.os.fs.mv("b", "c")
     assert Path("c", "b").is_dir()
 
     e3.os.fs.touch("d")
-    os.makedirs("dest")
+    Path("dest").mkdir(parents=True)
     e3.os.fs.mv("d", "dest")
 
     assert Path("dest", "d").is_file()
