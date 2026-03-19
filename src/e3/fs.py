@@ -313,7 +313,7 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
     if not quiet:
         logger.debug("mkdir %s (mode=%s)", path, oct(mode))
     try:
-        os.makedirs(path, mode)
+        Path(path).mkdir(mode=mode, parents=True)
     except Exception as e:  # defensive code
         if Path(path).is_dir():
             # Take care of cases where in parallel execution environment
@@ -987,7 +987,7 @@ def sync_tree(  # noqa: PLR0915
                 if dst.basename != src.basename:
                     os.rename(dst.path, dest_dir)
             else:
-                os.makedirs(dest_dir)
+                Path(dest_dir).mkdir(parents=True)
         except OSError:
             # in case of error to change parent directory
             # permissions. The permissions will be then
@@ -998,7 +998,7 @@ def sync_tree(  # noqa: PLR0915
                 if dst.basename != src.basename:
                     os.rename(dst.path, dest_dir)
             else:
-                os.makedirs(dest_dir)
+                Path(dest_dir).mkdir(parents=True)
 
     def walk(
         root_dir: str, target_root_dir: str, entry: FilesInfo | None = None
