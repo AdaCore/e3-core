@@ -431,15 +431,14 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         if env_var not in os.environ:
             logger.debug(f"export {env_var}={path}")
             os.environ[env_var] = path
+        elif append:
+            new_path = os.path.pathsep + path
+            logger.debug(f"export {env_var}=${env_var}{new_path}")
+            os.environ[env_var] += new_path
         else:
-            if append:
-                new_path = os.path.pathsep + path
-                logger.debug(f"export {env_var}=${env_var}{new_path}")
-                os.environ[env_var] += new_path
-            else:
-                new_path = path + os.path.pathsep + os.environ[env_var]
-                logger.debug(f"export {env_var}={new_path}")
-                os.environ[env_var] = new_path
+            new_path = path + os.path.pathsep + os.environ[env_var]
+            logger.debug(f"export {env_var}={new_path}")
+            os.environ[env_var] = new_path
 
     @property
     def dll_path_var(self) -> str:

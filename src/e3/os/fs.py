@@ -108,25 +108,24 @@ def chmod(mode: str, filename: str | Path) -> int:  # noqa: PLR0915
                     action_mask = action_mask | action_mask << 3 | action_mask << 6
                     action_mask &= ~umask
                     apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
+                elif "a" in wholist:
+                    action_mask = action_mask | action_mask << 3 | action_mask << 6
+                    apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
                 else:
-                    if "a" in wholist:
-                        action_mask = action_mask | action_mask << 3 | action_mask << 6
-                        apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
-                    else:
-                        final_action_mask = 0
-                        apply_mask = 0
-                        for who in wholist:
-                            if who == "u":
-                                final_action_mask |= action_mask << 6
-                                apply_mask |= stat.S_IRWXU
-                            elif who == "g":
-                                final_action_mask |= action_mask << 3
-                                apply_mask |= stat.S_IRWXG
-                            else:
-                                final_action_mask |= action_mask
-                                apply_mask |= stat.S_IRWXO
+                    final_action_mask = 0
+                    apply_mask = 0
+                    for who in wholist:
+                        if who == "u":
+                            final_action_mask |= action_mask << 6
+                            apply_mask |= stat.S_IRWXU
+                        elif who == "g":
+                            final_action_mask |= action_mask << 3
+                            apply_mask |= stat.S_IRWXG
+                        else:
+                            final_action_mask |= action_mask
+                            apply_mask |= stat.S_IRWXO
 
-                        action_mask = final_action_mask
+                    action_mask = final_action_mask
                 if op == "-":
                     current_mode &= ~action_mask
                 elif op == "=":

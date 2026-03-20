@@ -255,31 +255,29 @@ class SystemInfo:
             if effective_version is None or effective_version <= WINDOWS_VERSION_VISTA:
                 if version == "Vista" and "64" in cls.uname.machine:  # os-specific
                     version = "Vista64"
-            else:
-                if effective_version == WINDOWS_VERSION_8_1:
-                    if is_server:
-                        version = "2012R2"
+            elif effective_version == WINDOWS_VERSION_8_1:
+                if is_server:
+                    version = "2012R2"
+                else:
+                    version = "8.1"
+            elif effective_version == WINDOWS_VERSION_10:
+                if TYPE_CHECKING:
+                    assert build_number is not None
+                if is_server:
+                    if build_number < WINDOWS_BUILD_2016:
+                        version = "2016"
+                    elif build_number < WINDOWS_BUILD_2019:
+                        version = "2019"
+                    elif build_number < WINDOWS_BUILD_2022:
+                        version = "2022"
                     else:
-                        version = "8.1"
-                elif effective_version == WINDOWS_VERSION_10:
-                    if TYPE_CHECKING:
-                        assert build_number is not None
-                    if is_server:
-                        if build_number < WINDOWS_BUILD_2016:
-                            version = "2016"
-                        elif build_number < WINDOWS_BUILD_2019:
-                            version = "2019"
-                        elif build_number < WINDOWS_BUILD_2022:
-                            version = "2022"
-                        else:
-                            version = "2025"
-                    else:
-                        if build_number > WINDOWS_BUILD_11:
-                            version = "11"
-                            full_version = "11.0"
-                        else:
-                            version = "10"
-                            full_version = "10.0"
+                        version = "2025"
+                elif build_number > WINDOWS_BUILD_11:
+                    version = "11"
+                    full_version = "11.0"
+                else:
+                    version = "10"
+                    full_version = "10.0"
 
         if full_version is None:
             full_version = version

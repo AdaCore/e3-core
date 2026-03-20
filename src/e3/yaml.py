@@ -259,17 +259,15 @@ class CaseParser:
         if real_key not in cursor or real_key == key:
             e3.log.debug("set %s -> %s", real_key_str, real_value)
             cursor[real_key] = real_value
-        else:
-            if isinstance(cursor[real_key], dict):
-                e3.log.debug("update %s -> %s", real_key_str, real_value)
-                cursor[real_key].update(real_value)
-            else:
-                if key.startswith("+"):
-                    e3.log.debug("append %s -> %s", real_key_str, real_value)
-                    cursor[real_key] = cursor[real_key] + real_value
-                elif key.endswith("+"):
-                    e3.log.debug("prepend %s -> %s", real_key_str, real_value)
-                    cursor[real_key] = real_value + cursor[real_key]
+        elif isinstance(cursor[real_key], dict):
+            e3.log.debug("update %s -> %s", real_key_str, real_value)
+            cursor[real_key].update(real_value)
+        elif key.startswith("+"):
+            e3.log.debug("append %s -> %s", real_key_str, real_value)
+            cursor[real_key] = cursor[real_key] + real_value
+        elif key.endswith("+"):
+            e3.log.debug("prepend %s -> %s", real_key_str, real_value)
+            cursor[real_key] = real_value + cursor[real_key]
 
     def parse(
         self,

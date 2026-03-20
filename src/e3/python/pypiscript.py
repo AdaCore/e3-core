@@ -159,9 +159,8 @@ def main() -> None:  # noqa: PLR0915
                 url=str(Path(m.args.local_clones, url.split("/")[-1])),
                 revision=rev,
             )
-        else:
-            if not m.args.skip_repo_updates:
-                checkout_manager.update(vcs="git", url=url, revision=rev)
+        elif not m.args.skip_repo_updates:
+            checkout_manager.update(vcs="git", url=url, revision=rev)
 
         if update_version_file:
             # Try to update the version file for the given repository. Update
