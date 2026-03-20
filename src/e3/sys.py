@@ -95,7 +95,8 @@ class RewriteImportRule:
                         msg = f"Rejected import found in ast: {ast.dump(node)}"
                         raise RewriteNodeError(msg)
                     else:  # defensive code
-                        raise ValueError("unknown action %s", self.action)
+                        msg = "unknown action %s"  # type: ignore[unreachable]
+                        raise ValueError(msg, self.action)
                 else:
                     new_names.append(var)
             node.names = new_names  # type: ignore

@@ -291,7 +291,8 @@ class Anod:
                 logger.error(
                     f"Use dict for qualifiers when declaring specs (spec {self.name})"
                 )
-                raise e3.anod.error.SpecError("Use of str qualifiers is deprecated")
+                msg = "Use of str qualifiers is deprecated"
+                raise e3.anod.error.SpecError(msg)
 
             self.parsed_qualifier = qualifier_str_to_dict(qualifier)
         elif isinstance(qualifier, dict):
@@ -299,7 +300,8 @@ class Anod:
         elif qualifier is None:
             self.parsed_qualifier = {}
         else:
-            raise e3.anod.error.SpecError("invalid qualifier")
+            msg = "invalid qualifier"  # type: ignore[unreachable]
+            raise e3.anod.error.SpecError(msg)
 
         # Create the QualifiersManager.
         # Skip if the name generator is disabled.
@@ -413,7 +415,8 @@ class Anod:
         :raise AnodError: if build space has not been set
         """
         if self.__build_space is None:
-            raise AnodError("build space not set")
+            msg = "build space not set"
+            raise AnodError(msg)
         return self.__build_space
 
     @property
@@ -493,9 +496,8 @@ class Anod:
         if ldd_output is None:
             # If ldd is not in the path, return and issue a warning.
             if not which("ldd"):
-                raise FileNotFoundError(
-                    "Shared Libraries closure check skipped: ldd could not be found."
-                )
+                msg = "Shared Libraries closure check skipped: ldd could not be found."
+                raise FileNotFoundError(msg)
 
             if prefix is None:
                 prefix = self.build_space.install_dir

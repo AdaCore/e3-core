@@ -149,7 +149,8 @@ class BuildInfo:
         :return: Same as StoreReadInterface.get_build_data.
         """
         if not self.store:
-            raise AttributeError("self.store is None")
+            msg = "self.store is None"
+            raise AttributeError(msg)
         return self.store.get_build_data(bid=self.id)
 
     def mark_ready(self) -> bool:
@@ -171,7 +172,8 @@ class BuildInfo:
         :return: A list of File objects.
         """
         if not self.store:
-            raise AttributeError("self.store is None")
+            msg = "self.store is None"
+            raise AttributeError(msg)
         result = self.store.get_build_data(bid=self.id)
         return [File.load(f, store=self.store) for f in result.get("sources", [])]
 
@@ -184,7 +186,8 @@ class BuildInfo:
         :return: A File.
         """
         if not self.store:
-            raise AttributeError("self.store is None")
+            msg = "self.store is None"
+            raise AttributeError(msg)
         return File.load(
             self.store.get_source_info(bid=self.id, name=name, kind=kind),
             store=self.store,
@@ -218,7 +221,8 @@ class BuildInfo:
         :return: A list of Component.
         """
         if not self.store:
-            raise AttributeError("self.store is None")
+            msg = "self.store is None"
+            raise AttributeError(msg)
         result = self.store.list_components(self.id, component=name, platform=platform)
         return [
             Component.load(data=comp_data, store=self.store) for comp_data in result

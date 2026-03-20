@@ -305,7 +305,8 @@ class HTTPSession:
         # to the pool unless all the data is consumed or Response.close called.
         # Force Response.close by wrapping the code with contextlib.closing
         if dest is None and fileobj is None:
-            raise ValueError("no destination provided")
+            msg = "no destination provided"
+            raise ValueError(msg)
 
         path = None
         try:

@@ -208,7 +208,8 @@ class TestHTTP:
                     result = session.download_file(
                         base_url + "dummy", dest=".", exception_on_error=True
                     )
-                    raise AssertionError("exception not raised")
+                    msg = "exception not raised"
+                    raise AssertionError(msg)
                 except HTTPError as e:
                     assert e.status == HTTP_INTERNAL_SERVER_ERROR
 
@@ -288,7 +289,8 @@ class TestHTTP:
                     result = session.download_file(
                         base_url + "dummy", dest=".", exception_on_error=True
                     )
-                    raise AssertionError("exception not raised")
+                    msg = "exception not raised"
+                    raise AssertionError(msg)
                 except HTTPError as e:
                     assert e.status == HTTP_FORBIDDEN
                 # second test with authorization header

@@ -257,7 +257,8 @@ def test_pruned_dag() -> None:
         elif node.startswith("a"):
             assert len(preds) == 0
         else:
-            raise AssertionError("invalid node")
+            msg = "invalid node"
+            raise AssertionError(msg)
 
     # By default prune ensure we keep context unchanged.
     # If we add a tag to 'b' (that would be suppressed) then we expect a

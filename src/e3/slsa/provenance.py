@@ -214,7 +214,8 @@ class Builder:
         """  # noqa: RST304, RST399
         build_id: str | None = initializer.get(cls.ATTR_BUILD_ID)
         if build_id is None:
-            raise ValueError("Invalid build ID (None)")
+            msg = "Invalid build ID (None)"
+            raise ValueError(msg)
 
         builder: Builder = cls(
             build_id=build_id,
@@ -381,7 +382,8 @@ class BuildMetadata:
         """  # noqa: RST304, RST399
         invocation_id: str | None = initializer.get(cls.ATTR_INVOCATION_ID)
         if invocation_id is None:
-            raise ValueError("Invalid invocation ID (None)")
+            msg = "Invalid invocation ID (None)"
+            raise ValueError(msg)
 
         # Transform timestamp strings to datetime objects.
 
@@ -597,7 +599,8 @@ class Statement:
         """  # noqa: RST304, RST399
         statement_type: str | None = initializer.get(cls.ATTR_TYPE)
         if statement_type is None:
-            raise ValueError("Invalid statement type (None)")
+            msg = "Invalid statement type (None)"
+            raise ValueError(msg)
 
         predicate: dict = initializer.get(cls.ATTR_PREDICATE, {})
 
@@ -988,10 +991,11 @@ class ResourceDescriptor:
         .. seealso:: |rd.as_json|, |is_valid|, |rd.load_dict|
         """  # noqa: RST304, RST399
         if not self.is_valid:
-            raise ValueError(
+            msg = (
                 "Invalid resource descriptor. Either uri, content or digest "
                 "should be defined."
             )
+            raise ValueError(msg)
 
         return {
             self.ATTR_URI: str(self.uri) if self.uri is not None else None,
@@ -1113,10 +1117,11 @@ class ResourceDescriptor:
         )
 
         if not resource_descriptor.is_valid:
-            raise ValueError(
+            msg = (
                 "Invalid resource descriptor. Either uri, content or digest "
                 "should be defined."
             )
+            raise ValueError(msg)
 
         return resource_descriptor
 
@@ -1550,10 +1555,12 @@ class Predicate:
             # builder and metadata should be required.
 
             if builder is None:
-                raise ValueError("Missing builder definition.")
+                msg = "Missing builder definition."
+                raise ValueError(msg)
 
             if metadata is None:
-                raise ValueError("Missing metadata definition.")
+                msg = "Missing metadata definition."
+                raise ValueError(msg)
 
             run_details: Predicate.RunDetails = cls(
                 builder=Builder.load_dict(builder),
@@ -1655,10 +1662,12 @@ class Predicate:
         # All fields should be mandatory.
 
         if build_definition is None:
-            raise ValueError("Missing build definition.")
+            msg = "Missing build definition."
+            raise ValueError(msg)
 
         if run_details is None:
-            raise ValueError("Missing run details definition.")
+            msg = "Missing run details definition."
+            raise ValueError(msg)
 
         predicate: Predicate = cls(
             build_definition=Predicate.BuildDefinition.load_dict(build_definition),

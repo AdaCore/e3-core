@@ -169,7 +169,8 @@ def test_rlimit_ctrl_c() -> None:
     try:
         from ptyprocess import PtyProcess
     except ImportError:
-        raise ImportError("ptyprocess is needed to run this tests") from None
+        msg = "ptyprocess is needed to run this tests"
+        raise ImportError(msg) from None
 
     script_to_run = """
 from __future__ import annotations
@@ -208,7 +209,8 @@ def test_rlimit_foreground_option() -> None:
     try:
         from ptyprocess import PtyProcess
     except ImportError:
-        raise ImportError("ptyprocess is needed to run this tests") from None
+        msg = "ptyprocess is needed to run this tests"
+        raise ImportError(msg) from None
 
     # Test with --foreground
     os.environ["PS1"] = "$ "
@@ -516,7 +518,8 @@ def test_kill_process_tree() -> None:
             if proc.pid == child_pid:
                 break
         else:
-            raise AssertionError("issue when trying to get child process")
+            msg = "issue when trying to get child process"
+            raise AssertionError(msg)
         return parent_process, child_process
 
     p2, p2_child = get_one_child(1)

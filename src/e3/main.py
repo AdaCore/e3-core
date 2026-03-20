@@ -143,7 +143,8 @@ class Main:
             del sig, frame
             logger = logging.getLogger("")
             logger.critical("SIGTERM received")
-            raise SystemExit("SIGTERM received")
+            msg = "SIGTERM received"
+            raise SystemExit(msg)
 
         if sys.platform != "win32":  # unix-only
             if threading.current_thread() is threading.main_thread():

@@ -33,7 +33,8 @@ def process_exit_code(handle: int) -> int | None:
     exit_code = process_info.exit_status
 
     if status < 0:
-        raise OSError("invalid handle")
+        msg = "invalid handle"
+        raise OSError(msg)
     if exit_code == ProcessInfo.STILL_ACTIVE:
         return None
     else:
@@ -73,10 +74,12 @@ def wait_for_objects(
     if object_index == Wait.TIMEOUT:
         return None
     if object_index == Wait.FAILED:  # defensive code
-        raise OSError("error while waiting for objects")
+        msg = "error while waiting for objects"
+        raise OSError(msg)
     if Wait.ABANDONED <= object_index < Wait.ABANDONED + size:  # defensive code
         return object_index - Wait.ABANDONED
     elif Wait.OBJECT <= object_index < Wait.OBJECT + size:
         return object_index
     else:  # defensive code
-        raise OSError("unknown error while waiting for objects")
+        msg = "unknown error while waiting for objects"
+        raise OSError(msg)

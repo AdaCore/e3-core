@@ -19,7 +19,8 @@ def test_e3error() -> None:
         assert str(err).strip() == "here: E3Error"
 
     try:
-        raise E3Error("one", origin="here")
+        msg = "one"
+        raise E3Error(msg, origin="here")
     except E3Error as err1:
         err += err1
 

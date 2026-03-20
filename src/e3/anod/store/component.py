@@ -187,9 +187,8 @@ class Component:
             try:
                 result_data = json.loads(result_data)  # type: ignore[arg-type]
                 if not isinstance(result_data, dict):
-                    raise TypeError(
-                        "Corrupted metadata: Cannot convert metadata into dictionary"
-                    )
+                    msg = "Corrupted metadata: Cannot convert metadata into dictionary"
+                    raise TypeError(msg)
             except Exception as e:
                 logger.exception(e)
                 raise e
@@ -331,7 +330,8 @@ class Component:
             raise FileNotFoundError(msg)
 
         if not isinstance(self.store, StoreRWInterface):
-            raise StoreError("Not a writable store instance")
+            msg = "Not a writable store instance"
+            raise StoreError(msg)
 
         att_key: str | None = self.add_attachment(
             key=key, file=file, overwrite_existing=True
@@ -587,7 +587,8 @@ class Component:
             if len(external_files) == 1:
                 binary = external_files[0]
             else:
-                raise StoreError("cannot download: multiple external files found")
+                msg = "cannot download: multiple external files found"
+                raise StoreError(msg)
         else:
             binary = self.files[0]
 

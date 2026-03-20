@@ -19,7 +19,8 @@ except ImportError as ie:  # defensive code
     # coverage packages in release mode, they are deliberately not part of
     # the dependencies. Let the user know that the packages should be installed
     # if he wants to use e3 pytest driver.
-    raise ImportError("The e3.pytest plugin requires the pytest package") from ie
+    msg = "The e3.pytest plugin requires the pytest package"
+    raise ImportError(msg) from ie
 
 import typing
 

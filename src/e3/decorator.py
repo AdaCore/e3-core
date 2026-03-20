@@ -107,7 +107,8 @@ class memoize:
                 if args in self.cache:
                     del self.cache[args]
             else:
-                raise TypeError("memoize does not support keyword arguments")
+                msg = "memoize does not support keyword arguments"
+                raise TypeError(msg)
         try:
             return self.cache[args]
         except KeyError:
