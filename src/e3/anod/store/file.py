@@ -17,6 +17,7 @@ from e3.archive import create_archive, is_known_archive_format, unpack_archive
 from e3.dsse import DSSE
 from e3.fs import cp, extension, mv, rm, sync_tree
 from e3.log import getLogger
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -116,7 +117,7 @@ class File(object):
     """
 
     def __init__(
-        self: FileType,
+        self,
         build_id: str,
         kind: FileKind,
         name: str,
@@ -190,7 +191,7 @@ class File(object):
             msg = f"File({self.name=}).resource_id != File({self.name=}).resource.id"
             raise StoreError(msg)
 
-    def push(self: FileType) -> FileType:
+    def push(self) -> Self:
         """Upload this file to Store, using self.store to do so.
 
         :return: A newly created File instance of the final file. The current instance
@@ -206,7 +207,7 @@ class File(object):
         self.__update(res)
         return res
 
-    def __update(self: FileType, file: FileType) -> None:
+    def __update(self, file: Self) -> None:
         """Update this file data.
 
         This method is used to update the value of the current file from another.
@@ -233,7 +234,7 @@ class File(object):
         self.build_info = file.build_info
         self.resource = file.resource
 
-    def bind_to_resource(self: FileType, path: os.PathLike[str] | str) -> None:
+    def bind_to_resource(self, path: os.PathLike[str] | str) -> None:
         """Bind this File to the file at the given path.
 
         Unless self.resource_id is already set, this also sets self.resource_id
@@ -257,7 +258,7 @@ class File(object):
                 ),
             )
 
-    def set_metadata_statement(self: FileType, name: str, data: DSSE) -> None:
+    def set_metadata_statement(self, name: str, data: DSSE) -> None:
         """Set metadata statement.
 
         :param name: statement name
@@ -268,7 +269,7 @@ class File(object):
             raise StoreError(msg)
         self.metadata[name] = data.as_dict()
 
-    def get_metadata_statement(self: FileType, name: str) -> DSSE | None:
+    def get_metadata_statement(self, name: str) -> DSSE | None:
         """Get metadata statement.
 
         :param name: statement name
@@ -292,13 +293,13 @@ class File(object):
 
         return DSSE.load_dict(result_data)
 
-    def update_metadata(self: FileType) -> None:
+    def update_metadata(self) -> None:
         """Push file updates to Store."""
         assert isinstance(self.store, StoreRWInterface)
         self.store.update_file_metadata(self.as_dict())
 
     @classmethod
-    def metadata_path(cls: type[FileType], dest_dir: str, name: str) -> str:
+    def metadata_path(cls, dest_dir: str, name: str) -> str:
         """Return the path to the metadata file associated to a File.
 
         :param dest_dir: directory where the File is to be downloaded to
@@ -308,7 +309,7 @@ class File(object):
         return str(Path(dest_dir, name + "_meta.json"))
 
     def download(  # noqa: PLR0915
-        self: FileType,
+        self,
         dest_dir: str | None,
         as_name: str | None = None,
         unpack_dir: str | None = None,
@@ -493,7 +494,7 @@ class File(object):
                 )
         return not skip
 
-    def as_dict(self: FileType) -> FileDict:
+    def as_dict(self) -> FileDict:
         """Convert the current File instance into a python dictionary.
 
         :return: The dictionary representation of the file instance.
@@ -526,10 +527,10 @@ class File(object):
 
     @classmethod
     def load(
-        cls: type[FileType],
+        cls,
         data: FileDict,
         store: StoreReadInterface | StoreRWInterface | None = None,
-    ) -> FileType:
+    ) -> Self:
         """Load and create a File class instance from a dictionary.
 
         :param data: dictionary representing a file
@@ -623,12 +624,12 @@ class File(object):
 
     @classmethod
     def load_from_meta_file(  # noqa: F811
-        cls: type[FileType],
+        cls,
         dest_dir: str,
         name: str,
         store: StoreReadInterface | StoreRWInterface | None = None,
         ignore_errors: bool = False,
-    ) -> FileType | None:
+    ) -> Self | None:
         """Load file from a metadata file.
 
         :param dest_dir: directory in which the metadata is located
@@ -655,7 +656,7 @@ class File(object):
             msg = f"error while loading metadata file {meta_path} ({e})"
             raise StoreError(msg) from e
 
-    def save_to_meta_file(self: FileType, dest_dir: str, name: str) -> None:
+    def save_to_meta_file(self, dest_dir: str, name: str) -> None:
         """Dump as json file component information.
 
         :param dest_dir: directory in which the metadata file should be saved
@@ -666,8 +667,8 @@ class File(object):
 
     @classmethod
     def upload_thirdparty(
-        cls: type[FileType], store: StoreRWInterface, path: str, force: bool = False
-    ) -> FileType:
+        cls, store: StoreRWInterface, path: str, force: bool = False
+    ) -> Self:
         """Upload the given file to Store as a third party.
 
         :param store: a store read-write object
@@ -707,7 +708,7 @@ class File(object):
 
     @classmethod
     def upload_thirdparty_from_dir(
-        cls: type[FileType],
+        cls,
         store: StoreRWInterface,
         path: str,
         prefix: str,
@@ -748,7 +749,7 @@ class File(object):
 
         return filename
 
-    def __eq__(self: FileType, other: object) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Compare two file object.
 
         :param other: the other object to compare with the current one.
@@ -770,13 +771,13 @@ class File(object):
                 return False
         return True
 
-    def __ne__(self: FileType, other: object) -> bool:
+    def __ne__(self, other: object) -> bool:
         """Inverse of self.__eq__.
 
         :return: True if not self.__eq__(other).
         """
         return not self.__eq__(other)
 
-    def __str__(self: FileType) -> str:
+    def __str__(self) -> str:
         """Convert a file to a str."""
         return f"{self.name}:{self.kind}:{self.file_id}"

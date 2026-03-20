@@ -13,6 +13,7 @@ from e3.anod.store.file import File
 from e3.anod.store.interface import StoreError, StoreRWInterface
 from e3.dsse import DSSE
 from e3.log import getLogger
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -80,7 +81,7 @@ class Component(object):
     """
 
     def __init__(
-        self: ComponentType,
+        self,
         build_id: str,
         name: str,
         platform: str,
@@ -196,7 +197,7 @@ class Component(object):
         return DSSE.load_dict(result_data)
 
     def add_attachment(
-        self: ComponentType, key: str, file: File, overwrite_existing: bool = False
+        self, key: str, file: File, overwrite_existing: bool = False
     ) -> str | None:
         """Add a file in this component's attachments.
 
@@ -228,7 +229,7 @@ class Component(object):
 
         return file_key
 
-    def get_attachments(self: ComponentType, key: str | None = None) -> dict[str, File]:
+    def get_attachments(self, key: str | None = None) -> dict[str, File]:
         """Get the list of attachments matching *key*.
 
         If an attachment key starts with ``<key>,``, it is added to the returned
@@ -252,7 +253,7 @@ class Component(object):
         return attachments
 
     @classmethod
-    def metadata_path(cls: type[ComponentType], dest_dir: str, name: str) -> str:
+    def metadata_path(cls, dest_dir: str, name: str) -> str:
         """Return path to file containing component metadata.
 
         :param dest_dir: directory in which the metadata file can be found
@@ -261,7 +262,7 @@ class Component(object):
         """
         return str(Path(dest_dir, name + "_component.json"))
 
-    def remove_attachment(self: ComponentType, key: str | None = None) -> bool:
+    def remove_attachment(self, key: str | None = None) -> bool:
         """Remove an attachment by key.
 
         To remove all `"spdx"` attachments (for instance), use
@@ -287,9 +288,7 @@ class Component(object):
                     removed = True
         return removed
 
-    def save_to_meta_file(
-        self: ComponentType, dest_dir: str, name: str | None = None
-    ) -> None:
+    def save_to_meta_file(self, dest_dir: str, name: str | None = None) -> None:
         """Dump as json file component information.
 
         :param dest_dir: directory in which the metadata file should
@@ -300,7 +299,7 @@ class Component(object):
         with Path(self.metadata_path(dest_dir, as_name)).open("w") as fd:
             fd.write(json.dumps(self.as_dict(), indent=2))
 
-    def submit_attachment(self: ComponentType, key: str, file: File) -> ComponentDict:
+    def submit_attachment(self, key: str, file: File) -> ComponentDict:
         """Submit an attachment to a store component.
 
         Add an attachment to an existing component, upload the file to Store,
@@ -378,12 +377,12 @@ class Component(object):
 
     @classmethod
     def load_from_meta_file(  # noqa: F811
-        cls: type[ComponentType],
+        cls,
         dest_dir: str,
         name: str,
         store: StoreReadInterface | None = None,
         ignore_errors: bool = False,
-    ) -> ComponentType | None:
+    ) -> Self | None:
         """Load components from a metadata file.
 
         :param dest_dir: directory in which the metadata is located
@@ -410,7 +409,7 @@ class Component(object):
             msg = f"error while loading component metadata file {meta_path} ({e})"
             raise StoreError(msg) from None
 
-    def as_dict(self: ComponentType) -> ComponentDict:
+    def as_dict(self) -> ComponentDict:
         """Return a dictionary representation of self.
 
         Feeding to this class' "load" method the value returned by
@@ -448,10 +447,10 @@ class Component(object):
 
     @classmethod
     def load(
-        cls: type[ComponentType],
+        cls,
         data: ComponentDict,
         store: StoreReadInterface | StoreRWInterface | None = None,
-    ) -> ComponentType:
+    ) -> Self:
         """Create a Component from the result of a Store request.
 
         :param data: The dictionary returned by Store.
@@ -502,7 +501,7 @@ class Component(object):
 
     @classmethod
     def latest(
-        cls: type[ComponentType],
+        cls,
         store: StoreReadInterface | StoreRWInterface,
         setup: str,
         date: str | None = None,
@@ -510,7 +509,7 @@ class Component(object):
         component: str = "all",
         specname: str | None = None,
         build_id: str = "all",
-    ) -> list[ComponentType]:
+    ) -> list[Self]:
         """Get a list of latest components.
 
         :param store: a store instance
@@ -538,7 +537,7 @@ class Component(object):
         return [cls.load(data=comp, store=store) for comp in comps]
 
     def download(
-        self: ComponentType,
+        self,
         dest_dir: str | None,
         as_name: str | None = None,
         unpack_dir: str | None = None,
@@ -604,7 +603,7 @@ class Component(object):
             tmp_dir_root=tmp_dir_root,
         )
 
-    def push(self: ComponentType) -> ComponentType:
+    def push(self) -> Self:
         """Push the component to store, using self.store to do so.
 
         This operation requires self.store to be a StoreRWInterface; otherwise,
@@ -622,7 +621,7 @@ class Component(object):
         self.__update(result)
         return result
 
-    def __update(self: ComponentType, component: Component) -> None:
+    def __update(self, component: Component) -> None:
         """Update this component data.
 
         This method is used to update the value of the current component from another.
@@ -651,7 +650,7 @@ class Component(object):
         self.creation_date = component.creation_date
         self.metadata = component.metadata
 
-    def __eq__(self: ComponentType, other: object) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Compare two component object.
 
         :param other: the other object to compare with the current one.
@@ -674,7 +673,7 @@ class Component(object):
                 return False
         return True
 
-    def __ne__(self: ComponentType, other: object) -> bool:
+    def __ne__(self, other: object) -> bool:
         """Inverse of self.__eq__.
 
         :param other: the object to compare with

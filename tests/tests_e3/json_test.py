@@ -14,6 +14,7 @@ from e3.json import (
     dump_to_json_file,
     load_from_json_file,
 )
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from typing import TypeVar
@@ -69,7 +70,7 @@ class ComplexJsonData(JsonData):
         return {"data": self.data.as_dict(), "an_object": self.an_object.value}
 
     @classmethod
-    def from_dict(cls: type[ComplexJsonDataSelf], obj: dict) -> ComplexJsonDataSelf:
+    def from_dict(cls, obj: dict) -> Self:
         """Deserialize object from dictionary representation."""
         return cls(
             data=SimpleJsonData.from_dict(obj["data"]),

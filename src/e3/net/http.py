@@ -22,6 +22,7 @@ from urllib3.util import Retry
 import e3.log
 from e3.error import E3Error
 from e3.fs import mkdir, rm
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -120,7 +121,7 @@ class HTTPSession:
         self.session = requests.Session()
         self.last_base_url: BaseURL | None = None
 
-    def __enter__(self: HTTPSessionType) -> HTTPSessionType:
+    def __enter__(self) -> Self:
         self.session.__enter__()
         return self
 
