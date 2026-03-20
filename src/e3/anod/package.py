@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from typing import (
         Any,
         Callable,
-        Dict,
         Final,
         Literal,
         NoReturn,
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
 
     from e3.anod.spec import Anod
 
-    PrepareSrcCB = Callable[[Dict[str, Dict[str, str]], str], None]
+    PrepareSrcCB = Callable[[dict[str, dict[str, str]], str], None]
     ApplyPatchCB = Callable[[str, str, str], None]
 
 

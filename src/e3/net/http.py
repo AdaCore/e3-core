@@ -27,7 +27,7 @@ from typing_extensions import Self
 if TYPE_CHECKING:
     from collections.abc import Callable
     from types import TracebackType
-    from typing import Any, Deque, Protocol, TypeVar
+    from typing import Any, Protocol, TypeVar
 
     from requests.auth import AuthBase
     from requests.models import Response
@@ -113,7 +113,7 @@ class HTTPSession:
             during a request the next urls are used.
         """
         if base_urls:
-            self.base_urls: Deque[BaseURL] | Deque[None] = deque(
+            self.base_urls: deque[BaseURL] | deque[None] = deque(
                 [k if isinstance(k, BaseURL) else BaseURL(k) for k in base_urls]
             )
         else:

@@ -23,9 +23,9 @@ from e3.fs import mkdir, rm
 from e3.vcs import VCSError
 
 if TYPE_CHECKING:
-    from typing import IO, Any, List, Optional, TextIO
+    from typing import IO, Any, Optional, TextIO
 
-    SVNCmd = List[Optional[str]]
+    SVNCmd = list[Optional[str]]
 
 logger = e3.log.getLogger("vcs.svn")
 
