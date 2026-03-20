@@ -88,7 +88,7 @@ class FileKind(Enum):
     attachment = "attachment"
 
 
-class File(object):
+class File:
     """A file served by Store.
 
     :ivar    file_id: file ID.
