@@ -102,8 +102,6 @@ class E3ZipFile(zipfile.ZipFile):
 class ArchiveError(e3.error.E3Error):
     """Exception raised for archive operations errors."""
 
-    pass
-
 
 def is_known_archive_format(filename: str) -> bool:
     """Check if a given path is a supported archive format.

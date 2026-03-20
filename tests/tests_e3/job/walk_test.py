@@ -138,7 +138,6 @@ class DoNothingJob(Job):
 
     def run(self) -> None:
         """Run."""
-        pass
 
 
 class ControlledJob(ProcessJob):

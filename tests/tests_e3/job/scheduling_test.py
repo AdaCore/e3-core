@@ -16,7 +16,6 @@ MAX_CONCURRENT_JOBS = 2
 class NopJob(Job):
     def run(self) -> None:
         """Run."""
-        pass
 
     @property
     def priority(self) -> int:

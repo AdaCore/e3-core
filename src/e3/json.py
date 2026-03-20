@@ -19,8 +19,6 @@ if TYPE_CHECKING:
 class JsonError(e3.error.E3Error):
     """Exception raised for JSON operations errors."""
 
-    pass
-
 
 class JsonDataInvalidJsonError(e3.error.E3Error):
     """An error thrown when input data string does not represent a dictionary."""

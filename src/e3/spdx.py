@@ -743,7 +743,6 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
     @abstractmethod
     def algorithm(self) -> str:
         """Algorithm."""
-        pass
 
     def __str__(self) -> str:
         return f"{self.algorithm}: {self.value}"

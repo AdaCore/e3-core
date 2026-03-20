@@ -712,8 +712,6 @@ class File:
 class WaitError(Exception):
     """Exception raised when waiting for processes fails."""
 
-    pass
-
 
 def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
     """Wait for several processes spawned with Run.

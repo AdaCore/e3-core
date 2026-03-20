@@ -46,7 +46,6 @@ class PlatformDBPlugin(KnowledgeBase, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def update_db(self) -> None:
         """Update database with current state."""
-        pass  # all: no cover
 
 
 class AmberCPUSupport(PlatformDBPlugin):

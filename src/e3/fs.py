@@ -41,8 +41,6 @@ if TYPE_CHECKING:
 class FSError(e3.error.E3Error):
     """Exception raised for file system operations errors."""
 
-    pass
-
 
 def cp(
     source: str | os.PathLike[str],

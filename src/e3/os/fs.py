@@ -31,8 +31,6 @@ CYGPATH_MATCH: re.Pattern[str] = re.compile(
 class OSFSError(e3.error.E3Error):
     """Exception raised for OS file system operations errors."""
 
-    pass
-
 
 logger = e3.log.getLogger("os_fs")
 

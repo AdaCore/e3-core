@@ -210,7 +210,6 @@ class EmptyJob(Job):
 
     def run(self) -> None:
         """Do nothing (empty job implementation)."""
-        pass
 
     @property
     def status(self) -> ReturnValue:
