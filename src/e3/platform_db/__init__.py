@@ -12,9 +12,9 @@ import stevedore
 import e3.log
 
 if TYPE_CHECKING:
-    from typing import Any, Dict
+    from typing import Any
 
-    PlatformDBEntry = Dict[str, Dict[str, Any]]
+    PlatformDBEntry = dict[str, dict[str, Any]]
 
 
 @dataclass

@@ -15,12 +15,12 @@ from e3.job import Job
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from typing import Any, FrozenSet
+    from typing import Any
 
     from e3.collection.dag import DAG
 
     JobProviderCallback = Callable[
-        [str, Any, FrozenSet[str], Callable[[str], None]], Job
+        [str, Any, frozenset[str], Callable[[str], None]], Job
     ]
     CollectCallback = Callable[[Job], bool]
 
@@ -121,7 +121,7 @@ class Scheduler:
         self,
         uid: str,
         data: Any,  # noqa: ANN401  # polymorphic job data
-        predecessors: FrozenSet[str],
+        predecessors: frozenset[str],
         notify_end: Callable[[str], None],
     ) -> Job:
         """Protect call to job_provider.
@@ -146,7 +146,7 @@ class Scheduler:
         def provider(
             uid: str,
             data: Any,  # noqa: ANN401  # polymorphic job data
-            predecessors: FrozenSet[str],
+            predecessors: frozenset[str],
             notify_end: Callable[[str], None],
         ) -> Job:
             """Create a job instance.
@@ -257,7 +257,7 @@ class Scheduler:
                 job = self.safe_job_provider(
                     typing.cast(str, uid),
                     data,
-                    predecessors=typing.cast(typing.FrozenSet[str], predecessors),
+                    predecessors=typing.cast(frozenset[str], predecessors),
                     notify_end=self.message_queue.put,
                 )
                 if job.should_skip:
