@@ -710,6 +710,8 @@ class File:
 
 
 class WaitError(Exception):
+    """Exception raised when waiting for processes fails."""
+
     pass
 
 

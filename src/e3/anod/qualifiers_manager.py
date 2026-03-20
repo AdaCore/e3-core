@@ -108,6 +108,8 @@ class QualifierDeclaration(metaclass=abc.ABCMeta):
 
 
 class KeyValueDeclaration(QualifierDeclaration):
+    """Declaration for key-value pair qualifiers."""
+
     def __init__(
         self,
         origin: str,
@@ -264,6 +266,8 @@ class TagDeclaration(QualifierDeclaration):
 
 
 class KeySetDeclaration(QualifierDeclaration):
+    """Declaration for key-set qualifiers with multiple values."""
+
     # The separator use to distinguish all the element of the list
     LIST_SEPARATOR = ";"
 

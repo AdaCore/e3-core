@@ -37,6 +37,8 @@ class BuildVar:
 
 
 class Dependency:
+    """Represent a dependency between Anod specifications."""
+
     kind: DEPENDENCY_PRIMITIVE
 
     ALLOWED_REQUIRE: dict[str, str] = {

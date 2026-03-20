@@ -24,6 +24,8 @@ if TYPE_CHECKING:
     BuildInfoType = TypeVar("BuildInfoType", bound="BuildInfo")
 
     class BuildInfoDict(TypedDict):
+        """Dictionary representation of build information."""
+
         _id: str
         setup: str
         isready: bool

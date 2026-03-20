@@ -31,6 +31,8 @@ logger = e3.log.getLogger("vcs.svn")
 
 
 class SVNError(VCSError):
+    """Exception raised for SVN operations errors."""
+
     pass
 
 

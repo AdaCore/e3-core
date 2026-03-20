@@ -197,6 +197,8 @@ class SharedSource(Source):
 
 
 class SourceBuilder:
+    """Builder for creating source packages from source repositories."""
+
     DEFAULT_PATCH_CMD: Final = 1
 
     def __init__(

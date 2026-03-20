@@ -18,10 +18,14 @@ if TYPE_CHECKING:
 
 
 class DAGError(E3Error):
+    """Exception raised for DAG operations errors."""
+
     pass
 
 
 class DAGIterator:
+    """Iterator for traversing DAG vertices in topological order."""
+
     NOT_VISITED = 0
     BUSY = 1
     VISITED = 2

@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
 
 class FileHandler(EventHandler):
+    """Event handler that writes events to JSON files."""
+
     def __init__(self, log_dir: str) -> None:
         """Initialize file handler.
 

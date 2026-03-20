@@ -940,6 +940,8 @@ class _StoreWrite(_Store):
 
 
 class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
+    """Write-only interface to the Anod store for creating and uploading resources."""
+
     def create_thirdparty(self, file_info: FileDict) -> FileDict:
         """See e3.anod.store.interface.StoreWriteInterface.
 
@@ -1292,6 +1294,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
 
 
 class StoreReadOnly(_Store, StoreReadInterface):
+    """Read-only interface to the Anod store for querying and downloading resources."""
+
     def get_build_info(self, bid: str) -> BuildInfoDict:
         """See e3.anod.store.interface.StoreReadInterface.
 
@@ -1805,14 +1809,20 @@ class StoreReadOnly(_Store, StoreReadInterface):
 
 
 class Store(StoreReadOnly):
+    """Read-only Anod store (alias for StoreReadOnly)."""
+
     pass
 
 
 class StoreRW(StoreRWInterface, Store, StoreWriteOnly):
+    """Read-write interface to the Anod store."""
+
     pass
 
 
 class LocalStore(StoreRW, LocalStoreInterface):
+    """Local cache-backed store with optional online store fallback."""
+
     def __init__(
         self,
         db: os.PathLike[str] | str | None = None,

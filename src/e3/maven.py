@@ -13,6 +13,8 @@ logger = getLogger("e3.maven")
 
 
 class MavenLink:
+    """Represent Maven package download link with metadata."""
+
     BASE_URL = "https://repo.maven.apache.org/maven2"
 
     def __init__(self, group: str, name: str, version: str) -> None:
@@ -103,6 +105,8 @@ class MavenLink:
 
 
 class MavenLinksParser:
+    """Parser for Maven repository metadata XML to extract package links."""
+
     def __init__(self, group: str, name: str) -> None:
         """Create the MavenLinksParser.
 
@@ -166,6 +170,8 @@ class MavenLinksParser:
 
 
 class Maven:
+    """Interface to Maven repository for package discovery and download."""
+
     def __init__(self, url: str = MavenLink.BASE_URL) -> None:
         """Initialize Maven manager class.
 

@@ -202,6 +202,8 @@ class AnodSpecRepository:
 
 
 class AnodModule:
+    """Represent a loaded Anod specification module."""
+
     def __init__(self, name: str, path: str, data: list[str]) -> None:
         """Initialize an AnodModule instance.
 

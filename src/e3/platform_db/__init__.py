@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
 @dataclass
 class KnowledgeBase:
+    """Container for platform detection knowledge base entries."""
+
     cpu_info: PlatformDBEntry
     os_info: PlatformDBEntry
     platform_info: PlatformDBEntry

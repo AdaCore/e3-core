@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
 
 class SMTPHandler(EventHandler):
+    """Event handler that sends events via email using SMTP."""
+
     def __init__(
         self,
         subject: str,

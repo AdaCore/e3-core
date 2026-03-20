@@ -49,6 +49,8 @@ HTTP_NOT_FOUND = 404
 
 
 class PyPIError(E3Error):
+    """Exception raised for PyPI operations errors."""
+
     pass
 
 
@@ -219,6 +221,8 @@ class PyPILinksParser(HTMLParser):
 
 
 class PyPI:
+    """Interface to PyPI Simple API for package discovery and download."""
+
     def __init__(
         self,
         pypi_url: str = "https://pypi.org/",
@@ -350,6 +354,8 @@ class PyPI:
 
 
 class PyPICandidate:
+    """Represent a PyPI package candidate for installation."""
+
     def __init__(
         self,
         identifier: str,

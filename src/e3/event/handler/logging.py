@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
 
 class LoggingHandler(EventHandler):
+    """Event handler that sends events to Python logging system."""
+
     def __init__(self, logger_name: str = "", level: int = logging.DEBUG) -> None:
         """Initialize logging handler.
 

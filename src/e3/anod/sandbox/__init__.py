@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 
 
 class SandBox:
+    """Isolated build environment for Anod operations."""
+
     def __init__(self, root_dir: str) -> None:
         self.root_dir: str = os.path.realpath(root_dir)
         self.build_id: str | None = None

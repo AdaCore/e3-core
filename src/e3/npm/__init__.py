@@ -18,6 +18,8 @@ logger = getLogger("npm")
 
 
 class NPM:
+    """Interface to NPM registry for package discovery and download."""
+
     def __init__(self, url: str = "https://registry.npmjs.org/") -> None:
         """Initialize NPM manager class.
 

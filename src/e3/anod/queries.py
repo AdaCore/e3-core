@@ -14,11 +14,15 @@ if TYPE_CHECKING:
     from e3.anod.spec import Anod
 
     class SourceKey(NamedTuple):
+        """Key for identifying source packages in store queries."""
+
         anod_uid: str
         src_name: str
         publish: bool
 
     class PackageKey(NamedTuple):
+        """Key for identifying binary packages in store queries."""
+
         anod_uid: str
         track: bool
         has_closure: bool
