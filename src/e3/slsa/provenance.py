@@ -26,7 +26,7 @@ This predicate is the *RECOMMENDED* way to satisfy the
 .. |json.dumps| replace:: :func:`json.dumps()`
 .. |json.load| replace:: :func:`json.load()`
 .. |str| replace:: :class:`str`
-"""  # noqa RST304
+"""  # noqa: RST304, RST399
 
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ class Builder(object):
     .. |id| replace:: :attr:`~Builder.id`
     .. |builder.load_dict| replace:: :meth:`~Builder.load_dict`
     .. |builder.load_json| replace:: :meth:`~Builder.load_json`
-    """  # noqa RST304
+    """  # noqa: RST304, RST399
 
     ATTR_BUILD_ID: str = "id"
     ATTR_BUILDER_DEPENDENCIES: str = "builderDependencies"
@@ -115,7 +115,7 @@ class Builder(object):
 
         :return: A |bool| set to **True** if both builders are equal, **False**
             else.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         if isinstance(other, self.__class__):
             return self.as_json() == other.as_json()
         return False
@@ -154,7 +154,7 @@ class Builder(object):
           ``subject``.
         - The interpretation of any extension fields.
 
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__id
 
     @id.setter
@@ -180,7 +180,7 @@ class Builder(object):
             be a valid JSON object (call to |json.load| succeeds).
 
         .. seealso:: |json.load|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return {
             self.ATTR_BUILD_ID: str(self.id),
             self.ATTR_BUILDER_DEPENDENCIES: [
@@ -197,7 +197,7 @@ class Builder(object):
         *sort_keys* set to **True**.
 
         .. seealso:: |builder.as_dict|, |builder.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return json.dumps(self.as_dict(), sort_keys=True)
 
     @classmethod
@@ -211,7 +211,7 @@ class Builder(object):
         :raise ValueError: if the build ID is not defined in *initializer*.
 
         .. seealso:: |builder.as_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         build_id: str | None = initializer.get(cls.ATTR_BUILD_ID)
         if build_id is None:
             raise ValueError("Invalid build ID (None)")
@@ -238,7 +238,7 @@ class Builder(object):
         :raise ValueError: if the build ID is not defined in *initializer*.
 
         .. seealso:: |builder.as_json|, |builder.load_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return cls.load_dict(json.loads(initializer))
 
 
@@ -259,7 +259,7 @@ class BuildMetadata(object):
     .. |bm.load_dict| replace:: :meth:`~BuildMetadata.load_dict`
     .. |bm.load_json| replace:: :meth:`~BuildMetadata.load_json`
     .. |strptime| replace:: :meth:`~datetime.strptime`
-    """  # noqa RST304
+    """  # noqa: RST304, RST399
 
     ATTR_INVOCATION_ID: str = "invocationId"
     ATTR_STARTED_ON: str = "startedOn"
@@ -291,7 +291,7 @@ class BuildMetadata(object):
 
         :return: A |bool| set to **True** if both build metadatas are equal,
             **False** else.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         if isinstance(other, self.__class__):
             return self.as_json() == other.as_json()
         return False
@@ -321,7 +321,7 @@ class BuildMetadata(object):
         The value **SHOULD** be globally unique.
 
         .. |builder.id| replace:: :attr:`Builder.id`
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__invocation_id
 
     @property
@@ -346,7 +346,7 @@ class BuildMetadata(object):
             should be a valid JSON object (call to |json.load| succeeds).
 
         .. seealso:: |bm.as_json|, |json.load|, |bm.load_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return {
             self.ATTR_INVOCATION_ID: self.invocation_id,
             self.ATTR_STARTED_ON: self.started_on.strftime(self.TIMESTAMP_FORMAT),
@@ -361,7 +361,7 @@ class BuildMetadata(object):
         *sort_keys* set to **True**.
 
         .. seealso:: |bm.as_dict|, |bm.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return json.dumps(self.as_dict(), sort_keys=True)
 
     @classmethod
@@ -378,7 +378,7 @@ class BuildMetadata(object):
         :raise TypeError: if the timestamps types are invalid.
 
         .. seealso:: |bm.as_dict|, |bm.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         invocation_id: str | None = initializer.get(cls.ATTR_INVOCATION_ID)
         if invocation_id is None:
             raise ValueError("Invalid invocation ID (None)")
@@ -412,7 +412,7 @@ class BuildMetadata(object):
         :raise ValueError: if the build ID is not defined in *initializer*.
 
         .. seealso:: |builder.as_json|, |builder.load_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return cls.load_dict(json.loads(initializer))
 
     # --------------------------- Private methods --------------------------- #
@@ -456,7 +456,7 @@ class Statement(object):
     .. |st.as_json| replace:: :meth:`~Statement.as_json`
     .. |st.load_dict| replace:: :meth:`~Statement.load_dict`
     .. |st.load_json| replace:: :meth:`~Statement.load_json`
-    """  # noqa RST304
+    """  # noqa: RST304, RST399
 
     ATTR_PREDICATE: str = "predicate"
     ATTR_PREDICATE_TYPE: str = "predicateType"
@@ -500,7 +500,7 @@ class Statement(object):
 
         :return: A |bool| set to **True** if both statements are equal,
             **False** else.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         if isinstance(other, self.__class__):
             return self.as_json() == other.as_json()
         return False
@@ -519,12 +519,12 @@ class Statement(object):
 
         Unset is treated the same as set-but-empty. **MAY** be omitted if
         |predicateType| fully describes the predicate.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__predicate
 
     @property
     def predicate_type(self) -> TypeURI:
-        """URI identifying the type of the |Predicate|."""  # noqa RST304
+        """URI identifying the type of the |Predicate|."""  # noqa: RST304, RST399
         return self.__predicate_type
 
     @property
@@ -553,7 +553,7 @@ class Statement(object):
                      of content type. If this matters to you, please comment on
                      `GitHub Issue #28
                      <https://github.com/in-toto/attestation/issues/28>`_
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__subject
 
     def as_dict(self) -> dict:
@@ -563,7 +563,7 @@ class Statement(object):
             be a valid JSON object (call to |json.load| succeeds).
 
         .. seealso:: |json.load|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return {
             self.ATTR_TYPE: str(self.type),
             self.ATTR_SUBJECT: [subject.as_dict() for subject in self.subject],
@@ -579,7 +579,7 @@ class Statement(object):
         *sort_keys* set to **True**.
 
         .. seealso:: |st.as_dict|, |st.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return json.dumps(self.as_dict(), sort_keys=True)
 
     @classmethod
@@ -594,7 +594,7 @@ class Statement(object):
             *initializer*.
 
         .. seealso:: |st.as_dict|, |st.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         statement_type: str | None = initializer.get(cls.ATTR_TYPE)
         if statement_type is None:
             raise ValueError("Invalid statement type (None)")
@@ -627,7 +627,7 @@ class Statement(object):
             *initializer*.
 
         .. seealso:: |st.as_json|, |st.load_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return cls.load_dict(json.loads(initializer))
 
 
@@ -668,7 +668,7 @@ class ResourceDescriptor(object):
     .. |media_type| replace:: :attr:`~ResourceDescriptor.media_type`
     .. |name| replace:: :attr:`~ResourceDescriptor.name`
     .. |uri| replace:: :attr:`~ResourceDescriptor.uri`
-    """  # noqa RST304
+    """  # noqa: RST304, RST399
 
     ATTR_ANNOTATIONS: str = "annotations"
     ATTR_CONTENT: str = "content"
@@ -691,7 +691,7 @@ class ResourceDescriptor(object):
     )
     """JSON attributes returned by the |rd.as_dict| method (if the given attribute
     defines a value).
-    """  # noqa RST304
+    """  # noqa: RST304, RST399
 
     def __init__(
         self,
@@ -737,7 +737,7 @@ class ResourceDescriptor(object):
 
         :return: A |bool| set to **True** if both resource descriptors are
             equal, **False** else.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         if isinstance(other, self.__class__):
             return self.as_json() == other.as_json()
         return False
@@ -793,7 +793,7 @@ class ResourceDescriptor(object):
 
         :raise TypeError: When setting this field to something else than a
             |bytes| or ``None``.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__content
 
     @content.setter
@@ -824,7 +824,7 @@ class ResourceDescriptor(object):
 
         :raise TypeError: When setting this field to something else than a
             |dict|.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__digest
 
     @digest.setter
@@ -851,7 +851,7 @@ class ResourceDescriptor(object):
 
         :raise TypeError: When setting this field to something else than a
             |ResourceURI| or ``None``.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__download_location
 
     @download_location.setter
@@ -881,7 +881,7 @@ class ResourceDescriptor(object):
 
         :return: A |bool| set to **True** if at least one of the above-mentioned
             field is defined, **False** else.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         if self.uri or self.content or self.digest:
             return True
         return False
@@ -893,7 +893,7 @@ class ResourceDescriptor(object):
         The semantics are up to the producer and consumer. The |name| name
         **SHOULD** be stable, such as a filename, to allow consumers to reliably
         use the |name| as part of their policy.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return self.__name
 
     @name.setter
@@ -986,7 +986,7 @@ class ResourceDescriptor(object):
             |is_valid|).
 
         .. seealso:: |rd.as_json|, |is_valid|, |rd.load_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         if not self.is_valid:
             raise ValueError(
                 "Invalid resource descriptor. Either uri, content or digest "
@@ -1019,7 +1019,7 @@ class ResourceDescriptor(object):
         *sort_keys* set to **True**.
 
         .. seealso:: |rd.as_dict|, |rd.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return json.dumps(self.as_dict(), sort_keys=True)
 
     @staticmethod
@@ -1100,7 +1100,7 @@ class ResourceDescriptor(object):
             initialized with the dictionary content (see |is_valid|).
 
         .. seealso:: |rd.as_dict|, |is_valid|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         content: str = initializer.get(cls.ATTR_CONTENT, "")
         resource_descriptor: ResourceDescriptor = cls(
             uri=initializer.get(cls.ATTR_URI),
@@ -1134,7 +1134,7 @@ class ResourceDescriptor(object):
             initialized with the dictionary content (see |is_valid|).
 
         .. seealso:: |rd.load_dict|, |is_valid|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return cls.load_dict(json.loads(initializer))
 
 
@@ -1145,7 +1145,7 @@ class Predicate(object):
     .. |p.as_json| replace:: :meth:`as_json`
     .. |p.load_dict| replace:: :meth:`load_dict`
     .. |p.load_json| replace:: :meth:`load_json`
-    """  # noqa RST304
+    """  # noqa: RST304, RST399
 
     ATTR_BUILD_DEFINITION: str = "buildDefinition"
     ATTR_RUN_DETAILS: str = "runDetails"
@@ -1235,7 +1235,7 @@ class Predicate(object):
         .. |bd.load_dict| replace:: :meth:`load_dict`
         .. |bd.load_json| replace:: :meth:`load_json`
         .. |resolvedDependencies| replace:: :attr:`resolved_dependencies`
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
 
         ATTR_BUILD_TYPE: str = "buildType"
         ATTR_EXTERNAL_PARAMETERS: str = "externalParameters"
@@ -1276,7 +1276,7 @@ class Predicate(object):
 
             :return: A |bool| set to **True** if both build definitions are
                 equal, **False** else.
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             if isinstance(other, self.__class__):
                 return self.as_json() == other.as_json()
             return False
@@ -1366,7 +1366,7 @@ class Predicate(object):
                 succeeds).
 
             .. seealso:: |bd.as_json|, |json.load|, |bd.load_dict|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             return {
                 self.ATTR_BUILD_TYPE: str(self.build_type) if self.build_type else None,
                 self.ATTR_EXTERNAL_PARAMETERS: self.external_parameters,
@@ -1384,7 +1384,7 @@ class Predicate(object):
             *sort_keys* set to **True**.
 
             .. seealso:: |bd.as_dict|, |bd.load_json|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             return json.dumps(self.as_dict(), sort_keys=True)
 
         @classmethod
@@ -1398,7 +1398,7 @@ class Predicate(object):
                 *initializer*.
 
             .. seealso:: |bd.as_dict|, |bd.load_json|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             build_definition: Predicate.BuildDefinition = cls(
                 build_type=initializer.get(cls.ATTR_BUILD_TYPE, ""),
                 external_parameters=initializer.get(cls.ATTR_EXTERNAL_PARAMETERS),
@@ -1422,7 +1422,7 @@ class Predicate(object):
                 *initializer*.
 
             .. seealso:: |bd.as_json|, |bd.load_dict|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             return cls.load_dict(json.loads(initializer))
 
     class RunDetails(object):
@@ -1436,7 +1436,7 @@ class Predicate(object):
         .. |rund.as_json| replace:: :meth:`as_json`
         .. |rund.load_dict| replace:: :meth:`load_dict`
         .. |rund.load_json| replace:: :meth:`load_json`
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
 
         ATTR_BUILDER: str = "builder"
         ATTR_METADATA: str = "metadata"
@@ -1465,7 +1465,7 @@ class Predicate(object):
 
             :return: A |bool| set to **True** if both run details are equal,
                 **False** else.
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             if isinstance(other, self.__class__):
                 return self.as_json() == other.as_json()
             return False
@@ -1514,7 +1514,7 @@ class Predicate(object):
                 should be a valid JSON object (call to |json.load| succeeds).
 
             .. seealso:: |rund.as_json|, |json.load|, |rund.load_dict|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             return {
                 self.ATTR_BUILDER: self.builder.as_dict(),
                 self.ATTR_METADATA: self.metadata.as_dict(),
@@ -1529,7 +1529,7 @@ class Predicate(object):
             *sort_keys* set to **True**.
 
             .. seealso:: |rund.as_dict|, |rund.load_json|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             return json.dumps(self.as_dict(), sort_keys=True)
 
         @classmethod
@@ -1542,7 +1542,7 @@ class Predicate(object):
             :return: A run details object created from the input *initializer*.
 
             .. seealso:: |rund.as_dict|, |rund.load_json|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             builder: dict | None = initializer.get(cls.ATTR_BUILDER)
             metadata: dict | None = initializer.get(cls.ATTR_METADATA)
             by_products: list[dict] = initializer.get(cls.ATTR_BY_PRODUCTS, [])
@@ -1573,7 +1573,7 @@ class Predicate(object):
             :return: A run details object created from the input *initializer*.
 
             .. seealso:: |rund.as_json|, |rund.load_dict|
-            """  # noqa RST304
+            """  # noqa: RST304, RST399
             return cls.load_dict(json.loads(initializer))
 
     def __init__(
@@ -1597,7 +1597,7 @@ class Predicate(object):
 
         :return: A |bool| set to **True** if both predicates are equal,
             **False** else.
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         if isinstance(other, self.__class__):
             return self.as_json() == other.as_json()
         return False
@@ -1622,7 +1622,7 @@ class Predicate(object):
             be a valid JSON object (call to |json.load| succeeds).
 
         .. seealso:: |p.as_json|, |json.load|, |p.load_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return {
             self.ATTR_BUILD_DEFINITION: self.build_definition.as_dict(),
             self.ATTR_RUN_DETAILS: self.run_details.as_dict(),
@@ -1636,7 +1636,7 @@ class Predicate(object):
         *sort_keys* set to **True**.
 
         .. seealso:: |p.as_dict|, |p.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return json.dumps(self.as_dict(), sort_keys=True)
 
     @classmethod
@@ -1648,7 +1648,7 @@ class Predicate(object):
         :return: A predicate object created from the input *initializer*.
 
         .. seealso:: |p.as_dict|, |p.load_json|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         build_definition: dict | None = initializer.get(cls.ATTR_BUILD_DEFINITION)
         run_details: dict | None = initializer.get(cls.ATTR_RUN_DETAILS)
 
@@ -1676,7 +1676,7 @@ class Predicate(object):
         :return: A predictae object created from the input *initializer*.
 
         .. seealso:: |p.as_json|, |p.load_dict|
-        """  # noqa RST304
+        """  # noqa: RST304, RST399
         return cls.load_dict(json.loads(initializer))
 
 

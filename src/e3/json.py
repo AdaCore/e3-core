@@ -39,7 +39,7 @@ class JsonData(ABC):
         :return: A :class:`bool` set to **True** if both JSON data are
             identical, **False** if they are not, or if *other* is not a
             :class:`JsonData` object.
-        """  # noqa RST304
+        """  # noqa: RST304
         if isinstance(other, self.__class__):
             return self.as_json() == other.as_json()
         return False
@@ -48,7 +48,7 @@ class JsonData(ABC):
         """Return a JSON string representing this JSON data.
 
         .. seealso:: :func:`python:json.dumps`
-        """  # noqa RST304
+        """  # noqa: RST304
         return json.dumps(self.as_dict(), sort_keys=True)
 
     @classmethod
@@ -59,7 +59,7 @@ class JsonData(ABC):
 
         :return: A new :class:`JsonData` object initialized with
             values from the input dictionary.
-        """  # noqa RST304
+        """  # noqa: RST304
         return cls(**obj)
 
     @classmethod
@@ -79,7 +79,7 @@ class JsonData(ABC):
             represent a dictionary.
 
         .. seealso:: :meth:`as_json`, :meth:`from_dict`
-        """  # noqa RST304
+        """  # noqa: RST304
         dict_repr: dict = json.loads(content)
         if not isinstance(dict_repr, dict):
             raise JsonDataInvalidJsonError("Invalid JSON string initializer")
