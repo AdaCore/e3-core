@@ -21,11 +21,15 @@ if TYPE_CHECKING:
     )
 
     class BuildDataDict(TypedDict):
+        """Dictionary representation of build data with sources and components."""
+
         sources: list[FileDict]
         components: list[ComponentDict]
 
 
 class StoreError(E3Error):
+    """Exception raised for store operations errors."""
+
     pass
 
 
@@ -375,10 +379,14 @@ class StoreWriteInterface(object, metaclass=abc.ABCMeta):
 
 
 class StoreRWInterface(StoreReadInterface, StoreWriteInterface):
+    """Combined read-write interface for store operations."""
+
     pass
 
 
 class LocalStoreInterface(object, metaclass=abc.ABCMeta):
+    """Interface for local store operations."""
+
     @abc.abstractmethod
     def raw_add_build_info(self, build_info_data: BuildInfoDict) -> None:
         """Add a build info to the local store.

@@ -17,6 +17,8 @@ logger = e3.log.getLogger("e3.sys")
 
 
 class RewriteNodeError(Exception):
+    """Exception raised when AST node rewriting fails."""
+
     pass
 
 

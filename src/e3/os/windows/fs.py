@@ -42,6 +42,8 @@ logger = e3.log.getLogger("os.windows.fs")
 
 
 class WithOpenFile:
+    """Decorator to manage Windows file opening with specific access modes."""
+
     def __init__(
         self,
         desired_access: int | None = None,

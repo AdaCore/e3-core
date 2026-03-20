@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 
 
 class JsonError(e3.error.E3Error):
+    """Exception raised for JSON operations errors."""
+
     pass
 
 

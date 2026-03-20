@@ -14,6 +14,8 @@ NPM_SCOPE_PARTS = 2
 
 
 class NPMLink:
+    """Represent NPM package download link with metadata."""
+
     def __init__(
         self,
         name: str,

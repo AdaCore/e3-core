@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 
 class VCSError(E3Error):
+    """Exception raised for version control system operations errors."""
+
     def __init__(self, message: str, origin: str, process: Run | None = None) -> None:
         """Initialize VCSError.
 

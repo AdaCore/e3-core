@@ -158,6 +158,8 @@ class IOStatusBlock(Structure):
 
 
 class ReparseGUIDDataBuffer(Structure):
+    """Map Windows REPARSE_GUID_DATA_BUFFER structure."""
+
     _fields_ = [
         ("tag", DWORD),
         ("length", WORD),
@@ -287,6 +289,8 @@ class LargeFileTime(Structure):
 
 
 class FindData(Structure):
+    """Map Windows WIN32_FIND_DATA structure."""
+
     _fields_ = [
         ("file_attributes", FileAttribute),
         ("creation_time", FileTime),
@@ -411,6 +415,8 @@ class ObjectAttributes(Structure):
 
 # Declare the Win32 functions return types and signature
 class NT:
+    """Container for Windows NT API function bindings."""
+
     FindFirstFile = None
     FindClose = None
     FsControlFile = None
@@ -545,6 +551,8 @@ if sys.platform == "win32":
 
 
 class NTException(E3Error):
+    """Exception raised for Windows NT API errors."""
+
     def __init__(self, status: int, message: str, origin: str | None = None) -> None:
         """Initialize an NT exception.
 

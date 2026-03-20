@@ -49,6 +49,8 @@ if sys.platform == "win32":
     # does not exist in win32 but is simulated in Cygwin).
 
     class E3ZipInfo(zipfile.ZipInfo):
+        """ZipInfo subclass for cross-platform compatibility."""
+
         @classmethod
         def from_file(cls, *args, **kwargs):  # type: ignore[no-untyped-def]
             """Create a ZipInfo from a file with adjusted executable permissions.
@@ -98,6 +100,8 @@ class E3ZipFile(zipfile.ZipFile):
 
 
 class ArchiveError(e3.error.E3Error):
+    """Exception raised for archive operations errors."""
+
     pass
 
 

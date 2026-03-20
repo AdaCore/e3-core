@@ -26,10 +26,14 @@ if TYPE_CHECKING:
     ComponentType = TypeVar("ComponentType", bound="Component")
 
     class ComponentAttachmentDict(TypedDict, total=True):
+        """Dictionary representation of a component attachment."""
+
         name: str
         att_file: FileDict
 
     class ComponentDict(TypedDict, total=False):
+        """Dictionary representation of a component."""
+
         name: str
         specname: str | None
         _id: str | None

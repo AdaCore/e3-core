@@ -62,6 +62,8 @@ def get_filename(content_disposition: str) -> str | None:
 
 
 class HTTPError(E3Error):
+    """Exception raised for HTTP operations errors."""
+
     def __init__(self, msg: str, status: int | None = None) -> None:
         """Initialize an HTTPError exception.
 
@@ -97,6 +99,8 @@ class BaseURL:
 
 
 class HTTPSession:
+    """HTTP session manager with failover support for multiple base URLs."""
+
     CHUNK_SIZE = 1024 * 1024
     DEFAULT_TIMEOUT = (60, 60)
 

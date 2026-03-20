@@ -170,6 +170,8 @@ class SPDXEntryMaybeStr(SPDXEntry):
 
 
 class SPDXEntryMaybeStrMultilines(SPDXEntryMaybeStr):
+    """SPDX entry that can contain multiline string values."""
+
     def to_tagvalue(self) -> str:
         """Return the content that can span to multiple lines.
 
@@ -814,14 +816,20 @@ class PackageHomePage(SPDXEntryMaybeStr):
 
 
 class SHA1(PackageChecksum):
+    """SHA1 checksum for SPDX package verification."""
+
     algorithm = "SHA1"
 
 
 class SHA256(PackageChecksum):
+    """SHA256 checksum for SPDX package verification."""
+
     algorithm = "SHA256"
 
 
 class SHA512(PackageChecksum):
+    """SHA512 checksum for SPDX package verification."""
+
     algorithm = "SHA512"
 
 

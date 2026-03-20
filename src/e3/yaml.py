@@ -29,6 +29,8 @@ else:
 
 
 class YamlError(Exception):
+    """Exception raised for YAML operations errors."""
+
     pass
 
 

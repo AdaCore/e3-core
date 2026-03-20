@@ -52,6 +52,8 @@ class HTTPSimpleStoreResourceInfo(ResourceInfo):
 
 
 class HTTPSimpleStore(Store):
+    """Simple HTTP-based store for downloading resources from URLs."""
+
     def get_resource_metadata(
         self, query: dict[str, str]
     ) -> HTTPSimpleStoreResourceInfo:

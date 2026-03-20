@@ -57,6 +57,8 @@ FETCH_HEAD: Final = "FETCH_HEAD"
 
 
 class GitError(VCSError):
+    """Exception raised for Git operations errors."""
+
     pass
 
 

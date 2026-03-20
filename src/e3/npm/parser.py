@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class NPMLinksParser:
+    """Parser for NPM registry JSON responses to extract package links."""
+
     def __init__(self) -> None:
         """Create the NPMLinksParser."""
         self.links: list[NPMLink] = []

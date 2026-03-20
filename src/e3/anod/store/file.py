@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     FileType = TypeVar("FileType", bound="File")
 
     class ResourceDict(TypedDict):
+        """Dictionary representation of a resource."""
+
         id: str
         path: os.PathLike[str] | str
         size: int
@@ -38,6 +40,8 @@ if TYPE_CHECKING:
     # NotRequired instead to improve the type checking.
     # See https://peps.python.org/pep-0655/
     class FileDict(TypedDict, total=False):
+        """Dictionary representation of a file."""
+
         _id: str | None
         kind: str
         name: str

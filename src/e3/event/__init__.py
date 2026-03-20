@@ -267,6 +267,8 @@ class EventHandler(metaclass=abc.ABCMeta):
 
 
 class EventError(E3Error):
+    """Exception raised for event operations errors."""
+
     pass
 
 

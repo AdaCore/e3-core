@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
 
 class HashError(e3.error.E3Error):
+    """Exception raised for hash computation errors."""
+
     pass
 
 
