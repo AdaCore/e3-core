@@ -202,7 +202,7 @@ class BuildInfo:
         if len(result) == 0:
             msg = f"cannot find component {name} ({platform})"
             raise StoreError(msg)
-        elif len(result) != 1:
+        if len(result) != 1:
             msg = f"multiple component {name} ({platform}) found"
             raise StoreError(msg)
         return result[0]

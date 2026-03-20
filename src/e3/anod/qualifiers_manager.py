@@ -338,13 +338,13 @@ class KeySetDeclaration(QualifierDeclaration):
                 f"requires a str or Iterable[str], got bool"
             )
             raise AnodError(msg)
-        elif value is None:
+        if value is None:
             msg = (
                 f"{self.origin}: Invalid value for qualifier {self.name}: "
                 f"requires a str or Iterable[str], got None"
             )
             raise AnodError(msg)
-        elif isinstance(value, str):
+        if isinstance(value, str):
             # Make sure '' value is the empty set
             value_set = (
                 frozenset(value.split(self.LIST_SEPARATOR)) if value else frozenset({})

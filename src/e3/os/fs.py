@@ -370,8 +370,7 @@ def readlink(filename: str | Path) -> str:
             if reparsed_link is not None:
                 return reparsed_link
             raise
-        else:
-            raise
+        raise
 
 
 def touch(filename: str | Path) -> None:

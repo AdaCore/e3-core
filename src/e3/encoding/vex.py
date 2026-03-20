@@ -458,8 +458,7 @@ class Metadata(JsonData):
                 f"{spec_version} is not supported."
             )
             raise ValueError(msg)
-        else:
-            self.spec_version = spec_version
+        self.spec_version = spec_version
 
     def as_dict(self) -> dict[str, Any]:
         """Serialize object to dictionary representation."""

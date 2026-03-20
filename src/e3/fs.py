@@ -79,7 +79,7 @@ def cp(
     if file_number == 0:
         # If there is no source files raise an error
         raise FSError(origin="cp", message=f'can\'t find files matching "{source}"')
-    elif file_number > 1:
+    if file_number > 1:
         # If we have more than one file to copy then check that target is a
         # directory
         if not Path(target).is_dir():
@@ -428,7 +428,7 @@ def mv(
 
         if nb_files == 0:
             raise FSError(origin="mv", message=f'cannot find files matching "{source}"')
-        elif nb_files == 1:
+        if nb_files == 1:
             source = file_list[0]
             if Path(source).is_dir() and Path(target).is_dir():
                 move_file(source, str(Path(target, os.path.basename(source))))

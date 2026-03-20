@@ -326,7 +326,7 @@ def test_primitive() -> None:
         def build(self):
             if "error" in self.parsed_qualifier:
                 raise ValueError(self.parsed_qualifier["error"])
-            elif "error2" in self.parsed_qualifier:
+            if "error2" in self.parsed_qualifier:
                 self.shell(sys.executable, "-c", "import sys; sys.exit(2)")
             else:
                 hello = self.shell(
