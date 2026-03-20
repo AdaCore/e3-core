@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 logger = getLogger("e3.anod.store.buildinfo")
 
 
-class BuildInfo(object):
+class BuildInfo:
     """BuildInfo structure.
 
     :ivar build_date: The build date.

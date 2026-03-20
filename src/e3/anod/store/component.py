@@ -56,7 +56,7 @@ if TYPE_CHECKING:
 logger = getLogger("e3.anod.store.component")
 
 
-class Component(object):
+class Component:
     """A Store component.
 
     A component is an entity that regroups binaries, sources and additional

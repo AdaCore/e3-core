@@ -295,7 +295,7 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
         """
 
 
-class StoreWriteInterface(object, metaclass=abc.ABCMeta):
+class StoreWriteInterface(metaclass=abc.ABCMeta):
     """A class that defines the Store write interface."""
 
     @abc.abstractmethod
@@ -380,7 +380,7 @@ class StoreRWInterface(StoreReadInterface, StoreWriteInterface):
     """Combined read-write interface for store operations."""
 
 
-class LocalStoreInterface(object, metaclass=abc.ABCMeta):
+class LocalStoreInterface(metaclass=abc.ABCMeta):
     """Interface for local store operations."""
 
     @abc.abstractmethod

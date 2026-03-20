@@ -33,7 +33,7 @@ DICT_VALUES: dict = {
 }
 
 
-class AnObject(object):
+class AnObject:
     def __init__(self, value: dict) -> None:
         self.value = value
 

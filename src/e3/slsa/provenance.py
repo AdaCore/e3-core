@@ -40,7 +40,7 @@ from typing import Any
 from dateutil import parser as date_parser
 
 
-class Builder(object):
+class Builder:
     """Predicate run details builder object.
 
     The build platform, or builder for short, represents the transitive closure
@@ -242,7 +242,7 @@ class Builder(object):
         return cls.load_dict(json.loads(initializer))
 
 
-class BuildMetadata(object):
+class BuildMetadata:
     """Build metadata representation.
 
     When the timestamp parameters (*started_on* or *finished_on*) are strings,
@@ -438,7 +438,7 @@ class BuildMetadata(object):
         raise TypeError(msg)
 
 
-class Statement(object):
+class Statement:
     """SLSA statement object.
 
     The Statement is the middle layer of the attestation, binding it to a
@@ -631,7 +631,7 @@ class Statement(object):
         return cls.load_dict(json.loads(initializer))
 
 
-class ResourceDescriptor(object):
+class ResourceDescriptor:
     """Resource descriptor object.
 
     A size-efficient description of any software artifact or resource (mutable
@@ -1138,7 +1138,7 @@ class ResourceDescriptor(object):
         return cls.load_dict(json.loads(initializer))
 
 
-class Predicate(object):
+class Predicate:
     """Predicate object.
 
     .. |p.as_dict| replace:: :meth:`as_dict`
@@ -1150,7 +1150,7 @@ class Predicate(object):
     ATTR_BUILD_DEFINITION: str = "buildDefinition"
     ATTR_RUN_DETAILS: str = "runDetails"
 
-    class BuildDefinition(object):
+    class BuildDefinition:
         """The BuildDefinition describes all the inputs to the build.
 
         It **SHOULD** contain all the information necessary and sufficient to
@@ -1425,7 +1425,7 @@ class Predicate(object):
             """  # noqa: RST304, RST399
             return cls.load_dict(json.loads(initializer))
 
-    class RunDetails(object):
+    class RunDetails:
         """Details specific to this particular execution of the build.
 
         :param builder: Run details builder description.
@@ -1680,7 +1680,7 @@ class Predicate(object):
         return cls.load_dict(json.loads(initializer))
 
 
-class TypeURI(object):
+class TypeURI:
     """Uniform Resource Identifier as specified in RFC 3986.
 
     Used as a collision-resistant type identifier.
