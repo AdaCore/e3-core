@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 import e3.log
 import e3.os.platform
 from e3.platform import Platform
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -623,11 +624,11 @@ class BaseEnv(AbstractBaseEnv):
         return iter(self._instance.items())
 
     def copy(
-        self: BaseEnv_T,
+        self,
         build: str | None = None,
         host: str | None = None,
         target: str | None = None,
-    ) -> BaseEnv_T:
+    ) -> Self:
         """Copy an env.
 
         :param build: like build set_env parameter
@@ -642,7 +643,7 @@ class BaseEnv(AbstractBaseEnv):
         return result
 
     @classmethod
-    def from_env(cls: type[BaseEnv_T], env: Env | BaseEnv | None = None) -> BaseEnv_T:
+    def from_env(cls, env: Env | BaseEnv | None = None) -> Self:
         """Return a new BaseEnv object from an env.
 
         :param env: env. If None copy the current Env

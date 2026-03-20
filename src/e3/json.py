@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import e3.error
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from typing import Any, TypeVar
@@ -54,7 +55,7 @@ class JsonData(ABC):
         return json.dumps(self.as_dict(), sort_keys=True)
 
     @classmethod
-    def from_dict(cls: type[JsonDataSelf], obj: dict) -> JsonDataSelf:
+    def from_dict(cls, obj: dict) -> Self:
         """Load a dictionary as a JSON data object.
 
         :param obj: The dictionary to initialize the JSON data object with.
@@ -65,7 +66,7 @@ class JsonData(ABC):
         return cls(**obj)
 
     @classmethod
-    def from_json(cls: type[JsonDataSelf], content: str) -> JsonDataSelf:
+    def from_json(cls, content: str) -> Self:
         """Load a JSON string as a JSON data object.
 
         As this method calls for :meth:`from_dict`,  the input *content* string
