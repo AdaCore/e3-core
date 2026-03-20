@@ -272,7 +272,7 @@ class SourceBuilder:
         if not self.checkout:
             msg = f"no checkout associated to the builder {self.name}"
             raise e3.anod.error.SpecError(msg, "prepare_src")
-        elif len(self.checkout) > 1:
+        if len(self.checkout) > 1:
             msg = (
                 "more than 1 checkout and no prepare_src function"
                 f" given for {self.name}"

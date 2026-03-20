@@ -323,10 +323,10 @@ class Component:
         if not self.component_id:
             msg = f"Invalid component {self.name!r} (no ID)"
             raise ValueError(msg)
-        elif not file.resource_id:
+        if not file.resource_id:
             msg = f"Missing resource id for {file.name!r}"
             raise ValueError(msg)
-        elif not file.downloaded_as:
+        if not file.downloaded_as:
             msg = f"Invalid file {file.name!r}"
             raise FileNotFoundError(msg)
 
