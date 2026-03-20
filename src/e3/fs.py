@@ -467,11 +467,10 @@ def rm(
     # the list
     if glob:
         file_list = set(ls(path, emit_log_record=False))
+    elif isinstance(path, (str, Path)):
+        file_list = {os.fspath(path)}
     else:
-        if isinstance(path, (str, Path)):
-            file_list = {os.fspath(path)}
-        else:
-            file_list = {os.fspath(p) for p in path}
+        file_list = {os.fspath(p) for p in path}
 
     tmp = " ".join(file_list)
     if tmp:
@@ -1123,17 +1122,16 @@ def sync_tree(  # noqa: PLR0915
             if delete:
                 rm(wf.target.path, recursive=True, glob=False)
                 deleted_list.append(wf.target.path)
-        else:
-            # At this stage we have an element to synchronize in
-            # the source tree.
-            if need_update(wf.source, wf.target):
-                if isfile(wf.source) or islink(wf.source):
-                    safe_copy(wf.source, wf.target)
-                    updated_list.append(wf.target.path)
-                elif isdir(wf.source):
-                    safe_mkdir(wf.source, wf.target)
-                    updated_list.append(wf.target.path)
-                    copystat_dir_list.append((wf.source, wf.target))
+        # At this stage we have an element to synchronize in
+        # the source tree.
+        elif need_update(wf.source, wf.target):
+            if isfile(wf.source) or islink(wf.source):
+                safe_copy(wf.source, wf.target)
+                updated_list.append(wf.target.path)
+            elif isdir(wf.source):
+                safe_mkdir(wf.source, wf.target)
+                updated_list.append(wf.target.path)
+                copystat_dir_list.append((wf.source, wf.target))
 
     # Adjust directory permissions once all files have been copied
     for d in copystat_dir_list:

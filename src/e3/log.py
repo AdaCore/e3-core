@@ -465,11 +465,10 @@ def activate_with_args(args: Namespace, default_level: int = logging.WARNING) ->
 
     if args.verbose > 0:
         level = default_level - 10 * args.verbose
+    elif args.loglevel in LEVELS:
+        level = LEVELS[args.loglevel]
     else:
-        if args.loglevel in LEVELS:
-            level = LEVELS[args.loglevel]
-        else:
-            level = args.loglevel
+        level = args.loglevel
 
     if args.console_logs:
         console_logs = args.console_logs

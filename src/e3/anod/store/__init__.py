@@ -1697,13 +1697,12 @@ class StoreReadOnly(_Store, StoreReadInterface):
                             result["response"] = self.latest_thirdparty(  # type: ignore[assignment]
                                 name=query["name"]
                             )
+                        elif "bid" not in query:
+                            result["msg"] = "Invalid source query: missing build ID"
                         else:
-                            if "bid" not in query:
-                                result["msg"] = "Invalid source query: missing build ID"
-                            else:
-                                result["response"] = self.get_source_info(  # type: ignore[assignment]
-                                    bid=query["bid"], name=query["name"]
-                                )
+                            result["response"] = self.get_source_info(  # type: ignore[assignment]
+                                bid=query["bid"], name=query["name"]
+                            )
                     except Exception as e:
                         result["msg"] = str(e)
             else:

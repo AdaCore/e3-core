@@ -338,10 +338,9 @@ class Scheduler:
                 if collect_result:
                     # Requeue when needed
                     self.push(job)
-                else:
-                    # Mark the job as completed
-                    if job.uid in self.dag:
-                        self.dag_iterator.leave(job.uid)
+                # Mark the job as completed
+                elif job.uid in self.dag:
+                    self.dag_iterator.leave(job.uid)
 
                 del self.active_jobs[job_index]
                 return

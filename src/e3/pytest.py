@@ -307,10 +307,9 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]) ->
 
         with Path(results_dir, "results").open("a") as f:
             f.write(f"{test_name}:{outcome}\n")
-    else:
-        # If we detect a failure in an item that is not a "proper" test call, it's most
-        # likely an error.
-        # For example, this could be a failing assertion or a syntax error in a
-        # setup/teardown context.
-        if rep.outcome == "failed":
-            test_errors = True
+    # If we detect a failure in an item that is not a "proper" test call, it's most
+    # likely an error.
+    # For example, this could be a failing assertion or a syntax error in a
+    # setup/teardown context.
+    elif rep.outcome == "failed":
+        test_errors = True

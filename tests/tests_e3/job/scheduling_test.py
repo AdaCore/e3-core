@@ -192,12 +192,11 @@ class TestScheduler:
                 if job.should_skip:
                     # Skipped jobs are considered failed
                     self.results[job.uid] = [False, job]
+                # Job '2' is always failing
+                elif job.uid == "2":
+                    self.results[job.uid] = [False, job]
                 else:
-                    # Job '2' is always failing
-                    if job.uid == "2":
-                        self.results[job.uid] = [False, job]
-                    else:
-                        self.results[job.uid] = [True, job]
+                    self.results[job.uid] = [True, job]
 
         dag = DAG()
         dag.add_vertex("1")
