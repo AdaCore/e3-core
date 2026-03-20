@@ -48,8 +48,6 @@ class CachedResource(namedtuple("CachedResource", ["uid", "local_path"])):
 class StoreError(E3Error):
     """Exception raised for store operations errors."""
 
-    pass
-
 
 class Store(metaclass=abc.ABCMeta):
     """Abstract base class for resource store backends."""

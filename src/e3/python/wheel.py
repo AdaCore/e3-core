@@ -18,8 +18,6 @@ from e3.sys import python_script
 class WheelError(E3Error):
     """Exception raised for wheel package operations errors."""
 
-    pass
-
 
 class Wheel:
     """Handle Python wheel packages."""

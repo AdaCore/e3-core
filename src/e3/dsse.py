@@ -13,8 +13,6 @@ from e3.os.process import Run
 class DSSEError(Exception):
     """Exception raised for DSSE operations errors."""
 
-    pass
-
 
 class DSSE:
     """DSSE: Dead Simple Signing Envelope.

@@ -51,8 +51,6 @@ HTTP_NOT_FOUND = 404
 class PyPIError(E3Error):
     """Exception raised for PyPI operations errors."""
 
-    pass
-
 
 def get_pip_env(platform: str, python_version: Version) -> dict[str, str]:
     """Return an environment used by pip to match requirements markers.

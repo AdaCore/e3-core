@@ -1811,13 +1811,9 @@ class StoreReadOnly(_Store, StoreReadInterface):
 class Store(StoreReadOnly):
     """Read-only Anod store (alias for StoreReadOnly)."""
 
-    pass
-
 
 class StoreRW(StoreRWInterface, Store, StoreWriteOnly):
     """Read-write interface to the Anod store."""
-
-    pass
 
 
 class LocalStore(StoreRW, LocalStoreInterface):

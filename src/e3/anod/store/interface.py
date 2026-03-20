@@ -30,8 +30,6 @@ if TYPE_CHECKING:
 class StoreError(E3Error):
     """Exception raised for store operations errors."""
 
-    pass
-
 
 def resource_id(path: os.PathLike[str] | str) -> str:
     """Given a path to a file return the resource id.
@@ -380,8 +378,6 @@ class StoreWriteInterface(object, metaclass=abc.ABCMeta):
 
 class StoreRWInterface(StoreReadInterface, StoreWriteInterface):
     """Combined read-write interface for store operations."""
-
-    pass
 
 
 class LocalStoreInterface(object, metaclass=abc.ABCMeta):

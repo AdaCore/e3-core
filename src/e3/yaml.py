@@ -31,8 +31,6 @@ else:
 class YamlError(Exception):
     """Exception raised for YAML operations errors."""
 
-    pass
-
 
 class OrderedDictYAMLLoader(Loader):
     """A YAML loader that loads mappings into ordered dictionaries.

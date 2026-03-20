@@ -14,7 +14,6 @@ def timestamp_as_string(value: None) -> None:
 
     :param value: None
     """
-    ...
 
 
 @overload
@@ -23,7 +22,6 @@ def timestamp_as_string(value: float) -> str:
 
     :param value: a timestamp
     """
-    ...
 
 
 def timestamp_as_string(value: float | None) -> str | None:

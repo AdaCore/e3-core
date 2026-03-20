@@ -341,7 +341,6 @@ def getLogger(name: str | None = None, prefix: str = "e3") -> E3LoggerAdapter:
 
             :param _: logging record (ignored)
             """
-            pass
 
     logger = logging.getLogger(f"{prefix}.{name}")
 
