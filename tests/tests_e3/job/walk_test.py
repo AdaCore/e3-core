@@ -50,10 +50,10 @@ class SbxDirs:
 
     def mkdirs(self) -> None:
         """Mkdirs."""
-        os.mkdir(self.sbx_dir)
-        os.mkdir(self.fingerprint_dir)
-        os.mkdir(self.store_dir)
-        os.mkdir(self.sbx_tmp_dir)
+        Path(self.sbx_dir).mkdir()
+        Path(self.fingerprint_dir).mkdir()
+        Path(self.store_dir).mkdir()
+        Path(self.sbx_tmp_dir).mkdir()
 
 
 sbx_dirs = SbxDirs()
