@@ -94,7 +94,8 @@ def test_sendmail_onerror(caplog) -> None:
         smtp_mock.sendmail.return_value = {}
 
         def error_on_quit() -> NoReturn:
-            raise smtplib.SMTPException("error on quit ignored")
+            msg = "error on quit ignored"
+            raise smtplib.SMTPException(msg)
 
         smtp_mock.quit = error_on_quit
         mid = make_msgid()

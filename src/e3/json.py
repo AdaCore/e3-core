@@ -83,7 +83,8 @@ class JsonData(ABC):
         """  # noqa: RST304
         dict_repr: dict = json.loads(content)
         if not isinstance(dict_repr, dict):
-            raise JsonDataInvalidJsonError("Invalid JSON string initializer")
+            msg = "Invalid JSON string initializer"  # type: ignore[unreachable]
+            raise JsonDataInvalidJsonError(msg)
         return cls.from_dict(dict_repr)
 
 

@@ -645,7 +645,8 @@ class Run:
     def children(self) -> list[Any]:
         """Return list of child processes (using psutil)."""
         if not has_psutil:  # defensive code
-            raise NotImplementedError("Run.children() require psutil")
+            msg = "Run.children() require psutil"
+            raise NotImplementedError(msg)
         return self.internal.children()
 
 

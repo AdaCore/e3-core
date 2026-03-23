@@ -284,9 +284,8 @@ class File:
                 # This work with mypy because result_data have Any type
                 result_data = json.loads(result_data)
                 if not isinstance(result_data, dict):
-                    raise TypeError(
-                        "Corrupted metadata: Cannot convert metadata into dictionary"
-                    )
+                    msg = "Corrupted metadata: Cannot convert metadata into dictionary"
+                    raise TypeError(msg)
             except Exception as e:
                 logger.exception(e)
                 raise e
@@ -364,7 +363,8 @@ class File:
         skip = True
 
         if self.resource_id is None:
-            raise StoreError("Attempt to download a File without its resource_id set")
+            msg = "Attempt to download a File without its resource_id set"
+            raise StoreError(msg)
 
         if self.store is None:
             msg = f"File {self.name} is not bind to Store instance"
@@ -745,7 +745,8 @@ class File:
                 cls.upload_thirdparty(store, str(Path(dest, filename)))
                 break
         else:
-            raise StoreError("Too many third party packages created today!")
+            msg = "Too many third party packages created today!"
+            raise StoreError(msg)
 
         return filename
 

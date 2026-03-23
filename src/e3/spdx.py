@@ -1703,7 +1703,8 @@ class Document:
                 )
             else:
                 if self.main_package_spdx_id is None:
-                    raise InvalidSPDX("missing a main package")
+                    msg = "missing a main package"
+                    raise InvalidSPDX(msg)
                 relationship = Relationship(
                     spdx_element_id=self.main_package_spdx_id,
                     relationship_type=RelationshipType.CONTAINS,

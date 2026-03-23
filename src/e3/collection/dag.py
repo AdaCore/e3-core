@@ -94,7 +94,8 @@ class DAGIterator:
                                 )
                             )
                         )
-                raise DAGError("cycle detected (unknown error)")
+                msg = "cycle detected (unknown error)"
+                raise DAGError(msg)
 
             # No vertex is ready to be visited
             return None, None, frozenset()

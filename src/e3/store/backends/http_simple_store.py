@@ -65,7 +65,8 @@ class HTTPSimpleStore(Store):
             sha1sum of the resource and url is the remote url
         """
         if "sha" not in query or "url" not in query:
-            raise StoreError('missing either "sha" or "url" in query')
+            msg = 'missing either "sha" or "url" in query'
+            raise StoreError(msg)
         return HTTPSimpleStoreResourceInfo(query["url"], query["sha"])
 
     def download_resource_content(

@@ -35,7 +35,8 @@ def primitive_check() -> Callable[[F], F]:
                 msg = f"no primitive {func.__name__}"
                 raise AnodError(msg)
             if self.anod_instance.build_space is None:
-                raise AnodError(".activate() has not been called")
+                msg = ".activate() has not been called"
+                raise AnodError(msg)
             return func(self, *args, **kwargs)
 
         return wrapper  # type: ignore
@@ -104,14 +105,14 @@ class AnodDriver:
             download_data = self.anod_instance.download()
 
         if download_data is None:
-            raise AnodError("no download metadata returned by the download primitive")
+            msg = "no download metadata returned by the download primitive"
+            raise AnodError(msg)
         try:
             metadata = self.store.get_resource_metadata(download_data)
         except E3Error as err:
             self.anod_instance.log.critical(err)
-            raise AnodError(
-                "cannot get resource metadata from store", origin=self.anod_instance.uid
-            ) from err
+            msg = "cannot get resource metadata from store"
+            raise AnodError(msg, origin=self.anod_instance.uid) from err
         else:
             self.store.download_resource(
                 metadata, self.anod_instance.build_space.binary_dir

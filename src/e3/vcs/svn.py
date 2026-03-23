@@ -150,7 +150,8 @@ class SVNRepository:
         if self.__class__.svn_bin is None:
             svn_binary = e3.os.process.which("svn", default=None)
             if svn_binary is None:  # defensive code
-                raise SVNError("cannot find svn", "svn_cmd")
+                msg = "cannot find svn"
+                raise SVNError(msg, "svn_cmd")
             self.__class__.svn_bin = e3.os.fs.unixpath(svn_binary)
 
         if "output" not in kwargs:
@@ -214,7 +215,8 @@ class SVNRepository:
             return self.get_info("Last Changed Rev")
         except Exception as err:
             logger.exception("Cannot fetch last changed rev")
-            raise SVNError("Cannot fetch last changed rev", "svn_cmd") from err
+            msg = "Cannot fetch last changed rev"
+            raise SVNError(msg, "svn_cmd") from err
 
     def update(
         self,

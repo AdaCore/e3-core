@@ -148,7 +148,8 @@ class CheckoutManager:
 
             p = Run(rsync_cmd, cwd=url, output=None)
             if p.status != 0:
-                raise e3.error.E3Error("rsync failed")
+                msg = "rsync failed"
+                raise e3.error.E3Error(msg)
         else:
             # Test for a git repository by looking for ".git" in the current
             # directory - either as a file or as a directory. We check both

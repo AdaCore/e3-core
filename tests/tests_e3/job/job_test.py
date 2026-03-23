@@ -68,7 +68,8 @@ class TestJob:
             def cmdline(self) -> NoReturn:
                 # This will be called by self.run() and simulate an error
                 # when spawning the job
-                raise OSError("spawn issue")
+                msg = "spawn issue"
+                raise OSError(msg)
 
         job = SpawnIssueProcessJob("myuid", {}, None)
         job.run()

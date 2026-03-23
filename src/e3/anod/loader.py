@@ -322,7 +322,6 @@ def spec(name: str) -> Callable[..., Anod]:
 
     if Version(spec_repository.api_version) >= Version("1.6"):
         logger.error("e3.anod.loader.spec is only valid for API VERSION < 1.6")
-        raise SandBoxError(
-            "e3.anod.loader.spec is only valid for API VERSION < 1.6", "spec"
-        )
+        msg = "e3.anod.loader.spec is only valid for API VERSION < 1.6"
+        raise SandBoxError(msg, "spec")
     return spec_repository.load(name)

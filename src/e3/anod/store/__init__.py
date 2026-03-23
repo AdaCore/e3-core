@@ -888,7 +888,8 @@ class _StoreWrite(_Store):
         else:  # pragma: no cover
             self.cursor.execute(sql, values)
             if self.cursor.lastrowid is None:
-                raise StoreError("sqlite3.cursor.lastrowid return unexpected None")
+                msg = "sqlite3.cursor.lastrowid return unexpected None"
+                raise StoreError(msg)
             res = self._select_one(table, self.cursor.lastrowid)
         return res
 
@@ -1010,7 +1011,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             elif isinstance(attachments, Sequence):
                 for att in attachments:
                     if att["name"] in attachments_with_name:
-                        raise StoreError("Two attachments cannot use the same name")
+                        msg = "Two attachments cannot use the same name"
+                        raise StoreError(msg)
                     attachments_with_name[att["name"]] = self._submit_file(
                         att["att_file"]
                     )
@@ -1026,7 +1028,8 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             "_id", component_info.get("build_id")
         )
         if not component_build_id:
-            raise StoreError("No build id associate with the component to submit")
+            msg = "No build id associate with the component to submit"
+            raise StoreError(msg)
 
         # Insert the component itself.
         req_tuple = self._insert(
@@ -1160,15 +1163,18 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         buildinfo = file_info.get("build")
         build_id = file_info.get("build_id", buildinfo["_id"] if buildinfo else None)
         if not build_id:
-            raise StoreError("No build id associate to this file")
+            msg = "No build id associate to this file"
+            raise StoreError(msg)
 
         if buildinfo and build_id != buildinfo["_id"]:
-            raise StoreError("Malformed file: build_id field != build._id")
+            msg = "Malformed file: build_id field != build._id"
+            raise StoreError(msg)
 
         # Ensure the current file is already uploaded.
         fid = file_info.get("_id")
         if not fid:
-            raise StoreError("Cannot update a non uploaded file: id field missing")
+            msg = "Cannot update a non uploaded file: id field missing"
+            raise StoreError(msg)
 
         # Update its metadata
         req_tuple = self._update(
@@ -1222,9 +1228,11 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         resource_id: _Store.DB_IDType | None = file_info.get("resource_id", "")
 
         if not downloaded_as:
-            raise StoreError("Trying to submit file without 'downloaded_as' field")
+            msg = "Trying to submit file without 'downloaded_as' field"
+            raise StoreError(msg)
         if not resource_id:
-            raise StoreError("Trying to submit file without 'resource_id' field")
+            msg = "Trying to submit file without 'resource_id' field"
+            raise StoreError(msg)
 
         resource_path = os.path.abspath(downloaded_as)
         if not Path(resource_path).is_file():
@@ -1736,7 +1744,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
             no result is found.
         """
         if (not name or name == "all") and (not fid or fid == "all"):
-            raise ValueError("Cannot find file without name or file id")
+            msg = "Cannot find file without name or file id"
+            raise ValueError(msg)
 
         where_rules: list[_Store.FileField] = []
         where_values: list[str] = []
@@ -1765,7 +1774,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
         )
         if not file_list:
             if not possibly_empty:
-                raise StoreError("No file found")
+                msg = "No file found"
+                raise StoreError(msg)
             return None
 
         return self._tuple_to_file(file_list[0])  # type: ignore[arg-type]
@@ -1798,12 +1808,14 @@ class StoreReadOnly(_Store, StoreReadInterface):
         )
 
         if not possible_buildinfos:
-            raise StoreError("No buildinfo found")
+            msg = "No buildinfo found"
+            raise StoreError(msg)
         if only_one and len(possible_buildinfos) != 1:
             # This error should never occur, or it means that the database is corrupted.
             # Can be tested, but it's not an interesting test so skip this line
             # from the coverage.
-            raise StoreError("Too many buildinfo found")  # pragma: no cover
+            msg = "Too many buildinfo found"
+            raise StoreError(msg)  # pragma: no cover
         return self._tuple_to_buildinfo(possible_buildinfos[0])  # type: ignore[arg-type]
 
 
@@ -2128,7 +2140,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
             return False
 
         if not comp_id:
-            raise StoreError("cannot add a raw component without id")
+            msg = "cannot add a raw component without id"
+            raise StoreError(msg)
 
         for file in (*component_info["files"], *component_info["sources"]):
             self._raw_add_file(file)
@@ -2148,7 +2161,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
             elif isinstance(attachments, Sequence):
                 for att in attachments:
                     if att["name"] in attachments_with_name:
-                        raise StoreError("Two attachments cannot use the same name")
+                        msg = "Two attachments cannot use the same name"
+                        raise StoreError(msg)
                     self._raw_add_file(att["att_file"])
                     attachments_with_name[att["name"]] = att["att_file"]
             else:
@@ -2174,7 +2188,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
             "_id", component_info.get("build_id")
         )
         if not component_build_id:
-            raise StoreError("No build id associate with the component to submit")
+            msg = "No build id associate with the component to submit"
+            raise StoreError(msg)
 
         readme_id = None
         readme = component_info.get("readme")

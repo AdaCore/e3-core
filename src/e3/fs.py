@@ -436,7 +436,8 @@ def mv(
                 move_file(source, os.fspath(target))
         elif not Path(target).is_dir():
             # More than one file to move but the target is not a directory
-            raise FSError("mv", f"{target} should be a directory")
+            msg = "mv"
+            raise FSError(msg, f"{target} should be a directory")
         else:
             for f in file_list:
                 f_dest = str(Path(target, Path(f).name))

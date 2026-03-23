@@ -300,9 +300,8 @@ def unpack_archive(  # noqa: PLR0915
                                 member_list.append(tinfo)
 
                         if check_selected:
-                            raise ArchiveError(
-                                "unpack_archive", f"Cannot untar {filename} "
-                            )
+                            msg = "unpack_archive"
+                            raise ArchiveError(msg, f"Cannot untar {filename} ")
 
                         fd.extractall(path=tmp_dest, members=member_list)
                     else:
@@ -414,7 +413,8 @@ def create_archive(
     :raise ArchiveError: if an error occurs
     """
     if dest is None and fileobj is None:
-        raise ValueError("no destination provided")
+        msg = "no destination provided"
+        raise ValueError(msg)
 
     # Check extension
     from_dir = from_dir.rstrip("/")

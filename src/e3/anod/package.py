@@ -147,7 +147,8 @@ class Source:
         if dest is None:
             dest = ""
         elif os.path.isabs(dest) or os.pardir in dest:
-            raise e3.anod.error.SpecError("dest should be relative path")
+            msg = "dest should be relative path"
+            raise e3.anod.error.SpecError(msg)
         self.dest = dest
         self.unpack_cmd = unpack_cmd
         self.remove_root_dir = remove_root_dir
