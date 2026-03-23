@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import inspect
-import os
 import types
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -95,7 +94,7 @@ class AnodSpecRepository:
 
         # Look for all spec files and data files
         spec_list = {
-            Path(os.path.splitext(k)[0]).name: {"path": k, "data": []}
+            Path(k).stem: {"path": k, "data": []}
             for k in ls(Path(self.spec_dir, "*.anod"), emit_log_record=False)
         }
         logger.debug("found %s specs", len(spec_list))
@@ -127,7 +126,7 @@ class AnodSpecRepository:
                 # Keep only the yaml files associated with an .anod file
                 if associated_spec in spec_list:
                     # We're recording the relative path without the extension
-                    suffix, _ = os.path.splitext(Path(yml_f).name)
+                    suffix = Path(yml_f).stem
 
                     spec_list[associated_spec]["data"].append(  # type: ignore
                         str(Path(associated_spec, suffix))
