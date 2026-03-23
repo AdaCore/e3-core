@@ -143,7 +143,7 @@ def test_fingerprint_save_and_load() -> None:
     # Create a directory where to store our fingerprints, allowing us
     # to use any fingerprint name without potentially colliding with
     # other files used by this testcase.
-    os.mkdir("fingerprints")
+    Path("fingerprints").mkdir()
 
     def fingerprint_path(filename):
         return Path("fingerprints", filename)
