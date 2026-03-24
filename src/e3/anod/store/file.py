@@ -252,7 +252,7 @@ class File:
             self.resource = Resource(
                 id=self.resource_id,
                 path=self.downloaded_as,
-                size=os.stat(self.downloaded_as).st_size,
+                size=Path(self.downloaded_as).stat().st_size,
                 creation_date=datetime.now(timezone.utc).strftime(
                     "%Y-%m-%dT%H:%M:%f+00:00"
                 ),

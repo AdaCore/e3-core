@@ -1265,7 +1265,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                     [
                         resource_id,
                         resource_path,
-                        os.stat(resource_path).st_size,
+                        Path(resource_path).stat().st_size,
                     ],
                 )
             )
@@ -2043,7 +2043,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
                     [
                         resource_id,
                         resource_path,
-                        os.stat(resource_path).st_size if resource_path else 0,
+                        Path(resource_path).stat().st_size if resource_path else 0,
                         file_info["resource"]["creation_date"],
                     ],
                 )

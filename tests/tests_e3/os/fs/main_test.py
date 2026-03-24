@@ -36,7 +36,7 @@ def test_chmod() -> None:
     e3.os.fs.touch("a")
 
     def check_mode(filename, mode) -> None:
-        fmode = stat.S_IMODE(os.stat(filename).st_mode)
+        fmode = stat.S_IMODE(Path(filename).stat().st_mode)
         assert fmode == mode, f"{oct(fmode)} != {oct(mode)}"
 
     with pytest.raises(e3.os.fs.OSFSError) as err:
@@ -160,7 +160,7 @@ def test_touch() -> None:
 
     e3.os.fs.touch("a")
 
-    assert os.stat("a").st_atime - now < ATIME_TOLERANCE_SECONDS
+    assert Path("a").stat().st_atime - now < ATIME_TOLERANCE_SECONDS
 
 
 def test_which() -> None:
