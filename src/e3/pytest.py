@@ -276,7 +276,7 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
                 raise te
         new_coverage_data.write()
     finally:
-        os.unlink(old_cov_file.name)
+        Path(old_cov_file.name).unlink()
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

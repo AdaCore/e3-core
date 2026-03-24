@@ -413,7 +413,7 @@ def mv(
             if path.is_symlink():
                 linkto = path.readlink()
                 Path(real_dst).symlink_to(linkto)
-                os.unlink(src)
+                Path(src).unlink()
             elif path.is_dir():
                 if destinsrc(src, dst):
                     msg = f"Cannot move a directory '{src}' into itself '{dst}'."
