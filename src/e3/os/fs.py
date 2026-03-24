@@ -360,7 +360,7 @@ def readlink(filename: str | Path) -> str:
     :return: target of the symlink
     """
     try:
-        return os.readlink(filename)
+        return str(Path(filename).readlink())
     except Exception:
         if sys.platform == "win32":
             # This might be a WSL link
