@@ -64,7 +64,7 @@ def chmod(mode: str, filename: str | Path) -> int:  # noqa: PLR0915
     whos = {"u": stat.S_IRWXU, "g": stat.S_IRWXG, "o": stat.S_IRWXO}
     perms = {"r": stat.S_IROTH, "w": stat.S_IWOTH, "x": stat.S_IXOTH}
 
-    current_mode = os.stat(filename).st_mode
+    current_mode = Path(filename).stat().st_mode
 
     # Retrieve umask
     umask = os.umask(0)
@@ -257,7 +257,7 @@ def force_remove_file(path: str | Path) -> None:
         # The permission of the parent directory does not allow us to remove
         # the file, temporary get write permission in the directory
         dir_path = str(Path(path).parent)
-        orig_mode = os.stat(dir_path).st_mode
+        orig_mode = Path(dir_path).stat().st_mode
         chmod("u+w", dir_path)
 
         # ??? It seems that this might be needed on windows
