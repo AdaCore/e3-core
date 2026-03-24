@@ -73,13 +73,13 @@ def test_pathlib() -> None:
     e3.fs.cp(path_a, path_b)
     assert path_b.is_file()
 
-    assert e3.fs.directory_content(Path(".")) == ["a", "b"]
+    assert e3.fs.directory_content(Path()) == ["a", "b"]
     e3.fs.echo_to_file(Path("c"), "c")
-    assert e3.fs.directory_content(Path(".")) == ["a", "b", "c"]
+    assert e3.fs.directory_content(Path()) == ["a", "b", "c"]
 
-    assert set(e3.fs.find(Path("."))) == {"./a", "./b", "./c"}
+    assert set(e3.fs.find(Path())) == {"./a", "./b", "./c"}
 
-    assert e3.fs.get_filetree_state(Path(".")) == e3.fs.get_filetree_state(".")
+    assert e3.fs.get_filetree_state(Path()) == e3.fs.get_filetree_state(".")
 
     assert e3.fs.ls(Path("a")) == ["a"]
     assert e3.fs.ls([Path("a"), Path("c")]) == ["a", "c"]
@@ -94,7 +94,7 @@ def test_pathlib() -> None:
 
     e3.fs.mv(path_a, Path("e"))
     e3.fs.mv(d, Path("f"))
-    assert [e3.os.fs.unixpath(p) for p in e3.fs.directory_content(Path("."))] == [
+    assert [e3.os.fs.unixpath(p) for p in e3.fs.directory_content(Path())] == [
         "b",
         "c",
         "e",
@@ -106,7 +106,7 @@ def test_pathlib() -> None:
 
     e3.fs.rm(path_b)
     e3.fs.rm([Path("e"), Path("f")], recursive=True)
-    assert [e3.os.fs.unixpath(p) for p in e3.fs.directory_content(Path("."))] == [
+    assert [e3.os.fs.unixpath(p) for p in e3.fs.directory_content(Path())] == [
         "a/",
         "a/a_file",
         "c",
