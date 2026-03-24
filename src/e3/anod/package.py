@@ -146,7 +146,7 @@ class Source:
         self.publish = publish
         if dest is None:
             dest = ""
-        elif os.path.isabs(dest) or os.pardir in dest:
+        elif Path(dest).is_absolute() or os.pardir in dest:
             msg = "dest should be relative path"
             raise e3.anod.error.SpecError(msg)
         self.dest = dest
