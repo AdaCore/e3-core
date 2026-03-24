@@ -94,7 +94,7 @@ def cp(
 
             if recursive and Path(f).is_dir():
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
-            elif preserve_symlinks and os.path.islink(f):  # windows: no cover
+            elif preserve_symlinks and Path(f).is_symlink():  # windows: no cover
                 linkto = os.readlink(f)
                 Path(f_dest).symlink_to(linkto)
             elif copy_attrs:
@@ -406,7 +406,7 @@ def mv(
         try:
             Path(src).rename(real_dst)
         except OSError as err:
-            if os.path.islink(src):
+            if Path(src).is_symlink():
                 linkto = os.readlink(src)
                 Path(real_dst).symlink_to(linkto)
                 os.unlink(src)
@@ -550,7 +550,7 @@ def rm(
 
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
-            if recursive and Path(f).is_dir() and not os.path.islink(f):
+            if recursive and Path(f).is_dir() and not Path(f).is_symlink():
                 if Version(python_version()) >= Version("3.12"):
                     shutil.rmtree(f, onexc=onerror)
                 else:
