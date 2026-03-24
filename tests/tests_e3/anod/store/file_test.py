@@ -215,13 +215,13 @@ def test_download(store) -> None:
 
     mkdir("sandbox")
     source.download(dest_dir="sandbox")
-    mtime1 = os.path.getmtime(source.downloaded_as)
+    mtime1 = Path(source.downloaded_as).stat().st_mtime
     meta_file = Path("sandbox", source.name + "_meta.json")
     assert meta_file.is_file()
 
     sleep(1.0)
     source.download(dest_dir="sandbox")
-    mtime2 = os.path.getmtime(source.downloaded_as)
+    mtime2 = Path(source.downloaded_as).stat().st_mtime
     assert mtime1 == mtime2
 
     with Path(source.downloaded_as).open("r") as fd:
@@ -258,7 +258,7 @@ def test_download(store) -> None:
     assert source.resource_id == resource_id2
 
     source.download(dest_dir="sandbox")
-    mtime2 = os.path.getmtime(source.downloaded_as)
+    mtime2 = Path(source.downloaded_as).stat().st_mtime
     assert mtime1 != mtime2
 
     with Path(source.downloaded_as).open("r") as fd:
