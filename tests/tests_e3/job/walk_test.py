@@ -1,6 +1,5 @@
 """Tests for e3.job."""
 
-import os
 import sys
 from pathlib import Path
 
@@ -251,7 +250,7 @@ class FingerprintWalk(SimpleWalk):
         filename = self.fingerprint_filename(uid)
         if fingerprint is None:
             if Path(filename).exists():
-                os.remove(filename)
+                Path(filename).unlink()
         else:
             fingerprint.save_to_file(filename)
 

@@ -231,7 +231,7 @@ def __safe_unlink_func() -> tuple[
 
         :param x: path to file to remove
         """
-        return os.remove(x)
+        return Path(x).unlink()
 
     def os_rmdir(x: str | Path) -> None:
         """Remove a directory using os.rmdir.
