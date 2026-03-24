@@ -435,7 +435,7 @@ def mv(
         if nb_files == 1:
             source = file_list[0]
             if Path(source).is_dir() and Path(target).is_dir():
-                move_file(source, str(Path(target, os.path.basename(source))))
+                move_file(source, str(Path(target, os.path.basename(source))))  # noqa: PTH119
             else:
                 move_file(source, os.fspath(target))
         elif not Path(target).is_dir():
