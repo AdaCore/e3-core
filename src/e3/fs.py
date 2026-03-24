@@ -361,7 +361,7 @@ def mv(
             """
             if hasattr(os.path, "samefile"):
                 try:
-                    return os.path.samefile(src, dst)
+                    return Path(src).samefile(dst)
                 except OSError:  # defensive code
                     # This should never be raised as we called already os.stat
                     # on both src and dst.
