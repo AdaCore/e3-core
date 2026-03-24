@@ -144,7 +144,7 @@ def test_cp_symlink() -> None:
     e3.os.fs.touch("c")
     Path("c_sym").symlink_to("c")
     e3.fs.cp("c_sym", "d", preserve_symlinks=True)
-    assert os.path.islink("d")
+    assert Path("d").is_symlink()
 
 
 def test_echo() -> None:
@@ -504,7 +504,7 @@ def test_sync_tree_top_source_is_link() -> None:
     )
 
     # Make sure `c/a` is not a symlink
-    assert not os.path.islink(Path.cwd() / "c" / "a")
+    assert not (Path.cwd() / "c" / "a").is_symlink()
     with Path("c/a/content").open() as f:
         assert f.read() == "content"
 
@@ -596,7 +596,7 @@ def test_safe_copy_links() -> None:
     e3.fs.mkdir("b")
     e3.fs.mkdir("b/l")
     e3.fs.sync_tree("a", "b")
-    assert os.path.islink("b/l")
+    assert Path("b/l").is_symlink()
 
 
 def test_sync_tree_dir_vs_file() -> None:
