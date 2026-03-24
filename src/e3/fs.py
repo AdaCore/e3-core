@@ -92,10 +92,12 @@ def cp(
             else:
                 f_dest = os.fspath(target)
 
-            if recursive and Path(f).is_dir():
+            path = Path(f)
+
+            if recursive and path.is_dir():
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
-            elif preserve_symlinks and Path(f).is_symlink():  # windows: no cover
-                linkto = os.readlink(f)
+            elif preserve_symlinks and path.is_symlink():  # windows: no cover
+                linkto = path.readlink()
                 Path(f_dest).symlink_to(linkto)
             elif copy_attrs:
                 shutil.copy2(f, f_dest)
@@ -403,14 +405,16 @@ def mv(
             if real_dst.exists():
                 msg = f"Destination path '{real_dst}' already exists"
                 raise FSError(msg)
+
+        path = Path(src)
         try:
-            Path(src).rename(real_dst)
+            path.rename(real_dst)
         except OSError as err:
-            if Path(src).is_symlink():
-                linkto = os.readlink(src)
+            if path.is_symlink():
+                linkto = path.readlink()
                 Path(real_dst).symlink_to(linkto)
                 os.unlink(src)
-            elif Path(src).is_dir():
+            elif path.is_dir():
                 if destinsrc(src, dst):
                     msg = f"Cannot move a directory '{src}' into itself '{dst}'."
                     raise FSError(msg) from err
