@@ -294,7 +294,7 @@ def ls(
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
 
-    return sorted(itertools.chain.from_iterable(glob.glob(p) for p in path_list))
+    return sorted(itertools.chain.from_iterable(glob.glob(p) for p in path_list))  # noqa: PTH207
 
 
 def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
