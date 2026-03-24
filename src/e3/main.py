@@ -27,7 +27,6 @@ will also be provided::
 from __future__ import annotations
 
 import logging
-import os
 import signal
 import sys
 import threading
@@ -81,7 +80,7 @@ class Main:
             self.name = name
         elif hasattr(main, "__file__"):
             assert main.__file__ is not None
-            self.name = os.path.splitext(Path(main.__file__).name)[0]
+            self.name = Path(main.__file__).stem
         else:
             self.name = "unknown"
 

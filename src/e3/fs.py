@@ -1150,8 +1150,9 @@ def extension(path: str | Path) -> str:
     :param path: a path
     :return: an extension
     """
-    root, ext = os.path.splitext(path)
-    _, ext2 = os.path.splitext(root)
+    p = Path(path)
+    ext = p.suffix
+    ext2 = p.with_suffix("").suffix
     if ext2 == ".tar":
         return ext2 + ext
     return ext
