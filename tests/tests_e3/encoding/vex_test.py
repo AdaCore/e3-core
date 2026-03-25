@@ -470,6 +470,7 @@ def test_document_status_from_value() -> None:
 @pytest.mark.parametrize(("arguments", "expected"), STATEMENT_METADATA_ARGUMENTS)
 def test_statement(arguments: tuple, expected: tuple) -> None:
     """Test statement."""
+    del expected
     _id, version, first, last = arguments
     statement: Statement = create_statement(_id, version, first, last)
     st2: Statement = Statement.from_dict(statement.as_dict())

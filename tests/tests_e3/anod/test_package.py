@@ -54,6 +54,7 @@ def test_source_builder_custom_prepare_src() -> None:
     """Test SourceBuilder with a custom prepare_src function."""
 
     def prepare_src(repos, dest) -> None:
+        del repos
         touch(Path(dest, "my_generated_source_file"))
 
     sb = e3.anod.package.SourceBuilder(

@@ -262,7 +262,8 @@ def test_component_eq_ne() -> None:
         assert (ref_c != c) is not still_equal, attr_name
 
 
-def test_component_attachment(caplog) -> None:  # type: ignore[no-untyped-def]
+@pytest.mark.usefixtures("caplog")
+def test_component_attachment() -> None:
     """Check component attachment APIs."""
     c, att_1, att_2 = create_component_with_attachments()
 

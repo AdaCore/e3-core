@@ -55,7 +55,8 @@ def test_patch() -> None:
     )
 
 
-def test_patch_ignore_all(caplog) -> None:
+@pytest.mark.usefixtures("caplog")
+def test_patch_ignore_all() -> None:
     """Test patch ignore all."""
     test_dir = Path(__file__).parent
     file_to_patch = test_dir / "file_to_patch.orig.txt"

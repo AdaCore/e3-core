@@ -274,8 +274,9 @@ class FingerprintWalkDryRun(FingerprintWalk):
 
 
 @pytest.mark.parametrize("walk_class", [SimpleWalk, FingerprintWalk])
+@pytest.mark.usefixtures("setup_sbx")
 class TestWalk:
-    def test_good_job_no_predecessors(self, walk_class, setup_sbx) -> None:
+    def test_good_job_no_predecessors(self, walk_class) -> None:
         """Simple case of a leaf job."""
         actions = DAG()
         actions.add_vertex("1")
@@ -304,7 +305,8 @@ class TestWalk:
             assert r2.job_status == {"1": ReturnValue.skip}
             assert r2.requeued == {}
 
-    def test_bad_job_no_predecessors(self, walk_class, setup_sbx) -> None:
+    @pytest.mark.usefixtures("setup_sbx")
+    def test_bad_job_no_predecessors(self, walk_class) -> None:
         """Simple case of a leaf job failing."""
         actions = DAG()
         actions.add_vertex("1.bad")
@@ -331,7 +333,8 @@ class TestWalk:
             assert r2.job_status == {"1.bad": ReturnValue(1)}
             assert r2.requeued == {}
 
-    def test_failed_predecessor(self, walk_class, setup_sbx) -> None:
+    @pytest.mark.usefixtures("setup_sbx")
+    def test_failed_predecessor(self, walk_class) -> None:
         """Simulate the scenarior when a predecessor failed."""
         actions = DAG()
         actions.add_vertex("1.bad")
@@ -374,7 +377,8 @@ class TestWalk:
             }
             assert r2.requeued == {}
 
-    def test_job_not_ready_then_ok(self, walk_class, setup_sbx) -> None:
+    @pytest.mark.usefixtures("setup_sbx")
+    def test_job_not_ready_then_ok(self, walk_class) -> None:
         """Rerunning a job that first returned notready."""
         actions = DAG()
         actions.add_vertex("1.notready:once")
@@ -479,7 +483,8 @@ class TestWalk:
             assert r2.requeued == {}
 
 
-def test_source_deps(setup_sbx) -> None:  # noqa: PLR0915
+@pytest.mark.usefixtures("setup_sbx")
+def test_source_deps() -> None:  # noqa: PLR0915
     """Try runs with source dependencies changing between runs."""
     actions = DAG()
     actions.add_vertex("1")
@@ -639,7 +644,8 @@ def test_source_deps(setup_sbx) -> None:  # noqa: PLR0915
     assert r5.requeued == {}
 
 
-def test_predecessor_with_no_fingerprint(setup_sbx) -> None:
+@pytest.mark.usefixtures("setup_sbx")
+def test_predecessor_with_no_fingerprint() -> None:
     """Test predecessor with no fingerprint."""
     actions = DAG()
     actions.add_vertex("1")
@@ -695,7 +701,8 @@ def test_predecessor_with_no_fingerprint(setup_sbx) -> None:
     assert r2.requeued == {}
 
 
-def test_dry_run(setup_sbx) -> None:  # noqa: PLR0915
+@pytest.mark.usefixtures("setup_sbx")
+def test_dry_run() -> None:  # noqa: PLR0915
     """Simulate the use actions with "dry run" behavior."""
     actions = DAG()
     actions.add_vertex("1")
@@ -812,7 +819,8 @@ def test_dry_run(setup_sbx) -> None:  # noqa: PLR0915
     assert r6.requeued == {}
 
 
-def test_computing_fingerprint_after_job_done(setup_sbx) -> None:
+@pytest.mark.usefixtures("setup_sbx")
+def test_computing_fingerprint_after_job_done() -> None:
     """Test case where the fingerprint for one job has to be computed late."""
     download_uid = DOWNLOAD_JOB_UID_PREFIX + "fingerprint_after_job"
     actions = DAG()
@@ -908,7 +916,8 @@ def test_computing_fingerprint_after_job_done(setup_sbx) -> None:
     assert r4.requeued == {}
 
 
-def test_job_depending_on_job_with_no_predicted_fingerprint_failed(setup_sbx) -> None:
+@pytest.mark.usefixtures("setup_sbx")
+def test_job_depending_on_job_with_no_predicted_fingerprint_failed() -> None:
     """Test case where job depends on failed job with late fingerprint."""
     actions = DAG()
     actions.add_vertex("fingerprint_after_job.bad")
@@ -938,7 +947,8 @@ def test_job_depending_on_job_with_no_predicted_fingerprint_failed(setup_sbx) ->
     assert r1.requeued == {}
 
 
-def test_corrupted_fingerprint(setup_sbx) -> None:
+@pytest.mark.usefixtures("setup_sbx")
+def test_corrupted_fingerprint() -> None:
     """Test the case where a fingerprint somehow got corrupted."""
     actions = DAG()
     actions.add_vertex("1")

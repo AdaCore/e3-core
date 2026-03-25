@@ -20,6 +20,10 @@ PLAN_WITH_EXPLICIT_ENABLED = 2
 
 def build_action(spec, build=None, host=None, target=None, board=None) -> str:
     """Build an action string from a spec."""
+    del build
+    del host
+    del target
+    del board
     return "build " + spec
 
 

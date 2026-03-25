@@ -159,6 +159,8 @@ class TestHTTP:
         """Test content dispo."""
 
         def func(server, base_url) -> None:
+            del server
+
             with HTTPSession() as session:
                 result = session.download_file(base_url + "dummy", dest=".")
                 with Path(result).open("rb") as fd:
@@ -172,6 +174,8 @@ class TestHTTP:
         """Test content dispo fileobj."""
 
         def func(server, base_url) -> None:
+            del server
+
             with HTTPSession() as session:
                 fo = BytesIO()
                 result = session.download_file(base_url + "dummy", fileobj=fo)
@@ -184,9 +188,12 @@ class TestHTTP:
         """Test content validation."""
 
         def validate(path) -> bool:
+            del path
             return False
 
         def func(server, base_url) -> None:
+            del server
+
             with HTTPSession() as session:
                 result = session.download_file(
                     base_url + "dummy", dest=".", validate=validate
@@ -199,6 +206,8 @@ class TestHTTP:
         """Test error."""
 
         def func(server, base_url) -> None:
+            del server
+
             with HTTPSession() as session:
                 # first test with no exception on error
                 result = session.download_file(base_url + "dummy", dest=".")
@@ -256,6 +265,8 @@ class TestHTTP:
         """Test post stream data."""
 
         def outter_func(nok_server, nok_url) -> None:
+            del nok_server
+
             def func(server, url) -> None:
                 with HTTPSession(base_urls=[nok_url, url]) as session:
                     session.DEFAULT_TIMEOUT = (3.0, 3.0)
@@ -283,6 +294,8 @@ class TestHTTP:
         """Test authorization header."""
 
         def func(server, base_url) -> None:
+            del server
+
             with HTTPSession() as session:
                 # first test with no authorization header
                 try:
