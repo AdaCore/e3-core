@@ -97,6 +97,7 @@ class TestScheduler:
         results = {}
 
         def get_job(uid, data, predecessors, notify_end):
+            del predecessors
             result = NopJob(uid, data, notify_end)
             result.should_skip = True
             return result
@@ -122,6 +123,7 @@ class TestScheduler:
         pytest.importorskip("psutil")
 
         def get_job(uid, data, predecessors, notify_end):
+            del predecessors
             return SleepJob(uid, data, notify_end)
 
         def collect(job) -> None:
@@ -142,6 +144,7 @@ class TestScheduler:
         pytest.importorskip("psutil")
 
         def get_job(uid, data, predecessors, notify_end):
+            del predecessors
             return NopJob(uid, data, notify_end)
 
         def collect(job) -> None:

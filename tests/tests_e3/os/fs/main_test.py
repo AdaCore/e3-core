@@ -131,7 +131,8 @@ def test_df() -> None:
     assert all(isinstance(elt, numbers.Integral) for elt in statfs)
 
 
-def test_anod_ldd_output_to_posix(ldd) -> None:  # type: ignore[no-untyped-def]
+@pytest.mark.usefixtures("ldd")
+def test_anod_ldd_output_to_posix() -> None:
     """Test converting ldd output to POSIX format."""
     # Get the ldd output of the current executable.
     ldd_output = e3.os.process.Run(["ldd", sys.executable]).out or ""

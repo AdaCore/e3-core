@@ -33,6 +33,7 @@ ldd = require_tool("ldd")
 
 def svn_wrapper(request: pytest.FixtureRequest) -> None:
     """Pytest fixture to skip tests if SVN is not available."""
+    del request
     if not which("svn"):
         pytest.skip("svn is not available")
 

@@ -13,7 +13,8 @@ from e3.os.fs import unixpath
 from e3.vcs.git import GitError, GitRepository
 
 
-def test_git_non_utf8(git) -> None:
+@pytest.mark.usefixtures("git")
+def test_git_non_utf8() -> None:
     """Test with non utf-8 encoding in changelog."""
     working_tree = Path.cwd() / "working_tree"
     repo = GitRepository(str(working_tree))
@@ -45,7 +46,8 @@ def test_git_non_utf8(git) -> None:
     assert "\\x03\\xff" in commits[0]["diff"]
 
 
-def test_git_repo(git) -> None:  # noqa: PLR0915
+@pytest.mark.usefixtures("git")
+def test_git_repo() -> None:  # noqa: PLR0915
     """Test git repo."""
     working_tree = Path.cwd() / "working_tree"
     working_tree2 = Path.cwd() / "working_tree2"

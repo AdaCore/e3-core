@@ -2,11 +2,14 @@
 
 from pathlib import Path
 
+import pytest
+
 from e3.cve import NVD
 from e3.fs import cp
 
 
-def test_nvd_cve_search(socket_disabled) -> None:
+@pytest.mark.usefixtures("socket_disabled")
+def test_nvd_cve_search() -> None:
     """Test the CVE DB research using cached data."""
     from warnings import catch_warnings
     from warnings import simplefilter as warn_filter
