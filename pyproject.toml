@@ -183,6 +183,7 @@ ignore = [
   "PERF203", # `try`-`except` within a loop incurs performance overhead for Python < 3.11
   "PGH003", # allow type: ignore - can be done by mypy if we wanted to
   "S101", # use of assert statement, used for mypy
+  "S506", # unsafe yaml loader - OrderedDictYAMLLoader is a project-defined loader, already excluded from bandit (B506)
   "T201", # print statement are allowed
 
   # Recommendations from ruff
