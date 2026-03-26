@@ -7,8 +7,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import e3.error
 from typing_extensions import Self
+
+import e3.error
 
 if TYPE_CHECKING:
     from typing import Any, TypeVar

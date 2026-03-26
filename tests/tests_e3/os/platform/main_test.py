@@ -2,7 +2,6 @@
 
 import e3.os.platform
 
-
 # CPU architecture bits
 BITS_64 = 64
 

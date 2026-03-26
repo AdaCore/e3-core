@@ -4,7 +4,6 @@ from pathlib import Path
 
 from e3.store.cache.backends.filecache import FileCache
 
-
 # Default value for cache get operation
 DEFAULT_CACHE_VALUE = 3
 

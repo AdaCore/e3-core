@@ -10,7 +10,6 @@ from e3.env import Env
 from e3.error import E3Error
 from e3.fingerprint import Fingerprint
 
-
 # Length of SHA256 checksum in hexadecimal
 SHA256_CHECKSUM_LENGTH = 64
 

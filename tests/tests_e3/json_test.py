@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from typing_extensions import Self
 
 from e3.json import (
     JsonData,
@@ -14,7 +15,6 @@ from e3.json import (
     dump_to_json_file,
     load_from_json_file,
 )
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from typing import TypeVar

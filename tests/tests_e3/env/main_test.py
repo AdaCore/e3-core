@@ -11,7 +11,6 @@ import e3.fs
 import e3.os.process
 import e3.platform
 
-
 # Expected values for environment tests
 CMD_TRIPLET_OPTIONS = 3
 TEST_ATTR_VALUE = 3

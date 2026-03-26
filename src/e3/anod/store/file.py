@@ -11,13 +11,14 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, cast, overload
 
+from typing_extensions import Self
+
 from e3.anod.store.interface import StoreError, StoreRWInterface
 from e3.anod.store.interface import resource_id as store_resource_id
 from e3.archive import create_archive, is_known_archive_format, unpack_archive
 from e3.dsse import DSSE
 from e3.fs import cp, extension, mv, rm, sync_tree
 from e3.log import getLogger
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from collections.abc import Callable

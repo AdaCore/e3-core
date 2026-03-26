@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import hashlib
 
-from requests import Session
 from defusedxml.ElementTree import XMLParser
+from requests import Session
 
 from e3.log import getLogger
 

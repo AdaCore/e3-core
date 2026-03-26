@@ -10,7 +10,6 @@ import pytest
 import e3.net.smtp
 from e3.error import E3Error
 
-
 # Expected number of sendmail calls
 EXPECTED_SENDMAIL_CALLS = 2
 

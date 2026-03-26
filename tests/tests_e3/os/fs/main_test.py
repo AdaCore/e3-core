@@ -14,7 +14,6 @@ import e3.fs
 import e3.os.fs
 import e3.os.process
 
-
 # Access time tolerance in seconds
 ATIME_TOLERANCE_SECONDS = 100
 
