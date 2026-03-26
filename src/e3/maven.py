@@ -4,27 +4,32 @@ from __future__ import annotations
 
 import hashlib
 
-import requests
+from requests import Session
 from defusedxml.ElementTree import XMLParser
 
 from e3.log import getLogger
 
-logger = getLogger("e3.maven")
+logger = getLogger("maven")
 
 
 class MavenLink:
     """Represent Maven package download link with metadata."""
 
     BASE_URL = "https://repo.maven.apache.org/maven2"
+    _DEFAULT_SESSION = Session()
 
-    def __init__(self, group: str, name: str, version: str) -> None:
+    def __init__(
+        self, group: str, name: str, version: str, *, session: Session | None = None
+    ) -> None:
         """Maven download link metadata.
 
         :param group: The package group.
         :param name: The package name.
         :param version: The package version.
+        :param session: The session object to use to make HTTP requests.
         """
         filename = f"{name}-{version}.jar"
+        self.session = session or self._DEFAULT_SESSION
         self.filename = filename
         self.package_group = group
         self.package_name = name
@@ -47,7 +52,7 @@ class MavenLink:
             # To obtain the expected checksum for the current file, we need to perform
             # an additional HEAD request. This is because Maven sends the checksum
             # directly in the HTTP headers.
-            hdrs = requests.head(self.url).headers
+            hdrs = self.session.head(self.url).headers
             self.__sha1_checksum = hdrs.get("x-checksum-sha1")
             self.__md5_checksum = hdrs.get("x-checksum-md5")
             self.__pkg_checksum = True
@@ -62,7 +67,7 @@ class MavenLink:
             # To obtain the expected checksum for the current file, we need to perform
             # an additional HEAD request. This is because Maven sends the checksum
             # directly in the HTTP headers.
-            hdrs = requests.head(self.pom_url).headers
+            hdrs = self.session.head(self.pom_url).headers
             self.__pom_sha1_checksum = hdrs.get("x-checksum-sha1")
             self.__pom_md5_checksum = hdrs.get("x-checksum-md5")
             self.__pom_checksum = True
@@ -107,15 +112,19 @@ class MavenLink:
 class MavenLinksParser:
     """Parser for Maven repository metadata XML to extract package links."""
 
-    def __init__(self, group: str, name: str) -> None:
+    def __init__(
+        self, group: str, name: str, *, session: Session | None = None
+    ) -> None:
         """Create the MavenLinksParser.
 
         :param group: The package group.
         :param name: The package name.
+        :param session: The session object to use to make HTTP requests.
         """
         self.links: list[MavenLink] = []
         self.group = group
         self.name = name
+        self.session = session
 
         self.__version_already_done: set[str] = set()
         self.__should_retrieve_data = False
@@ -150,9 +159,7 @@ class MavenLinksParser:
 
         self.links.append(
             MavenLink(
-                group=self.group,
-                name=self.name,
-                version=text,
+                group=self.group, name=self.name, version=text, session=self.session
             )
         )
         self.__version_already_done.add(text)
@@ -172,6 +179,8 @@ class MavenLinksParser:
 class Maven:
     """Interface to Maven repository for package discovery and download."""
 
+    _DEFAULT_SESSION = Session()
+
     def __init__(self, url: str = MavenLink.BASE_URL) -> None:
         """Initialize Maven manager class.
 
@@ -186,6 +195,7 @@ class Maven:
         name: str,
         *,
         headers: dict[str, str | bytes | None] | None = None,
+        session: Session | None = None,
     ) -> list[MavenLink]:
         """Fetch list of resources for a given Maven package.
 
@@ -193,12 +203,14 @@ class Maven:
         :param name: Maven package name
         :param headers: To add additionnal headers to the HTTP request. Can be mandatory
             depending on the situation.
+        :param session: The session object to use to make HTTP requests.
         :return: a list of dict containing the link to each resource along with
             some metadata
         """
         if name not in self.cache:
+            session = session or self._DEFAULT_SESSION
             logger.debug(f"fetch {name} links from {self.url}")
-            request = requests.get(
+            request = session.get(
                 f"{self.url}/{group.replace('.', '/')}/{name}/maven-metadata.xml",
                 headers=headers,
             )
@@ -228,5 +240,7 @@ class Maven:
                 msg = f"'{group}/{name}' maven-metadata.xml: no checksum provided"
                 raise RuntimeError(msg)
 
-            self.cache[name] = MavenLinksParser(group, name).feed(request.text).links
+            self.cache[name] = (
+                MavenLinksParser(group, name, session=session).feed(request.text).links
+            )
         return self.cache[name]
