@@ -30,7 +30,7 @@ def test_reset() -> None:
 def test_subdir() -> None:
     """Check error handling of subdir."""
     bs = BuildSpace(root_dir=str(Path.cwd()))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="invalid subdir"):
         bs.subdir("foo")
 
 

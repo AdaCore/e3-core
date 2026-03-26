@@ -91,7 +91,7 @@ def test_rm() -> None:
         e3.os.fs.touch(bc / "d")
         e3.os.fs.chmod("a-w", bc)
 
-        with pytest.raises(OSError):
+        with pytest.raises(OSError, match="Permission denied"):
             e3.os.fs.safe_remove(bc / "d")
 
         # Use the high-level rm function to force the deletion
