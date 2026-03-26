@@ -291,9 +291,9 @@ def test_document_author_role_from_value() -> None:
     assert role == AuthorRole.COORDINATOR
     role = AuthorRole.from_value(AuthorRole.DISCOVERER)
     assert role == AuthorRole.DISCOVERER
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="is not a valid AuthorRole"):
         AuthorRole.from_value("Unknown")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid default value"):
         # Give None as default value to cover the infinite loop case. Disable
         # type checker.
         # noinspection PyTypeChecker
@@ -358,7 +358,7 @@ def test_document(arguments: tuple, expected: tuple) -> None:
 
         # Try with an unsupported format.
         out_file: Path = Path.cwd() / "unknown" / "vex.unknown"
-        with pytest.raises(ValueError) as format_error:
+        with pytest.raises(ValueError, match="Invalid output format") as format_error:
             doc.save(path=out_file, output_format="unknown")
         assert "Invalid output format" in format_error.value.args[0]
 
@@ -387,7 +387,7 @@ def test_document(arguments: tuple, expected: tuple) -> None:
                 assert doc4.statements[0].status.impact.timestamp == timestamp_datetime
 
     else:
-        with pytest.raises(ValueError) as ve:
+        with pytest.raises(ValueError, match=e_exc) as ve:
             create_metadata(
                 author=author,
                 author_role=author_role,
@@ -434,7 +434,7 @@ def test_document_metadata(arguments: tuple, expected: tuple) -> None:
 
         assert md == md2
     else:
-        with pytest.raises(ValueError) as ve:
+        with pytest.raises(ValueError, match=e_exc) as ve:
             create_metadata(
                 author=author,
                 author_role=author_role,
@@ -455,9 +455,9 @@ def test_document_status_from_value() -> None:
     assert status == ProductStatus.AFFECTED
     status = ProductStatus.from_value(ProductStatus.NOT_AFFECTED)
     assert status == ProductStatus.NOT_AFFECTED
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="is not a valid ProductStatus"):
         ProductStatus.from_value("Unknown")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid default value"):
         # Give None as default value to cover the infinite loop case. Disable
         # type checker.
         # noinspection PyTypeChecker
@@ -503,9 +503,9 @@ def test_statement_justification_from_value() -> None:
     assert role == Justification.VULNERABLE_CODE_NOT_PRESENT
     role = Justification.from_value(Justification.VULNERABLE_CODE_NOT_IN_EXECUTE_PATH)
     assert role == Justification.VULNERABLE_CODE_NOT_IN_EXECUTE_PATH
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="is not a valid Justification"):
         Justification.from_value("Unknown")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid default value"):
         # Give None as default value to cover the infinite loop case. Disable
         # type checker.
         # noinspection PyTypeChecker
@@ -614,7 +614,7 @@ def test_statement_status(arguments: tuple) -> None:
         st2: StatementStatus = StatementStatus.from_dict(statement_status.as_dict())
         assert statement_status == st2
     else:
-        with pytest.raises(ValueError) as ve:
+        with pytest.raises(ValueError, match=exc) as ve:
             StatementStatus(
                 status=st,
                 impact=ActionOrImpact(impact),

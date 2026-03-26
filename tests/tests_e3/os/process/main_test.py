@@ -69,7 +69,7 @@ def test_run_shebang(caplog) -> None:
         f.write(b'print("running python prog")\n')
 
     e3.os.fs.chmod("a+x", prog_filename)
-    with pytest.raises(OSError) as err:
+    with pytest.raises(OSError, match="doesnot") as err:
         e3.os.process.Run([str(prog_filename)], parse_shebang=True)
     assert "doesnot" in str(err)
     assert "doesnot exist" in caplog.text
@@ -247,15 +247,15 @@ def test_rlimit_foreground_option() -> None:
 
 def test_not_found() -> None:
     """Test not found."""
-    with pytest.raises(OSError) as err:
+    with pytest.raises(OSError, match="e3-bin-not-found not found") as err:
         e3.os.process.Run(["e3-bin-not-found"])
     assert "e3-bin-not-found not found" in str(err.value)
 
-    with pytest.raises(OSError) as err:
+    with pytest.raises(OSError, match="e3-bin-not-found not found") as err:
         e3.os.process.Run(["e3-bin-not-found"], parse_shebang=True)
     assert "e3-bin-not-found not found" in str(err.value)
 
-    with pytest.raises(OSError) as err:
+    with pytest.raises(OSError, match="e3-bin-not-found2 not found") as err:
         e3.os.process.Run(
             [
                 [

@@ -275,7 +275,7 @@ def test_builder_init() -> None:
     builder_id: str = "protocol://path/file"
     builder.id = builder_id
     builder.id = TypeURI(builder_id)
-    with pytest.raises(ValueError) as invalid_builder_id:
+    with pytest.raises(ValueError, match="Invalid URI None") as invalid_builder_id:
         builder.id = None
     assert "Invalid URI None" in invalid_builder_id.value.args[0]
 
@@ -293,7 +293,9 @@ def test_builder_load_dict() -> None:
     assert builder.version == builder2.version
     # Check with an invalid builder (by setting the build ID to None).
     dict_repr.pop(Builder.ATTR_BUILD_ID)
-    with pytest.raises(ValueError) as invalid_builder_id:
+    with pytest.raises(
+        ValueError, match=r"Invalid build ID \(None\)"
+    ) as invalid_builder_id:
         Builder.load_dict(dict_repr)
     assert "Invalid build ID (None)" in invalid_builder_id.value.args[0]
 
@@ -375,7 +377,9 @@ def test_buildmetadata_load_dict() -> None:
     assert bm.finished_on == bm2.finished_on
     # Check initialisation with an invalid invocation ID.
     dict_repr.pop(BuildMetadata.ATTR_INVOCATION_ID)
-    with pytest.raises(ValueError) as invalid_init_id:
+    with pytest.raises(
+        ValueError, match=r"Invalid invocation ID \(None\)"
+    ) as invalid_init_id:
         BuildMetadata.load_dict(dict_repr)
     assert "Invalid invocation ID (None)" in invalid_init_id.value.args[0]
 
@@ -437,7 +441,9 @@ def test_predicate_load_dict() -> None:
 
     # Set an invalid build definition for the statement.
     build_def = dict_repr.pop(Predicate.ATTR_BUILD_DEFINITION)
-    with pytest.raises(ValueError) as missing_build_def:
+    with pytest.raises(
+        ValueError, match="Missing build definition"
+    ) as missing_build_def:
         Predicate.load_dict(dict_repr)
     assert "Missing build definition" in missing_build_def.value.args[0]
 
@@ -445,7 +451,9 @@ def test_predicate_load_dict() -> None:
     # first.
     dict_repr[Predicate.ATTR_BUILD_DEFINITION] = build_def
     dict_repr.pop(Predicate.ATTR_RUN_DETAILS)
-    with pytest.raises(ValueError) as missing_run_details:
+    with pytest.raises(
+        ValueError, match="Missing run details definition"
+    ) as missing_run_details:
         Predicate.load_dict(dict_repr)
     assert "Missing run details definition" in missing_run_details.value.args[0]
 
@@ -579,7 +587,9 @@ def test_resource_descriptor_dir_hash() -> None:
 
     # Check with an invalid algorithm.
 
-    with pytest.raises(ValueError) as invalid_algo:
+    with pytest.raises(
+        ValueError, match="Unsupported digest algorithm"
+    ) as invalid_algo:
         # noinspection PyTypeChecker
         ResourceDescriptor.dir_hash(tree_dir, "algo")
     assert "Unsupported digest algorithm" in invalid_algo.value.args[0]
@@ -603,7 +613,7 @@ def test_resource_descriptor_init() -> None:
     # Create an empty ResourceDescriptor.
     desc = ResourceDescriptor()
     assert desc.is_valid is False
-    with pytest.raises(ValueError) as invalid_desc:
+    with pytest.raises(ValueError, match="Invalid resource descriptor") as invalid_desc:
         # Getting the dict representation should fail.
         desc.as_dict()
     assert "Invalid resource descriptor" in invalid_desc.value.args[0]
@@ -669,7 +679,7 @@ def test_resource_descriptor_load_dict() -> None:
     desc.media_type = None
     ResourceDescriptor.load_dict(desc.as_dict())
     # Check with an empty dict.
-    with pytest.raises(ValueError) as invalid_dict:
+    with pytest.raises(ValueError, match="Invalid resource descriptor") as invalid_dict:
         ResourceDescriptor.load_dict({})
     assert "Invalid resource descriptor" in invalid_dict.value.args[0]
 
@@ -693,7 +703,7 @@ def test_resource_descriptor_load_json() -> None:
     desc.media_type = None
     ResourceDescriptor.load_json(desc.as_json())
     # Check with an empty dict.
-    with pytest.raises(ValueError) as invalid_json:
+    with pytest.raises(ValueError, match="Invalid resource descriptor") as invalid_json:
         ResourceDescriptor.load_json(json.dumps({}))
     assert "Invalid resource descriptor" in invalid_json.value.args[0]
 
@@ -729,7 +739,7 @@ def test_resource_descriptor_uri() -> None:
     desc.uri = VALID_URIS[0]
     desc.uri = ResourceURI(VALID_URIS[0])
     # Try an invalid uri.
-    with pytest.raises(ValueError) as invalid_uri:
+    with pytest.raises(ValueError, match="Invalid URI") as invalid_uri:
         desc.uri = "test"
     assert "Invalid URI" in invalid_uri.value.args[0]
 
@@ -752,7 +762,7 @@ def test_resourceuri_init() -> None:
         "anydata",
     ]
     for invalid_uri in invalid_uris:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid URI"):
             ResourceURI(invalid_uri)
 
 
@@ -812,13 +822,17 @@ def test_run_details_load_dict() -> None:
 
     # Set an invalid metadata for the run details.
     dict_repr.pop(Predicate.RunDetails.ATTR_METADATA)
-    with pytest.raises(ValueError) as missing_metadata:
+    with pytest.raises(
+        ValueError, match="Missing metadata definition"
+    ) as missing_metadata:
         Predicate.RunDetails.load_dict(dict_repr)
     assert "Missing metadata definition" in missing_metadata.value.args[0]
 
     # Set an invalid builder for the run details.
     dict_repr.pop(Predicate.RunDetails.ATTR_BUILDER)
-    with pytest.raises(ValueError) as missing_builder:
+    with pytest.raises(
+        ValueError, match="Missing builder definition"
+    ) as missing_builder:
         Predicate.RunDetails.load_dict(dict_repr)
     assert "Missing builder definition" in missing_builder.value.args[0]
 
@@ -986,7 +1000,9 @@ def test_statement_load_dict() -> None:
     assert statement.predicate == statement2.predicate
     # Set an invalid type for a statement.
     dict_repr.pop(Statement.ATTR_TYPE)
-    with pytest.raises(ValueError) as invalid_statement_type:
+    with pytest.raises(
+        ValueError, match=r"Invalid statement type \(None\)"
+    ) as invalid_statement_type:
         Statement.load_dict(dict_repr)
     assert "Invalid statement type (None)" in invalid_statement_type.value.args[0]
 
@@ -1142,7 +1158,7 @@ def test_typeuri_init() -> None:
         "anydata",
     ]
     for invalid_uri in invalid_uris:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid URI"):
             TypeURI(invalid_uri)
 
 

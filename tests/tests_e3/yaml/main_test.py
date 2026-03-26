@@ -116,7 +116,7 @@ def test_include() -> None:
         [("b", OrderedDict([("a", 4)])), ("c", OrderedDict([("a", 4)]))]
     )
 
-    with pytest.raises(IOError) as err:
+    with pytest.raises(IOError, match="No such file or directory") as err:
         yaml.load("b: !include foo.yaml\n", e3.yaml.OrderedDictYAMLLoader)
     assert "No such file or directory" in str(err.value)
     assert "foo.yaml" in str(err.value)
