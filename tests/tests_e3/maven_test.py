@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from e3.maven import Maven
 
-
 # Expected number of Maven artifact links
 EXPECTED_ARTIFACT_LINKS = 4
 

@@ -6,12 +6,13 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 from e3.anod.store.component import Component
 from e3.anod.store.file import File
 from e3.anod.store.interface import StoreError, StoreWriteInterface
 from e3.error import E3Error
 from e3.log import getLogger
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from typing import TypedDict, TypeVar

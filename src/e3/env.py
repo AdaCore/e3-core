@@ -13,10 +13,11 @@ from collections import namedtuple
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 import e3.log
 import e3.os.platform
 from e3.platform import Platform
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from argparse import Namespace

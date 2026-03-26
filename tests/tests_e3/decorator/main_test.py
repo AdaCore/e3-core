@@ -6,7 +6,6 @@ import pytest
 
 import e3.decorator
 
-
 # Test return value for memoize decorator
 TEST_MEMOIZE_RETURN_VALUE = 22
 

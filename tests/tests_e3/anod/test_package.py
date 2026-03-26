@@ -9,7 +9,6 @@ import e3.anod.package
 from e3.fs import mkdir, rm
 from e3.os.fs import touch
 
-
 # Test return value for patch application
 TEST_PATCH_RETURN_VALUE = 42
 

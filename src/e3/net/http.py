@@ -17,12 +17,12 @@ import requests.adapters
 import requests.exceptions
 import requests_toolbelt.multipart
 import urllib3.exceptions
+from typing_extensions import Self
 from urllib3.util import Retry
 
 import e3.log
 from e3.error import E3Error
 from e3.fs import mkdir, rm
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from collections.abc import Callable

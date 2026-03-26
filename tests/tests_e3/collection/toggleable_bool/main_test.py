@@ -2,7 +2,6 @@
 
 from e3.collection.toggleable_bool import ToggleableBooleanGroup
 
-
 # Expected size of toggleable bool group
 EXPECTED_GROUP_SIZE = 6
 

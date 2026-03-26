@@ -8,12 +8,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict, overload
 
 from dateutil import parser as dateutil_parser
+from typing_extensions import Self
 
 from e3.anod.store.file import File
 from e3.anod.store.interface import StoreError, StoreRWInterface
 from e3.dsse import DSSE
 from e3.log import getLogger
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from collections.abc import Callable
