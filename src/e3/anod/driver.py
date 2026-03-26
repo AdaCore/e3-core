@@ -30,12 +30,12 @@ def primitive_check() -> Callable[[F], F]:
 
     def decorator(func: F) -> F:
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            if not has_primitive(self.anod_instance, func.__name__):
+        def wrapper(self: AnodDriver, *args: Any, **kwargs: Any) -> Any:
+            if not has_primitive(self.anod_instance, func.__name__):  # type: ignore[arg-type]
                 msg = f"no primitive {func.__name__}"
                 raise AnodError(msg)
             if self.anod_instance.build_space is None:
-                msg = ".activate() has not been called"
+                msg = ".activate() has not been called"  # type: ignore[unreachable]
                 raise AnodError(msg)
             return func(self, *args, **kwargs)
 

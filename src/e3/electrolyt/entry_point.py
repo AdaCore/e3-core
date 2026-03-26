@@ -117,7 +117,12 @@ def entry_point(
     """
 
     def entry_point_dec(  # type: ignore
-        f, ldb=db, lcls=cls, lkind=kind, largs=args, lkwargs=kwargs
+        f: Callable[[], None],
+        ldb: dict[str, EntryPoint] = db,
+        lcls: Callable[..., EntryPoint] = cls,
+        lkind: str = kind,
+        largs: tuple[Any, ...] = args,
+        lkwargs: dict[str, Any] = kwargs,
     ):
         lcls(ldb, f, lkind, *largs, **lkwargs)
         return f

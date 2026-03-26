@@ -66,7 +66,7 @@ class WithOpenFile:
         :param f: function to wrap
         """
 
-        def wrapper(obj, *args, **kwargs):  # type: ignore
+        def wrapper(obj: NTFile, *args, **kwargs):  # type: ignore
             """Handle file open/close.
 
             :param obj: NTFile object
