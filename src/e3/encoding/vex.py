@@ -202,11 +202,9 @@ class Document(JsonData):
         """  # noqa: RST304
         # Check if the statement has an ID. If not, add the statement's
         # vulnerability ID to the document's ID.
-        # noinspection PyProtectedMember
-        if new_statement.metadata._id is None:
-            # noinspection PyProtectedMember
-            new_statement.metadata._id = (
-                f"{self.metadata._id}/{new_statement.vulnerability._id}"
+        if new_statement.metadata.id is None:
+            new_statement.metadata.id = (
+                f"{self.metadata.id}/{new_statement.vulnerability.id}"
             )
             # Update the last modification date ?
         self.statements.append(new_statement)
@@ -279,8 +277,7 @@ class Document(JsonData):
             document.
         """  # noqa: RST304
         for statement in self.statements:
-            # noinspection PyProtectedMember
-            if statement.vulnerability and statement.vulnerability._id == cve_id:
+            if statement.vulnerability and statement.vulnerability.id == cve_id:
                 return statement
         return None
 
@@ -460,6 +457,15 @@ class Metadata(JsonData):
             raise ValueError(msg)
         self.spec_version = spec_version
 
+    @property
+    def id(self) -> str:
+        """Return the identifier of this metadata."""
+        return self._id
+
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
+
     def as_dict(self) -> dict[str, Any]:
         """Serialize object to dictionary representation."""
         return {
@@ -577,8 +583,7 @@ class Product(JsonData):
         """  # noqa: RST304
         if self.subcomponents is not None:
             for subcomponent in self.subcomponents:
-                # noinspection PyProtectedMember
-                if subcomponent._id == _id and subcomponent.version == version:
+                if subcomponent.id == _id and subcomponent.version == version:
                     return subcomponent
         return None
 
@@ -617,6 +622,11 @@ class ProductId(JsonData):
         """
         self._id = _id
         self.version = version
+
+    @property
+    def id(self) -> str:
+        """Return the identifier of this product."""
+        return self._id
 
     def as_dict(self) -> dict[str, Any]:
         """Serialize object to dictionary representation."""
@@ -802,6 +812,15 @@ class StatementMetadata(JsonData):
             if last_updated_on is None
             else last_updated_on
         )
+
+    @property
+    def id(self) -> str | None:
+        """Return the identifier of this statement metadata."""
+        return self._id
+
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
 
     def as_dict(self) -> dict[str, Any]:
         """Serialize object to dictionary representation."""
@@ -1055,6 +1074,11 @@ class Vulnerability(JsonData):
         self.version: str | None = version
         self.source: str | None = source
         self.url: str | None = url
+
+    @property
+    def id(self) -> str:
+        """Return the identifier of this vulnerability."""
+        return self._id
 
     def as_dict(self) -> dict[str, Any]:
         """Serialize object to dictionary representation."""

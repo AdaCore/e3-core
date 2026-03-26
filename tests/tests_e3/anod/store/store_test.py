@@ -138,9 +138,9 @@ def test_file(store) -> None:
     assert src["_id"] == f["_id"]
 
     with pytest.raises(ValueError, match="Cannot find file without name or file id"):
-        store._get_file()
+        store._get_file()  # noqa: SLF001
 
-    tmp = store._get_file(fid=f2["_id"])
+    tmp = store._get_file(fid=f2["_id"])  # noqa: SLF001
     assert tmp is not None
     assert tmp["name"] == "test-tp.txt"
 

@@ -103,7 +103,7 @@ def test_basic(store: StoreRW) -> None:
     with LocalStore(db="local-store.db", online_store=store) as local:
         local.add_component_from_store(from_store=store, setup=DEFAULT_SETUP)
 
-        assert local._raw_add_build_info(bid.as_dict()) is False, (
+        assert local._raw_add_build_info(bid.as_dict()) is False, (  # noqa: SLF001
             "The buildinfo has already been added to the local store. "
             "The function must return False."
         )
@@ -111,7 +111,7 @@ def test_basic(store: StoreRW) -> None:
         local.raw_add_build_info(bid.as_dict())
         local.add_build_info_from_store(from_store=store, bid=bid.id)
 
-        assert local._raw_add_component(c.as_dict()) is False, (
+        assert local._raw_add_component(c.as_dict()) is False, (  # noqa: SLF001
             "The component has already been added to the local store. "
             "The function must return False."
         )
@@ -119,7 +119,7 @@ def test_basic(store: StoreRW) -> None:
         local.raw_add_component(c.as_dict())
         local.add_component_from_store(from_store=store, setup=DEFAULT_SETUP)
 
-        assert local._raw_add_file(source.as_dict()) is False, (
+        assert local._raw_add_file(source.as_dict()) is False, (  # noqa: SLF001
             "The source has already been added to the local store. "
             "The function must return False."
         )
@@ -307,7 +307,7 @@ def test_component_with_attachments_list(store: StoreRW) -> None:
     c_dict["attachments"] = att_list
 
     with LocalStore(db="att-list.db", online_store=store) as local:
-        local._raw_add_component(c_dict)
+        local._raw_add_component(c_dict)  # noqa: SLF001
 
 
 def test_exceptions(store: StoreRW) -> None:

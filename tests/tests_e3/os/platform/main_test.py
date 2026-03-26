@@ -12,12 +12,12 @@ def test_system_info() -> None:
     s.reset_cache()
     platform_name = s.platform()
     os_version = s.os_version()
-    assert s._platform == platform_name
-    s._platform = "foo"
+    assert s._platform == platform_name  # noqa: SLF001
+    s._platform = "foo"  # noqa: SLF001
     assert s.platform() == "foo"
     s.reset_cache()
-    assert s._platform is None
-    assert s._os_version is None
+    assert s._platform is None  # noqa: SLF001
+    assert s._os_version is None  # noqa: SLF001
     assert s.os_version() == os_version
 
 
