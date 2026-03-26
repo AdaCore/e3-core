@@ -41,14 +41,14 @@ def test_nvd_cve_search() -> None:
 
         _ = tmp.session
 
-        assert tmp._session is not None, "tmp._session is None"
+        assert tmp._session is not None, "tmp._session is None"  # noqa: SLF001
 
         assert len(w) == 1, f"No python warning occure: len(warnings) == {len(w)}"
         assert issubclass(w[-1].category, DeprecationWarning)
 
         tmp.close()
 
-        assert tmp._session is None, "tmp._session is not None"
+        assert tmp._session is None, "tmp._session is not None"  # noqa: SLF001
 
     assert cve_urls == [
         "https://nvd.nist.gov/vuln/detail/CVE-2013-6954",

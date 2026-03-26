@@ -25,7 +25,7 @@ def test_wait_for_objects() -> None:
 
     p = e3.os.process.Run(long_cmd, bg=True)
 
-    assert wait_for_objects([int(p.internal._handle)], timeout=1) is None, (
+    assert wait_for_objects([int(p.internal._handle)], timeout=1) is None, (  # noqa: SLF001
         "timeout was expected"
     )
     p.kill()
@@ -36,7 +36,8 @@ def test_wait_for_objects() -> None:
     try:
         assert (
             wait_for_objects(
-                [int(p0.internal._handle), int(p1.internal._handle)], timeout=2
+                [int(p0.internal._handle), int(p1.internal._handle)],
+                timeout=2,  # noqa: SLF001
             )
             == 1
         ), "process 1 was expected"
@@ -50,7 +51,7 @@ def test_wait_for_objects() -> None:
     try:
         assert (
             wait_for_objects(
-                [int(p0.internal._handle), int(p1.internal._handle)],
+                [int(p0.internal._handle), int(p1.internal._handle)],  # noqa: SLF001
                 timeout=2,
                 wait_for_all=True,
             )
@@ -65,7 +66,7 @@ def test_wait_for_objects() -> None:
     try:
         assert (
             wait_for_objects(
-                [int(p0.internal._handle), int(p1.internal._handle)],
+                [int(p0.internal._handle), int(p1.internal._handle)],  # noqa: SLF001
                 timeout=0,
                 wait_for_all=True,
             )

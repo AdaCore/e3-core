@@ -328,7 +328,7 @@ def test_document(arguments: tuple, expected: tuple) -> None:
 
         # Get an existing statement.
 
-        assert doc.statement(st1.vulnerability._id) == st1
+        assert doc.statement(st1.vulnerability.id) == st1
         assert doc.statement("A vuln") is None
 
         # Copy this using from_dict().
@@ -411,7 +411,7 @@ def test_document_metadata(arguments: tuple, expected: tuple) -> None:
             version=version,
             spec_version=spec_version,
         )
-        assert md._id is not None
+        assert md.id is not None
         assert md.author == e_author
         assert md.author_role == e_author_role
         assert md.created_on == md.last_updated_on
@@ -524,7 +524,7 @@ def test_statement_metadata_init(arguments: tuple, expected: tuple) -> None:
         last_updated_on=last,
     )
     print(json.dumps(metadata.as_dict(), sort_keys=True, indent=2))
-    assert metadata._id == e_id
+    assert metadata.id == e_id
     assert metadata.version == e_version
     if e_first is not None:
         assert metadata.first_issued_on == e_first
@@ -548,7 +548,7 @@ def test_statement_product(arguments: tuple, expected: tuple) -> None:
         assert pd.subcomponents
         assert len(pd.subcomponents) == e_subcomps
         for subcomp in pd.subcomponents:
-            assert pd.subcomponent(subcomp._id, subcomp.version)
+            assert pd.subcomponent(subcomp.id, subcomp.version)
 
         assert pd.subcomponent("A vuln", "A version") is None
     else:
@@ -562,7 +562,7 @@ def test_statement_product(arguments: tuple, expected: tuple) -> None:
 def test_statement_product_id() -> None:
     """Test statement product id."""
     _id, version, pid = create_product_id()
-    assert pid._id == _id
+    assert pid.id == _id
     assert pid.version == version
     pid2: ProductId = ProductId.from_dict(pid.as_dict())
     assert pid == pid2
@@ -638,7 +638,7 @@ def test_statement_vulnerability(arguments: tuple) -> None:
     )
     vuln_dict: dict = vuln.as_dict()
 
-    assert vuln._id == _id
+    assert vuln.id == _id
     assert vuln_dict["_id"] == _id
     assert vuln.description == description
     assert vuln_dict["description"] == description

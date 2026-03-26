@@ -733,7 +733,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
 
         remain = int(timeout)
 
-        handles = [int(p.internal._handle) for p in process_list]
+        handles = [int(p.internal._handle) for p in process_list]  # noqa: SLF001
 
         while True:
             try:
