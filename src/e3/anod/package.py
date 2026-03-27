@@ -35,6 +35,8 @@ class Package:
         prefix: str,
         publish: bool = False,
         version: Callable[[], str] | None = None,
+        *,
+        anod_instance: Anod | None = None,
     ) -> None:
         """Create a binary package.
 
@@ -46,11 +48,13 @@ class Package:
             can be distributed to a customer).
         :param version: a callback returning the package version, if None the
             version is set to Anod.sandbox.build_version
+        :param anod_instance: an Anod instance
         """
         self.prefix = prefix
         self.name = prefix + "-{version}-{platform}-bin"
         self.publish = publish
         self.version = version
+        self.anod_instance = anod_instance
 
     @property
     def is_simple_archive(self) -> bool:
@@ -63,12 +67,15 @@ class Package:
         """
         return True
 
-    def pkg_name(self, anod_instance: Anod) -> str:
+    def pkg_name(self, anod_instance: Anod | None = None) -> str:
         """Return the final package filename.
 
         :param anod_instance: the Anod instance that creates the package
         :return: the name without extension of the package filename
         """
+        anod_instance = anod_instance or self.anod_instance
+        assert anod_instance is not None
+
         if self.version is not None:
             version = self.version()
         else:
@@ -76,12 +83,15 @@ class Package:
 
         return self.name.format(version=version, platform=anod_instance.env.platform)
 
-    def pkg_path(self, anod_instance: Anod) -> str:
+    def pkg_path(self, anod_instance: Anod | None = None) -> str:
         """Return the full path in which a package will be generated.
 
         :param anod_instance: the Anod instance that creates the package
         :return: the full path to the generated archive
         """
+        anod_instance = anod_instance or self.anod_instance
+        assert anod_instance is not None
+
         return str(
             Path(
                 anod_instance.build_space.binary_dir,
@@ -89,12 +99,15 @@ class Package:
             )
         )
 
-    def create_package(self, anod_instance: Anod) -> str:
+    def create_package(self, anod_instance: Anod | None = None) -> str:
         """Generate a package as a ZIP archive.
 
         :param anod_instance: the Anod instance that creates the package
         :return: the full path to the generated archive
         """
+        anod_instance = anod_instance or self.anod_instance
+        assert anod_instance is not None
+
         pkg_name = self.pkg_name(anod_instance)
         pkg_path = self.pkg_path(anod_instance)
 
