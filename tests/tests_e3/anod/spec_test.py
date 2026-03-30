@@ -160,7 +160,7 @@ def test_simple_spec() -> None:
         ]
 
         @property
-        def test_source_list(self):
+        def test_source_list(self) -> list[Anod.Source]:
             result = [Anod.Source("foo-test-src", publish=False)]
             if self.parsed_qualifier.get("with_bar"):
                 result.append(Anod.Source("bar-test-src", publish=False))
@@ -326,7 +326,7 @@ def test_primitive() -> None:
         package = Anod.Package(prefix="mypackage", version=lambda: "42")
 
         @Anod.primitive()
-        def build(self):
+        def build(self) -> str | None:
             if "error" in self.parsed_qualifier:
                 raise ValueError(self.parsed_qualifier["error"])
             if "error2" in self.parsed_qualifier:

@@ -102,7 +102,7 @@ class TestScheduler:
             data: Any,
             predecessors: frozenset[str],
             notify_end: Callable[[str], None],
-        ) -> Job:
+        ) -> NopJob:
             del predecessors
             result = NopJob(uid, data, notify_end)
             result.should_skip = True
@@ -133,7 +133,7 @@ class TestScheduler:
             data: Any,
             predecessors: frozenset[str],
             notify_end: Callable[[str], None],
-        ) -> Job:
+        ) -> SleepJob:
             del predecessors
             return SleepJob(uid, data, notify_end)
 
@@ -159,7 +159,7 @@ class TestScheduler:
             data: Any,
             predecessors: frozenset[str],
             notify_end: Callable[[str], None],
-        ) -> Job:
+        ) -> NopJob:
             del predecessors
             return NopJob(uid, data, notify_end)
 
@@ -204,7 +204,7 @@ class TestScheduler:
                 data: Any,
                 predecessors: frozenset[str],
                 notify_end: Callable[[str], None],
-            ) -> Job:
+            ) -> NopJob:
                 result = NopJob(uid, data, notify_end)
 
                 # If any of the predecessor failed skip the job

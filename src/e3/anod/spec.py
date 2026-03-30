@@ -712,7 +712,7 @@ class Anod:
             pre: str | None = pre,
             post: str | None = post,
             version: Callable[..., str] | None = version,
-        ):
+        ) -> Callable[..., Any]:
             """Decorate a primitive function with pre/post/version callbacks.
 
             :param f: the function to decorate
@@ -721,7 +721,7 @@ class Anod:
             :param version: version callback function
             """
 
-            def primitive_func(self: Anod, *args, **kwargs):  # type: ignore
+            def primitive_func(self: Anod, *args, **kwargs) -> Any:  # type: ignore
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
                 # Ensure temporary directory is set to a directory local to

@@ -10,7 +10,6 @@ import textwrap
 import time
 from pathlib import Path
 from subprocess import PIPE, STDOUT
-
 from typing import Any
 
 import pytest
