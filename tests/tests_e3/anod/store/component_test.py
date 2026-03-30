@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from e3.anod.store import StoreRW
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
@@ -67,7 +68,9 @@ def create_component_with_attachments() -> tuple[Component, File, File]:
     return c, att_1, att_2
 
 
-def push_component(store, metadata: dict[str, object] | None = None) -> Component:
+def push_component(
+    store: StoreRW, metadata: dict[str, object] | None = None
+) -> Component:
     """Create and push a component to the store."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
@@ -109,7 +112,7 @@ def push_component(store, metadata: dict[str, object] | None = None) -> Componen
     return c.push()
 
 
-def test_component_push(store) -> None:
+def test_component_push(store: StoreRW) -> None:
     """Check that we can create a component and retrieve it."""
     c = push_component(store=store)
     comp_list = Component.latest(store=store, setup=DEFAULT_SETUP)
@@ -308,7 +311,7 @@ def test_component_attachment() -> None:
     assert len(c.get_attachments()) == 0
 
 
-def test_component_metadata(store) -> None:  # type: ignore[no-untyped-def]
+def test_component_metadata(store: StoreRW) -> None:
     """Check component metadata APIs."""
     metadata: dict[str, object] = {
         "one": 1,
@@ -372,7 +375,7 @@ def test_component_metadata(store) -> None:  # type: ignore[no-untyped-def]
         comp.set_metadata_statement("Not-a-DSSE", None)
 
 
-def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untyped-def]
+def test_compononent_submit_attachment(store: StoreRW) -> None:
     """Make sure it is possible to submit an attachment to Store."""
     # First create a component
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
@@ -440,7 +443,7 @@ def test_compononent_submit_attachment(store) -> None:  # type: ignore[no-untype
             raise ValueError(msg)
 
 
-def test_component_download(store) -> None:
+def test_component_download(store: StoreRW) -> None:
     """Test component download."""
     bid = BuildInfo.create(store=store, setup=DEFAULT_SETUP, version="1.0")
     c = Component(
@@ -535,7 +538,7 @@ def test_component_meta_file() -> None:
     assert metadata_file.exists() is True
 
 
-def test_component_latest(store) -> None:
+def test_component_latest(store: StoreRW) -> None:
     """Test component latest."""
     buildinfo = store.create_build_id("test", "20241029", "1.0")
     store.mark_build_ready(buildinfo["_id"])

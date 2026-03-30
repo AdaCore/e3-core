@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -16,7 +17,7 @@ import e3.os.fs
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
-def test_unpack(ext) -> None:
+def test_unpack(ext: str) -> None:
     """Test unpack."""
     dir_to_pack = str(Path(__file__).parent)
 
@@ -86,7 +87,7 @@ def test_unpack(ext) -> None:
 
 
 @pytest.mark.parametrize("ext", (".tar.gz", ".zip"))
-def test_unpack_fileobj(ext) -> None:
+def test_unpack_fileobj(ext: str) -> None:
     """Test unpack fileobj."""
     dir_to_pack = str(Path(__file__).parent)
 
@@ -161,7 +162,7 @@ def test_unpack_cmd() -> None:
 
     t = TestResult()
 
-    def custom_unpack(filename, dest, selected_files) -> None:
+    def custom_unpack(filename: str, dest: str, selected_files: Any) -> None:
         t.store_result(f=filename, d=dest, s=selected_files)
 
     e3.archive.unpack_archive(
@@ -202,7 +203,7 @@ def test_unpack_cmd_fileobj() -> None:
 
     t = TestResult()
 
-    def custom_unpack(filename, dest, fileobj) -> None:
+    def custom_unpack(filename: str, dest: str, fileobj: Any) -> None:
         t.store_result(f=filename, d=dest, fo=fileobj)
 
     fo.seek(0)
@@ -315,7 +316,7 @@ def test_remove_root_dir() -> None:
 
 
 @patch("tempfile.mkdtemp", wraps=tempfile.mkdtemp)
-def test_tmp_dir_root(mock_mkdtemp) -> None:
+def test_tmp_dir_root(mock_mkdtemp: Any) -> None:
     """Try to unpack an archive with remove_root_dir and a custom tmp_dir root."""
     e3.fs.mkdir("custom_tmp_dir_root")
     e3.fs.mkdir("result")

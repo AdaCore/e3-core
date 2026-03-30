@@ -49,7 +49,7 @@ def test_sendmail() -> None:
         )
 
 
-def test_sendmail_onerror(caplog) -> None:
+def test_sendmail_onerror(caplog: pytest.LogCaptureFixture) -> None:
     """Test sendmail onerror."""
     from_addr = "e3@example.net"
     to_addresses = ["info@example.net", "info@example.com"]

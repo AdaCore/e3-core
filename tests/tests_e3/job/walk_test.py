@@ -1,7 +1,9 @@
 """Tests for e3.job."""
 
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -71,7 +73,7 @@ DOWNLOAD_JOB_UID_PREFIX = "download."
 
 
 @pytest.fixture()
-def setup_sbx(request) -> None:
+def setup_sbx(request: pytest.FixtureRequest) -> None:
     """Automatically create a (temporary) sandbox.
 
     That sandbox is created before each test gets executed, and
@@ -146,7 +148,7 @@ class ControlledJob(ProcessJob):
     the "cmd" line method for more details on this.
     """
 
-    def __init__(self, uid, data, notify_end) -> None:
+    def __init__(self, uid: str, data: Any, notify_end: Callable[[str], None]) -> None:
         super().__init__(uid, data, notify_end)
         self.run_count = 0
 
@@ -182,13 +184,13 @@ class ControlledJob(ProcessJob):
 class SimpleWalk(Walk):
     dry_run_mode = False
 
-    def __init__(self, actions) -> None:
+    def __init__(self, actions: DAG) -> None:
         # The list of jobs (by UID) that have been requeued.
         self.saved_jobs = {}
         self.requeued = {}
         super().__init__(actions)
 
-    def request_requeue(self, job) -> bool:
+    def request_requeue(self, job: ProcessJob) -> bool:
         """Requeue the job is not already queued once."""
         # First record the number of times we've been asked to requeue
         # that job, and allow requeuing only twice.
@@ -197,7 +199,13 @@ class SimpleWalk(Walk):
         self.requeued[job.uid] += 1
         return self.requeued[job.uid] < MAX_REQUEUE_COUNT
 
-    def create_job(self, uid, data, predecessors, notify_end) -> Job:
+    def create_job(
+        self,
+        uid: str,
+        data: Any,
+        predecessors: frozenset[str],
+        notify_end: Callable[[str], None],
+    ) -> Job:
         """Create job."""
         if self.dry_run_mode:
             job = DryRunJob(uid, data, notify_end, status=ReturnValue.skip)
@@ -207,7 +215,13 @@ class SimpleWalk(Walk):
             job = ControlledJob(uid, data, notify_end)
         return job
 
-    def get_job(self, uid, data, predecessors, notify_end) -> Job:
+    def get_job(
+        self,
+        uid: str,
+        data: Any,
+        predecessors: frozenset[str],
+        notify_end: Callable[[str], None],
+    ) -> Job:
         """Get job."""
         # Normally, deriving classes of class Walk are not expected
         # to override this method. However, we need to do it here
@@ -221,11 +235,13 @@ class SimpleWalk(Walk):
 
 class FingerprintWalk(SimpleWalk):
     @classmethod
-    def fingerprint_filename(cls, uid):
+    def fingerprint_filename(cls, uid: str) -> str:
         """Fingerprint filename."""
         return str(sbx_dirs.fingerprint_dir / uid)
 
-    def compute_fingerprint(self, uid, data, is_prediction=False) -> Fingerprint | None:
+    def compute_fingerprint(
+        self, uid: str, data: Any, is_prediction: bool = False
+    ) -> Fingerprint | None:
         """Compute fingerprint."""
         if "fingerprint_after_job" in uid and is_prediction:
             return None
@@ -240,7 +256,7 @@ class FingerprintWalk(SimpleWalk):
             f.add_file(source_fullpath(uid))
         return f
 
-    def save_fingerprint(self, uid, fingerprint) -> None:
+    def save_fingerprint(self, uid: str, fingerprint: Fingerprint | None) -> None:
         """Save fingerprint."""
         if self.dry_run_mode:
             # In dry-run mode, we don't do anything, so we should not
@@ -254,7 +270,7 @@ class FingerprintWalk(SimpleWalk):
         else:
             fingerprint.save_to_file(filename)
 
-    def load_previous_fingerprint(self, uid) -> Fingerprint | None:
+    def load_previous_fingerprint(self, uid: str) -> Fingerprint | None:
         """Load previous fingerprint."""
         # In dry-run mode, the fingerprints on file are let untouched,
         # so they might be out of date compared to this job's status
@@ -276,7 +292,7 @@ class FingerprintWalkDryRun(FingerprintWalk):
 @pytest.mark.parametrize("walk_class", [SimpleWalk, FingerprintWalk])
 @pytest.mark.usefixtures("setup_sbx")
 class TestWalk:
-    def test_good_job_no_predecessors(self, walk_class) -> None:
+    def test_good_job_no_predecessors(self, walk_class: type[SimpleWalk]) -> None:
         """Simple case of a leaf job."""
         actions = DAG()
         actions.add_vertex("1")
@@ -306,7 +322,7 @@ class TestWalk:
             assert r2.requeued == {}
 
     @pytest.mark.usefixtures("setup_sbx")
-    def test_bad_job_no_predecessors(self, walk_class) -> None:
+    def test_bad_job_no_predecessors(self, walk_class: type[SimpleWalk]) -> None:
         """Simple case of a leaf job failing."""
         actions = DAG()
         actions.add_vertex("1.bad")
@@ -334,7 +350,7 @@ class TestWalk:
             assert r2.requeued == {}
 
     @pytest.mark.usefixtures("setup_sbx")
-    def test_failed_predecessor(self, walk_class) -> None:
+    def test_failed_predecessor(self, walk_class: type[SimpleWalk]) -> None:
         """Simulate the scenarior when a predecessor failed."""
         actions = DAG()
         actions.add_vertex("1.bad")
@@ -378,7 +394,7 @@ class TestWalk:
             assert r2.requeued == {}
 
     @pytest.mark.usefixtures("setup_sbx")
-    def test_job_not_ready_then_ok(self, walk_class) -> None:
+    def test_job_not_ready_then_ok(self, walk_class: type[SimpleWalk]) -> None:
         """Rerunning a job that first returned notready."""
         actions = DAG()
         actions.add_vertex("1.notready:once")
@@ -407,7 +423,9 @@ class TestWalk:
             assert r2.job_status == {"1.notready:once": ReturnValue.skip}
             assert r2.requeued == {}
 
-    def test_job_never_ready(self, walk_class, setup_sbx) -> None:
+    def test_job_never_ready(
+        self, walk_class: type[SimpleWalk], setup_sbx: None
+    ) -> None:
         """Trying to run a job repeatedly returning notready."""
         actions = DAG()
         actions.add_vertex("1.notready:always")
@@ -436,7 +454,9 @@ class TestWalk:
             assert r2.job_status == {"1.notready:always": ReturnValue.notready}
             assert r2.requeued == {"1.notready:always": 3}
 
-    def test_do_nothing_job(self, walk_class, setup_sbx) -> None:
+    def test_do_nothing_job(
+        self, walk_class: type[SimpleWalk], setup_sbx: None
+    ) -> None:
         """Test DAG leading us to create a DoNothingJob object."""
         actions = DAG()
         actions.add_vertex("1.do-nothing")

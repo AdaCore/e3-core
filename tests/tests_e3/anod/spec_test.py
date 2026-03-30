@@ -8,6 +8,7 @@ import pytest
 
 from e3.anod.driver import AnodDriver
 from e3.anod.error import AnodError, SpecError
+from e3.anod.qualifiers_manager import QualifiersManager
 from e3.anod.sandbox import SandBox
 from e3.anod.spec import Anod, __version__, check_api_version, has_primitive
 from e3.env import Env
@@ -386,7 +387,7 @@ def test_spec_qualifier() -> None:
     class GeneratorEnabled(Anod):
         enable_name_generator = True
 
-        def declare_qualifiers_and_components(self, qm) -> None:
+        def declare_qualifiers_and_components(self, qm: QualifiersManager) -> None:
             qm.declare_tag_qualifier(
                 "q1",
                 description="???",

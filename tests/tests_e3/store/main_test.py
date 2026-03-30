@@ -3,6 +3,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from e3.store.backends.http_simple_store import HTTPSimpleStore
 from e3.store.cache.backends.filecache import FileCache
 
@@ -21,7 +23,7 @@ def mock_download() -> MagicMock:
     return mock_response
 
 
-def test_simple_store(caplog) -> None:
+def test_simple_store(caplog: pytest.LogCaptureFixture) -> None:
     """Basic test of HTTPSimpleStore."""
     query = {
         "url": "http://test.example",

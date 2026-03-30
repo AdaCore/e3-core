@@ -239,7 +239,7 @@ def test_pruned_dag() -> None:
     d.add_vertex("d", predecessors=["c"])
     d.add_tag("d", "tag")
 
-    def f(dg, node) -> bool:
+    def f(dg: DAG, node: str) -> bool:
         del dg
         if node in ("b", "c"):
             return True

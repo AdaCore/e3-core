@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -118,7 +119,7 @@ def test_mv_with_iterables() -> None:
     for idx in range(10):
         e3.os.fs.touch(f"a{idx}")
 
-    def star(d):
+    def star(d: str) -> Any:
         for star_idx in range(10):
             yield f"{d}{star_idx}"
 
@@ -127,7 +128,7 @@ def test_mv_with_iterables() -> None:
     for idx in range(10):
         assert Path("dst", f"a{idx}").exists()
 
-    def dst_star(d):
+    def dst_star(d: str) -> Any:
         for dst_star_idx in range(10):
             yield Path("dst", f"{d}{dst_star_idx}")
 
@@ -190,7 +191,7 @@ def test_find() -> None:
     assert {Path(f).name for f in result} == {"fs"}
 
 
-def test_ls(caplog) -> None:
+def test_ls(caplog: pytest.LogCaptureFixture) -> None:
     """Test ls."""
     e3.os.fs.touch("a")
     e3.fs.ls("a", emit_log_record=True)
@@ -205,14 +206,14 @@ def test_ls(caplog) -> None:
     assert e3.fs.ls(k for k in ("a", "c")) == ["a", "c"]
 
 
-def test_mkdir(caplog) -> None:
+def test_mkdir(caplog: pytest.LogCaptureFixture) -> None:
     """Test mkdir."""
     e3.fs.mkdir("subdir")
     for record in caplog.records:
         assert "mkdir" in record.msg
 
 
-def test_mkdir_exists(caplog) -> None:
+def test_mkdir_exists(caplog: pytest.LogCaptureFixture) -> None:
     """Test mkdir exists."""
     Path("subdir").mkdir(parents=True)
     e3.fs.mkdir("subdir")

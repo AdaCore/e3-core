@@ -193,9 +193,6 @@ ignore = [
 
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"tests/**" = ["ANN001"]
-
 [tool.ruff.lint.pep8-naming]
 extend-ignore-names = [
   "CaasSkipUpdate",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from e3.anod.store import StoreRW
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.interface import StoreError
 from e3.error import E3Error
@@ -23,7 +24,7 @@ EXPECTED_COMPONENTS_FOR_COMP1 = 2
 EXPECTED_SINGLE_COMPONENT = 1
 
 
-def test_build_info_create(store) -> None:
+def test_build_info_create(store: StoreRW) -> None:
     """Test creating a BuildInfo object from a build ID."""
     today = BuildInfo.today_build_date()
 
@@ -108,7 +109,7 @@ def test_load_build_info_implict_not_ready() -> None:
     assert bi.as_dict() == as_dict_result
 
 
-def test_create_build_info_from_id(store) -> None:
+def test_create_build_info_from_id(store: StoreRW) -> None:
     """Test creating a BuildInfo object from a build ID."""
     ref_bi = store.create_build_id(DEFAULT_SETUP, "20241030", "1.0")
     ref_bi["isready"] = store.mark_build_ready(ref_bi["_id"])
@@ -118,13 +119,13 @@ def test_create_build_info_from_id(store) -> None:
     assert bi.as_dict() == ref_bi
 
 
-def test_create_build_info_from_invalid_id(store) -> None:
+def test_create_build_info_from_invalid_id(store: StoreRW) -> None:
     """Test creating a BuildInfo object from a nonexistant build ID."""
     with pytest.raises(StoreError):
         BuildInfo.from_id(store, "non-existant")
 
 
-def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
+def test_get_build_info_list(store: StoreRW) -> None:
     """Test get build info list."""
     BuildInfo.create(
         store=store,
@@ -204,13 +205,13 @@ def test_get_build_info_list(store) -> None:  # type: ignore [no-untyped-def]
     assert len(bis) == 1
 
 
-def test_get_latest_build_not_found(store) -> None:
+def test_get_latest_build_not_found(store: StoreRW) -> None:
     """Test BuildInfo.latest class method."""
     with pytest.raises(StoreError):
         BuildInfo.from_id(store, "nonexistant")
 
 
-def test_get_latest_build_ready(store) -> None:
+def test_get_latest_build_ready(store: StoreRW) -> None:
     """Test get labuild ready."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -225,7 +226,7 @@ def test_get_latest_build_ready(store) -> None:
     assert bi.build_date == "20241002"
 
 
-def test_get_latest_build_ready_or_not(store) -> None:
+def test_get_latest_build_ready_or_not(store: StoreRW) -> None:
     """Test get labuild ready or not."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -240,7 +241,7 @@ def test_get_latest_build_ready_or_not(store) -> None:
     assert bi.build_date == "20241003"
 
 
-def test_get_source_list(store) -> None:
+def test_get_source_list(store: StoreRW) -> None:
     """Test get source list."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -326,7 +327,7 @@ def test_get_source_list(store) -> None:
     assert len(src_list) == EXPECTED_SOURCES_COUNT
 
 
-def test_get_build_data(store) -> None:
+def test_get_build_data(store: StoreRW) -> None:
     """Test get build data."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -444,7 +445,7 @@ def test_get_build_data(store) -> None:
     assert len(data["components"]) == 1
 
 
-def test_get_component_list(store) -> None:
+def test_get_component_list(store: StoreRW) -> None:
     """Test get component list."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -494,7 +495,7 @@ def test_get_component_list(store) -> None:
     assert data.name == "comp1" and data.platform == "x86-linux"
 
 
-def test_get_source_info(store) -> None:
+def test_get_source_info(store: StoreRW) -> None:
     """Test get source info."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -520,7 +521,7 @@ def test_get_source_info(store) -> None:
         bi.get_source_info("nonexist-src")
 
 
-def test_wait(store) -> None:
+def test_wait(store: StoreRW) -> None:
     """Test wait."""
     with pytest.raises(E3Error):
         bid = BuildInfo.wait(
@@ -617,7 +618,7 @@ def test_build_info_eq_ne() -> None:
         assert (bi == 1) is False
 
 
-def test_build_info_copy(store) -> None:
+def test_build_info_copy(store: StoreRW) -> None:
     """Test build info copy."""
     OTHER_SETUP = f"{DEFAULT_SETUP}-other"
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")

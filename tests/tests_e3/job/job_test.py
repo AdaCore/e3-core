@@ -3,6 +3,8 @@
 import sys
 from typing import NoReturn
 
+import pytest
+
 from e3.anod.status import ReturnValue
 from e3.job import EmptyJob, ProcessJob
 
@@ -45,14 +47,14 @@ class TestJob:
         job = EmptyProcessJob("1", None, print)
         assert job.status is ReturnValue.notready
 
-    def test_invalid_job_status(self, caplog) -> None:
+    def test_invalid_job_status(self, caplog: pytest.LogCaptureFixture) -> None:
         """Verify that when the return code is invalid we return a failure."""
         job = InvalidProcessJob("myuid", {}, None)
         job.run()
         assert job.status is ReturnValue.failure
         assert "job myuid returned an unknown status 6" in caplog.text
 
-    def test_none_job_status(self, caplog) -> None:
+    def test_none_job_status(self, caplog: pytest.LogCaptureFixture) -> None:
         """Verify that when the return code is None, we return a failure."""
         job = InvalidProcessJob("myuid", {}, None)
         job.run()
