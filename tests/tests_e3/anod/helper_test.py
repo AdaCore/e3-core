@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from typing import Any
 
 from e3.anod.driver import AnodDriver
 from e3.anod.helper import Configure, Make, text_replace
@@ -14,12 +15,12 @@ def test_make() -> None:
     """Test make."""
 
     class AnodMake(Anod):
-        def shell(self, *cmd, **kwargs):
+        def shell(self, *cmd, **kwargs) -> Any:
             """Mock for Anod.shell that does not spawn processes."""
             return (cmd, kwargs)
 
         @Anod.primitive()
-        def build(self):
+        def build(self) -> Any:
             m1 = Make(self, makefile="/tmp/makefile")
             m1.set_var("prefix", "/foo")
             m2 = Make(self, exec_dir="/tmp/exec_dir", jobs=2)
@@ -57,7 +58,7 @@ def test_configure() -> None:
 
     class AnodConf(Anod):
         @Anod.primitive()
-        def build(self):
+        def build(self) -> Any:
             c = Configure(self)
             return c.cmdline()
 
@@ -108,12 +109,12 @@ def test_configure_opts() -> None:
     """Check configure options."""
 
     class AnodConf(Anod):
-        def shell(self, *cmd, **kwargs):
+        def shell(self, *cmd, **kwargs) -> Any:
             """Mock for Anod.shell that does not spawn processes."""
             return (cmd, kwargs)
 
         @Anod.primitive()
-        def build(self):
+        def build(self) -> Any:
             c = Configure(self)
             c.add("--with-opt")
             c.add_env("OPT", "VAL")

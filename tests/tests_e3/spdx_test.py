@@ -422,7 +422,7 @@ def test_invalid_spdx() -> None:
         ],
     )
 
-    def add_main(is_main_package: bool) -> None:
+    def add_main(is_main_package: bool) -> SPDXID:
         package: Package = Package(
             name=PackageName("my-spdx-test-main"),
             version=PackageVersion("2.2.2"),

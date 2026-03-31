@@ -123,7 +123,7 @@ def entry_point(
         lkind: str = kind,
         largs: tuple[Any, ...] = args,
         lkwargs: dict[str, Any] = kwargs,
-    ):
+    ) -> Callable[[], None]:
         lcls(ldb, f, lkind, *largs, **lkwargs)
         return f
 

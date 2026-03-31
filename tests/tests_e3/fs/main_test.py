@@ -4,8 +4,8 @@ import os
 import re
 import shutil
 import sys
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -119,7 +119,7 @@ def test_mv_with_iterables() -> None:
     for idx in range(10):
         e3.os.fs.touch(f"a{idx}")
 
-    def star(d: str) -> Any:
+    def star(d: str) -> Iterator[str]:
         for star_idx in range(10):
             yield f"{d}{star_idx}"
 
@@ -128,7 +128,7 @@ def test_mv_with_iterables() -> None:
     for idx in range(10):
         assert Path("dst", f"a{idx}").exists()
 
-    def dst_star(d: str) -> Any:
+    def dst_star(d: str) -> Iterator[Path]:
         for dst_star_idx in range(10):
             yield Path("dst", f"{d}{dst_star_idx}")
 

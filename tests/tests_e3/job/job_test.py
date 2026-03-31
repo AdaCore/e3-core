@@ -41,7 +41,7 @@ class TestJob:
         """
 
         class EmptyProcessJob(ProcessJob):
-            def cmdline(self):
+            def cmdline(self) -> list[str]:
                 return [sys.executable, "-c", "pass"]
 
         job = EmptyProcessJob("1", None, print)

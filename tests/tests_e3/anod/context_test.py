@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import pytest
 
@@ -151,7 +151,7 @@ class TestContext:
     def test_add_anod_action2_no_source_resolver(self) -> None:
         """Test add anod action2 no source resolver."""
 
-        def no_resolver(action: Action, decision: Decision):
+        def no_resolver(action: Action, decision: Decision) -> NoReturn:
             return AnodContext.decision_error(action, decision)
 
         ac = self.create_context()
