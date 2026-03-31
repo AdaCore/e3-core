@@ -64,6 +64,7 @@ check = [
   "pytest",  # for the pytest plugin
   "bandit",
   "pip-audit",
+  "requests-mock",
   "types-colorama",
   "types-mock",
   "types-psutil",

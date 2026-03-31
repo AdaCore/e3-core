@@ -47,11 +47,10 @@ class TestCheckout:
     repo_data = str(Path(__file__).parent / "vcs_data")
     repo_data2 = str(Path(__file__).parent / "vcs_data2")
 
+    @pytest.mark.usefixtures("git")
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
-    def test_git_clone(
-        self, git: None, compute_changelog: bool, e3_feature: str
-    ) -> None:  # noqa: PLR0915
+    def test_git_clone(self, compute_changelog: bool, e3_feature: str) -> None:  # noqa: PLR0915
         """Test CheckoutManager with Git repositories."""
         logger = logging.getLogger("test_git_clone")
 
@@ -124,12 +123,13 @@ class TestCheckout:
         result = m.update(vcs="external", url=os.path.abspath("git2"))
         assert result == ReturnValue.unchanged
 
+    @pytest.mark.usefixtures("svn")
     @pytest.mark.skipif(
         sys.platform == "win32",
         reason="legacy test using SVN - only minimal testing on Linux",
     )
     @pytest.mark.parametrize("compute_changelog", [True, False])
-    def test_svn_checkout(self, svn: None, compute_changelog: bool) -> None:
+    def test_svn_checkout(self, compute_changelog: bool) -> None:
         """Test CheckoutManager with Subversion repositories."""
         logger = logging.getLogger("test_svn_checkout")
 
