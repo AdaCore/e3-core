@@ -22,7 +22,7 @@ from e3.python.wheel import Wheel
 
 if TYPE_CHECKING:
     from collections.abc import Set
-
+    from requests_mock import Mocker
 
 from e3.pytest import require_tool
 
@@ -47,7 +47,7 @@ class PypiSimulator:
     DOWNLOAD_MATCHER = regex_compile(f"{PYPIHOSTED_URL}/(?P<path>.*)")
     DATA_DIR = Path(abspath(__file__)).parent / "pypi_data"
 
-    def __init__(self, requests_mock: Any) -> None:
+    def __init__(self, requests_mock: Mocker) -> None:
         self.requests_mock = requests_mock
 
         self.requests_mock.stop()
@@ -160,7 +160,7 @@ class PypiSimulator:
 
 
 @pytest.fixture(scope="function")
-def pypi_server(requests_mock: Any) -> PypiSimulator:
+def pypi_server(requests_mock: Mocker) -> PypiSimulator:
     """Pytest fixture providing a mock PyPI server."""
     requests_mock.stop()
     return PypiSimulator(requests_mock)
@@ -175,7 +175,7 @@ class MavenCentralSimulator:
         "(?P<filename>.*\\.(jar|pom))$"
     )
 
-    def __init__(self, requests_mock: Any) -> None:
+    def __init__(self, requests_mock: Mocker) -> None:
         """Create the central simulator.
 
         :param request_mock: The mocker to use. See requests_mock modules for more
@@ -412,7 +412,7 @@ class MavenCentralSimulator:
 
 
 @pytest.fixture(scope="function")
-def maven_central(requests_mock: Any) -> MavenCentralSimulator:
+def maven_central(requests_mock: Mocker) -> MavenCentralSimulator:
     """Pytest fixture providing a mock Maven Central server."""
     requests_mock.stop()
     return MavenCentralSimulator(requests_mock)

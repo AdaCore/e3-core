@@ -9,6 +9,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any
 
+import pytest
 import requests_toolbelt.multipart
 
 from e3.net.http import HTTPError, HTTPSession
@@ -145,7 +146,8 @@ class TestHTTP:
         with HTTPSession():
             pass
 
-    def test_retry(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_retry(self) -> None:
         """Test retry."""
 
         def func(server: HTTPServer, base_url: str) -> None:
@@ -159,7 +161,8 @@ class TestHTTP:
 
         run_server(RetryHandler, func)
 
-    def test_content_dispo(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_content_dispo(self) -> None:
         """Test content dispo."""
 
         def func(server: HTTPServer, base_url: str) -> None:
@@ -174,7 +177,8 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_content_dispo_fileobj(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_content_dispo_fileobj(self) -> None:
         """Test content dispo fileobj."""
 
         def func(server: HTTPServer, base_url: str) -> None:
@@ -188,7 +192,8 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_content_validation(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_content_validation(self) -> None:
         """Test content validation."""
 
         def validate(path: str) -> bool:
@@ -206,7 +211,8 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_error(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_error(self) -> None:
         """Test error."""
 
         def func(server: HTTPServer, base_url: str) -> None:
@@ -228,7 +234,8 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_fallback(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_fallback(self) -> None:
         """Test fallback."""
 
         def func(server: HTTPServer, base_url: str) -> None:
@@ -246,7 +253,8 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_content_abort(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_content_abort(self) -> None:
         """Test content abort."""
 
         def func(server: HTTPServer, base_url: str) -> None:
@@ -265,7 +273,8 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_post_stream_data(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_post_stream_data(self) -> None:
         """Test post stream data."""
 
         def outter_func(nok_server: HTTPServer, nok_url: str) -> None:
@@ -294,7 +303,8 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, outter_func)
 
-    def test_authorization_header(self, socket_enabled: None) -> None:
+    @pytest.mark.usefixtures("socket_enabled")
+    def test_authorization_header(self) -> None:
         """Test authorization header."""
 
         def func(server: HTTPServer, base_url: str) -> None:
