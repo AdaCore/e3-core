@@ -707,7 +707,12 @@ class Anod:
         :raise: AnodError
         """
 
-        def primitive_dec(f, pre=pre, post=post, version=version):  # type: ignore
+        def primitive_dec(  # type: ignore
+            f: Callable[..., Any],
+            pre: str | None = pre,
+            post: str | None = post,
+            version: Callable[..., str] | None = version,
+        ):
             """Decorate a primitive function with pre/post/version callbacks.
 
             :param f: the function to decorate
@@ -716,7 +721,7 @@ class Anod:
             :param version: version callback function
             """
 
-            def primitive_func(self, *args, **kwargs):  # type: ignore
+            def primitive_func(self: Anod, *args, **kwargs):  # type: ignore
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
                 # Ensure temporary directory is set to a directory local to
@@ -744,12 +749,12 @@ class Anod:
                     self.log.exception(error_msg)
                     raise AnodError(error_msg) from err
 
-            primitive_func.is_primitive = True
-            primitive_func.pre = pre
-            primitive_func.post = post
-            primitive_func.post_install = post_install or (post == "install")
-            primitive_func.version = version
-            primitive_func.require = require
+            primitive_func.is_primitive = True  # type: ignore[attr-defined]
+            primitive_func.pre = pre  # type: ignore[attr-defined]
+            primitive_func.post = post  # type: ignore[attr-defined]
+            primitive_func.post_install = post_install or (post == "install")  # type: ignore[attr-defined]
+            primitive_func.version = version  # type: ignore[attr-defined]
+            primitive_func.require = require  # type: ignore[attr-defined]
             return primitive_func
 
         return primitive_dec

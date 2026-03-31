@@ -1,7 +1,10 @@
 """Tests for e3.yaml."""
 
+from __future__ import annotations
+
 from collections import OrderedDict
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -49,7 +52,7 @@ EXPECTED_YAML_KEYS = 2
         ),
     ],
 )
-def test_case_parser(config, expected) -> None:
+def test_case_parser(config: dict[str, str], expected: dict[str, Any]) -> None:
     """Test yaml CaseParser."""
     yaml_case_content = """
 case_param1:

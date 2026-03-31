@@ -3,9 +3,11 @@
 import logging
 import threading
 import time
+from collections.abc import Callable
 from email.message import Message
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 
 import requests_toolbelt.multipart
 
@@ -121,7 +123,9 @@ class AuthorizationHeaderHandler(ContentDispoHandler):
         super(AuthorizationHeaderHandler, self).do_GET()
 
 
-def run_server(handler, func) -> None:
+def run_server(
+    handler: type[BaseHTTPRequestHandler], func: Callable[[Any, str], None]
+) -> None:
     """Run a test HTTP server in a daemon thread."""
     server = HTTPServer(("localhost", 0), handler)
     try:
@@ -141,10 +145,10 @@ class TestHTTP:
         with HTTPSession():
             pass
 
-    def test_retry(self, socket_enabled) -> None:
+    def test_retry(self, socket_enabled: None) -> None:
         """Test retry."""
 
-        def func(server, base_url) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
             with HTTPSession() as session:
                 session.set_max_retries(base_url, connect=5)
                 result = session.download_file(base_url + "dummy", dest=".")
@@ -155,10 +159,10 @@ class TestHTTP:
 
         run_server(RetryHandler, func)
 
-    def test_content_dispo(self, socket_enabled) -> None:
+    def test_content_dispo(self, socket_enabled: None) -> None:
         """Test content dispo."""
 
-        def func(server, base_url) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
             del server
 
             with HTTPSession() as session:
@@ -170,10 +174,10 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_content_dispo_fileobj(self, socket_enabled) -> None:
+    def test_content_dispo_fileobj(self, socket_enabled: None) -> None:
         """Test content dispo fileobj."""
 
-        def func(server, base_url) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
             del server
 
             with HTTPSession() as session:
@@ -184,14 +188,14 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_content_validation(self, socket_enabled) -> None:
+    def test_content_validation(self, socket_enabled: None) -> None:
         """Test content validation."""
 
-        def validate(path) -> bool:
+        def validate(path: str) -> bool:
             del path
             return False
 
-        def func(server, base_url) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
             del server
 
             with HTTPSession() as session:
@@ -202,10 +206,10 @@ class TestHTTP:
 
         run_server(ContentDispoHandler, func)
 
-    def test_error(self, socket_enabled) -> None:
+    def test_error(self, socket_enabled: None) -> None:
         """Test error."""
 
-        def func(server, base_url) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
             del server
 
             with HTTPSession() as session:
@@ -224,11 +228,11 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_fallback(self, socket_enabled) -> None:
+    def test_fallback(self, socket_enabled: None) -> None:
         """Test fallback."""
 
-        def func(server, base_url) -> None:
-            def inner_func(server2, base_url2) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
+            def inner_func(server2: HTTPServer, base_url2: str) -> None:
                 logger = logging.getLogger("inner_func")
                 logger.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
@@ -242,11 +246,11 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_content_abort(self, socket_enabled) -> None:
+    def test_content_abort(self, socket_enabled: None) -> None:
         """Test content abort."""
 
-        def func(server, base_url) -> None:
-            def inner_func(server2, base_url2) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
+            def inner_func(server2: HTTPServer, base_url2: str) -> None:
                 logger = logging.getLogger("inner_func")
                 logger.info(f"servers: {base_url}, {base_url2}")
                 with HTTPSession(base_urls=[base_url, base_url2]) as session:
@@ -261,13 +265,13 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, func)
 
-    def test_post_stream_data(self, socket_enabled) -> None:
+    def test_post_stream_data(self, socket_enabled: None) -> None:
         """Test post stream data."""
 
-        def outter_func(nok_server, nok_url) -> None:
+        def outter_func(nok_server: HTTPServer, nok_url: str) -> None:
             del nok_server
 
-            def func(server, url) -> None:
+            def func(server: HTTPServer, url: str) -> None:
                 with HTTPSession(base_urls=[nok_url, url]) as session:
                     session.DEFAULT_TIMEOUT = (3.0, 3.0)
                     with Path("./data.txt").open("wb") as fd:
@@ -290,10 +294,10 @@ class TestHTTP:
 
         run_server(ServerErrorHandler, outter_func)
 
-    def test_authorization_header(self, socket_enabled) -> None:
+    def test_authorization_header(self, socket_enabled: None) -> None:
         """Test authorization header."""
 
-        def func(server, base_url) -> None:
+        def func(server: HTTPServer, base_url: str) -> None:
             del server
 
             with HTTPSession() as session:

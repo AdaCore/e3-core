@@ -49,7 +49,9 @@ class TestCheckout:
 
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
-    def test_git_clone(self, git, compute_changelog, e3_feature) -> None:  # noqa: PLR0915
+    def test_git_clone(
+        self, git: None, compute_changelog: bool, e3_feature: str
+    ) -> None:  # noqa: PLR0915
         """Test CheckoutManager with Git repositories."""
         logger = logging.getLogger("test_git_clone")
 
@@ -127,7 +129,7 @@ class TestCheckout:
         reason="legacy test using SVN - only minimal testing on Linux",
     )
     @pytest.mark.parametrize("compute_changelog", [True, False])
-    def test_svn_checkout(self, svn, compute_changelog) -> None:
+    def test_svn_checkout(self, svn: None, compute_changelog: bool) -> None:
         """Test CheckoutManager with Subversion repositories."""
         logger = logging.getLogger("test_svn_checkout")
 

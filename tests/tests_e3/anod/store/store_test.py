@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from e3.anod.store import StoreRW
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
@@ -18,7 +19,7 @@ from e3.os.fs import touch
 EXPECTED_COMPONENTS_COUNT = 2
 
 
-def test_create_and_get_build_info(store) -> None:
+def test_create_and_get_build_info(store: StoreRW) -> None:
     """Test create and get build info."""
     # Ensure the "build_info" is created between 'start' and 'end'.
     #
@@ -59,7 +60,7 @@ def test_create_and_get_build_info(store) -> None:
     assert tmp == previous
 
 
-def test_build_info_ready(store) -> None:
+def test_build_info_ready(store: StoreRW) -> None:
     """Test build info ready."""
     created = store.create_build_id("test", "20241028", "1.0")
     assert created["isready"] is False
@@ -75,7 +76,7 @@ def test_build_info_ready(store) -> None:
     assert tmp == created
 
 
-def test_file(store) -> None:
+def test_file(store: StoreRW) -> None:
     """Test file."""
     buildinfo = store.create_build_id("test", "20241028", "1.0")
     touch("test.txt")
@@ -145,7 +146,7 @@ def test_file(store) -> None:
     assert tmp["name"] == "test-tp.txt"
 
 
-def test_component(store) -> None:  # noqa: PLR0915
+def test_component(store: StoreRW) -> None:  # noqa: PLR0915
     """Check that we can add a component to the offline db."""
     buildinfo = store.create_build_id("test", "20241029", "1.0")
     store.mark_build_ready(buildinfo["_id"])
@@ -337,7 +338,7 @@ def test_component(store) -> None:  # noqa: PLR0915
     assert isinstance(tmp[0]["attachments"], dict) and "myatt2" in tmp[0]["attachments"]
 
 
-def test_bulk_query(store) -> None:  # noqa: PLR0915
+def test_bulk_query(store: StoreRW) -> None:  # noqa: PLR0915
     """Test bulk query."""
     with Path("file1.txt").open("w") as f:
         f.write("Carpette is a cat")

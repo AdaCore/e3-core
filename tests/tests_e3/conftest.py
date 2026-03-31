@@ -11,7 +11,7 @@ from os.path import abspath
 from pathlib import Path
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -22,7 +22,6 @@ from e3.python.wheel import Wheel
 
 if TYPE_CHECKING:
     from collections.abc import Set
-    from typing import Any
 
 
 from e3.pytest import require_tool
@@ -161,7 +160,7 @@ class PypiSimulator:
 
 
 @pytest.fixture(scope="function")
-def pypi_server(requests_mock) -> PypiSimulator:
+def pypi_server(requests_mock: Any) -> PypiSimulator:
     """Pytest fixture providing a mock PyPI server."""
     requests_mock.stop()
     return PypiSimulator(requests_mock)
@@ -413,7 +412,7 @@ class MavenCentralSimulator:
 
 
 @pytest.fixture(scope="function")
-def maven_central(requests_mock) -> MavenCentralSimulator:
+def maven_central(requests_mock: Any) -> MavenCentralSimulator:
     """Pytest fixture providing a mock Maven Central server."""
     requests_mock.stop()
     return MavenCentralSimulator(requests_mock)

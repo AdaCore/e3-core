@@ -10,7 +10,7 @@ from time import sleep
 
 import pytest
 
-from e3.anod.store import StoreError
+from e3.anod.store import StoreError, StoreRW
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
@@ -24,7 +24,7 @@ from e3.slsa.provenance import Statement
 DEFAULT_SETUP = "test"
 
 
-def test_file_metadata(store) -> None:  # type: ignore[no-untyped-def]
+def test_file_metadata(store: StoreRW) -> None:
     """Check component metadata APIs."""
     metadata: dict[str, object] = {
         "one": 1,
@@ -115,7 +115,7 @@ def test_file_metadata(store) -> None:  # type: ignore[no-untyped-def]
     assert "Metadata statement should be a DSSE envelope." in ce.value.args[0]
 
 
-def test_update_metadata(store) -> None:
+def test_update_metadata(store: StoreRW) -> None:
     """Test update metadata."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
@@ -156,7 +156,7 @@ def test_update_metadata(store) -> None:
     assert tmp["metadata"] == source.metadata
 
 
-def test_push(store) -> None:
+def test_push(store: StoreRW) -> None:
     """Test push."""
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")
 
@@ -187,7 +187,7 @@ def test_push(store) -> None:
     assert other == tmp and other == f
 
 
-def test_download(store) -> None:
+def test_download(store: StoreRW) -> None:
     """Test download."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
@@ -271,7 +271,7 @@ def test_download(store) -> None:
     assert source.download(dest_dir="atest1")
 
 
-def test_download_as_name(store) -> None:
+def test_download_as_name(store: StoreRW) -> None:
     """Test download as name."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
@@ -302,7 +302,7 @@ def test_download_as_name(store) -> None:
     assert Path("sandbox", "new_name_meta.json").is_file()
 
 
-def test_corrupted_meta_file(store) -> None:
+def test_corrupted_meta_file(store: StoreRW) -> None:
     """Test corrupted meta file."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)
@@ -349,7 +349,7 @@ def test_corrupted_meta_file(store) -> None:
         File.load_from_meta_file(dest_dir="sandbox", name="new_name", store=store)
 
 
-def test_upload_thirdparty(store) -> None:
+def test_upload_thirdparty(store: StoreRW) -> None:
     """Test upload thirdparty."""
     bid = store.create_build_id("thirdparties", "20271031", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -379,7 +379,7 @@ def test_upload_thirdparty(store) -> None:
         assert content == "This is a new content"
 
 
-def test_upload_thirdparty_from_dir(store) -> None:
+def test_upload_thirdparty_from_dir(store: StoreRW) -> None:
     """Test upload thirdparty from dir."""
     bid = store.create_build_id("thirdparties", "20271031", "1.0")["_id"]
     store.mark_build_ready(bid)
@@ -407,7 +407,7 @@ def test_upload_thirdparty_from_dir(store) -> None:
         File.upload_thirdparty_from_dir(store=store, path="test", prefix="foo")
 
 
-def test_download_and_unpack(store) -> None:
+def test_download_and_unpack(store: StoreRW) -> None:
     """Test download and unpack."""
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(build_id)

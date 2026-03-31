@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 import e3.electrolyt.plan as plan
+from e3.anod.action import Decision
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError
 from e3.anod.loader import AnodSpecRepository
 from e3.env import BaseEnv
+
+if TYPE_CHECKING:
+    from e3.anod.action import Action
 
 # Expected tree/result sizes for dependency graph tests
 # These constants document the expected number of nodes in dependency graphs
@@ -146,7 +151,7 @@ class TestContext:
     def test_add_anod_action2_no_source_resolver(self) -> None:
         """Test add anod action2 no source resolver."""
 
-        def no_resolver(action, decision):
+        def no_resolver(action: Action, decision: Decision):
             return AnodContext.decision_error(action, decision)
 
         ac = self.create_context()
@@ -524,24 +529,24 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module,
-            build=None,
-            default_build=False,
-            host=None,
-            target=None,
-            board=None,
-            weathers=None,
-            product_version=None,
-            when_missing=None,
-            manual_action=False,
-            qualifier=None,
-            jobs=None,
-            releases=None,
-            process_suffix=None,
-            update_vcs=False,
-            recursive=None,
-            query_range=None,
-            force_repackage=False,
+            module: Any,
+            build: Any = None,
+            default_build: Any = False,
+            host: Any = None,
+            target: Any = None,
+            board: Any = None,
+            weathers: Any = None,
+            product_version: Any = None,
+            when_missing: Any = None,
+            manual_action: Any = False,
+            qualifier: Any = None,
+            jobs: Any = None,
+            releases: Any = None,
+            process_suffix: Any = None,
+            update_vcs: Any = False,
+            recursive: Any = None,
+            query_range: Any = None,
+            force_repackage: Any = False,
         ) -> None:
             pass
 
@@ -648,24 +653,24 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module,
-            build=None,
-            default_build=False,
-            host=None,
-            target=None,
-            board=None,
-            weathers=None,
-            product_version=None,
-            when_missing=None,
-            manual_action=False,
-            qualifier=None,
-            jobs=None,
-            releases=None,
-            process_suffix=None,
-            update_vcs=False,
-            recursive=None,
-            query_range=None,
-            force_repackage=False,
+            module: Any,
+            build: Any = None,
+            default_build: bool = False,
+            host: Any = None,
+            target: Any = None,
+            board: Any = None,
+            weathers: Any = None,
+            product_version: Any = None,
+            when_missing: Any = None,
+            manual_action: bool = False,
+            qualifier: Any = None,
+            jobs: Any = None,
+            releases: Any = None,
+            process_suffix: Any = None,
+            update_vcs: bool = False,
+            recursive: Any = None,
+            query_range: Any = None,
+            force_repackage: bool = False,
         ) -> None:
             pass
 
@@ -722,24 +727,24 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module,
-            build=None,
-            default_build=False,
-            host=None,
-            target=None,
-            board=None,
-            weathers=None,
-            product_version=None,
-            when_missing=None,
-            manual_action=False,
-            qualifier=None,
-            jobs=None,
-            releases=None,
-            process_suffix=None,
-            update_vcs=False,
-            recursive=None,
-            query_range=None,
-            force_repackage=False,
+            module: Any,
+            build: Any = None,
+            default_build: bool = False,
+            host: Any = None,
+            target: Any = None,
+            board: Any = None,
+            weathers: Any = None,
+            product_version: Any = None,
+            when_missing: Any = None,
+            manual_action: bool = False,
+            qualifier: Any = None,
+            jobs: Any = None,
+            releases: Any = None,
+            process_suffix: Any = None,
+            update_vcs: bool = False,
+            recursive: Any = None,
+            query_range: Any = None,
+            force_repackage: bool = False,
         ) -> None:
             pass
 
@@ -769,7 +774,7 @@ class TestContext:
                 )
 
     @pytest.mark.parametrize("reject_duplicates", [True, False])
-    def test_duplicated_lines(self, reject_duplicates) -> None:
+    def test_duplicated_lines(self, reject_duplicates: bool) -> None:
         """Check that duplicated lines in plan are properly rejected."""
         ac = self.create_context(reject_duplicates=reject_duplicates)
         current_env = BaseEnv()
@@ -777,24 +782,24 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module,
-            build=None,
-            default_build=False,
-            host=None,
-            target=None,
-            board=None,
-            weathers=None,
-            product_version=None,
-            when_missing=None,
-            manual_action=False,
-            qualifier=None,
-            jobs=None,
-            releases=None,
-            process_suffix=None,
-            update_vcs=False,
-            recursive=None,
-            query_range=None,
-            force_repackage=False,
+            module: Any,
+            build: Any = None,
+            default_build: bool = False,
+            host: Any = None,
+            target: Any = None,
+            board: Any = None,
+            weathers: Any = None,
+            product_version: Any = None,
+            when_missing: Any = None,
+            manual_action: bool = False,
+            qualifier: Any = None,
+            jobs: Any = None,
+            releases: Any = None,
+            process_suffix: Any = None,
+            update_vcs: bool = False,
+            recursive: Any = None,
+            query_range: Any = None,
+            force_repackage: bool = False,
         ) -> None:
             pass
 
@@ -829,7 +834,7 @@ class TestContext:
         cm = plan.PlanContext(server=current_env)
 
         # Declare available actions and their signature
-        def plan_action(platform) -> None:
+        def plan_action(platform: Any) -> None:
             pass
 
         cm.register_action("plan_action", plan_action)
@@ -855,7 +860,9 @@ class TestContext:
             "local_name attribute (spec3)" in str(err)
         )
 
-    def test_add_anod_action_missing_src_pkg_dep(self, caplog) -> None:
+    def test_add_anod_action_missing_src_pkg_dep(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
         """Test add anod action missing src pkg dep."""
         ac = self.create_context()
         ac.add_anod_action("missing_src_pkg_dep", env=ac.default_env, primitive="build")

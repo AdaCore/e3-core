@@ -56,7 +56,7 @@ def test_fingerprint() -> None:
 def test_add_order_not_important() -> None:
     """Test add order not important."""
 
-    def create_fingerprint(first, second, third):
+    def create_fingerprint(first: int, second: int, third: int) -> Fingerprint:
         """Create a fingerprint with 3 elements added in the given order.
 
         The arguments, first, second, and third should be either
@@ -73,7 +73,7 @@ def test_add_order_not_important() -> None:
 
     f_ref = create_fingerprint(1, 2, 3)
 
-    def check_scenario(first, second, third) -> None:
+    def check_scenario(first: int, second: int, third: int) -> None:
         """Check scenario where adding fingerprint elements in given order.
 
         Create a fingerprint using create_fingerprint above
@@ -144,7 +144,7 @@ def test_fingerprint_save_and_load() -> None:
     # other files used by this testcase.
     Path("fingerprints").mkdir()
 
-    def fingerprint_path(filename):
+    def fingerprint_path(filename: str) -> Path:
         return Path("fingerprints", filename)
 
     # Save and then load a minimal fingerprint...

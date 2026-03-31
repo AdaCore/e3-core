@@ -1,7 +1,8 @@
 """Tests for e3.job."""
 
 import sys
-from typing import NoReturn
+from collections.abc import Callable
+from typing import Any, NoReturn
 
 import pytest
 
@@ -48,7 +49,7 @@ class TestScheduler:
         """Test that jobs are ordered correctly."""
         results = []
 
-        def collect(job) -> None:
+        def collect(job: Job) -> None:
             results.append(job.uid)
 
         dag = DAG()
@@ -76,7 +77,7 @@ class TestScheduler:
         """
         results = {}
 
-        def collect(job) -> bool:
+        def collect(job: Job) -> bool:
             if job.uid not in results:
                 results[job.uid] = True
                 return True
@@ -96,13 +97,18 @@ class TestScheduler:
         """Simple example in which all the tests are skipped."""
         results = {}
 
-        def get_job(uid, data, predecessors, notify_end):
+        def get_job(
+            uid: str,
+            data: Any,
+            predecessors: frozenset[str],
+            notify_end: Callable[[str], None],
+        ) -> Job:
             del predecessors
             result = NopJob(uid, data, notify_end)
             result.should_skip = True
             return result
 
-        def collect(job) -> None:
+        def collect(job: Job) -> None:
             results[job.uid] = job.timing_info
 
         # This time test with two interdependent jobs
@@ -122,11 +128,16 @@ class TestScheduler:
         results = {}
         pytest.importorskip("psutil")
 
-        def get_job(uid, data, predecessors, notify_end):
+        def get_job(
+            uid: str,
+            data: Any,
+            predecessors: frozenset[str],
+            notify_end: Callable[[str], None],
+        ) -> Job:
             del predecessors
             return SleepJob(uid, data, notify_end)
 
-        def collect(job) -> None:
+        def collect(job: Job) -> None:
             results[job.uid] = job
 
         dag = DAG()
@@ -143,11 +154,16 @@ class TestScheduler:
         results = {}
         pytest.importorskip("psutil")
 
-        def get_job(uid, data, predecessors, notify_end):
+        def get_job(
+            uid: str,
+            data: Any,
+            predecessors: frozenset[str],
+            notify_end: Callable[[str], None],
+        ) -> Job:
             del predecessors
             return NopJob(uid, data, notify_end)
 
-        def collect(job) -> None:
+        def collect(job: Job) -> None:
             results[job.uid] = job
 
         dag = DAG()
@@ -182,7 +198,13 @@ class TestScheduler:
                 # indicating success or failure and the second the job itself
                 self.results = {}
 
-            def get_job(self, uid, data, predecessors, notify_end):
+            def get_job(
+                self,
+                uid: str,
+                data: Any,
+                predecessors: frozenset[str],
+                notify_end: Callable[[str], None],
+            ) -> Job:
                 result = NopJob(uid, data, notify_end)
 
                 # If any of the predecessor failed skip the job
@@ -191,7 +213,7 @@ class TestScheduler:
                         result.should_skip = True
                 return result
 
-            def collect(self, job) -> None:
+            def collect(self, job: Job) -> None:
                 if job.should_skip:
                     # Skipped jobs are considered failed
                     self.results[job.uid] = [False, job]

@@ -11,7 +11,7 @@ from e3.os.process import Run
 from e3.vcs.svn import SVNError, SVNRepository
 
 
-def file_url(path, unix=False) -> str:
+def file_url(path: str, unix: bool = False) -> str:
     """Convert a file path to a file:// URL for SVN."""
     if sys.platform == "win32":
         if len(path) > 1 and path[1] == ":":

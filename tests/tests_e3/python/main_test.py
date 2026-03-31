@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import pytest
+
+if TYPE_CHECKING:
+    from tests_e3.conftest import PypiSimulator
 import yaml
 
 from e3.fs import mkdir
@@ -18,7 +22,7 @@ EXPECTED_PACKAGE_CLOSURE_SIZE = 2
 
 
 def generate_py_pkg_source(
-    name: str, requires: list[str] | None = None, version="1.0.0"
+    name: str, requires: list[str] | None = None, version: str = "1.0.0"
 ) -> Wheel:
     """Generate a Python package source and build a wheel."""
     mkdir(name)
@@ -174,7 +178,9 @@ def test_star_requirements() -> None:
         ((None, "setuptools_scm==8"), None),
     ],
 )
-def test_yanked(pypi_server, arguments, expected) -> None:
+def test_yanked(
+    pypi_server: PypiSimulator, arguments: Any, expected: str | None
+) -> None:
     """Test yanked."""
     allowed_yanked, invalid_wheel = arguments
     expected_wheel = expected

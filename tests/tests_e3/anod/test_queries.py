@@ -1,5 +1,7 @@
 """Tests for e3.anod queries."""
 
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
@@ -23,7 +25,10 @@ class TestSourceClosure:
     spec_dir = os.path.abspath(Path(__file__).parent / "source_closure_specs")
 
     def get_source_closure(
-        self, name, expand_packages=True, other_builds=None
+        self,
+        name: str,
+        expand_packages: bool = True,
+        other_builds: list[str] | None = None,
     ) -> SourceClosure:
         """Get source closure."""
         asr = AnodSpecRepository(self.spec_dir)

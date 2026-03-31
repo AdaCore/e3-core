@@ -11,6 +11,8 @@ import time
 from pathlib import Path
 from subprocess import PIPE, STDOUT
 
+from typing import Any
+
 import pytest
 
 import e3.fs
@@ -52,7 +54,7 @@ def test_run_stdout_stderr() -> None:
     assert p.err.replace("\r", "") == "stderr\n"
 
 
-def test_run_shebang(caplog) -> None:
+def test_run_shebang(caplog: pytest.LogCaptureFixture) -> None:
     """Verify that the parse shebang option works."""
     prog_filename = Path.cwd() / "prog"
     with prog_filename.open("wb") as f:
@@ -477,7 +479,7 @@ def test_kill_process_tree() -> None:
 
     time.sleep(2.0)
 
-    def get_one_child(idx):
+    def get_one_child(idx: int) -> tuple[Any, Any]:
         pid_file = f"child_pid_{idx}"
         gen_prog_name = f"child_prog_{idx}"
         prog = textwrap.dedent(
@@ -555,7 +557,7 @@ def test_run_with_env() -> None:
     assert p1.out.strip() == "helloworld"
 
 
-def test_no_rlimit(caplog) -> None:
+def test_no_rlimit(caplog: pytest.LogCaptureFixture) -> None:
     """Test no rlimit."""
     fake_rlimit = e3.os.process.get_rlimit(platform="null")
     old_get_rlimit = e3.os.process.get_rlimit

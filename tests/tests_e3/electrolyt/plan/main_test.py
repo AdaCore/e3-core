@@ -1,6 +1,9 @@
 """Tests for e3.electrolyt.plan."""
 
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -18,7 +21,13 @@ PLAN_WITH_DISABLED_IGNORED = 4
 PLAN_WITH_EXPLICIT_ENABLED = 2
 
 
-def build_action(spec, build=None, host=None, target=None, board=None) -> str:
+def build_action(
+    spec: str,
+    build: Any = None,
+    host: Any = None,
+    target: Any = None,
+    board: Any = None,
+) -> str:
     """Build an action string from a spec."""
     del build
     del host
@@ -27,7 +36,9 @@ def build_action(spec, build=None, host=None, target=None, board=None) -> str:
     return "build " + spec
 
 
-def _get_new_plancontext(machine_name, ignore_disabled=True):
+def _get_new_plancontext(
+    machine_name: str, ignore_disabled: bool = True
+) -> plan.PlanContext:
     server = host.Host(hostname=machine_name, platform="x86_64-linux", version="suse11")
 
     context = plan.PlanContext(server=server, ignore_disabled=ignore_disabled)
@@ -35,7 +46,7 @@ def _get_new_plancontext(machine_name, ignore_disabled=True):
     return context
 
 
-def _get_plan(data, content):
+def _get_plan(data: dict[str, Any], content: list[str]) -> plan.Plan:
     myplan = plan.Plan(data, entry_point_cls={"ms_preset": entry_point.EntryPoint})
     with Path("plan.txt").open("w") as f:
         f.write("\n".join(content))

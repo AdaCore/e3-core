@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 
+from e3.anod.store import StoreRW
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
@@ -16,7 +17,7 @@ DEFAULT_SETUP = "test"
 EXPECTED_RELEASE_COMPONENTS = 2
 
 
-def test_list_release_components(store) -> None:
+def test_list_release_components(store: StoreRW) -> None:
     """Test list release components."""
     # Use store to simplify the initialization phase.
     build_id = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]

@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from e3.maven import Maven
+
+if TYPE_CHECKING:
+    from tests_e3.conftest import MavenCentralSimulator
 
 # Expected number of Maven artifact links
 EXPECTED_ARTIFACT_LINKS = 4
 
 
-def test_maven(maven_central) -> None:
+def test_maven(maven_central: MavenCentralSimulator) -> None:
     """Test maven."""
     mvn = Maven()
 
