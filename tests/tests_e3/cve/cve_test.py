@@ -1,8 +1,11 @@
 """Tests for e3.cve."""
 
 from pathlib import Path
+from warnings import catch_warnings
+from warnings import simplefilter as warn_filter
 
 import pytest
+from requests_cache import NEVER_EXPIRE
 
 from e3.cve import NVD
 from e3.fs import cp
@@ -11,11 +14,6 @@ from e3.fs import cp
 @pytest.mark.usefixtures("socket_disabled")
 def test_nvd_cve_search() -> None:
     """Test the CVE DB research using cached data."""
-    from warnings import catch_warnings
-    from warnings import simplefilter as warn_filter
-
-    from requests_cache import NEVER_EXPIRE
-
     cache_db = Path.cwd() / "cache"
     cp(Path(__file__).parent / "cache", cache_db, recursive=True)
 

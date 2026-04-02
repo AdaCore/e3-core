@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import importlib.metadata
 import os
 import re
 import struct
@@ -11,7 +12,14 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import e3.env
 import e3.log
+import e3.main
+
+if sys.platform == "win32":
+    from msvcrt import get_osfhandle
+
+    from e3.os.windows.object import object_name
 
 logger = e3.log.getLogger("e3.sys")
 
@@ -137,8 +145,6 @@ class RewriteImportNodeTransformer(ast.NodeTransformer):
 
 def version() -> str:
     """Return the e3-core package version."""
-    import importlib.metadata
-
     return importlib.metadata.version("e3-core")
 
 
@@ -147,7 +153,7 @@ def sanity_check() -> int:
     errors = 0
     print("YAMLCheck:", end=" ")
     try:
-        import yaml
+        import yaml  # noqa: PLC0415  # testing if yaml can be imported
 
         yaml.safe_dump({"Yaml": "works"})
         print("PASSED")
@@ -157,7 +163,10 @@ def sanity_check() -> int:
 
     print("HashlibCheck:", end=" ")
     try:
-        from e3.hash import md5, sha1
+        from e3.hash import (  # noqa: PLC0415  # testing if e3.hash can be imported
+            md5,
+            sha1,
+        )
 
         sha1(__file__)
         md5(__file__)
@@ -176,9 +185,6 @@ def sanity_check() -> int:
 
 def main() -> None:
     """Run the e3 command line tool."""
-    import e3.main
-    from e3.env import Env
-
     m = e3.main.Main(platform_args=True)
     m.argument_parser.add_argument(
         "--platform-info",
@@ -208,7 +214,7 @@ def main() -> None:
             print("Everything OK!")
             return
     elif m.args.platform_info:
-        print(getattr(Env(), m.args.platform_info))
+        print(getattr(e3.env.Env(), m.args.platform_info))
 
 
 def set_python_env(prefix: str) -> None:
@@ -216,8 +222,6 @@ def set_python_env(prefix: str) -> None:
 
     :param prefix: root directory of the python distribution
     """
-    import e3.env
-
     env = e3.env.Env()
     if sys.platform == "win32":  # unix: no cover
         env.add_path(prefix)
@@ -337,10 +341,6 @@ def is_console() -> bool:
         return True
 
     if sys.platform == "win32":  # unix: no cover
-        from msvcrt import get_osfhandle
-
-        from e3.os.windows.object import object_name
-
         stdin_name = object_name(get_osfhandle(stdin_fd))  # type: ignore[arg-type]
         if re.match(r"\\Device\\NamedPipe\\(cygwin|msys).*-pty.*$", stdin_name):
             return True

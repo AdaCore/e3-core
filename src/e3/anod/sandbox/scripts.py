@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+import os
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import e3.anod.driver
+import e3.anod.loader
+import e3.anod.sandbox
+import e3.env
+import e3.store
+import e3.store.cache
 from e3.anod.error import AnodError
 from e3.main import Main
 
@@ -32,16 +40,6 @@ def anod() -> None:
 
     This script is installed in the sandbox.
     """
-    import os
-    import sys
-
-    import e3.anod.driver
-    import e3.anod.loader
-    import e3.anod.sandbox
-    import e3.env
-    import e3.store
-    import e3.store.cache
-
     assert sys.modules["__main__"].__file__ is not None
 
     sandbox_dir = os.path.abspath(

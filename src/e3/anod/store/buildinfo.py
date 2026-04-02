@@ -444,7 +444,7 @@ class BuildInfo:
 
         .. seealso:: py:meth:`as_dict`.
         """
-        import warnings
+        import warnings  # noqa: PLC0415  # deprecated, imported only when called
 
         warnings.warn(
             "`BuildInfo.to_dict` is deprecated, use `BuildInfo.as_dict` instead",

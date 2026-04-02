@@ -538,7 +538,7 @@ class File:
         :param store: the store class to use if store operations are needed
         :return: the File instance
         """
-        from e3.anod.store.buildinfo import BuildInfo
+        from e3.anod.store.buildinfo import BuildInfo  # noqa: PLC0415 circular import
 
         build_info: BuildInfo | None = None
         if "build" in data:
@@ -679,7 +679,7 @@ class File:
         :raise StoreError: if the file already exists in Store (unless force is True)
         :return: a File instance corresponding to the uploaded file on Store
         """
-        from e3.anod.store.buildinfo import BuildInfo
+        from e3.anod.store.buildinfo import BuildInfo  # noqa: PLC0415 circular import
 
         filename = Path(path).name
         bi = BuildInfo.latest(store=store, setup="thirdparties", ready_only=False)

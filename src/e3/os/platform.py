@@ -86,7 +86,7 @@ class SystemInfo:
 
         # Fetch linux distribution info on linux OS
         if cls.uname.system == "Linux":  # linux-only
-            import distro  # type: ignore[import-not-found]
+            import distro  # noqa: PLC0415 linux-only
 
             cls.ld_info = {
                 "name": distro.name(),
@@ -99,13 +99,13 @@ class SystemInfo:
         # setting anyway.
         cls.core_number = 1
         try:
-            import multiprocessing
+            import multiprocessing  # noqa: PLC0415  # optional dependency with fallback
 
             cls.core_number = multiprocessing.cpu_count()
         except Exception:  # defensive code
             logger.exception("multiprocessing error")
             try:
-                import psutil
+                import psutil  # noqa: PLC0415  # fallback if multiprocessing fails
 
                 tmp_core_number = psutil.cpu_count()
                 if not tmp_core_number:
@@ -208,7 +208,7 @@ class SystemInfo:
             # (6.3), the win32 function that returns the version may return
             # the wrong version depending on the application manifest. So
             # python will always return Windows 8 in that case.
-            import ctypes
+            import ctypes  # noqa: PLC0415  # windows-only import
 
             class WinOSVersion(ctypes.Structure):
                 _fields_ = [

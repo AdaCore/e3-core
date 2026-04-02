@@ -137,9 +137,9 @@ class NVD:
             return self
 
         if self.cache_db_path:
-            from datetime import timedelta
+            from datetime import timedelta  # noqa: PLC0415 optional dependency for caching
 
-            from requests_cache import CachedSession
+            from requests_cache import CachedSession  # noqa: PLC0415 optional dependency for caching
 
             self._session = CachedSession(
                 self.cache_db_path,
@@ -182,7 +182,7 @@ class NVD:
     def session(self) -> Session:
         """Return or create HTTP session."""
         if self._session is None:
-            from warnings import warn
+            from warnings import warn  # noqa: PLC0415 deprecated import only when used
 
             warn(
                 "Using NVD.session without using `with` statement is deprecated",

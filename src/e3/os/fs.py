@@ -158,7 +158,7 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
     """
     _ntuple_diskusage = collections.namedtuple("_ntuple_diskusage", "total used free")
     if sys.platform == "win32":  # unix: no cover
-        import ctypes
+        import ctypes  # noqa: PLC0415  # windows-only
 
         c_path = ctypes.c_wchar_p(str(path))
         GetDiskFreeSpaceEx: Callable = ctypes.WINFUNCTYPE(
@@ -216,7 +216,7 @@ def __safe_unlink_func() -> tuple[
     delete it just afterward.
     """
     if sys.platform == "win32":  # unix: no cover
-        from e3.os.windows.fs import NTFile
+        from e3.os.windows.fs import NTFile  # noqa: PLC0415  # windows-only
 
         def win_rm(x: str | Path) -> None:
             """Remove a file or directory on Windows.
@@ -329,7 +329,7 @@ def max_path() -> int:
     :return: the maximum length
     """
     if sys.platform == "win32":  # unix: no cover
-        from ctypes.wintypes import MAX_PATH
+        from ctypes.wintypes import MAX_PATH  # noqa: PLC0415  # windows-only
 
         return MAX_PATH
     # windows: no cover
@@ -366,7 +366,7 @@ def readlink(filename: str | Path) -> str:
     except Exception:
         if sys.platform == "win32":
             # This might be a WSL link
-            from e3.os.windows.fs import NTFile
+            from e3.os.windows.fs import NTFile  # noqa: PLC0415  # windows-only
 
             reparsed_link: str | None = NTFile(filename).wsl_reparse_link_target()
             if reparsed_link is not None:
