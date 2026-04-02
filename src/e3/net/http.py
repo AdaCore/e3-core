@@ -271,7 +271,7 @@ class HTTPSession:
     def download_file(
         self,
         url: str,
-        dest: str | None = None,
+        dest: str | Path | None = None,
         filename: str | None = None,
         fileobj: _Fileobj | None = None,
         validate: Callable[[str], bool] | None = None,
