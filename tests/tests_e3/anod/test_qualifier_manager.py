@@ -8,6 +8,7 @@ from e3.anod.qualifiers_manager import (
     KeySetDeclaration,
     KeyValueDeclaration,
     QualifiersManager,
+    TagDeclaration,
 )
 from e3.anod.spec import Anod
 from e3.env import BaseEnv
@@ -678,8 +679,6 @@ def test_tag_qualifier() -> None:
     assert spec2.build_space_name == "spec_f237cb03"
 
     # Explicitly test value
-    from e3.anod.qualifiers_manager import TagDeclaration
-
     tag = TagDeclaration(
         origin="origin",
         name="tag",

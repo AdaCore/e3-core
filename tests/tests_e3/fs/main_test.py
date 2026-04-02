@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import sys
+import time
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -259,8 +260,6 @@ def test_mv() -> None:
 
 def test_tree_state() -> None:
     """Test tree state."""
-    import time
-
     current_dir = Path.cwd()
     d = str(Path(__file__).parent.parent)
     state = e3.fs.get_filetree_state(d)

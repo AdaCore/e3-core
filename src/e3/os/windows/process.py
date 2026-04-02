@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from ctypes import pointer, sizeof
+from ctypes.wintypes import HANDLE
 from typing import TYPE_CHECKING
+
+from e3.os.windows.native_api import NT, ProcessInfo, Wait
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -17,10 +21,6 @@ def process_exit_code(handle: int) -> int | None:
     :return: the exit code if process is finished or None otherwise
     :raise: WindowsError in case the handle is invalid
     """
-    from ctypes import pointer, sizeof
-
-    from e3.os.windows.native_api import NT, ProcessInfo
-
     process_info = ProcessInfo.Basic()
     query_infoprocess: Callable = NT.QueryInformationProcess  # type: ignore
     status = query_infoprocess(
@@ -55,10 +55,6 @@ def wait_for_objects(
         of timeout
     :raise: WindowsError
     """
-    from ctypes.wintypes import HANDLE
-
-    from e3.os.windows.native_api import NT, Wait
-
     if timeout == 0:
         timeout = Wait.INFINITE
     else:

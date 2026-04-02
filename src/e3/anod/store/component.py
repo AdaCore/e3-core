@@ -456,7 +456,7 @@ class Component:
         :param data: The dictionary returned by Store.
         :param store: a Store instance
         """
-        from e3.anod.store.buildinfo import BuildInfo
+        from e3.anod.store.buildinfo import BuildInfo  # noqa: PLC0415 circular import
 
         readme = None
         if data["readme"]:

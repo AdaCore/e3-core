@@ -9,6 +9,7 @@ status
 from __future__ import annotations
 
 import errno
+import importlib.resources
 import logging
 import os
 import signal
@@ -84,8 +85,6 @@ def get_rlimit(platform: str | None = None) -> str:
         platform = e3.env.Env().build.platform
     if platform == "x86_64-windows64":
         platform = "x86_64-windows"
-
-    import importlib.resources
 
     return str(
         importlib.resources.files("e3.os").joinpath(
@@ -729,7 +728,8 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
     start = time.time()
 
     if sys.platform == "win32":  # unix: no cover
-        from e3.os.windows.process import process_exit_code, wait_for_objects
+        from e3.os.windows.process import process_exit_code  # noqa: PLC0415 windows-only
+        from e3.os.windows.process import wait_for_objects  # noqa: PLC0415 windows-only
 
         remain = int(timeout)
 
@@ -756,7 +756,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
                 raise WaitError from err
 
     else:  # windows: no cover
-        import select
+        import select  # noqa: PLC0415  # unix-only
 
         remain = timeout
 
@@ -821,8 +821,8 @@ def is_running(pid: int) -> bool:
     :param pid: an integer (e.g the value of Run().pid)
     """
     if sys.platform == "win32":  # unix: no cover
-        from e3.os.windows.native_api import NT, Access
-        from e3.os.windows.process import process_exit_code
+        from e3.os.windows.native_api import NT, Access  # noqa: PLC0415 windows-only
+        from e3.os.windows.process import process_exit_code  # noqa: PLC0415 windows-only
 
         if TYPE_CHECKING:
             assert NT.OpenProcess is not None

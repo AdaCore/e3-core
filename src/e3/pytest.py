@@ -176,7 +176,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:  # n
         "cov_source"
     ):
         # Load only the coverage package if it was activated using the --cov option
-        from coverage import Coverage
+        from coverage import Coverage  # noqa: PLC0415  # optional dependency
 
         cov_file = str(session.config.rootpath / ".coverage")
         if hasattr(
@@ -242,8 +242,8 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
     """
     # Only import packages from coverage if needed, the pytest plugin can
     # be used without coverage.
-    from coverage.files import PathAliases
-    from coverage.sqldata import CoverageData
+    from coverage.files import PathAliases  # noqa: PLC0415  # optional dependency
+    from coverage.sqldata import CoverageData  # noqa: PLC0415  # optional dependency
 
     paths = PathAliases()
     paths.add(origin_dir, new_dir)

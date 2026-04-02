@@ -10,6 +10,13 @@ from typing import TYPE_CHECKING
 import stevedore
 
 import e3.log
+from e3.platform_db.knowledge_base import (
+    BUILD_TARGETS,
+    CPU_INFO,
+    HOST_GUESS,
+    OS_INFO,
+    PLATFORM_INFO,
+)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -68,14 +75,6 @@ def get_knowledge_base() -> KnowledgeBase:
     :return: The knowledge base with the keys (cpu_info, os_info,
         platform_info, build_targets, host_guess)
     """
-    from e3.platform_db.knowledge_base import (
-        BUILD_TARGETS,
-        CPU_INFO,
-        HOST_GUESS,
-        OS_INFO,
-        PLATFORM_INFO,
-    )
-
     e3.log.debug("loading knownledge base")
     # Load all platform_db plugins
     ext: stevedore.ExtensionManager = stevedore.ExtensionManager(

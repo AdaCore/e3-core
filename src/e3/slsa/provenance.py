@@ -1719,7 +1719,8 @@ class TypeURI:
         :param uri: The URI string to initialize this TypeURI with
         """
         # Validate this uri.
-        from urllib.parse import ParseResult, urlparse
+        from urllib.parse import ParseResult  # noqa: PLC0415 lazy import for validation
+        from urllib.parse import urlparse  # noqa: PLC0415 lazy import for validation
 
         try:
             parsed: ParseResult = urlparse(uri)

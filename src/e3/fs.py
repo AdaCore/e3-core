@@ -850,7 +850,7 @@ def sync_tree(  # noqa: PLR0915
                 try:
                     getattr(os, "lchflags")(dst.path, src.stat.st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
-                    import errno
+                    import errno  # noqa: PLC0415  # check platform-specific error code
 
                     if (
                         not hasattr(errno, "EOPNOTSUPP")
@@ -871,7 +871,7 @@ def sync_tree(  # noqa: PLR0915
                 try:
                     getattr(os, "chflags")(dst.path, src.stat.st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
-                    import errno
+                    import errno  # noqa: PLC0415  # check platform-specific error code
 
                     if (
                         not hasattr(errno, "EOPNOTSUPP")

@@ -24,6 +24,11 @@ try:
 except ImportError:
     psutil = None
 
+try:
+    from ptyprocess import PtyProcess
+except ImportError:
+    PtyProcess = None  # type: ignore[assignment,misc]
+
 # Expected values for process tests
 CTRL_C_TEST_TIMEOUT_SECONDS = 30
 EXPECTED_LOG_LINES = 2
@@ -167,11 +172,9 @@ def test_rlimit_ctrl_c() -> None:
                 The foreground process has been killed, leaving no foreground process.
                 Signals were no longer propagated, so CTRL-C did nothing.
     """
-    try:
-        from ptyprocess import PtyProcess
-    except ImportError:
+    if PtyProcess is None:
         msg = "ptyprocess is needed to run this tests"
-        raise ImportError(msg) from None
+        raise ImportError(msg)
 
     script_to_run = """
 from __future__ import annotations
@@ -207,11 +210,9 @@ def test_rlimit_foreground_option() -> None:
 
     Test if we can read/write from an interactive terminal using rlimit --foreground.
     """
-    try:
-        from ptyprocess import PtyProcess
-    except ImportError:
+    if PtyProcess is None:
         msg = "ptyprocess is needed to run this tests"
-        raise ImportError(msg) from None
+        raise ImportError(msg)
 
     # Test with --foreground
     os.environ["PS1"] = "$ "

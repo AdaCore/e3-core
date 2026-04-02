@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import e3.fingerprint
 from e3.env import Env
 from e3.error import E3Error
 from e3.fingerprint import Fingerprint
@@ -99,8 +100,6 @@ def test_add_order_not_important() -> None:
 
 def test_fingerprint_version() -> None:
     """Changing the FINGERPRINT_VERSION modify the fingerprint's checksum."""
-    import e3.fingerprint
-
     f1 = Fingerprint()
 
     e3.fingerprint.FINGERPRINT_VERSION = "0.0"
