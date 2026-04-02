@@ -5,7 +5,7 @@ from __future__ import annotations
 import heapq
 import time
 import typing
-from datetime import datetime
+from datetime import datetime, timezone
 from queue import Empty, Queue
 from typing import TYPE_CHECKING
 
@@ -180,7 +180,7 @@ class Scheduler:
 
         self.dag = dag
         self.dag_iterator = DAGIterator(dag, enable_busy_state=True)
-        self.start_time = datetime.now()
+        self.start_time = datetime.now(tz=timezone.utc)
         self.stop_time = None
         self.max_active_jobs = 0
 
@@ -224,7 +224,7 @@ class Scheduler:
                 self.safe_collect(p)
                 p.on_finish(self)
             raise
-        self.stop_time = datetime.now()
+        self.stop_time = datetime.now(tz=timezone.utc)
 
     def push(self, job: Job) -> None:
         """Push a job into a queue.

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from time import sleep
 
@@ -386,7 +386,7 @@ def test_upload_thirdparty_from_dir(store: StoreRW) -> None:
     del bid
 
     mkdir("test")
-    today = datetime.now().strftime("%Y%m%d")
+    today = datetime.now(tz=timezone.utc).strftime("%Y%m%d")
     with Path("test/test.txt").open("w") as fd:
         fd.write("This is a test")
 

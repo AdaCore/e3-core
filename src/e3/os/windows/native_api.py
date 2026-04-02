@@ -21,7 +21,7 @@ from ctypes.wintypes import (
     USHORT,
     WORD,
 )
-from datetime import datetime
+from datetime import datetime, timezone
 
 from e3.error import E3Error
 
@@ -216,8 +216,8 @@ class FileTime(Structure):
 
         :param t: datetime to convert to Windows file time
         """
-        # Transform date to Windows timestamp
-        timestamp = (t - datetime(1970, 1, 1)).total_seconds()
+        # Transform date to Windows timestamp (handles both aware and naive datetimes)
+        timestamp = t.timestamp()
 
         # Windows use hundreds of ns as unit
         timestamp = (int(timestamp) + W32_EPOCH_OFFSET) * 10_000_000
@@ -234,7 +234,7 @@ class FileTime(Structure):
         """Convert to datetime object."""
         try:
             return datetime.fromtimestamp(
-                self.filetime // 10_000_000 - W32_EPOCH_OFFSET
+                self.filetime // 10_000_000 - W32_EPOCH_OFFSET, tz=timezone.utc
             )
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
@@ -262,8 +262,8 @@ class LargeFileTime(Structure):
 
         :param t: datetime to convert to Windows file time
         """
-        # Transform date to Windows timestamp
-        timestamp = (t - datetime(1970, 1, 1)).total_seconds()
+        # Transform date to Windows timestamp (handles both aware and naive datetimes)
+        timestamp = t.timestamp()
 
         # Windows use hundreds of ns as unit
         timestamp = (int(timestamp) + W32_EPOCH_OFFSET) * 10_000_000
@@ -274,7 +274,7 @@ class LargeFileTime(Structure):
         """Convert to datetime object."""
         try:
             return datetime.fromtimestamp(
-                self.filetime // 10_000_000 - W32_EPOCH_OFFSET
+                self.filetime // 10_000_000 - W32_EPOCH_OFFSET, tz=timezone.utc
             )
         except ValueError as err:  # defensive code
             # Add some information to ease debugging
