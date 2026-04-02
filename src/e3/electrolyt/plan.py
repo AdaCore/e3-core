@@ -301,8 +301,8 @@ class PlanContext:
     def _add_action(
         self,
         name: str,
-        *args: Any,  # noqa: ANN401  # generic action accepts any signature
-        **kwargs: Any,  # noqa: ANN401  # generic action accepts any signature
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Process action calls in plans.
 

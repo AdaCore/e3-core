@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 import pytest
 
@@ -529,24 +529,24 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module: Any,
-            build: Any = None,
-            default_build: Any = False,
-            host: Any = None,
-            target: Any = None,
-            board: Any = None,
-            weathers: Any = None,
-            product_version: Any = None,
-            when_missing: Any = None,
-            manual_action: Any = False,
-            qualifier: Any = None,
-            jobs: Any = None,
-            releases: Any = None,
-            process_suffix: Any = None,
-            update_vcs: Any = False,
-            recursive: Any = None,
-            query_range: Any = None,
-            force_repackage: Any = False,
+            module: str | None,
+            build: str | None = None,
+            default_build: bool = False,
+            host: str | None = None,
+            target: str | None = None,
+            board: str | None = None,
+            weathers: str | list[str] | None = None,
+            product_version: str | None = None,
+            when_missing: str | None = None,
+            manual_action: bool = False,
+            qualifier: str | dict[str, str | bool] | None = None,
+            jobs: int | None = None,
+            releases: list[str] | None = None,
+            process_suffix: str | None = None,
+            update_vcs: bool = False,
+            recursive: str | None = None,
+            query_range: str | None = None,
+            force_repackage: bool = False,
         ) -> None:
             pass
 
@@ -653,23 +653,23 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module: Any,
-            build: Any = None,
+            module: str | None,
+            build: str | None = None,
             default_build: bool = False,
-            host: Any = None,
-            target: Any = None,
-            board: Any = None,
-            weathers: Any = None,
-            product_version: Any = None,
-            when_missing: Any = None,
+            host: str | None = None,
+            target: str | None = None,
+            board: str | None = None,
+            weathers: str | list[str] | None = None,
+            product_version: str | None = None,
+            when_missing: str | None = None,
             manual_action: bool = False,
-            qualifier: Any = None,
-            jobs: Any = None,
-            releases: Any = None,
-            process_suffix: Any = None,
+            qualifier: str | dict[str, str | bool] | None = None,
+            jobs: int | None = None,
+            releases: list[str] | None = None,
+            process_suffix: str | None = None,
             update_vcs: bool = False,
-            recursive: Any = None,
-            query_range: Any = None,
+            recursive: str | None = None,
+            query_range: str | None = None,
             force_repackage: bool = False,
         ) -> None:
             pass
@@ -727,23 +727,23 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module: Any,
-            build: Any = None,
+            module: str | None,
+            build: str | None = None,
             default_build: bool = False,
-            host: Any = None,
-            target: Any = None,
-            board: Any = None,
-            weathers: Any = None,
-            product_version: Any = None,
-            when_missing: Any = None,
+            host: str | None = None,
+            target: str | None = None,
+            board: str | None = None,
+            weathers: str | list[str] | None = None,
+            product_version: str | None = None,
+            when_missing: str | None = None,
             manual_action: bool = False,
-            qualifier: Any = None,
-            jobs: Any = None,
-            releases: Any = None,
-            process_suffix: Any = None,
+            qualifier: str | dict[str, str | bool] | None = None,
+            jobs: int | None = None,
+            releases: list[str] | None = None,
+            process_suffix: str | None = None,
             update_vcs: bool = False,
-            recursive: Any = None,
-            query_range: Any = None,
+            recursive: str | None = None,
+            query_range: str | None = None,
             force_repackage: bool = False,
         ) -> None:
             pass
@@ -782,23 +782,23 @@ class TestContext:
 
         # Declare available actions and their signature
         def anod_action(
-            module: Any,
-            build: Any = None,
+            module: str | None,
+            build: str | None = None,
             default_build: bool = False,
-            host: Any = None,
-            target: Any = None,
-            board: Any = None,
-            weathers: Any = None,
-            product_version: Any = None,
-            when_missing: Any = None,
+            host: str | None = None,
+            target: str | None = None,
+            board: str | None = None,
+            weathers: str | list[str] | None = None,
+            product_version: str | None = None,
+            when_missing: str | None = None,
             manual_action: bool = False,
-            qualifier: Any = None,
-            jobs: Any = None,
-            releases: Any = None,
-            process_suffix: Any = None,
+            qualifier: str | dict[str, str | bool] | None = None,
+            jobs: int | None = None,
+            releases: list[str] | None = None,
+            process_suffix: str | None = None,
             update_vcs: bool = False,
-            recursive: Any = None,
-            query_range: Any = None,
+            recursive: str | None = None,
+            query_range: str | None = None,
             force_repackage: bool = False,
         ) -> None:
             pass
@@ -834,7 +834,7 @@ class TestContext:
         cm = plan.PlanContext(server=current_env)
 
         # Declare available actions and their signature
-        def plan_action(platform: Any) -> None:
+        def plan_action(platform: str) -> None:
             pass
 
         cm.register_action("plan_action", plan_action)

@@ -1,7 +1,6 @@
 """Tests for e3.decorator."""
 
 from random import random
-from typing import Any
 
 import pytest
 
@@ -17,7 +16,7 @@ def test_memoize() -> None:
     # can see whether the cache is used or not
 
     @e3.decorator.memoize
-    def t(arg: Any) -> float:
+    def t(arg: int | list[int]) -> float:
         """Do foo."""
         del arg
         return random()
@@ -39,7 +38,7 @@ def test_memoize() -> None:
 
     class C:
         @e3.decorator.memoize
-        def t(self, arg: Any) -> float:
+        def t(self, arg: int) -> float:
             del arg
             return random()
 

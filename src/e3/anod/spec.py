@@ -226,8 +226,8 @@ class Anod:
 
     def __new__(
         cls,
-        *args: Any,  # noqa: ANN401  # generic constructor
-        **kwargs: Any,  # noqa: ANN401  # generic constructor
+        *args: Any,
+        **kwargs: Any,
     ) -> Any:  # noqa: ANN401  # generic constructor
         """Replace `method` by property when decorator is missing."""
         should_be_property = (
@@ -721,7 +721,11 @@ class Anod:
             :param version: version callback function
             """
 
-            def primitive_func(self: Anod, *args, **kwargs) -> Any:  # type: ignore
+            def primitive_func(
+                self: Anod,
+                *args: Any,
+                **kwargs: Any,
+            ) -> object:  # type: ignore
                 self.log.debug("%s %s starts", self.name, f.__name__)
 
                 # Ensure temporary directory is set to a directory local to

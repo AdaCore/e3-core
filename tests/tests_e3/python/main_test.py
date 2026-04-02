@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 
-if TYPE_CHECKING:
-    from tests_e3.conftest import PypiSimulator
 import yaml
 
 from e3.fs import mkdir
@@ -16,6 +14,9 @@ from e3.os.process import Run
 from e3.python.pypi import PyPIClosure, PyPIError
 from e3.python.wheel import Wheel
 from e3.sys import python_script
+
+if TYPE_CHECKING:
+    from tests.tests_e3.conftest import PypiSimulator
 
 # Expected number of packages in PyPI closure tests
 EXPECTED_PACKAGE_CLOSURE_SIZE = 2
@@ -179,7 +180,9 @@ def test_star_requirements() -> None:
     ],
 )
 def test_yanked(
-    pypi_server: PypiSimulator, arguments: Any, expected: str | None
+    pypi_server: PypiSimulator,
+    arguments: tuple[str | None, str],
+    expected: str | None,
 ) -> None:
     """Test yanked."""
     allowed_yanked, invalid_wheel = arguments

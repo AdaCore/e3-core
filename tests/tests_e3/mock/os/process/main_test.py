@@ -49,7 +49,11 @@ class SleepCommandResult(CommandResult):
         self.seconds = seconds
         super().__init__(["sleep", str(seconds)])
 
-    def __call__(self, *args: Any, **kwargs: Any) -> None:
+    def __call__(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Sleep x seconds."""
         time.sleep(self.seconds)
 

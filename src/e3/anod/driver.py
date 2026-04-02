@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import wraps
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import e3.log
 import e3.store
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     from e3.anod.loader import AnodSpecRepository
     from e3.anod.sandbox import SandBox
-    from e3.anod.spec import Anod
+    from e3.anod.spec import PRIMITIVE, Anod
     from e3.store.backends.base import Store
 
     F = TypeVar("F", bound=Callable[..., Any])
@@ -30,8 +30,15 @@ def primitive_check() -> Callable[[F], F]:
 
     def decorator(func: F) -> F:
         @wraps(func)
-        def wrapper(self: AnodDriver, *args: Any, **kwargs: Any) -> Any:
-            if not has_primitive(self.anod_instance, func.__name__):  # type: ignore[arg-type]
+        def wrapper(
+            self: AnodDriver,
+            *args: Any,
+            **kwargs: Any,
+        ) -> object:
+            if not has_primitive(
+                self.anod_instance,
+                cast("Literal['download'] | PRIMITIVE", func.__name__),
+            ):
                 msg = f"no primitive {func.__name__}"
                 raise AnodError(msg)
             if self.anod_instance.build_space is None:

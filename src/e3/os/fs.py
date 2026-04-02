@@ -174,8 +174,8 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
         )
 
         def GetDiskFreeSpaceEx_errcheck(
-            result: int, func: Any, args: tuple[Any, ...]
-        ) -> tuple[Any, Any, Any]:
+            result: int, func: object, args: tuple[object, ...]
+        ) -> tuple[object, object, object]:
             """Error check function for GetDiskFreeSpaceEx.
 
             :param result: return value from the function

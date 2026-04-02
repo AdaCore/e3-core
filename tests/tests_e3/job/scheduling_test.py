@@ -2,13 +2,16 @@
 
 import sys
 from collections.abc import Callable
-from typing import Any, NoReturn
+from typing import NoReturn, TypeVar
 
 import pytest
 
 from e3.collection.dag import DAG
 from e3.job import Job, ProcessJob
 from e3.job.scheduler import Scheduler
+
+# TypeVar for polymorphic job data
+JobDataT = TypeVar("JobDataT")
 
 # Expected maximum concurrent jobs in scheduler tests
 MAX_CONCURRENT_JOBS = 2
@@ -99,7 +102,7 @@ class TestScheduler:
 
         def get_job(
             uid: str,
-            data: Any,
+            data: JobDataT,
             predecessors: frozenset[str],
             notify_end: Callable[[str], None],
         ) -> NopJob:
@@ -130,7 +133,7 @@ class TestScheduler:
 
         def get_job(
             uid: str,
-            data: Any,
+            data: JobDataT,
             predecessors: frozenset[str],
             notify_end: Callable[[str], None],
         ) -> SleepJob:
@@ -156,7 +159,7 @@ class TestScheduler:
 
         def get_job(
             uid: str,
-            data: Any,
+            data: JobDataT,
             predecessors: frozenset[str],
             notify_end: Callable[[str], None],
         ) -> NopJob:
@@ -201,7 +204,7 @@ class TestScheduler:
             def get_job(
                 self,
                 uid: str,
-                data: Any,
+                data: JobDataT,
                 predecessors: frozenset[str],
                 notify_end: Callable[[str], None],
             ) -> NopJob:
