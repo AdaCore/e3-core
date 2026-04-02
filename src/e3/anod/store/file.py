@@ -730,7 +730,7 @@ class File:
 
         :return: name of the uploaded package
         """
-        today = datetime.now().strftime("%Y%m%d")
+        today = datetime.now(tz=timezone.utc).strftime("%Y%m%d")
         filename = f"{prefix}-{today}.tgz"
         dest = build_dir or str(Path(path).parent)
         create_archive(

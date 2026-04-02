@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import threading
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 import e3.log
@@ -101,12 +101,12 @@ class Job(metaclass=abc.ABCMeta):
     def record_start_time(self) -> None:
         """Log the starting time of a job."""
         with self.lock:
-            self.__start_time = datetime.now()
+            self.__start_time = datetime.now(tz=timezone.utc)
 
     def record_stop_time(self) -> None:
         """Log the stopping time of a job."""
         with self.lock:
-            self.__stop_time = datetime.now()
+            self.__stop_time = datetime.now(tz=timezone.utc)
 
     @property
     def timing_info(self) -> JobTimingInfo:
@@ -120,7 +120,7 @@ class Job(metaclass=abc.ABCMeta):
         if start is None:
             duration = 0.0
         else:
-            duration = ((stop or datetime.now()) - start).total_seconds()
+            duration = ((stop or datetime.now(tz=timezone.utc)) - start).total_seconds()
         return JobTimingInfo(start, stop, duration)
 
     def start(self, slot: int) -> None:

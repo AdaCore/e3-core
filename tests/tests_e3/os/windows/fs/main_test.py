@@ -3,7 +3,7 @@
 import contextlib
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -39,9 +39,9 @@ def test_read_attributes() -> None:
     assert "test_read_attr_file.txt" in str(ntfile)
 
     ntfile.read_attributes()
-    assert datetime.now() - ntfile.basic_info.change_time.as_datetime < timedelta(
-        seconds=10
-    )
+    assert datetime.now(
+        tz=timezone.utc
+    ) - ntfile.basic_info.change_time.as_datetime < timedelta(seconds=10)
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
@@ -69,7 +69,7 @@ def test_write_attributes() -> None:
     ntfile.read_attributes()
     ntfile.open(Access.READ_ATTRS)
     ntfile.basic_info.change_time = LargeFileTime(
-        datetime.now() - timedelta(seconds=3600)
+        datetime.now(tz=timezone.utc) - timedelta(seconds=3600)
     )
     assert str(time.localtime().tm_year) in str(ntfile.basic_info.change_time)
     try:
@@ -77,11 +77,13 @@ def test_write_attributes() -> None:
             ntfile.write_attributes()
     finally:
         ntfile.close()
-    ntfile.basic_info.change_time = LargeFileTime(datetime.now() - timedelta(days=3))
-    ntfile.write_attributes()
-    assert datetime.now() - ntfile.basic_info.change_time.as_datetime > timedelta(
-        seconds=3000
+    ntfile.basic_info.change_time = LargeFileTime(
+        datetime.now(tz=timezone.utc) - timedelta(days=3)
     )
+    ntfile.write_attributes()
+    assert datetime.now(
+        tz=timezone.utc
+    ) - ntfile.basic_info.change_time.as_datetime > timedelta(seconds=3000)
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows specific test")
