@@ -10,7 +10,7 @@ import tempfile
 import zipfile
 from contextlib import closing
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import e3
 import e3.error
@@ -103,7 +103,7 @@ class ArchiveError(e3.error.E3Error):
     """Exception raised for archive operations errors."""
 
 
-def is_known_archive_format(filename: str) -> bool:
+def is_known_archive_format(filename: str | Path) -> bool:
     """Check if a given path is a supported archive format.
 
     :param filename: path
@@ -153,8 +153,8 @@ def check_type(
 
 
 def unpack_archive(  # noqa: PLR0915
-    filename: str,
-    dest: str,
+    filename: str | Path,
+    dest: str | Path,
     fileobj: IO[bytes] | None = None,
     selected_files: Sequence[str] | None = None,
     remove_root_dir: RemoveRootDirType = False,
@@ -163,7 +163,7 @@ def unpack_archive(  # noqa: PLR0915
     delete: bool = False,
     ignore: list[str] | None = None,
     preserve_timestamps: bool = True,
-    tmp_dir_root: str | None = None,
+    tmp_dir_root: str | Path | None = None,
 ) -> None:
     """Unpack an archive file (.tgz, .tar.gz, .tar or .zip).
 
@@ -233,7 +233,7 @@ def unpack_archive(  # noqa: PLR0915
 
         return unpack_cmd(filename, dest, **kwargs)
 
-    ext = check_type(filename, force_extension=force_extension)
+    ext = check_type(os.fspath(filename), force_extension=force_extension)
 
     # If remove_root_dir is set then extract to a temp directory first.
     # Otherwise extract directly to the final destination
@@ -242,7 +242,7 @@ def unpack_archive(  # noqa: PLR0915
             tmp_dir_root = str(Path(os.path.abspath(dest)).parent)
         tmp_dest = tempfile.mkdtemp(prefix="", dir=tmp_dir_root)
     else:
-        tmp_dest = dest
+        tmp_dest = os.fspath(dest)
 
     try:
         if ext == "tar" or ext == "tar.bz2" or ext == "tar.gz" or ext == "tar.xz":
@@ -381,8 +381,8 @@ def unpack_archive(  # noqa: PLR0915
 
 def create_archive(
     filename: str,
-    from_dir: str,
-    dest: str | None = None,
+    from_dir: str | Path,
+    dest: str | Path | None = None,
     fileobj: IO[bytes] | None = None,
     force_extension: str | None = None,
     from_dir_rename: str | None = None,
@@ -417,12 +417,13 @@ def create_archive(
         raise ValueError(msg)
 
     # Check extension
-    from_dir = from_dir.rstrip("/")
+    from_dir = os.fspath(from_dir).rstrip("/")
 
     # If fileobj is None, dest is not None
-    filepath = (
-        os.path.abspath(Path(cast(str, dest), filename)) if fileobj is None else None
-    )
+    filepath: str | None = None
+    if fileobj is None:
+        assert dest is not None
+        filepath = os.path.abspath(Path(dest, filename))
 
     ext = check_type(filename, force_extension=force_extension)
 
@@ -430,11 +431,13 @@ def create_archive(
         from_dir_rename = Path(from_dir).name
 
     if ext == "zip":
-        zip_archive = zipfile.ZipFile(
-            cast(str, filepath) if fileobj is None else fileobj,
-            "w",
-            zipfile.ZIP_DEFLATED,
-        )
+        if fileobj is None:
+            assert filepath is not None
+            file: str | IO[bytes] = filepath
+        else:
+            file = fileobj
+
+        zip_archive = zipfile.ZipFile(file, "w", zipfile.ZIP_DEFLATED)
         for root, _, files in os.walk(from_dir):
             relative_root = os.path.relpath(
                 os.path.abspath(root), os.path.abspath(from_dir)
