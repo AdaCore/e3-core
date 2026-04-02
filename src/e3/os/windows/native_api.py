@@ -52,6 +52,7 @@ class FileAttribute(Structure):
     _fields_ = [("attr", ULONG)]
 
     def __str__(self) -> str:
+        """Return string representation of active file attributes."""
         result = []
         for k in FileAttribute.__dict__:
             if not k.startswith("_") and k.isupper():
@@ -195,6 +196,7 @@ class UnicodeString(Structure):
         Structure.__init__(self, length * 2, max_length * 2, ctypes_strbuf)
 
     def __len__(self) -> int:
+        """Return the length of the Unicode string."""
         return self.length
 
 
@@ -242,6 +244,7 @@ class FileTime(Structure):
             raise ValueError(msg) from err
 
     def __str__(self) -> str:
+        """Return string representation of file time."""
         try:
             return str(time.ctime(self.filetime // 10_000_000 - W32_EPOCH_OFFSET))
         except ValueError:  # defensive code
@@ -282,6 +285,7 @@ class LargeFileTime(Structure):
             raise ValueError(msg) from err
 
     def __str__(self) -> str:
+        """Return string representation of large file time."""
         try:
             return str(time.ctime(self.filetime // 10_000_000 - W32_EPOCH_OFFSET))
         except ValueError:  # defensive code
@@ -347,6 +351,7 @@ class FileInfo:
             self.file_attributes = FileAttribute(0)
 
         def __str__(self) -> str:
+            """Return string representation of basic file information."""
             result = f"creation_time:    {self.creation_time}\n"
             result += f"last_access_time: {self.last_access_time}\n"
             result += f"last_write_time:  {self.last_write_time}\n"
@@ -566,6 +571,7 @@ class NTException(E3Error):
         E3Error.__init__(self, message, origin=origin)
 
     def __str__(self) -> str:
+        """Return string representation of NT exception with status code."""
         return E3Error.__str__(self) + "(status={:X} '{}')".format(
             self.status,
             Status.msgs.get(self.status, "unknown"),

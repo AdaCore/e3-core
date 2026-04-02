@@ -136,6 +136,7 @@ class NTFile:
         self.is_dir_empty_last_seen_file: str | None = None
 
     def __str__(self) -> str:
+        """Return string representation of NT file info."""
         result = [
             "{:<20}: {}".format("path", self.path),
             "{:<20}: {}".format("nt_filename", self.nt_filename),

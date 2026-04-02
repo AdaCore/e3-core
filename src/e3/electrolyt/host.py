@@ -107,6 +107,7 @@ class HostDB:
             self.add_host(hostname, platform, version, **result)
 
     def __getitem__(self, key: str) -> Host:
+        """Get host by name."""
         return self.hosts[key]
 
     def get(self, key: str, default: Host | None = None) -> Host | None:

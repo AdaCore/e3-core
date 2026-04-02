@@ -104,6 +104,7 @@ class SPDXEntry(metaclass=ABCMeta):
 
     @abstractmethod
     def __str__(self) -> str:
+        """Return string representation of SPDX entry."""
         pass
 
     def __format__(self, format_spec: str) -> str:
@@ -133,6 +134,7 @@ class SPDXEntryStr(SPDXEntry):
         self.value = value
 
     def __str__(self) -> str:
+        """Return string representation of SPDX entry."""
         return self.value
 
     def __gt__(self, other: object) -> bool:
@@ -162,6 +164,7 @@ class SPDXEntryMaybeStr(SPDXEntry):
         self.value = value
 
     def __str__(self) -> str:
+        """Return string representation of SPDX entry."""
         return self.value
 
     def to_json_dict(self) -> dict[str, Any]:
@@ -193,6 +196,7 @@ class SPDXEntryBool(SPDXEntry):
         self.value: bool = value
 
     def __str__(self) -> str:
+        """Return string representation of boolean value."""
         return "true" if self.value else "false"
 
     def to_json_dict(self) -> dict[str, Any]:
@@ -337,6 +341,7 @@ class SPDXID(SPDXEntryStr):
         super().__init__(re.sub(SPDXID_R, "", value))
 
     def __str__(self) -> str:
+        """Return string representation of SPDX ID."""
         return f"{self.PREFIX}{self.value}"
 
     def __eq__(self, o: object) -> bool:
@@ -347,6 +352,7 @@ class SPDXID(SPDXEntryStr):
         return isinstance(o, SPDXID) and o.value == self.value
 
     def __hash__(self) -> int:
+        """Return hash value of SPDX ID."""
         return hash(self.value)
 
     @classmethod
@@ -483,6 +489,7 @@ class EntityRef(SPDXEntry):
         self.value = value
 
     def __str__(self) -> str:
+        """Return string representation of entity reference."""
         if self.value == NOASSERTION:
             return NOASSERTION
         return self.value.to_tagvalue()
@@ -745,6 +752,7 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
         """Algorithm."""
 
     def __str__(self) -> str:
+        """Return string representation of package checksum."""
         return f"{self.algorithm}: {self.value}"
 
     def to_json_dict(self) -> dict[str, dict[str, str]]:
@@ -1078,6 +1086,7 @@ class ExternalRef(SPDXEntry):
         self.reference_locator = reference_locator
 
     def __str__(self) -> str:
+        """Return string representation of external reference."""
         return " ".join(
             (self.reference_category.value, self.reference_type, self.reference_locator)
         )
@@ -1351,6 +1360,7 @@ class Relationship(SPDXEntry):
         self.related_spdx_element = related_spdx_element
 
     def __str__(self) -> str:
+        """Return string representation of relationship."""
         return (
             f"{self.spdx_element_id} {self.relationship_type.name}"
             f" {self.related_spdx_element}"
@@ -1558,6 +1568,7 @@ class DocumentInformation(SPDXSection):
     spdx_id: SPDXID = SPDXID(SPDXID.DEFAULT_ID)
 
     def __post_init__(self) -> None:
+        """Initialize document namespace after dataclass initialization."""
         self.document_namespace = DocumentNamespace(f"{self.document_name}-{uuid4()}")
 
     @classmethod
@@ -1595,6 +1606,7 @@ class CreationInformation(SPDXSection):
     )
 
     def __post_init__(self) -> None:
+        """Initialize creation timestamp after dataclass initialization."""
         self.created_now = Created(
             datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         )

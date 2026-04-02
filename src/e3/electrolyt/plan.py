@@ -411,6 +411,7 @@ class PlanContext:
         self.action_list.append(result)
 
     def __enter__(self) -> None:
+        """Enter context manager for plan context."""
         assert self.plan is not None
         self.plan.mod.__dict__["env"] = self.env
         return None
@@ -421,6 +422,7 @@ class PlanContext:
         _value: BaseException | None,
         _tb: TracebackType | None,
     ) -> None:
+        """Exit context manager for plan context."""
         del _type, _value, _tb
         self.stack.pop()
         assert self.plan is not None

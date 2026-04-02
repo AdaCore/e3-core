@@ -33,6 +33,7 @@ class BuildVar:
         self.kind = "var"
 
     def __str__(self) -> str:
+        """Return string representation of variable dependency."""
         return f"{self.name}={self.value}"
 
 

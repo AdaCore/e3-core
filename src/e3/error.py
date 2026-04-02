@@ -38,6 +38,7 @@ class E3Error(Exception):
         return self
 
     def __str__(self) -> str:
+        """Return string representation of E3 error."""
         if self.messages:
             error_msg = self.messages[-1]
         else:

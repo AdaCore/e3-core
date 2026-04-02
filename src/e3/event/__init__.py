@@ -82,6 +82,7 @@ class Event:
         self.set_formatter("end_time", self.format_date)
 
     def __enter__(self) -> Event:
+        """Enter context manager for event."""
         return self
 
     def __exit__(

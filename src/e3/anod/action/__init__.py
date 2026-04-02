@@ -59,6 +59,7 @@ class Root(Action):
         super().__init__(uid="root", data="root")
 
     def __str__(self) -> str:
+        """Return string representation of root node."""
         return "root node"
 
 
@@ -82,6 +83,7 @@ class GetSource(Action):
         self.builder = builder
 
     def __str__(self) -> str:
+        """Return string representation of GetSource action."""
         return f"get source {self.data.name}"
 
 
@@ -108,6 +110,7 @@ class DownloadSource(Download):
         self.builder = builder
 
     def __str__(self) -> str:
+        """Return string representation of DownloadSource action."""
         return f"download source {self.builder.name}"
 
 
@@ -132,6 +135,7 @@ class InstallSource(Action):
         self.source = source
 
     def __str__(self) -> str:
+        """Return string representation of InstallSource action."""
         return f"install source {self.data[1].name}"
 
 
@@ -159,6 +163,7 @@ class CreateSource(Action):
         self.source_name = source_name
 
     def __str__(self) -> str:
+        """Return string representation of CreateSource action."""
         return f"create source {self.data[1]}"
 
 
@@ -181,6 +186,7 @@ class CreateSources(Action):
         self.anod_instance = anod_instance
 
     def __str__(self) -> str:
+        """Return string representation of CreateSources action."""
         return f"create all sources for {self.anod_instance.name}.anod"
 
 
@@ -212,6 +218,7 @@ class Checkout(Action):
         self.repo_data = repo_data
 
     def __str__(self) -> str:
+        """Return string representation of Checkout action."""
         return f"checkout {self.data[0]}"
 
 
@@ -233,6 +240,7 @@ class AnodAction(Action):
         self.anod_instance = anod_instance
 
     def __str__(self) -> str:
+        """Return string representation of Anod action."""
         if self.data.env.is_cross:
             result = (
                 f"{self.data.kind} {self.data.name} "
@@ -281,6 +289,7 @@ class DownloadBinary(Download):
         super().__init__(uid=uid, data=data)
 
     def __str__(self) -> str:
+        """Return string representation of DownloadBinary action."""
         return "download binary of {}".format(self.uid.rsplit(".", 1)[0])
 
 
@@ -309,6 +318,7 @@ class UploadComponent(Upload):
         self.anod_instance = data
 
     def __str__(self) -> str:
+        """Return string representation of UploadComponent action."""
         return "upload {} of {}".format(
             self.str_prefix,
             self.uid.rsplit(".", 1)[0],
@@ -372,6 +382,7 @@ class CheckVirus(Action):
         self.anod_instance = data
 
     def __str__(self) -> str:
+        """Return string representation of CheckVirus action."""
         return f"check for viruses in {self.uid.rsplit('.', 1)[0]}"
 
 
