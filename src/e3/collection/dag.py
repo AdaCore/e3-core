@@ -49,6 +49,7 @@ class DAGIterator:
         self.pred_number = {k: len(v) for k, v in self.dag.vertex_predecessors_items()}
 
     def __iter__(self) -> DAGIterator:
+        """Return iterator for DAG traversal."""
         return self
 
     def __next__(
@@ -596,6 +597,7 @@ class DAG:
         return result
 
     def __iter__(self) -> Iterator[tuple[VertexID, Any]]:
+        """Return iterator for DAG vertices in topological order."""
         return (
             iter(DAGIterator(self))
             if self.__cached_topological_order is None
@@ -767,9 +769,11 @@ class DAG:
         return result
 
     def __len__(self) -> int:
+        """Return the number of vertices in the DAG."""
         return len(self.vertex_data)
 
     def __str__(self) -> str:
+        """Return string representation of DAG with vertices and their predecessors."""
         result = []
         for vertex, predecessors in self.__vertex_predecessors.items():
             if predecessors:

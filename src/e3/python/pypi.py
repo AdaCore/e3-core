@@ -558,9 +558,11 @@ class PyPICandidate:
         )
 
     def __repr__(self) -> str:
+        """Return representation of Python package."""
         return f"{self.name}@{self.version} ({self.filename})"
 
     def __str__(self) -> str:
+        """Return string representation of Python package."""
         return f"{self.name}@{self.version} ({self.filename})"
 
 
@@ -808,6 +810,7 @@ class PyPIClosure:
         return sorted(reqs, key=lambda r: r.name)
 
     def __enter__(self) -> PyPIClosure:
+        """Enter context manager for PyPI closure."""
         return self
 
     def __exit__(

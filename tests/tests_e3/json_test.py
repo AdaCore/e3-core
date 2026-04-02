@@ -38,6 +38,7 @@ class AnObject:
         self.value = value
 
     def __eq__(self, other: object) -> bool:
+        """Check equality with another object."""
         if isinstance(other, self.__class__):
             return self.value == other.value
         return False

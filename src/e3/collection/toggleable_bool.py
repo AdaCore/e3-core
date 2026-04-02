@@ -46,6 +46,7 @@ class ToggleableBooleanGroup:
         return self.series[key]
 
     def __len__(self) -> int:
+        """Return the number of elements in the series."""
         return len(self.series)
 
     def shuffle(self) -> Iterator[list[ToggleableBoolean]]:
@@ -90,7 +91,9 @@ class ToggleableBoolean:
         self.name = name
 
     def __bool__(self) -> bool:
+        """Return boolean value of toggleable boolean."""
         return self.value
 
     def __str__(self) -> str:
+        """Return string representation of toggleable boolean."""
         return f"{self.name}: {self.value}"

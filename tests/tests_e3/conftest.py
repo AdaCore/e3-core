@@ -171,6 +171,7 @@ class PypiSimulator:
         return result
 
     def __enter__(self) -> PypiSimulator:
+        """Enter context manager for PyPI simulator."""
         self.requests_mock.start()
         self.requests_mock.get(self.SIMPLE_MATCHER, text=self.get_metadata)
         self.requests_mock.get(self.DOWNLOAD_MATCHER, content=self.get_resource)
@@ -182,6 +183,7 @@ class PypiSimulator:
         value: BaseException | None,
         traceback: object,
     ) -> None:
+        """Exit context manager for PyPI simulator."""
         self.requests_mock.stop()
 
 
@@ -431,6 +433,7 @@ class MavenCentralSimulator:
         return result
 
     def __enter__(self) -> MavenCentralSimulator:
+        """Enter context manager for Maven Central simulator."""
         self.__requests_mock.start()
         self.__requests_mock.get(self.METADATA_MATCHER, text=self._get_metadata)
         self.__requests_mock.head(self.FILE_MATCHER, text=self._get_file)
@@ -443,6 +446,7 @@ class MavenCentralSimulator:
         value: BaseException | None,
         traceback: object,
     ) -> None:
+        """Exit context manager for Maven Central simulator."""
         self.__requests_mock.stop()
 
 

@@ -96,6 +96,7 @@ class BaseURL:
         return None
 
     def __str__(self) -> str:
+        """Return string representation of base URL."""
         return self.url
 
 
@@ -122,6 +123,7 @@ class HTTPSession:
         self.last_base_url: BaseURL | None = None
 
     def __enter__(self) -> Self:
+        """Enter context manager for HTTP session."""
         self.session.__enter__()
         return self
 
