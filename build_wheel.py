@@ -39,7 +39,7 @@ def run(cmd: list[str], cwd: Path, *, fail_ok: bool | None = None) -> str:
     return output
 
 
-def main() -> None:  # noqa: PLR0915
+def main() -> None:
     """Entrypoint."""
     main = Main()
 
