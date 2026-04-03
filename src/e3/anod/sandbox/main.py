@@ -78,6 +78,6 @@ def main(get_argument_parser: bool = False) -> ArgumentParser | None:
         #  error: Item "None" of "Any | None" has no attribute "run"  [union-attr]
         ext[args.action].obj.run(args)  # type: ignore[union-attr]
     except SandBoxError as err:
-        logger.error(err)
+        logger.exception(err)
         sys.exit(1)
     return None

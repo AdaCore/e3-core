@@ -223,7 +223,7 @@ class Fingerprint:
             try:
                 data = json.load(f)
             except ValueError as e:
-                logger.error(
+                logger.exception(
                     "`%s' is not a properly formatted fingerprint file (%s)",
                     filename,
                     e,

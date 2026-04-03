@@ -481,7 +481,7 @@ class Run:
                     try:
                         runs.append(Popen(cmd, **popen_args))  # type: ignore[arg-type]
                     except OSError:
-                        logger.error("error when spawning %s", cmd)
+                        logger.exception("error when spawning %s", cmd)
                         # We have an error (e.g. file not found), try to kill
                         # all processes already started.
                         for p in runs:

@@ -864,5 +864,5 @@ def fetch_from_registry(
             if err.response.status_code != HTTP_NOT_FOUND:  # if other than NotFound
                 raise err
             if log_missing_packages:
-                logger.error(f"Package {p!r} is missing on the given registry")
+                logger.exception(f"Package {p!r} is missing on the given registry")
     return res
