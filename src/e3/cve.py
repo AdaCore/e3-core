@@ -137,9 +137,13 @@ class NVD:
             return self
 
         if self.cache_db_path:
-            from datetime import timedelta  # noqa: PLC0415 optional dependency for caching
+            from datetime import (
+                timedelta,  # noqa: PLC0415 optional dependency for caching
+            )
 
-            from requests_cache import CachedSession  # noqa: PLC0415 optional dependency for caching
+            from requests_cache import (
+                CachedSession,  # noqa: PLC0415 optional dependency for caching
+            )
 
             self._session = CachedSession(
                 self.cache_db_path,

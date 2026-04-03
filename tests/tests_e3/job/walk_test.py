@@ -3,8 +3,7 @@
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import pytest
 
