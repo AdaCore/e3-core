@@ -11,7 +11,7 @@ from os.path import abspath
 from pathlib import Path
 from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -23,20 +23,7 @@ from e3.python.wheel import Wheel
 
 if TYPE_CHECKING:
     from collections.abc import Set
-    from requests_mock import Mocker
-
-
-class RequestsMockRequest(Protocol):
-    """Protocol for requests_mock request object."""
-
-    url: str
-    method: str
-
-
-class RequestsMockContext(Protocol):
-    """Protocol for requests_mock context object."""
-
-    status_code: int
+    from requests_mock import Mocker, Request, Context
 
 
 git = require_tool("git")
@@ -69,8 +56,8 @@ class PypiSimulator:
         self,
         name: str,
         version: str,
-        request: RequestsMockRequest,
-        context: RequestsMockContext,
+        request: Request,
+        context: Context,
     ) -> bytes:
         """Download file."""
         if not Path(name).is_dir():
@@ -100,9 +87,7 @@ class PypiSimulator:
         context.status_code = 200
         return result
 
-    def get_metadata(
-        self, request: RequestsMockRequest, context: RequestsMockContext
-    ) -> dict:
+    def get_metadata(self, request: Request, context: Context) -> str:
         """Get metadata."""
         m = self.SIMPLE_MATCHER.match(request.url)
         if not m:
@@ -150,9 +135,7 @@ class PypiSimulator:
         context.status_code = 200
         return result
 
-    def get_resource(
-        self, request: RequestsMockRequest, context: RequestsMockContext
-    ) -> str:
+    def get_resource(self, request: Request, context: Context) -> str:
         """Get resource."""
         m = self.DOWNLOAD_MATCHER.match(request.url)
         package = m.group("path").split("/")[-1].split("#")[0]
@@ -301,9 +284,7 @@ class MavenCentralSimulator:
                 },
             }
 
-    def _get_file(
-        self, request: RequestsMockRequest, context: RequestsMockContext
-    ) -> str:
+    def _get_file(self, request: Request, context: Context) -> str:
         """Get a Maven package file.
 
         This function is also used to simulate a HEAD request.
@@ -365,9 +346,7 @@ class MavenCentralSimulator:
             return ""
         return data["content"]
 
-    def _get_metadata(
-        self, request: RequestsMockRequest, context: RequestsMockContext
-    ) -> str:
+    def _get_metadata(self, request: Request, context: Context) -> str:
         """Get a Maven package metadata.
 
         :param request: The mocked request received. See request_mock for more
