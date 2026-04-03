@@ -958,15 +958,19 @@ def sync_tree(  # noqa: PLR0915
                         src.basename,
                     )
 
-                with Path(src.path).open("rb") as fsrc:
-                    with Path(dst.path).open("wb") as fdst:
-                        shutil.copyfileobj(fsrc, fdst)
+                with (
+                    Path(src.path).open("rb") as fsrc,
+                    Path(dst.path).open("wb") as fdst,
+                ):
+                    shutil.copyfileobj(fsrc, fdst)
             except OSError:
                 if dst.stat is not None:
                     rm(dst.path, glob=False)
-                with Path(src.path).open("rb") as fsrc:
-                    with Path(dst.path).open("wb") as fdst:
-                        shutil.copyfileobj(fsrc, fdst)
+                with (
+                    Path(src.path).open("rb") as fsrc,
+                    Path(dst.path).open("wb") as fdst,
+                ):
+                    shutil.copyfileobj(fsrc, fdst)
             copystat(src, dst)
 
     def safe_mkdir(src: FileInfo, dst: FileInfo) -> None:

@@ -189,24 +189,26 @@ def test_yanked(
 
     mkdir("cache")
 
-    with pypi_server:
-        with PyPIClosure(
+    with (
+        pypi_server,
+        PyPIClosure(
             python3_version="3.11",
             platforms=[
                 "x86_64-linux",
             ],
             cache_dir="cache",
             allowed_yanked=allowed_yanked,
-        ) as pypi:
-            if invalid_wheel:
-                pypi.add_requirement(invalid_wheel)
+        ) as pypi,
+    ):
+        if invalid_wheel:
+            pypi.add_requirement(invalid_wheel)
 
-                with pytest.raises(
-                    PyPIError,
-                    match=("Impossible resolution"),
-                ):
-                    pypi.requirements_closure()
-            else:
-                pypi.add_requirement("setuptools_scm >= 6.2, <= 8")
-                all_filenames = [Path(f).name for f in pypi.file_closure()]
-                assert expected_wheel in all_filenames
+            with pytest.raises(
+                PyPIError,
+                match=("Impossible resolution"),
+            ):
+                pypi.requirements_closure()
+        else:
+            pypi.add_requirement("setuptools_scm >= 6.2, <= 8")
+            all_filenames = [Path(f).name for f in pypi.file_closure()]
+            assert expected_wheel in all_filenames

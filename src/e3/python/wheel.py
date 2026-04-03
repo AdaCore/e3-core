@@ -37,13 +37,15 @@ class Wheel:
     @property
     def requirements(self) -> set[Requirement]:
         """Return the set of Requirements for the wheel."""
-        with zipfile.ZipFile(self.path) as zipfd:
-            with zipfd.open(self.metadata_path) as fd:
-                return {
-                    Requirement(line.split(":", 1)[1].strip().replace('"', "'"))
-                    for line in fd.read().decode("utf-8").splitlines()
-                    if line.startswith("Requires-Dist:")
-                }
+        with (
+            zipfile.ZipFile(self.path) as zipfd,
+            zipfd.open(self.metadata_path) as fd,
+        ):
+            return {
+                Requirement(line.split(":", 1)[1].strip().replace('"', "'"))
+                for line in fd.read().decode("utf-8").splitlines()
+                if line.startswith("Requires-Dist:")
+            }
 
     @classmethod
     def build(
