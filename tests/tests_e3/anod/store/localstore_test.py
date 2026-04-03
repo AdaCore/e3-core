@@ -312,12 +312,14 @@ def test_component_with_attachments_list(store: StoreRW) -> None:
 
 def test_exceptions(store: StoreRW) -> None:
     """Test exceptions."""
-    with LocalStore(db="empty.db", online_store=store) as local:
-        with pytest.raises(
+    with (
+        LocalStore(db="empty.db", online_store=store) as local,
+        pytest.raises(
             StoreError,
             match="Cannot find any component matching the following criteria",
-        ):
-            local.add_component_from_store(store, DEFAULT_SETUP, name="doesnt-exist")
+        ),
+    ):
+        local.add_component_from_store(store, DEFAULT_SETUP, name="doesnt-exist")
 
 
 def test_bulk_update(store: StoreRW) -> None:
