@@ -20,11 +20,10 @@ from e3.maven import MavenLink
 from e3.os.fs import touch, which
 from e3.pytest import require_tool
 from e3.python.wheel import Wheel
-from requests_mock import Request, Context
 
 if TYPE_CHECKING:
     from collections.abc import Set
-    from requests_mock import Mocker
+    from requests_mock import Mocker, Request, Context
 
 
 git = require_tool("git")
