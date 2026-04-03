@@ -331,7 +331,7 @@ class CheckoutManager:
             try:
                 old_commit = working_copy.current_revision
             except SVNError:
-                logger.error(
+                logger.exception(
                     "Unable to get SVN informations form the %s working dir",
                     self.name,
                 )
@@ -341,7 +341,7 @@ class CheckoutManager:
                 url=url, revision=revision, force_and_clean=True
             )
         except SVNError:  # impossible to update, potential local changes
-            logger.error("Impossible to update the working copy of %s", self.name)
+            logger.exception("Impossible to update the working copy of %s", self.name)
             result = ReturnValue.failure
         else:
             new_commit = working_copy.current_revision

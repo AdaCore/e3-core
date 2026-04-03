@@ -109,7 +109,7 @@ class SystemInfo:
 
                 tmp_core_number = psutil.cpu_count()
                 if not tmp_core_number:
-                    logger.error("psutil.cpu_count() returned None or 0")
+                    logger.exception("psutil.cpu_count() returned None or 0")
                 else:
                     cls.core_number = tmp_core_number
             except Exception:
