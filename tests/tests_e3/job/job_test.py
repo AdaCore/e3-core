@@ -1,7 +1,7 @@
 """Tests for e3.job."""
 
 import sys
-from typing import NoReturn
+from typing import ClassVar, NoReturn
 
 import pytest
 
@@ -10,7 +10,7 @@ from e3.job import EmptyJob, ProcessJob
 
 
 class InvalidProcessJob(ProcessJob):
-    cmdline = [sys.executable, "-c", "import sys; sys.exit(6)"]
+    cmdline: ClassVar[list[str]] = [sys.executable, "-c", "import sys; sys.exit(6)"]
 
 
 class TestJob:
