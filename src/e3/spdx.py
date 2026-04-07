@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, Union
+    from typing import Any, Literal
 
 NOASSERTION: Literal["NOASSERTION"] = "NOASSERTION"
 """Indicates that the preparer of the SPDX document is not making any assertion
@@ -28,7 +28,7 @@ This value should only be used if there is sufficient evidence to support this
 assertion."""
 
 if TYPE_CHECKING:
-    MAYBE_STR = Union[Literal["NOASSERTION", "NONE"], str]
+    MAYBE_STR = str
 
 SPDXID_R = re.compile("[^a-zA-Z0-9.-]")
 
@@ -814,9 +814,7 @@ class PackageHomePage(SPDXEntryMaybeStr):
 
         :return: The :class:`PackageHomePage` initialized with the value of *obj*.
         """  # noqa: RST304
-        homepage: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
-            cls.get_json_entry_key()
-        )
+        homepage: str | None = obj.get(cls.get_json_entry_key())
         if homepage is not None:
             return PackageHomePage(homepage)
         return None
@@ -862,9 +860,7 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
         :return: The :class:`PackageLicenseConcluded` initialized with the value
             of *obj*.
         """  # noqa: RST304
-        lic: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
-            cls.get_json_entry_key(), NONE_VALUE
-        )
+        lic: str | None = obj.get(cls.get_json_entry_key(), NONE_VALUE)
         if lic is not None:
             return PackageLicenseConcluded(lic)
         return PackageLicenseConcluded(NONE_VALUE)
@@ -892,9 +888,7 @@ class PackageLicenseDeclared(SPDXEntryMaybeStr):
         :return: The :class:`PackageLicenseDeclared` initialized with the value
             of *obj*.
         """  # noqa: RST304
-        lic: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
-            cls.get_json_entry_key()
-        )
+        lic: str | None = obj.get(cls.get_json_entry_key())
         if lic is not None:
             return PackageLicenseDeclared(lic)
         return None
@@ -922,9 +916,7 @@ class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
         :return: The :class:`PackageLicenseComments` initialized with the value
             of *obj*.
         """  # noqa: RST304
-        comment: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
-            cls.get_json_entry_key()
-        )
+        comment: str | None = obj.get(cls.get_json_entry_key())
         if comment is not None:
             return PackageLicenseComments(comment)
         return None
@@ -952,9 +944,7 @@ class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
         :return: The :class:`PackageCopyrightText` initialized with the value
             of *obj*.
         """  # noqa: RST304
-        txt: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
-            cls.get_json_entry_key()
-        )
+        txt: str | None = obj.get(cls.get_json_entry_key())
         if txt is not None:
             return PackageCopyrightText(txt)
         return None
@@ -989,9 +979,7 @@ class PackageDescription(SPDXEntryMaybeStrMultilines):
         :return: The :class:`PackageDescription` initialized with the value
             of *obj*.
         """  # noqa: RST304
-        desc: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
-            cls.get_json_entry_key()
-        )
+        desc: str | None = obj.get(cls.get_json_entry_key())
         if desc is not None:
             return PackageDescription(desc)
         return None
@@ -1019,9 +1007,7 @@ class PackageComment(SPDXEntryMaybeStrMultilines):
         :return: The :class:`PackageComment` initialized with the value
             of *obj*.
         """  # noqa: RST304
-        comment: Literal["NOASSERTION", "NONE"] | str | None = obj.get(
-            cls.get_json_entry_key()
-        )
+        comment: str | None = obj.get(cls.get_json_entry_key())
         if comment is not None:
             return PackageComment(comment)
         return None
