@@ -190,7 +190,7 @@ class Component:
                     msg = "Corrupted metadata: Cannot convert metadata into dictionary"
                     raise TypeError(msg)
             except Exception as e:
-                logger.exception(e)
+                logger.exception("failed to load metadata")
                 raise e
 
         return DSSE.load_dict(result_data)
@@ -405,7 +405,7 @@ class Component:
         except Exception as e:
             if ignore_errors:
                 return None
-            logger.exception(e)
+            logger.exception(f"error while loading component metadata file {meta_path}")
             msg = f"error while loading component metadata file {meta_path} ({e})"
             raise StoreError(msg) from None
 

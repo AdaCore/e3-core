@@ -322,7 +322,7 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
             # the directory is created after the initial test on its
             # existence and the call to makedirs
             return
-        logger.exception(e)
+        logger.exception(f"can't create {path}")
         raise FSError(origin="mkdir", message=f"can't create {path}") from e
 
 
@@ -447,7 +447,7 @@ def mv(
                 f_dest = str(Path(target, Path(f).name))
                 move_file(f, f_dest)
     except Exception as e:
-        logger.exception(e)
+        logger.exception("mv operation failed")
         raise FSError(origin="mv", message=str(e)) from e
 
 
@@ -563,7 +563,7 @@ def rm(
                 e3.os.fs.force_remove_file(f)
 
         except Exception as e:  # defensive code
-            logger.exception(e)
+            logger.exception(f"error occurred while removing {f}")
             raise FSError(
                 origin="rm", message=f"error occurred while removing {f}"
             ) from e

@@ -251,7 +251,7 @@ class AnodModule:
                 code = compile(fd.read(), self.path, "exec")
                 exec(code, anod_module.__dict__)
         except Exception as e:
-            logger.exception("exception: %s", e)
+            logger.exception("exception occurred")
             logger.exception("cannot load code of %s", self.name)
             raise SandBoxError(
                 origin="load", message=f"invalid spec code for {self.name}"

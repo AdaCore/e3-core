@@ -81,11 +81,9 @@ class ElectrolytJob(Job):
         if self.__status == STATUS.unknown and not self.dry_run:
             try:
                 getattr(self, self.data.run_method)()
-            except Exception as e:
+            except Exception:
                 self.__status = STATUS.failure
-                logger.exception(
-                    "Exception occurred in action %s %s", self.data.run_method, e
-                )
+                logger.exception(f"Exception occurred in action {self.data.run_method}")
 
     @property
     def status(self) -> ReturnValue:

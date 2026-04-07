@@ -222,11 +222,9 @@ class Fingerprint:
         with Path(filename).open() as f:
             try:
                 data = json.load(f)
-            except ValueError as e:
+            except ValueError:
                 logger.exception(
-                    "`%s' is not a properly formatted fingerprint file (%s)",
-                    filename,
-                    e,
+                    f"`{filename}' is not a properly formatted fingerprint file"
                 )
                 return None
 
