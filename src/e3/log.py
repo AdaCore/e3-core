@@ -21,10 +21,10 @@ if TYPE_CHECKING:
         IO,
         Any,
         ClassVar,
-        Mapping,
         TextIO,
         TypeVar,
     )
+    from collections.abc import Mapping
 
     T = TypeVar("T")
 

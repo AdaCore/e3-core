@@ -12,7 +12,7 @@ from e3.log import getLogger
 from e3.mock.env import mock_env
 
 if TYPE_CHECKING:
-    from typing import Callable
+    from collections.abc import Callable
 
     from pytest import LogCaptureFixture
 

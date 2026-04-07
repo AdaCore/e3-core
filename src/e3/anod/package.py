@@ -15,11 +15,11 @@ from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 if TYPE_CHECKING:
     from typing import (
         Any,
-        Callable,
         Final,
         Literal,
         NoReturn,
     )
+    from collections.abc import Callable
 
     from e3.anod.spec import Anod
 

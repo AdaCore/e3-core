@@ -18,7 +18,8 @@ from e3.error import E3Error
 if TYPE_CHECKING:
     from collections.abc import Callable
     from types import TracebackType
-    from typing import Any, Iterable
+    from typing import Any
+    from collections.abc import Iterable
 
     from e3.collection.toggleable_bool import ToggleableBoolean
     from e3.electrolyt.entry_point import EntryPoint

@@ -49,7 +49,8 @@ spec_logger = e3.log.getLogger("anod.spec")
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
-    from typing import IO, Any, Iterable, Literal, Union
+    from typing import IO, Any, Literal, Union
+    from collections.abc import Iterable
 
     import e3.anod.package
     import e3.anod.sandbox

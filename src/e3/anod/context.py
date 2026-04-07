@@ -38,7 +38,8 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from typing import Iterable, NoReturn, Optional, cast
+    from typing import NoReturn, Optional, cast
+    from collections.abc import Iterable
 
     from e3.anod.action import Action
     from e3.anod.loader import AnodSpecRepository
