@@ -26,6 +26,8 @@ HTTP_FORBIDDEN = 403
 
 
 class RetryHandler(BaseHTTPRequestHandler):
+    """HTTP handler for testing retry logic."""
+
     def do_GET(self) -> None:
         """Handle HTTP GET request."""
         if hasattr(self.server, "tries"):
@@ -40,6 +42,8 @@ class RetryHandler(BaseHTTPRequestHandler):
 
 
 class RetryAbortHandler(BaseHTTPRequestHandler):
+    """HTTP handler for testing retry abortion scenarios."""
+
     def do_GET(self) -> None:
         """Handle HTTP GET request."""
         if hasattr(self.server, "tries"):
@@ -54,6 +58,8 @@ class RetryAbortHandler(BaseHTTPRequestHandler):
 
 
 class ContentDispoHandler(BaseHTTPRequestHandler):
+    """HTTP handler for testing Content-Disposition header handling."""
+
     def do_GET(self) -> None:
         """Handle HTTP GET request."""
         self.send_response(200)
@@ -65,6 +71,8 @@ class ContentDispoHandler(BaseHTTPRequestHandler):
 
 
 class ServerErrorHandler(BaseHTTPRequestHandler):
+    """HTTP handler that always returns 500 server errors."""
+
     def do_GET(self) -> None:
         """Handle HTTP GET request."""
         if not hasattr(self.server, "calls"):
@@ -82,6 +90,8 @@ class ServerErrorHandler(BaseHTTPRequestHandler):
 
 
 class MultiPartPostHandler(BaseHTTPRequestHandler):
+    """HTTP handler for testing multipart POST requests."""
+
     def do_POST(self) -> None:
         """Handle HTTP POST request."""
         logger = logging.getLogger("MultiPartPostHandler")
@@ -113,6 +123,8 @@ class MultiPartPostHandler(BaseHTTPRequestHandler):
 
 
 class AuthorizationHeaderHandler(ContentDispoHandler):
+    """HTTP handler for testing Authorization header validation."""
+
     def do_GET(self) -> None:
         """Handle HTTP GET request."""
         if self.headers.get("Authorization") != "Bearer toto":
@@ -141,6 +153,8 @@ def run_server(
 
 
 class TestHTTP:
+    """Test suite for HTTP session and request functionality."""
+
     def test_session(self) -> None:
         """Create a session in a context."""
         with HTTPSession():

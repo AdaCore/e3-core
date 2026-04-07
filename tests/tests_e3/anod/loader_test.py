@@ -10,6 +10,8 @@ from e3.fs import cp, sync_tree
 
 
 class TestLoader:
+    """Test suite for AnodSpecRepository and spec loading."""
+
     spec_dir = str(Path(__file__).parent / "data")
     spec2_dir = str(Path(__file__).parent / "data2")
 

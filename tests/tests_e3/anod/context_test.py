@@ -38,6 +38,8 @@ SPEC_BUILD_WITH_REMOTE_SCHEDULED_SIZE = 2  # build with remote scheduled
 
 
 class TestContext:
+    """Test suite for AnodContext functionality."""
+
     spec_dir = str(Path(__file__).parent / "context_data")
 
     def create_context(self, reject_duplicates: bool = True) -> AnodContext:

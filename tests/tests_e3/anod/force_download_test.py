@@ -11,6 +11,8 @@ from e3.env import BaseEnv
 
 
 class TestSourceClosure:
+    """Test suite for source closure and dependency resolution."""
+
     spec_dir = os.path.abspath(Path(__file__).parent / "force_download")
 
     def test_force_download_after_install(self) -> None:

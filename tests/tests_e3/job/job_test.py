@@ -10,10 +10,14 @@ from e3.job import EmptyJob, ProcessJob
 
 
 class InvalidProcessJob(ProcessJob):
+    """Process job that always fails with exit code 6."""
+
     cmdline: ClassVar[list[str]] = [sys.executable, "-c", "import sys; sys.exit(6)"]
 
 
 class TestJob:
+    """Test suite for job execution and management."""
+
     def test_run_empty_job(self) -> None:
         """Try running an empty job...
 

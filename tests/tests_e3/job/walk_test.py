@@ -23,6 +23,8 @@ MAX_REQUEUE_COUNT = 3
 
 
 class SbxDirs:
+    """Sandbox directory structure for testing."""
+
     def __init__(self) -> None:
         self.sbx_dir = Path("/dev/null")
         self.fingerprint_dir = Path("/dev/null")
@@ -187,6 +189,8 @@ class ControlledJob(ProcessJob):
 
 
 class SimpleWalk(Walk):
+    """Simple Walk implementation for testing job execution."""
+
     dry_run_mode = False
 
     def __init__(self, actions: DAG) -> None:
@@ -239,6 +243,8 @@ class SimpleWalk(Walk):
 
 
 class FingerprintWalk(SimpleWalk):
+    """Walk implementation with fingerprint tracking for incremental builds."""
+
     @classmethod
     def fingerprint_filename(cls, uid: str) -> str:
         """Fingerprint filename."""
@@ -294,12 +300,16 @@ class FingerprintWalk(SimpleWalk):
 
 
 class FingerprintWalkDryRun(FingerprintWalk):
+    """FingerprintWalk in dry-run mode for testing without side effects."""
+
     dry_run_mode = True
 
 
 @pytest.mark.parametrize("walk_class", [SimpleWalk, FingerprintWalk])
 @pytest.mark.usefixtures("setup_sbx")
 class TestWalk:
+    """Test suite for Walk implementations and job execution flows."""
+
     def test_good_job_no_predecessors(self, walk_class: type[SimpleWalk]) -> None:
         """Simple case of a leaf job."""
         actions = DAG()
