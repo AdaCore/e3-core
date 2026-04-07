@@ -113,7 +113,8 @@ def test_file(store: StoreRW) -> None:
     )
     assert now == date
     assert f.get("unpack_dir") is None
-    assert "build" in f and f["build"]["_id"] == f["build_id"]
+    assert "build" in f
+    assert f["build"]["_id"] == f["build_id"]
 
     touch("test-tp.txt")
     with Path("test-tp.txt").open("w") as fd:
@@ -335,7 +336,8 @@ def test_component(store: StoreRW) -> None:  # noqa: PLR0915
     assert tmp[0]["version"] == "3.0"
     assert tmp[0]["build_id"] == bid.id
     assert tmp[0]["build"] == bid.as_dict()
-    assert isinstance(tmp[0]["attachments"], dict) and "myatt2" in tmp[0]["attachments"]
+    assert isinstance(tmp[0]["attachments"], dict)
+    assert "myatt2" in tmp[0]["attachments"]
 
 
 def test_bulk_query(store: StoreRW) -> None:  # noqa: PLR0915

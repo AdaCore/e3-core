@@ -184,7 +184,8 @@ def test_push(store: StoreRW) -> None:
 
     store_data = store.get_source_info("myfile", bid.id, kind="source")
     other = File.load(data=store_data, store=store)
-    assert other == tmp and other == f
+    assert other == tmp
+    assert other == f
 
 
 def test_download(store: StoreRW) -> None:

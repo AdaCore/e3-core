@@ -49,7 +49,8 @@ def test_build_info_create(store: StoreRW) -> None:
     assert bid1.isready
 
     latest = BuildInfo.latest(store, DEFAULT_SETUP)
-    assert latest == bid1 and latest.isready
+    assert latest == bid1
+    assert latest.isready
 
     assert (
         BuildInfo.latest(store, DEFAULT_SETUP, build_date="20120101", ready_only=False)
@@ -59,7 +60,8 @@ def test_build_info_create(store: StoreRW) -> None:
     assert bid2.isready
 
     latest = BuildInfo.latest(store, DEFAULT_SETUP, build_date="20120101")
-    assert latest == bid2 and latest.isready
+    assert latest == bid2
+    assert latest.isready
 
 
 def test_load_build_info_ready() -> None:
@@ -492,7 +494,8 @@ def test_get_component_list(store: StoreRW) -> None:
     assert len(data) == 0
     data = bi.get_component(name="comp1", platform="x86-linux")
     assert data.build_id == bid
-    assert data.name == "comp1" and data.platform == "x86-linux"
+    assert data.name == "comp1"
+    assert data.platform == "x86-linux"
 
 
 def test_get_source_info(store: StoreRW) -> None:

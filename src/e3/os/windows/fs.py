@@ -113,7 +113,8 @@ class NTFile:
             self.parent_handle = None
         else:
             file_path = os.fspath(filename)
-            assert "\\" not in file_path and "/" not in file_path
+            assert "\\" not in file_path
+            assert "/" not in file_path
             self.path = str(Path(parent.path, filename))
             self.nt_filename = UnicodeString(str(filename))
             self.parent_handle = parent.handle
