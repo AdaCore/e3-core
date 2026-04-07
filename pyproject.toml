@@ -170,6 +170,7 @@ select = ["ALL"]
 
 ignore = [
   # Probably not useful for us
+  "ARG002", # unused method argument - needed for interface/compatibility
   "C901", # too complex function (MCCabe complexity)
   "FLY002", # consider f-string instead of join (sometimes less readable)
   "PLR0912", # too many branches in a function
