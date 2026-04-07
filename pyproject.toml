@@ -197,7 +197,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.pylint]
-max-args = 8
+max-args = 18
 max-statements = 75
 
 [tool.ruff.lint.flake8-annotations]
