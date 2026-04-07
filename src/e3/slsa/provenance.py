@@ -108,6 +108,8 @@ class Builder:
         self.__dependencies: list[ResourceDescriptor] = builder_dependencies
         self.__version: dict[str, str] = version
 
+    __hash__ = None  # type: ignore[assignment]
+
     def __eq__(self, other: object) -> bool:
         """Check if this builder object is equal to *other*.
 
@@ -284,6 +286,8 @@ class BuildMetadata:
         self.__invocation_id: str = invocation_id
         self.__started_on: datetime = self.__validate_timestamp(started_on)
         self.__finished_on: datetime = self.__validate_timestamp(finished_on)
+
+    __hash__ = None  # type: ignore[assignment]
 
     def __eq__(self, other: object) -> bool:
         """Check if this build metadata object is equal to *other*.
@@ -494,6 +498,8 @@ class Statement:
             else predicate_type
         )
         self.__predicate: Predicate | None = predicate
+
+    __hash__ = None  # type: ignore[assignment]
 
     def __eq__(self, other: object) -> bool:
         """Check if this statement is equal to *other*.
@@ -732,6 +738,8 @@ class ResourceDescriptor:
             self.download_location = download_location  # type: ignore[assignment]
         if uri:
             self.uri = uri  # type: ignore[assignment]
+
+    __hash__ = None  # type: ignore[assignment]
 
     def __eq__(self, other: object) -> bool:
         """Check if this resource descriptor is equal to *other*.
@@ -1274,6 +1282,8 @@ class Predicate:
                 resolved_dependencies
             )
 
+        __hash__ = None  # type: ignore[assignment]
+
         def __eq__(self, other: object) -> bool:
             """Check if this build definition is equal to *other*.
 
@@ -1463,6 +1473,8 @@ class Predicate:
             self.__metadata: BuildMetadata = metadata
             self.__by_products: list[ResourceDescriptor] = by_products
 
+        __hash__ = None  # type: ignore[assignment]
+
         def __eq__(self, other: object) -> bool:
             """Check if this run details object is equal to *other*.
 
@@ -1596,6 +1608,8 @@ class Predicate:
         """
         self.__build_definition: Predicate.BuildDefinition = build_definition
         self.__run_details: Predicate.RunDetails = run_details
+
+    __hash__ = None  # type: ignore[assignment]
 
     def __eq__(self, other: object) -> bool:
         """Check if this predicate is equal to *other*.
@@ -1746,6 +1760,13 @@ class TypeURI:
         if isinstance(other, str):
             return self.uri == other
         return False
+
+    def __hash__(self) -> int:
+        """Return the hash of this type URI.
+
+        :return: The hash value based on the URI string
+        """
+        return hash(self.uri)
 
     def __str__(self) -> str:
         """Return the string representation of this TypeURI."""
