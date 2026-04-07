@@ -173,6 +173,7 @@ ignore = [
   "ARG002", # unused method argument - needed for interface/compatibility
   "C901", # too complex function (MCCabe complexity)
   "FLY002", # consider f-string instead of join (sometimes less readable)
+  "INP001", # implicit namespace package - e3-core uses PEP 420 namespace packages
   "PLR0912", # too many branches in a function
   "SIM108", # ternary operator - can reduce readability
   "TRY003", # long message outside the exception class, difficult to change
