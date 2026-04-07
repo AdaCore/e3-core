@@ -41,6 +41,8 @@ svn = pytest.fixture(svn_wrapper)
 
 
 class PypiSimulator:
+    """Mock PyPI server for testing package downloads and requests."""
+
     PYPI_URL = "https://pypi.org"
     PYPIHOSTED_URL = "https://files.pythonhosted.org"
     SIMPLE_MATCHER = regex_compile(f"{PYPI_URL}/simple/(?P<package>.*)/")
@@ -178,6 +180,8 @@ def pypi_server(requests_mock: Mocker) -> PypiSimulator:
 
 
 class MavenCentralSimulator:
+    """Mock Maven Central repository for testing artifact downloads."""
+
     METADATA_MATCHER = regex_compile(
         f"^{MavenLink.BASE_URL}/(?P<group>.*)/(?P<name>.*)/maven-metadata.xml$"
     )

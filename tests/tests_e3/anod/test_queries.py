@@ -22,6 +22,8 @@ SPEC4_UNPUBLISHED_SOURCES = 2
 
 
 class TestSourceClosure:
+    """Test suite for source closure queries."""
+
     spec_dir = os.path.abspath(Path(__file__).parent / "source_closure_specs")
 
     def get_source_closure(

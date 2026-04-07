@@ -34,6 +34,8 @@ DICT_VALUES: dict = {
 
 
 class AnObject:
+    """Simple object wrapper for testing JSON serialization."""
+
     def __init__(self, value: dict) -> None:
         self.value = value
 
@@ -45,6 +47,8 @@ class AnObject:
 
 
 class SimpleJsonData(JsonData):
+    """Simple JsonData implementation for testing JSON conversion."""
+
     def __init__(self, string: str, integer: int, float_var: float) -> None:
         self.string: str = string
         self.integer: int = integer

@@ -18,6 +18,8 @@ MAX_CONCURRENT_JOBS = 2
 
 
 class NopJob(Job):
+    """Job that performs no operation, used for testing scheduling."""
+
     def run(self) -> None:
         """Run."""
 
@@ -32,6 +34,8 @@ class NopJob(Job):
 
 
 class SleepJob(ProcessJob):
+    """Job that sleeps for a specified duration, used for testing timeouts."""
+
     @property
     def cmdline(self) -> list[str]:
         """Return command line configuration as dictionary."""
@@ -39,6 +43,8 @@ class SleepJob(ProcessJob):
 
 
 class TestScheduler:
+    """Test suite for job scheduler functionality."""
+
     def test_minimal_run(self) -> None:
         """Test with only two independent jobs."""
         dag = DAG()

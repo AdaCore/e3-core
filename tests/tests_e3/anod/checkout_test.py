@@ -44,6 +44,8 @@ def test_rsync_mode() -> None:
 
 
 class TestCheckout:
+    """Test suite for CheckoutManager functionality."""
+
     repo_data = str(Path(__file__).parent / "vcs_data")
     repo_data2 = str(Path(__file__).parent / "vcs_data2")
 
