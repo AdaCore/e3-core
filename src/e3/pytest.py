@@ -25,7 +25,7 @@ except ImportError as ie:  # defensive code
 import typing
 
 if typing.TYPE_CHECKING:
-    from typing import Callable
+    from collections.abc import Callable
 
 test_errors = False
 

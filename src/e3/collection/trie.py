@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from typing import Any, Iterable
+    from typing import Any
+    from collections.abc import Iterable
 
 
 class Trie:

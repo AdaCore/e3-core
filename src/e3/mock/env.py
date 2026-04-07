@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING
 from e3.env import Env
 
 if TYPE_CHECKING:
-    from typing import Iterator, TypedDict
+    from typing import TypedDict
+    from collections.abc import Iterator
 
     from typing_extensions import NotRequired
 

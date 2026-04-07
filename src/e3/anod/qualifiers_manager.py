@@ -11,7 +11,8 @@ from typing import TYPE_CHECKING
 from e3.anod.error import AnodError
 
 if TYPE_CHECKING:
-    from typing import AbstractSet, TypeAlias
+    from collections.abc import Set as AbstractSet
+    from typing import TypeAlias
 
     from e3.anod.spec import Anod
 

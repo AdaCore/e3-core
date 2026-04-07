@@ -11,7 +11,8 @@ from requests import Session
 from e3.log import getLogger
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator
+    from typing import Any
+    from collections.abc import Iterator
 
 logger = getLogger("cve")
 
