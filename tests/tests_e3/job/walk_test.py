@@ -245,7 +245,10 @@ class FingerprintWalk(SimpleWalk):
         return str(sbx_dirs.fingerprint_dir / uid)
 
     def compute_fingerprint(
-        self, uid: str, data: Any, is_prediction: bool = False
+        self,
+        uid: str,
+        data: Any,  # noqa: ANN401
+        is_prediction: bool = False,
     ) -> Fingerprint | None:
         """Compute fingerprint."""
         if "fingerprint_after_job" in uid and is_prediction:

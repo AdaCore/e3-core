@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -55,7 +54,7 @@ def test_source_builder_default_prepare_src() -> None:
 def test_source_builder_custom_prepare_src() -> None:
     """Test SourceBuilder with a custom prepare_src function."""
 
-    def prepare_src(repos: Any, dest: str) -> None:
+    def prepare_src(repos: dict[str, dict[str, str]], dest: str) -> None:
         del repos
         touch(Path(dest, "my_generated_source_file"))
 

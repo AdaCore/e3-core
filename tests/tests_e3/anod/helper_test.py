@@ -62,7 +62,7 @@ def test_configure() -> None:
 
     class AnodConf(Anod):
         @Anod.primitive()
-        def build(self) -> Any:
+        def build(self) -> dict:
             c = Configure(self)
             return c.cmdline()
 
