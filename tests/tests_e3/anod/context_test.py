@@ -84,7 +84,10 @@ class TestContext:
         ac.load("spec1", env=None, qualifier="", kind="build")
 
         # One source should have been registered
-        assert len(ac.sources) == 1 and "spec1-src" in ac.sources, (
+        assert len(ac.sources) == 1, (
+            "spec1-src source from spec1.anod has not been registered"
+        )
+        assert "spec1-src" in ac.sources, (
             "spec1-src source from spec1.anod has not been registered"
         )
 

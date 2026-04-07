@@ -587,24 +587,18 @@ def test_statement_status(arguments: tuple) -> None:
         if not impact:
             assert not statement_status.impact
         else:
-            assert (
-                statement_status.impact and statement_status.impact.statement == impact
-            )
-        assert (
-            "impact" in st_status_dict
-            and st_status_dict["impact"]["statement"] == impact
-        )
+            assert statement_status.impact
+            assert statement_status.impact.statement == impact
+        assert "impact" in st_status_dict
+        assert st_status_dict["impact"]["statement"] == impact
         # Check action value.
         if not action:
             assert not statement_status.action
         else:
-            assert (
-                statement_status.action and statement_status.action.statement == action
-            )
-        assert (
-            "action" in st_status_dict
-            and st_status_dict["action"]["statement"] == action
-        )
+            assert statement_status.action
+            assert statement_status.action.statement == action
+        assert "action" in st_status_dict
+        assert st_status_dict["action"]["statement"] == action
 
         assert statement_status.justification == justification
         assert statement_status.notes == notes

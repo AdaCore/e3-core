@@ -63,14 +63,10 @@ class TestSourceClosure:
         unpublished_sources = [src for src, publish in sources if not publish]
 
         assert len(sources) == SPEC2_SOURCE_CLOSURE_SIZE
-        assert (
-            len(published_sources) == SPEC2_PUBLISHED_SOURCES
-            and published_sources[0] == "spec2-src"
-        )
-        assert (
-            len(unpublished_sources) == SPEC2_PUBLISHED_SOURCES
-            and unpublished_sources[0] == "spec2-internal-src"
-        )
+        assert len(published_sources) == SPEC2_PUBLISHED_SOURCES
+        assert published_sources[0] == "spec2-src"
+        assert len(unpublished_sources) == SPEC2_PUBLISHED_SOURCES
+        assert unpublished_sources[0] == "spec2-internal-src"
 
     def test_recursive_source_closure(self) -> None:
         """Test recursive source closure."""
