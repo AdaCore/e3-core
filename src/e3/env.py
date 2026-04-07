@@ -21,7 +21,7 @@ from e3.platform import Platform
 
 if TYPE_CHECKING:
     from argparse import Namespace
-    from typing import Any, Iterable, TypeVar
+    from typing import Any, ClassVar, Iterable, TypeVar
 
 logger = e3.log.getLogger("env")
 
@@ -663,10 +663,10 @@ class Env(AbstractBaseEnv):
     """
 
     # class variable that holds the current environment
-    _instance: dict[str, Any] = {}
+    _instance: ClassVar[dict[str, Any]] = {}
 
     # class variable that holds the stack of saved environments state
-    _context: list[Any] = []
+    _context: ClassVar[list[Any]] = []
 
     def __init__(self) -> None:
         """Initialize or reuse an existing Env object (singleton).
@@ -742,12 +742,12 @@ class Env(AbstractBaseEnv):
             # the store method).
             assert self.environ is not None
 
-        if filename is None and self._context:
-            self._instance = pickle.loads(self._context[-1])
-            self._context = self._context[:-1]
+        if filename is None and Env._context:
+            Env._instance = pickle.loads(Env._context[-1])
+            Env._context = Env._context[:-1]
         elif filename is not None:
             with Path(filename).open("rb") as fd:
-                self._instance = pickle.load(fd)
+                Env._instance = pickle.load(fd)
         else:
             return
 

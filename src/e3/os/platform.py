@@ -211,7 +211,7 @@ class SystemInfo:
             import ctypes  # noqa: PLC0415  # windows-only import
 
             class WinOSVersion(ctypes.Structure):
-                _fields_ = [
+                _fields_ = [  # noqa: RUF012
                     ("dwOSVersionInfoSize", ctypes.c_ulong),
                     ("dwMajorVersion", ctypes.c_ulong),
                     ("dwMinorVersion", ctypes.c_ulong),

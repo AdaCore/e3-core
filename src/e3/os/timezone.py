@@ -18,7 +18,7 @@ def timezone() -> float:
         from ctypes.wintypes import DWORD, LONG, WCHAR  # noqa: PLC0415  # windows-only
 
         class TIME_ZONE_INFORMATION(Structure):
-            _fields_ = [
+            _fields_ = [  # noqa: RUF012
                 ("Bias", LONG),
                 ("StandardName", WCHAR * 32),
                 ("StandardDate", DWORD * 8),

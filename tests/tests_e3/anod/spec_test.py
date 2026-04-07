@@ -3,6 +3,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 
@@ -154,7 +155,7 @@ def test_simple_spec() -> None:
     class Simple(Anod):
         test_qualifier_format = (("with_bar", False),)
 
-        build_source_list = [
+        build_source_list: ClassVar[list[Anod.Source]] = [
             Anod.Source("foo-src", publish=False),
             Anod.Source("bar-src", publish=True),
         ]
@@ -180,7 +181,7 @@ def test_spec_buildvars() -> None:
     """Build vars are used by the driver and not visible in deps."""
 
     class MySpec(Anod):
-        build_deps = [Anod.BuildVar("key", "value")]
+        build_deps: ClassVar[list[Anod.BuildVar]] = [Anod.BuildVar("key", "value")]
 
         @Anod.primitive()
         def build(self) -> None:

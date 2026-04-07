@@ -22,6 +22,7 @@ from ctypes.wintypes import (
     WORD,
 )
 from datetime import datetime, timezone
+from typing import ClassVar
 
 from e3.error import E3Error
 
@@ -49,7 +50,7 @@ class FileAttribute(Structure):
     VIRTUAL = 0x10000
     NO_SCRUB_DATA = 0x20000
 
-    _fields_ = [("attr", ULONG)]
+    _fields_ = [("attr", ULONG)]  # noqa: RUF012
 
     def __str__(self) -> str:
         """Return string representation of active file attributes."""
@@ -141,7 +142,7 @@ class Status:
     CANNOT_DELETE = 0xC0000121
     NO_MORE_FILES = 0x80000006
 
-    msgs = {
+    msgs: ClassVar[dict[int, str]] = {
         0xC0000022: "access denied",
         0xC0000034: "object name not found",
         0xC0000043: "sharing violation",
@@ -155,13 +156,13 @@ class Status:
 class IOStatusBlock(Structure):
     """Map IO_STATUS_BLOCK structure."""
 
-    _fields_ = [("status", NTSTATUS), ("information", POINTER(ULONG))]
+    _fields_ = [("status", NTSTATUS), ("information", POINTER(ULONG))]  # noqa: RUF012
 
 
 class ReparseGUIDDataBuffer(Structure):
     """Map Windows REPARSE_GUID_DATA_BUFFER structure."""
 
-    _fields_ = [
+    _fields_ = [  # noqa: RUF012
         ("tag", DWORD),
         ("length", WORD),
         ("reserved", WORD),
@@ -173,7 +174,7 @@ class ReparseGUIDDataBuffer(Structure):
 class UnicodeString(Structure):
     """Map UNICODE_STRING structure."""
 
-    _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]
+    _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]  # noqa: RUF012
 
     def __init__(self, value: str | None = None, max_length: int = 0) -> None:
         """Initialize a Unicode string structure.
@@ -211,7 +212,7 @@ class FileTime(Structure):
     # Note: in a previous implementation that structure was directly mapped to
     # LARGE_INTEGER Doing that is wrong as it force an implicit 8 byte alignment.
     # Some structures do not respect that alignment (See FindData for example).
-    _fields_ = [("filetime_low", DWORD), ("filetime_high", DWORD)]
+    _fields_ = [("filetime_low", DWORD), ("filetime_high", DWORD)]  # noqa: RUF012
 
     def __init__(self, t: datetime) -> None:
         """Initialize a FileTime structure.
@@ -258,7 +259,7 @@ class LargeFileTime(Structure):
     # of DWORD. This means that there is an implicit alignment constraint of
     # 8 bytes. As consequence even if similar, this should not be merged with
     # FileTime.
-    _fields_ = [("filetime", LARGE_INTEGER)]
+    _fields_ = [("filetime", LARGE_INTEGER)]  # noqa: RUF012
 
     def __init__(self, t: datetime) -> None:
         """Initialize a LargeFileTime structure.
@@ -295,7 +296,7 @@ class LargeFileTime(Structure):
 class FindData(Structure):
     """Map Windows WIN32_FIND_DATA structure."""
 
-    _fields_ = [
+    _fields_ = [  # noqa: RUF012
         ("file_attributes", FileAttribute),
         ("creation_time", FileTime),
         ("last_access_time", FileTime),
@@ -321,23 +322,23 @@ class FileInfo:
         class_id = 12
 
     class ReparsePoint(Structure):
-        _fields_ = [("file_reference", LARGE_INTEGER), ("tag", ULONG)]
+        _fields_ = [("file_reference", LARGE_INTEGER), ("tag", ULONG)]  # noqa: RUF012
         class_id = 33
 
     class Disposition(Structure):
-        _fields_ = [("delete_file", BOOLEAN)]
+        _fields_ = [("delete_file", BOOLEAN)]  # noqa: RUF012
         class_id = 13
 
     class Internal(Structure):
-        _fields_ = [("index_number", LARGE_INTEGER)]
+        _fields_ = [("index_number", LARGE_INTEGER)]  # noqa: RUF012
         class_id = 6
 
     class Rename(Structure):
-        _fields_ = []
+        _fields_ = []  # noqa: RUF012
         class_id = 10
 
     class Basic(Structure):
-        _fields_ = [
+        _fields_ = [  # noqa: RUF012
             ("creation_time", LargeFileTime),
             ("last_access_time", LargeFileTime),
             ("last_write_time", LargeFileTime),
@@ -364,7 +365,7 @@ class ObjectInfo:
     """Declaration of structures returned by QueryObjectInformation."""
 
     class Name(Structure):
-        _fields_ = []
+        _fields_ = []  # noqa: RUF012
         class_id = 1
 
 
@@ -374,7 +375,7 @@ class ProcessInfo:
     class Basic(Structure):
         class_id = 0
 
-        _fields_ = [
+        _fields_ = [  # noqa: RUF012
             ("exit_status", NTSTATUS),
             ("peb", LPVOID),
             ("affinity_mask", LPVOID),
@@ -391,7 +392,7 @@ class ObjectAttributes(Structure):
 
     OBJ_CASE_INSENSITIVE = 0x00000040
 
-    _fields_ = [
+    _fields_ = [  # noqa: RUF012
         ("length", ULONG),
         ("root_directory", HANDLE),
         ("object_name", POINTER(UnicodeString)),

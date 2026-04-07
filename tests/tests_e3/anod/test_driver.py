@@ -1,6 +1,7 @@
 """Tests for e3.anod driver."""
 
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 
@@ -31,7 +32,9 @@ def test_deps_driver() -> None:
     """Test deps driver."""
 
     class Deps(e3.anod.spec.Anod):
-        build_deps = [e3.anod.spec.Anod.Dependency(name="parent")]
+        build_deps: ClassVar[list[e3.anod.spec.Anod.Dependency]] = [
+            e3.anod.spec.Anod.Dependency(name="parent")
+        ]
 
         @e3.anod.spec.Anod.primitive()
         def build(self) -> str:

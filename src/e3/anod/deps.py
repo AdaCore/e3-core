@@ -11,7 +11,7 @@ from e3.anod import qualifier_str_to_dict
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, Hashable, Literal
+    from typing import Any, ClassVar, Hashable, Literal
 
     from e3.anod.spec import DEPENDENCY_PRIMITIVE, Anod
 
@@ -42,7 +42,7 @@ class Dependency:
 
     kind: DEPENDENCY_PRIMITIVE
 
-    ALLOWED_REQUIRE: dict[str, str] = {
+    ALLOWED_REQUIRE: ClassVar[dict[str, str]] = {
         "build_tree": "build",
         "download": "download",
         "installation": "install",

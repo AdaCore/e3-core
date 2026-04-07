@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from typing import (
         IO,
         Any,
+        ClassVar,
         Mapping,
         TextIO,
         TypeVar,
@@ -69,9 +70,16 @@ class JSONFormatter(logging.Formatter):
     """
 
     # standard attributes that will always be printed
-    STD_ATTR = ["asctime", "levelname", "name", "message", "module", "exc_text"]
+    STD_ATTR: ClassVar[list[str]] = [
+        "asctime",
+        "levelname",
+        "name",
+        "message",
+        "module",
+        "exc_text",
+    ]
     # custom attributes
-    _extra_attr: list[str] = ["anod_uui"]
+    _extra_attr: ClassVar[list[str]] = ["anod_uui"]
 
     def __init__(
         self,
