@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-import e3.electrolyt.host as host
+from e3.electrolyt import host
 
 
 def test_host_db() -> None:
