@@ -77,7 +77,7 @@ def main(get_argument_parser: bool = False) -> ArgumentParser | None:
         # Prevent a mypy error like:
         #  error: Item "None" of "Any | None" has no attribute "run"  [union-attr]
         ext[args.action].obj.run(args)  # type: ignore[union-attr]
-    except SandBoxError as err:
-        logger.exception(err)
+    except SandBoxError:
+        logger.exception("sandbox error occurred")
         sys.exit(1)
     return None

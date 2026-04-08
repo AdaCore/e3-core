@@ -288,7 +288,7 @@ class File:
                     msg = "Corrupted metadata: Cannot convert metadata into dictionary"
                     raise TypeError(msg)
             except Exception as e:
-                logger.exception(e)
+                logger.exception("failed to load metadata")
                 raise e
 
         return DSSE.load_dict(result_data)
@@ -433,7 +433,7 @@ class File:
                 )
                 skip = not updated and not deleted
             except Exception as e:
-                logger.exception(e)
+                logger.exception(f"cannot sync {self.unpack_dir}")
                 msg = f"cannot sync {self.unpack_dir}"
                 raise StoreError(msg) from e
 
@@ -477,7 +477,7 @@ class File:
                         )
                         skip = False
                     except Exception as e:
-                        logger.exception(e)
+                        logger.exception(f"cannot extract archive {downloaded_file}")
                         msg = f"cannot extract archive {downloaded_file}"
                         raise StoreError(msg) from e
 
@@ -591,7 +591,7 @@ class File:
                 ),
             )
         except Exception as e:
-            logger.exception(e)
+            logger.exception(f"cannot unserialize File from object: {data}")
             logger.critical(f"cannot unserialize File from object: {data}")
             raise e
 
@@ -653,7 +653,7 @@ class File:
         except Exception as e:
             if ignore_errors:
                 return None
-            logger.exception(e)
+            logger.exception(f"error while loading metadata file {meta_path}")
             msg = f"error while loading metadata file {meta_path} ({e})"
             raise StoreError(msg) from e
 
