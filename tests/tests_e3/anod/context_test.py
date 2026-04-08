@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, NoReturn
 
 import pytest
 
-import e3.electrolyt.plan as plan
+from e3.electrolyt import plan
 from e3.anod.action import Decision
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError

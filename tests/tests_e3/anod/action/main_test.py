@@ -1,6 +1,6 @@
 """Tests for e3.anod.action."""
 
-import e3.anod.action as action
+from e3.anod import action
 import e3.anod.spec
 import e3.collection.dag
 import e3.env

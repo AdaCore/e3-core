@@ -7,9 +7,9 @@ from typing import Any
 
 import pytest
 
-import e3.electrolyt.entry_point as entry_point
-import e3.electrolyt.host as host
-import e3.electrolyt.plan as plan
+from e3.electrolyt import entry_point
+from e3.electrolyt import host
+from e3.electrolyt import plan
 import e3.env
 
 # Expected number of actions/entries in plan execution tests
