@@ -751,6 +751,8 @@ class File:
 
         return filename
 
+    __hash__ = None  # type: ignore[assignment]
+
     def __eq__(self, other: object) -> bool:
         """Compare two file object.
 

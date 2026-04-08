@@ -143,6 +143,8 @@ class BuildInfo:
         """
         return not self.__eq__(other)
 
+    __hash__ = None  # type: ignore[assignment]
+
     def get_build_data(self) -> BuildDataDict:
         """Call self.store.get_build_data.
 

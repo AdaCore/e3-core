@@ -674,6 +674,8 @@ class Component:
                 return False
         return True
 
+    __hash__ = None  # type: ignore[assignment]
+
     def __ne__(self, other: object) -> bool:
         """Inverse of self.__eq__.
 

@@ -33,6 +33,8 @@ class JsonData(ABC):
         """Return the dict representation of this JSON data object."""
         ...
 
+    __hash__ = None  # type: ignore[assignment]
+
     def __eq__(self, other: object) -> bool:
         """Check if this JSON data is identical to *other*.
 

@@ -128,6 +128,8 @@ class Fingerprint:
         """
         return not self == other
 
+    __hash__ = None  # type: ignore[assignment]
+
     def compare_to(self, other: object) -> dict[str, set[str]] | None:
         """Compare two fingerprints and return the differences.
 

@@ -39,6 +39,8 @@ class AnObject:
     def __init__(self, value: dict) -> None:
         self.value = value
 
+    __hash__ = None  # type: ignore[assignment]
+
     def __eq__(self, other: object) -> bool:
         """Check equality with another object."""
         if isinstance(other, self.__class__):
