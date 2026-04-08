@@ -46,7 +46,7 @@ def get_entity(value: str | None) -> Organization | Person | Tool | None:
     :param value: A string to extract entity definition from.
 
     :return: The entity initialised by *value*, or :const:`None` on error.
-    """  # noqa: RST304
+    """
     if isinstance(value, str) and ":" in value:
         entity_type, entity_name = value.split(":", 1)
         if entity_type.lower() == "tool":
@@ -275,7 +275,7 @@ class SPDXVersion(SPDXEntryStr):
         'SPDX-2.3'
 
         :return: The :class:`SPDXVersion` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         return SPDXVersion(obj.get(cls.get_json_entry_key(), cls.VERSION))
 
 
@@ -307,7 +307,7 @@ class DataLicense(SPDXEntryStr):
         'CC0-1.0'
 
         :return: The :class:`DataLicense` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         return DataLicense(obj.get(cls.get_json_entry_key(), cls.LICENSE))
 
 
@@ -374,7 +374,7 @@ class SPDXID(SPDXEntryStr):
         'DOCUMENT'
 
         :return: The :class:`SPDXID` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         id_from_dict: str = obj.get(cls.get_json_entry_key(), cls.DEFAULT_ID)
         if id_from_dict.startswith(f"{cls.PREFIX}"):
             id_from_dict = id_from_dict[len(cls.PREFIX) :]
@@ -419,7 +419,7 @@ class DocumentNamespace(SPDXEntryStr):
 
         :return: The :class:`DocumentNamespace` initialized with the value of
             *obj*.
-        """  # noqa: RST304
+        """
         return DocumentNamespace(obj.get(cls.get_json_entry_key(), ""))
 
 
@@ -454,7 +454,7 @@ class LicenseListVersion(SPDXEntryStr):
 
         :return: The :class:`LicenseListVersion` initialized with the value of
             *obj*.
-        """  # noqa: RST304
+        """
         return LicenseListVersion(obj.get(cls.get_json_entry_key(), cls.VERSION))
 
 
@@ -471,7 +471,7 @@ class Entity(SPDXEntryStr):
 
         :return: The :class:`Entity` initialized with the value of *obj*, or
             :const:`None` if the JSON key does not match.
-        """  # noqa: RST304
+        """
         return get_entity(obj.get(cls.get_json_entry_key()))
 
 
@@ -525,7 +525,7 @@ class Creator(EntityRef):
 
         :return: The :class:`Creator` initialized with the value of *obj*, or
             :const:`None` if the JSON key does not match.
-        """  # noqa: RST304
+        """
         entity: Organization | Person | Tool | None = get_entity(
             obj.get(cls.get_json_entry_key())
         )
@@ -550,7 +550,7 @@ class Created(SPDXEntryStr):
             with.
 
         :return: The :class:`Created` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         if cls.get_json_entry_key() in obj:
             return Created(str(obj.get(cls.get_json_entry_key(), "")))
         return Created(datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
@@ -586,7 +586,7 @@ class PackageName(SPDXEntryStr):
             with.
 
         :return: The :class:`PackageName` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         return PackageName(str(obj.get(cls.get_json_entry_key(), "")))
 
 
@@ -608,7 +608,7 @@ class PackageVersion(SPDXEntryStr):
             with.
 
         :return: The :class:`PackageVersion` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         return PackageVersion(str(obj.get(cls.get_json_entry_key(), "")))
 
 
@@ -628,7 +628,7 @@ class PackageFileName(SPDXEntryStr):
             with.
 
         :return: The :class:`PackageFileName` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         return PackageFileName(str(obj.get(cls.get_json_entry_key(), "")))
 
 
@@ -651,7 +651,7 @@ class PackageSupplier(EntityRef):
 
         :return: The :class:`PackageSupplier` initialized with the value of
             *obj*, or :const:`None` if the JSON key does not match.
-        """  # noqa: RST304
+        """
         entity: Organization | Person | Tool | None = get_entity(
             obj.get(cls.get_json_entry_key())
         )
@@ -679,7 +679,7 @@ class PackageOriginator(EntityRef):
 
         :return: The :class:`PackageOriginator` initialized with the value of
             *obj*, or :const:`None` if the JSON key does not match.
-        """  # noqa: RST304
+        """
         entity: Organization | Person | Tool | None = get_entity(
             obj.get(cls.get_json_entry_key())
         )
@@ -707,7 +707,7 @@ class PackageDownloadLocation(SPDXEntryMaybeStr):
 
         :return: The :class:`PackageDownloadLocation` initialized with the
             value of *obj*.
-        """  # noqa: RST304
+        """
         return PackageDownloadLocation(obj.get(cls.get_json_entry_key(), NONE_VALUE))
 
 
@@ -730,7 +730,7 @@ class FilesAnalyzed(SPDXEntryBool):
             with.
 
         :return: The :class:`FilesAnalyzed` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         if cls.get_json_entry_key() in obj:
             return FilesAnalyzed(value=obj.get(cls.get_json_entry_key(), False))
         return FilesAnalyzed(value=False)
@@ -781,7 +781,7 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
         :return: The :class:`PackageChecksum` initialized with the value of *obj*.
 
         :raise: :exc:`ValueError` if the algorithm defined by *obj* is not supported.
-        """  # noqa: RST304
+        """
         if isinstance(obj, dict) and "algorithm" in obj and "checksumValue" in obj:
             if obj["algorithm"].upper() == SHA1.algorithm:
                 return SHA1(obj["checksumValue"])
@@ -813,7 +813,7 @@ class PackageHomePage(SPDXEntryMaybeStr):
             with.
 
         :return: The :class:`PackageHomePage` initialized with the value of *obj*.
-        """  # noqa: RST304
+        """
         homepage: str | None = obj.get(cls.get_json_entry_key())
         if homepage is not None:
             return PackageHomePage(homepage)
@@ -859,7 +859,7 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
 
         :return: The :class:`PackageLicenseConcluded` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         lic: str | None = obj.get(cls.get_json_entry_key(), NONE_VALUE)
         if lic is not None:
             return PackageLicenseConcluded(lic)
@@ -887,7 +887,7 @@ class PackageLicenseDeclared(SPDXEntryMaybeStr):
 
         :return: The :class:`PackageLicenseDeclared` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         lic: str | None = obj.get(cls.get_json_entry_key())
         if lic is not None:
             return PackageLicenseDeclared(lic)
@@ -915,7 +915,7 @@ class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
 
         :return: The :class:`PackageLicenseComments` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         comment: str | None = obj.get(cls.get_json_entry_key())
         if comment is not None:
             return PackageLicenseComments(comment)
@@ -943,7 +943,7 @@ class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
 
         :return: The :class:`PackageCopyrightText` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         txt: str | None = obj.get(cls.get_json_entry_key())
         if txt is not None:
             return PackageCopyrightText(txt)
@@ -978,7 +978,7 @@ class PackageDescription(SPDXEntryMaybeStrMultilines):
 
         :return: The :class:`PackageDescription` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         desc: str | None = obj.get(cls.get_json_entry_key())
         if desc is not None:
             return PackageDescription(desc)
@@ -1006,7 +1006,7 @@ class PackageComment(SPDXEntryMaybeStrMultilines):
 
         :return: The :class:`PackageComment` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         comment: str | None = obj.get(cls.get_json_entry_key())
         if comment is not None:
             return PackageComment(comment)
@@ -1098,7 +1098,7 @@ class ExternalRef(SPDXEntry):
 
         :return: The :class:`ExternalRef` initialized with the value
             of *external_ref_dict*.
-        """  # noqa: RST304
+        """
         return ExternalRef(
             reference_category=ExternalRefCategory(
                 external_ref_dict["referenceCategory"]
@@ -1173,7 +1173,7 @@ class PrimaryPackagePurpose(Enum):
 
         :return: The :class:`PrimaryPackagePurpose` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         purpose_name: str | None = obj.get(cls.get_json_entry_key(), None)
         if purpose_name:
             return PrimaryPackagePurpose.__members__[purpose_name]
@@ -1311,7 +1311,7 @@ class RelationshipType(Enum):
 
         :return: The :class:`RelationshipType` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         if cls.get_json_entry_key() in obj:
             rela_name: str = obj.get(
                 cls.get_json_entry_key(), RelationshipType.OTHER.name
@@ -1370,7 +1370,7 @@ class Relationship(SPDXEntry):
 
         :return: The :class:`Relationship` initialized with the value
             of *obj*.
-        """  # noqa: RST304
+        """
         return Relationship(
             spdx_element_id=SPDXID.from_json_dict(
                 {SPDXID.get_json_entry_key(): obj.get("spdxElementId")}
@@ -1479,7 +1479,7 @@ class Package(SPDXSection):
     :ivar PackageComment | None comment: This field provides a place for the
         SPDX document creator to record any general comments about the package
         being described.
-    """  # noqa: RST304
+    """
 
     name: PackageName
     spdx_id: SPDXID
@@ -1508,7 +1508,7 @@ class Package(SPDXSection):
             initialize this :class:`Package` with.
 
         :return: The :class:`Package` initialized with the values of *obj*.
-        """  # noqa: RST304
+        """
         checksums: list[PackageChecksum] = [
             PackageChecksum.from_json_dict(ck_dict)
             for ck_dict in package_dict.get(PackageChecksum.get_json_entry_key(), [])
@@ -1566,7 +1566,7 @@ class DocumentInformation(SPDXSection):
 
         :return: The :class:`DocumentInformation` initialized with the values of
             *obj*.
-        """  # noqa: RST304
+        """
         res: DocumentInformation = DocumentInformation(
             DocumentName(obj.get("name", ""))
         )
@@ -1606,7 +1606,7 @@ class CreationInformation(SPDXSection):
 
         :return: The :class:`CreationInformation` initialized with the values of
             *obj*.
-        """  # noqa: RST304
+        """
         if "creationInfo" in obj:
             ci_dict: dict = obj.get("creationInfo", {})
             creators: list[Creator] = []
@@ -1676,7 +1676,7 @@ class Document:
             is True or (<main package> CONTAINS <package>)
 
         :return: the package SPDX_ID
-        """  # noqa: RST304
+        """
         if is_main_package and not package.spdx_id.value.endswith("-pkg"):
             # This is the main package, given that is often occurs that
             # a main package depends on a source package of the same name
@@ -1835,7 +1835,7 @@ class Document:
 
         :returns: A new :class:`Document` initialized with the JSON values of
             *doc_dict*.
-        """  # noqa: RST304
+        """
         creators: list[Entity] = []
         # As the Entity.from_json_dict() may return None, better handle the
         # case.

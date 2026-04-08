@@ -41,7 +41,7 @@ class ActionOrImpact(JsonData):
     :ivar str | None statement: The statement of this action or impact.
     :ivar datetime | None timestamp: The time at which the statement has
         been last modified.
-    """  # noqa: RST304
+    """
 
     def __init__(
         self,
@@ -55,7 +55,7 @@ class ActionOrImpact(JsonData):
         :param timestamp: The time this action or impact has
             been defined. If :const:`None` and *statement* is defined, the timestamp
             is set to the current time.
-        """  # noqa: RST304
+        """
         self.timestamp: datetime | None
         self.statement: str | None = statement
         if self.statement and not timestamp:
@@ -73,7 +73,7 @@ class ActionOrImpact(JsonData):
 
         :return: **True** if this action or impact has a statement defined to
             something else that :const:`None`, **False** else.
-        """  # noqa: RST304
+        """
         return self.statement is not None
 
     def as_dict(self) -> dict[str, Any]:
@@ -144,7 +144,7 @@ class AuthorRole(Enum):
         :raise ValueError: If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
             **and** *value* is :const:`None`.
-        """  # noqa: RST304
+        """
         if isinstance(value, str) and value:
             return cls(value)
         if isinstance(value, cls):
@@ -199,7 +199,7 @@ class Document(JsonData):
         *_id* is updated to ``<document id>/<statement vuln id>``.
 
         :param new_statement: The statement to add to this VEX document.
-        """  # noqa: RST304
+        """
         # Check if the statement has an ID. If not, add the statement's
         # vulnerability ID to the document's ID.
         if new_statement.metadata.id is None:
@@ -235,7 +235,7 @@ class Document(JsonData):
         :param path: The path of a VEX document to initialise this document
             with.
         :return: a new Document instance loaded from the file
-        """  # noqa: RST304
+        """
         with path.open() as f:
             vex_dict: dict = yaml.safe_load(f)
 
@@ -248,7 +248,7 @@ class Document(JsonData):
         :param output_format: The file format. May be any of :attr:`FORMATS`.
         :raise ValueError: If *output_format* is not one of the
             possible :attr:`FORMATS`.
-        """  # noqa: RST304
+        """
         if output_format not in self.FORMATS:
             msg = (
                 f"Invalid output format {output_format}. Accepted output "
@@ -275,7 +275,7 @@ class Document(JsonData):
         :return: A :class:`Statement` object which defines the vulnerability
             *cve_id*, or :const:`None` if such a statement does not exist in this
             document.
-        """  # noqa: RST304
+        """
         for statement in self.statements:
             if statement.vulnerability and statement.vulnerability.id == cve_id:
                 return statement
@@ -311,7 +311,7 @@ class Justification(Enum):
         included in *product_id* but the vulnerable code is not present.
         Typically, this case occurs when source code is configured or built in
         a way that excludes the vulnerable code.
-    """  # noqa: RST304
+    """
 
     COMPONENT_NOT_PRESENT = "Component not present"
     INLINE_MITIGATIONS_ALREADY_EXIST = "Inline mitigations already exist"
@@ -328,7 +328,7 @@ class Justification(Enum):
 
         :return: **False** only if justification is set to
             :attr:`Justification.NO_JUSTIFICATION`, else **True** is returned.
-        """  # noqa: RST304
+        """
         return self != Justification.NO_JUSTIFICATION
 
     @classmethod
@@ -345,7 +345,7 @@ class Justification(Enum):
         :raise ValueError: If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
             **and** *value* is :const:`None`.
-        """  # noqa: RST304
+        """
         if isinstance(value, str) and value:
             return cls(value)
         if isinstance(value, cls):
@@ -392,7 +392,7 @@ class Metadata(JsonData):
     :ivar datetime last_updated_on: The time this VEX document was updated.
     :ivar str spec_version: The VEX requirements version used by the parent
         document. By default, it is set to :attr:`SPEC_VERSION`.
-    """  # noqa: RST304
+    """
 
     AUTHOR: str = "AdaCore"
     AUTHOR_ROLE: AuthorRole = AuthorRole.VENDOR
@@ -425,7 +425,7 @@ class Metadata(JsonData):
             If not set, use the current time.
         :param spec_version: The specification version used to build this VEX
             document.
-        """  # noqa: RST304
+        """
         self.author: str = author
         self.author_role: AuthorRole = AuthorRole.from_value(
             author_role, self.AUTHOR_ROLE
@@ -580,7 +580,7 @@ class Product(JsonData):
         :param version: The version of the subcomponent to look for.
         :return: A matching subcomponent ID, or :const:`None` if no such subcomponent
             could be found.
-        """  # noqa: RST304
+        """
         if self.subcomponents is not None:
             for subcomponent in self.subcomponents:
                 if subcomponent.id == _id and subcomponent.version == version:
@@ -668,7 +668,7 @@ class ProductStatus(Enum):
         :raise ValueError: If *value* is not one of the possible
             values of this enumerate, or if *default* has an invalid value
             **and** *value* is :const:`None`.
-        """  # noqa: RST304
+        """
         if isinstance(value, str) and value:
             return cls(value)
         if isinstance(value, cls):
@@ -799,7 +799,7 @@ class StatementMetadata(JsonData):
             :const:`None`, current time is used.
         :param last_updated_on: The time this statement was last updated. If
             :const:`None`, current time is used.
-        """  # noqa: RST304
+        """
         self._id: str | None = _id
         self.version: int = version if isinstance(version, int) else 1
         self.first_issued_on: datetime = (
@@ -879,7 +879,7 @@ class StatementStatus(JsonData):
         when the *action statement* was issued.
     :ivar str | None notes: Status notes **MAY** convey information about how
         *status* was determined and **MAY** reference other VEX information.
-    """  # noqa: RST304
+    """
 
     def __init__(
         self,
@@ -954,7 +954,7 @@ class SubProductId(ProductId):
     :ivar str version: see :class:`ProductId`
     :ivar list[str] platforms: The list of platform for this sub-product ID.
     :ivar StatementStatus status: The status of the sub product.
-    """  # noqa: RST304
+    """
 
     def __init__(
         self,
@@ -970,7 +970,7 @@ class SubProductId(ProductId):
         :param platforms: The list of platform for this sub-product ID.
         :param status: The status of the sub product. If
             :const:`None`, the status of the parent statement is assumed.
-        """  # noqa: RST304
+        """
         super().__init__(_id=_id, version=version)
         self.platforms: list[str] = platforms or []
         self.status: StatementStatus | None = status
@@ -1038,7 +1038,7 @@ class Vulnerability(JsonData):
     :ivar str | None source: The emitter of the above *score* and *vector* if
         any.
     :ivar str | None url: An url to get details on this vulnerability.
-    """  # noqa: RST304
+    """
 
     def __init__(
         self,
