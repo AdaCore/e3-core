@@ -69,7 +69,7 @@ logger = getLogger("pypiscript", "e3.python")
 VERSION_PARTS_MAJOR_MINOR = 2
 
 
-def main() -> None:  # noqa: PLR0915
+def main() -> None:
     """Run the e3-pypi-closure script."""
     m = Main()
     m.argument_parser.formatter_class = argparse.RawDescriptionHelpFormatter

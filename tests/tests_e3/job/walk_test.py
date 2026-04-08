@@ -525,7 +525,7 @@ class TestWalk:
 
 
 @pytest.mark.usefixtures("setup_sbx")
-def test_source_deps() -> None:  # noqa: PLR0915
+def test_source_deps() -> None:
     """Try runs with source dependencies changing between runs."""
     actions = DAG()
     actions.add_vertex("1")
@@ -743,7 +743,7 @@ def test_predecessor_with_no_fingerprint() -> None:
 
 
 @pytest.mark.usefixtures("setup_sbx")
-def test_dry_run() -> None:  # noqa: PLR0915
+def test_dry_run() -> None:
     """Simulate the use actions with "dry run" behavior."""
     actions = DAG()
     actions.add_vertex("1")

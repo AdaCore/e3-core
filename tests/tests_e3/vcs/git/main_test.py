@@ -47,7 +47,7 @@ def test_git_non_utf8() -> None:
 
 
 @pytest.mark.usefixtures("git")
-def test_git_repo() -> None:  # noqa: PLR0915
+def test_git_repo() -> None:
     """Test git repo."""
     working_tree = Path.cwd() / "working_tree"
     working_tree2 = Path.cwd() / "working_tree2"

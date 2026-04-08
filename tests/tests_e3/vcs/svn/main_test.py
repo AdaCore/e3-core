@@ -28,7 +28,7 @@ def file_url(path: str, unix: bool = False) -> str:
     reason="test using SVN: not available in our windows CI image at the moment.",
 )
 @pytest.mark.usefixtures("svn")
-def test_svn_repo() -> None:  # noqa: PLR0915
+def test_svn_repo() -> None:
     """Test svn repo."""
     cwd = Path.cwd()
 

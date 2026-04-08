@@ -52,7 +52,7 @@ class AnodSpecRepository:
     files.
     """
 
-    def __init__(  # noqa: PLR0915
+    def __init__(
         self,
         spec_dir: str,
         spec_config: Any = None,  # noqa: ANN401  # plugin-specific configuration
