@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -32,14 +33,18 @@ class Package:
 
     def __init__(
         self,
-        prefix: str,
+        anod_instance: str | Anod | None = None,
+        prefix: str | None = None,
+        *,
         publish: bool = False,
         version: Callable[[], str] | None = None,
-        *,
-        anod_instance: Anod | None = None,
     ) -> None:
         """Create a binary package.
 
+        :param anod_instance: an Anod instance (if anod_instance is
+            a string then it is used as the value for as the prefix
+            parameter. The trick is mainly implemented to handle
+            backward compatibility issues).
         :param prefix: prefix of the package to create, the name will be
             {prefix}-{version}-{platform}-bin.{exe,tar.gz}
             The version is by default set to 'unknown' and
@@ -48,13 +53,34 @@ class Package:
             can be distributed to a customer).
         :param version: a callback returning the package version, if None the
             version is set to Anod.sandbox.build_version
-        :param anod_instance: an Anod instance
         """
-        self.prefix = prefix
-        self.name = prefix + "-{version}-{platform}-bin"
+        self.anod_instance = None
+        if isinstance(anod_instance, str):
+            self.prefix = anod_instance
+            # Try to guess the anod instance in which package was declared
+            # This code should be removed once anod_instance parameter is
+            # made mandatory
+            # Get the upper frame and look for the first argument (most
+            # of the time this should be the anod instance).
+            current_frame = inspect.currentframe()
+            upper_frame = current_frame.f_back if current_frame else None
+            if upper_frame:
+                var_names = upper_frame.f_code.co_varnames
+                if var_names:
+                    self.anod_instance = upper_frame.f_locals[var_names[0]]
+        else:
+            if prefix is None:
+                msg = "prefix required for Package"
+                raise e3.anod.error.SpecError(msg)
+
+            self.anod_instance = anod_instance
+            self.prefix = prefix
+
+        # Don't try to transform into an f-string expression here as
+        # the evaluation is done later using format.
+        self.name = self.prefix + "-{version}-{platform}-bin"
         self.publish = publish
         self.version = version
-        self.anod_instance = anod_instance
 
     @property
     def is_simple_archive(self) -> bool:
