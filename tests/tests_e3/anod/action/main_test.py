@@ -6,7 +6,7 @@ import e3.collection.dag
 import e3.env
 
 
-def test_initall() -> None:  # noqa: PLR0915
+def test_initall() -> None:
     """Very simple test to check that all objects can be initialized."""
     root = action.Root()
     assert root.uid == "root"

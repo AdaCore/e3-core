@@ -52,7 +52,7 @@ class TestCheckout:
     @pytest.mark.usefixtures("git")
     @pytest.mark.parametrize("compute_changelog", [True, False])
     @pytest.mark.parametrize("e3_feature", ["", "git_shallow_fetch"])
-    def test_git_clone(self, compute_changelog: bool, e3_feature: str) -> None:  # noqa: PLR0915
+    def test_git_clone(self, compute_changelog: bool, e3_feature: str) -> None:
         """Test CheckoutManager with Git repositories."""
         logger = logging.getLogger("test_git_clone")
 

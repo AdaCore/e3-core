@@ -329,7 +329,7 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
 def mv(
     source: str | Path | Iterable[str] | Iterable[Path],
     target: str | Path,
-) -> None:  # noqa: PLR0915
+) -> None:
     """Move files.
 
     :param source: a glob pattern, a sequence/iterator of glob patterns, a path,
