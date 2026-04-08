@@ -37,7 +37,7 @@ def test_wait_for_objects() -> None:
         assert (
             wait_for_objects(
                 [int(p0.internal._handle), int(p1.internal._handle)],
-                timeout=2,  # noqa: SLF001
+                timeout=2,
             )
             == 1
         ), "process 1 was expected"

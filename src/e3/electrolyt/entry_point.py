@@ -95,8 +95,8 @@ def entry_point(
     db: dict[str, EntryPoint],
     cls: Callable[..., EntryPoint],
     kind: str,
-    *args: Any,  # noqa: ANN401  # generic decorator accepts any signature
-    **kwargs: Any,  # noqa: ANN401  # generic decorator accepts any signature
+    *args: Any,
+    **kwargs: Any,
 ) -> Callable:
     """Entry point decorator.
 

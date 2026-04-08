@@ -139,11 +139,11 @@ class NVD:
 
         if self.cache_db_path:
             from datetime import (
-                timedelta,  # noqa: PLC0415 optional dependency for caching
+                timedelta,
             )
 
             from requests_cache import (
-                CachedSession,  # noqa: PLC0415 optional dependency for caching
+                CachedSession,
             )
 
             self._session = CachedSession(

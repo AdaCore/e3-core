@@ -252,8 +252,8 @@ class Run:
             STDOUT_VALUE | DEVNULL_VALUE | PIPE_VALUE | str | Path | IO | None
         ) = STDOUT,
         input: (  # noqa: A002
-            DEVNULL_VALUE | PIPE_VALUE | str | bytes | Path | IO | None  # noqa: A002
-        ) = None,  # noqa: A002
+            DEVNULL_VALUE | PIPE_VALUE | str | bytes | Path | IO | None
+        ) = None,
         bg: bool = False,
         timeout: int | None = None,
         env: dict | None = None,
@@ -729,8 +729,8 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
 
     if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.process import (
-            process_exit_code,  # noqa: PLC0415 windows-only
-            wait_for_objects,  # noqa: PLC0415 windows-only
+            process_exit_code,
+            wait_for_objects,
         )
 
         remain = int(timeout)
@@ -825,7 +825,7 @@ def is_running(pid: int) -> bool:
     if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.native_api import NT, Access  # noqa: PLC0415 windows-only
         from e3.os.windows.process import (
-            process_exit_code,  # noqa: PLC0415 windows-only
+            process_exit_code,
         )
 
         if TYPE_CHECKING:

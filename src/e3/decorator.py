@@ -46,8 +46,8 @@ def disabled(func: Callable) -> Callable:
     del func
 
     def empty_func(
-        *args: Any,  # noqa: ANN401
-        **kargs: Any,  # noqa: ANN401  # generic wrapper accepts any signature
+        *args: Any,
+        **kargs: Any,
     ) -> None:
         del args, kargs
 
@@ -97,8 +97,8 @@ class memoize:
 
     def __call__(
         self,
-        *args: Any,  # noqa: ANN401  # generic decorator caches any function signature
-        **kwargs: Any,  # noqa: ANN401
+        *args: Any,
+        **kwargs: Any,
     ) -> Any:  # noqa: ANN401
         """Return the cache value if exist, else call func."""
         if kwargs:

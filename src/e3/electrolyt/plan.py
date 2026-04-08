@@ -145,7 +145,7 @@ class PlanContext:
         target: str | None = None,
         enabled: bool = True,
         default_push_to_store: bool = False,
-        **kwargs: Any,  # noqa: ANN401  # user-defined scope metadata
+        **kwargs: Any,
     ) -> None:
         """Initialize an execution context or a scope.
 

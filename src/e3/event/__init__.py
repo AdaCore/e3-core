@@ -397,8 +397,8 @@ def send_event_from_file(filename: str) -> bool:
 
 def add_handler(
     name: str,
-    *args: Any,  # noqa: ANN401  # handler-specific arguments
-    **kwargs: Any,  # noqa: ANN401  # handler-specific arguments
+    *args: Any,
+    **kwargs: Any,
 ) -> None:
     """Add handler in the default manager.
 

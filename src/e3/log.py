@@ -125,8 +125,8 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def process(
         self,
         msg: Any,  # noqa: ANN401  # standard LoggerAdapter.process signature
-        kwargs: Any,  # noqa: ANN401
-    ) -> tuple[Any, Any]:  # noqa: ANN401
+        kwargs: Any,
+    ) -> tuple[Any, Any]:
         """Allow to handle extra parameter.
 
         It is called by super method log. It is overwritten here because
@@ -141,9 +141,9 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         self,
         level: int,
         msg: Any,  # noqa: ANN401  # standard logging signature
-        *args: Any,  # noqa: ANN401
+        *args: Any,
         anod_uui: int = 0,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Integrate additional keywords using standard interface.
 
@@ -162,9 +162,9 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def info(  # type: ignore[override]
         self,
         msg: Any,  # noqa: ANN401  # standard logging signature
-        *args: Any,  # noqa: ANN401
+        *args: Any,
         anod_uui: int = 0,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Wrap standard logger.info method.
 
@@ -180,9 +180,9 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def debug(  # type: ignore[override]
         self,
         msg: Any,  # noqa: ANN401  # standard logging signature
-        *args: Any,  # noqa: ANN401
+        *args: Any,
         anod_uui: int = 0,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Wrap standard logger.debug method.
 
@@ -198,9 +198,9 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def warning(  # type: ignore[override]
         self,
         msg: Any,  # noqa: ANN401  # standard logging signature
-        *args: Any,  # noqa: ANN401
+        *args: Any,
         anod_uui: int = 0,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Wrap standard logger.warning method.
 
@@ -216,9 +216,9 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def error(  # type: ignore[override]
         self,
         msg: Any,  # noqa: ANN401  # standard logging signature
-        *args: Any,  # noqa: ANN401
+        *args: Any,
         anod_uui: int = 0,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Wrap standard logger.error method.
 
@@ -234,9 +234,9 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def critical(  # type: ignore[override]
         self,
         msg: Any,  # noqa: ANN401  # standard logging signature
-        *args: Any,  # noqa: ANN401
+        *args: Any,
         anod_uui: int = 0,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Wrap of standard logger.critical method.
 
@@ -252,10 +252,10 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def exception(  # type: ignore[override]
         self,
         msg: Any,  # noqa: ANN401  # standard logging signature
-        *args: Any,  # noqa: ANN401
+        *args: Any,
         exc_info: _ExcInfoType = True,
         anod_uui: int = 0,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Wrap standard logger.exception method.
 
@@ -274,7 +274,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
 
 def progress_bar(
     it: Iterator[T] | Sequence[T],
-    **kwargs: Any,  # noqa: ANN401  # tqdm accepts many kwargs
+    **kwargs: Any,
 ) -> tqdm[T]:
     """Create a tqdm progress bar.
 

@@ -70,7 +70,7 @@ class HostDB:
         hostname: str,
         platform: str,
         version: str,
-        **data: Any,  # noqa: ANN401  # user-defined host metadata
+        **data: Any,
     ) -> None:
         """Add/Update a host entry.
 

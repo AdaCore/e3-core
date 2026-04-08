@@ -614,7 +614,7 @@ class File:
 
     @overload
     @classmethod
-    def load_from_meta_file(  # noqa: F811
+    def load_from_meta_file(
         cls: type[FileType],
         dest_dir: str,
         name: str,
@@ -624,7 +624,7 @@ class File:
         """See self.load_from_meta_file."""
 
     @classmethod
-    def load_from_meta_file(  # noqa: F811
+    def load_from_meta_file(
         cls,
         dest_dir: str,
         name: str,
