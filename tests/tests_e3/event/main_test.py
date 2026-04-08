@@ -4,7 +4,7 @@ import email
 import json
 from pathlib import Path
 
-import mock
+from unittest import mock
 
 import e3.archive
 import e3.event
