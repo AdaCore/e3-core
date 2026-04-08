@@ -26,6 +26,7 @@ class SandBox:
     """Isolated build environment for Anod operations."""
 
     def __init__(self, root_dir: str) -> None:
+        """SandBox constructor."""
         self.root_dir: str = os.path.realpath(root_dir)
         self.build_id: str | None = None
         self.build_date: str | None = None

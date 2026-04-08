@@ -26,6 +26,7 @@ class SbxDirs:
     """Sandbox directory structure for testing."""
 
     def __init__(self) -> None:
+        """SbxDirs constructor."""
         self.sbx_dir = Path("/dev/null")
         self.fingerprint_dir = Path("/dev/null")
         self.store_dir = Path("/dev/null")
@@ -156,6 +157,7 @@ class ControlledJob(ProcessJob):
     def __init__(
         self, uid: str, data: JobDataT, notify_end: Callable[[str], None]
     ) -> None:
+        """ControlledJob constructor."""
         super().__init__(uid, data, notify_end)
         self.run_count = 0
 
@@ -194,6 +196,7 @@ class SimpleWalk(Walk):
     dry_run_mode = False
 
     def __init__(self, actions: DAG) -> None:
+        """SimpleWalk constructor."""
         # The list of jobs (by UID) that have been requeued.
         self.saved_jobs = {}
         self.requeued = {}

@@ -35,6 +35,7 @@ class SpecConfig:
     """
 
     def __init__(self) -> None:
+        """SpecConfig constructor."""
         # Both values are set by AnodSpecRepository init
         self.spec_dir = ""
         self.repositories: dict[str, Any] = {}

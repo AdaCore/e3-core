@@ -306,6 +306,7 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
     )
 
     def __init__(self) -> None:
+        """TqdmHandler constructor."""
         logging.StreamHandler.__init__(self)
 
     def emit(self, record: logging.LogRecord) -> None:

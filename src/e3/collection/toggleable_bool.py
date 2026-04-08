@@ -36,6 +36,7 @@ class ToggleableBooleanGroup:
     """
 
     def __init__(self) -> None:
+        """ToggleableBooleanGroup constructor."""
         self.series: list[ToggleableBoolean] = []
 
     def __getitem__(self, key: int) -> ToggleableBoolean:
