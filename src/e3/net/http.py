@@ -265,8 +265,10 @@ class HTTPSession:
                 problematic_url = self.base_urls.popleft()
                 self.base_urls.append(problematic_url)  # type: ignore
 
+        error_msgs_str = "\n".join(error_msgs)
+        msg = f"got request error ({len(error_msgs)}):\n{error_msgs_str}"
         raise HTTPError(
-            "got request error (%d):\n%s" % (len(error_msgs), "\n".join(error_msgs)),
+            msg,
             status=last_status,
         )
 

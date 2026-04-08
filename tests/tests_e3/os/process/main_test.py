@@ -290,12 +290,12 @@ def test_enable_commands_handler() -> None:
 def test_wait_for_processes() -> None:
     """Test wait for processes."""
     for v in (1, 2):
-        with Path("p%d.py" % v).open("w") as f:
+        with Path(f"p{v}.py").open("w") as f:
             f.write(
                 "import os\n"
                 "while True:\n"
-                '    if os.path.exists("end%d"): break\n'
-                'print("process%d")\n' % (v, v)
+                f'    if os.path.exists("end{v}"): break\n'
+                f'print("process{v}")\n'
             )
 
     p1 = e3.os.process.Run([sys.executable, "p1.py"], bg=True)

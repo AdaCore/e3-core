@@ -267,7 +267,7 @@ class GitRepository:
             + ("%N%n" if with_gerrit_notes else "")
             + "%n%B",
             "--log-size",
-            "--max-count=%d" % max_count if max_count else None,
+            f"--max-count={max_count if max_count else None}",
             "--show-notes=review" if with_gerrit_notes else None,
             rev_range,
         ]

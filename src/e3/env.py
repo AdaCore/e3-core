@@ -486,7 +486,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             discs.append("vxworks")
         if not self.is_cross:
             discs.append("native")
-        discs.append("%dbits" % self.target.cpu.bits)
+        discs.append(f"{self.target.cpu.bits}bits")
         if self.target.os.name.lower() == "windows":
             discs.append("NT")
 

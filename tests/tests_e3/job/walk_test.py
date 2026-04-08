@@ -176,9 +176,9 @@ class ControlledJob(ProcessJob):
             self.uid.endswith("notready:once")
             and self.run_count < NOT_READY_RUN_COUNT_THRESHOLD
         ):
-            result.append("import sys; sys.exit(%d)" % ReturnValue.notready.value)
+            result.append(f"import sys; sys.exit({ReturnValue.notready.value})")
         elif self.uid.endswith("notready:always"):
-            result.append("import sys; sys.exit(%d)" % ReturnValue.notready.value)
+            result.append(f"import sys; sys.exit({ReturnValue.notready.value})")
         elif self.uid.startswith(DOWNLOAD_JOB_UID_PREFIX):
             result.append(
                 "import shutil; shutil.copyfile(r"
