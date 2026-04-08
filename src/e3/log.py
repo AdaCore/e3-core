@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser, Namespace, _ArgumentGroup
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Iterator, Mapping, Sequence
     from logging import _ExcInfoType
     from typing import (
         IO,
@@ -24,7 +24,6 @@ if TYPE_CHECKING:
         TextIO,
         TypeVar,
     )
-    from collections.abc import Mapping
 
     T = TypeVar("T")
 

@@ -13,13 +13,13 @@ from e3.archive import create_archive
 from e3.fs import VCS_IGNORE_LIST, mkdir, rm, sync_tree
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from typing import (
         Any,
         Final,
         Literal,
         NoReturn,
     )
-    from collections.abc import Callable
 
     from e3.anod.spec import Anod
 

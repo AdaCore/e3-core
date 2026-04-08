@@ -3,8 +3,8 @@
 import smtplib
 from email.utils import make_msgid
 from typing import NoReturn
-
 from unittest import mock
+
 import pytest
 
 import e3.net.smtp

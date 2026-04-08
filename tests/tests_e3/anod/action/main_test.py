@@ -1,9 +1,9 @@
 """Tests for e3.anod.action."""
 
-from e3.anod import action
 import e3.anod.spec
 import e3.collection.dag
 import e3.env
+from e3.anod import action
 
 
 def test_initall() -> None:
