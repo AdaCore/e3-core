@@ -1734,8 +1734,8 @@ class TypeURI:
         """
         # Validate this uri.
         from urllib.parse import (
-            ParseResult,  # noqa: PLC0415 lazy import for validation
-            urlparse,  # noqa: PLC0415 lazy import for validation
+            ParseResult,
+            urlparse,
         )
 
         try:

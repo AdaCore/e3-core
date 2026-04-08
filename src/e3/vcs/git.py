@@ -105,7 +105,7 @@ class GitRepository:
         output: (
             DEVNULL_VALUE | PIPE_VALUE | GIT_LOG_STREAM_VALUE | str | IO | None
         ) = GIT_LOG_STREAM,
-        **kwargs: Any,  # noqa: ANN401  # VCS command accepts many kwargs
+        **kwargs: Any,
     ) -> Run:
         """Run a git command.
 

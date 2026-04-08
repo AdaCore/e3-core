@@ -367,7 +367,7 @@ class Component:
 
     @overload
     @classmethod
-    def load_from_meta_file(  # noqa: F811
+    def load_from_meta_file(
         cls: type[ComponentType],
         dest_dir: str,
         name: str,
@@ -376,7 +376,7 @@ class Component:
     ) -> ComponentType | None: ...
 
     @classmethod
-    def load_from_meta_file(  # noqa: F811
+    def load_from_meta_file(
         cls,
         dest_dir: str,
         name: str,

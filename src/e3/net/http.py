@@ -174,7 +174,7 @@ class HTTPSession:
         method: str,
         url: str,
         data_streams: dict[str, Any] | None = None,
-        **kwargs: Any,  # noqa: ANN401  # HTTP request accepts many kwargs
+        **kwargs: Any,
     ) -> Response:
         """Send a request.
 
@@ -280,7 +280,7 @@ class HTTPSession:
         fileobj: _Fileobj | None = None,
         validate: Callable[[str], bool] | None = None,
         exception_on_error: bool = False,
-        **kwargs: Any,  # noqa: ANN401  # HTTP request accepts many kwargs
+        **kwargs: Any,
     ) -> str | None:
         """Download a file.
 

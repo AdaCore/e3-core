@@ -93,8 +93,8 @@ class SideEffect(Protocol):
         self,
         result: CommandResult,
         cmd: list[str],
-        *args: Any,  # noqa: ANN401  # mock accepts any Run signature
-        **kwargs: Any,  # noqa: ANN401  # mock accepts any Run signature
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Run when the mocked command is called.
 
@@ -158,8 +158,8 @@ class CommandResult:
     def __call__(
         self,
         cmd: list[str],
-        *args: Any,  # noqa: ANN401  # mock accepts any Run signature
-        **kwargs: Any,  # noqa: ANN401  # mock accepts any Run signature
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Allow to run code to emulate the command.
 
@@ -203,8 +203,8 @@ class MockRun(Run):
     def __call__(
         self,
         cmds: AnyCmdLine,
-        *args: Any,  # noqa: ANN401  # mock accepts any Run signature
-        **kwargs: Any,  # noqa: ANN401  # mock accepts any Run signature
+        *args: Any,
+        **kwargs: Any,
     ) -> Run:
         """Emulate how e3.os.process.Run.__init__ works.
 

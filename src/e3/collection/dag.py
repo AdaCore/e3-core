@@ -54,7 +54,7 @@ class DAGIterator:
 
     def __next__(
         self,
-    ) -> tuple[None, None] | tuple[VertexID, Any]:  # noqa: ANN401 polymorphic data
+    ) -> tuple[None, None] | tuple[VertexID, Any]:
         """Retrieve next_element with with_predecessors=False.
 
         The intermediate function is needed in Python 3.x
@@ -68,7 +68,7 @@ class DAGIterator:
         self,
     ) -> tuple[
         VertexID | None,
-        Any,  # noqa: ANN401  # polymorphic vertex data
+        Any,
         frozenset[VertexID],
     ]:
         """Retrieve next element in topological order.
@@ -140,8 +140,8 @@ class DAG:
 
     def __init__(self) -> None:
         """Initialize a DAG."""
-        self.vertex_data: dict[VertexID, Any] = {}  # noqa: ANN401 polymorphic data
-        self.tags: dict[VertexID, Any] = {}  # noqa: ANN401  # polymorphic tags
+        self.vertex_data: dict[VertexID, Any] = {}
+        self.tags: dict[VertexID, Any] = {}
 
         self.__vertex_predecessors: dict[VertexID, frozenset[VertexID]] = {}
         self.__vertex_successors: dict[VertexID, frozenset[VertexID]] = {}
@@ -247,7 +247,7 @@ class DAG:
         max_distance: int | None = None,
         max_element: int | None = None,
         reverse_order: bool = False,
-    ) -> list[tuple[int, VertexID, Any]]:  # noqa: ANN401  # polymorphic tags
+    ) -> list[tuple[int, VertexID, Any]]:
         r"""Get tag context.
 
         Returns the list of predecessors tags along with their vertex id and

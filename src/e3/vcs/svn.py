@@ -134,7 +134,7 @@ class SVNRepository:
     def svn_cmd(
         self,
         cmd: SVNCmd,
-        **kwargs: Any,  # noqa: ANN401  # VCS command accepts many kwargs
+        **kwargs: Any,
     ) -> e3.os.process.Run:
         """Run a svn command.
 

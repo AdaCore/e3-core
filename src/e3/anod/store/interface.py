@@ -257,8 +257,8 @@ class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def bulk_query(
         self,
-        queries: list[dict[str, Any]],  # noqa: ANN401  # query structure
-    ) -> list[dict[str, Any]]:  # noqa: ANN401  # response structure
+        queries: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """Perform a list of queries (source and components) to Store.
 
         Each element of the queries list should conform to the following
@@ -486,8 +486,8 @@ class LocalStoreInterface(metaclass=abc.ABCMeta):
     def bulk_update_from_store(
         self,
         from_store: StoreReadInterface,
-        queries: list[dict[str, Any]],  # noqa: ANN401  # query structure
-    ) -> list[dict[str, Any]]:  # noqa: ANN401  # response structure
+        queries: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """Perform a list of update queries (source and components) to Store.
 
         Each element of the queries list should conform to the specifications define by
