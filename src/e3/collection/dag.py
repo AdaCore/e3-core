@@ -719,7 +719,7 @@ class DAG:
         if not self.__vertex_predecessors:
             return ""
         return get_subtree(
-            root=list(self.__vertex_predecessors.keys())[0], name_key=name_key
+            root=next(iter(self.__vertex_predecessors.keys())), name_key=name_key
         )
 
     def prune(

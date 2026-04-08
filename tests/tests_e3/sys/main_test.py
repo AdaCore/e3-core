@@ -94,9 +94,12 @@ def test_python_func() -> None:
         # Note: On windows sys.executable sometimes references python.exe and sometimes
         # python3.exe. To avoid having different assert depending on the windows
         # platform used, we just remove the "3" from the executable name.
-        assert [e3.os.fs.unixpath(p) for p in e3.sys.python_script("run")][0].replace(
-            "3", ""
-        ).lower() == e3.os.fs.unixpath(sys.executable.replace("3", "")).lower()
+        assert (
+            next(e3.os.fs.unixpath(p) for p in e3.sys.python_script("run"))
+            .replace("3", "")
+            .lower()
+            == e3.os.fs.unixpath(sys.executable.replace("3", "")).lower()
+        )
 
         e3.fs.mkdir("Scripts")
         e3.os.fs.touch("Scripts/run.exe")
