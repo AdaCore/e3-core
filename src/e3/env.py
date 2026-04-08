@@ -21,8 +21,8 @@ from e3.platform import Platform
 
 if TYPE_CHECKING:
     from argparse import Namespace
-    from typing import Any, ClassVar, TypeVar
     from collections.abc import Iterable
+    from typing import Any, ClassVar, TypeVar
 
 logger = e3.log.getLogger("env")
 

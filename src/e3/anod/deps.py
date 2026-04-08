@@ -11,8 +11,8 @@ from e3.anod import qualifier_str_to_dict
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from typing import Any, ClassVar, Literal
     from collections.abc import Hashable
+    from typing import Any, ClassVar, Literal
 
     from e3.anod.spec import DEPENDENCY_PRIMITIVE, Anod
 

@@ -23,7 +23,8 @@ from e3.python.wheel import Wheel
 
 if TYPE_CHECKING:
     from collections.abc import Set
-    from requests_mock import Mocker, Request, Context
+
+    from requests_mock import Context, Mocker, Request
 
 
 git = require_tool("git")

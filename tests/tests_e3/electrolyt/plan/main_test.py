@@ -7,10 +7,8 @@ from typing import Any
 
 import pytest
 
-from e3.electrolyt import entry_point
-from e3.electrolyt import host
-from e3.electrolyt import plan
 import e3.env
+from e3.electrolyt import entry_point, host, plan
 
 # Expected number of actions/entries in plan execution tests
 SIMPLE_PLAN_ACTIONS = 2
