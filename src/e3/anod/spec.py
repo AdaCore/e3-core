@@ -485,7 +485,7 @@ class Anod:
             *ldd_output*) is not in the same directory as the analysed element.
         :raise FileNotFoundError: if *ldd_output* is not provided and ``ldd``
             application cannot be found in the ``PATH``.
-        """  # noqa: RST304
+        """
         ignored: list[str] = ignored_libs or []
         result: dict[str, list[tuple[str, str]]] = {}
         errors: dict[str, list[str]] = {}
@@ -835,7 +835,7 @@ class Anod:
             assert r.status is not None
         if r.status != 0:
             raise ShellError(
-                message="%s failed (exit status: %d)" % (" ".join(command), r.status),
+                message=f"{' '.join(command)} failed (exit status: {r.status})",
                 origin="anod.shell",
                 process=r,
             )

@@ -109,13 +109,10 @@ class BuildInfo:
 
     def __str__(self) -> str:
         """Convert a buildinfo to a str."""
-        return "%-8s | %-16s | %-16s | %s | %s | %s" % (
-            self.build_date,
-            self.setup,
-            self.build_version,
-            self.id,
-            self.creation_date,
-            "ready" if self.isready else "notready",
+        return (
+            f"{self.build_date:<8} | {self.setup:<16} | "
+            f"{self.build_version:<16} | {self.id} | {self.creation_date} | "
+            f"{'ready' if self.isready else 'notready'}"
         )
 
     def __eq__(self, other: object) -> bool:

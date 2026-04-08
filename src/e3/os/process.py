@@ -407,7 +407,7 @@ class Run:
         if timeout is not None:
             rlimit = get_rlimit()
             if Path(rlimit).exists():
-                rlimit_args = [rlimit, "%d" % timeout]
+                rlimit_args = [rlimit, f"{timeout}"]
             else:
                 logger.warning("cannot find rlimit at %s", rlimit)
                 rlimit_args = []

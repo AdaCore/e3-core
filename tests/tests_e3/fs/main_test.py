@@ -631,7 +631,7 @@ def test_sync_tree_with_file_list() -> None:
     """Test sync_tree with file_list."""
     e3.fs.mkdir("a")
     for x in range(10):
-        e3.os.fs.touch("a/%d" % x)
+        e3.os.fs.touch(f"a/{x}")
 
     e3.fs.mkdir("b")
     e3.fs.sync_tree("a", "b", file_list=["3", "7"])
@@ -644,7 +644,7 @@ def test_sync_tree_with_ignore() -> None:
     """Test sync_tree with ignore."""
     e3.fs.mkdir("a")
     for x in range(10):
-        e3.os.fs.touch("a/%d" % x)
+        e3.os.fs.touch(f"a/{x}")
 
     e3.fs.mkdir("b")
     e3.fs.sync_tree("a", "b", ignore=["/3", "/7"])
