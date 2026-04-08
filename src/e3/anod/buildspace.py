@@ -54,10 +54,7 @@ class BuildSpace:
         if not Path(self.root_dir, ".buildspace").is_file():
             return False
         # Next, verify that all the necessary directories exist as well.
-        for d in self.DIRS:
-            if not Path(self.subdir(name=d)).is_dir():
-                return False
-        return True
+        return all(Path(self.subdir(name=d)).is_dir() for d in self.DIRS)
 
     @property
     def dirs(self) -> list[str]:
