@@ -302,7 +302,7 @@ class SourceBuilder:
             :param dest: destination directory for the source
             """
             sync_tree(
-                list(repos.values())[0]["working_dir"], dest, ignore=VCS_IGNORE_LIST
+                next(iter(repos.values()))["working_dir"], dest, ignore=VCS_IGNORE_LIST
             )
 
         return default_prepare_src

@@ -234,8 +234,8 @@ def test_component(store: StoreRW) -> None:  # noqa: PLR0915
     assert tmp[0]["readme"]["filename"] == "readme.txt"
     assert isinstance(tmp[0]["attachments"], dict)
     assert len(tmp[0]["attachments"].keys()) == 1
-    assert list(tmp[0]["attachments"].keys())[0] == "myatt"
-    assert list(tmp[0]["attachments"].values())[0]["name"] == "att.txt"
+    assert next(iter(tmp[0]["attachments"].keys())) == "myatt"
+    assert next(iter(tmp[0]["attachments"].values()))["name"] == "att.txt"
     assert tmp[0]["readme"]["filename"] == "readme.txt"
 
     tmp = store.list_components(bid.id, platform="CannotBeFound")
