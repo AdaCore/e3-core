@@ -37,6 +37,7 @@ class AnObject:
     """Simple object wrapper for testing JSON serialization."""
 
     def __init__(self, value: dict) -> None:
+        """AnObject constructor."""
         self.value = value
 
     __hash__ = None  # type: ignore[assignment]
@@ -52,6 +53,7 @@ class SimpleJsonData(JsonData):
     """Simple JsonData implementation for testing JSON conversion."""
 
     def __init__(self, string: str, integer: int, float_var: float) -> None:
+        """SimpleJsonData constructor."""
         self.string: str = string
         self.integer: int = integer
         self.float_var: float = float_var
@@ -69,6 +71,7 @@ class ComplexJsonData(JsonData):
     """Example of a JsonData which needs to overwrite the from_dict() method."""
 
     def __init__(self, data: SimpleJsonData, an_object: AnObject) -> None:
+        """ComplexJsonData constructor."""
         self.data: SimpleJsonData = data
         self.an_object = an_object
 

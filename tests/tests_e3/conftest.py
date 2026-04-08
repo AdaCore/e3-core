@@ -50,6 +50,7 @@ class PypiSimulator:
     DATA_DIR = Path(abspath(__file__)).parent / "pypi_data"
 
     def __init__(self, requests_mock: Mocker) -> None:
+        """PypiSimulator constructor."""
         self.requests_mock = requests_mock
 
         self.requests_mock.stop()

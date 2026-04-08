@@ -348,6 +348,7 @@ class FileInfo:
         class_id = 4
 
         def __init__(self) -> None:
+            """Initialize Basic class."""
             Structure.__init__(self)
             self.file_attributes = FileAttribute(0)
 
