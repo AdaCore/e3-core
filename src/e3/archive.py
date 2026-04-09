@@ -21,7 +21,7 @@ import e3.os.fs
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from os import PathLike
-    from typing import IO, Any, Literal, Text
+    from typing import IO, Any, Literal
 
     from e3.mypy import assert_never
 
@@ -69,7 +69,7 @@ class E3ZipFile(zipfile.ZipFile):
 
     def _extract_member(
         self,
-        member: Text | zipfile.ZipInfo,
+        member: str | zipfile.ZipInfo,
         path: str | PathLike[str] | None,
         pwd: bytes | None,
     ) -> str:
