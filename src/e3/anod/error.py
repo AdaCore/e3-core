@@ -29,7 +29,7 @@ class ShellError(AnodError):
         self,
         message: str,
         origin: str | None = None,
-        process: "Run" | None = None,
+        process: Run | None = None,
     ) -> None:
         """Initialize a ShellError.
 
