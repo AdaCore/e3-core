@@ -180,7 +180,7 @@ class CheckoutManager:
                         ]
                     )
                     logger.debug("Ignore in external: %s", ignore_list)
-                except Exception:  # defensive code
+                except Exception:  # defensive code  # noqa: BLE001
                     # don't crash on exception
                     pass
 
@@ -239,7 +239,7 @@ class CheckoutManager:
 
             if remote_name not in remote_list:
                 g.git_cmd(["remote", "add", remote_name, url])
-        except Exception:  # defensive code
+        except Exception:  # defensive code  # noqa: BLE001
             # Ignore exception as it probably means that remote already exist
             # In case of real error the failure will be detected later.
             pass

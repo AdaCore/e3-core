@@ -124,7 +124,7 @@ class PypiSimulator:
             with path.open() as html_file:
                 result = html_file.read()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             context.status_code = 500
             return json.dumps(
                 {

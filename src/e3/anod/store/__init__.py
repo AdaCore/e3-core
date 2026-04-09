@@ -1688,7 +1688,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                             platform=query["platform"],
                             component=query["name"],
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         result["msg"] = str(e)
                     else:
                         if components:
@@ -1711,7 +1711,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
                             result["response"] = self.get_source_info(  # type: ignore[assignment]
                                 bid=query["bid"], name=query["name"]
                             )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         result["msg"] = str(e)
             else:
                 result["msg"] = f"Invalid query type {query['query']!r}"

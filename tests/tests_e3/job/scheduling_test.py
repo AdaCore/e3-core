@@ -28,7 +28,7 @@ class NopJob(Job):
         """Priority."""
         try:
             result = -int(self.uid)
-        except Exception:
+        except ValueError:
             result = 0
         return result
 

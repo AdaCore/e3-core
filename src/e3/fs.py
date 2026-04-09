@@ -1035,7 +1035,7 @@ def sync_tree(  # noqa: PLR0915
             source_names = {
                 path_key(p.name): p.name for p in Path(entry.source.path).iterdir()
             }
-        except Exception:  # defensive code
+        except Exception:  # defensive code  # noqa: BLE001
             e3.log.debug("cannot get sources list", exc_info=True)
             # Don't crash in case a source directory cannot be read
             return
@@ -1046,7 +1046,7 @@ def sync_tree(  # noqa: PLR0915
                 target_names = {
                     path_key(p.name): p.name for p in Path(entry.target.path).iterdir()
                 }
-            except Exception:
+            except Exception:  # noqa: BLE001
                 e3.log.debug("cannot get targets list", exc_info=True)
                 target_names = {}
 
