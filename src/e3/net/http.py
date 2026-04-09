@@ -5,7 +5,6 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
-import socket
 import tempfile
 from collections import deque
 from email.message import Message
@@ -256,7 +255,7 @@ class HTTPSession:
                     response.raise_for_status()
                 return response
             except (
-                socket.timeout,
+                TimeoutError,
                 requests.exceptions.RequestException,
                 urllib3.exceptions.HTTPError,
             ) as e:
