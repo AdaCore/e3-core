@@ -534,7 +534,7 @@ class NTFile:
             while True:
                 off, _, size = struct.unpack_from("LLL", b.raw, pos)
                 name = b.raw[pos + s_size : pos + s_size + size].decode("utf-16-le")
-                if name != "." and name != "..":
+                if name not in {".", ".."}:
                     result, should_exit = fun(name, self)
                     if should_exit:
                         return result

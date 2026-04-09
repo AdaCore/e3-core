@@ -569,10 +569,10 @@ class Run:
         # If there is no pipe in the loop then just do a wait. Otherwise
         # in order to avoid blocked processes due to full pipes, use
         # communicate.
-        if (
-            self.output_file.fd != subprocess.PIPE
-            and self.error_file.fd != subprocess.PIPE
-            and self.input_file.fd != subprocess.PIPE
+        if subprocess.PIPE not in (
+            self.output_file.fd,
+            self.error_file.fd,
+            self.input_file.fd,
         ):
             self.status = self.internal.wait()
         else:

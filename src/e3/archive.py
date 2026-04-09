@@ -245,7 +245,7 @@ def unpack_archive(  # noqa: PLR0915
         tmp_dest = os.fspath(dest)
 
     try:
-        if ext == "tar" or ext == "tar.bz2" or ext == "tar.gz" or ext == "tar.xz":
+        if ext in {"tar", "tar.bz2", "tar.gz", "tar.xz"}:
             try:
                 # Set the right mode
                 mode = "r:"
@@ -327,7 +327,7 @@ def unpack_archive(  # noqa: PLR0915
                     message=f"Cannot unzip {filename} ({e})",
                 ) from e
         else:
-            assert_never()
+            assert_never()  # type: ignore[call-arg]
 
         if remove_root_dir:
             # First check that we have only one dir in our temp destination,

@@ -77,8 +77,8 @@ def test_list_release_components(store: StoreRW) -> None:
     tmp0 = Component.load(comp_list[0])
     tmp1 = Component.load(comp_list[1])
     assert tmp0 != tmp1
-    assert tmp0 == comp1 or tmp0 == comp2
-    assert tmp1 == comp1 or tmp1 == comp2
+    assert tmp0 in (comp1, comp2)
+    assert tmp1 in (comp1, comp2)
 
     comp_list = store.list_release_components(name="release-1", component="comp1")
     assert len(comp_list) == 1
