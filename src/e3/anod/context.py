@@ -336,12 +336,7 @@ class AnodContext:
             return None
 
         primitive = action_name.replace("anod_", "", 1)
-        if (
-            primitive != "build"
-            and primitive != "install"
-            and primitive != "test"
-            and primitive != "source"
-        ):
+        if primitive not in {"build", "install", "test", "source"}:
             logger.warning(f"Unknown primtive {primitive}")
             return None
         if TYPE_CHECKING:
@@ -468,8 +463,8 @@ class AnodContext:
             for el in self.predecessors(result):
                 if isinstance(el, BuildOrDownload):
                     el.set_decision(BuildOrDownload.INSTALL, plan_line)
-        elif primitive != "source" and primitive != "test":
-            assert_never()
+        elif primitive not in {"source", "test"}:
+            assert_never()  # type: ignore[call-arg]
         return result
 
     def add_spec(  # noqa: PLR0915

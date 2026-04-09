@@ -147,7 +147,7 @@ class CommandResult:
         for i, arg in enumerate(cmd):
             checker = self.cmd[i]
             if isinstance(checker, str):
-                if arg == checker or checker == "*":
+                if checker in (arg, "*"):
                     continue
             elif checker.check(arg):
                 continue
