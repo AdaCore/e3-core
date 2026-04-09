@@ -255,9 +255,9 @@ class Scheduler:
                     return
 
                 job = self.safe_job_provider(
-                    typing.cast(str, uid),
+                    typing.cast("str", uid),
                     data,
-                    predecessors=typing.cast(frozenset[str], predecessors),
+                    predecessors=typing.cast("frozenset[str]", predecessors),
                     notify_end=self.message_queue.put,
                 )
                 if job.should_skip:

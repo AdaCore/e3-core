@@ -399,7 +399,7 @@ class File:
                 raise StoreError(msg)
             prev_source = self.load_from_meta_file(
                 dest_dir=dest_dir,
-                name=cast(str, meta_name),
+                name=cast("str", meta_name),
                 store=self.store,
                 ignore_errors=True,
             )

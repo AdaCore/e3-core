@@ -345,7 +345,7 @@ class AnodContext:
             logger.warning(f"Unknown primtive {primitive}")
             return None
         if TYPE_CHECKING:
-            primitive = cast(PRIMITIVE, primitive)
+            primitive = cast("PRIMITIVE", primitive)
 
         qual_dict: dict[str, str | bool | Iterable[str]]
         if isinstance(plan_action_env.qualifier, str):
