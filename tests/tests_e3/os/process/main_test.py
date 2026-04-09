@@ -171,6 +171,7 @@ def test_rlimit_ctrl_c() -> None:
             A CTRL-C appear:
                 The foreground process has been killed, leaving no foreground process.
                 Signals were no longer propagated, so CTRL-C did nothing.
+
     """
     if PtyProcess is None:
         msg = "ptyprocess is needed to run this tests"

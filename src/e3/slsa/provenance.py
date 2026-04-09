@@ -1316,6 +1316,7 @@ class Predicate:
             ::
 
                 https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1
+
             """
             return self.__build_type
 
@@ -1725,6 +1726,7 @@ class TypeURI:
     ::
 
         https://in-toto.io/Statement/v1
+
     """
 
     def __init__(self, uri: str) -> None:
@@ -1805,6 +1807,7 @@ class ResourceURI(TypeURI):
     ::
 
         pkg:deb/debian/stunnel@5.50-3?arch=amd64
+
     """
 
     def __init__(self, uri: str) -> None:
