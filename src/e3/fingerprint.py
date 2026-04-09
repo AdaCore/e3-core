@@ -113,11 +113,7 @@ class Fingerprint:
             # return False
             return False
 
-        for k in self.elements:
-            if self.elements[k] != other.elements[k]:
-                return False
-
-        return True
+        return all(self.elements[k] == other.elements[k] for k in self.elements)
 
     def __ne__(self, other: object) -> bool:
         """Implement != operator for two fingerprints.
