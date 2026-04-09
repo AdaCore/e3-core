@@ -241,9 +241,7 @@ def test_pruned_dag() -> None:
 
     def f(dg: DAG, node: str) -> bool:
         del dg
-        if node in ("b", "c"):
-            return True
-        return False
+        return node in ("b", "c")
 
     d2 = d.prune(f)
 
