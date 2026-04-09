@@ -893,9 +893,7 @@ class ResourceDescriptor:
         :return: A |bool| set to **True** if at least one of the above-mentioned
             field is defined, **False** else.
         """  # noqa: RST399
-        if self.uri or self.content or self.digest:
-            return True
-        return False
+        return bool(self.uri or self.content or self.digest)
 
     @property
     def name(self) -> str | None:

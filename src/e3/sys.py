@@ -342,9 +342,9 @@ def is_console() -> bool:
 
     if sys.platform == "win32":  # unix: no cover
         stdin_name = object_name(get_osfhandle(stdin_fd))  # type: ignore[arg-type]
-        if re.match(r"\\Device\\NamedPipe\\(cygwin|msys).*-pty.*$", stdin_name):
-            return True
-        return False
+        return bool(
+            re.match(r"\\Device\\NamedPipe\\(cygwin|msys).*-pty.*$", stdin_name)
+        )
     # win32: no cover
     return False
 

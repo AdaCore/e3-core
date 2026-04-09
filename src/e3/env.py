@@ -110,17 +110,13 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
     def is_canadian(self) -> bool:
         """Return true if this is a canadian configuration."""
         if self.build != self.host:
-            if (self.build.platform, self.host.platform) in CANADIAN_EXCEPTIONS:
-                return False
-            return True
+            return (self.build.platform, self.host.platform) not in CANADIAN_EXCEPTIONS
         return False
 
     @property
     def is_cross(self) -> bool:
         """Return true if this is a cross configuration."""
-        if self.target != self.host:
-            return True
-        return False
+        return self.target != self.host
 
     def set_build(
         self,

@@ -64,10 +64,7 @@ class SVNRepository:
 
         svn_version = e3.os.process.Run(["svn", "--version"]).out  # type: ignore[unreachable]
 
-        if svn_version is not None and "cygwin" in svn_version:
-            return True
-
-        return False
+        return bool(svn_version is not None and "cygwin" in svn_version)
 
     @classmethod
     def local_url(cls, repo_path: str) -> str:

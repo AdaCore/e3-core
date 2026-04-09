@@ -130,9 +130,7 @@ class S3Handler(EventHandler):
                 f"{event.uid}-{unique_id()}.s3",
             )
 
-            if not success:
-                return False
-            return True
+            return success
         finally:
             if tempfile_name is not None:
                 rm(tempfile_name)
