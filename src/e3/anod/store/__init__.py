@@ -1892,7 +1892,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             )
         except sqlite3.IntegrityError as err:
             if "UNIQUE constraint failed: buildinfos.build_id" not in str(err):
-                raise err
+                raise
             return False
         else:
             return True
@@ -2133,7 +2133,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             )
         except StoreError as err:
             if f"No element with component_id={comp_id} found" not in str(err):
-                raise err
+                raise
         else:
             # The file already exists, so just return.
             component_info.update(tmp)

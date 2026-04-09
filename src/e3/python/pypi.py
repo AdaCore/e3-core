@@ -213,9 +213,9 @@ class PyPILinksParser(HTMLParser):
                 )
             except (InvalidVersion, InvalidWheelFilename, InvalidSdistFilename):
                 pass
-            except Exception as err:
+            except Exception:
                 if not self.ignore_errors:
-                    raise err
+                    raise
 
 
 class PyPI:
@@ -862,7 +862,7 @@ def fetch_from_registry(
             )
         except HTTPError as err:
             if err.response.status_code != HTTP_NOT_FOUND:  # if other than NotFound
-                raise err
+                raise
             if log_missing_packages:
                 logger.exception(f"Package {p!r} is missing on the given registry")
     return res

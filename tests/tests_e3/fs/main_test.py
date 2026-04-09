@@ -489,11 +489,11 @@ def test_sync_tree_top_source_is_link() -> None:
             Path.cwd() / "a",
             target_is_directory=True,
         )
-    except Exception as e:
+    except Exception:
         if sys.platform == "win32":
             pytest.skip("Insufficient permissions to create symbolic links on Windows")
         else:
-            raise e
+            raise
 
     # Sync tree in "c", source top is "b", which is a symlink to "a".
     e3.fs.mkdir("c")

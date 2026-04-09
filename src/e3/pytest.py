@@ -273,7 +273,7 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
                 # noinspection PyArgumentList
                 new_coverage_data.update(old_coverage_data, aliases=paths)  # type: ignore[call-arg]
             else:
-                raise te
+                raise
         new_coverage_data.write()
     finally:
         Path(old_cov_file.name).unlink()

@@ -235,7 +235,7 @@ def test_spec_check_dll_closure(arguments: tuple, expected: tuple) -> None:
                         )
                         raise Exception(msg) from ae
             else:
-                raise ae
+                raise
     elif errors:
         with pytest.raises(AnodError) as anod_error:
             test_spec.check_shared_libraries_closure(
