@@ -1309,8 +1309,8 @@ class Predicate:
             - unambiguous instructions for how to initiate the build given this
               BuildDefinition, and a complete example.
 
-            Example
-            -------
+            Example:
+            --------
             ::
 
                 https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1
@@ -1719,8 +1719,8 @@ class TypeURI:
     TypeURIs are not registered. The natural namespacing of URIs is sufficient
     to prevent collisions.
 
-    Example
-    -------
+    Example:
+    --------
     ::
 
         https://in-toto.io/Statement/v1
@@ -1800,8 +1800,8 @@ class ResourceURI(TypeURI):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#77-package-download-location-field>`_
     (e.g. ``git+https:``).
 
-    Example
-    -------
+    Example:
+    --------
     ::
 
         pkg:deb/debian/stunnel@5.50-3?arch=amd64
