@@ -548,7 +548,7 @@ class AnodContext:
                     f"raised from {primitive}(name={name}, qual={qualifier})",
                 ]
             )
-            raise err
+            raise
 
         result: Build | CreateSources | CreateSource | Install | Test
 
@@ -800,7 +800,7 @@ class AnodContext:
                             ),
                         ]
                     )
-                    raise err
+                    raise
 
                 add_dep(
                     spec_instance=spec, dep=e, dep_instance=child_action.anod_instance

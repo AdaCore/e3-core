@@ -189,9 +189,9 @@ class Component:
                 if not isinstance(result_data, dict):
                     msg = "Corrupted metadata: Cannot convert metadata into dictionary"
                     raise TypeError(msg)
-            except Exception as e:
+            except Exception:
                 logger.exception("failed to load metadata")
-                raise e
+                raise
 
         return DSSE.load_dict(result_data)
 

@@ -287,9 +287,9 @@ class File:
                 if not isinstance(result_data, dict):
                     msg = "Corrupted metadata: Cannot convert metadata into dictionary"
                     raise TypeError(msg)
-            except Exception as e:
+            except Exception:
                 logger.exception("failed to load metadata")
-                raise e
+                raise
 
         return DSSE.load_dict(result_data)
 
@@ -590,10 +590,10 @@ class File:
                     creation_date=data["resource"]["creation_date"],
                 ),
             )
-        except Exception as e:
+        except Exception:
             logger.exception(f"cannot unserialize File from object: {data}")
             logger.critical(f"cannot unserialize File from object: {data}")
-            raise e
+            raise
 
         return result
 
