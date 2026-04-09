@@ -24,6 +24,7 @@ class Qualifier(dict):
 
             {"k1": "v1", "k2": "v2"} - {"k2"} == {"k1": "v1"}
             {"k1": "v1", "k2": "v2"} - {"k2": "v3"} == {"k1": "v1"}
+
         """
         return Qualifier({k: v for k, v in self.items() if k not in other})
 
@@ -51,5 +52,6 @@ class Qualifier(dict):
 
             {"k1": "v1", "k2": "v2"} & {"k2"} == {"k2": "v2"}
             {"k1": "v1", "k2": "v2"} & {"k2": "v3"} == {"k2": "v2"}
+
         """
         return Qualifier({k: v for k, v in self.items() if k in other})
