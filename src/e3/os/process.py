@@ -34,9 +34,9 @@ if TYPE_CHECKING:
     DEVNULL_VALUE = Literal[-3]
 
     # Make STDOUT subprocess constant visible in e3.os.process
-    STDOUT = cast(STDOUT_VALUE, subprocess.STDOUT)
-    PIPE = cast(PIPE_VALUE, subprocess.PIPE)
-    DEVNULL = cast(DEVNULL_VALUE, subprocess.DEVNULL)
+    STDOUT = cast("STDOUT_VALUE", subprocess.STDOUT)
+    PIPE = cast("PIPE_VALUE", subprocess.PIPE)
+    DEVNULL = cast("DEVNULL_VALUE", subprocess.DEVNULL)
 else:
     STDOUT = subprocess.STDOUT
     PIPE = subprocess.PIPE
