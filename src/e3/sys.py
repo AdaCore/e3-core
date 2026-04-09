@@ -157,7 +157,7 @@ def sanity_check() -> int:
 
         yaml.safe_dump({"Yaml": "works"})
         print("PASSED")
-    except Exception:  # defensive code
+    except Exception:  # defensive code  # noqa: BLE001
         print("FAILED")
         errors += 1
 
@@ -171,14 +171,14 @@ def sanity_check() -> int:
         sha1(__file__)
         md5(__file__)
         print("PASSED")
-    except Exception:  # defensive code
+    except Exception:  # defensive code  # noqa: BLE001
         print("FAILED")
         errors += 1
 
     print("Version:", end=" ")
     try:
         print(version())
-    except Exception:  # defensive code
+    except Exception:  # defensive code  # noqa: BLE001
         errors += 1
     return errors
 

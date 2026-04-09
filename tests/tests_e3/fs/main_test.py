@@ -550,7 +550,7 @@ def test_rm_symlink() -> None:
     e3.fs.mkdir("a")
     try:
         Path("b").symlink_to("a")
-    except Exception:
+    except OSError:
         # This means symlinks are not supported on that system or not allowed
         return
 

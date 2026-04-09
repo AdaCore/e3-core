@@ -122,7 +122,7 @@ class FileCache(Cache):
                 pickle.dumps(self.get_expiry_time(timeout), pickle.HIGHEST_PROTOCOL)
             )
             tmp_file.write(pickle.dumps(value, pickle.HIGHEST_PROTOCOL))
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             tmp_file.close()
             e3.log.debug("error when setting %s in %s:\n%s", uid, dest_file, err)
             return False
