@@ -49,7 +49,7 @@ spec_logger = e3.log.getLogger("anod.spec")
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
-    from typing import IO, Any, Literal, Union
+    from typing import IO, Any, Literal
 
     import e3.anod.package
     import e3.anod.sandbox
@@ -66,18 +66,16 @@ if TYPE_CHECKING:
     SOURCE_PRIMITIVE = Literal["source"]
 
     # Anod Dependency can target a build, install, or source
-    DEPENDENCY_PRIMITIVE = Union[
-        BUILD_PRIMITIVE,
-        DOWNLOAD_PRIMITIVE,
-        INSTALL_PRIMITIVE,
-        SOURCE_PRIMITIVE,
-        TEST_PRIMITIVE,
-    ]
+    DEPENDENCY_PRIMITIVE = (
+        BUILD_PRIMITIVE
+        | DOWNLOAD_PRIMITIVE
+        | INSTALL_PRIMITIVE
+        | SOURCE_PRIMITIVE
+        | TEST_PRIMITIVE
+    )
 
     # Supported primitives are build, install, source, and test
-    PRIMITIVE = Union[
-        BUILD_PRIMITIVE, INSTALL_PRIMITIVE, SOURCE_PRIMITIVE, TEST_PRIMITIVE
-    ]
+    PRIMITIVE = BUILD_PRIMITIVE | INSTALL_PRIMITIVE | SOURCE_PRIMITIVE | TEST_PRIMITIVE
 
 
 def check_api_version(version: str) -> None:

@@ -21,12 +21,12 @@ import e3.os.fs
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from os import PathLike
-    from typing import IO, Any, Literal, Text, Union
+    from typing import IO, Any, Literal, Text
 
     from e3.mypy import assert_never
 
     UnpackAutoRemoveDirType = Literal["auto"]
-    RemoveRootDirType = Union[bool, Literal["auto"]]
+    RemoveRootDirType = bool | Literal["auto"]
 
     TAR_GZ = Literal["tar.gz"]
     TAR_BZ2 = Literal["tar.bz2"]

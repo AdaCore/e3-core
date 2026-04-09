@@ -25,10 +25,10 @@ from e3.os.fs import which
 from e3.text import bytes_as_str
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Literal, NoReturn, Union, cast
+    from typing import IO, Any, Literal, NoReturn, cast
 
     CmdLine = list[str]
-    AnyCmdLine = Union[list[CmdLine], CmdLine]
+    AnyCmdLine = list[CmdLine] | CmdLine
     PIPE_VALUE = Literal[-1]
     STDOUT_VALUE = Literal[-2]
     DEVNULL_VALUE = Literal[-3]

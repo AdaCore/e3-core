@@ -26,7 +26,7 @@ from e3.fs import cp
 from e3.log import getLogger
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, Union
+    from typing import Any, Literal
 
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.component import ComponentAttachmentDict, ComponentDict
@@ -42,10 +42,10 @@ DATE_FORMAT_LENGTH = 8
 
 class _Store(_StoreContextManager):
     if TYPE_CHECKING:
-        DB_IDType = Union[str, int]
-        DB_BoolType = Union[bool, int]
-        DB_OptionalStrType = Union[str, None]
-        DB_OptionalIDType = Union[DB_IDType, None]
+        DB_IDType = str | int
+        DB_BoolType = bool | int
+        DB_OptionalStrType = str | None
+        DB_OptionalIDType = DB_IDType | None
 
         # BuildInfo Types
 
@@ -178,41 +178,41 @@ class _Store(_StoreContextManager):
             str,  # metadata
         ]
 
-        AnyField = Union[
-            BuildInfoField,
-            ResourceField,
-            FileField,
-            ComponentFileField,
-            ComponentReleaseField,
-            ComponentField,
-        ]
+        AnyField = (
+            BuildInfoField
+            | ResourceField
+            | FileField
+            | ComponentFileField
+            | ComponentReleaseField
+            | ComponentField
+        )
 
-        AnyFieldSequence = Union[
-            Sequence[BuildInfoField],
-            Sequence[ResourceField],
-            Sequence[FileField],
-            Sequence[ComponentFileField],
-            Sequence[ComponentReleaseField],
-            Sequence[ComponentField],
-        ]
+        AnyFieldSequence = (
+            Sequence[BuildInfoField]
+            | Sequence[ResourceField]
+            | Sequence[FileField]
+            | Sequence[ComponentFileField]
+            | Sequence[ComponentReleaseField]
+            | Sequence[ComponentField]
+        )
 
-        AnyTuple = Union[
-            BuildInfoTuple,
-            ResourceTuple,
-            FileTuple,
-            ComponentFileTuple,
-            ComponentReleaseTuple,
-            ComponentTuple,
-        ]
+        AnyTuple = (
+            BuildInfoTuple
+            | ResourceTuple
+            | FileTuple
+            | ComponentFileTuple
+            | ComponentReleaseTuple
+            | ComponentTuple
+        )
 
-        AnyTupleList = Union[
-            list[BuildInfoTuple],
-            list[ResourceTuple],
-            list[FileTuple],
-            list[ComponentFileTuple],
-            list[ComponentReleaseTuple],
-            list[ComponentTuple],
-        ]
+        AnyTupleList = (
+            list[BuildInfoTuple]
+            | list[ResourceTuple]
+            | list[FileTuple]
+            | list[ComponentFileTuple]
+            | list[ComponentReleaseTuple]
+            | list[ComponentTuple]
+        )
 
     class TableName(str, Enum):
         buildinfos = "buildinfos"
