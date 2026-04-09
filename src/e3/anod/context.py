@@ -38,7 +38,7 @@ from e3.error import E3Error
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
-    from typing import NoReturn, Optional, cast
+    from typing import NoReturn, cast
 
     from e3.anod.action import Action
     from e3.anod.loader import AnodSpecRepository
@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
     # spec name, build env, target env, host env, qualifier, kind, source name
     CacheKeyType = tuple[
-        str, Platform, Platform, Platform, Optional[str], Optional[str], Optional[str]
+        str, Platform, Platform, Platform, str | None, str | None, str | None
     ]
     ResolverType = Callable[[Action, Decision], bool]
     QualifierType = str | dict[str, str | bool | Iterable[str]] | None
