@@ -401,8 +401,10 @@ class _Store(_StoreContextManager):
         :raise anod.store.interface.StoreError: if no or more than one element
             found.
         """
-        res = self._select(  # type: ignore[arg-type, list-item]
-            table, [field_name], [rid]
+        res = self._select(
+            table,
+            [field_name],  # type: ignore[arg-type, list-item]
+            [rid],
         )
         if not res:
             msg = f"No element with {field_name}={rid} found"
@@ -1198,8 +1200,9 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             id_field="file_id",
         )
         self.connection.commit()
-        return self._tuple_to_file(  # type: ignore[arg-type]
-            req_tuple, buildinfo=buildinfo
+        return self._tuple_to_file(
+            req_tuple,  # type: ignore[arg-type]
+            buildinfo=buildinfo,
         )
 
     def _add_component_attachment(
@@ -1318,8 +1321,9 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}",
             ],
         )
-        res = self._tuple_to_file(  # type: ignore[arg-type]
-            req_tuple, resource=resource
+        res = self._tuple_to_file(
+            req_tuple,  # type: ignore[arg-type]
+            resource=resource,
         )
         res["downloaded_as"] = file_info["downloaded_as"]
         return res
@@ -1718,9 +1722,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
                         result["msg"] = str(e)
                     else:
                         if components:
-                            result["response"] = (  # type: ignore[assignment]
-                                components[0]
-                            )
+                            comp = components[0]
+                            result["response"] = comp  # type: ignore[assignment]
                         else:
                             result["msg"] = "No component matching criteria"
 
@@ -1730,17 +1733,15 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 else:
                     try:
                         if query.get("kind", "source") == "thirdparty":
-                            result["response"] = (  # type: ignore[assignment]
-                                self.latest_thirdparty(name=query["name"])
-                            )
+                            thirdparty = self.latest_thirdparty(name=query["name"])
+                            result["response"] = thirdparty  # type: ignore[assignment]
                         elif "bid" not in query:
                             result["msg"] = "Invalid source query: missing build ID"
                         else:
-                            result["response"] = (  # type: ignore[assignment]
-                                self.get_source_info(
-                                    bid=query["bid"], name=query["name"]
-                                )
+                            source_info = self.get_source_info(
+                                bid=query["bid"], name=query["name"]
                             )
+                            result["response"] = source_info  # type: ignore[assignment]
                     except Exception as e:  # noqa: BLE001
                         result["msg"] = str(e)
             else:
@@ -1846,8 +1847,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
             # from the coverage.
             msg = "Too many buildinfo found"
             raise StoreError(msg)  # pragma: no cover
-        return self._tuple_to_buildinfo(  # type: ignore[arg-type]
-            possible_buildinfos[0]
+        return self._tuple_to_buildinfo(
+            possible_buildinfos[0]  # type: ignore[arg-type]
         )
 
 
@@ -2057,8 +2058,8 @@ class LocalStore(StoreRW, LocalStoreInterface):
             # Note: if no path has been provided, `path` variable will be an empty
             # string and so `path.is_dir()` will return true, which is what is expected.
             if path.exists():
-                resource = self._tuple_to_resource(  # type: ignore[arg-type]
-                    resource_tmp[0]
+                resource = self._tuple_to_resource(
+                    resource_tmp[0]  # type: ignore[arg-type]
                 )
             else:
                 resource = self._tuple_to_resource(

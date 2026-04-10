@@ -359,7 +359,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             )
         else:
             result.append(None)
-        return EnvInfo(*result)
+        return EnvInfo(*result)  # type: ignore[arg-type]
 
     def cmd_triplet(self) -> list[str]:
         """Return command line parameters corresponding to current env.

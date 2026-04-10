@@ -439,8 +439,9 @@ class Run:
                 if sys.platform == "win32":
                     popen_args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-                self.internal = Popen(  # type: ignore[arg-type]
-                    self.cmds[0], **popen_args
+                self.internal = Popen(
+                    self.cmds[0],
+                    **popen_args,  # type: ignore[arg-type]
                 )
 
             else:

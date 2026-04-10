@@ -830,14 +830,17 @@ def sync_tree(  # noqa: PLR0915
         # when not preserving timestamps we cannot rely on the timestamps to
         # check if a file is up-to-date. In that case do a full content
         # comparison as last check.
+        src_mode = stat.S_IFMT(src.stat.st_mode)  # type: ignore[union-attr]
+        dst_mode = stat.S_IFMT(dst.stat.st_mode)  # type: ignore[union-attr]
+        src_mtime = src.stat.st_mtime  # type: ignore[union-attr]
+        dst_mtime = dst.stat.st_mtime  # type: ignore[union-attr]
         return (
             dst.stat is None
-            or stat.S_IFMT(src.stat.st_mode) != stat.S_IFMT(dst.stat.st_mode)
+            or src_mode != dst_mode
             or (
-                preserve_timestamps
-                and abs(src.stat.st_mtime - dst.stat.st_mtime) > TIMESTAMP_TOLERANCE
+                preserve_timestamps and abs(src_mtime - dst_mtime) > TIMESTAMP_TOLERANCE
             )
-            or src.stat.st_size != dst.stat.st_size
+            or src.stat.st_size != dst.stat.st_size  # type: ignore[union-attr]
             or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))
             or src.basename != dst.basename
         )
@@ -848,6 +851,7 @@ def sync_tree(  # noqa: PLR0915
         :param src: the source FileInfo object
         :param dst: the target FileInfo object
         """
+        assert src.stat is not None
         mode = stat.S_IMODE(src.stat.st_mode)
 
         if islink(src):  # windows: no cover
@@ -856,7 +860,8 @@ def sync_tree(  # noqa: PLR0915
 
             if hasattr(os, "lchflags") and hasattr(src.stat, "st_flags"):
                 try:
-                    getattr(os, "lchflags")(dst.path, src.stat.st_flags)  # noqa: B009
+                    st_flags = src.stat.st_flags  # type: ignore[attr-defined]
+                    getattr(os, "lchflags")(dst.path, st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
                     import errno  # noqa: PLC0415  # check platform-specific error code
 
@@ -877,7 +882,8 @@ def sync_tree(  # noqa: PLR0915
                 Path(dst.path).chmod(mode)
             if hasattr(os, "chflags") and hasattr(src.stat, "st_flags"):
                 try:
-                    getattr(os, "chflags")(dst.path, src.stat.st_flags)  # noqa: B009
+                    st_flags = src.stat.st_flags  # type: ignore[attr-defined]
+                    getattr(os, "chflags")(dst.path, st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
                     import errno  # noqa: PLC0415  # check platform-specific error code
 
@@ -994,7 +1000,7 @@ def sync_tree(  # noqa: PLR0915
             if dst.basename != src.basename:
                 dest_dir = Path(dst.path).parent / src.basename
             else:
-                dest_dir = dst.path
+                dest_dir = Path(dst.path)
 
             if isdir(dst):
                 # For directories in case of non-matching casing just do a rename

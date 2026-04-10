@@ -142,17 +142,17 @@ class Dependency:
         if self.build == "default":
             build = default_env.build.platform
         else:
-            build = self.build
+            build = self.build  # type: ignore[assignment]
 
         if self.host == "default":
             host = default_env.build.platform
         else:
-            host = self.host
+            host = self.host  # type: ignore[assignment]
 
         if self.target == "default":
             target = default_env.build.platform
         else:
-            target = self.target
+            target = self.target  # type: ignore[assignment]
 
         dep_env.set_env(build, host, target)
         return dep_env

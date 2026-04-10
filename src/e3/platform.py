@@ -119,13 +119,13 @@ class Platform(NamedTuple):
             "os_version": os.version
         }
 
-        return cls(
+        return cls(  # type: ignore[call-arg]
             cpu,
             os,
             is_hie,
             platform_name,
             triplet,
-            machine,
+            machine,  # type: ignore[arg-type]
             domain,
             is_host,
             is_default,
