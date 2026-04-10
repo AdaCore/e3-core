@@ -830,13 +830,14 @@ def sync_tree(  # noqa: PLR0915
         # when not preserving timestamps we cannot rely on the timestamps to
         # check if a file is up-to-date. In that case do a full content
         # comparison as last check.
+        if dst.stat is None:
+            return True
         src_mode = stat.S_IFMT(src.stat.st_mode)  # type: ignore[union-attr]
-        dst_mode = stat.S_IFMT(dst.stat.st_mode)  # type: ignore[union-attr]
+        dst_mode = stat.S_IFMT(dst.stat.st_mode)
         src_mtime = src.stat.st_mtime  # type: ignore[union-attr]
-        dst_mtime = dst.stat.st_mtime  # type: ignore[union-attr]
+        dst_mtime = dst.stat.st_mtime
         return (
-            dst.stat is None
-            or src_mode != dst_mode
+            src_mode != dst_mode
             or (
                 preserve_timestamps and abs(src_mtime - dst_mtime) > TIMESTAMP_TOLERANCE
             )

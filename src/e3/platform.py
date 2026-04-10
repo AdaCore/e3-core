@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 import e3.os
 import e3.os.platform
@@ -42,7 +42,7 @@ class Platform(NamedTuple):
     is_host: bool
     is_default: bool
 
-    default_arch: ClassVar[Platform | None] = None
+    default_arch = None  # type: ignore[misc]
     system_info = e3.os.platform.SystemInfo  # type: ignore[misc]
 
     @classmethod
@@ -79,8 +79,10 @@ class Platform(NamedTuple):
             mode = e3.os.platform.UNKNOWN
 
         # Initialize default arch class variable
-        if cls.default_arch is None and not compute_default:
-            cls.default_arch = Platform.get(compute_default=True)
+        if getattr(cls, "default_arch", None) is None and not compute_default:
+            cls.default_arch = Platform.get(  # type: ignore[attr-defined]
+                compute_default=True
+            )
 
         is_default = False
         is_host = False
@@ -89,8 +91,8 @@ class Platform(NamedTuple):
         if compute_default:
             default_platform = cls.system_info.platform()
         else:
-            assert cls.default_arch is not None
-            default_platform = cls.default_arch.platform
+            assert cls.default_arch is not None  # type: ignore[attr-defined]
+            default_platform = cls.default_arch.platform  # type: ignore[attr-defined]
 
         # Check if the object correspond to the current machine and thus allow
         # us to compute some additional info automatically
