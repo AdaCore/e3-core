@@ -1,9 +1,8 @@
-"""Platform information and detection."""
+"""Platform information and detection."""  # noqa: A005
 
 from __future__ import annotations
 
-import collections
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import e3.os
 import e3.os.platform
@@ -16,22 +15,7 @@ KNOWLEDGE_BASE = get_knowledge_base()
 
 
 # noinspection PyUnresolvedReferences
-class Platform(
-    collections.namedtuple(
-        "Platform",
-        [
-            "cpu",
-            "os",
-            "is_hie",
-            "platform",
-            "triplet",
-            "machine",
-            "domain",
-            "is_host",
-            "is_default",
-        ],
-    )
-):
+class Platform(NamedTuple):
     """Class that allow user to retrieve os/cpu specific information.
 
     Attributes are:
@@ -48,10 +32,18 @@ class Platform(
     - is_default: True if the platform is the default one
     """
 
-    default_arch: Platform | None = None
-    system_info = e3.os.platform.SystemInfo
+    cpu: e3.os.platform.CPU
+    os: e3.os.platform.OS
+    is_hie: bool
+    platform: str
+    triplet: str
+    machine: str
+    domain: str
+    is_host: bool
+    is_default: bool
 
-    __slots__ = ()
+    default_arch = None  # type: ignore[misc]
+    system_info = e3.os.platform.SystemInfo  # type: ignore[misc]
 
     @classmethod
     def get(
@@ -87,8 +79,10 @@ class Platform(
             mode = e3.os.platform.UNKNOWN
 
         # Initialize default arch class variable
-        if cls.default_arch is None and not compute_default:
-            cls.default_arch = Platform.get(compute_default=True)
+        if getattr(cls, "default_arch", None) is None and not compute_default:
+            cls.default_arch = Platform.get(  # type: ignore[attr-defined]
+                compute_default=True
+            )
 
         is_default = False
         is_host = False
@@ -97,8 +91,8 @@ class Platform(
         if compute_default:
             default_platform = cls.system_info.platform()
         else:
-            assert cls.default_arch is not None
-            default_platform = cls.default_arch.platform
+            assert cls.default_arch is not None  # type: ignore[attr-defined]
+            default_platform = cls.default_arch.platform  # type: ignore[attr-defined]
 
         # Check if the object correspond to the current machine and thus allow
         # us to compute some additional info automatically
@@ -127,13 +121,13 @@ class Platform(
             "os_version": os.version
         }
 
-        return cls(
+        return cls(  # type: ignore[call-arg]
             cpu,
             os,
             is_hie,
             platform_name,
             triplet,
-            machine,
+            machine,  # type: ignore[arg-type]
             domain,
             is_host,
             is_default,

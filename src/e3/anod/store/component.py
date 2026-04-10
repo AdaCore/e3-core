@@ -169,7 +169,9 @@ class Component:
             with *name*.
         """
         if not isinstance(data, DSSE):
-            msg = f"Metadata statement should be a DSSE envelope. Got {type(data)}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Metadata statement should be a DSSE envelope. Got {type(data)}"
+            )
             raise StoreError(msg)
         self.metadata[name] = data.as_dict()
 

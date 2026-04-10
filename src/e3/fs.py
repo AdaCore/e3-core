@@ -11,11 +11,10 @@ import re
 import shutil
 import stat
 import sys
-from collections import namedtuple
 from collections.abc import Iterable
 from pathlib import Path
 from platform import python_version
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from packaging.version import Version
 
@@ -294,7 +293,9 @@ def ls(
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
 
-    return sorted(itertools.chain.from_iterable(glob.glob(p) for p in path_list))  # noqa: PTH207
+    return sorted(
+        itertools.chain.from_iterable(glob.glob(p) for p in path_list)  # noqa: PTH207
+    )
 
 
 def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
@@ -435,7 +436,10 @@ def mv(
         if nb_files == 1:
             source = file_list[0]
             if Path(source).is_dir() and Path(target).is_dir():
-                move_file(source, str(Path(target, os.path.basename(source))))  # noqa: PTH119
+                move_file(
+                    source,
+                    str(Path(target, os.path.basename(source))),  # noqa: PTH119
+                )
             else:
                 move_file(source, os.fspath(target))
         elif not Path(target).is_dir():
@@ -655,12 +659,16 @@ def sync_tree(  # noqa: PLR0915
     :param delete_ignore: if True files that are explicitly ignored
         are deleted. Note delete should be set to True in that case.
     """
-    # Some structure used when walking the trees to be synced
-    FilesInfo = namedtuple("FilesInfo", ["rel_path", "source", "target"])
 
-    # The basename in the FileInfo structure is used to compare casing of
-    # source and destination.
-    FileInfo = namedtuple("FileInfo", ["path", "stat", "basename"])
+    class FileInfo(NamedTuple):
+        path: str
+        stat: os.stat_result | None
+        basename: str
+
+    class FilesInfo(NamedTuple):
+        rel_path: str
+        source: FileInfo
+        target: FileInfo
 
     # Normalize casing function for path comparison. path_key function
     # return a version of the path that is in lower case for case sensitive
@@ -822,14 +830,18 @@ def sync_tree(  # noqa: PLR0915
         # when not preserving timestamps we cannot rely on the timestamps to
         # check if a file is up-to-date. In that case do a full content
         # comparison as last check.
+        if dst.stat is None:
+            return True
+        src_mode = stat.S_IFMT(src.stat.st_mode)  # type: ignore[union-attr]
+        dst_mode = stat.S_IFMT(dst.stat.st_mode)
+        src_mtime = src.stat.st_mtime  # type: ignore[union-attr]
+        dst_mtime = dst.stat.st_mtime
         return (
-            dst.stat is None
-            or stat.S_IFMT(src.stat.st_mode) != stat.S_IFMT(dst.stat.st_mode)
+            src_mode != dst_mode
             or (
-                preserve_timestamps
-                and abs(src.stat.st_mtime - dst.stat.st_mtime) > TIMESTAMP_TOLERANCE
+                preserve_timestamps and abs(src_mtime - dst_mtime) > TIMESTAMP_TOLERANCE
             )
-            or src.stat.st_size != dst.stat.st_size
+            or src.stat.st_size != dst.stat.st_size  # type: ignore[union-attr]
             or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))
             or src.basename != dst.basename
         )
@@ -840,6 +852,7 @@ def sync_tree(  # noqa: PLR0915
         :param src: the source FileInfo object
         :param dst: the target FileInfo object
         """
+        assert src.stat is not None
         mode = stat.S_IMODE(src.stat.st_mode)
 
         if islink(src):  # windows: no cover
@@ -848,7 +861,8 @@ def sync_tree(  # noqa: PLR0915
 
             if hasattr(os, "lchflags") and hasattr(src.stat, "st_flags"):
                 try:
-                    getattr(os, "lchflags")(dst.path, src.stat.st_flags)  # noqa: B009
+                    st_flags = src.stat.st_flags  # type: ignore[attr-defined]
+                    getattr(os, "lchflags")(dst.path, st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
                     import errno  # noqa: PLC0415  # check platform-specific error code
 
@@ -869,7 +883,8 @@ def sync_tree(  # noqa: PLR0915
                 Path(dst.path).chmod(mode)
             if hasattr(os, "chflags") and hasattr(src.stat, "st_flags"):
                 try:
-                    getattr(os, "chflags")(dst.path, src.stat.st_flags)  # noqa: B009
+                    st_flags = src.stat.st_flags  # type: ignore[attr-defined]
+                    getattr(os, "chflags")(dst.path, st_flags)  # noqa: B009
                 except OSError as why:  # defensive code
                     import errno  # noqa: PLC0415  # check platform-specific error code
 
@@ -986,7 +1001,7 @@ def sync_tree(  # noqa: PLR0915
             if dst.basename != src.basename:
                 dest_dir = Path(dst.path).parent / src.basename
             else:
-                dest_dir = dst.path
+                dest_dir = Path(dst.path)
 
             if isdir(dst):
                 # For directories in case of non-matching casing just do a rename

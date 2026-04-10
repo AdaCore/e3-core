@@ -692,7 +692,9 @@ class QualifiersManager:
         # Make sure the default is None or a set as key_set qualifier are not used the
         # same way as the more standard key_value qualifier
         if default is not None and not isinstance(default, set):
-            msg = "The default of key_set qualifier must be either None or a set"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                "The default of key_set qualifier must be either None or a set"
+            )
             raise AnodError(msg)
 
         if not test_only or self.anod_instance.kind == "test":

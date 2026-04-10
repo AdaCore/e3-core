@@ -754,7 +754,9 @@ class Anod:
             primitive_func.is_primitive = True  # type: ignore[attr-defined]
             primitive_func.pre = pre  # type: ignore[attr-defined]
             primitive_func.post = post  # type: ignore[attr-defined]
-            primitive_func.post_install = post_install or (post == "install")  # type: ignore[attr-defined]
+            primitive_func.post_install = (  # type: ignore[attr-defined]
+                post_install or (post == "install")
+            )
             primitive_func.version = version  # type: ignore[attr-defined]
             primitive_func.require = require  # type: ignore[attr-defined]
             return primitive_func

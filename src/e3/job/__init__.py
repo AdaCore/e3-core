@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import abc
 import threading
-from collections import namedtuple
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import e3.log
 from e3.anod.status import ReturnValue
@@ -23,7 +22,12 @@ if TYPE_CHECKING:
 logger = e3.log.getLogger("job")
 
 
-JobTimingInfo = namedtuple("JobTimingInfo", ["start_time", "stop_time", "duration"])
+class JobTimingInfo(NamedTuple):
+    """Timing information for a job execution."""
+
+    start_time: datetime | None
+    stop_time: datetime | None
+    duration: float
 
 
 class Job(metaclass=abc.ABCMeta):

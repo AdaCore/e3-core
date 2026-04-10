@@ -62,7 +62,9 @@ class SVNRepository:
         if sys.platform != "win32":
             return True
 
-        svn_version = e3.os.process.Run(["svn", "--version"]).out  # type: ignore[unreachable]
+        svn_version = (  # type: ignore[unreachable]
+            e3.os.process.Run(["svn", "--version"]).out
+        )
 
         return bool(svn_version is not None and "cygwin" in svn_version)
 
@@ -244,7 +246,9 @@ class SVNRepository:
             """
             if Path(dir_path, ".svn").exists():
                 try:
-                    status = self.svn_cmd(["status"], output=PIPE).out.strip()  # type: ignore
+                    status = (  # type: ignore
+                        self.svn_cmd(["status"], output=PIPE).out.strip()
+                    )
                 except SVNError:  # defensive code
                     return False, False
                 if "warning: W" in status:

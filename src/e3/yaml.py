@@ -49,8 +49,12 @@ class OrderedDictYAMLLoader(Loader):
         self.stream = stream
         super().__init__(stream)
 
-        self.add_constructor("tag:yaml.org,2002:map", type(self).construct_yaml_map)  # type: ignore
-        self.add_constructor("tag:yaml.org,2002:omap", type(self).construct_yaml_map)  # type: ignore
+        self.add_constructor(  # type: ignore
+            "tag:yaml.org,2002:map", type(self).construct_yaml_map
+        )
+        self.add_constructor(  # type: ignore
+            "tag:yaml.org,2002:omap", type(self).construct_yaml_map
+        )
         self.add_constructor("!include", type(self).yaml_include)  # type: ignore
 
     def yaml_include(self, node: Node) -> OrderedDict:
@@ -104,7 +108,9 @@ class OrderedDictYAMLLoader(Loader):
 
         mapping = OrderedDict()
         for key_node, value_node in node.value:
-            key = self.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
+            key = self.construct_object(  # type: ignore[no-untyped-call]
+                key_node, deep=deep
+            )
             try:
                 hash(key)
             except TypeError as exc:
@@ -114,7 +120,9 @@ class OrderedDictYAMLLoader(Loader):
                     problem=f"found unacceptable key ({exc})",
                     problem_mark=key_node.start_mark,
                 ) from exc
-            value = self.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
+            value = self.construct_object(  # type: ignore[no-untyped-call]
+                value_node, deep=deep
+            )
             if key in mapping:
                 raise yaml.constructor.ConstructorError(
                     context="while constructing a mapping",

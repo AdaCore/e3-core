@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import abc
-from collections import namedtuple
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import e3.log
 from e3.error import E3Error
@@ -39,10 +38,11 @@ class ResourceInfo(metaclass=abc.ABCMeta):
         """
 
 
-class CachedResource(namedtuple("CachedResource", ["uid", "local_path"])):
+class CachedResource(NamedTuple):
     """Cached information about an already downloaded resource."""
 
-    __slots__ = ()
+    uid: str
+    local_path: str
 
 
 class StoreError(E3Error):

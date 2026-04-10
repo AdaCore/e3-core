@@ -401,7 +401,11 @@ class _Store(_StoreContextManager):
         :raise anod.store.interface.StoreError: if no or more than one element
             found.
         """
-        res = self._select(table, [field_name], [rid])  # type: ignore[arg-type, list-item]
+        res = self._select(
+            table,
+            [field_name],  # type: ignore[arg-type, list-item]
+            [rid],
+        )
         if not res:
             msg = f"No element with {field_name}={rid} found"
             raise StoreError(msg)
@@ -972,7 +976,13 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 internal = True
             self._insert(
                 _Store.TableName.component_files,
-                ["kind", "file_id", "component_id", "internal", "attachment_name"],  # type: ignore[arg-type]
+                [  # type: ignore[arg-type]
+                    "kind",
+                    "file_id",
+                    "component_id",
+                    "internal",
+                    "attachment_name",
+                ],
                 [kind, f["_id"], component_id, internal, att_name],
             )
 
@@ -1129,7 +1139,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         """
         req_tuple = self._insert(
             _Store.TableName.buildinfos,
-            ["build_id", "build_date", "setup", "build_version"],  # type: ignore[arg-type]
+            [  # type: ignore[arg-type]
+                "build_id",
+                "build_date",
+                "setup",
+                "build_version",
+            ],
             [unique_id(), date, setup, version],
         )
         self.connection.commit()
@@ -1185,7 +1200,10 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             id_field="file_id",
         )
         self.connection.commit()
-        return self._tuple_to_file(req_tuple, buildinfo=buildinfo)  # type: ignore[arg-type]
+        return self._tuple_to_file(
+            req_tuple,  # type: ignore[arg-type]
+            buildinfo=buildinfo,
+        )
 
     def _add_component_attachment(
         self, component_id: str, file_id: str, name: str
@@ -1198,7 +1216,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         """
         self._insert(
             _Store.TableName.component_files,
-            ["kind", "file_id", "component_id", "attachment_name"],  # type: ignore[arg-type]
+            [  # type: ignore[arg-type]
+                "kind",
+                "file_id",
+                "component_id",
+                "attachment_name",
+            ],
             ["attachment", file_id, component_id, name],
         )
 
@@ -1214,7 +1237,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         self._add_component_attachment(component_id, file_id, name)
         self.connection.commit()
 
-    ### PRIVATE ###
+    # PRIVATE
 
     def _submit_file(self, file_info: FileDict) -> FileDict:
         """Private method.
@@ -1256,7 +1279,9 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                     [resource_path],
                 )
                 path = resource_path
-            resource = self._tuple_to_resource((rid, resource_id, path, *rest))  # type: ignore[arg-type, operator]
+            resource = self._tuple_to_resource(  # type: ignore[arg-type, operator]
+                (rid, resource_id, path, *rest)
+            )
         else:  # Create the resource entry
             resource = self._tuple_to_resource(
                 self._insert(  # type: ignore[arg-type]
@@ -1296,7 +1321,10 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}",
             ],
         )
-        res = self._tuple_to_file(req_tuple, resource=resource)  # type: ignore[arg-type]
+        res = self._tuple_to_file(
+            req_tuple,  # type: ignore[arg-type]
+            resource=resource,
+        )
         res["downloaded_as"] = file_info["downloaded_as"]
         return res
 
@@ -1482,7 +1510,9 @@ class StoreReadOnly(_Store, StoreReadInterface):
             where_rules.append("platform")
             where_values.append(platform)
         return self._tuple_list_to_comp_list(
-            self._select(_Store.TableName.components, where_rules, where_values)  # type: ignore[arg-type]
+            self._select(  # type: ignore[arg-type]
+                _Store.TableName.components, where_rules, where_values
+            )
         )
 
     def get_build_data(self, bid: str) -> BuildDataDict:
@@ -1692,7 +1722,8 @@ class StoreReadOnly(_Store, StoreReadInterface):
                         result["msg"] = str(e)
                     else:
                         if components:
-                            result["response"] = components[0]  # type: ignore[assignment]
+                            comp = components[0]
+                            result["response"] = comp  # type: ignore[assignment]
                         else:
                             result["msg"] = "No component matching criteria"
 
@@ -1702,15 +1733,15 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 else:
                     try:
                         if query.get("kind", "source") == "thirdparty":
-                            result["response"] = self.latest_thirdparty(  # type: ignore[assignment]
-                                name=query["name"]
-                            )
+                            thirdparty = self.latest_thirdparty(name=query["name"])
+                            result["response"] = thirdparty  # type: ignore[assignment]
                         elif "bid" not in query:
                             result["msg"] = "Invalid source query: missing build ID"
                         else:
-                            result["response"] = self.get_source_info(  # type: ignore[assignment]
+                            source_info = self.get_source_info(
                                 bid=query["bid"], name=query["name"]
                             )
+                            result["response"] = source_info  # type: ignore[assignment]
                     except Exception as e:  # noqa: BLE001
                         result["msg"] = str(e)
             else:
@@ -1719,7 +1750,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             results.append(result)
         return results
 
-    ### PRIVATE ###
+    # PRIVATE
 
     def _get_file(
         self,
@@ -1816,7 +1847,9 @@ class StoreReadOnly(_Store, StoreReadInterface):
             # from the coverage.
             msg = "Too many buildinfo found"
             raise StoreError(msg)  # pragma: no cover
-        return self._tuple_to_buildinfo(possible_buildinfos[0])  # type: ignore[arg-type]
+        return self._tuple_to_buildinfo(
+            possible_buildinfos[0]  # type: ignore[arg-type]
+        )
 
 
 class Store(StoreReadOnly):
@@ -2025,7 +2058,9 @@ class LocalStore(StoreRW, LocalStoreInterface):
             # Note: if no path has been provided, `path` variable will be an empty
             # string and so `path.is_dir()` will return true, which is what is expected.
             if path.exists():
-                resource = self._tuple_to_resource(resource_tmp[0])  # type: ignore[arg-type]
+                resource = self._tuple_to_resource(
+                    resource_tmp[0]  # type: ignore[arg-type]
+                )
             else:
                 resource = self._tuple_to_resource(
                     self._update(
@@ -2039,7 +2074,12 @@ class LocalStore(StoreRW, LocalStoreInterface):
             resource = self._tuple_to_resource(
                 self._insert(  # type: ignore[arg-type]
                     _Store.TableName.resources,
-                    ["resource_id", "path", "size", "creation_date"],  # type: ignore[arg-type]
+                    [  # type: ignore[arg-type]
+                        "resource_id",
+                        "path",
+                        "size",
+                        "creation_date",
+                    ],
                     [
                         resource_id,
                         resource_path,

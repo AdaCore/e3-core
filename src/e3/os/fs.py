@@ -6,7 +6,6 @@ logging (unless in case of unexpected failure).
 
 from __future__ import annotations
 
-import collections
 import itertools
 import os
 import re
@@ -14,7 +13,7 @@ import shutil
 import stat
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, NamedTuple, overload
 
 import e3.error
 import e3.log
@@ -156,7 +155,12 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
         with ``total``, ``used`` and ``free`` attributes. Each attribute is
         an int representing Mo.
     """
-    _ntuple_diskusage = collections.namedtuple("_ntuple_diskusage", "total used free")
+
+    class _NtupleDiskusage(NamedTuple):
+        total: int
+        used: int
+        free: int
+
     if sys.platform == "win32":  # unix: no cover
         import ctypes  # noqa: PLC0415  # windows-only
 
@@ -187,7 +191,9 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
                 raise ctypes.WinError()
             return args[1].value, args[2].value, args[3].value
 
-        GetDiskFreeSpaceEx.errcheck = GetDiskFreeSpaceEx_errcheck  # type: ignore[attr-defined]
+        GetDiskFreeSpaceEx.errcheck = (  # type: ignore[attr-defined]
+            GetDiskFreeSpaceEx_errcheck
+        )
         _, total, free = GetDiskFreeSpaceEx(c_path)
         used = total - free
     else:  # windows: no cover
@@ -199,7 +205,7 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
         total = st.f_blocks * st.f_frsize
         used = (st.f_blocks - st.f_bfree) * st.f_frsize
     if full:
-        return _ntuple_diskusage(
+        return _NtupleDiskusage(
             total // (1024 * 1024), used // (1024 * 1024), free // (1024 * 1024)
         )
     return free // (1024 * 1024)

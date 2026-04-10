@@ -2,36 +2,31 @@
 
 from __future__ import annotations
 
-import collections
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, NamedTuple, overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from typing import Any, NamedTuple
+    from typing import Any
 
     from e3.anod.context import AnodContext
     from e3.anod.package import SourceBuilder
     from e3.anod.spec import Anod
 
-    class SourceKey(NamedTuple):
-        """Key for identifying source packages in store queries."""
 
-        anod_uid: str
-        src_name: str
-        publish: bool
+class SourceKey(NamedTuple):
+    """Key for identifying source packages in store queries."""
 
-    class PackageKey(NamedTuple):
-        """Key for identifying binary packages in store queries."""
+    anod_uid: str
+    src_name: str
+    publish: bool
 
-        anod_uid: str
-        track: bool
-        has_closure: bool
 
-else:
-    SourceKey = collections.namedtuple("SourceKey", ["anod_uid", "src_name", "publish"])
-    PackageKey = collections.namedtuple(
-        "PackageKey", ["anod_uid", "track", "has_closure"]
-    )
+class PackageKey(NamedTuple):
+    """Key for identifying binary packages in store queries."""
+
+    anod_uid: str
+    track: bool
+    has_closure: bool
 
 
 @overload
