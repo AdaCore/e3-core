@@ -781,7 +781,9 @@ class ResourceDescriptor:
         if isinstance(value, dict):
             self.__annotations = value
         else:
-            msg = f"Invalid resource descriptor annotations type: {value}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Invalid resource descriptor annotations type: {value}"
+            )
             raise TypeError(msg)
 
     @property
@@ -816,7 +818,9 @@ class ResourceDescriptor:
         if isinstance(value, bytes) or value is None:
             self.__content = value
         else:
-            msg = f"Invalid resource descriptor content type: {value}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Invalid resource descriptor content type: {value}"
+            )
             raise TypeError(msg)
 
     @property
@@ -847,7 +851,9 @@ class ResourceDescriptor:
         if isinstance(value, dict):
             self.__digest = value
         else:
-            msg = f"Invalid resource descriptor digest type: {value}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Invalid resource descriptor digest type: {value}"
+            )
             raise TypeError(msg)
 
     @property
@@ -876,7 +882,9 @@ class ResourceDescriptor:
         elif isinstance(value, str):
             self.__download_location = ResourceURI(value)
         else:
-            msg = f"Invalid resource descriptor download location type: {value}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Invalid resource descriptor download location type: {value}"
+            )
             raise TypeError(msg)
 
     @property
@@ -914,7 +922,9 @@ class ResourceDescriptor:
         if isinstance(value, str) or value is None:
             self.__name = value
         else:
-            msg = f"Invalid resource descriptor name: {value}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Invalid resource descriptor name: {value}"
+            )
             raise TypeError(msg)
 
     @property
@@ -942,7 +952,9 @@ class ResourceDescriptor:
         if isinstance(value, str) or value is None:
             self.__media_type = value
         else:
-            msg = f"Invalid resource descriptor media type: {value}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Invalid resource descriptor media type: {value}"
+            )
             raise TypeError(msg)
 
     @property
@@ -964,7 +976,9 @@ class ResourceDescriptor:
         elif isinstance(value, str):
             self.__uri = ResourceURI(value)
         else:
-            msg = f"Invalid resource descriptor uri type: {value}"  # type: ignore[unreachable]
+            msg = (  # type: ignore[unreachable]
+                f"Invalid resource descriptor uri type: {value}"
+            )
             raise TypeError(msg)
 
     def add_digest(self, algorithm: str, digest: str) -> None:

@@ -174,7 +174,11 @@ class ReparseGUIDDataBuffer(Structure):
 class UnicodeString(Structure):
     """Map UNICODE_STRING structure."""
 
-    _fields_ = [("length", USHORT), ("maximum_length", USHORT), ("buffer", LPWSTR)]  # noqa: RUF012
+    _fields_ = [  # noqa: RUF012
+        ("length", USHORT),
+        ("maximum_length", USHORT),
+        ("buffer", LPWSTR),
+    ]
 
     def __init__(self, value: str | None = None, max_length: int = 0) -> None:
         """Initialize a Unicode string structure.

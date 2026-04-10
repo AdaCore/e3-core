@@ -448,5 +448,6 @@ class BuildInfo:
         warnings.warn(
             "`BuildInfo.to_dict` is deprecated, use `BuildInfo.as_dict` instead",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.as_dict()
