@@ -11,11 +11,10 @@ import re
 import shutil
 import stat
 import sys
-from collections import namedtuple
 from collections.abc import Iterable
 from pathlib import Path
 from platform import python_version
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from packaging.version import Version
 
@@ -294,7 +293,9 @@ def ls(
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
 
-    return sorted(itertools.chain.from_iterable(glob.glob(p) for p in path_list))  # noqa: PTH207
+    return sorted(
+        itertools.chain.from_iterable(glob.glob(p) for p in path_list)  # noqa: PTH207
+    )
 
 
 def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
@@ -435,7 +436,10 @@ def mv(
         if nb_files == 1:
             source = file_list[0]
             if Path(source).is_dir() and Path(target).is_dir():
-                move_file(source, str(Path(target, os.path.basename(source))))  # noqa: PTH119
+                move_file(
+                    source,
+                    str(Path(target, os.path.basename(source))),  # noqa: PTH119
+                )
             else:
                 move_file(source, os.fspath(target))
         elif not Path(target).is_dir():
@@ -655,12 +659,16 @@ def sync_tree(  # noqa: PLR0915
     :param delete_ignore: if True files that are explicitly ignored
         are deleted. Note delete should be set to True in that case.
     """
-    # Some structure used when walking the trees to be synced
-    FilesInfo = namedtuple("FilesInfo", ["rel_path", "source", "target"])
 
-    # The basename in the FileInfo structure is used to compare casing of
-    # source and destination.
-    FileInfo = namedtuple("FileInfo", ["path", "stat", "basename"])
+    class FileInfo(NamedTuple):
+        path: str
+        stat: os.stat_result | None
+        basename: str
+
+    class FilesInfo(NamedTuple):
+        rel_path: str
+        source: FileInfo
+        target: FileInfo
 
     # Normalize casing function for path comparison. path_key function
     # return a version of the path that is in lower case for case sensitive

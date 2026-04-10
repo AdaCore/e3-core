@@ -9,9 +9,8 @@ from __future__ import annotations
 import abc
 import os
 import pickle
-from collections import namedtuple
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from typing_extensions import Self
 
@@ -38,7 +37,12 @@ CANADIAN_EXCEPTIONS = (
 )
 
 
-EnvInfo = namedtuple("EnvInfo", ["build", "host", "target"])
+class EnvInfo(NamedTuple):
+    """Store build, host and target platform information."""
+
+    build: Platform
+    host: Platform
+    target: Platform
 
 
 class AbstractBaseEnv(metaclass=abc.ABCMeta):

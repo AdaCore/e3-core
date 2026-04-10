@@ -1,9 +1,8 @@
-"""Platform information and detection."""
+"""Platform information and detection."""  # noqa: A005
 
 from __future__ import annotations
 
-import collections
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, NamedTuple
 
 import e3.os
 import e3.os.platform
@@ -16,22 +15,7 @@ KNOWLEDGE_BASE = get_knowledge_base()
 
 
 # noinspection PyUnresolvedReferences
-class Platform(
-    collections.namedtuple(
-        "Platform",
-        [
-            "cpu",
-            "os",
-            "is_hie",
-            "platform",
-            "triplet",
-            "machine",
-            "domain",
-            "is_host",
-            "is_default",
-        ],
-    )
-):
+class Platform(NamedTuple):
     """Class that allow user to retrieve os/cpu specific information.
 
     Attributes are:
@@ -48,10 +32,18 @@ class Platform(
     - is_default: True if the platform is the default one
     """
 
-    default_arch: Platform | None = None
-    system_info = e3.os.platform.SystemInfo
+    cpu: e3.os.platform.CPU
+    os: e3.os.platform.OS
+    is_hie: bool
+    platform: str
+    triplet: str
+    machine: str
+    domain: str
+    is_host: bool
+    is_default: bool
 
-    __slots__ = ()
+    default_arch: ClassVar[Platform | None] = None
+    system_info = e3.os.platform.SystemInfo  # type: ignore[misc]
 
     @classmethod
     def get(

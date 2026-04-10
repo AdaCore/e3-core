@@ -1,12 +1,11 @@
-"""Provides function to detect platform specific information."""
+"""Provides function to detect platform specific information."""  # noqa: A005
 
 from __future__ import annotations
 
 import os
 import re
-from collections import namedtuple
 from platform import uname as platform_uname
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import e3.log
 from e3.platform_db import get_knowledge_base
@@ -18,9 +17,17 @@ KNOWLEDGE_BASE = get_knowledge_base()
 
 UNKNOWN = "unknown"
 
-Uname = namedtuple(
-    "Uname", ["system", "node", "release", "version", "machine", "processor"]
-)
+
+class Uname(NamedTuple):
+    """System uname information."""
+
+    system: str
+    node: str
+    release: str
+    version: str
+    machine: str
+    processor: str
+
 
 logger = e3.log.getLogger("os.platform")
 
@@ -326,7 +333,7 @@ class SystemInfo:
         return cls._hostname
 
 
-class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
+class CPU(NamedTuple):
     """Object representing a CPU.
 
     CPU attributes are:
@@ -337,7 +344,10 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
     - cores: number of cores available
     """
 
-    __slots__ = ()
+    name: str
+    bits: int
+    endian: str
+    cores: int
 
     def as_dict(self) -> dict[str, Any]:
         """Serialize object to dictionary representation."""
@@ -374,20 +384,7 @@ class CPU(namedtuple("CPU", ["name", "bits", "endian", "cores"])):
         return CPU(name, bits, endian, cores)
 
 
-class OS(
-    namedtuple(
-        "OS",
-        [
-            "name",
-            "version",
-            "kernel_version",
-            "exeext",
-            "dllext",
-            "is_bareboard",
-            "mode",
-        ],
-    )
-):
+class OS(NamedTuple):
     """Object representing an OS.
 
     Attributes are:
@@ -400,7 +397,13 @@ class OS(
     - is_bareboard: whether the system has an OS or not.
     """
 
-    __slots__ = ()
+    name: str
+    version: str
+    kernel_version: str
+    exeext: str
+    dllext: str
+    is_bareboard: bool
+    mode: str
 
     def as_dict(self) -> dict[str, Any]:
         """Serialize object to dictionary representation."""
