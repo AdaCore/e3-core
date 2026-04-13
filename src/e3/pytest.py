@@ -224,8 +224,7 @@ def pytest_sessionfinish(  # noqa: ARG001
         conf_file = coverage_conf_dir / f"omit-files-{os_name}"
         if conf_file.exists():
             with conf_file.open() as f:
-                for line in f:
-                    omit_files.append(line.rstrip())
+                omit_files.extend(line.rstrip() for line in f)
 
         # cov.html_report(directory=str(session.config.rootpath ), omit=omit_files)
         cov.html_report(omit=omit_files)

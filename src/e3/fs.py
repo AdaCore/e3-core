@@ -122,12 +122,10 @@ def directory_content(
     :return: a list of of path. Note that directories will end with a path
         separator
     """
-    result = []
+    result: list[str] = []
     for root, dirs, files in os.walk(path):
-        for f in files:
-            result.append(str(Path(root, f)))
-        for d in dirs:
-            result.append(str(Path(root, d)) + os.sep)
+        result.extend(str(Path(root, f)) for f in files)
+        result.extend(str(Path(root, d)) + os.sep for d in dirs)
     if not include_root_dir:
         result = [
             (
@@ -185,17 +183,21 @@ def find(
 
     :return: a list of files
     """
-    result = []
+    result: list[str] = []
     for rt, dirs, files in os.walk(root, followlinks=follow_symlinks):
         root = rt.replace("\\", "/")
         if include_files:
-            for f in files:
-                if pattern is None or fnmatch.fnmatch(f, pattern):
-                    result.append(root + "/" + f)
+            result.extend(
+                root + "/" + f
+                for f in files
+                if pattern is None or fnmatch.fnmatch(f, pattern)
+            )
         if include_dirs:
-            for d in dirs:
-                if pattern is None or fnmatch.fnmatch(d, pattern):
-                    result.append(root + "/" + d)
+            result.extend(
+                root + "/" + d
+                for d in dirs
+                if pattern is None or fnmatch.fnmatch(d, pattern)
+            )
     return result
 
 
