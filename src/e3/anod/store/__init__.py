@@ -618,7 +618,7 @@ class _Store(_StoreContextManager):
                 WHERE component_files.component_id=? AND component_files.kind=?
 
         .. note::
-            In the previous query, the ‘?’ will be replaced by, in order of encounter,
+            In the previous query, the `?` will be replaced by, in order of encounter,
             <component_id> and <kind>.
 
 
