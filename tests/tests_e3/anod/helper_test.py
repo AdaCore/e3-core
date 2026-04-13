@@ -25,9 +25,9 @@ def test_make() -> None:
 
         @Anod.primitive()
         def build(self) -> object:
-            m1 = Make(self, makefile="/tmp/makefile")
+            m1 = Make(self, makefile="/tmp/makefile")  # noqa: S108
             m1.set_var("prefix", "/foo")
-            m2 = Make(self, exec_dir="/tmp/exec_dir", jobs=2)
+            m2 = Make(self, exec_dir="/tmp/exec_dir", jobs=2)  # noqa: S108
             m2.set_default_target("install")
             m2.set_var("profiles", ["dev", "prod"])
             return (
@@ -47,13 +47,13 @@ def test_make() -> None:
     AnodDriver(anod_instance=am, store=None).activate(Anod.sandbox, None)
     am.build_space.create()
     assert am.build() == (
-        ["make", "-f", "/tmp/makefile", "-j", "10", "prefix=/foo"],
-        ("make", "-f", "/tmp/makefile", "-j", "10", "prefix=/foo"),
+        ["make", "-f", "/tmp/makefile", "-j", "10", "prefix=/foo"],  # noqa: S108
+        ("make", "-f", "/tmp/makefile", "-j", "10", "prefix=/foo"),  # noqa: S108
         {"cwd": "/foo", "timeout": 2},
         ["make", "-j", "2", "profiles=dev prod", "install"],
         ["make", "-j", "2", "profiles=dev prod", "clean", "install"],
         ["make", "-j", "2", "profiles=dev prod", "all"],
-        {"cwd": "/tmp/exec_dir", "timeout": None},
+        {"cwd": "/tmp/exec_dir", "timeout": None},  # noqa: S108
     )
 
 

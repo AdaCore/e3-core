@@ -7,6 +7,7 @@ import json
 import random
 import shutil
 import string
+import tempfile
 from os.path import abspath
 from pathlib import Path
 from re import compile as regex_compile
@@ -153,7 +154,7 @@ class PypiSimulator:
         shutil.make_archive(package, format="zip", root_dir=package_name, base_dir=".")
         with Path(f"{package}.zip").open("rb") as fd:
             result = fd.read()
-        cp(f"{package}.zip", "/tmp")
+        cp(f"{package}.zip", tempfile.gettempdir())
         context.status_code = 200
         return result
 
