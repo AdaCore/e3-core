@@ -105,7 +105,7 @@ class AuthorRole(Enum):
     CSAF 2.0:
 
     :cvar COORDINATOR: indicates individuals or organizations that manage a
-        single vendor’s response or multiple vendors’ responses to a
+        single vendor's response or multiple vendors' responses to a
         vulnerability, a security flaw, or an incident. This includes all
         Computer Emergency/Incident Response Teams (CERTs/CIRTs) or agents
         acting on the behalf of a researcher.
@@ -118,7 +118,7 @@ class AuthorRole(Enum):
     :cvar OTHER: indicates a catchall for everyone else. Currently, this
         includes editors, reviewers, forwarders, republishers, and miscellaneous
         contributors.
-    :cvar USER: indicates anyone using a vendor’s product.
+    :cvar USER: indicates anyone using a vendor's product.
     :cvar VENDOR: indicates developers or maintainers of information system
         products or services. This includes all authoritative product vendors,
         Product Security Incident Response Teams (PSIRTs), and product resellers
@@ -1015,7 +1015,7 @@ class Vulnerability(JsonData):
         - A VEX statement **MUST** specify one *_id*.
         - *_id* **SHOULD** use existing, readily available, and well-known
           identifiers such as: CVE, the Global Security Database (GSD), or a
-          supplier’s vulnerability identification system. It is expected that
+          supplier's vulnerability identification system. It is expected that
           vulnerability identification systems are external to and maintained
           separately from VEX.
         - *_id* **MAY** be URIs or URLs.

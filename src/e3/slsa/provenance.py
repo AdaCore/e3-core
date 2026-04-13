@@ -58,7 +58,7 @@ class Builder:
     The |id| **MUST** reflect the trust base that consumers care about. How
     detailed to be is a judgement call. For example, GitHub Actions supports
     both GitHub-hosted runners and self-hosted runners. The GitHub-hosted runner
-    might be a single identity because it’s all GitHub from the consumer’s
+    might be a single identity because it's all GitHub from the consumer's
     perspective. Meanwhile, each self-hosted runner might have its own identity
     because not all runners are trusted by all consumers.
 
@@ -1233,7 +1233,7 @@ class Predicate:
           practical. Consumers need a way to know what configuration is
           expected and the usual way to do that is to map it back to version
           control, but that is not possible if the server cannot verify the
-          configuration’s origins. Possible solutions:
+          configuration's origins. Possible solutions:
 
             - (**RECOMMENDED**) Rearchitect the build platform to read
               configuration directly from version control, recording the
