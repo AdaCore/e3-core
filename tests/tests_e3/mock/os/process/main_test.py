@@ -229,7 +229,7 @@ def test_glob_checker() -> None:
                         # Any path ending with python
                         GlobChecker("**/python"),
                         # Any temp directory containing test.py
-                        GlobChecker("/tmp/**/test.py"),
+                        GlobChecker("/tmp/**/test.py"),  # noqa: S108
                     ]
                 )
             ]
@@ -237,7 +237,7 @@ def test_glob_checker() -> None:
         }
     ):
         # Both paths match the globs
-        e3.os.process.Run(["/usr/bin/python", "/tmp/abcd/test.py"])
+        e3.os.process.Run(["/usr/bin/python", "/tmp/abcd/test.py"])  # noqa: S108
 
         # Second path starts with /pmt instead of /tmp
         with pytest.raises(UnexpectedCommandError) as excinfo:

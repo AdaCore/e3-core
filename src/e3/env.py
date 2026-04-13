@@ -9,6 +9,7 @@ from __future__ import annotations
 import abc
 import os
 import pickle
+import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -502,7 +503,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         and in case none of these variables are defined fallback on
         on ``/tmp``.
         """
-        return os.environ.get("TMPDIR", os.environ.get("TMP", "/tmp"))
+        return os.environ.get("TMPDIR", os.environ.get("TMP", tempfile.gettempdir()))
 
     def to_dict(self) -> dict:
         """Get current env as a dictionary.
