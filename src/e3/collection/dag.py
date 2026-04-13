@@ -653,11 +653,12 @@ class DAG:
         :return: the dot source file
         """
         result = ["digraph G {", 'rankdir="LR";']
-        for vertex in self.vertex_data:
-            result.append(f'"{vertex}"')
-        for vertex, predecessors in self.__vertex_predecessors.items():
-            for predecessor in predecessors:
-                result.append(f'"{vertex}" -> "{predecessor}"')
+        result.extend(f'"{vertex}"' for vertex in self.vertex_data)
+        result.extend(
+            f'"{vertex}" -> "{predecessor}"'
+            for vertex, predecessors in self.__vertex_predecessors.items()
+            for predecessor in predecessors
+        )
         result.append("}")
         return "\n".join(result)
 

@@ -213,14 +213,15 @@ class SPDXSection:
 
         Return a list of SPDX lines
         """
-        output = []
+        output: list[str] = []
         for fd in fields(self):
             section_field = self.__dict__[fd.name]
             if section_field is None:
                 continue
             if isinstance(section_field, list):
-                for extra_field in section_field:
-                    output.append(extra_field.to_tagvalue())
+                output.extend(
+                    extra_field.to_tagvalue() for extra_field in section_field
+                )
             else:
                 output.append(section_field.to_tagvalue())
 
@@ -1855,14 +1856,16 @@ class Document:
 
         # Look for the main package in documentDescribes entry. If it does not
         # exist, we may look at packages with a primaryPackagePurpose field.
-        main_packages: list[SPDXID] = []
-        for spdx_id in doc_dict.get("documentDescribes", []):
-            main_packages.append(SPDXID(spdx_id))
+        main_packages: list[SPDXID] = [
+            SPDXID(spdx_id) for spdx_id in doc_dict.get("documentDescribes", [])
+        ]
         if not main_packages:
             # Look for a package with  a primaryPackagePurpose field.
-            for package_dict in doc_dict.get("packages", []):
-                if PrimaryPackagePurpose.get_json_entry_key() in package_dict:
-                    main_packages.append(package_dict.get(SPDXID.json_entry_key))
+            main_packages.extend(
+                package_dict.get(SPDXID.json_entry_key)
+                for package_dict in doc_dict.get("packages", [])
+                if PrimaryPackagePurpose.get_json_entry_key() in package_dict
+            )
 
         # Now that we know which package is the main package, we may add all
         # packages to the SPDX document.
