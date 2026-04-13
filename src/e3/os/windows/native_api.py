@@ -323,25 +323,37 @@ class FileInfo:
     """Declaration of structures returned by QueryInformationFile."""
 
     class Names:
+        """File names information class."""
+
         class_id = 12
 
     class ReparsePoint(Structure):
+        """Reparse point information structure."""
+
         _fields_ = [("file_reference", LARGE_INTEGER), ("tag", ULONG)]  # noqa: RUF012
         class_id = 33
 
     class Disposition(Structure):
+        """File disposition information structure."""
+
         _fields_ = [("delete_file", BOOLEAN)]  # noqa: RUF012
         class_id = 13
 
     class Internal(Structure):
+        """File internal information structure."""
+
         _fields_ = [("index_number", LARGE_INTEGER)]  # noqa: RUF012
         class_id = 6
 
     class Rename(Structure):
+        """File rename information structure."""
+
         _fields_ = []  # noqa: RUF012
         class_id = 10
 
     class Basic(Structure):
+        """Basic file information structure."""
+
         _fields_ = [  # noqa: RUF012
             ("creation_time", LargeFileTime),
             ("last_access_time", LargeFileTime),
@@ -370,6 +382,8 @@ class ObjectInfo:
     """Declaration of structures returned by QueryObjectInformation."""
 
     class Name(Structure):
+        """Object name information structure."""
+
         _fields_ = []  # noqa: RUF012
         class_id = 1
 
@@ -378,6 +392,8 @@ class ProcessInfo:
     """Declaration of structure returned by QueryInformationProcess."""
 
     class Basic(Structure):
+        """Basic process information structure."""
+
         class_id = 0
 
         _fields_ = [  # noqa: RUF012
