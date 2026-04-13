@@ -1,4 +1,4 @@
-"""Platform information and detection."""  # noqa: A005
+"""Platform information and detection."""
 
 from __future__ import annotations
 

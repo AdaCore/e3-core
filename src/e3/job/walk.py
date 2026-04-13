@@ -49,7 +49,7 @@ class Walk:
     :ivar scheduler: The scheduler used to schedule and execute all
         the actions.
     :vartype scheduler: e3.job.scheduler.Scheduler
-    """  # noqa: RST399
+    """
 
     def __init__(self, actions: DAG) -> None:
         """Object initializer.
