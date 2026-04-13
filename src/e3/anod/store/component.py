@@ -188,12 +188,12 @@ class Component:
         if not isinstance(result_data, dict):
             try:
                 result_data = json.loads(result_data)  # type: ignore[arg-type]
-                if not isinstance(result_data, dict):
-                    msg = "Corrupted metadata: Cannot convert metadata into dictionary"
-                    raise TypeError(msg)
             except Exception:
                 logger.exception("failed to load metadata")
                 raise
+            if not isinstance(result_data, dict):
+                msg = "Corrupted metadata: Cannot convert metadata into dictionary"
+                raise TypeError(msg)
 
         return DSSE.load_dict(result_data)
 
