@@ -281,12 +281,18 @@ class MavenCentralSimulator:
             encoded_pom_content = pom_content.encode("utf-8")
             self.__packages[group][name][version] = {
                 "content": content,
-                "sha1": hashlib.sha1(encoded_content).hexdigest(),
-                "md5": hashlib.md5(encoded_content).hexdigest(),
+                "sha1": hashlib.sha1(
+                    encoded_content, usedforsecurity=False
+                ).hexdigest(),
+                "md5": hashlib.md5(encoded_content, usedforsecurity=False).hexdigest(),
                 "pom": {
                     "content": pom_content,
-                    "sha1": hashlib.sha1(encoded_pom_content).hexdigest(),
-                    "md5": hashlib.md5(encoded_pom_content).hexdigest(),
+                    "sha1": hashlib.sha1(
+                        encoded_pom_content, usedforsecurity=False
+                    ).hexdigest(),
+                    "md5": hashlib.md5(
+                        encoded_pom_content, usedforsecurity=False
+                    ).hexdigest(),
                 },
             }
 
@@ -410,10 +416,10 @@ class MavenCentralSimulator:
 
         context.status_code = 200
         context.headers["x-checksum-sha1"] = hashlib.sha1(
-            result.encode("utf-8")
+            result.encode("utf-8"), usedforsecurity=False
         ).hexdigest()
         context.headers["x-checksum-md5"] = hashlib.md5(
-            result.encode("utf-8")
+            result.encode("utf-8"), usedforsecurity=False
         ).hexdigest()
         return result
 
