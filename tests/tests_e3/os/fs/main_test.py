@@ -146,8 +146,8 @@ def test_anod_ldd_output_to_posix() -> None:
 
 def test_maxpath() -> None:
     """Test maxpath."""
-    maxPath = e3.os.fs.max_path()
-    assert isinstance(maxPath, numbers.Integral)
+    max_path = e3.os.fs.max_path()
+    assert isinstance(max_path, numbers.Integral)
 
 
 def test_touch() -> None:

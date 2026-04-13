@@ -165,19 +165,19 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
         import ctypes  # noqa: PLC0415  # windows-only
 
         c_path = ctypes.c_wchar_p(str(path))
-        GetDiskFreeSpaceEx: Callable = ctypes.WINFUNCTYPE(
+        get_disk_free_space_ex: Callable = ctypes.WINFUNCTYPE(
             ctypes.c_int,
             ctypes.c_wchar_p,
             ctypes.POINTER(ctypes.c_uint64),
             ctypes.POINTER(ctypes.c_uint64),
             ctypes.POINTER(ctypes.c_uint64),
         )
-        GetDiskFreeSpaceEx = GetDiskFreeSpaceEx(
+        get_disk_free_space_ex = get_disk_free_space_ex(
             ("GetDiskFreeSpaceExW", ctypes.windll.kernel32),
             ((1, "path"), (2, "freeuserspace"), (2, "totalspace"), (2, "freespace")),
         )
 
-        def GetDiskFreeSpaceEx_errcheck(
+        def get_disk_free_space_ex_errcheck(
             result: int, func: object, args: tuple[object, ...]
         ) -> tuple[object, object, object]:
             """Error check function for GetDiskFreeSpaceEx.
@@ -191,10 +191,10 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
                 raise ctypes.WinError()
             return args[1].value, args[2].value, args[3].value
 
-        GetDiskFreeSpaceEx.errcheck = (  # type: ignore[attr-defined]
-            GetDiskFreeSpaceEx_errcheck
+        get_disk_free_space_ex.errcheck = (  # type: ignore[attr-defined]
+            get_disk_free_space_ex_errcheck
         )
-        _, total, free = GetDiskFreeSpaceEx(c_path)
+        _, total, free = get_disk_free_space_ex(c_path)
         used = total - free
     else:  # windows: no cover
         # f_frsize = fundamental filesystem block size

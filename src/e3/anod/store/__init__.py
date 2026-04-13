@@ -1703,11 +1703,11 @@ class StoreReadOnly(_Store, StoreReadInterface):
                 result["msg"] = "Invalid query: missing 'query' key"
 
             elif query["query"] == "component":
-                MANDATORY_KEYS = frozenset(("setup", "platform", "name"))
-                if not all(query.get(key) for key in MANDATORY_KEYS):
+                mandatory_keys = frozenset(("setup", "platform", "name"))
+                if not all(query.get(key) for key in mandatory_keys):
                     result["msg"] = (
                         "Invalid component query: "
-                        f"one or more mandatory keys ({', '.join(MANDATORY_KEYS)}) is "
+                        f"one or more mandatory keys ({', '.join(mandatory_keys)}) is "
                         f"missing from query {query}"
                     )
                 else:
