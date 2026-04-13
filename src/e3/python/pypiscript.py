@@ -146,8 +146,9 @@ def main() -> None:
     for name, url in config.get("wheels", {}).items():
         logger.info(f"Fetch {name} sources")
         if "#" in url:
-            url, rev = url.split("#", 1)
+            repo_url, rev = url.split("#", 1)
         else:
+            repo_url = url
             rev = "master"
         checkout_manager = CheckoutManager(
             name=name, working_dir=str(Path(vcs_cache_dir)), compute_changelog=False
@@ -156,11 +157,11 @@ def main() -> None:
         if m.args.local_clones is not None:
             checkout_manager.update(
                 vcs="external",
-                url=str(Path(m.args.local_clones, url.split("/")[-1])),
+                url=str(Path(m.args.local_clones, repo_url.split("/")[-1])),
                 revision=rev,
             )
         elif not m.args.skip_repo_updates:
-            checkout_manager.update(vcs="git", url=url, revision=rev)
+            checkout_manager.update(vcs="git", url=repo_url, revision=rev)
 
         if update_version_file:
             # Try to update the version file for the given repository. Update

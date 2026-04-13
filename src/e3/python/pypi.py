@@ -445,23 +445,29 @@ class PyPICandidate:
                             requires = file_fd.read().decode("utf-8")
                             current_marker = ""
                             for line in requires.splitlines():
-                                line = line.strip()
+                                stripped_line = line.strip()
 
-                                if line.startswith("[:") and line.endswith("]"):
+                                if stripped_line.startswith(
+                                    "[:"
+                                ) and stripped_line.endswith("]"):
                                     # In requires.txt format markers are set using
                                     # sections
-                                    current_marker = line[2:-1]
-                                elif line and not line.startswith("#"):
+                                    current_marker = stripped_line[2:-1]
+                                elif stripped_line and not stripped_line.startswith(
+                                    "#"
+                                ):
                                     # Non empty lines that are not comments should be
                                     # considered as requirements
                                     if current_marker:
                                         self._reqs.add(
-                                            Requirement(f"{line};{current_marker}")
+                                            Requirement(
+                                                f"{stripped_line};{current_marker}"
+                                            )
                                         )
                                     else:
                                         # Don't emit a final ; if the marker is empty
                                         # as this is not accepted by the syntax
-                                        self._reqs.add(Requirement(line))
+                                        self._reqs.add(Requirement(stripped_line))
 
                     elif requirements_txt in archive_members:
                         # Check if there is a requirements.txt (this is a fallback)

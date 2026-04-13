@@ -558,22 +558,24 @@ def rm(
             # we got some strange unicode "ascii codec" errors
             # (need some further investigation at some point)
             if sys.platform == "win32":  # unix: no cover
-                f = str(f)
+                f_path = str(f)
+            else:
+                f_path = f
 
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
-            if recursive and Path(f).is_dir() and not Path(f).is_symlink():
+            if recursive and Path(f_path).is_dir() and not Path(f_path).is_symlink():
                 if Version(python_version()) >= Version("3.12"):
-                    shutil.rmtree(f, onexc=onerror)
+                    shutil.rmtree(f_path, onexc=onerror)
                 else:
-                    shutil.rmtree(f, onerror=onerror)
+                    shutil.rmtree(f_path, onerror=onerror)
             else:
-                e3.os.fs.force_remove_file(f)
+                e3.os.fs.force_remove_file(f_path)
 
         except Exception as e:  # defensive code
-            logger.exception(f"error occurred while removing {f}")
+            logger.exception(f"error occurred while removing {f_path}")
             raise FSError(
-                origin="rm", message=f"error occurred while removing {f}"
+                origin="rm", message=f"error occurred while removing {f_path}"
             ) from e
 
 
