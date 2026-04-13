@@ -434,7 +434,9 @@ def mv(
         nb_files = len(file_list)
 
         if nb_files == 0:
-            raise FSError(origin="mv", message=f'cannot find files matching "{source}"')
+            raise FSError(  # noqa: TRY301
+                origin="mv", message=f'cannot find files matching "{source}"'
+            )
         if nb_files == 1:
             source = file_list[0]
             if Path(source).is_dir() and Path(target).is_dir():
@@ -447,7 +449,7 @@ def mv(
         elif not Path(target).is_dir():
             # More than one file to move but the target is not a directory
             msg = "mv"
-            raise FSError(msg, f"{target} should be a directory")
+            raise FSError(msg, f"{target} should be a directory")  # noqa: TRY301
         else:
             for f in file_list:
                 f_dest = str(Path(target, Path(f).name))

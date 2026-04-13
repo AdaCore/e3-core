@@ -1754,14 +1754,12 @@ class TypeURI:
 
         try:
             parsed: ParseResult = urlparse(uri)
-            if not all([parsed.scheme, parsed.netloc]):
-                msg = f"Invalid URI {uri}."
-                raise ValueError(msg)
-        except ValueError:
-            raise
         except AttributeError as ae:
             msg = f"Invalid URI {uri} : {ae}."
             raise ValueError(msg) from ae
+        if not all([parsed.scheme, parsed.netloc]):
+            msg = f"Invalid URI {uri}."
+            raise ValueError(msg)
         self.__uri = uri
 
     def __eq__(self, other: object) -> bool:

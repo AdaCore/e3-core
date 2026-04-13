@@ -286,12 +286,12 @@ class File:
             try:
                 # This work with mypy because result_data have Any type
                 result_data = json.loads(result_data)
-                if not isinstance(result_data, dict):
-                    msg = "Corrupted metadata: Cannot convert metadata into dictionary"
-                    raise TypeError(msg)
             except Exception:
                 logger.exception("failed to load metadata")
                 raise
+            if not isinstance(result_data, dict):
+                msg = "Corrupted metadata: Cannot convert metadata into dictionary"
+                raise TypeError(msg)
 
         return DSSE.load_dict(result_data)
 
