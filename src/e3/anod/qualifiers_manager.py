@@ -943,7 +943,7 @@ class QualifiersManager:
             for el in self.serialized_qualifier_values
         ]
         if hash_pool:
-            hash_obj = sha1()  # nosec
+            hash_obj = sha1(usedforsecurity=False)
             # update() method does not implement Buffer. Ignore type checking
             # here.
             # noinspection PyTypeChecker

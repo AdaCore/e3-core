@@ -221,7 +221,9 @@ class Maven:
             sha1_checksum = request.headers.get("x-checksum-sha1")
             md5_checksum = request.headers.get("x-checksum-md5")
             if sha1_checksum:
-                content_sha1 = hashlib.sha1(request.content).hexdigest()
+                content_sha1 = hashlib.sha1(
+                    request.content, usedforsecurity=False
+                ).hexdigest()
                 if content_sha1 != sha1_checksum:
                     msg = (
                         f"'{group}/{name}' maven-metadata.xml sha1 checksum missmatch: "
@@ -229,7 +231,9 @@ class Maven:
                     )
                     raise RuntimeError(msg)
             elif md5_checksum:
-                content_md5 = hashlib.md5(request.content).hexdigest()
+                content_md5 = hashlib.md5(
+                    request.content, usedforsecurity=False
+                ).hexdigest()
                 if content_md5 != md5_checksum:
                     msg = (
                         f"'{group}/{name}' maven-metadata.xml md5 checksum missmatch: "
