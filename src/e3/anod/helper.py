@@ -274,16 +274,23 @@ def text_replace(
     output = io.BytesIO()
     nb_substitution = [0 for _ in pattern]
     with Path(filename).open("rb") as f:
-        for line in f:
+        for current_line in f:
+            processed_line = current_line
             for pattern_index, (regexp, replacement) in enumerate(pattern):
-                if isinstance(replacement, str):
-                    replacement = replacement.encode("utf-8")
-                if isinstance(regexp, str):
-                    regexp = regexp.encode("utf-8")
-                line, count = re.subn(regexp, replacement, line)
+                encoded_replacement = (
+                    replacement.encode("utf-8")
+                    if isinstance(replacement, str)
+                    else replacement
+                )
+                encoded_regexp = (
+                    regexp.encode("utf-8") if isinstance(regexp, str) else regexp
+                )
+                processed_line, count = re.subn(
+                    encoded_regexp, encoded_replacement, processed_line
+                )
                 if count:
                     nb_substitution[pattern_index] += count
-            output.write(line)
+            output.write(processed_line)
     if any(nb for nb in nb_substitution):
         # file changed, update it
         with Path(filename).open("wb") as f:
