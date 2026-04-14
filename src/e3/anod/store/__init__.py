@@ -378,7 +378,7 @@ class _Store(_StoreContextManager):
         join_filter = " OR " if use_or_filter else " AND "
         where_clause = join_filter.join(where_rules)
 
-        sql = f"SELECT * FROM {table} "
+        sql = f"SELECT * FROM {table} "  # noqa: S608
         if where_clause:
             sql = f"{sql}WHERE {where_clause} "
         sql = f"{sql}ORDER BY {order_by}"
@@ -654,7 +654,7 @@ class _Store(_StoreContextManager):
         order_by_sql = f" ORDER BY {'.'.join(order_by)}" if order_by else ""
 
         req = self.cursor.execute(
-            f"SELECT {selected_field} FROM {table} "  # nosec B608
+            f"SELECT {selected_field} FROM {table} "  # nosec B608  # noqa: S608
             f"INNER JOIN {inner_join} ON {on_cond} "
             f"WHERE {where_clause}{order_by_sql}",
             dynamic_where_values,
@@ -941,7 +941,8 @@ class _StoreWrite(_Store):
         elm_to_set = [f"{tmp}=?" for tmp in toset]
         return self._insert_or_update(
             table,
-            f"UPDATE {table} SET {','.join(elm_to_set)} WHERE {id_field}=?",
+            f"UPDATE {table} SET {','.join(elm_to_set)} "  # noqa: S608
+            f"WHERE {id_field}=?",
             [*values, rowid],
         )
 
@@ -1160,7 +1161,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         """
         req_tuple = self._insert_or_update(
             _Store.TableName.buildinfos,
-            f"INSERT INTO {_Store.TableName.buildinfos}("
+            f"INSERT INTO {_Store.TableName.buildinfos}("  # noqa: S608
             "   build_id, build_date, setup, build_version"
             ") "
             "  SELECT ?, build_date, ?, build_version"
@@ -1472,7 +1473,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
         #   SELECT * FROM latest_components WHERE lc=1 ORDER BY creation_date DESC
         return self._tuple_list_to_comp_list(
             self.cursor.execute(
-                "WITH latest_components AS ("  # nosec: B608
+                "WITH latest_components AS ("  # nosec: B608  # noqa: S608
                 f"SELECT {_Store.TableName.components}.*, ROW_NUMBER() OVER ("
                 "PARTITION BY "
                 f"{_Store.TableName.components}.name, "
@@ -1650,7 +1651,7 @@ class StoreReadOnly(_Store, StoreReadInterface):
             ],
             dynamic_where_values=[name, kind, bid, bid],
             static_where_rules=[
-                f"({_Store.TableName.files}.build_id=? "
+                f"({_Store.TableName.files}.build_id=? "  # noqa: S608
                 f"OR ({_Store.TableName.files}.kind IN ('source', 'thirdparty') "
                 f"AND {_Store.TableName.buildinfos}.creation_date <= ("
                 f"SELECT creation_date FROM {_Store.TableName.buildinfos} "
