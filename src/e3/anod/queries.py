@@ -144,15 +144,16 @@ class SourceClosure:
             # Only consider build and install dependency (discard source deps)
             if dep.kind in ("build", "install", "download"):
                 effective_dep_spec = dep_spec
-                if dep_spec.kind == "install":
-                    # An install dep should be expanded whenever
-                    # expand_packages is defined or when there is no component
-                    # information generated (i.e: when dep_spec.component is
-                    # None)
-                    if self.expand_packages or dep_spec.component is None:
-                        effective_dep_spec = get_build_node(
-                            dep_spec, context=self.context, default=dep_spec
-                        )
+                # An install dep should be expanded whenever
+                # expand_packages is defined or when there is no component
+                # information generated (i.e: when dep_spec.component is
+                # None)
+                if dep_spec.kind == "install" and (
+                    self.expand_packages or dep_spec.component is None
+                ):
+                    effective_dep_spec = get_build_node(
+                        dep_spec, context=self.context, default=dep_spec
+                    )
                 self.compute_closure(effective_dep_spec, publish and dep.track)
 
     def resolve_package(self, spec_uid: str, data: list[tuple[Any, bool]]) -> None:

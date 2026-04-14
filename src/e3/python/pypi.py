@@ -765,12 +765,15 @@ class PyPIClosure:
                 if has_generic_wheel and not candidate.is_wheel:
                     continue
 
-                if candidate.version in req.specifier:
-                    if candidate.is_compatible_with_cpython3(
+                if (
+                    candidate.version in req.specifier
+                    and candidate.is_compatible_with_cpython3(
                         int(self.python3_version.minor)
-                    ) and candidate.is_compatible_with_platforms(self.platforms):
-                        result.add(candidate)
-                        candidate.download()
+                    )
+                    and candidate.is_compatible_with_platforms(self.platforms)
+                ):
+                    result.add(candidate)
+                    candidate.download()
         return [str(Path(el.cache_dir, el.filename)) for el in result]
 
     def _requirements_closure(self) -> dict:

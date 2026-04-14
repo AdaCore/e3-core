@@ -63,9 +63,8 @@ class OrderedDictYAMLLoader(Loader):
         :param node: YAML node containing the filename
         """
         # Get the path out of the yaml file
-        if self.name is None:
-            if not isinstance(self.stream, str):
-                self.name = getattr(self.stream, "name", None)
+        if self.name is None and not isinstance(self.stream, str):
+            self.name = getattr(self.stream, "name", None)
 
         if self.name is not None and Path(self.name).is_file():
             file_name = str(Path(self.name).parent / node.value)

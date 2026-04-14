@@ -56,9 +56,12 @@ class FileAttribute(Structure):
         """Return string representation of active file attributes."""
         result = []
         for k in FileAttribute.__dict__:
-            if not k.startswith("_") and k.isupper():
-                if FileAttribute.__dict__[k] & self.attr > 0:
-                    result.append(k)
+            if (
+                not k.startswith("_")
+                and k.isupper()
+                and FileAttribute.__dict__[k] & self.attr > 0
+            ):
+                result.append(k)
         return ",".join(result)
 
 
