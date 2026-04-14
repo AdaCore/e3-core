@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from e3.anod.store import StoreRW
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
@@ -21,6 +20,7 @@ from e3.os.fs import touch
 from e3.slsa.provenance import Statement
 
 if TYPE_CHECKING:
+    from e3.anod.store import StoreRW
     from e3.anod.store.component import ComponentDict
 
 # Expected number of attachments in component tests

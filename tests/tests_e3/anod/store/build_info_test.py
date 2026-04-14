@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
-from e3.anod.store import StoreRW
+if TYPE_CHECKING:
+    from e3.anod.store import StoreRW
+
 from e3.anod.store.buildinfo import BuildInfo
 from e3.anod.store.interface import StoreError
 from e3.error import E3Error

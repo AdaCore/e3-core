@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
-from e3.anod.store import StoreRW
 from e3.anod.store.buildinfo import BuildInfo
+
+if TYPE_CHECKING:
+    from e3.anod.store import StoreRW
 from e3.anod.store.component import Component
 from e3.anod.store.file import File, FileKind
 from e3.os.fs import touch
