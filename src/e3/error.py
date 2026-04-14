@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing_extensions import Self
+
 
 class E3Error(Exception):
     """Exception raised by functions defined in E3."""
@@ -24,7 +26,7 @@ class E3Error(Exception):
             else:
                 self.messages.extend(message)
 
-    def __iadd__(self, other: str | list[str] | E3Error) -> E3Error:
+    def __iadd__(self, other: str | list[str] | E3Error) -> Self:
         """Add messages to the current instance.
 
         :param other: a message or an E3Error instance

@@ -14,6 +14,8 @@ from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 import pytest
 
 from e3.fs import cp, mkdir
@@ -158,7 +160,7 @@ class PypiSimulator:
         context.status_code = 200
         return result
 
-    def __enter__(self) -> PypiSimulator:
+    def __enter__(self) -> Self:
         """Enter context manager for PyPI simulator."""
         self.requests_mock.start()
         self.requests_mock.get(self.SIMPLE_MATCHER, text=self.get_metadata)
@@ -424,7 +426,7 @@ class MavenCentralSimulator:
         ).hexdigest()
         return result
 
-    def __enter__(self) -> MavenCentralSimulator:
+    def __enter__(self) -> Self:
         """Enter context manager for Maven Central simulator."""
         self.__requests_mock.start()
         self.__requests_mock.get(self.METADATA_MATCHER, text=self._get_metadata)

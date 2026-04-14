@@ -11,6 +11,8 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 from packaging.version import Version
 
 from e3.anod.store.interface import (
@@ -326,7 +328,7 @@ class _Store(_StoreContextManager):
     def __del__(self) -> None:
         self.close()
 
-    def __enter__(self) -> _Store:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
