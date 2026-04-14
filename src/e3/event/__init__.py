@@ -10,9 +10,8 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from typing_extensions import Self
-
 import stevedore
+from typing_extensions import Self
 
 import e3.env
 import e3.hash

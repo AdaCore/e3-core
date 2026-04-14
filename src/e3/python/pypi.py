@@ -10,8 +10,6 @@ from html.parser import HTMLParser
 from operator import attrgetter
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-from typing_extensions import Self
 from urllib.parse import urlparse
 
 import requests
@@ -28,6 +26,7 @@ from requests.exceptions import HTTPError
 from resolvelib import BaseReporter, Resolver
 from resolvelib.providers import AbstractProvider
 from resolvelib.resolvers import ResolutionImpossible
+from typing_extensions import Self
 
 import e3.log
 from e3.error import E3Error
