@@ -399,19 +399,18 @@ class DAG:
                 vertex_id, previous_predecessors | vertex_predecessors
             )
 
-            if enable_checks:
-                # Will raise DAGError if a cycle is created
-                if vertex_id in self.get_closure(vertex_id):
-                    minimal_cycle = self.shortest_path(vertex_id, vertex_id)
-                    if TYPE_CHECKING:
-                        assert minimal_cycle is not None
-                    self.set_predecessors(vertex_id, previous_predecessors)
-                    raise DAGError(
-                        message="cannot update vertex ({} create a cycle: {})".format(
-                            vertex_id, " -> ".join([str(vid) for vid in minimal_cycle])
-                        ),
-                        origin="DAG.update_vertex",
-                    )
+            # Will raise DAGError if a cycle is created
+            if enable_checks and vertex_id in self.get_closure(vertex_id):
+                minimal_cycle = self.shortest_path(vertex_id, vertex_id)
+                if TYPE_CHECKING:
+                    assert minimal_cycle is not None
+                self.set_predecessors(vertex_id, previous_predecessors)
+                raise DAGError(
+                    message="cannot update vertex ({} create a cycle: {})".format(
+                        vertex_id, " -> ".join([str(vid) for vid in minimal_cycle])
+                    ),
+                    origin="DAG.update_vertex",
+                )
 
             if data is not None:
                 self.vertex_data[vertex_id] = data

@@ -318,9 +318,8 @@ class HTTPSession:
             ) as response:
                 content_length = int(response.headers.get("content-length", 0))
                 logger.debug(response.headers)
-                if filename is None:
-                    if "content-disposition" in response.headers:
-                        filename = get_filename(response.headers["content-disposition"])
+                if filename is None and "content-disposition" in response.headers:
+                    filename = get_filename(response.headers["content-disposition"])
 
                 expected_size = content_length // self.CHUNK_SIZE
 

@@ -78,11 +78,10 @@ def cp(
     if file_number == 0:
         # If there is no source files raise an error
         raise FSError(origin="cp", message=f'can\'t find files matching "{source}"')
-    if file_number > 1:
+    if file_number > 1 and not Path(target).is_dir():
         # If we have more than one file to copy then check that target is a
         # directory
-        if not Path(target).is_dir():
-            raise FSError(origin="cp", message="target should be a directory")
+        raise FSError(origin="cp", message="target should be a directory")
 
     for f in file_list:
         try:
