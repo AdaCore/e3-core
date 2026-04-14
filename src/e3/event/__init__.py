@@ -10,6 +10,8 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 import stevedore
 
 import e3.env
@@ -81,7 +83,7 @@ class Event:
         self.set_formatter("begin_time", self.format_date)
         self.set_formatter("end_time", self.format_date)
 
-    def __enter__(self) -> Event:
+    def __enter__(self) -> Self:
         """Enter context manager for event."""
         return self
 

@@ -10,6 +10,8 @@ from html.parser import HTMLParser
 from operator import attrgetter
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+from typing_extensions import Self
 from urllib.parse import urlparse
 
 import requests
@@ -818,7 +820,7 @@ class PyPIClosure:
                     reqs.add(Requirement(f'{k}; sys_platform == "{sys_platform}"'))
         return sorted(reqs, key=lambda r: r.name)
 
-    def __enter__(self) -> PyPIClosure:
+    def __enter__(self) -> Self:
         """Enter context manager for PyPI closure."""
         return self
 
