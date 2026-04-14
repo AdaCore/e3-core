@@ -522,7 +522,7 @@ def test_file_eq_neq() -> None:
     #   - A new value to use when modifying this attribute;
     #   - A boolean indicating the modified file is still expected
     #     to be equal to the unmodified one.
-    TESTING_PLAN = {
+    testing_plan = {
         # Attributes which affect comparison...
         "file_id": ("c" * 24, False),
         "build_id": ("d" * 24, False),
@@ -542,12 +542,12 @@ def test_file_eq_neq() -> None:
         "store": ("unimportant", True),
     }
 
-    # Verify that the TESTING_PLAN above covers all attributes
+    # Verify that the testing_plan above covers all attributes
     # of class File.
-    assert sorted(TESTING_PLAN.keys()) == sorted(f.__dict__.keys())
+    assert sorted(testing_plan.keys()) == sorted(f.__dict__.keys())
 
-    for attr_name in list(TESTING_PLAN.keys()):
-        new_val, still_equal = TESTING_PLAN[attr_name]
+    for attr_name in list(testing_plan.keys()):
+        new_val, still_equal = testing_plan[attr_name]
 
         f = File(
             build_id=ref_f.build_id,

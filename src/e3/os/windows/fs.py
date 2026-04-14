@@ -273,7 +273,7 @@ class NTFile:
 
         :return: the link target
         """
-        FSCTL_GET_REPARSE_POINT = 0x900A8
+        fsctl_get_reparse_point = 0x900A8
         self.read_attributes_internal()
         if self.reparse_tag != IOReparseTag.WSL_SYMLINK:
             return None
@@ -287,7 +287,7 @@ class NTFile:
             None,
             None,
             pointer(self.io_status),
-            FSCTL_GET_REPARSE_POINT,
+            fsctl_get_reparse_point,
             None,
             0,
             pointer(result),

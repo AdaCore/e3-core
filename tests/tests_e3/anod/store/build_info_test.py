@@ -587,7 +587,7 @@ def test_build_info_eq_ne() -> None:
     #   - A new value to use when modifying this attribute;
     #   - A boolean indicating the modified component is still expected
     #     to be equal to the unmodified one.
-    TESTING_PLAN = {
+    testing_plan = {
         # Attributes which affect comparison...
         "build_date": ("unimportant", False),
         "setup": (ref_bi.setup + "-src", False),
@@ -599,12 +599,12 @@ def test_build_info_eq_ne() -> None:
         "store": ("unimportant", True),
     }
 
-    # Verify that the TESTING_PLAN above covers all attributes
+    # Verify that the testing_plan above covers all attributes
     # of class File.
-    assert sorted(TESTING_PLAN.keys()) == sorted(bi.__dict__.keys())
+    assert sorted(testing_plan.keys()) == sorted(bi.__dict__.keys())
 
-    for attr_name in list(TESTING_PLAN.keys()):
-        new_val, still_equal = TESTING_PLAN[attr_name]
+    for attr_name in list(testing_plan.keys()):
+        new_val, still_equal = testing_plan[attr_name]
 
         bi = BuildInfo(
             build_date=ref_bi.build_date,
@@ -623,32 +623,32 @@ def test_build_info_eq_ne() -> None:
 
 def test_build_info_copy(store: StoreRW) -> None:
     """Test build info copy."""
-    OTHER_SETUP = f"{DEFAULT_SETUP}-other"
+    other_setup = f"{DEFAULT_SETUP}-other"
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0")
-    copy = bid.copy(OTHER_SETUP, mark_as_ready=False)
+    copy = bid.copy(other_setup, mark_as_ready=False)
 
-    assert copy.setup == OTHER_SETUP
+    assert copy.setup == other_setup
     assert copy.build_date == BuildInfo.today_build_date()
     assert copy.build_version == "1.0"
     assert not copy.isready
 
     with pytest.raises(StoreError, match="No buildinfo found"):
-        BuildInfo.latest(store, OTHER_SETUP, ready_only=True)
+        BuildInfo.latest(store, other_setup, ready_only=True)
 
-    assert BuildInfo.latest(store, OTHER_SETUP, ready_only=False) == copy
+    assert BuildInfo.latest(store, other_setup, ready_only=False) == copy
 
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0", date="20120101")
-    copy = bid.copy(OTHER_SETUP, mark_as_ready=True)
+    copy = bid.copy(other_setup, mark_as_ready=True)
 
-    assert copy.setup == OTHER_SETUP
+    assert copy.setup == other_setup
     assert copy.build_date == "20120101"
     assert copy.build_version == "1.0"
     assert copy.isready
 
     # Ensure no errors
-    _ = BuildInfo.latest(store, OTHER_SETUP, ready_only=False)
+    _ = BuildInfo.latest(store, other_setup, ready_only=False)
 
-    assert BuildInfo.latest(store, OTHER_SETUP, ready_only=True) == copy
+    assert BuildInfo.latest(store, other_setup, ready_only=True) == copy
 
     with pytest.raises(
         StoreError, match=f"Cannot copy into the same setup: {DEFAULT_SETUP}"
