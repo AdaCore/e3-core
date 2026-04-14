@@ -32,7 +32,6 @@ from e3.anod.error import AnodError
 from e3.anod.package import UnmanagedSourceBuilder
 from e3.anod.spec import fetch_attr, has_primitive
 from e3.collection.dag import DAG
-from e3.electrolyt.plan import PlanActionEnv
 from e3.env import BaseEnv
 from e3.error import E3Error
 
@@ -42,6 +41,7 @@ if TYPE_CHECKING:
 
     from e3.anod.action import Action
     from e3.anod.loader import AnodSpecRepository
+    from e3.electrolyt.plan import PlanActionEnv
     from e3.anod.package import SourceBuilder
     from e3.anod.sandbox import SandBox
     from e3.anod.spec import PRIMITIVE, Anod

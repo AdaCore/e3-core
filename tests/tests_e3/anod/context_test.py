@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, NoReturn
 
 import pytest
 
-from e3.anod.action import Decision
 from e3.anod.context import AnodContext, SchedulingError
 from e3.anod.error import AnodError
 from e3.anod.loader import AnodSpecRepository
@@ -15,7 +14,7 @@ from e3.electrolyt import plan
 from e3.env import BaseEnv
 
 if TYPE_CHECKING:
-    from e3.anod.action import Action
+    from e3.anod.action import Action, Decision
 
 # Expected tree/result sizes for dependency graph tests
 # These constants document the expected number of nodes in dependency graphs

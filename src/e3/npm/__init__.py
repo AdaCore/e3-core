@@ -8,11 +8,12 @@ from requests import Session
 
 from e3.log import getLogger
 
-from .link import NPMLink
 from .parser import NPMLinksParser
 
 if TYPE_CHECKING:
     from requests_cache import CachedSession
+
+    from .link import NPMLink
 
 logger = getLogger("npm")
 
