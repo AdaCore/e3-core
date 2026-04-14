@@ -639,7 +639,8 @@ def test_spdx_without_main_package() -> None:
         },
         "dataLicense": "CC0-1.0",
         "documentNamespace": (
-            "http://spdx.org/spdxdocs/ada-26.0.202508111-f5857bbc-8122-4a8c-a90e-4349d65c0a11"  # noqa: E501
+            "http://spdx.org/spdxdocs/"
+            "ada-26.0.202508111-f5857bbc-8122-4a8c-a90e-4349d65c0a11"
         ),
         "name": "ada@26.0.202508111",
         "packages": [

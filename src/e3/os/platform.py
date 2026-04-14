@@ -1,4 +1,4 @@
-"""Provides function to detect platform specific information."""  # noqa: A005
+"""Provides function to detect platform specific information."""
 
 from __future__ import annotations
 

@@ -56,7 +56,8 @@ VALID_DIGESTS: dict[str, str] = {
 
 VALID_URIS: list[str] = [
     "scheme://netloc/path;parameters?query#fragment",
-    "http://docs.python.org:80/3/library/urllib.parse.html?highlight=params#url-parsing",  # noqa: E501
+    "http://docs.python.org:80/3/library/urllib.parse.html"
+    "?highlight=params#url-parsing",
     "https://www.adacore.com/company",
 ]
 
@@ -1057,7 +1058,9 @@ def test_statement_recreate_file() -> None:
     build_dep: ResourceDescriptor = ResourceDescriptor(
         name="Python",
         uri=f"https://www.python.org/ftp/python/{version}/Python-{version}.tgz",
-        download_location=f"https://www.python.org/ftp/python/{version}/Python-{version}.tgz",  # noqa: E501
+        download_location=(
+            f"https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
+        ),
         media_type="application/gzip",
         digest={"md5": "d6eda3e1399cef5dfde7c4f319b0596c"},
         resource_annotations={"version": version},
