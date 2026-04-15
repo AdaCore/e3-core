@@ -332,7 +332,7 @@ class _Store(_StoreContextManager):
 
     def __exit__(
         self,
-        *args: Any,
+        *args: object,
     ) -> None:
         self.close()
 
