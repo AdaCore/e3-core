@@ -380,7 +380,7 @@ def add_log_handlers(
         file handler stream when filename is not None
     :param json_format: if True, use JSON formatter for log output
     """
-    global default_output_stream
+    global default_output_stream  # noqa: PLW0603
     handler: TqdmHandler | logging.StreamHandler | logging.FileHandler
     fmt: logging.Formatter | JSONFormatter
 
@@ -468,8 +468,8 @@ def activate_with_args(args: Namespace, default_level: int = logging.WARNING) ->
     :param args: the result of parsing arguments
     :param default_level: the logging level assumed by default
     """
-    global console_logs
-    global pretty_cli
+    global console_logs  # noqa: PLW0603
+    global pretty_cli  # noqa: PLW0603
 
     if args.verbose > 0:
         level = default_level - 10 * args.verbose
