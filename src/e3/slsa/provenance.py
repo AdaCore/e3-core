@@ -36,6 +36,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import ParseResult, urlparse
 
 from dateutil import parser as date_parser
 
@@ -1747,11 +1748,6 @@ class TypeURI:
         :param uri: The URI string to initialize this TypeURI with
         """
         # Validate this uri.
-        from urllib.parse import (
-            ParseResult,
-            urlparse,
-        )
-
         try:
             parsed: ParseResult = urlparse(uri)
         except AttributeError as ae:

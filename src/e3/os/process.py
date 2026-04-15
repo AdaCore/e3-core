@@ -731,7 +731,7 @@ def wait_for_processes(process_list: list[Run], timeout: float) -> int | None:
     start = time.time()
 
     if sys.platform == "win32":  # unix: no cover
-        from e3.os.windows.process import (
+        from e3.os.windows.process import (  # noqa: PLC0415  # windows-only
             process_exit_code,
             wait_for_objects,
         )
@@ -827,7 +827,7 @@ def is_running(pid: int) -> bool:
     """
     if sys.platform == "win32":  # unix: no cover
         from e3.os.windows.native_api import NT, Access  # noqa: PLC0415 windows-only
-        from e3.os.windows.process import (
+        from e3.os.windows.process import (  # noqa: PLC0415  # windows-only
             process_exit_code,
         )
 
