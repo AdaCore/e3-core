@@ -120,8 +120,7 @@ def load_from_json_file(
     """
     if Path(path).is_file():
         with Path(path).open() as fd:
-            content = json.load(fd)
-        return content
+            return json.load(fd)
     if ignore_non_existing:
         return default
     msg = f"json file {path} does not exist"

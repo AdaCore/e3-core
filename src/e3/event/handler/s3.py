@@ -124,13 +124,11 @@ class S3Handler(EventHandler):
             # Note that an event can be sent several times with a different
             # status. As a consequence the target url in s3 should be different
             # for call to send.
-            success = s3_cp(
+            return s3_cp(
                 tempfile_name,
                 f"{self.event_s3_url}/{self.s3_prefix(event)}"
                 f"{event.uid}-{unique_id()}.s3",
             )
-
-            return success
         finally:
             if tempfile_name is not None:
                 rm(tempfile_name)

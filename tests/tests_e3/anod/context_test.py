@@ -58,8 +58,7 @@ class TestContext:
         asr.repos["a-git"] = repo_conf("a")
         env = BaseEnv()
         env.set_build("x86-linux", "rhes6", "mylinux")
-        ac = AnodContext(asr, default_env=env, reject_duplicates=reject_duplicates)
-        return ac
+        return AnodContext(asr, default_env=env, reject_duplicates=reject_duplicates)
 
     def test_context_init(self) -> None:
         """Test context init."""
