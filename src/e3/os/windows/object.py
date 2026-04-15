@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import struct
 from ctypes import create_string_buffer
-from ctypes.wintypes import HANDLE
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ctypes.wintypes import HANDLE
 
 from e3.os.windows.native_api import NT, ObjectInfo
 

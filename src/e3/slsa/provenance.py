@@ -34,8 +34,10 @@ import base64
 import hashlib
 import json
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
 from dateutil import parser as date_parser
