@@ -92,7 +92,7 @@ class JSONFormatter(logging.Formatter):
         """
         # We need to pass fmt and datefmt parameters for
         # asctime atribute to be created
-        super(JSONFormatter, self).__init__(fmt="%(asctime)s", datefmt=date_fmt)
+        super().__init__(fmt="%(asctime)s", datefmt=date_fmt)
 
         if context is None:
             context = {}
@@ -104,7 +104,7 @@ class JSONFormatter(logging.Formatter):
         :param record: logging record
         """
         # Parent's format is called in order to setup additional attributes
-        super(JSONFormatter, self).format(record)
+        super().format(record)
 
         json_record = {
             attr: getattr(record, attr, None)
@@ -156,7 +156,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
         extra = kwargs.setdefault("extra", {})
         # we use the standard 'extra' parameter to pass additional keywords
         extra.update(extra_attrs)
-        super(E3LoggerAdapter, self).log(level, msg, *args, **kwargs)
+        super().log(level, msg, *args, **kwargs)
 
     def info(  # type: ignore[override]
         self,
