@@ -159,7 +159,7 @@ class Platform(NamedTuple):
 
     def __str__(self) -> str:
         """Return a representation string of the object."""
-        result = (
+        return (
             "platform: {platform}\n"
             "machine:  {machine}\n"
             "is_hie:   {is_hie}\n"
@@ -178,4 +178,3 @@ class Platform(NamedTuple):
             "   endian: {cpu_endian}\n"
             "   cores:  {cpu_cores}".format(**self.to_dict(full_os_version=True))
         )
-        return result

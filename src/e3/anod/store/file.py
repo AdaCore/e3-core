@@ -706,8 +706,7 @@ class File:
             msg = f"Third party {filename} already exists."
             raise StoreError(msg)
 
-        result = cls.load(store.create_thirdparty(f.as_dict()), store=store)
-        return result
+        return cls.load(store.create_thirdparty(f.as_dict()), store=store)
 
     @classmethod
     def upload_thirdparty_from_dir(
