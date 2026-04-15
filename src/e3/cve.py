@@ -6,7 +6,10 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING
 
+from datetime import timedelta
+
 from requests import Session
+from requests_cache import CachedSession
 
 from e3.log import getLogger
 
@@ -138,14 +141,6 @@ class NVD:
             return self
 
         if self.cache_db_path:
-            from datetime import (
-                timedelta,
-            )
-
-            from requests_cache import (
-                CachedSession,
-            )
-
             self._session = CachedSession(
                 self.cache_db_path,
                 backend=self.cache_backend,
