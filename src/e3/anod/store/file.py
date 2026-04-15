@@ -607,12 +607,7 @@ class File:
         name: str,
         store: StoreReadInterface | StoreRWInterface | None = None,
         ignore_errors: Literal[False] = False,
-    ) -> FileType:
-        """See self.load_from_meta_file.
-
-        This overload indicate that the method will always return a component if
-        ignore_errors is False. If no component is found for any reason, raise an error.
-        """
+    ) -> FileType: ...
 
     @overload
     @classmethod
@@ -622,8 +617,7 @@ class File:
         name: str,
         store: StoreReadInterface | StoreRWInterface | None = None,
         ignore_errors: Literal[True] = True,
-    ) -> FileType | None:
-        """See self.load_from_meta_file."""
+    ) -> FileType | None: ...
 
     @classmethod
     def load_from_meta_file(
