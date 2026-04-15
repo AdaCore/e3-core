@@ -41,11 +41,11 @@ if TYPE_CHECKING:
 
     from e3.anod.action import Action
     from e3.anod.loader import AnodSpecRepository
-    from e3.electrolyt.plan import PlanActionEnv
     from e3.anod.package import SourceBuilder
     from e3.anod.sandbox import SandBox
     from e3.anod.spec import PRIMITIVE, Anod
     from e3.collection.dag import VertexID
+    from e3.electrolyt.plan import PlanActionEnv
     from e3.mypy import assert_never
     from e3.platform import Platform
 

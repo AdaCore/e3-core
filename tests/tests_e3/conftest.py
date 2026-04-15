@@ -14,9 +14,8 @@ from re import compile as regex_compile
 from traceback import format_stack as traceback_format_stack
 from typing import TYPE_CHECKING
 
-from typing_extensions import Self
-
 import pytest
+from typing_extensions import Self
 
 from e3.fs import cp, mkdir
 from e3.maven import MavenLink

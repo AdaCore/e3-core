@@ -11,9 +11,8 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from typing_extensions import Self
-
 from packaging.version import Version
+from typing_extensions import Self
 
 from e3.anod.store.interface import (
     LocalStoreInterface,
