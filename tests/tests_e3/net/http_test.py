@@ -133,7 +133,7 @@ class AuthorizationHeaderHandler(ContentDispoHandler):
             self.wfile.close()
             return
 
-        super(AuthorizationHeaderHandler, self).do_GET()
+        super().do_GET()
 
 
 def run_server(

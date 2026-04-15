@@ -1823,4 +1823,4 @@ class ResourceURI(TypeURI):
 
         :param uri: The URI string to initialize this ResourceURI with
         """
-        super(ResourceURI, self).__init__(uri)
+        super().__init__(uri)
