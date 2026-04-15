@@ -1,5 +1,7 @@
 """Tests for e3.error."""
 
+import pytest
+
 from e3.error import E3Error
 
 
@@ -7,10 +9,9 @@ def test_e3error() -> None:
     """Test e3error."""
     err = None
 
-    try:
+    with pytest.raises(E3Error) as exc_info:
         raise E3Error(None)  # noqa: TRY301
-    except E3Error as basicerr:
-        assert str(basicerr) == "E3Error"
+    assert str(exc_info.value) == "E3Error"
 
     try:
         raise E3Error(None, origin="here")  # noqa: TRY301
