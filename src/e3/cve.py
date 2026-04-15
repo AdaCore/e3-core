@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import types
 from functools import cached_property
 from typing import TYPE_CHECKING
 
@@ -160,9 +161,9 @@ class NVD:
 
     def __exit__(
         self,
-        _type: Any,  # noqa: ANN401  # context manager protocol
-        _value: Any,  # noqa: ANN401  # context manager protocol
-        _tb: Any,  # noqa: ANN401  # context manager protocol
+        _type: type[BaseException] | None,
+        _value: BaseException | None,
+        _tb: types.TracebackType | None,
     ) -> None:
         """Exit context manager.
 

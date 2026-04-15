@@ -60,7 +60,7 @@ class _StoreContextManager(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __exit__(
         self,
-        *args: Any,
+        *args: object,
     ) -> None:
         """Exit a context.
 
