@@ -27,7 +27,12 @@ import typing
 if typing.TYPE_CHECKING:
     from collections.abc import Callable
 
-test_errors = False
+
+class _State:
+    test_errors: bool = False
+
+
+_state = _State()
 
 # Detect that we're in CI mode, most providers set the $CI environment variable
 IN_CI_MODE = "CI" in os.environ
@@ -164,8 +169,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
     if not session.config.getoption("e3"):
         return
 
-    global test_errors
-    if test_errors:
+    if _state.test_errors:
         # Return with an exit code of `3` if we encountered errors (not failures).
         # This is the exit code that corresponds to an "internal error" according to the
         # pytest docs, which is the closest thing to having an actual Python error in
@@ -292,7 +296,6 @@ def pytest_runtest_makereport(  # type: ignore
     :param item: pytest test item (unused but required by pytest hook)
     :param call: pytest call information (unused but required by pytest hook)
     """
-    global test_errors
     # execute all other hooks to obtain the report object
     outcome = yield
     rep = outcome.get_result()
@@ -316,4 +319,4 @@ def pytest_runtest_makereport(  # type: ignore
     # For example, this could be a failing assertion or a syntax error in a
     # setup/teardown context.
     elif rep.outcome == "failed":
-        test_errors = True
+        _state.test_errors = True
