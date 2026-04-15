@@ -13,7 +13,6 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from enum import Enum
-from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -24,6 +23,7 @@ from packaging.version import Version
 from e3.json import JsonData
 
 if TYPE_CHECKING:
+    from pathlib import Path
     from typing import Any
 
 

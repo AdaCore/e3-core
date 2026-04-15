@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import abc
-import os
 from typing import TYPE_CHECKING
 
 from e3.error import E3Error
 from e3.hash import sha1
 
 if TYPE_CHECKING:
+    import os
+
     from typing import Any, Literal, TypedDict, TypeVar
 
     from e3.anod.store.buildinfo import BuildInfoDict
