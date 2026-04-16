@@ -93,7 +93,7 @@ class SystemInfo:
 
         # Fetch linux distribution info on linux OS
         if cls.uname.system == "Linux":  # linux-only
-            import distro  # noqa: PLC0415 linux-only
+            import distro  # noqa: PLC0415
 
             cls.ld_info = {
                 "name": distro.name(),
