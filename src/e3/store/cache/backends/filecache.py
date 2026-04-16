@@ -71,7 +71,7 @@ class FileCache(Cache):
         :param fd: open file descriptor to check
         :return: True if the cache file has expired, False otherwise
         """
-        exp = pickle.load(fd)
+        exp = pickle.load(fd)  # noqa: S301
         if exp is not None and exp < time.time():
             fd.close()
             rm(fd.name)
@@ -93,7 +93,7 @@ class FileCache(Cache):
         try:
             with Path(cache_file).open("rb") as fd:
                 if not self._is_expired(fd):
-                    return pickle.load(fd)
+                    return pickle.load(fd)  # noqa: S301
         except OSError as err:
             if err.errno == errno.ENOENT:
                 pass  # Cache file was removed after the exists check
