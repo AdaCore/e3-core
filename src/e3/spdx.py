@@ -1550,9 +1550,13 @@ class DocumentInformation(SPDXSection):
 
     document_name: DocumentName
     document_namespace: DocumentNamespace = field(init=False)
-    version: SPDXVersion = SPDXVersion(SPDXVersion.VERSION)
-    data_license: DataLicense = DataLicense(DataLicense.LICENSE)
-    spdx_id: SPDXID = SPDXID(SPDXID.DEFAULT_ID)
+    version: SPDXVersion = field(
+        default_factory=lambda: SPDXVersion(SPDXVersion.VERSION)
+    )
+    data_license: DataLicense = field(
+        default_factory=lambda: DataLicense(DataLicense.LICENSE)
+    )
+    spdx_id: SPDXID = field(default_factory=lambda: SPDXID(SPDXID.DEFAULT_ID))
 
     def __post_init__(self) -> None:
         """Initialize document namespace after dataclass initialization."""
@@ -1588,8 +1592,8 @@ class CreationInformation(SPDXSection):
 
     creators: list[Creator]
     created_now: Created = field(init=False)
-    license_list_version: LicenseListVersion = LicenseListVersion(
-        LicenseListVersion.VERSION
+    license_list_version: LicenseListVersion = field(
+        default_factory=lambda: LicenseListVersion(LicenseListVersion.VERSION)
     )
 
     def __post_init__(self) -> None:
@@ -1625,7 +1629,7 @@ class CreationInformation(SPDXSection):
                 creation_info.created_now = Created.from_json_dict(ci_dict)
             return creation_info
         return CreationInformation(
-            license_list_version=cls.license_list_version,
+            license_list_version=LicenseListVersion(LicenseListVersion.VERSION),
             creators=[Creator(NOASSERTION)],
         )
 
