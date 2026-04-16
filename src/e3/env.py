@@ -745,11 +745,11 @@ class Env(AbstractBaseEnv):
             assert self.environ is not None
 
         if filename is None and Env._context:
-            Env._instance = pickle.loads(Env._context[-1])
+            Env._instance = pickle.loads(Env._context[-1])  # noqa: S301
             Env._context = Env._context[:-1]
         elif filename is not None:
             with Path(filename).open("rb") as fd:
-                Env._instance = pickle.load(fd)
+                Env._instance = pickle.load(fd)  # noqa: S301
         else:
             return
 
