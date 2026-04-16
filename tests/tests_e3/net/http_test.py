@@ -237,14 +237,11 @@ class TestHTTP:
                 result = session.download_file(base_url + "dummy", dest=".")
                 assert result is None
                 # second test with error as exception
-                try:
-                    result = session.download_file(
+                with pytest.raises(HTTPError) as exc_info:
+                    session.download_file(
                         base_url + "dummy", dest=".", exception_on_error=True
                     )
-                    msg = "exception not raised"
-                    raise AssertionError(msg)
-                except HTTPError as e:
-                    assert e.status == HTTP_INTERNAL_SERVER_ERROR
+                assert exc_info.value.status == HTTP_INTERNAL_SERVER_ERROR
 
         run_server(ServerErrorHandler, func)
 
@@ -326,14 +323,11 @@ class TestHTTP:
 
             with HTTPSession() as session:
                 # first test with no authorization header
-                try:
-                    result = session.download_file(
+                with pytest.raises(HTTPError) as exc_info:
+                    session.download_file(
                         base_url + "dummy", dest=".", exception_on_error=True
                     )
-                    msg = "exception not raised"
-                    raise AssertionError(msg)
-                except HTTPError as e:
-                    assert e.status == HTTP_FORBIDDEN
+                assert exc_info.value.status == HTTP_FORBIDDEN
                 # second test with authorization header
                 result = session.download_file(
                     base_url + "dummy",

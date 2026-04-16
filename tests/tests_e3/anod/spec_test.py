@@ -290,12 +290,15 @@ def test_spec_check_dll_closure_single_file() -> None:
     # - exception: the analysis was ok, since it detected system libraries
     # - result: make sure there is only one element in the result
 
+    anod_error = None
     try:
         result = test_spec.check_shared_libraries_closure(prefix=str(prefix))
         assert len(result) == 1
         assert Path(shlib_path).as_posix() in result
     except AnodError as ae:
-        assert shlib_path in ae.messages[0]
+        anod_error = ae
+    if anod_error is not None:
+        assert shlib_path in anod_error.messages[0]
 
 
 def test_spec_wrong_dep() -> None:
