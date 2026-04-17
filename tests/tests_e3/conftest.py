@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import random
+import secrets
 import shutil
 import string
 import tempfile
@@ -272,13 +272,10 @@ class MavenCentralSimulator:
         else:
             self.__packages[group][name].pop("release", None)
 
+        chars = string.ascii_uppercase + string.digits
         for version in versions:
-            content = version + "".join(
-                random.choice(string.ascii_uppercase + string.digits) for _ in range(10)
-            )
-            pom_content = version + "".join(
-                random.choice(string.ascii_uppercase + string.digits) for _ in range(10)
-            )
+            content = version + "".join(secrets.choice(chars) for _ in range(10))
+            pom_content = version + "".join(secrets.choice(chars) for _ in range(10))
             encoded_content = content.encode("utf-8")
             encoded_pom_content = pom_content.encode("utf-8")
             self.__packages[group][name][version] = {
