@@ -255,8 +255,8 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
     if not Path(cov_db).exists():
         return
 
-    old_cov_file = NamedTemporaryFile(dir=str(Path(cov_db).parent))
-    old_cov_file.close()
+    with NamedTemporaryFile(dir=str(Path(cov_db).parent)) as old_cov_file:
+        pass
     try:
         mv(cov_db, old_cov_file.name)
 

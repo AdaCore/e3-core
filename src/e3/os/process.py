@@ -690,7 +690,7 @@ class File:
                 else:
                     open_mode = "r"
 
-                self.fd = Path(name).open(open_mode)
+                self.fd = Path(name).open(open_mode)  # noqa: SIM115
                 if open_mode == "a+":
                     self.fd.seek(0, 2)
                 self.to_close = True

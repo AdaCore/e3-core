@@ -116,19 +116,18 @@ class FileCache(Cache):
         self._create_cache_dir()
         dest_file = self.uid_to_file(uid)
 
-        tmp_file = tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False)
         try:
-            tmp_file.write(
-                pickle.dumps(self.get_expiry_time(timeout), pickle.HIGHEST_PROTOCOL)
-            )
-            tmp_file.write(pickle.dumps(value, pickle.HIGHEST_PROTOCOL))
+            with tempfile.NamedTemporaryFile(
+                dir=self.cache_dir, delete=False
+            ) as tmp_file:
+                tmp_file.write(
+                    pickle.dumps(self.get_expiry_time(timeout), pickle.HIGHEST_PROTOCOL)
+                )
+                tmp_file.write(pickle.dumps(value, pickle.HIGHEST_PROTOCOL))
         except Exception as err:  # noqa: BLE001
-            tmp_file.close()
             e3.log.debug("error when setting %s in %s:\n%s", uid, dest_file, err)
             return False
         else:
-            tmp_file.close()
-
             if sys.platform == "win32":  # unix: no cover
                 # atomic rename does not work on windows if the dest file
                 # already exist
