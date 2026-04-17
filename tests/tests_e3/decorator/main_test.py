@@ -1,6 +1,6 @@
 """Tests for e3.decorator."""
 
-from random import random
+import secrets
 
 import pytest
 
@@ -19,7 +19,7 @@ def test_memoize() -> None:
     def t(arg: int | list[int]) -> float:
         """Do foo."""
         del arg
-        return random()
+        return secrets.randbelow(1_000_000_000)
 
     assert "Do foo." in t.__repr__()
 
@@ -40,7 +40,7 @@ def test_memoize() -> None:
         @e3.decorator.memoize
         def t(self, arg: int) -> float:
             del arg
-            return random()
+            return secrets.randbelow(1_000_000_000)
 
     # same instance use the same cache
     c_instance = C()
