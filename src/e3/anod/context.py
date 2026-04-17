@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from e3.anod.spec import PRIMITIVE, Anod
     from e3.collection.dag import VertexID
     from e3.electrolyt.plan import PlanActionEnv
-    from e3.mypy import assert_never
+    from e3.mypy import assert_never  # noqa: TC004
     from e3.platform import Platform
 
     # spec name, build env, target env, host env, qualifier, kind, source name
