@@ -189,7 +189,11 @@ def df(path: str | Path, full: bool = False) -> int | tuple:
             del func
             if not result:  # defensive code
                 raise ctypes.WinError()
-            return args[1].value, args[2].value, args[3].value
+            return (
+                args[1].value,  # type: ignore[attr-defined]
+                args[2].value,  # type: ignore[attr-defined]
+                args[3].value,  # type: ignore[attr-defined]
+            )
 
         get_disk_free_space_ex.errcheck = (  # type: ignore[attr-defined]
             get_disk_free_space_ex_errcheck
@@ -234,7 +238,7 @@ def __safe_unlink_func() -> tuple[
         return win_rm, win_rm
     # windows: no cover
 
-    def os_remove(x: str | Path) -> None:
+    def os_remove(x: str | Path) -> None:  # type: ignore[unreachable]
         """Remove a file using os.remove.
 
         :param x: path to file to remove
@@ -339,7 +343,7 @@ def max_path() -> int:
 
         return MAX_PATH
     # windows: no cover
-    return os.pathconf("/", "PC_PATH_MAX")
+    return os.pathconf("/", "PC_PATH_MAX")  # type: ignore[unreachable]
 
 
 def mv(source: str | Path, target: str | Path) -> None:

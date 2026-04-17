@@ -10,7 +10,7 @@ def test_e3error() -> None:
     err = None
 
     with pytest.raises(E3Error) as exc_info:
-        raise E3Error(None)  # noqa: TRY301
+        raise E3Error(None)
     assert str(exc_info.value) == "E3Error"
 
     try:

@@ -253,7 +253,7 @@ def interpreter(prefix: str | None = None) -> str:
             return str(python3)
         return str(Path(prefix, "python.exe"))
     # windows: no cover
-    python3 = Path(prefix, "bin", "python3")
+    python3 = Path(prefix, "bin", "python3")  # type: ignore[unreachable]
     if python3.exists():
         return str(python3)
     return str(Path(prefix, "bin", "python"))
@@ -323,7 +323,10 @@ def python_script(name: str, prefix: str | None = None) -> list[str]:
             return [script_exe]
         # Case in which the script is probably a Python file
         return [interpreter(prefix), script]
-    return [interpreter(prefix), str(Path(prefix, "bin", name))]
+    return [  # type: ignore[unreachable]
+        interpreter(prefix),
+        str(Path(prefix, "bin", name)),
+    ]
 
 
 def is_console() -> bool:
@@ -346,7 +349,7 @@ def is_console() -> bool:
             re.match(r"\\Device\\NamedPipe\\(cygwin|msys).*-pty.*$", stdin_name)
         )
     # win32: no cover
-    return False
+    return False  # type: ignore[unreachable]
 
 
 def relocate_python_distrib(
