@@ -188,6 +188,18 @@ run linux tests:
   variables:
     CI_TOX_ENV: $WINDOWS_CI_TOX_ENV
 
+# Stage: Checks
+
+check-windows:
+  stage: checks
+  extends: .windows-common
+  variables:
+    CI_TOX_ENV: check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
+
 # Stage: Tests
 
 windows python:
