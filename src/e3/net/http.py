@@ -353,11 +353,10 @@ class HTTPSession:
                 # Fallback to local file otherwise
                 if filename is None:
                     # Generate a temporary name
-                    tmpf = tempfile.NamedTemporaryFile(
+                    with tempfile.NamedTemporaryFile(
                         delete=False, dir=dest, prefix="download."
-                    )
-                    tmpf.close()
-                    filename = tmpf.name
+                    ) as tmpf:
+                        filename = tmpf.name
 
                 path = Path(dest, filename)
 
