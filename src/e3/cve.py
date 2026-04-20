@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from functools import cached_property
 from typing import TYPE_CHECKING
-
-from datetime import timedelta
 
 from requests import Session
 from requests_cache import CachedSession
@@ -15,7 +14,6 @@ from e3.log import getLogger
 
 if TYPE_CHECKING:
     import types
-
     from collections.abc import Iterator
     from typing import Any
 

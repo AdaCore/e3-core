@@ -25,7 +25,6 @@ from e3.fs import find
 from e3.os.fs import ldd_output_to_posix, which
 from e3.platform_db.knowledge_base import OS_INFO
 from e3.yaml import load_with_config
-import e3.anod.package
 
 # Default API version
 __version__ = "1.4"

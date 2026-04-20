@@ -10,7 +10,6 @@ from e3.hash import sha1
 
 if TYPE_CHECKING:
     import os
-
     from typing import Any, Literal, TypedDict, TypeVar
 
     from e3.anod.store.buildinfo import BuildInfoDict
