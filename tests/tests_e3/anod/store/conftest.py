@@ -7,7 +7,7 @@ import pytest
 from e3.anod.store import StoreRW
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def store() -> StoreRW:
     """Pytest fixture providing a temporary store instance."""
     # Adding a default DB filename is mandatory to avoid collision between the tests and
