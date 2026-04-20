@@ -5,7 +5,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import IO
+from typing import IO, Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -157,7 +157,7 @@ def test_unpack_cmd() -> None:
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
     class TestResult:
-        def store_result(self, **kwargs) -> None:
+        def store_result(self, **kwargs: Any) -> None:
             self.kwargs = kwargs
 
     t = TestResult()
@@ -198,7 +198,7 @@ def test_unpack_cmd_fileobj() -> None:
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
     class TestResult:
-        def store_result(self, **kwargs) -> None:
+        def store_result(self, **kwargs: Any) -> None:
             self.kwargs = kwargs
 
     t = TestResult()

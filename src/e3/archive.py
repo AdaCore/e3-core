@@ -52,7 +52,9 @@ if sys.platform == "win32":
         """ZipInfo subclass for cross-platform compatibility."""
 
         @classmethod
-        def from_file(cls, *args, **kwargs):  # type: ignore[no-untyped-def]
+        def from_file(  # type: ignore[override]
+            cls, *args: Any, **kwargs: Any
+        ) -> "E3ZipInfo":
             """Create a ZipInfo from a file with adjusted executable permissions.
 
             Sets execute permissions (0o555) in external_attr for the file.
