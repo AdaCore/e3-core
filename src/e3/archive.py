@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from os import PathLike
     from typing import IO, Any, Literal
 
-    from e3.mypy import assert_never
+    from e3.mypy import assert_never  # noqa: TC004
 
     UnpackAutoRemoveDirType = Literal["auto"]
     RemoveRootDirType = bool | Literal["auto"]

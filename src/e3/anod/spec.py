@@ -25,6 +25,7 @@ from e3.fs import find
 from e3.os.fs import ldd_output_to_posix, which
 from e3.platform_db.knowledge_base import OS_INFO
 from e3.yaml import load_with_config
+import e3.anod.package
 
 # Default API version
 __version__ = "1.4"
@@ -51,8 +52,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
     from typing import IO, Any, Literal
 
-    import e3.anod.package
-    import e3.anod.sandbox
     from e3.anod.buildspace import BuildSpace
     from e3.anod.qualifiers_manager import QualifierValue
     from e3.anod.sandbox import SandBox

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Literal
 
-    from e3.mypy import assert_never
+    from e3.mypy import assert_never  # noqa: TC004
 
 logger = e3.log.getLogger("e3.anod.checkout")
 
