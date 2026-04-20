@@ -1327,7 +1327,7 @@ class Predicate:
               BuildDefinition, and a complete example.
 
             Example:
-            --------
+            -------
             ::
 
                 https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1
@@ -1737,7 +1737,7 @@ class TypeURI:
     to prevent collisions.
 
     Example:
-    --------
+    -------
     ::
 
         https://in-toto.io/Statement/v1
@@ -1811,7 +1811,7 @@ class ResourceURI(TypeURI):
     (e.g. ``git+https:``).
 
     Example:
-    --------
+    -------
     ::
 
         pkg:deb/debian/stunnel@5.50-3?arch=amd64
