@@ -652,7 +652,7 @@ class PyPIProvider(AbstractProvider):
                     # don't use sdist files to fetch dependencies.
                     continue
 
-                elif not candidate.filename.endswith(".tar.gz"):
+                if not candidate.filename.endswith(".tar.gz"):
                     # Only .tar.gz archive are considered for sdist files
                     continue
 

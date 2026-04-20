@@ -86,51 +86,50 @@ def chmod(mode: str, filename: str | Path) -> int:
         for op, permlist in actions:
             if permlist == "" and op != "=":
                 continue
+            if permlist in ("u", "g", "o"):
+                action_mask = current_mode & whos[permlist]
+                if permlist == "u":
+                    action_mask >>= 6
+                elif permlist == "g":
+                    action_mask >>= 3
+            elif permlist.isdigit():
+                raise OSFSError(
+                    origin="chmod",
+                    message="numeric mode not supported, use os.chmod instead",
+                )
             else:
-                if permlist in ("u", "g", "o"):
-                    action_mask = current_mode & whos[permlist]
-                    if permlist == "u":
-                        action_mask >>= 6
-                    elif permlist == "g":
-                        action_mask >>= 3
-                elif permlist.isdigit():
-                    raise OSFSError(
-                        origin="chmod",
-                        message="numeric mode not supported, use os.chmod instead",
-                    )
-                else:
-                    action_mask = 0
-                    for perm in permlist:
-                        action_mask |= perms[perm]
+                action_mask = 0
+                for perm in permlist:
+                    action_mask |= perms[perm]
 
-                if wholist == "":
-                    action_mask = action_mask | action_mask << 3 | action_mask << 6
-                    action_mask &= ~umask
-                    apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
-                elif "a" in wholist:
-                    action_mask = action_mask | action_mask << 3 | action_mask << 6
-                    apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
-                else:
-                    final_action_mask = 0
-                    apply_mask = 0
-                    for who in wholist:
-                        if who == "u":
-                            final_action_mask |= action_mask << 6
-                            apply_mask |= stat.S_IRWXU
-                        elif who == "g":
-                            final_action_mask |= action_mask << 3
-                            apply_mask |= stat.S_IRWXG
-                        else:
-                            final_action_mask |= action_mask
-                            apply_mask |= stat.S_IRWXO
+            if wholist == "":
+                action_mask = action_mask | action_mask << 3 | action_mask << 6
+                action_mask &= ~umask
+                apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
+            elif "a" in wholist:
+                action_mask = action_mask | action_mask << 3 | action_mask << 6
+                apply_mask = stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG
+            else:
+                final_action_mask = 0
+                apply_mask = 0
+                for who in wholist:
+                    if who == "u":
+                        final_action_mask |= action_mask << 6
+                        apply_mask |= stat.S_IRWXU
+                    elif who == "g":
+                        final_action_mask |= action_mask << 3
+                        apply_mask |= stat.S_IRWXG
+                    else:
+                        final_action_mask |= action_mask
+                        apply_mask |= stat.S_IRWXO
 
-                    action_mask = final_action_mask
-                if op == "-":
-                    current_mode &= ~action_mask
-                elif op == "=":
-                    current_mode = (current_mode & ~apply_mask) | action_mask
-                else:
-                    current_mode = current_mode | action_mask
+                action_mask = final_action_mask
+            if op == "-":
+                current_mode &= ~action_mask
+            elif op == "=":
+                current_mode = (current_mode & ~apply_mask) | action_mask
+            else:
+                current_mode = current_mode | action_mask
 
     Path(filename).chmod(current_mode)
     return current_mode
