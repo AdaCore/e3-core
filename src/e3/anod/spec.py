@@ -517,7 +517,7 @@ class Anod:
         else:
             # An ldd output has been provided. Update it first to Posix.
             ldd_output = ldd_output_to_posix(ldd_output)
-            lib_files = re.findall(r"^([^\t].*):$", ldd_output, flags=re.M)
+            lib_files = re.findall(r"^([^\t].*):$", ldd_output, flags=re.MULTILINE)
 
         if self.sandbox and hasattr(self.sandbox, "root_dir"):
             root_dir = self.sandbox.root_dir

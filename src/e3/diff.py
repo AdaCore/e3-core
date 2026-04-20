@@ -128,7 +128,7 @@ def patch(  # noqa: PLR0915
 
     with Path(patch_file).open() as f:
         content = f.read()
-        if re.search(r"^diff --git a/.* b/", content, flags=re.M):
+        if re.search(r"^diff --git a/.* b/", content, flags=re.MULTILINE):
             is_git_patch = True
 
     def apply_patch(fname: str) -> None:
