@@ -366,9 +366,9 @@ def test_document(arguments: tuple, expected: tuple) -> None:
         # it. This is to simulate a VEX file updated manually, with a timestamp
         # change.
         timestamps = (
-            ("2024/03/03", datetime(2024, 3, 3)),
-            ("2024-03-04", datetime(2024, 3, 4)),
-            ("5th of March 2024", datetime(2024, 3, 5)),
+            ("2024/03/03", datetime(2024, 3, 3, tzinfo=timezone.utc)),
+            ("2024-03-04", datetime(2024, 3, 4, tzinfo=timezone.utc)),
+            ("5th of March 2024", datetime(2024, 3, 5, tzinfo=timezone.utc)),
         )
         for timestamp_str, timestamp_datetime in timestamps:
             dict_repr: dict = doc.as_dict()
