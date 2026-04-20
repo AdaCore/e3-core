@@ -160,7 +160,10 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+def pytest_sessionfinish(
+    session: pytest.Session,
+    exitstatus: int,  # noqa: ARG001
+) -> None:
     """Manage the exit code depending on if errors were detected or not.
 
     :param session: pytest session
@@ -286,7 +289,8 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(  # type: ignore
-    item: pytest.Item, call: pytest.CallInfo[None]
+    item: pytest.Item,  # noqa: ARG001
+    call: pytest.CallInfo[None],  # noqa: ARG001
 ) -> None:
     """Generate results file.
 
