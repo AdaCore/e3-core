@@ -335,7 +335,7 @@ class PlanContext:
                 frame_filename = frame.filename
                 if frame_filename.endswith(self.plan.plan_ext):
                     caller_frames_in_plan.append(frame)
-        except Exception:  # defensive code  # noqa: BLE001
+        except Exception:  # defensive code  # noqa: BLE001, S110
             # do not crash when inspect frames fails
             pass
         else:
