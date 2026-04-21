@@ -92,7 +92,13 @@ class ActionOrImpact(JsonData):
         """Deserialize object from dictionary representation."""
         return cls(
             statement=obj["statement"],
-            timestamp=date_parse(obj["timestamp"]) if obj["timestamp"] else None,
+            timestamp=(
+                (lambda dt: dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc))(
+                    date_parse(obj["timestamp"])
+                )
+                if obj["timestamp"]
+                else None
+            ),
         )
 
 
