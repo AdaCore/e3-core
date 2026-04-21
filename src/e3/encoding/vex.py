@@ -949,7 +949,7 @@ class StatementStatus(JsonData):
             impact=ActionOrImpact.from_dict(obj["impact"]) if "impact" in obj else None,
             justification=obj["justification"],
             action=ActionOrImpact.from_dict(obj["action"]) if "action" in obj else None,
-            notes=obj["notes"] if "notes" in obj else None,
+            notes=obj.get("notes"),
         )
 
 
