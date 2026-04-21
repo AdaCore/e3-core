@@ -42,8 +42,8 @@ class FSError(e3.error.E3Error):
 
 
 def cp(
-    source: str | os.PathLike[str],
-    target: str | os.PathLike[str],
+    source: str | Path,
+    target: str | Path,
     copy_attrs: bool = True,
     recursive: bool = False,
     preserve_symlinks: bool = False,
@@ -71,47 +71,48 @@ def cp(
     if recursive and not copy_attrs:
         logger.warning("recursive copy always preserves file attributes")
 
+    # Starting from here ensure we only use Path objects
+    if isinstance(source, str):
+        source = Path(source)
+
+    if isinstance(target, str):
+        target = Path(target)
+
     # Compute file list and number of file to copy
-    file_list = ls(source, emit_log_record=False)
+    file_list = ls_paths(source, emit_log_record=False)
     file_number = len(file_list)
 
     if file_number == 0:
         # If there is no source files raise an error
         raise FSError(origin="cp", message=f'can\'t find files matching "{source}"')
-    if file_number > 1 and not Path(target).is_dir():
+    if file_number > 1 and not target.is_dir():
         # If we have more than one file to copy then check that target is a
         # directory
         raise FSError(origin="cp", message="target should be a directory")
 
     for f in file_list:
         try:
-            if Path(target).is_dir():
-                f_dest = str(Path(target, Path(f).name))
-            else:
-                f_dest = os.fspath(target)
+            f_dest = target / f.name if target.is_dir() else target
 
-            path = Path(f)
-
-            if recursive and path.is_dir():
+            if recursive and f.is_dir():
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
-            elif preserve_symlinks and path.is_symlink():  # windows: no cover
-                linkto = path.readlink()
-                Path(f_dest).symlink_to(linkto)
+            elif preserve_symlinks and f.is_symlink():  # windows: no cover
+                linkto = f.readlink()
+                f_dest.symlink_to(linkto)
             elif copy_attrs:
                 shutil.copy2(f, f_dest)
             else:
                 shutil.copy(f, f_dest)
         except Exception as e:
-            logger.error(e, exc_info=True)
-            raise FSError(
-                origin="cp", message=f"error occurred while copying {f}"
-            ) from e
+            msg = f"error occurred while copying {f} to {f_dest}"
+            logger.exception(msg)
+            raise FSError(origin="cp", message=msg) from e
 
 
 def directory_content(
     path: str | Path, include_root_dir: bool = False, unixpath: bool = False
 ) -> list[str]:
-    """Return the complete directory content (recusrsively).
+    """Return the complete directory content (recursively).
 
     :param path: path for the which the content should be returned
     :param include_root_dir: if True include the root directory in the paths
@@ -158,8 +159,8 @@ def echo_to_file(
             fd.seek(0, 2)
 
         if isinstance(content, list):
-            for line in content:
-                fd.write(line + "\n")
+            fd.write("\n".join(content))
+            fd.write("\n")
         else:
             fd.write(content)
 
@@ -250,29 +251,38 @@ def get_filetree_state(
     content of all files.
     """
 
-    def compute_state(file_path: str) -> bytes:
+    def compute_state(file_path: Path) -> bytes:
         """Compute file state as bytes.
 
         :param file_path: path to the file
         """
-        f_stat = os.lstat(file_path)
+        f_stat = file_path.lstat()
 
         state = ":".join(
-            [file_path, str(f_stat.st_mode), str(f_stat.st_size), str(f_stat.st_mtime)]
+            [
+                str(file_path),
+                str(f_stat.st_mode),
+                str(f_stat.st_size),
+                str(f_stat.st_mtime),
+            ]
         )
         return state.encode("utf-8")
 
-    def get_content(file_path: str) -> bytes:
+    def get_content(file_path: Path) -> bytes:
         """Get file content as bytes.
 
         :param file_path: path to the file
         """
-        with Path(file_path).open("rb") as f:
+        with file_path.open("rb") as f:
             return f.read()
 
-    path = os.path.abspath(path)
+    # Normalize input to Path object
+    path = Path(path).absolute()
     result = hashlib.sha1(usedforsecurity=False)
-    if Path(path).is_dir():
+
+    if path.is_dir():
+        # Note that Path now has a walk method but this was added only on 3.12 and
+        # for the moment we still support older Python versions.
         for root, dirs, files in os.walk(path):
             if ignore_hidden:
                 ignore_dirs = []
@@ -287,7 +297,7 @@ def get_filetree_state(
                 if ignore_hidden and path.startswith("."):
                     continue
 
-                full_path = str(Path(root, path))
+                full_path = Path(root) / path
                 result.update(compute_state(full_path))
 
                 if hash_content:
@@ -365,14 +375,15 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
     This function behaves quite like mkdir -p command shell. So if the
     directory already exist no error is raised.
     """
-    if Path(path).is_dir():
+    path = Path(path)
+    if path.is_dir():
         return
     if not quiet:
         logger.debug("mkdir %s (mode=%s)", path, oct(mode))
     try:
-        Path(path).mkdir(mode=mode, parents=True)
+        path.mkdir(mode=mode, parents=True)
     except Exception as e:  # defensive code
-        if Path(path).is_dir():
+        if path.is_dir():
             # Take care of cases where in parallel execution environment
             # the directory is created after the initial test on its
             # existence and the call to makedirs
@@ -531,14 +542,14 @@ def rm(
     # We transform the list into a set in order to remove duplicate files in
     # the list
     if glob:
-        file_list = set(ls(path, emit_log_record=False))
+        file_list = set(ls_paths(path, emit_log_record=False))
     elif isinstance(path, (str, Path)):
-        file_list = {os.fspath(path)}
+        file_list = {Path(path)}
     else:
-        file_list = {os.fspath(p) for p in path}
+        file_list = {Path(p) for p in path}
 
-    tmp = " ".join(file_list)
-    if tmp:
+    if file_list:
+        tmp = " ".join([str(p) for p in file_list])
         logger.debug(f"rm{' -r' if recursive else ''} {tmp}")
 
     def onerror(
@@ -551,10 +562,11 @@ def rm(
         :param exc_info: exception raised when the first delete attempt was made
         """
         del exc_info
+        path = Path(error_path)
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
-        if not Path(error_path).exists():
+        if not path.exists():
             return
 
         if func in (os.remove, os.unlink):
@@ -563,72 +575,60 @@ def rm(
             # This function is only called when deleting a file inside a
             # directory to remove, it is safe to change the parent directory
             # permission since the parent directory will also be removed.
-            Path(error_path).parent.chmod(0o700)
+            path.parent.chmod(0o700)
 
             # ??? It seems that this might be needed on windows
-            Path(error_path).chmod(0o700)
-            e3.os.fs.safe_remove(error_path)
+            path.chmod(0o700)
+            e3.os.fs.safe_remove(path)
 
         elif func == os.rmdir:
             # Cannot remove error_path, call chmod and redo an attempt
-            Path(error_path).chmod(0o700)
+            path.chmod(0o700)
 
             # Also change the parent directory permission if it will also
             # be removed.
-            if recursive and error_path not in file_list:
+            if recursive and path not in file_list:
                 # If error_path not in the list of directories to remove it
                 # means that we are already in a subdirectory.
-                Path(error_path).parent.chmod(0o700)
-            e3.os.fs.safe_rmdir(error_path)
+                path.parent.chmod(0o700)
+            e3.os.fs.safe_rmdir(path)
 
         elif func in (os.listdir, os.open):
             # Cannot read the directory content, probably a permission issue
-            Path(error_path).chmod(0o700)
+            path.chmod(0o700)
 
             # And continue to delete the subdir
             if Version(python_version()) >= Version("3.12"):
-                shutil.rmtree(error_path, onexc=onerror)
+                shutil.rmtree(path, onexc=onerror)
             else:
-                shutil.rmtree(error_path, onerror=onerror)
+                shutil.rmtree(path, onerror=onerror)
 
         else:
             raise FSError(origin="rm", message=f"unknown function: {func.__name__!r}")
 
         # If the file still exists, let the user know through a debug message.
-        if Path(error_path).exists():
+        if path.exists():
             logger.debug(
-                f"error when running {func.__name__!r} on {error_path}. "
+                f"error when running {func.__name__!r} on {path}. "
                 "Element could not be removed."
             )
 
     for f in file_list:
         try:
-            # When calling rmtree or remove, ensure that the string that is
-            # passed to this function is unicode on Windows. Otherwise,
-            # the non-Unicode API will be used and so we won't be
-            # able to remove these files. On Unix don't do that as
-            # we got some strange unicode "ascii codec" errors
-            # (need some further investigation at some point)
-            if sys.platform == "win32":  # unix: no cover
-                f_path = str(f)
-            else:
-                f_path = f
-
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
-            if recursive and Path(f_path).is_dir() and not Path(f_path).is_symlink():
+            if recursive and f.is_dir() and not f.is_symlink():
                 if Version(python_version()) >= Version("3.12"):
-                    shutil.rmtree(f_path, onexc=onerror)
+                    shutil.rmtree(f, onexc=onerror)
                 else:
-                    shutil.rmtree(f_path, onerror=onerror)
+                    shutil.rmtree(f, onerror=onerror)
             else:
-                e3.os.fs.force_remove_file(f_path)
+                e3.os.fs.force_remove_file(f)
 
         except Exception as e:  # defensive code
-            logger.exception(f"error occurred while removing {f_path}")
-            raise FSError(
-                origin="rm", message=f"error occurred while removing {f_path}"
-            ) from e
+            msg = f"error occurred while removing {f}"
+            logger.exception(msg)
+            raise FSError(origin="rm", message=msg) from e
 
 
 def splitall(path: str | Path) -> tuple[str, ...]:
