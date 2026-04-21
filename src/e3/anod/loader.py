@@ -170,7 +170,9 @@ class AnodSpecRepository:
 
         if prolog_file.exists():
             with prolog_file.open() as f:
-                exec(compile(f.read(), prolog_file, "exec"), self.prolog_dict)
+                exec(  # noqa: S102
+                    compile(f.read(), prolog_file, "exec"), self.prolog_dict
+                )
 
     def __contains__(self, item: str) -> bool:
         """Check by name if a spec is present in the repository.
@@ -250,7 +252,7 @@ class AnodModule:
 
                 # Exec spec code
                 code = compile(fd.read(), self.path, "exec")
-                exec(code, anod_module.__dict__)
+                exec(code, anod_module.__dict__)  # noqa: S102
         except Exception as e:
             logger.exception("exception occurred")
             logger.exception("cannot load code of %s", self.name)

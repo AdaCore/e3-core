@@ -109,7 +109,7 @@ class Plan:
         code_ast = ast.parse(source_code, filename)
         self.check(code_ast)
         code = compile(code_ast, filename, "exec")
-        exec(code, self.mod.__dict__)
+        exec(code, self.mod.__dict__)  # noqa: S102
 
 
 class PlanActionEnv(BaseEnv):
