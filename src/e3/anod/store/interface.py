@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.component import ComponentDict
     from e3.anod.store.file import FileDict
+    from pathlib import Path
 
     StoreContextManagerType = TypeVar(
         "StoreContextManagerType", bound="_StoreContextManager"
@@ -472,7 +473,7 @@ class LocalStoreInterface(metaclass=abc.ABCMeta):
         raise NotImplementedError  # all: no cover
 
     @abc.abstractmethod
-    def save(self, filename: os.PathLike | None = None) -> None:
+    def save(self, filename: Path | None = None) -> None:
         """Save the local store database.
 
         This function can does nothing and is hightly related to the LocalStore
