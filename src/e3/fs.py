@@ -406,117 +406,94 @@ def mv(
     :raise FSError: if an error occurs
     """
 
-    def move_file(src: str, dst: str) -> None:
+    def move_file(src: Path, dst: Path) -> None:
         """Reimplementation of shutil.move.
 
         The implementation follows shutil.move from the standard library.
         The only difference is that we use e3.fs.rm function instead of
         rmtree. This ensure moving a directory with read-only files will
-        work.
+        work. Note that we assume that dst is always the final destination
+        (expansion into dst / basename(src) is done in the parent function).
 
         :param src: source file or directory
         :param dst: destination file or directory
         """
         logger.debug(f"mv {src} {dst}")
 
-        def same_file(src: str, dst: str) -> bool:
-            """Check if two paths point to the same file.
-
-            :param src: source path
-            :param dst: destination path
-            """
-            if hasattr(os.path, "samefile"):
-                try:
-                    return Path(src).samefile(dst)
-                except OSError:  # defensive code
-                    # This should never be raised as we called already os.stat
-                    # on both src and dst.
-                    return False
-            else:  # defensive code (samefile supported on linux and windows)
-                return os.path.normcase(os.path.abspath(src)) == os.path.normcase(
-                    os.path.abspath(dst)
-                )
-
-        def basename(path: str) -> str:
-            """Get base name of a path.
-
-            :param path: file path
-            """
-            sep = os.path.sep + (os.path.altsep or "")
-            return os.path.basename(path.rstrip(sep))  # noqa: PTH119
-
-        def destinsrc(src: str, dst: str) -> bool:
-            """Check if destination is inside source.
-
-            :param src: source directory
-            :param dst: destination directory
-            """
-            src = os.path.abspath(src)
-            dst = os.path.abspath(dst)
-            if not src.endswith(os.path.sep):
-                src += os.path.sep
-            if not dst.endswith(os.path.sep):
-                dst += os.path.sep
-            return dst.startswith(src)
-
-        real_dst = Path(dst)
-        if Path(dst).is_dir():
-            if same_file(src, dst):
-                # We might be on a case insensitive filesystem,
-                # perform the rename anyway.
-                Path(src).rename(dst)
-                return
-
-            real_dst = Path(dst, basename(src))
-            if real_dst.exists():
-                msg = f"Destination path '{real_dst}' already exists"
-                raise FSError(msg)
-
-        path = Path(src)
         try:
-            path.rename(real_dst)
+            src.rename(dst)
         except OSError as err:
-            if path.is_symlink():
-                linkto = path.readlink()
-                Path(real_dst).symlink_to(linkto)
-                Path(src).unlink()
-            elif path.is_dir():
-                if destinsrc(src, dst):
-                    msg = f"Cannot move a directory '{src}' into itself '{dst}'."
+            if dst.exists() and src.samefile(dst):
+                # If src and dst are the same file and rename failed, there
+                # is nothing to do. For note this case is useful to adjust
+                # casing of a file on a case insensitive filesystem.
+                # The present protection is necessary as in all subsequent
+                # case an attempt is made to delete the source file.
+                msg = f"Casing change of '{src}' to '{dst}' failed"
+                raise FSError(msg) from err
+
+            if src.is_symlink():
+                linkto = src.readlink()
+                dst.symlink_to(linkto)
+                src.unlink()
+            elif src.is_dir():
+                if dst.absolute().is_relative_to(src.absolute()):
+                    msg = f"Cannot move a directory '{src}' into itself '{dst}'"
                     raise FSError(msg) from err
-                shutil.copytree(src, real_dst, symlinks=True)
+
+                if dst.is_dir():
+                    if next(dst.iterdir(), None) is None:
+                        # If target directory is empty remove it
+                        rm(dst, recursive=True)
+                    else:
+                        msg = f"Cannot overwrite non-empty directory '{dst}'"
+                        raise FSError(msg) from err
+
+                elif dst.is_file():
+                    msg = f"Cannot overwrite file '{dst}' with directory '{src}'"
+                    raise FSError(msg) from err
+
+                shutil.copytree(src, dst, symlinks=True)
                 rm(src, recursive=True)
             else:
-                shutil.copy2(src, real_dst)
+                if dst.is_dir():
+                    msg = f"Cannot overwrite directory '{dst}' with file '{src}'"
+                    raise FSError(msg) from err
+
+                # Make sure to delete target if this is a file.
+                if dst.is_file():
+                    rm(dst)
+
+                shutil.copy2(src, dst)
                 rm(src)
-        return
 
     try:
         # Compute file list and number of file to copy
-        file_list = ls(source, emit_log_record=False)
+        target = Path(target)
+        file_list = ls_paths(source, emit_log_record=False)
         nb_files = len(file_list)
 
         if nb_files == 0:
             raise FSError(  # noqa: TRY301
                 origin="mv", message=f'cannot find files matching "{source}"'
             )
-        if nb_files == 1:
-            source = file_list[0]
-            if Path(source).is_dir() and Path(target).is_dir():
-                move_file(
-                    source,
-                    str(Path(target, os.path.basename(source))),  # noqa: PTH119
-                )
-            else:
-                move_file(source, os.fspath(target))
-        elif not Path(target).is_dir():
+
+        if nb_files == 1 and (not target.is_dir() or file_list[0].samefile(target)):
+            # In case target is not directory or target is equal to source then the
+            # effective destination is target itself. This case can only occurs when
+            # the number of source files is 1.
+            move_file(file_list[0], target)
+
+        elif not target.is_dir():
             # More than one file to move but the target is not a directory
             msg = "mv"
             raise FSError(msg, f"{target} should be a directory")  # noqa: TRY301
+
         else:
+            # In all other case the target is target / basename(source)
             for f in file_list:
-                f_dest = str(Path(target, Path(f).name))
-                move_file(f, f_dest)
+                move_file(f, target / f.name)
+
     except Exception as e:
         logger.exception("mv operation failed")
         raise FSError(origin="mv", message=str(e)) from e
