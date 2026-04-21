@@ -200,6 +200,36 @@ def find(
     return result
 
 
+def find_paths(
+    root: str | Path,
+    pattern: str | None = None,
+    include_dirs: bool = False,
+    include_files: bool = True,
+    follow_symlinks: bool = False,
+) -> list[Path]:
+    """Find files or directory recursively.
+
+    :param root: directory from which the research start
+    :param pattern: glob pattern that files or directories should match in
+        order to be included in the final result
+    :param include_dirs: if True include directories
+    :param include_files: if True include regular files
+    :param follow_symlinks: if True include symbolic links
+
+    :return: a list of Path objects
+    """
+    return [
+        Path(p)
+        for p in find(
+            root=root,
+            pattern=pattern,
+            include_dirs=include_dirs,
+            include_files=include_files,
+            follow_symlinks=follow_symlinks,
+        )
+    ]
+
+
 def get_filetree_state(
     path: str | Path, ignore_hidden: bool = True, hash_content: bool = False
 ) -> str:
@@ -273,7 +303,7 @@ def get_filetree_state(
 
 
 def ls(
-    path: str | Iterable[str] | os.PathLike[str] | Iterable[os.PathLike[str]],
+    path: str | Path | Iterable[str | Path],
     emit_log_record: bool = True,
 ) -> list[str]:
     """List files.
@@ -286,17 +316,40 @@ def ls(
     This function do not raise an error if no file matching the glob pattern
     is encountered. The only consequence is that an empty list is returned.
     """
-    if isinstance(path, Iterable) and not isinstance(path, str):
-        path_list = [os.fspath(p) for p in path]
-    else:
+    if isinstance(path, str):
+        path_list = [path]
+    elif isinstance(path, Path):
         path_list = [os.fspath(path)]
+    else:
+        path_list = [os.fspath(p) for p in path]
 
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
 
+    # We cannot use here Path.glob as only path relative to a given directory
+    # are supported.
+    # Note also that support for Path-like parameter in glob.glob has only been
+    # introduced in Python 3.13
     return sorted(
         itertools.chain.from_iterable(glob.glob(p) for p in path_list)  # noqa: PTH207
     )
+
+
+def ls_paths(
+    path: str | Path | Iterable[str | Path],
+    emit_log_record: bool = True,
+) -> list[Path]:
+    """List files.
+
+    :param path: glob pattern or glob pattern list
+    :param emit_log_record: if True, emit a log (debug) record
+
+    :return: a list of Path objects
+
+    This function do not raise an error if no file matching the glob pattern
+    is encountered. The only consequence is that an empty list is returned.
+    """
+    return [Path(p) for p in ls(path=path, emit_log_record=emit_log_record)]
 
 
 def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
