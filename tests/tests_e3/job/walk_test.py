@@ -78,7 +78,7 @@ sbx_dirs = SbxDirs()
 DOWNLOAD_JOB_UID_PREFIX = "download."
 
 
-@pytest.fixture()
+@pytest.fixture
 def setup_sbx(request: pytest.FixtureRequest) -> None:
     """Automatically create a (temporary) sandbox.
 

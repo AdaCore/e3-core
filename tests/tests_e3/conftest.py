@@ -176,7 +176,7 @@ class PypiSimulator:
         self.requests_mock.stop()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def pypi_server(requests_mock: Mocker) -> PypiSimulator:
     """Pytest fixture providing a mock PyPI server."""
     requests_mock.stop()
@@ -440,7 +440,7 @@ class MavenCentralSimulator:
         self.__requests_mock.stop()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def maven_central(requests_mock: Mocker) -> MavenCentralSimulator:
     """Pytest fixture providing a mock Maven Central server."""
     requests_mock.stop()
