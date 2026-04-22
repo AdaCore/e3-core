@@ -318,7 +318,7 @@ def test_primitive() -> None:
 
     class NoPrimitive(Anod):
         @staticmethod
-        def build():
+        def build() -> int:
             return 2
 
     no_primitive = NoPrimitive("", "build")
