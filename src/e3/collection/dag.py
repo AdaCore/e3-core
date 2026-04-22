@@ -39,7 +39,7 @@ class DAGIterator:
         """
         self.dag = dag
         self.non_visited = set(self.dag.vertex_data.keys())
-        self.states = {k: self.NOT_VISITED for k in list(self.dag.vertex_data.keys())}
+        self.states = dict.fromkeys(list(self.dag.vertex_data.keys()), self.NOT_VISITED)
         self.enable_busy_state = enable_busy_state
 
         # Compute number of non visited predecessors for each node.
@@ -442,7 +442,7 @@ class DAG:
         infinite = len(self.vertex_data) + 1
 
         # Keep track of minimal distance between vertices and the sources
-        dist: dict[VertexID | None, int] = {k: infinite for k in self.vertex_data}
+        dist: dict[VertexID | None, int] = dict.fromkeys(self.vertex_data, infinite)
 
         # Keep track of the minimum distance
         prev: dict[VertexID | None, VertexID | None] = dict.fromkeys(
