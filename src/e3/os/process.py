@@ -905,7 +905,7 @@ def kill_process_tree(
         )
         e3.log.debug("%d processes killed", len(gone))
         for p in alive:  # defensive code
-            logger.warn("process %s survived kill()", p)
+            logger.warning("process %s survived kill()", p)
 
         return True
     except psutil.TimeoutExpired as err:  # defensive code
