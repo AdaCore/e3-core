@@ -487,7 +487,7 @@ class Anod:
         lib_file: str = ""
 
         if case_sensitive is None:
-            case_sensitive = not sys.platform == "win32"
+            case_sensitive = sys.platform != "win32"
 
         if ldd_output is None:
             # If ldd is not in the path, return and issue a warning.
