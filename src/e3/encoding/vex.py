@@ -93,8 +93,10 @@ class ActionOrImpact(JsonData):
         return cls(
             statement=obj["statement"],
             timestamp=(
-                (lambda dt: dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc))(
-                    date_parse(obj["timestamp"])
+                (
+                    dt
+                    if (dt := date_parse(obj["timestamp"])).tzinfo
+                    else dt.replace(tzinfo=timezone.utc)
                 )
                 if obj["timestamp"]
                 else None
