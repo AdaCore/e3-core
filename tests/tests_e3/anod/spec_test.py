@@ -233,7 +233,7 @@ def test_spec_check_dll_closure(arguments: tuple, expected: tuple) -> None:
                             f"Shared library {culprit_dll} is listed in the "
                             "dll closure errors, while it should be ignored"
                         )
-                        raise Exception(msg) from ae
+                        raise AnodError(msg) from ae
             else:
                 raise
     elif errors:
