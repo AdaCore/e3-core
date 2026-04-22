@@ -932,7 +932,7 @@ class ResourceDescriptor:
 
     @property
     def media_type(self) -> str | None:
-        """This resource descriptor media type.
+        """Resource descriptor media type.
 
         The `MIME Type
         <https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types>`_
