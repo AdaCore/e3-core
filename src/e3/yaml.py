@@ -419,11 +419,11 @@ def load_with_regexp_table(filename: str, selectors: list[str], data: dict) -> d
     # At this stage we have our dictionary filled. Now use data to replace to
     # replace %()s strings.
 
-    for key in result:
-        if isinstance(result[key], str):
-            result[key] = result[key] % data
-        elif isinstance(result[key], list):
-            result[key] = [k % data for k in result[key]]
+    for key, value in result.items():
+        if isinstance(value, str):
+            result[key] = value % data
+        elif isinstance(value, list):
+            result[key] = [k % data for k in value]
 
     e3.log.debug("yaml results: %s", result)
     return result
