@@ -276,8 +276,7 @@ def unpack_archive(  # noqa: PLR0915
                         """
                         for pattern in files:
                             if fnmatch.fnmatch(name, pattern):
-                                if pattern in check_selected:
-                                    check_selected.remove(pattern)
+                                check_selected.discard(pattern)
                                 return True
                         return False
 
