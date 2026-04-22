@@ -14,7 +14,7 @@ from e3.fs import mkdir, mv, rm
 from e3.store.cache.backends.base import DEFAULT_TIMEOUT, Cache
 
 try:
-    import pickle as pickle
+    import pickle
 except ImportError:  # defensive code
     import pickle
 
