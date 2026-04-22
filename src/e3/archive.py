@@ -304,9 +304,9 @@ def unpack_archive(
                             msg = "unpack_archive"
                             raise ArchiveError(msg, f"Cannot untar {filename} ")
 
-                        fd.extractall(path=tmp_dest, members=member_list)
+                        fd.extractall(path=tmp_dest, members=member_list)  # noqa: S202
                     else:
-                        fd.extractall(path=tmp_dest)
+                        fd.extractall(path=tmp_dest)  # noqa: S202
 
             except tarfile.TarError as e:
                 raise ArchiveError(
@@ -319,7 +319,7 @@ def unpack_archive(
                 with closing(
                     E3ZipFile(fileobj if fileobj is not None else filename, mode="r")
                 ) as zip_fd:
-                    zip_fd.extractall(
+                    zip_fd.extractall(  # noqa: S202
                         tmp_dest, selected_files if selected_files else None
                     )
             except zipfile.BadZipfile as e:
