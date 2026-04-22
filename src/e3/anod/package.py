@@ -58,8 +58,7 @@ class Package:
 
     @property
     def is_simple_archive(self) -> bool:
-        """
-        Check if package creation can be bypassed.
+        """Check if package creation can be bypassed.
 
         If true it means that package creation can be bypassed
         in some context such as user mode. By default it is
