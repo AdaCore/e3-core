@@ -338,7 +338,7 @@ class Run:
                     header = f.read()[0:2]
                 except UnicodeDecodeError:
                     # unknown header - cannot decode the first two bytes
-                    return cmd_line
+                    header = ""
                 if header != "#!":
                     # Unknown header
                     return cmd_line
