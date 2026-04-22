@@ -69,7 +69,7 @@ def test_exception_pass() -> None:
 def test_token_str() -> None:
     """Test token str."""
     token = (
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZGFjb3JlLmNvbSI"
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZGFjb3JlLmNvbSI"  # noqa: S105
         "sImlhdCI6MTUxOTExOTcxMSwiZXhwIjoxNTUwNjU1NzExLCJhdWQiOiJ3d3cuYWR"
         "hY29yZS5jb20iLCJzdWIiOiJ0ZXN0IiwiR2l2ZW5OYW1lIjoiVG90byIsIlN1cm5"
         "hbWUiOiIxMjMiLCJFbWFpbCI6InRvdG9AZXhhbXBsZS5jb20iLCJSb2xlIjoidGV"
