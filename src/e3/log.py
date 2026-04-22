@@ -124,7 +124,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def process(
         self,
         msg: Any,  # noqa: ANN401  # standard LoggerAdapter.process signature
-        kwargs: Any,
+        kwargs: Any,  # noqa: ANN401  # standard LoggerAdapter.process signature
     ) -> tuple[Any, Any]:
         """Allow to handle extra parameter.
 
