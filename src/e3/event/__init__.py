@@ -246,10 +246,10 @@ class EventHandler(metaclass=abc.ABCMeta):
         """
 
     @classmethod
-    def decode_config(cls, config_str: str) -> dict:
+    def decode_config(cls, _config_str: str) -> dict:
         """Decode a config string into a dict.
 
-        :param config_str: the string containing configuration information
+        :param _config_str: the string containing configuration information
         :return: a dict that can be used as ``**kwargs`` for the handler
             initialization method
         """
