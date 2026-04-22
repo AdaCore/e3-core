@@ -14,7 +14,6 @@ from e3.mock.env import mock_env
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from pytest import LogCaptureFixture
 
 logger = getLogger("test MockEnv")
 
@@ -60,7 +59,7 @@ def echo_hello() -> None:
 
 
 @mock_env(config={"name": "x86_64-windows64", "version": "2022"})
-def test_mock_env_decorator(caplog: LogCaptureFixture) -> None:
+def test_mock_env_decorator(caplog: pytest.LogCaptureFixture) -> None:
     """Test mock env decorator."""
     run_on_windows_2022()
 
@@ -68,7 +67,7 @@ def test_mock_env_decorator(caplog: LogCaptureFixture) -> None:
 
 
 @mock_env()
-def test_mock_env_decorator_without_config(caplog: LogCaptureFixture) -> None:
+def test_mock_env_decorator_without_config(caplog: pytest.LogCaptureFixture) -> None:
     """Test mock env decorator."""
     env = Env()
     version = env.build.os.version
@@ -99,7 +98,7 @@ def test_mock_env_with_context_config(
     version: str,
     func: Callable,
     command_result: str,
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test mock_env as context."""
     with mock_env(config={"name": platform_name, "version": version}):
