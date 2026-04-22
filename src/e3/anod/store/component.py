@@ -244,13 +244,13 @@ class Component:
         :return: A list of dictionaries. Each dictionary is simply made of
             the matching key and the attached file.
         """
-        attachments: dict[str, File] = {}
         file_key: str = key if key is not None else ""
         # Attachments parsing depends on the attachments type.
-        for att_key, att_file in self.attachments.items():
-            if not file_key or att_key.startswith(file_key):
-                attachments[att_key] = att_file
-
+        attachments: dict[str, File] = {
+            att_key: att_file
+            for att_key, att_file in self.attachments.items()
+            if not file_key or att_key.startswith(file_key)
+        }
         return attachments
 
     @classmethod
