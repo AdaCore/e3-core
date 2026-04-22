@@ -154,7 +154,7 @@ def check_type(
     raise ArchiveError(origin="unpack_archive", message=f'unknown format "{filename}"')
 
 
-def unpack_archive(  # noqa: PLR0915
+def unpack_archive(
     filename: str | Path,
     dest: str | Path,
     fileobj: IO[bytes] | None = None,
