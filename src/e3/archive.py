@@ -337,7 +337,7 @@ def unpack_archive(  # noqa: PLR0915
             nb_files = len(list(Path(tmp_dest).iterdir()))
             if nb_files == 0:
                 # Nothing to do...
-                return
+                return None
             if nb_files > 1:
                 if remove_root_dir != "auto":
                     raise ArchiveError(
