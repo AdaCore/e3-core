@@ -21,8 +21,7 @@ logger = getLogger("test MockEnv")
 
 LOG_RUNNING_IN_WIN_2022 = "Running in Windows Server 2022"
 LOG_ERROR_WIN_VERSION = (
-    "Not running in correct windows version, expected version"
-    " is 2022 but running in %(version)s"
+    "Not running in correct windows version, expected version is 2022 but running in %s"
 )
 
 ASSERT_PLATFORM_ERROR = (
@@ -47,9 +46,7 @@ def run_on_windows_2022() -> None:
     if version == "2022":
         logger.info(LOG_RUNNING_IN_WIN_2022)
     else:
-        logger.error(
-            LOG_ERROR_WIN_VERSION % {"exp_version": " 2022", "version": version}
-        )
+        logger.error(LOG_ERROR_WIN_VERSION, version)
 
 
 def echo_hello() -> None:
@@ -87,7 +84,7 @@ def test_mock_env_decorator_without_config(caplog: LogCaptureFixture) -> None:
         if "2022" in version:
             assert caplog.text.count(LOG_RUNNING_IN_WIN_2022) == 1
         else:
-            assert caplog.text.count(LOG_ERROR_WIN_VERSION % {"version": version}) == 1
+            assert caplog.text.count(LOG_ERROR_WIN_VERSION % version) == 1
 
 
 @pytest.mark.parametrize(
