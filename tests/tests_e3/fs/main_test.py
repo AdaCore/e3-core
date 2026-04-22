@@ -1,7 +1,6 @@
 """Tests for e3.fs."""
 
 import os
-import re
 import shutil
 import sys
 import time
@@ -233,10 +232,26 @@ def test_mv() -> None:
     for fname in ("a1", "a2", "a3"):
         assert Path("b", fname).is_file()
 
-    e3.os.fs.touch("a1")
-    with pytest.raises(e3.fs.FSError) as err:
-        e3.fs.mv("a*", "b")
-    assert re.search("Destination path 'b.*a1' already exists", str(err))
+    # By default mv should clobber target file if both are files
+    with Path("a1").open("w") as fd:
+        fd.write("new")
+    e3.fs.mv("a*", "b")
+    with Path("b/a1").open() as fd:
+        assert fd.read() == "new"
+
+    # Target directory can be clobbered only if empty
+    e3.fs.mkdir(Path("src-dir", "subdir"))
+    e3.os.fs.touch(Path("src-dir") / "subdir" / "b")
+    e3.fs.mkdir(Path("tgt-dir", "src-dir"))
+    e3.fs.mv("src-dir", "tgt-dir")
+    assert Path("tgt-dir", "src-dir", "subdir", "b").is_file(), (
+        "tgt-dir content: " + str(e3.fs.find("tgt-dir"))
+    )
+
+    # A non-empty directory cannot be clobbered
+    e3.fs.mkdir("src-dir")
+    with pytest.raises(e3.fs.FSError, match="Cannot overwrite non-empty directory"):
+        e3.fs.mv("src-dir", "tgt-dir")
 
     e3.fs.mv("1", "b")
     assert Path("b", "1").is_file()
@@ -252,10 +267,19 @@ def test_mv() -> None:
     with pytest.raises(e3.fs.FSError):
         e3.fs.mv("d*", "b")
 
+    e3.fs.mkdir(Path("target_dir") / "collision")
+    src_dir = Path("source_dir")
+    e3.fs.mkdir(src_dir)
+    e3.os.fs.touch(src_dir / "collision")
+    e3.os.fs.touch(src_dir / "another")
+    with pytest.raises(e3.fs.FSError):
+        e3.fs.mv(e3.fs.ls(src_dir / "*"), "target_dir")
+
     e3.fs.mv("b/", "B/")
-    with pytest.raises(e3.fs.FSError) as err:
+    with pytest.raises(
+        e3.fs.FSError, match=r"Cannot move a directory 'B' into itself 'B.*b'"
+    ):
         e3.fs.mv("B", "B/b")
-    assert "Cannot move a directory 'B' into itself 'B/b" in str(err)
 
 
 def test_tree_state() -> None:

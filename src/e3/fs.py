@@ -42,8 +42,8 @@ class FSError(e3.error.E3Error):
 
 
 def cp(
-    source: str | os.PathLike[str],
-    target: str | os.PathLike[str],
+    source: str | Path,
+    target: str | Path,
     copy_attrs: bool = True,
     recursive: bool = False,
     preserve_symlinks: bool = False,
@@ -71,47 +71,48 @@ def cp(
     if recursive and not copy_attrs:
         logger.warning("recursive copy always preserves file attributes")
 
+    # Starting from here ensure we only use Path objects
+    if isinstance(source, str):
+        source = Path(source)
+
+    if isinstance(target, str):
+        target = Path(target)
+
     # Compute file list and number of file to copy
-    file_list = ls(source, emit_log_record=False)
+    file_list = ls_paths(source, emit_log_record=False)
     file_number = len(file_list)
 
     if file_number == 0:
         # If there is no source files raise an error
         raise FSError(origin="cp", message=f'can\'t find files matching "{source}"')
-    if file_number > 1 and not Path(target).is_dir():
+    if file_number > 1 and not target.is_dir():
         # If we have more than one file to copy then check that target is a
         # directory
         raise FSError(origin="cp", message="target should be a directory")
 
     for f in file_list:
         try:
-            if Path(target).is_dir():
-                f_dest = str(Path(target, Path(f).name))
-            else:
-                f_dest = os.fspath(target)
+            f_dest = target / f.name if target.is_dir() else target
 
-            path = Path(f)
-
-            if recursive and path.is_dir():
+            if recursive and f.is_dir():
                 shutil.copytree(f, f_dest, symlinks=preserve_symlinks)
-            elif preserve_symlinks and path.is_symlink():  # windows: no cover
-                linkto = path.readlink()
-                Path(f_dest).symlink_to(linkto)
+            elif preserve_symlinks and f.is_symlink():  # windows: no cover
+                linkto = f.readlink()
+                f_dest.symlink_to(linkto)
             elif copy_attrs:
                 shutil.copy2(f, f_dest)
             else:
                 shutil.copy(f, f_dest)
         except Exception as e:
-            logger.error(e, exc_info=True)
-            raise FSError(
-                origin="cp", message=f"error occurred while copying {f}"
-            ) from e
+            msg = f"error occurred while copying {f} to {f_dest}"
+            logger.exception(msg)
+            raise FSError(origin="cp", message=msg) from e
 
 
 def directory_content(
     path: str | Path, include_root_dir: bool = False, unixpath: bool = False
 ) -> list[str]:
-    """Return the complete directory content (recusrsively).
+    """Return the complete directory content (recursively).
 
     :param path: path for the which the content should be returned
     :param include_root_dir: if True include the root directory in the paths
@@ -158,8 +159,8 @@ def echo_to_file(
             fd.seek(0, 2)
 
         if isinstance(content, list):
-            for line in content:
-                fd.write(line + "\n")
+            fd.write("\n".join(content))
+            fd.write("\n")
         else:
             fd.write(content)
 
@@ -200,6 +201,36 @@ def find(
     return result
 
 
+def find_paths(
+    root: str | Path,
+    pattern: str | None = None,
+    include_dirs: bool = False,
+    include_files: bool = True,
+    follow_symlinks: bool = False,
+) -> list[Path]:
+    """Find files or directory recursively.
+
+    :param root: directory from which the research start
+    :param pattern: glob pattern that files or directories should match in
+        order to be included in the final result
+    :param include_dirs: if True include directories
+    :param include_files: if True include regular files
+    :param follow_symlinks: if True include symbolic links
+
+    :return: a list of Path objects
+    """
+    return [
+        Path(p)
+        for p in find(
+            root=root,
+            pattern=pattern,
+            include_dirs=include_dirs,
+            include_files=include_files,
+            follow_symlinks=follow_symlinks,
+        )
+    ]
+
+
 def get_filetree_state(
     path: str | Path, ignore_hidden: bool = True, hash_content: bool = False
 ) -> str:
@@ -220,29 +251,38 @@ def get_filetree_state(
     content of all files.
     """
 
-    def compute_state(file_path: str) -> bytes:
+    def compute_state(file_path: Path) -> bytes:
         """Compute file state as bytes.
 
         :param file_path: path to the file
         """
-        f_stat = os.lstat(file_path)
+        f_stat = file_path.lstat()
 
         state = ":".join(
-            [file_path, str(f_stat.st_mode), str(f_stat.st_size), str(f_stat.st_mtime)]
+            [
+                str(file_path),
+                str(f_stat.st_mode),
+                str(f_stat.st_size),
+                str(f_stat.st_mtime),
+            ]
         )
         return state.encode("utf-8")
 
-    def get_content(file_path: str) -> bytes:
+    def get_content(file_path: Path) -> bytes:
         """Get file content as bytes.
 
         :param file_path: path to the file
         """
-        with Path(file_path).open("rb") as f:
+        with file_path.open("rb") as f:
             return f.read()
 
-    path = os.path.abspath(path)
+    # Normalize input to Path object
+    path = Path(path).absolute()
     result = hashlib.sha1(usedforsecurity=False)
-    if Path(path).is_dir():
+
+    if path.is_dir():
+        # Note that Path now has a walk method but this was added only on 3.12 and
+        # for the moment we still support older Python versions.
         for root, dirs, files in os.walk(path):
             if ignore_hidden:
                 ignore_dirs = []
@@ -257,7 +297,7 @@ def get_filetree_state(
                 if ignore_hidden and path.startswith("."):
                     continue
 
-                full_path = str(Path(root, path))
+                full_path = Path(root) / path
                 result.update(compute_state(full_path))
 
                 if hash_content:
@@ -273,7 +313,7 @@ def get_filetree_state(
 
 
 def ls(
-    path: str | Iterable[str] | os.PathLike[str] | Iterable[os.PathLike[str]],
+    path: str | Path | Iterable[str | Path],
     emit_log_record: bool = True,
 ) -> list[str]:
     """List files.
@@ -286,17 +326,40 @@ def ls(
     This function do not raise an error if no file matching the glob pattern
     is encountered. The only consequence is that an empty list is returned.
     """
-    if isinstance(path, Iterable) and not isinstance(path, str):
-        path_list = [os.fspath(p) for p in path]
-    else:
+    if isinstance(path, str):
+        path_list = [path]
+    elif isinstance(path, Path):
         path_list = [os.fspath(path)]
+    else:
+        path_list = [os.fspath(p) for p in path]
 
     if emit_log_record:
         logger.debug("ls %s", " ".join(path_list))
 
+    # We cannot use here Path.glob as only path relative to a given directory
+    # are supported.
+    # Note also that support for Path-like parameter in glob.glob has only been
+    # introduced in Python 3.13
     return sorted(
         itertools.chain.from_iterable(glob.glob(p) for p in path_list)  # noqa: PTH207
     )
+
+
+def ls_paths(
+    path: str | Path | Iterable[str | Path],
+    emit_log_record: bool = True,
+) -> list[Path]:
+    """List files.
+
+    :param path: glob pattern or glob pattern list
+    :param emit_log_record: if True, emit a log (debug) record
+
+    :return: a list of Path objects
+
+    This function do not raise an error if no file matching the glob pattern
+    is encountered. The only consequence is that an empty list is returned.
+    """
+    return [Path(p) for p in ls(path=path, emit_log_record=emit_log_record)]
 
 
 def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
@@ -312,14 +375,15 @@ def mkdir(path: str | Path, mode: int = 0o755, quiet: bool = False) -> None:
     This function behaves quite like mkdir -p command shell. So if the
     directory already exist no error is raised.
     """
-    if Path(path).is_dir():
+    path = Path(path)
+    if path.is_dir():
         return
     if not quiet:
         logger.debug("mkdir %s (mode=%s)", path, oct(mode))
     try:
-        Path(path).mkdir(mode=mode, parents=True)
+        path.mkdir(mode=mode, parents=True)
     except Exception as e:  # defensive code
-        if Path(path).is_dir():
+        if path.is_dir():
             # Take care of cases where in parallel execution environment
             # the directory is created after the initial test on its
             # existence and the call to makedirs
@@ -342,117 +406,94 @@ def mv(
     :raise FSError: if an error occurs
     """
 
-    def move_file(src: str, dst: str) -> None:
+    def move_file(src: Path, dst: Path) -> None:
         """Reimplementation of shutil.move.
 
         The implementation follows shutil.move from the standard library.
         The only difference is that we use e3.fs.rm function instead of
         rmtree. This ensure moving a directory with read-only files will
-        work.
+        work. Note that we assume that dst is always the final destination
+        (expansion into dst / basename(src) is done in the parent function).
 
         :param src: source file or directory
         :param dst: destination file or directory
         """
         logger.debug(f"mv {src} {dst}")
 
-        def same_file(src: str, dst: str) -> bool:
-            """Check if two paths point to the same file.
-
-            :param src: source path
-            :param dst: destination path
-            """
-            if hasattr(os.path, "samefile"):
-                try:
-                    return Path(src).samefile(dst)
-                except OSError:  # defensive code
-                    # This should never be raised as we called already os.stat
-                    # on both src and dst.
-                    return False
-            else:  # defensive code (samefile supported on linux and windows)
-                return os.path.normcase(os.path.abspath(src)) == os.path.normcase(
-                    os.path.abspath(dst)
-                )
-
-        def basename(path: str) -> str:
-            """Get base name of a path.
-
-            :param path: file path
-            """
-            sep = os.path.sep + (os.path.altsep or "")
-            return os.path.basename(path.rstrip(sep))  # noqa: PTH119
-
-        def destinsrc(src: str, dst: str) -> bool:
-            """Check if destination is inside source.
-
-            :param src: source directory
-            :param dst: destination directory
-            """
-            src = os.path.abspath(src)
-            dst = os.path.abspath(dst)
-            if not src.endswith(os.path.sep):
-                src += os.path.sep
-            if not dst.endswith(os.path.sep):
-                dst += os.path.sep
-            return dst.startswith(src)
-
-        real_dst = Path(dst)
-        if Path(dst).is_dir():
-            if same_file(src, dst):
-                # We might be on a case insensitive filesystem,
-                # perform the rename anyway.
-                Path(src).rename(dst)
-                return
-
-            real_dst = Path(dst, basename(src))
-            if real_dst.exists():
-                msg = f"Destination path '{real_dst}' already exists"
-                raise FSError(msg)
-
-        path = Path(src)
         try:
-            path.rename(real_dst)
+            src.rename(dst)
         except OSError as err:
-            if path.is_symlink():
-                linkto = path.readlink()
-                Path(real_dst).symlink_to(linkto)
-                Path(src).unlink()
-            elif path.is_dir():
-                if destinsrc(src, dst):
-                    msg = f"Cannot move a directory '{src}' into itself '{dst}'."
+            if dst.exists() and src.samefile(dst):
+                # If src and dst are the same file and rename failed, there
+                # is nothing to do. For note this case is useful to adjust
+                # casing of a file on a case insensitive filesystem.
+                # The present protection is necessary as in all subsequent
+                # case an attempt is made to delete the source file.
+                msg = f"Casing change of '{src}' to '{dst}' failed"
+                raise FSError(msg) from err
+
+            if src.is_symlink():
+                linkto = src.readlink()
+                dst.symlink_to(linkto)
+                src.unlink()
+            elif src.is_dir():
+                if dst.absolute().is_relative_to(src.absolute()):
+                    msg = f"Cannot move a directory '{src}' into itself '{dst}'"
                     raise FSError(msg) from err
-                shutil.copytree(src, real_dst, symlinks=True)
+
+                if dst.is_dir():
+                    if next(dst.iterdir(), None) is None:
+                        # If target directory is empty remove it
+                        rm(dst, recursive=True)
+                    else:
+                        msg = f"Cannot overwrite non-empty directory '{dst}'"
+                        raise FSError(msg) from err
+
+                elif dst.is_file():
+                    msg = f"Cannot overwrite file '{dst}' with directory '{src}'"
+                    raise FSError(msg) from err
+
+                shutil.copytree(src, dst, symlinks=True)
                 rm(src, recursive=True)
             else:
-                shutil.copy2(src, real_dst)
+                if dst.is_dir():
+                    msg = f"Cannot overwrite directory '{dst}' with file '{src}'"
+                    raise FSError(msg) from err
+
+                # Make sure to delete target if this is a file.
+                if dst.is_file():
+                    rm(dst)
+
+                shutil.copy2(src, dst)
                 rm(src)
-        return
 
     try:
         # Compute file list and number of file to copy
-        file_list = ls(source, emit_log_record=False)
+        target = Path(target)
+        file_list = ls_paths(source, emit_log_record=False)
         nb_files = len(file_list)
 
         if nb_files == 0:
             raise FSError(  # noqa: TRY301
                 origin="mv", message=f'cannot find files matching "{source}"'
             )
-        if nb_files == 1:
-            source = file_list[0]
-            if Path(source).is_dir() and Path(target).is_dir():
-                move_file(
-                    source,
-                    str(Path(target, os.path.basename(source))),  # noqa: PTH119
-                )
-            else:
-                move_file(source, os.fspath(target))
-        elif not Path(target).is_dir():
+
+        if nb_files == 1 and (not target.is_dir() or file_list[0].samefile(target)):
+            # In case target is not directory or target is equal to source then the
+            # effective destination is target itself. This case can only occurs when
+            # the number of source files is 1.
+            move_file(file_list[0], target)
+
+        elif not target.is_dir():
             # More than one file to move but the target is not a directory
             msg = "mv"
             raise FSError(msg, f"{target} should be a directory")  # noqa: TRY301
+
         else:
+            # In all other case the target is target / basename(source)
             for f in file_list:
-                f_dest = str(Path(target, Path(f).name))
-                move_file(f, f_dest)
+                move_file(f, target / f.name)
+
     except Exception as e:
         logger.exception("mv operation failed")
         raise FSError(origin="mv", message=str(e)) from e
@@ -478,14 +519,14 @@ def rm(
     # We transform the list into a set in order to remove duplicate files in
     # the list
     if glob:
-        file_list = set(ls(path, emit_log_record=False))
+        file_list = set(ls_paths(path, emit_log_record=False))
     elif isinstance(path, (str, Path)):
-        file_list = {os.fspath(path)}
+        file_list = {Path(path)}
     else:
-        file_list = {os.fspath(p) for p in path}
+        file_list = {Path(p) for p in path}
 
-    tmp = " ".join(file_list)
-    if tmp:
+    if file_list:
+        tmp = " ".join([str(p) for p in file_list])
         logger.debug(f"rm{' -r' if recursive else ''} {tmp}")
 
     def onerror(
@@ -498,10 +539,11 @@ def rm(
         :param exc_info: exception raised when the first delete attempt was made
         """
         del exc_info
+        path = Path(error_path)
 
         # First check whether the file we are trying to delete exist. If not
         # the work is already done, no need to continue trying removing it.
-        if not Path(error_path).exists():
+        if not path.exists():
             return
 
         if func in (os.remove, os.unlink):
@@ -510,72 +552,60 @@ def rm(
             # This function is only called when deleting a file inside a
             # directory to remove, it is safe to change the parent directory
             # permission since the parent directory will also be removed.
-            Path(error_path).parent.chmod(0o700)
+            path.parent.chmod(0o700)
 
             # ??? It seems that this might be needed on windows
-            Path(error_path).chmod(0o700)
-            e3.os.fs.safe_remove(error_path)
+            path.chmod(0o700)
+            e3.os.fs.safe_remove(path)
 
         elif func == os.rmdir:
             # Cannot remove error_path, call chmod and redo an attempt
-            Path(error_path).chmod(0o700)
+            path.chmod(0o700)
 
             # Also change the parent directory permission if it will also
             # be removed.
-            if recursive and error_path not in file_list:
+            if recursive and path not in file_list:
                 # If error_path not in the list of directories to remove it
                 # means that we are already in a subdirectory.
-                Path(error_path).parent.chmod(0o700)
-            e3.os.fs.safe_rmdir(error_path)
+                path.parent.chmod(0o700)
+            e3.os.fs.safe_rmdir(path)
 
         elif func in (os.listdir, os.open):
             # Cannot read the directory content, probably a permission issue
-            Path(error_path).chmod(0o700)
+            path.chmod(0o700)
 
             # And continue to delete the subdir
             if Version(python_version()) >= Version("3.12"):
-                shutil.rmtree(error_path, onexc=onerror)
+                shutil.rmtree(path, onexc=onerror)
             else:
-                shutil.rmtree(error_path, onerror=onerror)
+                shutil.rmtree(path, onerror=onerror)
 
         else:
             raise FSError(origin="rm", message=f"unknown function: {func.__name__!r}")
 
         # If the file still exists, let the user know through a debug message.
-        if Path(error_path).exists():
+        if path.exists():
             logger.debug(
-                f"error when running {func.__name__!r} on {error_path}. "
+                f"error when running {func.__name__!r} on {path}. "
                 "Element could not be removed."
             )
 
     for f in file_list:
         try:
-            # When calling rmtree or remove, ensure that the string that is
-            # passed to this function is unicode on Windows. Otherwise,
-            # the non-Unicode API will be used and so we won't be
-            # able to remove these files. On Unix don't do that as
-            # we got some strange unicode "ascii codec" errors
-            # (need some further investigation at some point)
-            if sys.platform == "win32":  # unix: no cover
-                f_path = str(f)
-            else:
-                f_path = f
-
             # Note: shutil.rmtree requires its argument to be an actual
             # directory, not a symbolic link to a directory
-            if recursive and Path(f_path).is_dir() and not Path(f_path).is_symlink():
+            if recursive and f.is_dir() and not f.is_symlink():
                 if Version(python_version()) >= Version("3.12"):
-                    shutil.rmtree(f_path, onexc=onerror)
+                    shutil.rmtree(f, onexc=onerror)
                 else:
-                    shutil.rmtree(f_path, onerror=onerror)
+                    shutil.rmtree(f, onerror=onerror)
             else:
-                e3.os.fs.force_remove_file(f_path)
+                e3.os.fs.force_remove_file(f)
 
         except Exception as e:  # defensive code
-            logger.exception(f"error occurred while removing {f_path}")
-            raise FSError(
-                origin="rm", message=f"error occurred while removing {f_path}"
-            ) from e
+            msg = f"error occurred while removing {f}"
+            logger.exception(msg)
+            raise FSError(origin="rm", message=msg) from e
 
 
 def splitall(path: str | Path) -> tuple[str, ...]:

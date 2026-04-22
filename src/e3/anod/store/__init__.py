@@ -2344,7 +2344,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
             self._raw_add_component(comp)
         self.connection.commit()
 
-    def save(self, filename: os.PathLike[str] | str | None = None) -> None:
+    def save(self, filename: Path | str | None = None) -> None:
         """Interface method implementation.
 
         .. seealso::
