@@ -340,6 +340,7 @@ def test_primitive() -> None:
                     sys.executable, "-c", 'print("world")', output=subprocess.PIPE
                 )
                 return hello.out.strip()
+            return None
 
     with_primitive = WithPrimitive("", "build")
     with_primitive2 = WithPrimitive("error=foobar", "build")
