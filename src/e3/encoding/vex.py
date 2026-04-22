@@ -574,7 +574,7 @@ class Product(JsonData):
             supplier=obj["supplier"],
             subcomponents=(
                 [SubProductId.from_dict(sc) for sc in obj["subcomponents"]]
-                if "subcomponents" in obj and obj["subcomponents"]
+                if obj.get("subcomponents")
                 else None
             ),
         )
