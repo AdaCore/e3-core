@@ -202,7 +202,7 @@ def enable_commands_handler(filename: str | Path, mode: str = "a") -> logging.Ha
 
             :param record: log record to filter
             """
-            return True if record.name == "e3." + CMD_LOGGER_NAME else False
+            return record.name == "e3." + CMD_LOGGER_NAME
 
     # Here we don't attach the handler directly to the cmdline logger. Indeed
     # in class like e3.Main we do attach handlers to the root logger. In that
