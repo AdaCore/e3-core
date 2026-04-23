@@ -154,7 +154,6 @@ class ElectrolytJob(Job):
             src_builder.prepare_src(repo_dict, str(dest_dir))
             self.__status = STATUS.success
             logger.debug("%s created in cache/tmp", source_name)
-        return
 
     def do_getsource(self) -> None:
         """action_item from an intermediate node.
