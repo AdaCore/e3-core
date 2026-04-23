@@ -740,14 +740,15 @@ class Anod:
 
                     # Run the primitive
                     result = f(self, *args, **kwargs)
-                    self.log.debug("%s %s ends", self.name, f.__name__)
-
-                    # And return the result
-                    return result
                 except Exception as err:
                     error_msg = f"{self.name} {f.__name__} fails"
                     self.log.exception(error_msg)
                     raise AnodError(error_msg) from err
+                else:
+                    self.log.debug("%s %s ends", self.name, f.__name__)
+
+                    # And return the result
+                    return result
 
             primitive_func.is_primitive = True  # type: ignore[attr-defined]
             primitive_func.pre = pre  # type: ignore[attr-defined]

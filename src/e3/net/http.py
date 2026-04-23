@@ -253,7 +253,6 @@ class HTTPSession:
                     error_msgs.append(f"{message_prefix}{response.text}")
                     last_status = response.status_code
                     response.raise_for_status()
-                return response
             except (
                 TimeoutError,
                 requests.exceptions.RequestException,
@@ -263,6 +262,8 @@ class HTTPSession:
                 error_msgs.append(f"{message_prefix}{e}")
                 problematic_url = self.base_urls.popleft()
                 self.base_urls.append(problematic_url)  # type: ignore
+            else:
+                return response
 
         error_msgs_str = "\n".join(error_msgs)
         msg = f"got request error ({len(error_msgs)}):\n{error_msgs_str}"
