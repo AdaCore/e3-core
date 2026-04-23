@@ -109,8 +109,7 @@ def job_source_basename(uid: str) -> str:
 
     :param uid: A unique Job ID.
     """
-    if uid.startswith(DOWNLOAD_JOB_UID_PREFIX):
-        uid = uid[len(DOWNLOAD_JOB_UID_PREFIX) :]
+    uid = uid.removeprefix(DOWNLOAD_JOB_UID_PREFIX)
     return uid + ".txt"
 
 
