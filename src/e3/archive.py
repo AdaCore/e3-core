@@ -130,9 +130,9 @@ def check_type(
     """
     # Check extension
     if (
-        filename.endswith(".tar.gz")
-        or filename.endswith(".tgz")
-        or (force_extension is not None and force_extension in [".tar.gz", ".tgz"])
+        filename.endswith((".tar.gz", ".tgz"))
+        or force_extension is not None
+        and force_extension in [".tar.gz", ".tgz"]
     ):
         return "tar.gz"
     if filename.endswith(".tar.bz2") or (
