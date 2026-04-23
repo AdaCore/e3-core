@@ -58,8 +58,11 @@ def get_entity(value: str | None) -> Organization | Person | Tool | None:
     return None
 
 
-class InvalidSPDX(Exception):
+class InvalidSPDXError(Exception):
     """Raise an exception when the SPDX document cannot be generated."""
+
+
+InvalidSPDX = InvalidSPDXError  # backward compat
 
 
 class SPDXPackageSupplier(Enum):
@@ -1173,7 +1176,7 @@ class PrimaryPackagePurpose(Enum):
         :return: The :class:`PrimaryPackagePurpose` initialized with the value
             of *obj*.
         """
-        purpose_name: str | None = obj.get(cls.get_json_entry_key(), None)
+        purpose_name: str | None = obj.get(cls.get_json_entry_key())
         if purpose_name:
             return PrimaryPackagePurpose.__members__[purpose_name]
         return None

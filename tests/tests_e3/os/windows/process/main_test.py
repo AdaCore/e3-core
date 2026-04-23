@@ -36,7 +36,7 @@ def test_wait_for_objects() -> None:
     try:
         assert (
             wait_for_objects(
-                [int(p0.internal._handle), int(p1.internal._handle)],
+                [int(p0.internal._handle), int(p1.internal._handle)],  # noqa: SLF001
                 timeout=2,
             )
             == 1

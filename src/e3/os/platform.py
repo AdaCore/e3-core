@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import re
 from platform import uname as platform_uname
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, ClassVar, NamedTuple
 
 import e3.log
 from e3.platform_db import get_knowledge_base
@@ -218,7 +218,7 @@ class SystemInfo:
             import ctypes  # noqa: PLC0415  # windows-only import
 
             class WinOSVersion(ctypes.Structure):
-                _fields_ = [  # noqa: RUF012
+                _fields_: ClassVar = [
                     ("dwOSVersionInfoSize", ctypes.c_ulong),
                     ("dwMajorVersion", ctypes.c_ulong),
                     ("dwMinorVersion", ctypes.c_ulong),

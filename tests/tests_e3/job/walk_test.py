@@ -1,7 +1,7 @@
 """Tests for e3.job."""
 
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -79,7 +79,7 @@ DOWNLOAD_JOB_UID_PREFIX = "download."
 
 
 @pytest.fixture
-def setup_sbx(request: pytest.FixtureRequest) -> None:
+def setup_sbx() -> Generator[None, None, None]:
     """Automatically create a (temporary) sandbox.
 
     That sandbox is created before each test gets executed, and
@@ -87,10 +87,10 @@ def setup_sbx(request: pytest.FixtureRequest) -> None:
     directory upon test tear-down.
     """
     sbx_dirs.set_dirs(root_dir=str(Path.cwd()))
-    request.addfinalizer(sbx_dirs.delete_sbx)
-
     sbx_dirs.delete_sbx()
     sbx_dirs.mkdirs()
+    yield
+    sbx_dirs.delete_sbx()
 
 
 def job_source_basename(uid: str) -> str:

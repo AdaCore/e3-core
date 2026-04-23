@@ -439,7 +439,7 @@ class Run:
                 if sys.platform == "win32":
                     popen_args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-                self.internal = Popen(
+                self.internal = Popen(  # noqa: S603
                     self.cmds[0],
                     **popen_args,  # type: ignore[arg-type]
                 )
@@ -482,7 +482,9 @@ class Run:
                         )
 
                     try:
-                        runs.append(Popen(cmd, **popen_args))  # type: ignore[arg-type]
+                        runs.append(
+                            Popen(cmd, **popen_args)  # type: ignore  # noqa: S603
+                        )
                     except OSError:
                         logger.exception("error when spawning %s", cmd)
                         # We have an error (e.g. file not found), try to kill

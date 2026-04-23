@@ -25,7 +25,7 @@ except ImportError as ie:  # defensive code
 import typing
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Generator
 
 
 class _State:
@@ -108,7 +108,7 @@ def set_git_env_config() -> None:
 
 
 @pytest.fixture(autouse=True)
-def env_protect(request: pytest.FixtureRequest) -> None:
+def env_protect(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Protection against environment change.
 
     The fixture is enabled for all tests and does the following:
@@ -131,13 +131,12 @@ def env_protect(request: pytest.FixtureRequest) -> None:
             del os.environ["E3_HOSTNAME"]
 
         set_git_env_config()
-
-        def restore_env() -> None:
-            Env().restore()
-            rm(tempd, recursive=True)
-
         e3.log.activate(level=logging.DEBUG, e3_debug=True)
-        request.addfinalizer(restore_env)
+        yield
+        Env().restore()
+        rm(tempd, recursive=True)
+    else:
+        yield
 
 
 def pytest_configure(config: pytest.Config) -> None:

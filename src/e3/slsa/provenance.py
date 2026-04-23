@@ -162,7 +162,7 @@ class Builder:
         """
         return self.__id
 
-    @id.setter
+    @id.setter  # noqa: A003
     def id(self, value: str | TypeURI) -> None:
         """Set the build platform ID.
 

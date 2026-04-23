@@ -279,9 +279,7 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
                 return None
 
             # We expect 4 fields for build and host and target
-            split_value = ([k if k else None for k in value.split(",")] + [None] * 4)[
-                0:4
-            ]
+            split_value = ([k or None for k in value.split(",")] + [None] * 4)[0:4]
 
             if split_value[0] == "build":
                 return saved_build

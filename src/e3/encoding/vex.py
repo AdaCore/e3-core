@@ -470,7 +470,7 @@ class Metadata(JsonData):
         """Return the identifier of this metadata."""
         return self._id
 
-    @id.setter
+    @id.setter  # noqa: A003
     def id(self, value: str) -> None:
         self._id = value
 
@@ -826,7 +826,7 @@ class StatementMetadata(JsonData):
         """Return the identifier of this statement metadata."""
         return self._id
 
-    @id.setter
+    @id.setter  # noqa: A003
     def id(self, value: str) -> None:
         self._id = value
 

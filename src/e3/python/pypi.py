@@ -279,7 +279,9 @@ class PyPI:
         identifier = canonicalize_name(name)
         if identifier not in self.cache:
             logger.debug(f"fetch {identifier} links from {self.pypi_url}")
-            pypi_request = requests.get(self.pypi_url + "simple/" + identifier + "/")
+            pypi_request = requests.get(
+                self.pypi_url + "simple/" + identifier + "/", timeout=60
+            )
             pypi_request.raise_for_status()
             pypi_links_parser = PyPILinksParser(identifier, ignore_errors=ignore_errors)
             pypi_links_parser.feed(pypi_request.text)
@@ -403,7 +405,7 @@ class PyPICandidate:
             if self.url.startswith("file://"):
                 cp(self.url.replace("file://", "", 1), download_path)
             else:
-                answer = requests.get(self.url, stream=True)
+                answer = requests.get(self.url, stream=True, timeout=60)
                 with download_path.open("wb") as fd:
                     fd.write(answer.content)
         return str(download_path)

@@ -161,7 +161,7 @@ class BuildInfo:
         """
         if not isinstance(self.store, StoreWriteInterface):
             msg = f"self.store is not a StoreWriteInterface: {type(self.store)}"
-            raise AttributeError(msg)
+            raise TypeError(msg)
         self.isready = self.store.mark_build_ready(bid=self.id)
         return self.isready
 
@@ -408,7 +408,7 @@ class BuildInfo:
         """
         if not isinstance(self.store, StoreWriteInterface):
             msg = f"self.store is not a StoreWriteInterface: {type(self.store)}"
-            raise AttributeError(msg)
+            raise TypeError(msg)
         if self.setup == dest_setup:
             msg = f"Cannot copy into the same setup: {self.setup}"
             raise StoreError(msg)

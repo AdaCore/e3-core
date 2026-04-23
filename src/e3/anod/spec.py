@@ -222,8 +222,8 @@ class Anod:
 
     def __new__(
         cls,
-        *args: Any,
-        **kwargs: Any,
+        *_args: Any,
+        **_kwargs: Any,
     ) -> Any:  # noqa: ANN401  # generic constructor
         """Replace `method` by property when decorator is missing."""
         should_be_property = (
@@ -604,7 +604,7 @@ class Anod:
         """
         # Compute data file location and check for existence
         if Version(self.api_version) >= Version("1.5"):
-            filename = str(Path(self.name, suffix if suffix else "config"))
+            filename = str(Path(self.name, suffix or "config"))
         else:
             filename = "{}{}".format(self.name, "-" + suffix if suffix else "")
         assert filename in self.data_files, "invalid data file: {} ({})".format(

@@ -454,32 +454,26 @@ def test_invalid_spdx() -> None:
 
     add_main(is_main_package=True)
 
+    common_pkg_kwargs: dict = {
+        "version": PackageVersion("1b2"),
+        "spdx_id": SPDXID("my-dep-1b2"),
+        "file_name": PackageFileName("my-dep-1b2.tgz"),
+        "checksum": [SHA1("6876df3aa8780622368173fe6e868a2edc3932c8")],
+        "license_concluded": PackageLicenseConcluded("GPL-3.0-or-later"),
+        "license_declared": None,
+        "license_comments": None,
+        "supplier": PackageSupplier(Organization("AdaCore")),
+        "originator": PackageOriginator(Organization("AdaCore")),
+        "download_location": PackageDownloadLocation(NOASSERTION),
+        "files_analyzed": FilesAnalyzed(value=False),
+        "copyright_text": PackageCopyrightText("2023 AdaCore"),
+        "external_refs": None,
+        "homepage": None,
+    }
+    doc.add_package(Package(name=PackageName("my-dep"), **common_pkg_kwargs))
+    dep_duplicate = Package(name=PackageName("my___-dep"), **common_pkg_kwargs)
     with pytest.raises(InvalidSPDX) as err:
-        for idx in range(2):
-            if idx == 0:
-                name = "my-dep"
-            else:
-                name = "my___-dep"
-            dep: Package = Package(
-                name=PackageName(name),
-                version=PackageVersion("1b2"),
-                spdx_id=SPDXID("my-dep-1b2"),
-                file_name=PackageFileName("my-dep-1b2.tgz"),
-                checksum=[
-                    SHA1("6876df3aa8780622368173fe6e868a2edc3932c8"),
-                ],
-                license_concluded=PackageLicenseConcluded("GPL-3.0-or-later"),
-                license_declared=None,
-                license_comments=None,
-                supplier=PackageSupplier(Organization("AdaCore")),
-                originator=PackageOriginator(Organization("AdaCore")),
-                download_location=PackageDownloadLocation(NOASSERTION),
-                files_analyzed=FilesAnalyzed(value=False),
-                copyright_text=PackageCopyrightText("2023 AdaCore"),
-                external_refs=None,
-                homepage=None,
-            )
-            doc.add_package(dep)
+        doc.add_package(dep_duplicate)
     assert (
         "A package with the same SPDXID SPDXRef-my-dep-1b2 has already been added"
         in str(err)

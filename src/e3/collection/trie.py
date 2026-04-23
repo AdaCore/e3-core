@@ -39,9 +39,9 @@ class Trie:
         """
         self.tree: dict[str, Any] = {}
         self.match_delimiter = match_delimiter
-        self.word_iterator: Callable[[str], Iterable[str]] = lambda x: iter(x)
+        self.word_iterator: Callable[[str], Iterable[str]] = iter
         if use_suffix:
-            self.word_iterator = lambda x: reversed(x)
+            self.word_iterator = reversed
 
         if word_list is not None:
             for word in word_list:
