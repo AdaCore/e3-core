@@ -43,7 +43,7 @@ def cd(path: str | Path) -> None:
     try:
         os.chdir(path)
     except Exception as e:
-        logger.error(e, exc_info=True)
+        logger.exception("can't chdir to %s", path)
         raise OSFSError(origin="cd", message=f"can't chdir to {path}\n") from e
 
 
