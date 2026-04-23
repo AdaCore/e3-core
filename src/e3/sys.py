@@ -231,7 +231,7 @@ def set_python_env(prefix: str) -> None:
         env.add_dll_path(str(Path(prefix, "lib")))
 
 
-def interpreter(prefix: str | None = None) -> str:
+def interpreter(prefix: str | Path | None = None) -> str:
     """Return location of the Python interpreter.
 
     When there are both a python3 and python binary file return the path to
@@ -243,20 +243,22 @@ def interpreter(prefix: str | None = None) -> str:
     """
     if prefix is None:
         return sys.executable
+    if isinstance(prefix, str):
+        prefix = Path(prefix)
     if sys.platform == "win32":  # unix: no cover
-        python3 = Path(prefix, "python3.exe")
+        python3 = prefix / "python3.exe"
         if python3.exists():
             return str(python3)
         # Might be the python location when in a venv
-        python3 = Path(prefix, "Scripts", "python.exe")
+        python3 = prefix / "Scripts" / "python.exe"
         if python3.exists():
             return str(python3)
-        return str(Path(prefix, "python.exe"))
+        return str(prefix / "python.exe")
     # windows: no cover
-    python3 = Path(prefix, "bin", "python3")  # type: ignore[unreachable]
+    python3 = prefix / "bin" / "python3"  # type: ignore[unreachable]
     if python3.exists():
         return str(python3)
-    return str(Path(prefix, "bin", "python"))
+    return str(prefix / "bin" / "python")
 
 
 def python_script(name: str, prefix: str | None = None) -> list[str]:
