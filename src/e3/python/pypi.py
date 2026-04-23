@@ -74,7 +74,7 @@ def get_pip_env(platform: str, python_version: Version) -> dict[str, str]:
         result["sys_platform"] = "darwin"
     elif platform.endswith("-linux"):
         result["sys_platform"] = "linux"
-    elif platform.endswith("-windows") or platform.endswith("-windows64"):
+    elif platform.endswith(("-windows", "-windows64")):
         result["sys_platform"] = "win32"
     else:
         msg = f"Non supported platform {platform}"

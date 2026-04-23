@@ -11,7 +11,6 @@ import re
 import shutil
 import stat
 import sys
-from collections.abc import Iterable
 from pathlib import Path
 from platform import python_version
 from typing import TYPE_CHECKING, NamedTuple
@@ -33,7 +32,7 @@ WSL_SYMLINK_TAG = 0xA000001D
 TIMESTAMP_TOLERANCE = 0.001
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
     from typing import Any
 
 
@@ -621,12 +620,12 @@ def splitall(path: str | Path) -> tuple[str, ...]:
             # os.path.split('/') -> ('/', '')
             dirnames.append(head)
             break
-        elif tail == path:
+        if tail == path:
             # relative paths
             # os.path.split('..') -> ('', '..')
             dirnames.append(tail)
             break
-        elif tail == "":
+        if tail == "":
             # ending with a directory separator
             # os.path.split('a/b/c/') -> ('a/b/c', '')
             pass

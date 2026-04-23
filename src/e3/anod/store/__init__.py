@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import sqlite3
@@ -2386,12 +2387,10 @@ class LocalStore(StoreRW, LocalStoreInterface):
                 query.update(unprocessed_query)
 
                 if not query["bid"] and "setup" in query:
-                    try:
+                    with contextlib.suppress(StoreError):
                         query["bid"] = from_store.get_latest_build_info(
                             setup=query["setup"], date=query.get("date")
                         )["_id"]
-                    except StoreError:
-                        pass
 
                 if query.get("bid"):
                     required_bids.add(query["bid"])

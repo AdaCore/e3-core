@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import contextlib
 import json
 
 from e3.date import utc_timestamp
@@ -26,10 +27,8 @@ def get_payload(token: str) -> dict:
         rem = len(payload) % 4
         if rem > 0:
             payload += "=" * (4 - rem)
-        try:
+        with contextlib.suppress(ValueError, TypeError):
             data = json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))
-        except (ValueError, TypeError):
-            pass
     return data
 
 

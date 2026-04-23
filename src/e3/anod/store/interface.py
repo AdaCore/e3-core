@@ -10,12 +10,12 @@ from e3.hash import sha1
 
 if TYPE_CHECKING:
     import os
+    from pathlib import Path
     from typing import Any, Literal, TypedDict, TypeVar
 
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.component import ComponentDict
     from e3.anod.store.file import FileDict
-    from pathlib import Path
 
     StoreContextManagerType = TypeVar(
         "StoreContextManagerType", bound="_StoreContextManager"

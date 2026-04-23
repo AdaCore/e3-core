@@ -87,13 +87,10 @@ class DAGIterator:
                 for node in self.non_visited:
                     minimal_cycle = self.dag.shortest_path(node, node)
                     if minimal_cycle is not None:
-                        raise DAGError(
-                            "cycle detected: {}".format(
-                                " -> ".join(
-                                    [str(vertex_id) for vertex_id in minimal_cycle]
-                                )
-                            )
+                        msg = "cycle detected: {}".format(
+                            " -> ".join([str(vertex_id) for vertex_id in minimal_cycle])
                         )
+                        raise DAGError(msg)
                 msg = "cycle detected (unknown error)"
                 raise DAGError(msg)
 
@@ -475,7 +472,7 @@ class DAG:
             # We have found our shortest path, so break
             if u == path_source:
                 break
-            elif u is None:
+            if u is None:
                 continue
 
             for u_pred in self.get_predecessors(u):

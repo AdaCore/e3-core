@@ -16,7 +16,7 @@ import e3.log
 import e3.os.fs
 
 
-@pytest.mark.parametrize("ext", (".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"))
+@pytest.mark.parametrize("ext", [".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"])
 def test_unpack(ext: str) -> None:
     """Test unpack."""
     dir_to_pack = str(Path(__file__).parent)
@@ -86,7 +86,7 @@ def test_unpack(ext: str) -> None:
         e3.fs.rm(dest, recursive=True)
 
 
-@pytest.mark.parametrize("ext", (".tar.gz", ".zip"))
+@pytest.mark.parametrize("ext", [".tar.gz", ".zip"])
 def test_unpack_fileobj(ext: str) -> None:
     """Test unpack fileobj."""
     dir_to_pack = str(Path(__file__).parent)
