@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import os
-from collections.abc import Generator
 from pathlib import Path
 from tempfile import NamedTemporaryFile, mkdtemp
 
@@ -26,7 +25,7 @@ except ImportError as ie:  # defensive code
 import typing
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Generator
 
 
 class _State:
