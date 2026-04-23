@@ -207,7 +207,7 @@ def main() -> None:
             pypi.add_wheel(wheel.path)
 
         for req in toplevel_reqs:
-            logger.info(f"Add top-level requirement {str(req)}")
+            logger.info(f"Add top-level requirement {req!s}")
             pypi.add_requirement(req)
 
         packages: set[str] = set()
@@ -232,4 +232,4 @@ def main() -> None:
                 if "discard_from_closure" not in config or not re.search(
                     config["discard_from_closure"], req.name
                 ):
-                    fd.write(f"{str(req)}\n")
+                    fd.write(f"{req!s}\n")
