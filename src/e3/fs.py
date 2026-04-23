@@ -353,16 +353,16 @@ def get_filetree_state(
     content of all files.
     """
 
-    def compute_state(file_path: Path) -> bytes:
+    def compute_state(file_path: Path | os.DirEntry) -> bytes:
         """Compute file state as bytes.
 
         :param file_path: path to the file
         """
-        f_stat = file_path.lstat()
+        f_stat = file_path.stat(follow_symlinks=False)
 
         state = ":".join(
             [
-                str(file_path),
+                os.fspath(file_path),
                 str(f_stat.st_mode),
                 str(f_stat.st_size),
                 str(f_stat.st_mtime),
@@ -385,25 +385,24 @@ def get_filetree_state(
     if path.is_dir():
         # Note that Path now has a walk method but this was added only on 3.12 and
         # for the moment we still support older Python versions.
-        for root, dirs, files in os.walk(path):
+        for _, dirs, files in walk_tree(path):
             if ignore_hidden:
                 ignore_dirs = []
-                for index, name in enumerate(dirs):
-                    if name.startswith("."):
+                for index, dir_entry in enumerate(dirs):
+                    if dir_entry.name.startswith("."):
                         ignore_dirs.append(index)
                 ignore_dirs.reverse()
                 for index in ignore_dirs:
                     del dirs[index]
 
-            for path in files:
-                if ignore_hidden and path.startswith("."):
+            for dir_entry in files:
+                if ignore_hidden and dir_entry.name.startswith("."):
                     continue
 
-                full_path = Path(root) / path
-                result.update(compute_state(full_path))
+                result.update(compute_state(dir_entry))
 
                 if hash_content:
-                    result.update(get_content(full_path))
+                    result.update(get_content(Path(dir_entry.path)))
 
     else:
         result.update(compute_state(path))
