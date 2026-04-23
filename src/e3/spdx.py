@@ -336,8 +336,7 @@ class SPDXID(SPDXEntryStr):
         where [idstring] is a unique string containing letters, numbers, .,
         and/or -.
         """
-        if value.startswith(self.PREFIX):
-            value = value[len(self.PREFIX) :]
+        value = value.removeprefix(self.PREFIX)
         super().__init__(re.sub(SPDXID_R, "", value))
 
     def __str__(self) -> str:
