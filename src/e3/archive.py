@@ -54,7 +54,7 @@ if sys.platform == "win32":
         @classmethod
         def from_file(  # type: ignore[override]
             cls, *args: Any, **kwargs: Any
-        ) -> "E3ZipInfo":
+        ) -> E3ZipInfo:
             """Create a ZipInfo from a file with adjusted executable permissions.
 
             Sets execute permissions (0o555) in external_attr for the file.
@@ -154,7 +154,7 @@ def check_type(
     raise ArchiveError(origin="unpack_archive", message=f'unknown format "{filename}"')
 
 
-def unpack_archive(  # noqa: PLR0915
+def unpack_archive(
     filename: str | Path,
     dest: str | Path,
     fileobj: IO[bytes] | None = None,
@@ -276,8 +276,7 @@ def unpack_archive(  # noqa: PLR0915
                         """
                         for pattern in files:
                             if fnmatch.fnmatch(name, pattern):
-                                if pattern in check_selected:
-                                    check_selected.remove(pattern)
+                                check_selected.discard(pattern)
                                 return True
                         return False
 
@@ -337,7 +336,7 @@ def unpack_archive(  # noqa: PLR0915
             nb_files = len(list(Path(tmp_dest).iterdir()))
             if nb_files == 0:
                 # Nothing to do...
-                return
+                return None
             if nb_files > 1:
                 if remove_root_dir != "auto":
                     raise ArchiveError(

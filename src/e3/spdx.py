@@ -105,7 +105,6 @@ class SPDXEntry(metaclass=ABCMeta):
     @abstractmethod
     def __str__(self) -> str:
         """Return string representation of SPDX entry."""
-        pass
 
     def __format__(self, format_spec: str) -> str:
         """Format the entry.

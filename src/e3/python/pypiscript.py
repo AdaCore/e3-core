@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from sys import version_info as python_version_info
 
@@ -175,7 +175,8 @@ def main() -> None:
                 split_version = version.split(".")
                 if len(split_version) == VERSION_PARTS_MAJOR_MINOR:
                     # We have a major and minor but no patch so add it automatically
-                    version = f"{version}.{datetime.today().strftime('%Y%m%d%H%M')}"
+                    now = datetime.now(tz=timezone.utc).strftime("%Y%m%d%H%M")
+                    version = f"{version}.{now}"
                     with version_file.open("w") as fd:
                         fd.write(version)
 

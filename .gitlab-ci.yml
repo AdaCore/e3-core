@@ -60,7 +60,6 @@ include:
       else
         source /it/activate-py${PYTHON_VERSION:0:1}${PYTHON_VERSION:2}
       fi
-
 .linux-common:
   extends:
     - .linux-image
@@ -173,6 +172,7 @@ run linux tests:
         source /it/activate-python $PYTHON_VERSION
       fi
     - mkdir -p "C:/tmp/Trash"
+    - python --version
 
 .windows-common:
   extends:

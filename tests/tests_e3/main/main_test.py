@@ -37,7 +37,7 @@ def test_mainprog() -> None:
     assert "testmain" in p.out
 
 
-# TODO:: Rework this test. It ends up creating a 1600 seconds long test on
+# ???: Rework this test. It ends up creating a 1600 seconds long test on
 #        linux (probably due to a timeout since we are offline), and about 250
 #        seconds on Windows.
 #

@@ -32,10 +32,10 @@ if TYPE_CHECKING:
     from requests.models import Response
 
     class _Fileobj(Protocol):
-        def write(self, __b: bytes) -> object:
+        def write(self, b: bytes, /) -> object:
             """Write bytes to file.
 
-            :param __b: bytes to write
+            :param b: bytes to write
             """
             ...
 

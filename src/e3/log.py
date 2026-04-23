@@ -124,7 +124,7 @@ class E3LoggerAdapter(logging.LoggerAdapter):
     def process(
         self,
         msg: Any,  # noqa: ANN401  # standard LoggerAdapter.process signature
-        kwargs: Any,
+        kwargs: Any,  # noqa: ANN401  # standard LoggerAdapter.process signature
     ) -> tuple[Any, Any]:
         """Allow to handle extra parameter.
 
@@ -329,7 +329,9 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
         tqdm.write(msg, file=sys.stderr)
 
 
-def getLogger(name: str | None = None, prefix: str = "e3") -> E3LoggerAdapter:
+def getLogger(  # noqa: N802
+    name: str | None = None, prefix: str = "e3"
+) -> E3LoggerAdapter:
     """Get a logger with a default handler doing nothing.
 
     Calling this function instead of logging.getLogger will avoid warnings

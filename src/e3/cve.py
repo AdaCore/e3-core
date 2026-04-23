@@ -1,5 +1,4 @@
-"""CVE (Common Vulnerabilities and Exposures) and \
-   NVD (National Vulnerability Database) utilities."""
+"""CVE (Common Vulnerabilities and Exposures) and NVD utilities."""
 
 from __future__ import annotations
 

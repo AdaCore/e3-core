@@ -6,6 +6,7 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -370,7 +371,7 @@ def test_component_metadata(store: StoreRW) -> None:
 
     # More code coverage for the set_metadata_statement() method
     with pytest.raises(
-        StoreError, match="Metadata statement should be a DSSE envelope."
+        StoreError, match=re.escape("Metadata statement should be a DSSE envelope.")
     ):
         comp.set_metadata_statement("Not-a-DSSE", None)
 

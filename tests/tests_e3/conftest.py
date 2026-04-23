@@ -24,7 +24,7 @@ from e3.pytest import require_tool
 from e3.python.wheel import Wheel
 
 if TYPE_CHECKING:
-    from collections.abc import Set
+    from collections.abc import Set as AbstractSet
 
     from requests_mock import Context, Mocker, Request
 
@@ -242,7 +242,7 @@ class MavenCentralSimulator:
         self,
         group: str,
         name: str,
-        versions: Set[str],
+        versions: AbstractSet[str],
         *,
         latest: str | None = None,
         release: str | None = None,

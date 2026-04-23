@@ -159,8 +159,7 @@ def echo_to_file(
             fd.seek(0, 2)
 
         if isinstance(content, list):
-            fd.write("\n".join(content))
-            fd.write("\n")
+            fd.writelines(line + "\n" for line in content)
         else:
             fd.write(content)
 

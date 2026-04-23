@@ -68,7 +68,7 @@ class AmberCPUSupport(PlatformDBPlugin):
         )
 
 
-@lru_cache()
+@lru_cache
 def get_knowledge_base() -> KnowledgeBase:
     """Load the knowledge base, including all content from plugins.
 

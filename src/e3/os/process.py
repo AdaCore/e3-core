@@ -202,7 +202,7 @@ def enable_commands_handler(filename: str | Path, mode: str = "a") -> logging.Ha
 
             :param record: log record to filter
             """
-            return True if record.name == "e3." + CMD_LOGGER_NAME else False
+            return record.name == "e3." + CMD_LOGGER_NAME
 
     # Here we don't attach the handler directly to the cmdline logger. Indeed
     # in class like e3.Main we do attach handlers to the root logger. In that
@@ -338,7 +338,7 @@ class Run:
                     header = f.read()[0:2]
                 except UnicodeDecodeError:
                     # unknown header - cannot decode the first two bytes
-                    return cmd_line
+                    header = ""
                 if header != "#!":
                     # Unknown header
                     return cmd_line
@@ -905,7 +905,7 @@ def kill_process_tree(
         )
         e3.log.debug("%d processes killed", len(gone))
         for p in alive:  # defensive code
-            logger.warn("process %s survived kill()", p)
+            logger.warning("process %s survived kill()", p)
 
         return True
     except psutil.TimeoutExpired as err:  # defensive code

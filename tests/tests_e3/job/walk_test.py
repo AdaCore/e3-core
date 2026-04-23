@@ -175,9 +175,7 @@ class ControlledJob(ProcessJob):
         elif (
             self.uid.endswith("notready:once")
             and self.run_count < NOT_READY_RUN_COUNT_THRESHOLD
-        ):
-            result.append(f"import sys; sys.exit({ReturnValue.notready.value})")
-        elif self.uid.endswith("notready:always"):
+        ) or self.uid.endswith("notready:always"):
             result.append(f"import sys; sys.exit({ReturnValue.notready.value})")
         elif self.uid.startswith(DOWNLOAD_JOB_UID_PREFIX):
             result.append(

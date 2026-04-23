@@ -93,8 +93,10 @@ class ActionOrImpact(JsonData):
         return cls(
             statement=obj["statement"],
             timestamp=(
-                (lambda dt: dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc))(
-                    date_parse(obj["timestamp"])
+                (
+                    dt
+                    if (dt := date_parse(obj["timestamp"])).tzinfo
+                    else dt.replace(tzinfo=timezone.utc)
                 )
                 if obj["timestamp"]
                 else None
@@ -574,7 +576,7 @@ class Product(JsonData):
             supplier=obj["supplier"],
             subcomponents=(
                 [SubProductId.from_dict(sc) for sc in obj["subcomponents"]]
-                if "subcomponents" in obj and obj["subcomponents"]
+                if obj.get("subcomponents")
                 else None
             ),
         )
@@ -949,7 +951,7 @@ class StatementStatus(JsonData):
             impact=ActionOrImpact.from_dict(obj["impact"]) if "impact" in obj else None,
             justification=obj["justification"],
             action=ActionOrImpact.from_dict(obj["action"]) if "action" in obj else None,
-            notes=obj["notes"] if "notes" in obj else None,
+            notes=obj.get("notes"),
         )
 
 
