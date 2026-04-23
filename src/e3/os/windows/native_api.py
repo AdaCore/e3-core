@@ -579,7 +579,7 @@ if sys.platform == "win32":
     NT.init_api()
 
 
-class NTException(E3Error):
+class NTExceptionError(E3Error):
     """Exception raised for Windows NT API errors."""
 
     def __init__(self, status: int, message: str, origin: str | None = None) -> None:
@@ -600,3 +600,6 @@ class NTException(E3Error):
             self.status,
             Status.msgs.get(self.status, "unknown"),
         )
+
+
+NTException = NTExceptionError  # backward compat

@@ -58,8 +58,11 @@ def get_entity(value: str | None) -> Organization | Person | Tool | None:
     return None
 
 
-class InvalidSPDX(Exception):
+class InvalidSPDXError(Exception):
     """Raise an exception when the SPDX document cannot be generated."""
+
+
+InvalidSPDX = InvalidSPDXError  # backward compat
 
 
 class SPDXPackageSupplier(Enum):
