@@ -13,6 +13,8 @@ import stat
 import sys
 from pathlib import Path
 from platform import python_version
+from queue import SimpleQueue
+from threading import Thread
 from typing import TYPE_CHECKING, NamedTuple
 
 from packaging.version import Version
@@ -21,6 +23,7 @@ import e3
 import e3.error
 import e3.log
 import e3.os.fs
+import e3.os.process
 from e3.collection.trie import Trie
 
 logger = e3.log.getLogger("fs")
@@ -30,6 +33,48 @@ WSL_SYMLINK_TAG = 0xA000001D
 
 # Timestamp comparison tolerance (in seconds)
 TIMESTAMP_TOLERANCE = 0.001
+
+# FICLONE ioctl (linux). The constant is not declared before Python 3.12
+# This is use to make COW file copies on Linux filesystems that support it
+FICLONE = 0x40049409
+
+# Minimal major verion of linux kernel needed for support of FICLONE (reflinks)
+FICLONE_MINIMAL_KERNEL_VERSION = 5
+
+# Windows reserved file names
+WINDOWS_RESERVED_FILENAMES = {
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    "com1",
+    "com2",
+    "com3",
+    "com4",
+    "com5",
+    "com6",
+    "com7",
+    "com8",
+    "com9",
+    "com0",
+    "lpt1",
+    "lpt2",
+    "lpt3",
+    "lpt4",
+    "lpt5",
+    "lpt6",
+    "lpt7",
+    "lpt8",
+    "lpt9",
+    "lpt0",
+}
+
+if sys.platform == "linux":
+    import fcntl
+
+if sys.platform == "win32":
+    import msvcrt
+    from ctypes import byref, windll, wintypes
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable, Sequence
@@ -763,6 +808,11 @@ VCS_IGNORE_LIST = (
     "comment",
 )
 
+SYNC_BREAK = 0
+SYNC_MKDIR = 1
+SYNC_RM = 2
+SYNC_COPY = 3
+
 
 def sync_tree(  # noqa: PLR0915
     source: str | Path,
@@ -774,6 +824,8 @@ def sync_tree(  # noqa: PLR0915
     delete_ignore: bool = False,
 ) -> tuple[list[str], list[str]]:
     """Synchronize the files and directories between two directories.
+
+    Use a Pure Python implementation.
 
     :param source: the directory from where the files and directories
         need to be copied
@@ -795,16 +847,41 @@ def sync_tree(  # noqa: PLR0915
     :param delete_ignore: if True files that are explicitly ignored
         are deleted. Note delete should be set to True in that case.
     """
+    # Note that this function does not always use Path objects on purpose. Indeed
+    # when dealing with large tree, there is a significant hit in doing creating
+    # the object and then calling str on it.
 
     class FileInfo(NamedTuple):
         path: str
         stat: os.stat_result | None
         basename: str
+        dirname: str
 
     class FilesInfo(NamedTuple):
         rel_path: str
         source: FileInfo
         target: FileInfo
+
+    # Queue used to parallelize the implementation
+    io_queue: SimpleQueue = SimpleQueue()
+    error_queue: SimpleQueue = SimpleQueue()
+
+    # This is used by the Windows version as a copy buffer. The
+    # observed gain of reusing that buffer is around 10-15%
+    copy_buffer = memoryview(bytearray(1024 * 1024))
+
+    # For linux only
+    try_ficlone = False
+    try_sendfile = False
+
+    # Some os function that may be os specific
+    os_chmod = getattr(os, "chmod", None)
+    os_fchmod = getattr(os, "fchmod", None)
+    os_lchmod = getattr(os, "lchmod", None)
+    os_chflags = getattr(os, "chflags", None)
+    os_lchflags = getattr(os, "lchflags", None)
+    os_utime = getattr(os, "utime", None)
+    os_has_st_flags = hasattr(os.stat_result, "st_flags")
 
     # Normalize casing function for path comparison. path_key function
     # return a version of the path that is in lower case for case sensitive
@@ -876,7 +953,7 @@ def sync_tree(  # noqa: PLR0915
             or ignore_path_suffixes.match(pk)
             or (
                 ignore_base_regexp is not None
-                and bool(re.match(ignore_base_regexp, Path(pk).name))
+                and bool(re.match(ignore_base_regexp, pk.rsplit("/", 1)[-1]))
             )
         )
 
@@ -942,19 +1019,6 @@ def sync_tree(  # noqa: PLR0915
         """
         return fi.stat is not None and stat.S_ISREG(fi.stat.st_mode)
 
-    def cmp_files(src: FileInfo, dst: FileInfo) -> bool:
-        """Fast compare two files."""
-        bufsize = 8 * 1024
-        with Path(src.path).open("rb") as fp1, Path(dst.path).open("rb") as fp2:
-            while True:
-                b1 = fp1.read(bufsize)
-                b2 = fp2.read(bufsize)
-                if b1 != b2:
-                    return False
-
-                if len(b1) < bufsize:
-                    return True
-
     def need_update(src: FileInfo, dst: FileInfo) -> bool:
         """Check if dst file should updated.
 
@@ -963,13 +1027,28 @@ def sync_tree(  # noqa: PLR0915
 
         :return: True if we should update dst
         """
-        # when not preserving timestamps we cannot rely on the timestamps to
-        # check if a file is up-to-date. In that case do a full content
-        # comparison as last check.
+        # When not preserving timestamps, treat source files as needing
+        # update only when they are at least as new as the destination.
+        # This is faster than a content comparison, but can miss stale
+        # targets with newer mtimes.
+
         if dst.stat is None:
             return True
+
+        assert src.stat is not None
+
         src_mode = stat.S_IFMT(src.stat.st_mode)  # type: ignore[union-attr]
         dst_mode = stat.S_IFMT(dst.stat.st_mode)
+
+        # For directories compare only the mode and the basename
+        if (
+            isdir(dst)
+            and isdir(src)
+            and src_mode == dst_mode
+            and src.basename == dst.basename
+        ):
+            return False
+
         src_mtime = src.stat.st_mtime  # type: ignore[union-attr]
         dst_mtime = dst.stat.st_mtime
         return (
@@ -978,7 +1057,7 @@ def sync_tree(  # noqa: PLR0915
                 preserve_timestamps and abs(src_mtime - dst_mtime) > TIMESTAMP_TOLERANCE
             )
             or src.stat.st_size != dst.stat.st_size  # type: ignore[union-attr]
-            or (not preserve_timestamps and isfile(src) and not cmp_files(src, dst))
+            or (not preserve_timestamps and isfile(src) and src_mtime >= dst_mtime)
             or src.basename != dst.basename
         )
 
@@ -992,13 +1071,13 @@ def sync_tree(  # noqa: PLR0915
         mode = stat.S_IMODE(src.stat.st_mode)
 
         if islink(src):  # windows: no cover
-            if hasattr(os, "lchmod"):
-                getattr(os, "lchmod")(dst.path, mode)  # noqa: B009
+            if os_lchmod:
+                os_lchmod(dst.path, mode)
 
-            if hasattr(os, "lchflags") and hasattr(src.stat, "st_flags"):
+            if os_lchflags and os_has_st_flags:
                 try:
                     st_flags = src.stat.st_flags  # type: ignore[attr-defined]
-                    getattr(os, "lchflags")(dst.path, st_flags)  # noqa: B009
+                    os_lchflags(dst.path, st_flags)
                 except OSError as why:  # defensive code
                     import errno  # noqa: PLC0415  # check platform-specific error code
 
@@ -1010,17 +1089,17 @@ def sync_tree(  # noqa: PLR0915
 
                     logger.debug("lchflags: operation not supported [EOPNOTSUPP]")
         else:
-            if hasattr(os, "utime"):
+            if os_utime:
                 if preserve_timestamps:
-                    os.utime(dst.path, ns=(src.stat.st_atime_ns, src.stat.st_mtime_ns))
+                    os_utime(dst.path, ns=(src.stat.st_atime_ns, src.stat.st_mtime_ns))
                 else:
-                    os.utime(dst.path, None)
-            if hasattr(os, "chmod"):
-                Path(dst.path).chmod(mode)
-            if hasattr(os, "chflags") and hasattr(src.stat, "st_flags"):
+                    os_utime(dst.path, None)
+            if os_chmod:
+                os_chmod(dst.path, mode)
+            if os_chflags and os_has_st_flags:
                 try:
                     st_flags = src.stat.st_flags  # type: ignore[attr-defined]
-                    getattr(os, "chflags")(dst.path, st_flags)  # noqa: B009
+                    os_chflags(dst.path, st_flags)
                 except OSError as why:  # defensive code
                     import errno  # noqa: PLC0415  # check platform-specific error code
 
@@ -1032,12 +1111,185 @@ def sync_tree(  # noqa: PLR0915
 
                     logger.debug("chflags: operation not supported [EOPNOTSUPP]")
 
+    def safe_copy_sendfile(src: FileInfo, dst: FileInfo) -> None:
+        """Version of safe_copy that use sendfile (linux only).
+
+        Note that this function assume the source file exists and is a regular
+        file.
+
+        :param src: source file
+        :param dst: destination file
+        """
+        nonlocal try_sendfile
+        assert src.stat is not None
+        dst_fd = None
+        src_fd = None
+        try:
+            src_fd = os.open(src.path, os.O_RDONLY)
+            dst_fd = os.open(
+                dst.path,
+                os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+                mode=src.stat.st_mode,
+            )
+
+            offset = 0
+
+            # Try to send the file in as a whole. Some code suggest
+            # to have a minimum value of 8MB. Don't exceed 2GB as
+            # suggested by the documentation.
+            blocksize = min(max(src.stat.st_size, 2**23), 2**32)
+
+            while True:
+                sent = os.sendfile(dst_fd, src_fd, offset, blocksize)
+                offset += sent
+                if sent == 0 or offset == src.stat.st_size:
+                    break
+
+            if isfile(dst):
+                # If dst was already a file open does not adjust the mode
+                os.fchmod(dst_fd, src.stat.st_mode)
+
+            if preserve_timestamps and os_utime:
+                os_utime(dst_fd, ns=(src.stat.st_atime_ns, src.stat.st_mtime_ns))
+
+        except OSError:
+            # We will probably have the same issue with all files
+            # of that call. Disable sendfile
+            try_sendfile = False
+            raise
+        finally:
+            if src_fd is not None:
+                os.close(src_fd)
+            if dst_fd is not None:
+                os.close(dst_fd)
+
+    def safe_copy_ficlone(src: FileInfo, dst: FileInfo) -> None:
+        """Version of safe_copy that use ficlone ioctl (linux only).
+
+        Note that this function assume the source file exists and is a regular
+        file. This copy method works only when using filesystems that support
+        reflinks (i.e: Copy-On-Write). For example XFS or BTRFS have such support
+        whereas EXT4 doesn't.
+
+        :param src: source file
+        :param dst: destination file
+        """
+        nonlocal try_ficlone
+        assert src.stat is not None
+        dst_fd = None
+        src_fd = None
+        try:
+            src_fd = os.open(src.path, os.O_RDONLY)
+            dst_fd = os.open(
+                dst.path,
+                os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+                mode=src.stat.st_mode,
+            )
+
+            fcntl.ioctl(dst_fd, FICLONE, src_fd)
+
+            if isfile(dst):
+                # If dst was already a file open does not adjust the mode
+                os.fchmod(dst_fd, src.stat.st_mode)
+
+            if not preserve_timestamps and os_utime:
+                # By default FICLONE preserve timestamps. So adjust timestamp to now
+                # only if preserve_timestamps is False.
+                os_utime(dst_fd, None)
+
+        except OSError:
+            # We will probably have the same issue with all files
+            # of that call. Disable FICLONE
+            try_ficlone = False
+            raise
+
+        finally:
+            if src_fd is not None:
+                os.close(src_fd)
+            if dst_fd is not None:
+                os.close(dst_fd)
+
+    def safe_copy_generic(src: FileInfo, dst: FileInfo) -> None:
+        """Copy a regular file using the generic method.
+
+        Note that this function assume the source file exists and is a regular
+        file.
+
+        :param src: source file
+        :param dst: destination file
+        """
+        # Windows I/O are slow. This code comes from the implementation
+        # of shutil.copyfile with the additional optimization that
+        # the buffer is reused for all files part of the given
+        # sync_tree
+        if sys.platform == "win32":
+            dst_fd = None
+            src_f = None
+            try:
+                base, _ = os.path.splitext(src.basename)  # noqa: PTH122
+                if base.lower() not in WINDOWS_RESERVED_FILENAMES:
+                    # We need to open the source file using open rather than
+                    # os.open in order to have access to readinto
+                    src_f = open(src.path, "rb")  # noqa: PTH123, SIM115
+                    dst_fd = os.open(
+                        dst.path,
+                        os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_BINARY,
+                        mode=src.stat.st_mode,
+                    )
+
+                    while True:
+                        n = src_f.readinto(copy_buffer)
+                        if not n:
+                            break
+
+                        if n < 1024 * 1024:
+                            with copy_buffer[:n] as smv:
+                                os.write(dst_fd, smv)
+                            break
+
+                        os.write(dst_fd, copy_buffer)
+
+                    if preserve_timestamps:
+                        # Don't use os.utime here as it will force us to close
+                        # and reopen the destination file.
+                        timestamp = 11644473600 * 10000000 + src.stat.st_mtime_ns // 100
+                        win_mtime = wintypes.FILETIME(
+                            timestamp & 0xFFFFFFFF, timestamp >> 32
+                        )
+                        windll.kernel32.SetFileTime(
+                            msvcrt.get_osfhandle(dst_fd),
+                            None,
+                            None,
+                            byref(win_mtime),
+                        )
+                    if isfile(dst) and os_fchmod:
+                        # If the file is not created open does not set the mode
+                        # Starting with Python 3.13 fchmod is available. Prefer
+                        # that method in order not to have to re-open the file
+                        os_fchmod(dst_fd, src.stat.st_mode)
+            finally:
+                if src_f is not None:
+                    src_f.close()
+                if dst_fd is not None:
+                    os.close(dst_fd)
+
+                    if isfile(dst) and not os_fchmod:
+                        # Needed on Python < 3.13
+                        os_chmod(dst.path, src.stat.st_mode)
+        else:
+            # In all other cases copyfile should pick the best option
+            # Don't use copyfileobj that use a dummy buffer approach.
+            shutil.copyfile(src.path, dst.path)
+            copystat(src, dst)
+
     def safe_copy(src: FileInfo, dst: FileInfo) -> None:
         """Copy src file into dst preserving all attributes.
 
         :param src: the source FileInfo object
         :param dst: the target FileInfo object
         """
+        assert src.stat is not None
+
         if islink(src):  # windows: no cover
             linkto = e3.os.fs.readlink(src.path)
             if not is_native_link(dst) or e3.os.fs.readlink(dst.path) != linkto:
@@ -1070,6 +1322,7 @@ def sync_tree(  # noqa: PLR0915
                             str(src_linkto_path),
                             os.lstat(src_linkto_path),
                             src_linkto_path.name,
+                            str(Path(src.path).parent),
                         )
 
                         if not islink(src_linkto):
@@ -1103,26 +1356,24 @@ def sync_tree(  # noqa: PLR0915
                         # target file and redo a copy. This occurs for example
                         # on Windos with NTFS.
                         rm(dst.path, glob=False)
+
                     dst = FileInfo(
                         str(Path(dst.path).parent / src.basename),
                         None,
                         src.basename,
+                        str(Path(dst.path).parent),
                     )
 
-                with (
-                    Path(src.path).open("rb") as fsrc,
-                    Path(dst.path).open("wb") as fdst,
-                ):
-                    shutil.copyfileobj(fsrc, fdst)
+                if try_ficlone:
+                    safe_copy_ficlone(src, dst)
+                elif try_sendfile:
+                    safe_copy_sendfile(src, dst)
+                else:
+                    safe_copy_generic(src, dst)
             except OSError:
                 if dst.stat is not None:
                     rm(dst.path, glob=False)
-                with (
-                    Path(src.path).open("rb") as fsrc,
-                    Path(dst.path).open("wb") as fdst,
-                ):
-                    shutil.copyfileobj(fsrc, fdst)
-            copystat(src, dst)
+                safe_copy_generic(src, dst)
 
     def safe_mkdir(src: FileInfo, dst: FileInfo) -> None:
         """Create a directory modifying parent directory permissions if needed.
@@ -1135,9 +1386,9 @@ def sync_tree(  # noqa: PLR0915
         try:
             # Final dirname with right casing
             if dst.basename != src.basename:
-                dest_dir = Path(dst.path).parent / src.basename
+                dest_dir = os.path.join(dst.dirname, src.basename)  # noqa: PTH118
             else:
-                dest_dir = Path(dst.path)
+                dest_dir = dst.path
 
             if isdir(dst):
                 # For directories in case of non-matching casing just do a rename
@@ -1146,7 +1397,7 @@ def sync_tree(  # noqa: PLR0915
                 if dst.basename != src.basename:
                     Path(dst.path).rename(dest_dir)
             else:
-                Path(dest_dir).mkdir(parents=True)
+                os.makedirs(dest_dir)  # noqa: PTH103
         except OSError:
             # in case of error to change parent directory
             # permissions. The permissions will be then
@@ -1157,7 +1408,7 @@ def sync_tree(  # noqa: PLR0915
                 if dst.basename != src.basename:
                     Path(dst.path).rename(dest_dir)
             else:
-                Path(dest_dir).mkdir(parents=True)
+                os.makedirs(dest_dir)  # noqa: PTH103
 
     def walk(
         root_dir: str, target_root_dir: str, entry: FilesInfo | None = None
@@ -1177,15 +1428,13 @@ def sync_tree(  # noqa: PLR0915
 
             entry = FilesInfo(
                 "",
-                FileInfo(root_dir, os.lstat(root_dir), ""),
-                FileInfo(target_root_dir, target_stat, ""),
+                FileInfo(root_dir, os.lstat(root_dir), "", ""),
+                FileInfo(target_root_dir, target_stat, "", ""),
             )
             yield entry
 
         try:
-            source_names = {
-                path_key(p.name): p.name for p in Path(entry.source.path).iterdir()
-            }
+            source_names = {path_key(p.name): p for p in os.scandir(entry.source.path)}
         except Exception:  # defensive code  # noqa: BLE001
             e3.log.debug("cannot get sources list", exc_info=True)
             # Don't crash in case a source directory cannot be read
@@ -1195,7 +1444,7 @@ def sync_tree(  # noqa: PLR0915
         if isdir(entry.target):
             try:
                 target_names = {
-                    path_key(p.name): p.name for p in Path(entry.target.path).iterdir()
+                    path_key(p.name): p for p in os.scandir(entry.target.path)
                 }
             except Exception:  # noqa: BLE001
                 e3.log.debug("cannot get targets list", exc_info=True)
@@ -1206,35 +1455,37 @@ def sync_tree(  # noqa: PLR0915
         result = []
         for name in all_names:
             rel_path = f"{entry.rel_path}/{name}"
+            source_info = source_names.get(name)
+            if source_info is not None:
+                src_base = source_info.name
+                src_stat = source_info.stat(follow_symlinks=False)
+            else:
+                src_base = name
+                src_stat = None
+            src_path = os.path.join(entry.source.path, src_base)  # noqa: PTH118
 
-            source_full_path = Path(entry.source.path, source_names.get(name, name))
-            target_full_path = Path(entry.target.path, target_names.get(name, name))
-            source_stat = None
-            target_stat = None
+            target_info = target_names.get(name)
+            if target_info is not None:
+                tgt_base = target_info.name
+                tgt_stat = target_info.stat(follow_symlinks=False)
+            else:
+                tgt_base = name
+                tgt_stat = None
+            tgt_path = os.path.join(entry.target.path, tgt_base)  # noqa: PTH118
 
-            if name in source_names:
-                source_stat = os.lstat(source_full_path)
-
-            source_file = FileInfo(
-                str(source_full_path), source_stat, source_full_path.name
-            )
-
-            if name in target_names:
-                target_stat = os.lstat(target_full_path)
-
-            target_file = FileInfo(
-                str(target_full_path), target_stat, target_full_path.name
-            )
+            source_file = FileInfo(src_path, src_stat, src_base, entry.source.path)
+            target_file = FileInfo(tgt_path, tgt_stat, tgt_base, entry.target.path)
 
             result.append(FilesInfo(rel_path, source_file, target_file))
 
         for el in result:
             if is_in_ignore_list(el.rel_path):
-                logger.debug("ignore %s", el.rel_path)
                 if delete_ignore:
                     yield FilesInfo(
                         el.rel_path,
-                        FileInfo(el.source.path, None, el.source.basename),
+                        FileInfo(
+                            el.source.path, None, el.source.basename, el.source.dirname
+                        ),
                         el.target,
                     )
             elif is_in_file_list(el.rel_path):
@@ -1244,7 +1495,9 @@ def sync_tree(  # noqa: PLR0915
             else:
                 yield FilesInfo(
                     el.rel_path,
-                    FileInfo(el.source.path, None, el.source.basename),
+                    FileInfo(
+                        el.source.path, None, el.source.basename, el.source.dirname
+                    ),
                     el.target,
                 )
 
@@ -1271,27 +1524,70 @@ def sync_tree(  # noqa: PLR0915
     else:
         source_top = os.path.realpath(source_top, strict=True)
 
+    # Check if we can use on Linux the FICLONE call and/or sendfile
+    if sys.platform == "linux":
+        if int(os.uname().release.split(".", 1)[0]) >= FICLONE_MINIMAL_KERNEL_VERSION:
+            try_ficlone = True
+        try_sendfile = True
+
     # Keep track of deleted and updated files
     deleted_list: list[str] = []
     updated_list: list[str] = []
 
-    for wf in walk(source_top, target_top):
-        if wf.source.stat is None and wf.target.stat is not None:
-            # Entry that exist only in the target file tree. Check if we
-            # should delete it
-            if delete:
-                rm(wf.target.path, recursive=True, glob=False)
-                deleted_list.append(wf.target.path)
-        # At this stage we have an element to synchronize in
-        # the source tree.
-        elif need_update(wf.source, wf.target):
-            if isfile(wf.source) or islink(wf.source):
-                safe_copy(wf.source, wf.target)
-                updated_list.append(wf.target.path)
-            elif isdir(wf.source):
-                safe_mkdir(wf.source, wf.target)
-                updated_list.append(wf.target.path)
-                copystat_dir_list.append((wf.source, wf.target))
+    def io_task() -> None:
+        """Task in charge of mkdir, cp and rm operations."""
+        while True:
+            io_work, wf = io_queue.get()
+            try:
+                if io_work == SYNC_BREAK:
+                    break
+
+                if io_work == SYNC_RM:
+                    rm(wf.target.path, recursive=True, glob=False)
+
+                elif io_work == SYNC_MKDIR:
+                    safe_mkdir(wf.source, wf.target)
+
+                elif io_work == SYNC_COPY:
+                    safe_copy(wf.source, wf.target)
+            except Exception as e:  # noqa: BLE001
+                error_queue.put(str(e))
+                break
+
+    try:
+        io_worker = Thread(target=io_task, daemon=True)
+        io_worker.start()
+
+        for wf in walk(source_top, target_top):
+            if wf.source.stat is None and wf.target.stat is not None:
+                # Entry that exist only in the target file tree. Check if we
+                # should delete it
+                if delete:
+                    io_queue.put((SYNC_RM, wf))
+                    deleted_list.append(wf.target.path)
+
+            # At this stage we have an element to synchronize in
+            # the source tree.
+            elif need_update(wf.source, wf.target):
+                if isfile(wf.source) or islink(wf.source):
+                    io_queue.put((SYNC_COPY, wf))
+                    updated_list.append(os.path.relpath(wf.target.path, target_top))
+                elif isdir(wf.source):
+                    io_queue.put((SYNC_MKDIR, wf))
+                    updated_list.append(os.path.relpath(wf.target.path, target_top))
+                    copystat_dir_list.append((wf.source, wf.target))
+
+    finally:
+        # First ensure that io_worker finish its tasks
+        io_queue.put((SYNC_BREAK, None))
+        io_worker.join()
+
+        # Finally check for errors
+        if not error_queue.empty():
+            # Using empty is safe as this is the only location where we
+            # read the error queue.
+            msg = error_queue.get()
+            raise FSError(origin="py_sync_tree", message=msg)
 
     # Adjust directory permissions once all files have been copied
     for d in copystat_dir_list:

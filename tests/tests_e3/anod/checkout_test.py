@@ -37,11 +37,6 @@ def test_rsync_mode() -> None:
     m = CheckoutManager(name="myrepo", working_dir="work")
     m.update(vcs="external", url=os.path.abspath("git"))
 
-    os.environ["E3_ENABLE_FEATURE"] = "use-rsync"
-
-    m = CheckoutManager(name="myrepo", working_dir="work2")
-    m.update(vcs="external", url=os.path.abspath("git"))
-
 
 class TestCheckout:
     """Test suite for CheckoutManager functionality."""
@@ -116,6 +111,10 @@ class TestCheckout:
         touch("git2/ignore_file.txt")
         with Path("git2/.gitignore").open("w") as fd:
             fd.write("/ignore_file.txt")
+        now = time.time()
+        os.utime("git2/file4.txt", (now - 2, now - 2))
+        os.utime("git2/ignore_file.txt", (now - 2, now - 2))
+        os.utime("git2/.gitignore", (now - 2, now - 2))
 
         result = m.update(vcs="external", url=os.path.abspath("git2"))
         assert Path(m.working_dir, "file4.txt").is_file()
