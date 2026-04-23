@@ -32,12 +32,116 @@ WSL_SYMLINK_TAG = 0xA000001D
 TIMESTAMP_TOLERANCE = 0.001
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Sequence
+    from collections.abc import Callable, Generator, Iterable, Sequence
     from typing import Any
 
 
 class FSError(e3.error.E3Error):
     """Exception raised for file system operations errors."""
+
+
+def walk_tree(
+    path: str | Path, *, topdown: bool = True, follow_symlinks: bool = False
+) -> Generator[tuple[str, list[os.DirEntry], list[os.DirEntry]]]:
+    """Copy of the Python implementation of walk that returns DirEntry.
+
+    The main advantage of DirEntry is that on Windows it contains both the path
+    and the stat information which on Windows can save a significant amount of time
+    as both information are returned by the API in one call.
+
+    See os.walk documentation
+    """
+    stack: list[str | tuple[str, list[os.DirEntry], list[os.DirEntry]]] = [
+        os.fspath(path)
+    ]
+    islink, join = os.path.islink, os.path.join
+
+    while stack:
+        top = stack.pop()
+        if not isinstance(top, str):
+            yield top
+            continue
+
+        dirs = []
+        nondirs = []
+        walk_dirs = []
+
+        # We may not have read permission for top, in which case we can't
+        # get a list of the files the directory contains.
+        # We suppress the exception here, rather than blow up for a
+        # minor reason when (say) a thousand readable directories are still
+        # left to visit.
+        try:
+            scandir_it = os.scandir(top)
+        except OSError:
+            continue
+
+        cont = False
+        with scandir_it:
+            while True:
+                try:
+                    try:
+                        entry = next(scandir_it)
+                    except StopIteration:
+                        break
+                except OSError:
+                    cont = True
+                    break
+
+                try:
+                    if not follow_symlinks:
+                        is_dir = entry.is_dir(follow_symlinks=False) and (
+                            not hasattr(entry, "is_junction") or not entry.is_junction()
+                        )
+                    else:
+                        is_dir = entry.is_dir()
+                except OSError:
+                    # If is_dir() raises an OSError, consider the entry not to
+                    # be a directory, same behaviour as os.path.isdir().
+                    is_dir = False
+
+                if is_dir:
+                    dirs.append(entry)
+                else:
+                    nondirs.append(entry)
+
+                if not topdown and is_dir:
+                    # Bottom-up: traverse into sub-directory, but exclude
+                    # symlinks to directories if followlinks is False
+                    if follow_symlinks:
+                        walk_into = True
+                    else:
+                        try:
+                            is_symlink = entry.is_symlink()
+                        except OSError:
+                            # If is_symlink() raises an OSError, consider the
+                            # entry not to be a symbolic link, same behaviour
+                            # as os.path.islink().
+                            is_symlink = False
+                        walk_into = not is_symlink
+
+                    if walk_into:
+                        walk_dirs.append(entry.path)
+        if cont:
+            continue
+
+        if topdown:
+            # Yield before sub-directory traversal if going top down
+            yield top, dirs, nondirs
+            # Traverse into sub-directories
+            for dirname in reversed(dirs):
+                new_path = join(top, dirname.name)
+                # bpo-23605: os.path.islink() is used instead of caching
+                # entry.is_symlink() result during the loop on os.scandir() because
+                # the caller can replace the directory entry during the "yield"
+                # above.
+                if follow_symlinks or not islink(new_path):
+                    stack.append(new_path)
+        else:
+            # Yield after sub-directory traversal if going bottom up
+            stack.append((top, dirs, nondirs))
+            # Traverse into sub-directories
+            stack += (new_path for new_path in reversed(walk_dirs))
 
 
 def cp(
