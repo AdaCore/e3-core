@@ -222,8 +222,8 @@ class Anod:
 
     def __new__(
         cls,
-        *args: Any,
-        **kwargs: Any,
+        *_args: Any,
+        **_kwargs: Any,
     ) -> Any:  # noqa: ANN401  # generic constructor
         """Replace `method` by property when decorator is missing."""
         should_be_property = (
