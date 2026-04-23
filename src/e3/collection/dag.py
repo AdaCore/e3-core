@@ -475,7 +475,7 @@ class DAG:
             # We have found our shortest path, so break
             if u == path_source:
                 break
-            elif u is None:
+            if u is None:
                 continue
 
             for u_pred in self.get_predecessors(u):

@@ -621,12 +621,12 @@ def splitall(path: str | Path) -> tuple[str, ...]:
             # os.path.split('/') -> ('/', '')
             dirnames.append(head)
             break
-        elif tail == path:
+        if tail == path:
             # relative paths
             # os.path.split('..') -> ('', '..')
             dirnames.append(tail)
             break
-        elif tail == "":
+        if tail == "":
             # ending with a directory separator
             # os.path.split('a/b/c/') -> ('a/b/c', '')
             pass
