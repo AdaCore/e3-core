@@ -827,9 +827,13 @@ class TestContext:
                 if uid.endswith("build"):
                     assert ac.tree.get_tag(uid)["plan_args"]["weathers"] == "B"
         else:
-            with pytest.raises(SchedulingError):
+
+            def _execute() -> None:
                 for action in cm.execute(myplan, "myserver"):
                     ac.add_plan_action(action)
+
+            with pytest.raises(SchedulingError):
+                _execute()
 
     def test_plan_call_args(self) -> None:
         """Retrieve call args values."""
