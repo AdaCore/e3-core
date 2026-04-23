@@ -37,8 +37,7 @@ def process_exit_code(handle: int) -> int | None:
         raise OSError(msg)
     if exit_code == ProcessInfo.STILL_ACTIVE:
         return None
-    else:
-        return exit_code
+    return exit_code
 
 
 def wait_for_objects(
@@ -74,8 +73,8 @@ def wait_for_objects(
         raise OSError(msg)
     if Wait.ABANDONED <= object_index < Wait.ABANDONED + size:  # defensive code
         return object_index - Wait.ABANDONED
-    elif Wait.OBJECT <= object_index < Wait.OBJECT + size:
+    if Wait.OBJECT <= object_index < Wait.OBJECT + size:
         return object_index
-    else:  # defensive code
-        msg = "unknown error while waiting for objects"
-        raise OSError(msg)
+    # defensive code
+    msg = "unknown error while waiting for objects"
+    raise OSError(msg)
