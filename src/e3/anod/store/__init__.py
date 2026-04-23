@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import sqlite3
@@ -25,7 +26,6 @@ from e3.anod.store.interface import (
 from e3.event import unique_id
 from e3.fs import cp
 from e3.log import getLogger
-import contextlib
 
 if TYPE_CHECKING:
     from typing import Any, Literal

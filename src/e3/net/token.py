@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import base64
+import contextlib
 import json
 
 from e3.date import utc_timestamp
-import contextlib
 
 # Number of dots in a valid JWT (header.payload.signature)
 JWT_PARTS_COUNT = 2
