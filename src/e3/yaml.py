@@ -408,7 +408,7 @@ def load_with_regexp_table(filename: str, selectors: list[str], data: dict) -> d
 
             has_matched = True
             for index, r in enumerate(line[0:-1]):
-                r_pat = r if r else ".*"
+                r_pat = r or ".*"
                 if not re.search(rf"^{r_pat}$", str(selectors[index])):
                     has_matched = False
 

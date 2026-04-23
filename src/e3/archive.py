@@ -318,7 +318,7 @@ def unpack_archive(
                     E3ZipFile(fileobj if fileobj is not None else filename, mode="r")
                 ) as zip_fd:
                     zip_fd.extractall(  # noqa: S202
-                        tmp_dest, selected_files if selected_files else None
+                        tmp_dest, selected_files or None
                     )
             except zipfile.BadZipfile as e:
                 raise ArchiveError(

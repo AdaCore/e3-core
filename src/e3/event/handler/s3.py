@@ -50,7 +50,7 @@ class S3Handler(EventHandler):
             "event_s3_url": event_s3_url,
             "log_s3_url": log_s3_url,
             "sse": sse,
-            "profile": aws_profile if aws_profile else None,
+            "profile": aws_profile or None,
         }
 
     def encode_config(self) -> str:
