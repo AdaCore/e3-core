@@ -414,7 +414,6 @@ class PlanContext:
         """Enter context manager for plan context."""
         assert self.plan is not None
         self.plan.mod.__dict__["env"] = self.env
-        return
 
     def __exit__(
         self,
