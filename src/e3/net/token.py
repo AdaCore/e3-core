@@ -6,6 +6,7 @@ import base64
 import json
 
 from e3.date import utc_timestamp
+import contextlib
 
 # Number of dots in a valid JWT (header.payload.signature)
 JWT_PARTS_COUNT = 2
@@ -26,10 +27,8 @@ def get_payload(token: str) -> dict:
         rem = len(payload) % 4
         if rem > 0:
             payload += "=" * (4 - rem)
-        try:
+        with contextlib.suppress(ValueError, TypeError):
             data = json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))
-        except (ValueError, TypeError):
-            pass
     return data
 
 
