@@ -41,6 +41,10 @@ FICLONE = 0x40049409
 # Minimal major verion of linux kernel needed for support of FICLONE (reflinks)
 FICLONE_MINIMAL_KERNEL_VERSION = 5
 
+# Sendfile maximum and minimum transfer size in one call
+SENDFILE_MAX_CHUNK = 0x7FFFF000
+SENDFILE_MIN_CHUNK = 2**23
+
 # Windows reserved file names
 WINDOWS_RESERVED_FILENAMES = {
     "con",
@@ -68,6 +72,13 @@ WINDOWS_RESERVED_FILENAMES = {
     "lpt9",
     "lpt0",
 }
+
+# Windows EPOCH in seconds (number of seconds that you need to add to transform
+# a Unix timestamp into a Windows one (Windows time starts in 1601-01-01)
+WINDOWS_EPOCH = 11644473600
+
+# Windows I/O buffer size (used for sync_tree buffer)
+WINDOWS_BUFFER_SIZE = 1024 * 1024
 
 if sys.platform == "linux":
     import fcntl
@@ -825,8 +836,6 @@ def sync_tree(  # noqa: PLR0915
 ) -> tuple[list[str], list[str]]:
     """Synchronize the files and directories between two directories.
 
-    Use a Pure Python implementation.
-
     :param source: the directory from where the files and directories
         need to be copied
     :param target: the target directory
@@ -868,7 +877,7 @@ def sync_tree(  # noqa: PLR0915
 
     # This is used by the Windows version as a copy buffer. The
     # observed gain of reusing that buffer is around 10-15%
-    copy_buffer = memoryview(bytearray(1024 * 1024))
+    copy_buffer = memoryview(bytearray(WINDOWS_BUFFER_SIZE))
 
     # For linux only
     try_ficlone = False
@@ -1134,10 +1143,12 @@ def sync_tree(  # noqa: PLR0915
 
             offset = 0
 
-            # Try to send the file in as a whole. Some code suggest
-            # to have a minimum value of 8MB. Don't exceed 2GB as
-            # suggested by the documentation.
-            blocksize = min(max(src.stat.st_size, 2**23), 2**32)
+            # Try to send the file in as a whole. Some code suggest to have a
+            # minimum value of 8MB (2 ** 23). For chunk max size see Linux
+            # sendfile documentation.
+            blocksize = min(
+                max(src.stat.st_size, SENDFILE_MIN_CHUNK), SENDFILE_MAX_CHUNK
+            )
 
             while True:
                 sent = os.sendfile(dst_fd, src_fd, offset, blocksize)
@@ -1242,7 +1253,7 @@ def sync_tree(  # noqa: PLR0915
                         if not n:
                             break
 
-                        if n < 1024 * 1024:
+                        if n < WINDOWS_BUFFER_SIZE:
                             with copy_buffer[:n] as smv:
                                 os.write(dst_fd, smv)
                             break
@@ -1251,8 +1262,11 @@ def sync_tree(  # noqa: PLR0915
 
                     if preserve_timestamps:
                         # Don't use os.utime here as it will force us to close
-                        # and reopen the destination file.
-                        timestamp = 11644473600 * 10000000 + src.stat.st_mtime_ns // 100
+                        # and reopen the destination file (note that timestamp
+                        # on Windows is a number of 100ns intervals)
+                        timestamp = (
+                            WINDOWS_EPOCH * 10000000 + src.stat.st_mtime_ns // 100
+                        )
                         win_mtime = wintypes.FILETIME(
                             timestamp & 0xFFFFFFFF, timestamp >> 32
                         )
