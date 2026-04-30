@@ -1547,6 +1547,7 @@ def sync_tree(  # noqa: PLR0915
     # Keep track of deleted and updated files
     deleted_list: list[str] = []
     updated_list: list[str] = []
+    up_to_date_count: int = 0
 
     def io_task() -> None:
         """Task in charge of mkdir, cp and rm operations."""
@@ -1590,6 +1591,8 @@ def sync_tree(  # noqa: PLR0915
                     io_queue.put((SYNC_MKDIR, wf))
                     updated_list.append(os.path.relpath(wf.target.path, target_top))
                     copystat_dir_list.append((wf.source, wf.target))
+            else:
+                up_to_date_count += 1
 
     finally:
         # First ensure that io_worker finish its tasks
@@ -1607,6 +1610,15 @@ def sync_tree(  # noqa: PLR0915
     for d in copystat_dir_list:
         copystat(d[0], d[1])
 
+    final_sync_method = (
+        "ficlone" if try_ficlone else ("sendfile" if try_sendfile else "generic")
+    )
+    logger.debug(
+        f"sync_tree ends (method: {final_sync_method}, "
+        f"updated: {len(updated_list)}, "
+        f"deleted: {len(deleted_list)}, "
+        f"up-to-date: {up_to_date_count})"
+    )
     return updated_list, deleted_list
 
 
