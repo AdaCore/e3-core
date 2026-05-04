@@ -12,9 +12,8 @@ from typing import TYPE_CHECKING
 
 import e3.log
 from e3.anod.status import ReturnValue
-from e3.fs import VCS_IGNORE_LIST, get_filetree_state, rm, sync_tree
-from e3.os.fs import unixpath, which
-from e3.os.process import PIPE, Run
+from e3.fs import get_filetree_state, rm, sync_tree
+from e3.os.process import PIPE
 from e3.vcs.git import GitError, GitRepository
 from e3.vcs.svn import SVNError, SVNRepository
 
@@ -125,72 +124,47 @@ class CheckoutManager:
             old_commit = ""
         ignore_list: list[str] = []
 
-        if which("rsync") and "use-rsync" in os.environ.get(
-            "E3_ENABLE_FEATURE", ""
-        ).split(","):
-            # Run rsync using -a but without preserving timestamps. --update switch
-            # is also used to skip files that are older in the user directory than
-            # in the checkout itself. This ensure rsync remain efficient event when
-            # timestamps are not preserved (otherwise rsync has to compute checksum
-            # of all file as quick check cannot be used when timestamp is not
-            # preserved).
-            rsync_cmd = [
-                "rsync",
-                "--update",
-                "-rlpgoD",
-                f"{unixpath(url)}/",
-                f"{unixpath(self.working_dir)}",
-                "--delete-excluded",
-            ] + [f"--exclude={el}" for el in VCS_IGNORE_LIST]
+        # Test for a git repository by looking for ".git" in the current
+        # directory - either as a file or as a directory. We check both
+        # because, if a normal git clone, ".git" is a directory; if a
+        # git clone with `git submodule init`, ".git" is a file.
+        if Path(url, ".git").exists():
+            # It seems that this is a git repository. Get the list of files to
+            # ignore
+            try:
+                g = GitRepository(working_tree=url)
+                ignore_list_lines = g.git_cmd(
+                    [
+                        "ls-files",
+                        # Show other (i.e. untracked) files in the output
+                        "--others",
+                        "--ignored",
+                        "--exclude-standard",
+                        "--directory",
+                    ],
+                    output=PIPE,
+                ).out
 
-            if Path(url, ".git").is_dir() and Path(url, ".gitignore").is_file():
-                rsync_cmd.append("--filter=:- .gitignore")
+                ignore_list = (
+                    []
+                    if ignore_list_lines is None
+                    else [
+                        f"/{f.strip().rstrip('/')}"
+                        for f in ignore_list_lines.splitlines()
+                    ]
+                )
+                logger.debug("Ignore in external: %s", ignore_list)
+            except Exception:  # defensive code  # noqa: BLE001, S110
+                # don't crash on exception
+                pass
 
-            p = Run(rsync_cmd, cwd=url, output=None)
-            if p.status != 0:
-                msg = "rsync failed"
-                raise e3.error.E3Error(msg)
-        else:
-            # Test for a git repository by looking for ".git" in the current
-            # directory - either as a file or as a directory. We check both
-            # because, if a normal git clone, ".git" is a directory; if a
-            # git clone with `git submodule init`, ".git" is a file.
-            if Path(url, ".git").exists():
-                # It seems that this is a git repository. Get the list of files to
-                # ignore
-                try:
-                    g = GitRepository(working_tree=url)
-                    ignore_list_lines = g.git_cmd(
-                        [
-                            "ls-files",
-                            "-o",
-                            "--ignored",
-                            "--exclude-standard",
-                            "--directory",
-                        ],
-                        output=PIPE,
-                    ).out
-
-                    ignore_list = (
-                        []
-                        if ignore_list_lines is None
-                        else [
-                            f"/{f.strip().rstrip('/')}"
-                            for f in ignore_list_lines.splitlines()
-                        ]
-                    )
-                    logger.debug("Ignore in external: %s", ignore_list)
-                except Exception:  # defensive code  # noqa: BLE001, S110
-                    # don't crash on exception
-                    pass
-
-            sync_tree(
-                url,
-                self.working_dir,
-                preserve_timestamps=False,
-                delete_ignore=True,
-                ignore=[".git", ".svn", *ignore_list],
-            )
+        sync_tree(
+            url,
+            self.working_dir,
+            preserve_timestamps=False,
+            delete_ignore=True,
+            ignore=[".git", ".svn", *ignore_list],
+        )
 
         new_commit = get_filetree_state(self.working_dir, ignore_hidden=False)
         if new_commit == old_commit:

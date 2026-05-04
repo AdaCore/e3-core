@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import stat
 import sys
 import time
 from collections.abc import Iterator
@@ -420,18 +421,101 @@ def test_sync_tree_preserve_timestamps() -> None:
     """Run sync_tree without preserving timestamps."""
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
-    with Path("a/content").open("w") as f:
-        f.write("content")
-    with Path("a/content2").open("w") as f:
-        f.write("content2")
-    with Path("b/content").open("w") as f:
-        f.write("content")
-    with Path("b/content2").open("w") as f:
-        f.write("content1")
+    a_content = Path("a/content")
+    a_content.write_text("content1")
+    b_content = Path("b/content")
+    b_content.write_text("content2")
+
+    now = time.time()
+    os.utime(a_content, (now - 10, now - 10))
+    os.utime(b_content, (now - 5, now - 5))
+
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
 
-    with Path("b/content2").open() as f:
+    with b_content.open() as f:
         assert f.read() == "content2"
+
+    os.utime(a_content, (now, now))
+    e3.fs.sync_tree("a", "b", preserve_timestamps=False)
+    with b_content.open() as f:
+        assert f.read() == "content1"
+
+    assert b_content.stat().st_mtime - now < 2  # noqa: PLR2004
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="win32 does not support full mode")
+def test_sync_tree_preserve_mode() -> None:
+    """Ensure that sync_tree preserve mode."""
+    src = Path("src")
+    dst = Path("dst")
+    e3.fs.mkdir(src)
+    e3.fs.mkdir(dst)
+
+    # Do the test on two file as on first file, sync_tree
+    # might change the method use to sync
+    (src / "tool").write_text("new")
+    (dst / "tool").write_text("old")
+    (src / "tool").chmod(0o755)
+    (dst / "tool").chmod(0o644)
+    (src / "tool2").write_text("new")
+    (dst / "tool2").write_text("old")
+    (src / "tool2").chmod(0o755)
+    (dst / "tool2").chmod(0o644)
+
+    now = time.time()
+    os.utime(src / "tool", (now, now))
+    os.utime(dst / "tool", (now - 10, now - 10))
+    os.utime(src / "tool2", (now, now))
+    os.utime(dst / "tool2", (now - 10, now - 10))
+
+    update, removed = e3.fs.sync_tree(src, dst)
+
+    mode = stat.S_IMODE((dst / "tool").stat().st_mode)
+    assert mode == 0o755  # noqa: PLR2004
+    mode = stat.S_IMODE((dst / "tool2").stat().st_mode)
+    assert mode == 0o755  # noqa: PLR2004
+    assert len(update) == 2  # noqa: PLR2004
+    assert len(removed) == 0
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="win32 dedicated test for mode")
+def test_sync_tree_preserve_mode_win32() -> None:
+    """Ensure that sync_tree preserve mode."""
+    src = Path("src")
+    dst = Path("dst")
+    e3.fs.mkdir(src)
+    e3.fs.mkdir(dst)
+
+    (src / "tool").write_text("new")
+    (dst / "tool").write_text("old")
+    (src / "tool").chmod(0o444)
+    (dst / "tool").chmod(0o666)
+
+    now = time.time()
+    os.utime(src / "tool", (now, now))
+    os.utime(dst / "tool", (now - 10, now - 10))
+
+    update, removed = e3.fs.sync_tree(src, dst)
+
+    mode = stat.S_IMODE((dst / "tool").stat().st_mode)
+    assert mode == 0o444  # noqa: PLR2004
+    assert len(update) == 1
+    assert len(removed) == 0
+
+
+def test_sync_tree_return_value() -> None:
+    """Ensure rsync implement returns the same values as py one."""
+    src = Path("src")
+    dst = Path("dst")
+    e3.fs.mkdir(src)
+    e3.fs.mkdir(dst)
+    e3.fs.mkdir(src / "subdir")
+    (src / "file1").write_text("new")
+    (src / "file2").write_text("new")
+
+    updated, deleted = e3.fs.sync_tree(src, dst)
+    assert {k.replace("\\", "/") for k in updated} == {"subdir", "file1", "file2"}
+    assert len(deleted) == 0
 
 
 def test_sync_tree_no_delete() -> None:
