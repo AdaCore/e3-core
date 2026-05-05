@@ -419,28 +419,62 @@ def test_sync_tree_case_insensitive() -> None:
 
 def test_sync_tree_preserve_timestamps() -> None:
     """Run sync_tree without preserving timestamps."""
+    # Some filesystem might require some tolerance on
+    # timestamps
+    timestamp_tolerance = 2.0
+
     e3.fs.mkdir("a")
     e3.fs.mkdir("b")
-    a_content = Path("a/content")
-    a_content.write_text("content1")
-    b_content = Path("b/content")
-    b_content.write_text("content2")
-
     now = time.time()
-    os.utime(a_content, (now - 10, now - 10))
-    os.utime(b_content, (now - 5, now - 5))
 
+    # Ensure to do the test on a few files as the sync method
+    # may change while synchronizing the first files
+    basenames = ("content1", "content2", "content3", "content4")
+    for b in basenames:
+        a_content = Path("a") / b
+        a_content.write_text("content1")
+        b_content = Path("b") / b
+        b_content.write_text("content2")
+        os.utime(a_content, (now - 10, now - 10))
+        os.utime(b_content, (now - 7, now - 7))
+
+    # First sync should not update b directory as timestamps
+    # for files in b are newer and size is equal
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
 
-    with b_content.open() as f:
-        assert f.read() == "content2"
+    for b in basenames:
+        b_content = Path("b") / b
+        with b_content.open() as f:
+            assert f.read() == "content2"
 
-    os.utime(a_content, (now, now))
+    # Update timestamps in a/ to now - 4s
+    for b in basenames:
+        a_content = Path("a") / b
+        os.utime(a_content, (now - 4, now - 4))
+
+    # Sync should sync all files and set timestamp to now
     e3.fs.sync_tree("a", "b", preserve_timestamps=False)
+
+    for b in basenames:
+        b_content = Path("b") / b
+        with b_content.open() as f:
+            assert f.read() == "content1"
+        assert abs(b_content.stat().st_mtime - time.time()) < timestamp_tolerance
+
+    # Reset timestamp to original value and re-run sync with
+    # timestamp preservation
+    for b in basenames:
+        a_content = Path("a") / b
+        os.utime(a_content, (now - 10.0, now - 10.0))
+
+    e3.fs.sync_tree("a", "b", preserve_timestamps=True)
     with b_content.open() as f:
         assert f.read() == "content1"
 
-    assert b_content.stat().st_mtime - now < 2  # noqa: PLR2004
+    # Check that timestamp is preserved
+    for b in basenames:
+        b_content = Path("b") / b
+        assert abs(b_content.stat().st_mtime - now + 10) < timestamp_tolerance
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="win32 does not support full mode")
