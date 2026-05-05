@@ -1203,10 +1203,8 @@ def sync_tree(  # noqa: PLR0915
                 # If dst was already a file open does not adjust the mode
                 os.fchmod(dst_fd, src.stat.st_mode)
 
-            if not preserve_timestamps and os_utime:
-                # By default FICLONE preserve timestamps. So adjust timestamp to now
-                # only if preserve_timestamps is False.
-                os_utime(dst_fd, None)
+            if preserve_timestamps and os_utime:
+                os_utime(dst_fd, ns=(src.stat.st_atime_ns, src.stat.st_mtime_ns))
 
         except OSError:
             # We will probably have the same issue with all files
