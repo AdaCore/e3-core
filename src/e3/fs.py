@@ -1135,6 +1135,11 @@ def sync_tree(  # noqa: PLR0915
         src_fd = None
         try:
             src_fd = os.open(src.path, os.O_RDONLY)
+
+            # Try to ensure we can write in the destination file
+            if isfile(dst) and dst.stat and not (dst.stat.st_mode & stat.S_IWUSR):
+                os.chmod(dst.path, 0o600)  # noqa: PTH101
+
             dst_fd = os.open(
                 dst.path,
                 os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
@@ -1163,7 +1168,11 @@ def sync_tree(  # noqa: PLR0915
             if preserve_timestamps and os_utime:
                 os_utime(dst_fd, ns=(src.stat.st_atime_ns, src.stat.st_mtime_ns))
 
-        except OSError:
+        except (OSError, PermissionError):
+            # If destination file was created, ensure the fallback method
+            # can write it
+            if dst_fd is not None:
+                os.fchmod(dst_fd, 0o600)
             # We will probably have the same issue with all files
             # of that call. Disable sendfile
             try_sendfile = False
@@ -1191,6 +1200,11 @@ def sync_tree(  # noqa: PLR0915
         src_fd = None
         try:
             src_fd = os.open(src.path, os.O_RDONLY)
+
+            # Try to ensure we can write in the destination file
+            if isfile(dst) and dst.stat and not (dst.stat.st_mode & stat.S_IWUSR):
+                os.chmod(dst.path, 0o600)  # noqa: PTH101
+
             dst_fd = os.open(
                 dst.path,
                 os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
@@ -1206,7 +1220,11 @@ def sync_tree(  # noqa: PLR0915
             if preserve_timestamps and os_utime:
                 os_utime(dst_fd, ns=(src.stat.st_atime_ns, src.stat.st_mtime_ns))
 
-        except OSError:
+        except (OSError, PermissionError):
+            # If destination file was created, ensure the fallback method
+            # can write it
+            if dst_fd is not None:
+                os.fchmod(dst_fd, 0o600)
             # We will probably have the same issue with all files
             # of that call. Disable FICLONE
             try_ficlone = False
@@ -1382,7 +1400,7 @@ def sync_tree(  # noqa: PLR0915
                     safe_copy_sendfile(src, dst)
                 else:
                     safe_copy_generic(src, dst)
-            except OSError:
+            except (OSError, PermissionError):
                 if dst.stat is not None:
                     rm(dst.path, glob=False)
                 safe_copy_generic(src, dst)
