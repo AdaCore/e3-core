@@ -511,6 +511,27 @@ def test_sync_tree_preserve_mode() -> None:
     assert len(update) == 2  # noqa: PLR2004
     assert len(removed) == 0
 
+    # Try to make the source files read-only. This special
+    # test case is introduced as if ficlone ioctl fails
+    # on linux, the destination file may be created with
+    # read-only permission and the fallback may not be aware
+    # of it, thus causing a permission error issue.
+    (src / "tool2").write_text("new2")
+    (src / "tool2").chmod(0o444)
+    (src / "tool").write_text("new2")
+    (src / "tool").chmod(0o444)
+    e3.fs.rm(dst / "tool")
+    e3.fs.rm(dst / "tool2")
+
+    update, removed = e3.fs.sync_tree(src, dst)
+
+    mode = stat.S_IMODE((dst / "tool").stat().st_mode)
+    assert mode == 0o444  # noqa: PLR2004
+    mode = stat.S_IMODE((dst / "tool2").stat().st_mode)
+    assert mode == 0o444  # noqa: PLR2004
+    assert len(update) == 2  # noqa: PLR2004
+    assert len(removed) == 0
+
 
 @pytest.mark.skipif(sys.platform != "win32", reason="win32 dedicated test for mode")
 def test_sync_tree_preserve_mode_win32() -> None:
