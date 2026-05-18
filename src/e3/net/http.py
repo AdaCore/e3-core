@@ -64,14 +64,19 @@ def get_filename(content_disposition: str) -> str | None:
 class HTTPError(E3Error):
     """Exception raised for HTTP operations errors."""
 
-    def __init__(self, msg: str, status: int | None = None) -> None:
+    def __init__(self, msg: str, response: Response | None = None) -> None:
         """Initialize an HTTPError exception.
 
         :param msg: an error message
-        :param status: an optional HTTP status code
+        :param response: an optional HTTP response
         """
         super().__init__(msg)
-        self.status = status
+        self.response = response
+
+    @property
+    def status(self) -> int | None:
+        """Return the HTTP status code from the response."""
+        return self.response.status_code if self.response is not None else None
 
 
 class BaseURL:
@@ -197,7 +202,7 @@ class HTTPSession:
         headers one modified.
         """
         error_msgs = []
-        last_status = None
+        response = None
 
         for base_url in list(self.base_urls):
             if self.last_base_url != base_url:
@@ -251,7 +256,6 @@ class HTTPSession:
                 response = self.session.request(method, final_url, **kwargs)
                 if response.status_code != HTTP_OK:
                     error_msgs.append(f"{message_prefix}{response.text}")
-                    last_status = response.status_code
                     response.raise_for_status()
             except (
                 TimeoutError,
@@ -267,10 +271,7 @@ class HTTPSession:
 
         error_msgs_str = "\n".join(error_msgs)
         msg = f"got request error ({len(error_msgs)}):\n{error_msgs_str}"
-        raise HTTPError(
-            msg,
-            status=last_status,
-        )
+        raise HTTPError(msg, response=response)
 
     def download_file(
         self,
