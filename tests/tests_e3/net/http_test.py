@@ -242,6 +242,7 @@ class TestHTTP:
                         base_url + "dummy", dest=".", exception_on_error=True
                     )
                 assert exc_info.value.status == HTTP_INTERNAL_SERVER_ERROR
+                assert exc_info.value.response.reason == "Internal Server Error"
 
         run_server(ServerErrorHandler, func)
 
@@ -328,6 +329,7 @@ class TestHTTP:
                         base_url + "dummy", dest=".", exception_on_error=True
                     )
                 assert exc_info.value.status == HTTP_FORBIDDEN
+                assert exc_info.value.response.reason == "Forbidden"
                 # second test with authorization header
                 result = session.download_file(
                     base_url + "dummy",
