@@ -218,7 +218,7 @@ def test_get_latest_build_not_found(store: StoreRW) -> None:
 
 
 def test_get_latest_build_ready(store: StoreRW) -> None:
-    """Test get labuild ready."""
+    """Test get latest build ready."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     bid = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
@@ -233,7 +233,7 @@ def test_get_latest_build_ready(store: StoreRW) -> None:
 
 
 def test_get_latest_build_ready_or_not(store: StoreRW) -> None:
-    """Test get labuild ready or not."""
+    """Test get latest build ready or not."""
     bid = store.create_build_id(DEFAULT_SETUP, "20241001", "1.0")["_id"]
     store.mark_build_ready(bid)
     bid = store.create_build_id(DEFAULT_SETUP, "20241002", "1.0")["_id"]
@@ -245,6 +245,51 @@ def test_get_latest_build_ready_or_not(store: StoreRW) -> None:
 
     bi = BuildInfo.latest(store, setup=DEFAULT_SETUP, ready_only=False)
     assert bi.build_date == "20241003"
+
+
+def test_get_latest_build_with_build_id(store: StoreRW) -> None:
+    """Test latest build with a build ID."""
+    BuildInfo.create(store, "setup1", "1.0", "20190204", mark_ready=False)
+    BuildInfo.create(store, "setup1", "1.0", "20190203", mark_ready=True)
+
+    # We are calling BuildInfo.latest to make sure we retrieve two differents BuildInfo
+    # depending if the BuildInfo is ready or not.
+    bi = BuildInfo.latest(store, setup="setup1")
+    bi_not_ready = BuildInfo.latest(store, setup="setup1", ready_only=False)
+
+    assert bi.build_date == "20190203"
+
+    bi2 = BuildInfo.latest(store, setup="setup1", build_id=bi.id)
+    assert bi2 == bi
+
+    with pytest.raises(StoreError):
+        BuildInfo.latest(store, setup="setup2", build_id=bi.id)
+
+    with pytest.raises(StoreError):
+        BuildInfo.latest(store, setup="setup1", build_date="202002002", build_id=bi.id)
+
+    with pytest.raises(StoreError):
+        BuildInfo.latest(store, setup="setup1", build_version="random", build_id=bi.id)
+
+    with pytest.raises(StoreError):
+        BuildInfo.latest(store, setup="setup1", build_id=bi_not_ready.id)
+
+    with pytest.raises(StoreError):
+        BuildInfo.latest(store, setup="setup1", build_date="20190205")
+
+    # With this "with" block, we are looking for a BuildInfo **ready** with a setup
+    # value equal to "setup1" with a build date between [20190205, 20190204].
+    #
+    # No BuildInfo match this request: The only BuildInfo ready has a build date value
+    # of "20190203".
+    with pytest.raises(StoreError):
+        BuildInfo.latest(store, setup="setup1", build_date="20190205", days_limit=2)
+
+    bi2 = BuildInfo.latest(store, setup="setup1", build_date="20190205", days_limit=3)
+    assert bi2 == bi
+
+    bi2 = BuildInfo.latest(store, setup="setup1", build_date="20190205", days_limit=15)
+    assert bi2 == bi
 
 
 def test_get_source_list(store: StoreRW) -> None:
