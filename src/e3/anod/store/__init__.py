@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from e3.anod.store.interface import BuildDataDict
 
 
-logger = getLogger("e3.anod.store")
+logger = getLogger("anod.store")
 
 # Length of YYYYMMDD date format
 DATE_FORMAT_LENGTH = 8
@@ -241,6 +241,7 @@ class _Store(_StoreContextManager):
         """
         self.db_path = os.fspath(db or ".store.db")
         self.connection = sqlite3.connect(self.db_path)
+        self._closed = False
         self.cursor = self.connection.cursor()
         self.cursor.execute(
             f"CREATE TABLE IF NOT EXISTS {_Store.TableName.buildinfos}("
@@ -339,9 +340,11 @@ class _Store(_StoreContextManager):
 
     def close(self) -> None:
         """Close commit all changes and close the database connection."""
-        self.connection.commit()
-        self.cursor.close()
-        self.connection.close()
+        if not self._closed:
+            self.connection.commit()
+            self.cursor.close()
+            self.connection.close()
+            self._closed = True
 
     def _select(
         self,

@@ -10,6 +10,7 @@ import e3.decorator
 TEST_MEMOIZE_RETURN_VALUE = 22
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_memoize() -> None:
     """Test memoize."""
     # First generate a function returning random values so that we
