@@ -72,7 +72,7 @@ class Fingerprint:
                 "fingerprint.add",
             )
 
-    def add_dir(self, path: str) -> None:
+    def add_dir(self, path: str | Path) -> None:
         """Add a file tree to the fingerprint.
 
         :param path: a path to a directory
@@ -84,7 +84,7 @@ class Fingerprint:
         else:
             self.elements[os.path.abspath(path)] = ""
 
-    def add_file(self, filename: str) -> None:
+    def add_file(self, filename: str | Path) -> None:
         """Add a file element to the fingerprint.
 
         :param filename: a path
@@ -187,7 +187,7 @@ class Fingerprint:
                 checksum.update(chunk.encode("utf-8"))
         return checksum.hexdigest()
 
-    def save_to_file(self, filename: str) -> None:
+    def save_to_file(self, filename: str | Path) -> None:
         """Save the fingerprint to the given file.
 
         :param filename: The name of the file where to save the fingerprint.
@@ -205,7 +205,7 @@ class Fingerprint:
             json.dump(data, f, indent=2)
 
     @classmethod
-    def load_from_file(cls, filename: str) -> Fingerprint | None:
+    def load_from_file(cls, filename: str | Path) -> Fingerprint | None:
         """Return the fingerprint saved in the given file.
 
         Return None in the following situations:
@@ -216,10 +216,12 @@ class Fingerprint:
         :param filename: The name of the file where to load the fingerprint
             from.
         """
-        if not Path(filename).is_file():
+        filename = Path(filename)
+
+        if not filename.is_file():
             return None
 
-        with Path(filename).open() as f:
+        with filename.open() as f:
             try:
                 data = json.load(f)
             except ValueError:
