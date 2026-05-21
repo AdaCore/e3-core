@@ -10,7 +10,11 @@ from typing_extensions import Self
 
 from e3.anod.store.component import Component
 from e3.anod.store.file import File
-from e3.anod.store.interface import StoreError, StoreWriteInterface
+from e3.anod.store.interface import (
+    StoreConnectionError,
+    StoreError,
+    StoreWriteInterface,
+)
 from e3.error import E3Error
 from e3.log import getLogger
 
@@ -36,7 +40,7 @@ if TYPE_CHECKING:
         build_version: str
 
 
-logger = getLogger("e3.anod.store.buildinfo")
+logger = getLogger("anod.store.buildinfo")
 
 
 class BuildInfo:
@@ -229,13 +233,28 @@ class BuildInfo:
         ]
 
     @classmethod
+    def previous_build_date(cls, build_date: str) -> str:
+        """Given a build date return the previous one.
+
+        :param build_date: a build date
+        :return: the build date before the one passed as parameter
+        """
+        current_build_date = datetime.strptime(build_date, "%Y%m%d").replace(
+            tzinfo=timezone.utc
+        )
+        return (current_build_date - timedelta(days=1)).strftime("%Y%m%d")
+
+    @classmethod
     def latest(
         cls,
         store: StoreReadInterface | StoreRWInterface,
         setup: str,
         build_version: str = "all",
         build_date: str | None = "all",
+        *,
         ready_only: bool = True,
+        build_id: str | None = None,
+        days_limit: int = 1,
     ) -> Self:
         """Find a build.
 
@@ -247,17 +266,78 @@ class BuildInfo:
             is selected.
         :param ready_only: If True (default), return only build ids
             that are in a ready state.
-        :return: A build object
+        :param build_id: if not None look only for the given build_id.
+            The returned build object should match setup and optionally
+            build_version and or build_date.
+        :param days_limit: if build_id is None and build_date is set then
+            look for prior days in case there is no build at the given
+            build_date. The parameter specify the number of days the call
+            is allowed to look back before raising a StoreError.
+        :return: A build object.
         """
-        return cls.load(
-            data=store.get_latest_build_info(
-                setup=setup,
-                date=build_date,
-                version=build_version,
-                ready_only=ready_only,
-            ),
-            store=store,
-        )
+        if build_id:
+            result = cls.from_id(store, build_id)
+
+            if result.setup != setup:
+                msg = (
+                    f"The retrieved build ID setup does not match (expect {setup!r} but"
+                    f" got {result.setup!r})"
+                )
+                raise StoreError(msg)
+            if result.build_version != build_version != "all":
+                msg = (
+                    "The retrieved build ID version does not match (expect "
+                    f"{build_version!r} but got {result.build_version!r})"
+                )
+                raise StoreError(msg)
+            if build_date and result.build_date != build_date != "all":
+                msg = (
+                    f"The retrieved build ID date does not match (expect {build_date!r}"
+                    f" but got {result.build_date!r})"
+                )
+                raise StoreError(msg)
+            if ready_only and not result.isready:
+                msg = "The retrieved build ID is expected to be marked ready"
+                raise StoreError(msg)
+
+            return result
+
+        # Case in which neither build date nor build id is defined. In that  case we can
+        # ignore days_limit.
+        if not build_date or build_date == "all":
+            return cls.load(
+                data=store.get_latest_build_info(
+                    setup=setup,
+                    date=build_date,
+                    version=build_version,
+                    ready_only=ready_only,
+                ),
+                store=store,
+            )
+
+        # Cases in which build_date is set
+        current_date = build_date
+        for _ in range(days_limit):
+            try:
+                return cls.load(
+                    data=store.get_latest_build_info(
+                        setup=setup,
+                        date=current_date,
+                        version=build_version,
+                        ready_only=ready_only,
+                    ),
+                    store=store,
+                )
+            except StoreConnectionError:
+                raise
+            except StoreError:
+                pass
+
+            current_date = cls.previous_build_date(current_date)
+
+        # At this stage raise an error
+        msg = f"cannot find a suitable build id for setup {setup!r}"
+        raise StoreError(msg)
 
     @classmethod
     def list(

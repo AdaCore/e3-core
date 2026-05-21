@@ -32,6 +32,14 @@ class StoreError(E3Error):
     """Exception raised for store operations errors."""
 
 
+class StoreConnectionError(StoreError):
+    """Exception used to indicate a connection error with the online store.
+
+    Having this special exception allows the user to make distinction between access to
+    the store and request errors (for example when an object cannot be found).
+    """
+
+
 def resource_id(path: os.PathLike[str] | str) -> str:
     """Given a path to a file return the resource id.
 
