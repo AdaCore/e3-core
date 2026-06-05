@@ -1347,6 +1347,33 @@ class Relationship(SPDXEntry):
         self.relationship_type = relationship_type
         self.related_spdx_element = related_spdx_element
 
+    def __eq__(self, other: object) -> bool:
+        """Check if this relationship may be equal to *other*.
+
+        :return: **True** if all field of this relationship are equal to
+            other's fields.
+        """
+        if isinstance(other, self.__class__):
+            return (
+                self.spdx_element_id == other.spdx_element_id
+                and self.relationship_type == other.relationship_type
+                and self.related_spdx_element == other.related_spdx_element
+            )
+        return False
+
+    def __hash__(self) -> int:
+        """Get the hash value of this SPDX relationship.
+
+        :return: The hash value of this relationship.
+        """
+        return hash(
+            (
+                self.spdx_element_id.value,
+                self.relationship_type.value,
+                self.related_spdx_element.value,
+            )
+        )
+
     def __str__(self) -> str:
         """Return string representation of relationship."""
         return (
