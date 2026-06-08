@@ -563,7 +563,7 @@ def test_entity() -> None:
 
 
 def test_misc_from_json_dict() -> None:
-    """Test misc from json dict."""
+    """Test misc from JSON dict."""
     created: Created = Created.from_json_dict(
         {Created.get_json_entry_key(): "2025-09-26"}
     )
@@ -691,3 +691,36 @@ def test_spdx_without_main_package() -> None:
     }
     doc: Document = Document.from_json_dict(doc_dict)
     assert "documentDescribes" in doc.to_json_dict()
+
+
+def test_relationship() -> None:
+    """Check for the Relationship.__eq__() method.
+
+    The `__hash__()` method is tested too.
+    """
+    relationship: Relationship = Relationship(
+        spdx_element_id=SPDXID("first"),
+        relationship_type=RelationshipType.BUILD_DEPENDENCY_OF,
+        related_spdx_element=SPDXID("main"),
+    )
+    other_relationship: Relationship = Relationship(
+        spdx_element_id=SPDXID("other"),
+        relationship_type=RelationshipType.COPY_OF,
+        related_spdx_element=SPDXID("main"),
+    )
+    assert relationship != other_relationship
+
+    # Test with a cloned relationship.
+    cloned_relationship: Relationship = Relationship(
+        spdx_element_id=SPDXID("first"),
+        relationship_type=RelationshipType.BUILD_DEPENDENCY_OF,
+        related_spdx_element=SPDXID("main"),
+    )
+    assert relationship == cloned_relationship
+
+    # Test with wrong object class.
+    assert relationship != "first"
+
+    # Now get the hashes
+    assert hash(relationship) != hash(other_relationship)
+    assert hash(relationship) == hash(cloned_relationship)

@@ -38,14 +38,14 @@ def get_entity(value: str | None) -> Organization | Person | Tool | None:
 
     The entity string looks like ``<entity_type>: <entity_name>``. If the
     entity type is ``Organization``, ``Person`` or ``Tool``, the appropriate
-    :class:`Organization`, :class:`Person` or :class:`Tool` initialised with
+    :class:`Organization`, :class:`Person` or :class:`Tool` initialized with
     *entity_name* is returned.
 
     If not possible match if found, :const:`None` is returned.
 
     :param value: A string to extract entity definition from.
 
-    :return: The entity initialised by *value*, or :const:`None` on error.
+    :return: The entity initialized by *value*, or :const:`None` on error.
     """
     if isinstance(value, str) and ":" in value:
         entity_type, entity_name = value.split(":", 1)
@@ -853,7 +853,7 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
     def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseConcluded:
         """Initialize a :class:`PackageLicenseConcluded` from a :class:`dict`.
 
-        By default a :class:`PackageLicenseConcluded(NONE_VALUE)` is returned.
+        By default, a :class:`PackageLicenseConcluded(NONE_VALUE)` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -881,7 +881,7 @@ class PackageLicenseDeclared(SPDXEntryMaybeStr):
     def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseDeclared | None:
         """Initialize a :class:`PackageLicenseDeclared` from a :class:`dict`.
 
-        By default :const:`None` is returned.
+        By default, :const:`None` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -909,7 +909,7 @@ class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
     def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseComments | None:
         """Initialize a :class:`PackageLicenseComments` from a :class:`dict`.
 
-        By default :const:`None` is returned.
+        By default, :const:`None` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -937,7 +937,7 @@ class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
     def from_json_dict(cls, obj: dict[str, Any]) -> PackageCopyrightText | None:
         """Initialize a :class:`PackageCopyrightText` from a :class:`dict`.
 
-        By default :const:`None` is returned.
+        By default, :const:`None` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -972,7 +972,7 @@ class PackageDescription(SPDXEntryMaybeStrMultilines):
     def from_json_dict(cls, obj: dict[str, Any]) -> PackageDescription | None:
         """Initialize a :class:`PackageDescription` from a :class:`dict`.
 
-        By default :const:`None` is returned.
+        By default, :const:`None` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -1000,7 +1000,7 @@ class PackageComment(SPDXEntryMaybeStrMultilines):
     def from_json_dict(cls, obj: dict[str, Any]) -> PackageComment | None:
         """Initialize a :class:`PackageComment` from a :class:`dict`.
 
-        By default :const:`None` is returned.
+        By default, :const:`None` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -1167,7 +1167,7 @@ class PrimaryPackagePurpose(Enum):
     def from_json_dict(cls, obj: dict[str, Any]) -> PrimaryPackagePurpose | None:
         """Initialize a :class:`PrimaryPackagePurpose` from a :class:`dict`.
 
-        By default :const:`None` is returned.
+        By default, :const:`None` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -1305,7 +1305,7 @@ class RelationshipType(Enum):
     def from_json_dict(cls, obj: dict[str, Any]) -> RelationshipType:
         """Initialize a :class:`RelationshipType` from a :class:`dict`.
 
-        By default ``RelationshipType.OTHER`` is returned.
+        By default, ``RelationshipType.OTHER`` is returned.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
             and the value, an object to initialize an
@@ -1346,6 +1346,33 @@ class Relationship(SPDXEntry):
         self.spdx_element_id = spdx_element_id
         self.relationship_type = relationship_type
         self.related_spdx_element = related_spdx_element
+
+    def __eq__(self, other: object) -> bool:
+        """Check if this relationship may be equal to *other*.
+
+        :return: **True** if all field of this relationship are equal to
+            other's fields.
+        """
+        if isinstance(other, self.__class__):
+            return (
+                self.spdx_element_id == other.spdx_element_id
+                and self.relationship_type == other.relationship_type
+                and self.related_spdx_element == other.related_spdx_element
+            )
+        return False
+
+    def __hash__(self) -> int:
+        """Get the hash value of this SPDX relationship.
+
+        :return: The hash value of this relationship.
+        """
+        return hash(
+            (
+                self.spdx_element_id.value,
+                self.relationship_type.value,
+                self.related_spdx_element.value,
+            )
+        )
 
     def __str__(self) -> str:
         """Return string representation of relationship."""
@@ -1676,7 +1703,7 @@ class Document:
             which case a relationship will automatically be added to record
             that the document DESCRIBES this package. If false, it is assumed
             that the package is contained by the main package unless a
-            relationship is explicitely passed
+            relationship is explicitly passed
         :param add_relationship: whether to automatically add a relationship
             element - either (DOCUMENT DESCRIBES <main package>) if is_main_package
             is True or (<main package> CONTAINS <package>)
