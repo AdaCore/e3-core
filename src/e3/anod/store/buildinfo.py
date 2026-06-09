@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 from typing_extensions import Self
 
-from e3.anod.store.component import Component
-from e3.anod.store.file import File
+import e3.anod.store.component
+import e3.anod.store.file
 from e3.anod.store.interface import (
     StoreConnectionError,
     StoreError,
@@ -19,15 +19,15 @@ from e3.error import E3Error
 from e3.log import getLogger
 
 if TYPE_CHECKING:
-    from typing import TypedDict, TypeVar
+    from typing import TypedDict
 
+    from e3.anod.store.component import Component
+    from e3.anod.store.file import File
     from e3.anod.store.interface import (
         BuildDataDict,
         StoreReadInterface,
         StoreRWInterface,
     )
-
-    BuildInfoType = TypeVar("BuildInfoType", bound="BuildInfo")
 
     class BuildInfoDict(TypedDict):
         """Dictionary representation of build information."""
@@ -111,6 +111,22 @@ class BuildInfo:
         self.isready = isready
         self.store = store
 
+    @classmethod
+    def file_cls(cls) -> type[e3.anod.store.file.File]:
+        """Return class to be used to instantiate File objects.
+
+        :return: a child class of e3.anod.store.file.File
+        """
+        return e3.anod.store.file.File
+
+    @classmethod
+    def component_cls(cls) -> type[e3.anod.store.component.Component]:
+        """Return class to be used to instantiate Component objects.
+
+        :return: a child class of e3.anod.store.component.Component
+        """
+        return e3.anod.store.component.Component
+
     def __str__(self) -> str:
         """Convert a buildinfo to a str."""
         return (
@@ -179,7 +195,9 @@ class BuildInfo:
             msg = "self.store is None"
             raise AttributeError(msg)
         result = self.store.get_build_data(bid=self.id)
-        return [File.load(f, store=self.store) for f in result.get("sources", [])]
+        return [
+            self.file_cls().load(f, store=self.store) for f in result.get("sources", [])
+        ]
 
     def get_source_info(self, name: str, kind: str = "source") -> File:
         """Return the File with the given name and kind.
@@ -192,7 +210,7 @@ class BuildInfo:
         if not self.store:
             msg = "self.store is None"
             raise AttributeError(msg)
-        return File.load(
+        return self.file_cls().load(
             self.store.get_source_info(bid=self.id, name=name, kind=kind),
             store=self.store,
         )
@@ -229,7 +247,8 @@ class BuildInfo:
             raise AttributeError(msg)
         result = self.store.list_components(self.id, component=name, platform=platform)
         return [
-            Component.load(data=comp_data, store=self.store) for comp_data in result
+            self.component_cls().load(data=comp_data, store=self.store)
+            for comp_data in result
         ]
 
     @classmethod

@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, cast, overload
 
 from typing_extensions import Self
 
+import e3.anod.store.buildinfo
 from e3.anod.store.interface import StoreError, StoreRWInterface
 from e3.anod.store.interface import resource_id as store_resource_id
 from e3.archive import create_archive, is_known_archive_format, unpack_archive
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Any, Literal, TypedDict, TypeVar
 
-    from e3.anod.store.buildinfo import BuildInfo, BuildInfoDict
+    from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.interface import StoreReadInterface
     from e3.archive import RemoveRootDirType
 
@@ -128,7 +129,7 @@ class File:
         internal: bool = True,
         alias: str | None = None,
         revision: str = "",
-        build_info: BuildInfo | None = None,
+        build_info: e3.anod.store.buildinfo.BuildInfo | None = None,
         metadata: dict[str, Any] | None = None,
         store: StoreReadInterface | StoreRWInterface | None = None,
         resource_path: os.PathLike[str] | str | None = None,
@@ -191,6 +192,14 @@ class File:
         if self.resource and self.resource_id and self.resource.id != self.resource_id:
             msg = f"File({self.name=}).resource_id != File({self.name=}).resource.id"
             raise StoreError(msg)
+
+    @classmethod
+    def buildinfo_cls(cls) -> type[e3.anod.store.buildinfo.BuildInfo]:
+        """Return class to be used to instantiate BuildInfo objects.
+
+        :return: a child class of e3.anod.store.buildinfo.BuildInfo
+        """
+        return e3.anod.store.buildinfo.BuildInfo
 
     def push(self) -> Self:
         """Upload this file to Store, using self.store to do so.
@@ -540,11 +549,9 @@ class File:
         :param store: the store class to use if store operations are needed
         :return: the File instance
         """
-        from e3.anod.store.buildinfo import BuildInfo  # noqa: PLC0415 circular import
-
-        build_info: BuildInfo | None = None
+        build_info: e3.anod.store.buildinfo.BuildInfo | None = None
         if "build" in data:
-            build_info = BuildInfo.load(data["build"])
+            build_info = cls.buildinfo_cls().load(data["build"])
 
         # The `internal` default field value is related to the file kind.
         #
@@ -675,10 +682,10 @@ class File:
         :raise StoreError: if the file already exists in Store (unless force is True)
         :return: a File instance corresponding to the uploaded file on Store
         """
-        from e3.anod.store.buildinfo import BuildInfo  # noqa: PLC0415 circular import
-
         filename = Path(path).name
-        bi = BuildInfo.latest(store=store, setup="thirdparties", ready_only=False)
+        bi = cls.buildinfo_cls().latest(
+            store=store, setup="thirdparties", ready_only=False
+        )
         f = cls(
             bi.id,
             kind=FileKind.thirdparty,
