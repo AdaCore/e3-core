@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING, TypedDict, overload
 from dateutil import parser as dateutil_parser
 from typing_extensions import Self
 
-from e3.anod.store.file import File
+import e3.anod.store.buildinfo
+import e3.anod.store.file
 from e3.anod.store.interface import StoreError, StoreRWInterface
 from e3.dsse import DSSE
 from e3.log import getLogger
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
     from typing import Literal, TypeVar
 
     from e3.anod.store.buildinfo import BuildInfo, BuildInfoDict
-    from e3.anod.store.file import FileDict
+    from e3.anod.store.file import File, FileDict
     from e3.anod.store.interface import StoreReadInterface
     from e3.archive import RemoveRootDirType
 
@@ -136,10 +137,11 @@ class Component:
         #   - remove_attachment
         #
         # once the attachments are initialized  through the __init__ constructor.
-        self.attachments: dict[str, File]
+        self.attachments: dict[str, e3.anod.store.file.File]
         if isinstance(attachments, list):
             self.attachments = {
-                tmp["name"]: File.load(tmp["att_file"]) for tmp in attachments
+                tmp["name"]: self.file_cls().load(tmp["att_file"])
+                for tmp in attachments
             }
         else:
             self.attachments = attachments or {}
@@ -160,6 +162,22 @@ class Component:
 
         self.store = store
         self.metadata = metadata or {}
+
+    @classmethod
+    def buildinfo_cls(cls) -> type[e3.anod.store.buildinfo.BuildInfo]:
+        """Return class to be used to instantiate BuildInfo objects.
+
+        :return: a child class of e3.anod.store.buildinfo.BuildInfo
+        """
+        return e3.anod.store.buildinfo.BuildInfo
+
+    @classmethod
+    def file_cls(cls) -> type[e3.anod.store.file.File]:
+        """Return class to be used to instantiate File objects.
+
+        :return: a child class of e3.anod.store.file.File
+        """
+        return e3.anod.store.file.File
 
     def set_metadata_statement(self, name: str, data: DSSE) -> None:
         """Set additional metadata statement.
@@ -458,36 +476,34 @@ class Component:
         :param data: The dictionary returned by Store.
         :param store: a Store instance
         """
-        from e3.anod.store.buildinfo import BuildInfo  # noqa: PLC0415 circular import
-
         readme = None
         if data["readme"]:
-            readme = File.load(data["readme"], store=store)
+            readme = cls.file_cls().load(data["readme"], store=store)
 
         attachments = None
         if data["attachments"]:
             if isinstance(data["attachments"], list):
                 attachments = {
-                    d["name"]: File.load(d["att_file"], store=store)
+                    d["name"]: cls.file_cls().load(d["att_file"], store=store)
                     for d in data["attachments"]
                 }
             else:
                 attachments = {
-                    name: File.load(att, store=store)
+                    name: cls.file_cls().load(att, store=store)
                     for name, att in data["attachments"].items()
                 }
 
         build_info = None
         if "build" in data:
-            build_info = BuildInfo.load(data["build"])
+            build_info = cls.buildinfo_cls().load(data["build"])
 
         return cls(
             component_id=str(data["_id"]) if data["_id"] is not None else data["_id"],
             build_id=str(data["build_id"]),
             name=str(data["name"]),
             platform=str(data["platform"]),
-            files=[File.load(f, store=store) for f in data["files"]],
-            sources=[File.load(f, store=store) for f in data["sources"]],
+            files=[cls.file_cls().load(f, store=store) for f in data["files"]],
+            sources=[cls.file_cls().load(f, store=store) for f in data["sources"]],
             releases=data["releases"],
             creation_date=dateutil_parser.parse(data["creation_date"]),
             attachments=attachments,
