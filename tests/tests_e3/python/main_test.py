@@ -7,10 +7,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 import yaml
+from packaging.version import Version
 
 from e3.fs import mkdir
 from e3.os.process import Run
-from e3.python.pypi import PyPIClosure, PyPIError
+from e3.python.pypi import PyPI, PyPIClosure, PyPIError
 from e3.python.wheel import Wheel
 from e3.sys import python_script
 
@@ -41,6 +42,32 @@ def generate_py_pkg_source(
     return Wheel.build(
         source_dir=name, dest_dir=".", build_args=["--no-build-isolation", "--no-index"]
     )
+
+
+def test_pypi(pypi_server: PypiSimulator) -> None:
+    """Test e3.python.pypi.PyPI and e3.python.pypi.PyPILink.
+
+    :param pypi_server: The pypi_server fixture used for testing.
+    """
+    with pypi_server:
+        pypi = PyPI()
+        link_list = pypi.fetch_project_links("setuptools")
+        for link in link_list:
+            assert link.name == link.pkg_name
+            assert isinstance(link.pkg_version, Version)
+            assert link.version == str(link.pkg_version)
+            if link.is_yanked:
+                assert link.version in {
+                    "51.1.0.post20201221",
+                    "59.1.0",
+                    "60.3.0",
+                    "69.3.0",
+                    "69.3",
+                    "69.4.0",
+                    "69.4",
+                    "71.0.1",
+                    "72.0.0",
+                }
 
 
 def test_wheel() -> None:

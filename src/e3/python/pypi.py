@@ -146,6 +146,22 @@ class PyPILink:
         return self.yanked is not None
 
     @property
+    def name(self) -> str:
+        """Get the package name.
+
+        :return: The current package name.
+        """
+        return self.pkg_name
+
+    @property
+    def version(self) -> str:
+        """Get the package version.
+
+        :return: The current package version.
+        """
+        return str(self.pkg_version)
+
+    @property
     def metadata_url(self) -> str:
         """Return the metadata url."""
         return self.url + ".metadata"
