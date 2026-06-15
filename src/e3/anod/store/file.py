@@ -569,12 +569,22 @@ class File:
         if internal is None:
             internal = kind != "binary"
 
-        resource_path = Path(data["resource"]["path"]).resolve()
+        resource: Resource | None = None
 
-        if resource_path.is_dir():
-            data.setdefault("unpack_dir", str(resource_path))
-        elif resource_path.is_file():
-            data.setdefault("downloaded_as", str(resource_path))
+        if "resource" in data:
+            resource_path = Path(data["resource"]["path"]).resolve()
+
+            if resource_path.is_dir():
+                data.setdefault("unpack_dir", str(resource_path))
+            elif resource_path.is_file():
+                data.setdefault("downloaded_as", str(resource_path))
+
+            resource = Resource(
+                id=data["resource"]["id"],
+                path=str(resource_path),
+                size=data["resource"]["size"],
+                creation_date=data["resource"]["creation_date"],
+            )
 
         try:
             result = cls(
@@ -592,12 +602,7 @@ class File:
                 unpack_dir=data.get("unpack_dir"),
                 build_info=build_info,
                 store=store,
-                resource=Resource(
-                    id=data["resource"]["id"],
-                    path=str(resource_path),
-                    size=data["resource"]["size"],
-                    creation_date=data["resource"]["creation_date"],
-                ),
+                resource=resource,
             )
         except Exception:
             logger.exception(f"cannot unserialize File from object: {data}")
