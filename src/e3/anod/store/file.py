@@ -770,7 +770,7 @@ class File:
         if not isinstance(other, self.__class__):
             return False
         for attr_name, attr_val in list(self.__dict__.items()):
-            if attr_name in ("downloaded_as", "unpack_dir", "store"):
+            if attr_name in ("downloaded_as", "unpack_dir", "store", "resource"):
                 # This attribute is not meaningful when comparing two files.
                 continue
             val = getattr(other, attr_name)
