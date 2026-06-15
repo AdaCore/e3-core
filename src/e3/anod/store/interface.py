@@ -82,14 +82,6 @@ class _StoreContextManager(metaclass=abc.ABCMeta):
             # __exit__ is call here
         """
 
-    @abc.abstractmethod
-    def close(self) -> None:
-        """Close the current context.
-
-        This method is used to close a context, generally not initiated using the
-        `with` keyword. See `builtin.open` for more example.
-        """
-
 
 class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
     """A class that defines the Store read interface."""
