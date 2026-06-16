@@ -81,7 +81,8 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
             self.cwd: str | None = None
             self.main_options: Namespace | None = None
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def _initialized(self) -> bool:
         """Whether the new instance should be initialized.
 

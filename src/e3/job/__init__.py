@@ -294,7 +294,8 @@ class ProcessJob(Job, metaclass=abc.ABCMeta):
             )
             return ReturnValue.failure
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def cmdline(self) -> list[str]:
         """Return the command line of the process to be spawned.
 

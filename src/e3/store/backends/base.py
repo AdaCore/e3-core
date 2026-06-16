@@ -22,7 +22,8 @@ class ResourceInfo(metaclass=abc.ABCMeta):
     This is subclassed by all store drivers.
     """
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def uid(self) -> str:
         """Return an unique identifier.
 
