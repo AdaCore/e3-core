@@ -345,12 +345,12 @@ class EventManager:
         :param var_name: the name of the variable
         """
         handler_cfg_str = os.environ.get(var_name, "")
-        handler_cfg_dict: dict[str, str] = dict(
-            [
-                el.split("=", 1) if "=" in el else (el, "")  # type: ignore
-                for el in handler_cfg_str.split("|")
-            ]
-        )
+        handler_cfg_dict: dict[str, str] = {}
+        for el in handler_cfg_str.split("|"):
+            # Each entry is either "name=value" or a bare "name"; partition
+            # handles both, leaving an empty value in the latter case.
+            handler_name, _, handler_config = el.partition("=")
+            handler_cfg_dict[handler_name] = handler_config
         for handler_name, handler_config in list(handler_cfg_dict.items()):
             handler = self.get_handler(handler_name)
             logger.info("Add handler %s (%s)", handler_name, handler_config)
