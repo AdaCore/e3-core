@@ -579,7 +579,7 @@ class Run:
             self.error_file.fd,
             self.input_file.fd,
         ):
-            self.status = self.internal.wait()
+            status = self.internal.wait()
         else:
             tmp_input: str | bytes | None = None
             if self.input_file.fd == subprocess.PIPE:
@@ -592,10 +592,14 @@ class Run:
             self.raw_out = raw_out if raw_out is not None else b""
             self.raw_err = raw_err if raw_err is not None else b""
 
-            self.status = self.internal.returncode
+            # communicate() waits for the process to terminate, so the
+            # return code is necessarily set at this point.
+            status = self.internal.returncode
+            assert status is not None
 
+        self.status = status
         self.close_files()
-        return self.status
+        return status
 
     def poll(self) -> int | None:
         """Check the process status and set self.status if available.
