@@ -418,54 +418,58 @@ class AnodContext:
         self.connect(self.root, result)
 
         # Ensure decision is set in case of explicit build or install
-        if primitive == "build":
-            build_action = None
-            for el in self.predecessors(result):
-                if isinstance(el, BuildOrDownload):
-                    el.set_decision(BuildOrDownload.BUILD, plan_line)
-                    build_action = self[el.left]
-            if build_action is None and isinstance(result, Build):
-                build_action = result
+        match primitive:
+            case "build":
+                build_action = None
+                for el in self.predecessors(result):
+                    if isinstance(el, BuildOrDownload):
+                        el.set_decision(BuildOrDownload.BUILD, plan_line)
+                        build_action = self[el.left]
+                if build_action is None and isinstance(result, Build):
+                    build_action = result
 
-            # Create upload nodes
-            if build_action is not None:
-                spec = build_action.data
-                if spec.component is not None and upload:
-                    upload_bin: UploadBinaryComponent | UploadSourceComponent
-                    check_virus: None | CheckVirus = None
-                    if spec.has_package:
-                        upload_bin = UploadBinaryComponent(spec)
-                        check_virus = CheckVirus(spec)
-                    else:
-                        upload_bin = UploadSourceComponent(spec)
-                    self.add(upload_bin)
-                    # ??? is it needed?
-                    if plan_line is not None and plan_args is not None:
-                        self.link_to_plan(
-                            vertex_id=upload_bin.uid,
-                            plan_line=plan_line,
-                            plan_args=plan_args,
-                        )
-                    if check_virus:
-                        self.add(check_virus)
+                # Create upload nodes
+                if build_action is not None:
+                    spec = build_action.data
+                    if spec.component is not None and upload:
+                        upload_bin: UploadBinaryComponent | UploadSourceComponent
+                        check_virus: None | CheckVirus = None
+                        if spec.has_package:
+                            upload_bin = UploadBinaryComponent(spec)
+                            check_virus = CheckVirus(spec)
+                        else:
+                            upload_bin = UploadSourceComponent(spec)
+                        self.add(upload_bin)
+                        # ??? is it needed?
                         if plan_line is not None and plan_args is not None:
                             self.link_to_plan(
-                                vertex_id=check_virus.uid,
+                                vertex_id=upload_bin.uid,
                                 plan_line=plan_line,
                                 plan_args=plan_args,
                             )
-                        self.connect(self.root, check_virus)
-                        self.connect(check_virus, upload_bin)
-                    else:
-                        self.connect(self.root, upload_bin)
-                    self.connect(upload_bin, build_action)
+                        if check_virus:
+                            self.add(check_virus)
+                            if plan_line is not None and plan_args is not None:
+                                self.link_to_plan(
+                                    vertex_id=check_virus.uid,
+                                    plan_line=plan_line,
+                                    plan_args=plan_args,
+                                )
+                            self.connect(self.root, check_virus)
+                            self.connect(check_virus, upload_bin)
+                        else:
+                            self.connect(self.root, upload_bin)
+                        self.connect(upload_bin, build_action)
 
-        elif primitive == "install":
-            for el in self.predecessors(result):
-                if isinstance(el, BuildOrDownload):
-                    el.set_decision(BuildOrDownload.INSTALL, plan_line)
-        elif primitive not in {"source", "test"}:
-            assert_never()  # type: ignore[call-arg]
+            case "install":
+                for el in self.predecessors(result):
+                    if isinstance(el, BuildOrDownload):
+                        el.set_decision(BuildOrDownload.INSTALL, plan_line)
+            case "source" | "test":
+                # source and test require no specific action here
+                pass
+            case _:
+                assert_never(primitive)
         return result
 
     def add_spec(  # noqa: PLR0915

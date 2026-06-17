@@ -152,6 +152,15 @@ def check_type(
     raise ArchiveError(origin="unpack_archive", message=f'unknown format "{filename}"')
 
 
+# tarfile read mode for each supported tar extension
+TAR_READ_MODES: dict[str, Literal["r:", "r:bz2", "r:gz", "r:xz"]] = {
+    "tar": "r:",
+    "tar.bz2": "r:bz2",
+    "tar.gz": "r:gz",
+    "tar.xz": "r:xz",
+}
+
+
 def unpack_archive(
     filename: str | Path,
     dest: str | Path,
@@ -245,88 +254,87 @@ def unpack_archive(
         tmp_dest = os.fspath(dest)
 
     try:
-        if ext in {"tar", "tar.bz2", "tar.gz", "tar.xz"}:
-            try:
-                # Set the right mode
-                mode = "r:"
-                if ext.endswith("bz2"):
-                    mode += "bz2"
-                elif ext.endswith("gz"):
-                    mode += "gz"
-                elif ext.endswith("xz"):
-                    mode += "xz"
-                # Extract tar files
-                with closing(
-                    tarfile.open(
-                        filename if fileobj is None else None,
-                        fileobj=fileobj,
-                        mode=mode,
-                    )
-                ) as fd:
-                    check_selected = set(selected_files)
+        match ext:
+            case "tar" | "tar.bz2" | "tar.gz" | "tar.xz":
+                try:
+                    # Set the right mode based on the (known) tar extension
+                    mode = TAR_READ_MODES[ext]
+                    # Extract tar files
+                    with closing(
+                        tarfile.open(
+                            filename if fileobj is None else None,
+                            fileobj=fileobj,
+                            mode=mode,
+                        )
+                    ) as fd:
+                        check_selected = set(selected_files)
 
-                    def is_match(name: str, files: Sequence[str]) -> bool:
-                        """Check if name match any of the expression in files.
+                        def is_match(name: str, files: Sequence[str]) -> bool:
+                            """Check if name match any of the expression in files.
 
-                        :param name: file name
-                        :param files: list of patterns to test against
-                        :return: True when the name is matched
-                        """
-                        for pattern in files:
-                            if fnmatch.fnmatch(name, pattern):
-                                check_selected.discard(pattern)
-                                return True
-                        return False
+                            :param name: file name
+                            :param files: list of patterns to test against
+                            :return: True when the name is matched
+                            """
+                            for pattern in files:
+                                if fnmatch.fnmatch(name, pattern):
+                                    check_selected.discard(pattern)
+                                    return True
+                            return False
 
-                    dirs: list[str] = []
+                        dirs: list[str] = []
 
-                    # IMPORTANT: don't use the method extract. Always use the
-                    # extractall function. Indeed extractall will set file
-                    # permissions only once all selected members are unpacked.
-                    # Using extract can lead to permission denied for example
-                    # if a read-only directory is created.
-                    if selected_files:
-                        member_list = []
-                        for tinfo in fd:
-                            if is_match(
-                                tinfo.name, selected_files
-                            ) or tinfo.name.startswith(tuple(dirs)):
-                                # If dir then add it for recursive extracting
-                                if tinfo.isdir() and not tinfo.name.startswith(
-                                    tuple(dirs)
-                                ):
-                                    dirs.append(tinfo.name)
-                                member_list.append(tinfo)
+                        # IMPORTANT: don't use the method extract. Always use the
+                        # extractall function. Indeed extractall will set file
+                        # permissions only once all selected members are unpacked.
+                        # Using extract can lead to permission denied for example
+                        # if a read-only directory is created.
+                        if selected_files:
+                            member_list = []
+                            for tinfo in fd:
+                                if is_match(
+                                    tinfo.name, selected_files
+                                ) or tinfo.name.startswith(tuple(dirs)):
+                                    # If dir then add it for recursive extracting
+                                    if tinfo.isdir() and not tinfo.name.startswith(
+                                        tuple(dirs)
+                                    ):
+                                        dirs.append(tinfo.name)
+                                    member_list.append(tinfo)
 
-                        if check_selected:
-                            msg = "unpack_archive"
-                            raise ArchiveError(msg, f"Cannot untar {filename} ")
+                            if check_selected:
+                                msg = "unpack_archive"
+                                raise ArchiveError(msg, f"Cannot untar {filename} ")
 
-                        fd.extractall(path=tmp_dest, members=member_list)  # noqa: S202
-                    else:
-                        fd.extractall(path=tmp_dest)  # noqa: S202
+                            fd.extractall(  # noqa: S202
+                                path=tmp_dest, members=member_list
+                            )
+                        else:
+                            fd.extractall(path=tmp_dest)  # noqa: S202
 
-            except tarfile.TarError as e:
-                raise ArchiveError(
-                    origin="unpack_archive",
-                    message=f"Cannot untar {filename} ({e})",
-                ) from e
+                except tarfile.TarError as e:
+                    raise ArchiveError(
+                        origin="unpack_archive",
+                        message=f"Cannot untar {filename} ({e})",
+                    ) from e
 
-        elif ext == "zip":
-            try:
-                with closing(
-                    E3ZipFile(fileobj if fileobj is not None else filename, mode="r")
-                ) as zip_fd:
-                    zip_fd.extractall(  # noqa: S202
-                        tmp_dest, selected_files or None
-                    )
-            except zipfile.BadZipfile as e:
-                raise ArchiveError(
-                    origin="unpack_archive",
-                    message=f"Cannot unzip {filename} ({e})",
-                ) from e
-        else:
-            assert_never()  # type: ignore[call-arg]
+            case "zip":
+                try:
+                    with closing(
+                        E3ZipFile(
+                            fileobj if fileobj is not None else filename, mode="r"
+                        )
+                    ) as zip_fd:
+                        zip_fd.extractall(  # noqa: S202
+                            tmp_dest, selected_files or None
+                        )
+                except zipfile.BadZipfile as e:
+                    raise ArchiveError(
+                        origin="unpack_archive",
+                        message=f"Cannot unzip {filename} ({e})",
+                    ) from e
+            case _:
+                assert_never(ext)
 
         if remove_root_dir:
             # First check that we have only one dir in our temp destination,
@@ -457,7 +465,7 @@ def create_archive(
         elif ext == "tar.xz":
             tar_format = "w:xz"
         else:
-            assert_never()
+            assert_never(ext)
         with closing(
             tarfile.open(filepath, fileobj=fileobj, mode=tar_format)
         ) as tar_archive:

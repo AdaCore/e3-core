@@ -90,7 +90,7 @@ class CheckoutManager:
         elif vcs == "external":
             update = self.update_external
         else:
-            assert_never()
+            assert_never(vcs)
 
         result, old_commit, new_commit = update(url=url, revision=revision)
 
