@@ -306,7 +306,7 @@ class TqdmHandler(logging.StreamHandler):  # all: no cover
 
     def __init__(self) -> None:
         """TqdmHandler constructor."""
-        logging.StreamHandler.__init__(self)
+        super().__init__()
 
     def emit(self, record: logging.LogRecord) -> None:
         """Emit a record with colors.
