@@ -287,10 +287,10 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(  # type: ignore
+def pytest_runtest_makereport(
     item: pytest.Item,  # noqa: ARG001
     call: pytest.CallInfo[None],  # noqa: ARG001
-) -> None:
+) -> Generator[None, typing.Any, None]:
     """Generate results file.
 
     When the variable results_dir is set to an existing directory, the testsuite
