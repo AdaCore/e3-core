@@ -19,6 +19,12 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import psutil
+
+# Use psutil.Popen to get psutil.Process properties and methods available in
+# Run.internal
+from psutil import Popen
+
 import e3.env
 import e3.log
 from e3.os.fs import which
@@ -49,19 +55,6 @@ logger = e3.log.getLogger("os.process")
 CMD_LOGGER_NAME = "os.process.cmdline"
 
 cmdlogger = e3.log.getLogger(CMD_LOGGER_NAME)
-
-
-# Use psutil.Popen when available to get psutil.Process properties and
-# methods available in Run.internal
-try:
-    import psutil
-    from psutil import Popen
-
-    has_psutil = True
-except ImportError:  # defensive code
-    from subprocess import Popen  # type: ignore
-
-    has_psutil = False
 
 
 def subprocess_setup() -> None:
@@ -439,7 +432,7 @@ class Run:
                 if sys.platform == "win32":
                     popen_args["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-                self.internal = Popen(  # noqa: S603
+                self.internal = Popen(
                     self.cmds[0],
                     **popen_args,  # type: ignore[arg-type]
                 )
@@ -483,7 +476,7 @@ class Run:
 
                     try:
                         runs.append(
-                            Popen(cmd, **popen_args)  # type: ignore  # noqa: S603
+                            Popen(cmd, **popen_args)  # type: ignore
                         )
                     except OSError:
                         logger.exception("error when spawning %s", cmd)
@@ -645,16 +638,10 @@ class Run:
 
     def is_running(self) -> bool:
         """Check whether the process is running."""
-        if not has_psutil:  # defensive code
-            # psutil not imported, use our is_running function
-            return is_running(self.pid)
         return self.internal.is_running()
 
     def children(self) -> list[Any]:
         """Return list of child processes (using psutil)."""
-        if not has_psutil:  # defensive code
-            msg = "Run.children() require psutil"
-            raise NotImplementedError(msg)
         return self.internal.children()
 
 
