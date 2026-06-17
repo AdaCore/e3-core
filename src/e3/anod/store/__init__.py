@@ -1666,32 +1666,32 @@ class StoreReadOnly(_Store, StoreReadInterface):
             raise StoreError(msg)
         return self._tuple_to_file(req[0])  # type: ignore[arg-type]
 
-    def download_resource(self, rid: str, path: str) -> str:
+    def download_resource(self, resource_id: str, path: str) -> str:
         """See e3.anod.store.interface.StoreReadInterface.
 
-        :param rid: the resource ID
+        :param resource_id: the resource ID
         :param path: the destination path for the downloaded resource
         """
         _, _, resource_path, *_ = self._select_one(
-            _Store.TableName.resources, rid, field_name="resource_id"
+            _Store.TableName.resources, resource_id, field_name="resource_id"
         )
         cp(resource_path, path)  # type: ignore[arg-type]
         return os.path.abspath(path)
 
     def latest_thirdparty(
-        self, name: str, tp_id: str = "all", rid: str = "all"
+        self, name: str, tp_id: str = "all", resource_id: str = "all"
     ) -> FileDict | None:
         """See e3.anod.store.interface.StoreReadInterface.
 
         :param name: the thirdparty name
         :param tp_id: the thirdparty ID filter (default: "all")
-        :param rid: the resource ID filter (default: "all")
+        :param resource_id: the resource ID filter (default: "all")
         """
         return self._get_file(
             name=name,
             kind="thirdparty",
             fid=tp_id,
-            rid=rid,
+            rid=resource_id,
             possibly_empty=True,
         )
 
