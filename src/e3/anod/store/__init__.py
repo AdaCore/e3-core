@@ -21,7 +21,6 @@ from e3.anod.store.interface import (
     StoreReadInterface,
     StoreRWInterface,
     StoreWriteInterface,
-    _StoreContextManager,
 )
 from e3.event import unique_id
 from e3.fs import cp
@@ -42,7 +41,7 @@ logger = getLogger("anod.store")
 DATE_FORMAT_LENGTH = 8
 
 
-class _Store(_StoreContextManager):
+class _Store:
     if TYPE_CHECKING:
         DB_IDType = str | int
         DB_BoolType = bool | int
