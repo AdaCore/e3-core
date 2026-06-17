@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING
 
 from e3.error import E3Error
@@ -11,15 +12,11 @@ from e3.hash import sha1
 if TYPE_CHECKING:
     import os
     from pathlib import Path
-    from typing import Any, Literal, TypedDict, TypeVar
+    from typing import Any, Literal, TypedDict
 
     from e3.anod.store.buildinfo import BuildInfoDict
     from e3.anod.store.component import ComponentDict
     from e3.anod.store.file import FileDict
-
-    StoreContextManagerType = TypeVar(
-        "StoreContextManagerType", bound="_StoreContextManager"
-    )
 
     class BuildDataDict(TypedDict):
         """Dictionary representation of build data with sources and components."""
@@ -49,41 +46,7 @@ def resource_id(path: os.PathLike[str] | str) -> str:
     return sha1(path)
 
 
-class _StoreContextManager(metaclass=abc.ABCMeta):
-    """A class to define the context manager interface needed by a Store class."""
-
-    @abc.abstractmethod
-    def __enter__(self: StoreContextManagerType) -> StoreContextManagerType:
-        """Enter in a new context.
-
-        This method is called when used with the "with" keyword. For example:
-
-        .. code-block:: python
-
-            with _StoreContextManager() as x:
-                pass
-
-        :return: Self
-        """
-
-    @abc.abstractmethod
-    def __exit__(
-        self,
-        *args: object,
-    ) -> None:
-        """Exit a context.
-
-        This method is called when exiting a "with" context. For example:
-
-        .. code-block:: python
-
-            with _StoreContextManager() as x:
-                pass
-            # __exit__ is call here
-        """
-
-
-class StoreReadInterface(_StoreContextManager, metaclass=abc.ABCMeta):
+class StoreReadInterface(AbstractContextManager, metaclass=abc.ABCMeta):
     """A class that defines the Store read interface."""
 
     @classmethod
