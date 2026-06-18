@@ -197,23 +197,23 @@ class StoreReadInterface(AbstractContextManager, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def download_resource(self, rid: str, path: str) -> str:
+    def download_resource(self, resource_id: str, path: str) -> str:
         """Download a resource.
 
-        :param rid: the resource id
+        :param resource_id: the resource id
         :param path: destination
         :return: absolute path to the downloaded resource
         """
 
     @abc.abstractmethod
     def latest_thirdparty(
-        self, name: str, tp_id: str = "all", rid: str = "all"
+        self, name: str, tp_id: str = "all", resource_id: str = "all"
     ) -> FileDict | None:
         """Get third party metadata.
 
         :param name: Third party name.
         :param tp_id: Third party id or 'all'.
-        :param rid: Third party resource_id or 'all'.
+        :param resource_id: Third party resource_id or 'all'.
         :return: a dict representing a file structure or None if the third
             party does not exist. (See e3.anod.store.file.File.load)
         """
