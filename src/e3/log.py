@@ -394,6 +394,9 @@ def add_log_handlers(
     else:
         handler = logging.FileHandler(filename)
         if set_default_output:
+            # FileHandler delay parameter is False by default
+            # so the stream is always available at this point.
+            assert handler.stream is not None
             default_output_stream = handler.stream
 
     if json_format:
