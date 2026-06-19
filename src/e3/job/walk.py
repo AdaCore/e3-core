@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from e3.collection.dag import DAG
     from e3.fingerprint import Fingerprint
-    from e3.job import Job, ProcessJob
+    from e3.job import Job
 
 
 logger = getLogger("walk", "e3.job")
@@ -68,7 +68,7 @@ class Walk:
 
         self.scheduler = Scheduler(
             job_provider=self.get_job,
-            collect=self.collect,  # type: ignore
+            collect=self.collect,
             queues=self.queues,
             tokens=self.tokens,
             job_timeout=self.job_timeout,
@@ -223,8 +223,8 @@ class Walk:
         data: Any,  # noqa: ANN401  # polymorphic job data
         predecessors: frozenset[str],
         notify_end: Callable[[str], None],
-    ) -> ProcessJob:
-        """Create a ProcessJob.
+    ) -> Job:
+        """Create a Job.
 
         :param uid: A unique Job ID
         :param data: Data associated to the job to create
@@ -233,7 +233,7 @@ class Walk:
         """
 
     @abc.abstractmethod
-    def request_requeue(self, job: ProcessJob) -> bool:
+    def request_requeue(self, job: Job) -> bool:
         """Requeue the given job.
 
         Return True if the job has been requeued, False otherwise.
@@ -316,7 +316,7 @@ class Walk:
             uid, data, predecessors, "skipped", notify_end, status=ReturnValue.skip
         )
 
-    def collect(self, job: ProcessJob) -> bool:
+    def collect(self, job: Job) -> bool:
         """Collect all the results from the given job.
 
         :param job: The job whose results we need to collect.

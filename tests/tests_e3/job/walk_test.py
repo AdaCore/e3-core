@@ -199,7 +199,7 @@ class SimpleWalk(Walk):
         self.requeued = {}
         super().__init__(actions)
 
-    def request_requeue(self, job: ProcessJob) -> bool:
+    def request_requeue(self, job: Job) -> bool:
         """Requeue the job is not already queued once."""
         # First record the number of times we've been asked to requeue
         # that job, and allow requeuing only twice.
