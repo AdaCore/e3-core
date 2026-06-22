@@ -37,10 +37,7 @@ dependencies = [
   "setuptools",
   "packaging",
   "resolvelib",
-  "psutil; sys_platform=='win32'",
-  "psutil; sys_platform=='linux'",
-  "psutil; sys_platform=='linux2'",
-  "psutil; sys_platform=='darwin'",
+  "psutil",
   "distro; sys_platform=='linux'",
   "distro; sys_platform=='linux2'",
 ]
