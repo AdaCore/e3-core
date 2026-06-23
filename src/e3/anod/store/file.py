@@ -259,14 +259,19 @@ class File:
         self.downloaded_as = os.path.abspath(path)
 
         if not self.resource:
-            self.resource = Resource(
-                id=self.resource_id,
-                path=self.downloaded_as,
-                size=Path(self.downloaded_as).stat().st_size,
-                creation_date=datetime.now(timezone.utc).strftime(
-                    "%Y-%m-%dT%H:%M:%f+00:00"
-                ),
-            )
+            # Temporary fix to avoid errors on "downloaded_as"
+            # pointing to non-existent file. Create a resource object
+            # only if the file exists
+            p = Path(self.downloaded_as)
+            if p.exists():
+                self.resource = Resource(
+                    id=self.resource_id,
+                    path=self.downloaded_as,
+                    size=p.stat().st_size,
+                    creation_date=datetime.now(timezone.utc).strftime(
+                        "%Y-%m-%dT%H:%M:%f+00:00"
+                    ),
+                )
 
     def set_metadata_statement(self, name: str, data: DSSE) -> None:
         """Set metadata statement.
