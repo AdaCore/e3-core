@@ -772,7 +772,7 @@ def splitall(path: str | Path) -> tuple[str, ...]:
     :return: a list of path components
     """
     dirnames: list[str] = []
-    while 1:
+    while True:
         head, tail = os.path.split(path)
         if head == path:
             # absolute paths
