@@ -2096,13 +2096,13 @@ class LocalStore(StoreRW, LocalStoreInterface):
 
         file_info["resource"] = resource
 
-        resource_path = resource["path"]  # type: ignore[assignment]
-        if resource_path:
-            path = Path(resource_path)
+        stored_resource_path = resource["path"]
+        if stored_resource_path:
+            path = Path(stored_resource_path)
             if path.is_file():
-                file_info["downloaded_as"] = resource_path
+                file_info["downloaded_as"] = os.fspath(stored_resource_path)
             elif path.is_dir():
-                file_info["unpack_dir"] = resource_path
+                file_info["unpack_dir"] = os.fspath(stored_resource_path)
         return True
 
     def raw_add_file(self, file_info: FileDict) -> None:
