@@ -18,7 +18,7 @@ import e3.log
 import e3.os.process
 import e3.text
 from e3.anod import qualifier_dict_to_str, qualifier_str_to_dict
-from e3.anod.error import AnodError, ShellError
+from e3.anod.error import AnodError, ShellError, SpecError
 from e3.anod.qualifier import Qualifier
 from e3.anod.qualifiers_manager import QualifiersManager
 from e3.fs import find
@@ -288,7 +288,7 @@ class Anod:
                     f"Use dict for qualifiers when declaring specs (spec {self.name})"
                 )
                 msg = "Use of str qualifiers is deprecated"
-                raise e3.anod.error.SpecError(msg)
+                raise SpecError(msg)
 
             self.parsed_qualifier = qualifier_str_to_dict(qualifier)
         elif isinstance(qualifier, dict):
@@ -297,7 +297,7 @@ class Anod:
             self.parsed_qualifier = {}
         else:
             msg = "invalid qualifier"  # type: ignore[unreachable]
-            raise e3.anod.error.SpecError(msg)
+            raise SpecError(msg)
 
         # Create the QualifiersManager.
         # Skip if the name generator is disabled.
