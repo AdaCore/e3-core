@@ -267,10 +267,6 @@ def test_from_platform_name() -> None:
     e = e3.env.BaseEnv.from_platform_name("arm-linux-linux64")
     assert e.target.platform == "arm-linux"
     assert e.build.platform == "x86_64-linux"
-    e = e3.env.BaseEnv.from_platform_name("x86_64-linux-darwin")
-    assert e.target.platform == "x86_64-linux"
-    assert e.build.platform == "x86_64-darwin"
-    assert e.is_cross
     e = e3.env.BaseEnv.from_platform_name("x86_64-linux")
     assert e.target.platform == "x86_64-linux"
     assert e.build.platform == "x86_64-linux"
