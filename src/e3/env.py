@@ -103,11 +103,15 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
         """
         if self.is_cross:
             # In cross we need to append host information. For backward
-            # compatibility we don't append 64 to darwin host (which is
-            # always 64bits).
+            # compatibility we don't append a suffix to a darwin host (which is
+            # always 64bits). aarch64 hosts get an "a64" suffix so they are
+            # distinct from x86_64 ("64") and x86 (no suffix) hosts.
             suffix = self.host.os.name
-            if self.host.cpu.bits == BITS_64 and self.host.os.name != "darwin":
-                suffix += "64"
+            if self.host.os.name != "darwin":
+                if self.host.cpu.name == "aarch64":
+                    suffix += "a64"
+                elif self.host.cpu.bits == BITS_64:
+                    suffix += "64"
             return self.target.platform + "-" + suffix
         # In native concept the platform is equivalent to target.platform
         return self.target.platform
@@ -544,6 +548,9 @@ class AbstractBaseEnv(metaclass=abc.ABCMeta):
                 host_cpu = "x86_64"
             elif host == "solaris":
                 host_cpu = "sparc"
+            elif host.endswith("a64"):
+                host = host[:-3]
+                host_cpu = "aarch64"
             elif host.endswith("64"):
                 host = host[:-2]
                 host_cpu = "x86_64"
