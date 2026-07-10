@@ -1345,7 +1345,12 @@ def sync_tree(  # noqa: PLR0915
                     # limit recursion to 32 in order not to crash on link loops
                     src_linkto_path = Path(src.path).parent / linkto
                     for _ in range(32):
-                        if not src_linkto_path.exists():
+                        # Keep os.path.exists instead of using `Path.exists` because
+                        # the `follow_symlinks` parameter has been added in python 3.12.
+                        #
+                        # This part will be reverted once python 3.11 will be
+                        # deprecated.
+                        if not os.path.lexists(src_linkto_path):
                             break
 
                         src_linkto = FileInfo(
