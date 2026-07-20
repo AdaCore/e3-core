@@ -51,6 +51,13 @@ def test_platform() -> None:
     e.set_target("x86-solaris")
     assert e.platform == "x86-solaris-linux"
 
+    # check aarch64 hosts
+    e = e3.env.BaseEnv()
+    e.set_host("aarch64-linux")
+    assert e.platform == "aarch64-linux"
+    e.set_target("x86_64-linux")
+    assert e.platform == "x86_64-linux-linuxa64"
+
 
 def test_is_canadian() -> None:
     """Test is canadian."""
@@ -260,10 +267,6 @@ def test_from_platform_name() -> None:
     e = e3.env.BaseEnv.from_platform_name("arm-linux-linux64")
     assert e.target.platform == "arm-linux"
     assert e.build.platform == "x86_64-linux"
-    e = e3.env.BaseEnv.from_platform_name("x86_64-linux-darwin")
-    assert e.target.platform == "x86_64-linux"
-    assert e.build.platform == "x86_64-darwin"
-    assert e.is_cross
     e = e3.env.BaseEnv.from_platform_name("x86_64-linux")
     assert e.target.platform == "x86_64-linux"
     assert e.build.platform == "x86_64-linux"
@@ -272,6 +275,14 @@ def test_from_platform_name() -> None:
     assert e.target.platform == "avr-elf"
     assert e.build.platform == "sparc-solaris"
     assert e.is_cross
+    e = e3.env.BaseEnv.from_platform_name("x86_64-linux-linuxa64")
+    assert e.target.platform == "x86_64-linux"
+    assert e.build.platform == "aarch64-linux"
+    assert e.is_cross
+    e = e3.env.BaseEnv.from_platform_name("aarch64-linux")
+    assert e.target.platform == "aarch64-linux"
+    assert e.build.platform == "aarch64-linux"
+    assert not e.is_cross
 
     e = e3.env.BaseEnv.from_platform_name("what-linux-linux")
     assert e is None
