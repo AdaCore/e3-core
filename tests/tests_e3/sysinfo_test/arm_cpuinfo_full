@@ -1,0 +1,4 @@
+processor	: 0
+CPU implementer	: 0x41
+CPU part	: 0xd4f
+Any data for coverage purpose : foobar
