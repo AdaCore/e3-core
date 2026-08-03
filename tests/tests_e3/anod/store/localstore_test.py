@@ -324,9 +324,12 @@ def test_exceptions(store: StoreRW) -> None:
 
 def test_bulk_update(store: StoreRW) -> None:
     """Test bulk update."""
-    with Path("file1.txt").open("w") as f:
+    file1 = Path("file1.txt")
+    with file1.open("w") as f:
         f.write("Carpette is a cat")
-    with Path("file2.txt").open("w") as f:
+
+    file2 = Path("file2.txt")
+    with file2.open("w") as f:
         f.write("Carpette is a nice cat")
 
     bid = BuildInfo.create(store, DEFAULT_SETUP, "1.0", mark_ready=True)
@@ -336,7 +339,7 @@ def test_bulk_update(store: StoreRW) -> None:
         kind=FileKind.source,
         name="src",
         filename="file1.txt",
-        resource_path=os.path.abspath("file1.txt"),
+        resource_path=str(file1.resolve()),
         store=store,
     ).push()
     tp = File(
@@ -344,7 +347,7 @@ def test_bulk_update(store: StoreRW) -> None:
         kind=FileKind.thirdparty,
         name="tp",
         filename="file2.txt",
-        resource_path=os.path.abspath("file2.txt"),
+        resource_path=str(file2.resolve()),
         store=store,
     )
     component = Component(
