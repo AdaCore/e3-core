@@ -286,6 +286,44 @@ def fix_coverage_paths(origin_dir: str, new_dir: str, cov_db: str) -> None:
         Path(old_cov_file.name).unlink()
 
 
+def _normalize_nodeid(nodeid: str) -> str:
+    """Return an injective encoding of a pytest node ID suitable for use as a filename.
+
+    Percent-encode the characters that serve as delimiters after replacement
+    so that distinct node IDs always produce distinct result names.
+
+    Examples:
+        1. "subdir/test_example.py::test_pass"
+            -> "subdir~test_example.py++test_pass"
+
+        2. "test_example.py::TestGroup::test_method"
+            -> "test_example.py++TestGroup++test_method"
+
+        3. "test_example.py::test_param[key:value]"
+            -> "test_example.py++test_param[key+value]"
+
+        4. "test_example.py::test_param[key+value]"
+            -> "test_example.py++test_param[key%2Bvalue]"
+
+        5. "test_example.py::test_param[key~value]"
+            -> "test_example.py++test_param[key%7Evalue]"
+
+        6. "test_example.py::test_param[key%value]"
+            -> "test_example.py++test_param[key%25value]"
+
+    :param nodeid: pytest node ID
+    :return: normalized node ID
+
+    """
+    return (
+        nodeid.replace("%", "%25")
+        .replace("~", "%7E")
+        .replace("+", "%2B")
+        .replace("/", "~")
+        .replace(":", "+")
+    )
+
+
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(
     item: pytest.Item,  # noqa: ARG001
@@ -310,7 +348,7 @@ def pytest_runtest_makereport(
     # we only look at actual test calls, not setup/teardown
     if rep.when == "call":
         outcome = rep.outcome.upper()
-        test_name = rep.nodeid.replace("/", ".").replace("::", "--")
+        test_name = _normalize_nodeid(rep.nodeid)
         if rep.longreprtext:
             with Path(results_dir, f"{test_name}.diff").open("w") as f:
                 f.write(rep.longreprtext)
