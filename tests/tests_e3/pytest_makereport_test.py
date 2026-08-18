@@ -143,7 +143,7 @@ def test_with_broken_fixture(broken_fixture):
     pass
 """
     )
-    result = pytester.runpytest("--e3")
+    result = pytester.runpytest_subprocess("--e3")
     assert result.ret == 3  # noqa: PLR2004
 
 
