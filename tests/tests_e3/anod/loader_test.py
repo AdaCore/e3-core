@@ -15,6 +15,43 @@ class TestLoader:
     spec_dir = str(Path(__file__).parent / "data")
     spec2_dir = str(Path(__file__).parent / "data2")
 
+    def test_repositories_config_customization(self) -> None:
+        """Test repositories configuration customization."""
+
+        def customize_repo(name: str, config: dict[str, str]) -> None:
+            """Set all 'vcs' configuration to 'foobar'.
+
+            :param config: The repositories configuration to customize.
+            """
+            # Delete the name parameter because we will not use it for this test.
+            del name
+            config["vcs"] = "foobar"
+            assert config["revision"] == "20.1"
+
+        # Initialize the current repositories configuration
+        sync_tree(self.spec_dir, "specs_dir")
+        repositories_yaml = str(Path("specs_dir", "config", "repositories.yaml"))
+        cp(repositories_yaml + ".tmpl", repositories_yaml)
+
+        spec_repo = AnodSpecRepository(
+            "specs_dir", customize_repo_config=customize_repo
+        )
+        assert all(
+            repo_data["vcs"] == "foobar" for repo_data in spec_repo.repos.values()
+        )
+
+        # extra_configuration should not be updated by the customization
+        spec_repo = AnodSpecRepository(
+            "specs_dir",
+            extra_repositories_config={"foobar": {"vcs": "notfoobar"}},
+            customize_repo_config=customize_repo,
+        )
+        assert spec_repo.repos["foobar"]["vcs"] == "notfoobar"
+        del spec_repo.repos["foobar"]
+        assert all(
+            repo_data["vcs"] == "foobar" for repo_data in spec_repo.repos.values()
+        )
+
     def test_spec_does_not_exist(self) -> None:
         """Test spec does not exist."""
         with pytest.raises(SandBoxError) as err:

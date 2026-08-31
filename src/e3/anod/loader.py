@@ -59,6 +59,7 @@ class AnodSpecRepository:
         # Ideally should be spec_config: SpecConfig | None = None,
         # We keep it to Any to avoid mypy issues on other projects
         extra_repositories_config: dict | None = None,
+        customize_repo_config: Callable[[str, dict[str, str]], None] | None = None,
     ) -> None:
         """Initialize an AnodSpecRepository.
 
@@ -68,6 +69,10 @@ class AnodSpecRepository:
         :param extra_repositories_config: first read the configuration from
             <spec_dir>/config/repositories.yaml and update the result with
             extra_repositories_config
+        :param customize_repo_config: Optional callback to customize loaded repository
+            configurations. It is called on each repository sequentially, excluding
+            extra repositories. The callback receives the repository name as its first
+            argument and the repository data as its second.
         """
         logger.debug("initialize spec repository (%s)", spec_dir)
 
@@ -143,17 +148,24 @@ class AnodSpecRepository:
             with repo_file.open() as fd:
                 self.repos = yaml.safe_load(fd)
 
-        if extra_repositories_config:
-            for repo_name, repo_data in extra_repositories_config.items():
-                if repo_name in self.repos:
-                    self.repos[repo_name].update(repo_data)
-                else:
-                    self.repos[repo_name] = repo_data
-
         # Make sure that all revision are strings and not floats
         for repo_conf in self.repos.values():
             if "revision" in repo_conf:
                 repo_conf["revision"] = str(repo_conf["revision"])
+        if customize_repo_config:
+            for repo_name, repo_data in self.repos.items():
+                customize_repo_config(repo_name, repo_data)
+
+        if extra_repositories_config:
+            for repo_name, repo_data in extra_repositories_config.items():
+                # Make sure that all revision are strings and not floats
+                if "revision" in repo_data:
+                    repo_data["revision"] = str(repo_data["revision"])
+
+                if repo_name in self.repos:
+                    self.repos[repo_name].update(repo_data)
+                else:
+                    self.repos[repo_name] = repo_data
 
         if spec_config is None:
             spec_config = SpecConfig()
