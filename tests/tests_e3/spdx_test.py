@@ -16,13 +16,18 @@ from e3.spdx import (
     Created,
     CreationInformation,
     Creator,
+    DataLicense,
     Document,
+    DocumentInformation,
+    DocumentName,
+    DocumentNamespace,
     Entity,
     EntityRef,
     ExternalRef,
     ExternalRefCategory,
     FilesAnalyzed,
     InvalidSPDX,
+    LicenseListVersion,
     Organization,
     Package,
     PackageChecksum,
@@ -45,6 +50,7 @@ from e3.spdx import (
     RelationshipType,
     SPDXEntryMaybeStrMultilines,
     SPDXEntryStr,
+    SPDXVersion,
     Tool,
 )
 
@@ -139,6 +145,7 @@ def create_spdx() -> Document:
 
     pkg_id = doc.add_package(package, add_relationship=False)
 
+    assert doc.main_package_spdx_id
     doc.add_relationship(
         relationship=Relationship(
             spdx_element_id=pkg_id,
@@ -516,46 +523,64 @@ def test_spdx_from_json_dict() -> None:
 
 def test_creator() -> None:
     """Test creator."""
-    creator: Creator | None = Creator(Organization("AdaCore"))
+    creator: Creator = Creator(Organization("AdaCore"))
     creator_dict: dict = creator.to_json_dict()
-    creator2: Creator = Creator.from_json_dict(creator_dict)
+    creator2: Creator | None = Creator.from_json_dict(creator_dict)
+    assert creator2
     creator_dict2 = creator2.to_json_dict()
     assert json.dumps(creator_dict, indent=2, sort_keys=True) == json.dumps(
         creator_dict2, indent=2, sort_keys=True
     )
-    creator = Creator.from_json_dict({Creator.get_json_entry_key(): "Person: me"})
-    assert creator.value.value == "me"
-    assert isinstance(creator, Creator)
-    assert isinstance(creator.value, Person)
-    creator = Creator.from_json_dict({"xxx": "Person: me"})
-    assert creator is None
-    creator = Creator.from_json_dict(
+
+    creator_from_json: Creator | None = Creator.from_json_dict(
+        {Creator.get_json_entry_key(): "Person: me"}
+    )
+    assert creator_from_json
+    assert hasattr(creator_from_json, "value")
+    assert isinstance(creator_from_json.value, Entity)
+    assert creator_from_json.value.value == "me"
+    assert isinstance(creator_from_json, Creator)
+    assert isinstance(creator_from_json.value, Person)
+    creator_from_json = Creator.from_json_dict({"xxx": "Person: me"})
+    assert creator_from_json is None
+    creator_from_json = Creator.from_json_dict(
         {Creator.get_json_entry_key(): "Organization: AdaCore"}
     )
-    assert creator.value.value == "AdaCore"
-    assert isinstance(creator, Creator)
-    assert isinstance(creator.value, Organization)
-    creator = Creator.from_json_dict({Creator.get_json_entry_key(): "Tool: e3"})
-    assert creator.value.value == "e3"
-    assert isinstance(creator, Creator)
-    assert isinstance(creator.value, Tool)
-    creator = Creator.from_json_dict(
+    assert creator_from_json
+    assert hasattr(creator_from_json, "value")
+    assert isinstance(creator_from_json.value, Entity)
+    assert creator_from_json.value.value == "AdaCore"
+    assert isinstance(creator_from_json, Creator)
+    assert isinstance(creator_from_json.value, Organization)
+    creator_from_json = Creator.from_json_dict(
+        {Creator.get_json_entry_key(): "Tool: e3"}
+    )
+    assert creator_from_json
+    assert hasattr(creator_from_json, "value")
+    assert isinstance(creator_from_json.value, Entity)
+    assert creator_from_json.value.value == "e3"
+    assert isinstance(creator_from_json, Creator)
+    assert isinstance(creator_from_json.value, Tool)
+    creator_from_json = Creator.from_json_dict(
         {Creator.get_json_entry_key(): "Anything: anything"}
     )
-    assert creator is None
+    assert creator_from_json is None
 
 
 def test_entity() -> None:
     """Test entity."""
     entity: Entity | None = Entity.from_json_dict({"entity": "Person: me"})
+    assert entity
     assert entity.value == "me"
     assert isinstance(entity, Person)
     entity = Entity.from_json_dict({"xxx": "Person: me"})
     assert entity is None
     entity = Entity.from_json_dict({"entity": "Organization: AdaCore"})
+    assert entity
     assert entity.value == "AdaCore"
     assert isinstance(entity, Organization)
     entity = Entity.from_json_dict({"entity": "Tool: e3"})
+    assert entity
     assert entity.value == "e3"
     assert isinstance(entity, Tool)
     entity = Entity.from_json_dict({"entity": "Anything: anything"})
@@ -576,6 +601,7 @@ def test_misc_from_json_dict() -> None:
     originator: PackageOriginator | None = PackageOriginator.from_json_dict({})
     assert originator is None
     analyzed: FilesAnalyzed | None = FilesAnalyzed.from_json_dict({})
+    assert analyzed is not None
     assert analyzed.value is False
     cksum: PackageChecksum = PackageChecksum.from_json_dict(
         {"algorithm": SHA512.algorithm, "checksumValue": "not checked"}
@@ -587,9 +613,16 @@ def test_misc_from_json_dict() -> None:
         PackageChecksum.from_json_dict(
             {"algorithm": "invalid", "checksumValue": "not checked"}
         )
+    # Create a package checksum out of another.
+    cksum = SHA1(value="not checked")
+    cksum_dup: SHA1 = SHA1.from_json_dict(cksum.to_json_dict())
+    assert cksum.value == cksum_dup.value
+    assert cksum.algorithm == cksum_dup.algorithm
+
     homepage: PackageHomePage | None = PackageHomePage.from_json_dict(
         {PackageHomePage.get_json_entry_key(): "homepage"}
     )
+    assert homepage is not None
     assert homepage.value == "homepage"
     assert PackageHomePage.from_json_dict({"not homepage": "not a homepage"}) is None
     license_concluded: PackageLicenseConcluded = PackageLicenseConcluded.from_json_dict(
@@ -724,3 +757,121 @@ def test_relationship() -> None:
     # Now get the hashes
     assert hash(relationship) != hash(other_relationship)
     assert hash(relationship) == hash(cloned_relationship)
+
+
+# NOTE: testing PackageChecksum is not possible as it requires the `algorithm`
+#       field to be set. If we try with the SHA1 class instead (which is a
+#       PackageChecksum), we should write the `from_json_dict()` classmethod
+#       for SHA1 (which is not what we want), and unless rewriting it completely
+#       the test would still fail.
+@pytest.mark.parametrize(
+    ("spdx_class", "init_values"),
+    [
+        (Created, {"value": "2025-09-26"}),
+        (Creator, {"value": Organization("AdaCore")}),
+        (CreationInformation, {"creators": [Creator(Organization("AdaCore"))]}),
+        (DataLicense, {"value": "4.5.6"}),
+        (Document, {"document_name": "My Document", "creators": []}),
+        (DocumentNamespace, {"value": "Namespace"}),
+        (DocumentInformation, {"document_name": DocumentName("Document Information")}),
+        (
+            ExternalRef,
+            {
+                "reference_category": ExternalRefCategory.package_manager,
+                "reference_type": "maven-central",
+                "reference_locator": "name:version",
+            },
+        ),
+        (FilesAnalyzed, {"value": True}),
+        (LicenseListVersion, {"value": "1.2.3"}),
+        (PackageComment, {"value": "Comment"}),
+        (PackageCopyrightText, {"value": "Copyright (C) AdaCore"}),
+        (PackageDescription, {"value": "Description"}),
+        (PackageDownloadLocation, {"value": "https://my.package/download"}),
+        (PackageFileName, {"value": "my-package.zip"}),
+        (PackageHomePage, {"value": "https://my.home/page"}),
+        (PackageLicenseComments, {"value": "License comments"}),
+        (PackageLicenseConcluded, {"value": "Apache-2.0"}),
+        (PackageLicenseDeclared, {"value": "Apache-2.0"}),
+        (PackageName, {"value": "My package name"}),
+        (PackageOriginator, {"value": Organization("AdaCore")}),
+        (PackageSupplier, {"value": Organization("AdaCore")}),
+        (PackageVersion, {"value": "My package version"}),
+        (
+            Relationship,
+            {
+                "spdx_element_id": SPDXID("first"),
+                "relationship_type": RelationshipType.BUILD_DEPENDENCY_OF,
+                "related_spdx_element": SPDXID("main"),
+            },
+        ),
+        (SPDXID, {"value": "Any"}),
+        (SPDXVersion, {"value": "7.8.9"}),
+        (
+            Package,
+            {
+                "name": PackageName("My Package"),
+                "version": PackageVersion("1.2.3"),
+                "spdx_id": SPDXID("Any"),
+                "file_name": PackageFileName("my-package.zip"),
+                "checksum": [
+                    SHA1("6476df3aac780622368173fe6e768a2edc3932c8"),
+                    SHA256(
+                        "91751cee0a1ab8414400238a761411daa29643ab4b8243e9a91649e25be53ada",
+                    ),
+                ],
+                "license_concluded": PackageLicenseConcluded("GPL-3.0-or-later"),
+                "license_declared": PackageLicenseDeclared("GPL-3.0-or-later"),
+                "license_comments": PackageLicenseComments("License comments"),
+                "supplier": PackageSupplier(Organization("AdaCore")),
+                "originator": PackageOriginator(Organization("AdaCore")),
+                "download_location": PackageDownloadLocation(
+                    "https://my.package/download"
+                ),
+                "files_analyzed": FilesAnalyzed(value=True),
+                "copyright_text": PackageCopyrightText("Copyright (C) AdaCore"),
+                "external_refs": [
+                    ExternalRef(
+                        reference_category=ExternalRefCategory.package_manager,
+                        reference_type="maven-central",
+                        reference_locator="name:version",
+                    )
+                ],
+                "homepage": PackageHomePage("https://my.home/page"),
+                "description": PackageDescription("Description"),
+            },
+        ),
+    ],
+)
+def test_spdx_object_overrides(spdx_class: type, init_values: dict) -> None:
+    """Test all SPDX objects overrides with parametrized values."""
+
+    class MyClass(spdx_class):
+        foo: bool = True
+
+    parent = spdx_class(**init_values)
+    if hasattr(parent, "from_json_dict"):
+        child = MyClass.from_json_dict(parent.to_json_dict())
+    else:
+        child = MyClass.from_dict(parent.to_json_dict())
+
+    assert parent.to_tagvalue() == child.to_tagvalue(), (
+        f"Tag:value representations do not match for {spdx_class.__name__}."
+    )
+    assert json.dumps(parent.to_json_dict()) == json.dumps(child.to_json_dict()), (
+        f"JSON representations do not match for {spdx_class.__name__}."
+    )
+    assert isinstance(child, child.__class__), (
+        f"Invalid class type for {child.__class__.__name__}."
+    )
+    assert child.foo is True, (
+        f"The foo property of {child.__class__.__name__} should be True"
+    )
+    assert isinstance(child, parent.__class__), (
+        f"Child class {child.__class__.__name__} should be an instance of "
+        f"{spdx_class.__name__}."
+    )
+    assert not isinstance(parent, child.__class__), (
+        f"Parent class {parent.__class__.__name__} should not be an instance "
+        f"of {child.__name__}."
+    )
