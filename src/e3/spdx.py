@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 if TYPE_CHECKING:
-    from typing import Any, Literal
+    from typing import Any, Literal, Self
 
 NOASSERTION: Literal["NOASSERTION"] = "NOASSERTION"
 """Indicates that the preparer of the SPDX document is not making any assertion
@@ -257,10 +257,14 @@ class SPDXVersion(SPDXEntryStr):
 
     VERSION: str = "SPDX-2.3"
 
-    json_entry_key = "spdxVersion"
+    entry_key: str = "SPDXVersion"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "spdxVersion"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> SPDXVersion:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize an :class:`SPDXVersion` from a :class:`dict`.
 
         If an SPDX version value could not be extracted from *obj*, the default
@@ -279,7 +283,7 @@ class SPDXVersion(SPDXEntryStr):
 
         :return: The :class:`SPDXVersion` initialized with the value of *obj*.
         """
-        return SPDXVersion(obj.get(cls.get_json_entry_key(), cls.VERSION))
+        return cls(obj.get(cls.get_json_entry_key(), cls.VERSION))
 
 
 class DataLicense(SPDXEntryStr):
@@ -291,8 +295,14 @@ class DataLicense(SPDXEntryStr):
 
     LICENSE: str = "CC0-1.0"
 
+    entry_key: str = "DataLicense"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "dataLicense"
+    """JSON entry key (allow class override)"""
+
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> DataLicense:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`DataLicense` from a :class:`dict`.
 
         If a data license value could not be extracted from *obj*, the default
@@ -311,7 +321,7 @@ class DataLicense(SPDXEntryStr):
 
         :return: The :class:`DataLicense` initialized with the value of *obj*.
         """
-        return DataLicense(obj.get(cls.get_json_entry_key(), cls.LICENSE))
+        return cls(obj.get(cls.get_json_entry_key(), cls.LICENSE))
 
 
 class SPDXID(SPDXEntryStr):
@@ -328,7 +338,11 @@ class SPDXID(SPDXEntryStr):
     PREFIX: str = "SPDXRef-"
     DEFAULT_ID: str = "DOCUMENT"
 
-    json_entry_key = "SPDXID"
+    entry_key: str = "SPDXID"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "SPDXID"
+    """JSON entry key (allow class override)"""
 
     def __init__(self, value: str) -> None:
         """Initialize SPDXID.
@@ -358,7 +372,7 @@ class SPDXID(SPDXEntryStr):
         return hash(self.value)
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> SPDXID:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize an :class:`SPDXID` from a :class:`dict`.
 
         If an SPDX ID value could not be extracted from *obj*, the default
@@ -380,7 +394,7 @@ class SPDXID(SPDXEntryStr):
         id_from_dict: str = obj.get(cls.get_json_entry_key(), cls.DEFAULT_ID)
         if id_from_dict.startswith(f"{cls.PREFIX}"):
             id_from_dict = id_from_dict[len(cls.PREFIX) :]
-        return SPDXID(id_from_dict)
+        return cls(id_from_dict)
 
 
 class DocumentName(SPDXEntryStr):
@@ -390,7 +404,7 @@ class DocumentName(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#64-document-name-field>`_.
     """
 
-    json_entry_key = "name"
+    json_entry_key: str = "name"
 
 
 class DocumentNamespace(SPDXEntryStr):
@@ -400,8 +414,14 @@ class DocumentNamespace(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#65-spdx-document-namespace-field>`_.
     """
 
+    entry_key: str = "DocumentNamespace"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "documentNamespace"
+    """JSON entry key (allow class override)"""
+
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> DocumentNamespace:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`DocumentNamespace` from a :class:`dict`.
 
         If a document namespace value could not be extracted from *obj*, an
@@ -422,7 +442,7 @@ class DocumentNamespace(SPDXEntryStr):
         :return: The :class:`DocumentNamespace` initialized with the value of
             *obj*.
         """
-        return DocumentNamespace(obj.get(cls.get_json_entry_key(), ""))
+        return cls(obj.get(cls.get_json_entry_key(), ""))
 
 
 class LicenseListVersion(SPDXEntryStr):
@@ -435,8 +455,14 @@ class LicenseListVersion(SPDXEntryStr):
     VERSION: str = "3.19"
     """Default license list version value."""
 
+    entry_key: str = "LicenseListVersion"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "licenseListVersion"
+    """JSON entry key (allow class override)"""
+
     @classmethod
-    def from_json_dict(cls, obj: dict[str, str]) -> LicenseListVersion:
+    def from_json_dict(cls, obj: dict[str, str]) -> Self:
         """Initialize a :class:`LicenseListVersion` from a :class:`dict`.
 
         If a license list version value could not be extracted from *obj*, the
@@ -457,7 +483,7 @@ class LicenseListVersion(SPDXEntryStr):
         :return: The :class:`LicenseListVersion` initialized with the value of
             *obj*.
         """
-        return LicenseListVersion(obj.get(cls.get_json_entry_key(), cls.VERSION))
+        return cls(obj.get(cls.get_json_entry_key(), cls.VERSION))
 
 
 class Entity(SPDXEntryStr):
@@ -516,10 +542,14 @@ class Creator(EntityRef):
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#68-creator-field>`_.
     """
 
-    json_entry_key = "creators"
+    entry_key: str = "Creator"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "creators"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> Creator | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`Creator` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -543,8 +573,14 @@ class Created(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#69-created-field>`_.
     """
 
+    entry_key: str = "Created"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "created"
+    """JSON entry key (allow class override)"""
+
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> Created:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`Created` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -554,8 +590,8 @@ class Created(SPDXEntryStr):
         :return: The :class:`Created` initialized with the value of *obj*.
         """
         if cls.get_json_entry_key() in obj:
-            return Created(str(obj.get(cls.get_json_entry_key(), "")))
-        return Created(datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+            return cls(str(obj.get(cls.get_json_entry_key(), "")))
+        return cls(datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
 
 
 class Organization(Entity):
@@ -577,10 +613,14 @@ class PackageName(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#71-package-name-field>`_
     """
 
-    json_entry_key = "name"
+    entry_key: str = "PackageName"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "name"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageName:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`PackageName` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -589,7 +629,7 @@ class PackageName(SPDXEntryStr):
 
         :return: The :class:`PackageName` initialized with the value of *obj*.
         """
-        return PackageName(str(obj.get(cls.get_json_entry_key(), "")))
+        return cls(str(obj.get(cls.get_json_entry_key(), "")))
 
 
 class PackageVersion(SPDXEntryStr):
@@ -599,10 +639,14 @@ class PackageVersion(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#73-package-version-field>`_
     """
 
-    json_entry_key = "versionInfo"
+    entry_key: str = "PackageVersion"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "versionInfo"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageVersion:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`PackageVersion` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -611,7 +655,7 @@ class PackageVersion(SPDXEntryStr):
 
         :return: The :class:`PackageVersion` initialized with the value of *obj*.
         """
-        return PackageVersion(str(obj.get(cls.get_json_entry_key(), "")))
+        return cls(str(obj.get(cls.get_json_entry_key(), "")))
 
 
 class PackageFileName(SPDXEntryStr):
@@ -621,8 +665,14 @@ class PackageFileName(SPDXEntryStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#74-package-file-name-field>`_
     """
 
+    entry_key: str = "PackageFileName"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "packageFileName"
+    """JSON entry key (allow class override)"""
+
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageFileName:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`PackageFileName` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -631,7 +681,7 @@ class PackageFileName(SPDXEntryStr):
 
         :return: The :class:`PackageFileName` initialized with the value of *obj*.
         """
-        return PackageFileName(str(obj.get(cls.get_json_entry_key(), "")))
+        return cls(str(obj.get(cls.get_json_entry_key(), "")))
 
 
 class PackageSupplier(EntityRef):
@@ -641,10 +691,14 @@ class PackageSupplier(EntityRef):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#75-package-supplier-field>`_
     """
 
-    json_entry_key = "supplier"
+    entry_key: str = "PackageSupplier"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "supplier"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageSupplier | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageSupplier` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -669,10 +723,14 @@ class PackageOriginator(EntityRef):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#76-package-originator-field>`_
     """
 
-    json_entry_key = "originator"
+    entry_key: str = "PackageOriginator"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "originator"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageOriginator | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageOriginator` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -697,10 +755,14 @@ class PackageDownloadLocation(SPDXEntryMaybeStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#77-package-download-location-field>`_
     """
 
-    json_entry_key = "downloadLocation"
+    entry_key: str = "PackageDownloadLocation"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "downloadLocation"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageDownloadLocation:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`PackageDownloadLocation` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -710,7 +772,7 @@ class PackageDownloadLocation(SPDXEntryMaybeStr):
         :return: The :class:`PackageDownloadLocation` initialized with the
             value of *obj*.
         """
-        return PackageDownloadLocation(obj.get(cls.get_json_entry_key(), NONE_VALUE))
+        return cls(obj.get(cls.get_json_entry_key(), NONE_VALUE))
 
 
 class FilesAnalyzed(SPDXEntryBool):
@@ -720,8 +782,14 @@ class FilesAnalyzed(SPDXEntryBool):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#78-files-analyzed-field>`_
     """
 
+    entry_key: str = "FilesAnalyzed"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "filesAnalyzed"
+    """JSON entry key (allow class override)"""
+
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> FilesAnalyzed:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`FilesAnalyzed` from a :class:`dict`.
 
         By default, if *obj* does not contain this class' JSON entry key,
@@ -734,8 +802,8 @@ class FilesAnalyzed(SPDXEntryBool):
         :return: The :class:`FilesAnalyzed` initialized with the value of *obj*.
         """
         if cls.get_json_entry_key() in obj:
-            return FilesAnalyzed(value=obj.get(cls.get_json_entry_key(), False))
-        return FilesAnalyzed(value=False)
+            return cls(value=obj.get(cls.get_json_entry_key(), False))
+        return cls(value=False)
 
 
 class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
@@ -745,8 +813,8 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#710-package-checksum-field>`_
     """
 
-    entry_key = "PackageChecksum"
-    json_entry_key = "checksums"
+    entry_key: str = "PackageChecksum"
+    json_entry_key: str = "checksums"
 
     @property
     @abstractmethod
@@ -767,7 +835,7 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
         }
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageChecksum:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`PackageChecksum` from a :class:`dict`.
 
         Supported algorithms so far:
@@ -784,16 +852,26 @@ class PackageChecksum(SPDXEntryStr, metaclass=ABCMeta):
 
         :raise: :exc:`ValueError` if the algorithm defined by *obj* is not supported.
         """
-        if isinstance(obj, dict) and "algorithm" in obj and "checksumValue" in obj:
-            if obj["algorithm"].upper() == SHA1.algorithm:
-                return SHA1(obj["checksumValue"])
-            if obj["algorithm"].upper() == SHA256.algorithm:
-                return SHA256(obj["checksumValue"])
-            if obj["algorithm"].upper() == SHA512.algorithm:
-                return SHA512(obj["checksumValue"])
-            msg = f"Unsupported checksum algorithm {obj['algorithm']}."
+        checksum_dict: dict = obj
+        if cls.json_entry_key in checksum_dict:
+            # Looking at the `to_json_dict()`, we need to use the content of
+            # cls.json_entrykey rather than the plain input dict.
+            checksum_dict = checksum_dict.get(cls.json_entry_key, {})
+
+        if (
+            isinstance(checksum_dict, dict)
+            and "algorithm" in checksum_dict
+            and "checksumValue" in checksum_dict
+        ):
+            if checksum_dict["algorithm"].upper() == SHA1.algorithm:
+                return SHA1(checksum_dict["checksumValue"])  # type: ignore[return-value]
+            if checksum_dict["algorithm"].upper() == SHA256.algorithm:
+                return SHA256(checksum_dict["checksumValue"])  # type: ignore[return-value]
+            if checksum_dict["algorithm"].upper() == SHA512.algorithm:
+                return SHA512(checksum_dict["checksumValue"])  # type: ignore[return-value]
+            msg = f"Unsupported checksum algorithm {checksum_dict['algorithm']}."
             raise ValueError(msg)
-        msg = f"Invalid input checksum dict {obj!r}."
+        msg = f"Invalid input checksum dict {checksum_dict!r}."
         raise ValueError(msg)
 
 
@@ -804,10 +882,14 @@ class PackageHomePage(SPDXEntryMaybeStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#711-package-home-page-field>`_
     """
 
-    json_entry_key = "homepage"
+    entry_key: str = "PackageHomePage"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "homepage"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageHomePage | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageHomePage` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -818,7 +900,7 @@ class PackageHomePage(SPDXEntryMaybeStr):
         """
         homepage: str | None = obj.get(cls.get_json_entry_key())
         if homepage is not None:
-            return PackageHomePage(homepage)
+            return cls(homepage)
         return None
 
 
@@ -847,10 +929,14 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#713-concluded-license-field>`_
     """
 
-    json_entry_key = "licenseConcluded"
+    entry_key: str = "PackageLicenseConcluded"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "licenseConcluded"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseConcluded:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`PackageLicenseConcluded` from a :class:`dict`.
 
         By default, a :class:`PackageLicenseConcluded(NONE_VALUE)` is returned.
@@ -864,8 +950,8 @@ class PackageLicenseConcluded(SPDXEntryMaybeStr):
         """
         lic: str | None = obj.get(cls.get_json_entry_key(), NONE_VALUE)
         if lic is not None:
-            return PackageLicenseConcluded(lic)
-        return PackageLicenseConcluded(NONE_VALUE)
+            return cls(lic)
+        return cls(NONE_VALUE)
 
 
 class PackageLicenseDeclared(SPDXEntryMaybeStr):
@@ -875,10 +961,14 @@ class PackageLicenseDeclared(SPDXEntryMaybeStr):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#715-declared-license-field>`_
     """
 
-    json_entry_key = "licenseDeclared"
+    entry_key: str = "PackageLicenseDeclared"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "licenseDeclared"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseDeclared | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageLicenseDeclared` from a :class:`dict`.
 
         By default, :const:`None` is returned.
@@ -892,7 +982,7 @@ class PackageLicenseDeclared(SPDXEntryMaybeStr):
         """
         lic: str | None = obj.get(cls.get_json_entry_key())
         if lic is not None:
-            return PackageLicenseDeclared(lic)
+            return cls(lic)
         return None
 
 
@@ -903,10 +993,14 @@ class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#716-comments-on-license-field>`_
     """
 
-    json_entry_key = "licenseComments"
+    entry_key: str = "PackageLicenseComments"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "licenseComments"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageLicenseComments | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageLicenseComments` from a :class:`dict`.
 
         By default, :const:`None` is returned.
@@ -920,7 +1014,7 @@ class PackageLicenseComments(SPDXEntryMaybeStrMultilines):
         """
         comment: str | None = obj.get(cls.get_json_entry_key())
         if comment is not None:
-            return PackageLicenseComments(comment)
+            return cls(comment)
         return None
 
 
@@ -931,10 +1025,14 @@ class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#717-copyright-text-field>`_
     """
 
-    json_entry_key = "copyrightText"
+    entry_key: str = "PackageCopyrightText"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "copyrightText"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageCopyrightText | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageCopyrightText` from a :class:`dict`.
 
         By default, :const:`None` is returned.
@@ -948,7 +1046,7 @@ class PackageCopyrightText(SPDXEntryMaybeStrMultilines):
         """
         txt: str | None = obj.get(cls.get_json_entry_key())
         if txt is not None:
-            return PackageCopyrightText(txt)
+            return cls(txt)
         return None
 
 
@@ -966,10 +1064,14 @@ class PackageDescription(SPDXEntryMaybeStrMultilines):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#719-package-detailed-description-field>`_
     """
 
-    json_entry_key = "description"
+    entry_key: str = "PackageDescription"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "description"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageDescription | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageDescription` from a :class:`dict`.
 
         By default, :const:`None` is returned.
@@ -983,7 +1085,7 @@ class PackageDescription(SPDXEntryMaybeStrMultilines):
         """
         desc: str | None = obj.get(cls.get_json_entry_key())
         if desc is not None:
-            return PackageDescription(desc)
+            return cls(desc)
         return None
 
 
@@ -994,10 +1096,14 @@ class PackageComment(SPDXEntryMaybeStrMultilines):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#720-package-comment-field>`_
     """
 
-    json_entry_key = "comment"
+    entry_key: str = "PackageComment"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "comment"
+    """JSON entry key (allow class override)"""
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> PackageComment | None:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self | None:
         """Initialize a :class:`PackageComment` from a :class:`dict`.
 
         By default, :const:`None` is returned.
@@ -1011,7 +1117,7 @@ class PackageComment(SPDXEntryMaybeStrMultilines):
         """
         comment: str | None = obj.get(cls.get_json_entry_key())
         if comment is not None:
-            return PackageComment(comment)
+            return cls(comment)
         return None
 
 
@@ -1055,7 +1161,11 @@ class ExternalRef(SPDXEntry):
     <https://spdx.github.io/spdx-spec/v2.3/package-information/#721-external-reference-field>`_
     """
 
-    json_entry_key = "externalRefs"
+    entry_key: str = "ExternalRef"
+    """Tag:Value entry key (allow class override)"""
+
+    json_entry_key: str = "externalRefs"
+    """JSON entry key (allow class override)"""
 
     def __init__(
         self,
@@ -1090,7 +1200,7 @@ class ExternalRef(SPDXEntry):
         }
 
     @classmethod
-    def from_dict(cls, external_ref_dict: dict[str, str]) -> ExternalRef:
+    def from_dict(cls, external_ref_dict: dict[str, str]) -> Self:
         """Initialize an :class:`ExternalRef` from a :class:`dict`.
 
         :param external_ref_dict: A :class:`dict` containing the
@@ -1101,12 +1211,14 @@ class ExternalRef(SPDXEntry):
         :return: The :class:`ExternalRef` initialized with the value
             of *external_ref_dict*.
         """
-        return ExternalRef(
-            reference_category=ExternalRefCategory(
-                external_ref_dict["referenceCategory"]
-            ),
-            reference_type=external_ref_dict["referenceType"],
-            reference_locator=external_ref_dict["referenceLocator"],
+        er_dict: dict = external_ref_dict
+        if cls.json_entry_key in er_dict:
+            er_dict = er_dict.get(cls.json_entry_key, {})
+
+        return cls(
+            reference_category=ExternalRefCategory(er_dict["referenceCategory"]),
+            reference_type=er_dict["referenceType"],
+            reference_locator=er_dict["referenceLocator"],
         )
 
 
@@ -1329,6 +1441,9 @@ class Relationship(SPDXEntry):
     <https://spdx.github.io/spdx-spec/v2.3/relationships-between-SPDX-elements/#111-relationship-field>`_.
     """
 
+    entry_key: str = "Relationship"
+    """Tag:Value entry key (allow class override)"""
+
     def __init__(
         self,
         spdx_element_id: SPDXID,
@@ -1390,7 +1505,7 @@ class Relationship(SPDXEntry):
         }
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> Relationship:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`Relationship` from a :class:`dict`.
 
         :param obj: A :class:`dict` which key is this class' JSON entry key,
@@ -1400,7 +1515,7 @@ class Relationship(SPDXEntry):
         :return: The :class:`Relationship` initialized with the value
             of *obj*.
         """
-        return Relationship(
+        return cls(
             spdx_element_id=SPDXID.from_json_dict(
                 {SPDXID.get_json_entry_key(): obj.get("spdxElementId")}
             ),
@@ -1530,7 +1645,7 @@ class Package(SPDXSection):
     description: PackageDescription | None = field(default=None)
 
     @classmethod
-    def from_json_dict(cls, package_dict: dict[str, Any]) -> Package:
+    def from_json_dict(cls, package_dict: dict[str, Any]) -> Self:
         """Initialize a :class:`Package` from a :class:`dict`.
 
         :param package_dict: A :class:`dict` containing JSON elements to
@@ -1547,7 +1662,7 @@ class Package(SPDXSection):
             external_refs = []
             for ext_ref_dict in package_dict.get(ExternalRef.get_json_entry_key(), {}):
                 external_refs.append(ExternalRef.from_dict(ext_ref_dict))
-        pkg: Package = Package(
+        pkg: Self = cls(
             name=PackageName.from_json_dict(package_dict),
             spdx_id=SPDXID.from_json_dict(package_dict),
             version=PackageVersion.from_json_dict(package_dict),
@@ -1591,7 +1706,7 @@ class DocumentInformation(SPDXSection):
         self.document_namespace = DocumentNamespace(f"{self.document_name}-{uuid4()}")
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> DocumentInformation:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`DocumentInformation` from a :class:`dict`.
 
         :param obj: A :class:`dict` containing JSON elements to initialize this
@@ -1600,9 +1715,7 @@ class DocumentInformation(SPDXSection):
         :return: The :class:`DocumentInformation` initialized with the values of
             *obj*.
         """
-        res: DocumentInformation = DocumentInformation(
-            DocumentName(obj.get("name", ""))
-        )
+        res: Self = cls(DocumentName(obj.get("name", "")))
         if DocumentNamespace.get_json_entry_key() in obj:
             res.document_namespace = DocumentNamespace.from_json_dict(obj)
         if SPDXVersion.get_json_entry_key() in obj:
@@ -1631,7 +1744,7 @@ class CreationInformation(SPDXSection):
         )
 
     @classmethod
-    def from_json_dict(cls, obj: dict[str, Any]) -> CreationInformation:
+    def from_json_dict(cls, obj: dict[str, Any]) -> Self:
         """Initialize a :class:`CreationInformation` from a :class:`dict`.
 
         :param obj: A :class:`dict` containing JSON elements to initialize this
@@ -1640,26 +1753,23 @@ class CreationInformation(SPDXSection):
         :return: The :class:`CreationInformation` initialized with the values of
             *obj*.
         """
+        ci_dict: dict = obj
         if "creationInfo" in obj:
-            ci_dict: dict = obj.get("creationInfo", {})
-            creators: list[Creator] = []
-            for entity in ci_dict.get(Creator.json_entry_key, []):
-                creator: Creator | None = Creator.from_json_dict(
-                    {Creator.get_json_entry_key(): entity}
-                )
-                if creator is not None:
-                    creators.append(creator)
-            creation_info: CreationInformation = CreationInformation(
-                license_list_version=LicenseListVersion.from_json_dict(ci_dict),
-                creators=creators,
+            ci_dict = obj.get("creationInfo", {})
+        creators: list[Creator] = []
+        for entity in ci_dict.get(Creator.json_entry_key, []):
+            creator: Creator | None = Creator.from_json_dict(
+                {Creator.get_json_entry_key(): entity}
             )
-            if Created.get_json_entry_key() in ci_dict:
-                creation_info.created_now = Created.from_json_dict(ci_dict)
-            return creation_info
-        return CreationInformation(
-            license_list_version=LicenseListVersion(LicenseListVersion.VERSION),
-            creators=[Creator(NOASSERTION)],
+            if creator is not None:
+                creators.append(creator)
+        creation_info: Self = cls(
+            license_list_version=LicenseListVersion.from_json_dict(ci_dict),
+            creators=creators,
         )
+        if Created.get_json_entry_key() in ci_dict:
+            creation_info.created_now = Created.from_json_dict(ci_dict)
+        return creation_info
 
 
 class Document:
@@ -1846,7 +1956,7 @@ class Document:
         return output
 
     @classmethod
-    def from_json_dict(cls, doc_dict: dict[str, Any]) -> Document:
+    def from_json_dict(cls, doc_dict: dict[str, Any]) -> Self:
         """Create a :class:`Document` out of a JSON :class:`dict`.
 
         This may be used when initializing a :class:`Document` from an SPDX
@@ -1879,7 +1989,7 @@ class Document:
             if entity is not None:
                 creators.append(entity)
 
-        doc: Document = Document(
+        doc: Self = cls(
             document_name=doc_dict.get("name", ""),
             creators=creators,
         )
