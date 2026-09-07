@@ -3,6 +3,7 @@
 import io
 import os
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 from typing import IO, Any
@@ -15,8 +16,55 @@ import e3.fs
 import e3.log
 import e3.os.fs
 
+E3_ARCHIVE_EXTENSIONS: list[str] = [".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"]
 
-@pytest.mark.parametrize("ext", [".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".zip"])
+
+@pytest.mark.parametrize("ext", E3_ARCHIVE_EXTENSIONS)
+def test_bandit_b202(ext: str) -> None:
+    """Test bandit B202 on e3.archive."""
+    archive_name: str = f"test_b202{ext}"
+
+    # Create a tarball with ".." everywhere
+    e3.fs.mkdir("archive")
+    e3.fs.mkdir("archive/dir1")
+    with Path("archive/dir1/file1").open(mode="w") as f:
+        f.write("file1")
+    e3.fs.mkdir("archive/dir2/")
+    with Path("archive/dir2/file2").open(mode="w") as f:
+        f.write("file2")
+    dest = Path.cwd()
+    os.chdir("archive/dir1")
+    e3.archive.create_archive(filename=archive_name, from_dir="..", dest=dest)
+    os.chdir(dest)
+
+    # Make sure e3.archive.unpack_archive() unpacks it caring about the ".."
+    # issues.
+    os.chdir(dest)
+    e3.fs.mkdir("unpack/level1")
+    if hasattr(tarfile, "data_filter") and ext != ".zip":
+        # this fails on error when data_filter exist.
+        with pytest.raises(e3.archive.ArchiveError):
+            e3.archive.unpack_archive(
+                Path(dest, archive_name), Path(dest, "unpack/level1")
+            )
+    else:
+        # When using the members filtering, invalid paths are filtered out, no
+        # exception is raised.
+        e3.archive.unpack_archive(Path(dest, archive_name), Path(dest, "unpack/level1"))
+    # As we packed with (for instance) "../dir1/file1", make sure that none of
+    # - unpack/dir1
+    # - unpack/dir2
+    # exist.
+
+    assert Path("unpack/dir1").exists() is False, (
+        "Directory unpack/dir1 should not exist"
+    )
+    assert Path("unpack/dir2").exists() is False, (
+        "Directory unpack/dir2 should not exist"
+    )
+
+
+@pytest.mark.parametrize("ext", E3_ARCHIVE_EXTENSIONS)
 def test_unpack(ext: str) -> None:
     """Test unpack."""
     dir_to_pack = str(Path(__file__).parent)
@@ -57,7 +105,7 @@ def test_unpack(ext: str) -> None:
             e3.archive.unpack_archive(
                 str(dest / archive_name),
                 str(dest / "dest3"),
-                selected_files=(Path(test_dir, "*.py"),),
+                selected_files=(Path(test_dir, "*.py").as_posix(),),
                 remove_root_dir=True,
             )
 
@@ -157,13 +205,17 @@ def test_unpack_cmd() -> None:
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
     class TestResult:
+        kwargs: dict
+
         def store_result(self, **kwargs: Any) -> None:
             self.kwargs = kwargs
 
     t = TestResult()
 
-    def custom_unpack(filename: str, dest: str, selected_files: list[str]) -> None:
-        t.store_result(f=filename, d=dest, s=selected_files)
+    def custom_unpack(
+        filename: str, unpack_dest: str, selected_files: list[str]
+    ) -> None:
+        t.store_result(f=filename, d=unpack_dest, s=selected_files)
 
     e3.archive.unpack_archive(
         str(dest / archive_name),
@@ -198,13 +250,15 @@ def test_unpack_cmd_fileobj() -> None:
     # Use a custom unpack function and verify that it is called with
     # the expected arguments
     class TestResult:
+        kwargs: dict
+
         def store_result(self, **kwargs: Any) -> None:
             self.kwargs = kwargs
 
     t = TestResult()
 
-    def custom_unpack(filename: str, dest: str, fileobj: IO[bytes]) -> None:
-        t.store_result(f=filename, d=dest, fo=fileobj)
+    def custom_unpack(filename: str, unpack_dest: str, fileobj: IO[bytes]) -> None:
+        t.store_result(f=filename, d=unpack_dest, fo=fileobj)
 
     fo.seek(0)
     e3.archive.unpack_archive(
