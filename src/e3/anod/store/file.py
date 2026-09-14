@@ -68,7 +68,7 @@ logger = getLogger("e3.anod.store.buildinfo")
 class Resource:
     """The resource information about a file.
 
-    :ivar id: The resource id (generaly the sha1 of the file).
+    :ivar id: The resource id (generally the sha1 of the file).
     :ivar path: The resource path (Where the file is located).
     :ivar size: The file size.
     :ivar creation_date: The creation date of this resource.
@@ -150,7 +150,7 @@ class File:
         :param build_info: see corresponding attribute (default is None).
         :param metadata: see corresponding attribute (default is None).
         :param store: a store instance.
-        :param resource_path: the path of the file in the current computer. Generaly
+        :param resource_path: the path of the file in the current computer. Generally
             used to create a file to push.
         :param unpack_dir: the directory to unpack the file (if the file is an archive).
         :param resource: a Resource dataclass. Use to link the current file object with
@@ -439,7 +439,7 @@ class File:
                 msg = f"unpacked resource directory {self.unpack_dir} does not exist"
                 raise StoreError(msg)
 
-            if unpack_dir is None or not Path(str(unpack_dir)).is_dir():
+            if unpack_dir is None or not Path(unpack_dir).is_dir():
                 msg = f"target directory {unpack_dir} does not exist"
                 raise StoreError(msg)
 
@@ -599,7 +599,7 @@ class File:
                 name=data["name"],
                 resource_id=data["resource_id"],
                 filename=data["filename"],
-                internal=bool(internal),
+                internal=internal,
                 alias=data.get("alias"),
                 revision=data.get("revision", ""),
                 metadata=data.get("metadata"),
@@ -671,7 +671,7 @@ class File:
             raise StoreError(msg) from e
 
     def save_to_meta_file(self, dest_dir: str, name: str) -> None:
-        """Dump as json file component information.
+        """Dump as JSON file component information.
 
         :param dest_dir: directory in which the metadata file should be saved
         :param name: file basename
