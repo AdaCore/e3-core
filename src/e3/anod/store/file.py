@@ -780,10 +780,6 @@ class File:
                 continue
             val = getattr(other, attr_name)
             if val != attr_val:
-                logger.debug(
-                    f"File attribute {attr_name!r} is different: "
-                    f"other.{attr_name} = {val!r}, self.{attr_name} = {attr_val!r}"
-                )
                 return False
         return True
 
