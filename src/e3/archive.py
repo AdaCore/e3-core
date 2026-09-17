@@ -81,6 +81,7 @@ class E3ZipFile(zipfile.ZipFile):
         :param path: directory to extract to
         :param pwd: password for encrypted files
         """
+        # noinspection protected-member
         result = super()._extract_member(member, path, pwd)  # type: ignore[misc]
 
         if sys.platform != "win32":
@@ -319,12 +320,18 @@ def unpack_archive(  # noqa: PLR0915
                             else:
                                 # At least remove some problematic paths.
                                 for member in members:
+                                    dest_path: Path = Path(destination)
                                     member_path: Path = Path(member.name)
                                     if member_path.is_absolute():
                                         logger.error(
                                             f"Ignoring absolute path {member.name}"
                                         )
-                                    elif ".." in member_path.parts:
+                                    elif (
+                                        ".."
+                                        in (dest_path / member.name)
+                                        .relative_to(dest_path)
+                                        .parts
+                                    ):
                                         logger.error(
                                             f"Ignoring traversal path {member.name}"
                                         )
@@ -348,6 +355,24 @@ def unpack_archive(  # noqa: PLR0915
                                     check_selected.discard(pattern)
                                     return True
                             return False
+
+                        def custom_data_filter(
+                            member: tarfile.TarInfo, destination: str
+                        ) -> tarfile.TarInfo:
+                            """Filter tarfile member.
+
+                            Assume the above filter_invalid_paths() has been
+                            called already, we may return all members.
+
+                            :param member: The tarfile member to filter.
+                            :param destination: The destination path to extract
+                                to.
+
+                            :return: Always return *member* (without any actual
+                                filtering).
+                            """
+                            del destination
+                            return member
 
                         dirs: list[str] = []
 
@@ -377,9 +402,15 @@ def unpack_archive(  # noqa: PLR0915
                         else:
                             member_list = fd.getmembers()
 
-                        # Use filter="data" is available.
-                        if hasattr(tarfile, "data_filter"):
-                            fd.extractall(tmp_dest, members=member_list, filter="data")
+                        if sys.version_info < (3, 12):
+                            # There is no filter parameter before 3.12.
+                            fd.extractall(  # noqa: S202
+                                path=tmp_dest,
+                                members=filter_invalid_paths(
+                                    destination=tmp_dest,
+                                    members=member_list,
+                                ),
+                            )
                         else:
                             fd.extractall(  # noqa: S202
                                 path=tmp_dest,
@@ -387,6 +418,7 @@ def unpack_archive(  # noqa: PLR0915
                                     destination=tmp_dest,
                                     members=member_list,
                                 ),
+                                filter=custom_data_filter,
                             )
 
                 except tarfile.TarError as e:
