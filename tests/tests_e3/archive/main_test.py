@@ -2,8 +2,8 @@
 
 import io
 import os
+import stat
 import sys
-import tarfile
 import tempfile
 from pathlib import Path
 from typing import IO, Any
@@ -35,22 +35,12 @@ def test_bandit_b202(ext: str) -> None:
     dest = Path.cwd()
     os.chdir("archive/dir1")
     e3.archive.create_archive(filename=archive_name, from_dir="..", dest=dest)
-    os.chdir(dest)
 
     # Make sure e3.archive.unpack_archive() unpacks it caring about the ".."
     # issues.
     os.chdir(dest)
     e3.fs.mkdir("unpack/level1")
-    if hasattr(tarfile, "data_filter") and ext != ".zip":
-        # this fails on error when data_filter exist.
-        with pytest.raises(e3.archive.ArchiveError):
-            e3.archive.unpack_archive(
-                Path(dest, archive_name), Path(dest, "unpack/level1")
-            )
-    else:
-        # When using the members filtering, invalid paths are filtered out, no
-        # exception is raised.
-        e3.archive.unpack_archive(Path(dest, archive_name), Path(dest, "unpack/level1"))
+    e3.archive.unpack_archive(Path(dest, archive_name), Path(dest, "unpack/level1"))
     # As we packed with (for instance) "../dir1/file1", make sure that none of
     # - unpack/dir1
     # - unpack/dir2
@@ -62,6 +52,37 @@ def test_bandit_b202(ext: str) -> None:
     assert Path("unpack/dir2").exists() is False, (
         "Directory unpack/dir2 should not exist"
     )
+
+
+@pytest.mark.parametrize("ext", E3_ARCHIVE_EXTENSIONS)
+def test_filtered_permissions(ext: str) -> None:
+    """Test file permissions are preserved even with filtering."""
+    archive_name: str = f"test_filtered_permissions{ext}"
+    file_mode: int = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
+    # Create a tarball with ".." everywhere
+    e3.fs.mkdir("archive")
+    e3.fs.mkdir("archive/dir1")
+    first_file: Path = Path("archive/dir1/file1")
+    with first_file.open(mode="w") as f:
+        f.write("file1")
+    first_file.chmod(mode=file_mode)
+    dest = Path.cwd()
+    os.chdir("archive")
+    e3.archive.create_archive(filename=archive_name, from_dir=".", dest=dest)
+
+    # Make sure e3.archive.unpack_archive() unpacks it caring about the file
+    # permissions.
+    os.chdir(dest)
+    e3.fs.mkdir("unpack")
+    e3.archive.unpack_archive(Path(dest, archive_name), Path(dest, "unpack"))
+
+    st = Path("unpack/dir1/file1").stat()
+    # Seems like zip is not aware of file permissions (at least on Windows)
+    if ext == ".zip" and sys.platform == "win32":
+        # Ignore file permissions with zip on Windows.
+        pass
+    else:
+        assert st.st_mode & 0o777 == file_mode, "Invalid unpacked file permissions"
 
 
 @pytest.mark.parametrize("ext", E3_ARCHIVE_EXTENSIONS)
