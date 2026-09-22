@@ -19,7 +19,13 @@ class MavenLink:
     _DEFAULT_SESSION = Session()
 
     def __init__(
-        self, group: str, name: str, version: str, *, session: Session | None = None
+        self,
+        group: str,
+        name: str,
+        version: str,
+        *,
+        base_url: str | None = None,
+        session: Session | None = None,
     ) -> None:
         """Maven download link metadata.
 
@@ -27,7 +33,9 @@ class MavenLink:
         :param name: The package name.
         :param version: The package version.
         :param session: The session object to use to make HTTP requests.
+        :param base_url: The base URL to use to re-create the download URL.
         """
+        base_url = base_url or self.BASE_URL
         filename = f"{name}-{version}.jar"
         self.session = session or self._DEFAULT_SESSION
         self.filename = filename
@@ -35,9 +43,7 @@ class MavenLink:
         self.package_name = name
         self.name = f"{group}/{name}"
         self.version = version
-        self.url = (
-            f"{self.BASE_URL}/{group.replace('.', '/')}/{name}/{version}/{filename}"
-        )
+        self.url = f"{base_url}/{group.replace('.', '/')}/{name}/{version}/{filename}"
         self.pom_url = f"{self.url[:-4]}.pom"
 
         self.__pkg_checksum = False
@@ -113,14 +119,21 @@ class MavenLinksParser:
     """Parser for Maven repository metadata XML to extract package links."""
 
     def __init__(
-        self, group: str, name: str, *, session: Session | None = None
+        self,
+        group: str,
+        name: str,
+        *,
+        base_url: str = MavenLink.BASE_URL,
+        session: Session | None = None,
     ) -> None:
         """Create the MavenLinksParser.
 
         :param group: The package group.
         :param name: The package name.
+        :param base_url: The base URL to use to re-create the download URL.
         :param session: The session object to use to make HTTP requests.
         """
+        self.base_url = base_url or MavenLink.BASE_URL
         self.links: list[MavenLink] = []
         self.group = group
         self.name = name
@@ -159,7 +172,11 @@ class MavenLinksParser:
 
         self.links.append(
             MavenLink(
-                group=self.group, name=self.name, version=text, session=self.session
+                group=self.group,
+                name=self.name,
+                version=text,
+                base_url=self.base_url,
+                session=self.session,
             )
         )
         self.__version_already_done.add(text)
@@ -244,7 +261,6 @@ class Maven:
                 msg = f"'{group}/{name}' maven-metadata.xml: no checksum provided"
                 raise RuntimeError(msg)
 
-            self.cache[name] = (
-                MavenLinksParser(group, name, session=session).feed(request.text).links
-            )
+            parser = MavenLinksParser(group, name, base_url=self.url, session=session)
+            self.cache[name] = parser.feed(request.text).links
         return self.cache[name]
