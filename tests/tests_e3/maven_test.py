@@ -4,13 +4,33 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from e3.maven import Maven
+from e3.maven import Maven, MavenLinksParser
 
 if TYPE_CHECKING:
     from tests_e3.conftest import MavenCentralSimulator
 
 # Expected number of Maven artifact links
 EXPECTED_ARTIFACT_LINKS = 4
+
+
+def test_maven_linksparser_base_url() -> None:
+    """Test MavenLinksParser base_url parameter."""
+    parser = MavenLinksParser("test.e3.mvn", "e3mvn", base_url="https://foobar")
+    parser.feed("""
+<metadata>
+    <groupId>test.e3.mvn</groupId>
+    <artifactId>e3mvn</artifactId>
+    <versioning>
+        <versions>
+            <latest>1.0</latest>
+            <version>1.0</version>
+        </versions>
+    </versioning>
+</metadata>
+""")
+
+    assert len(parser.links) == 1
+    assert parser.links[0].url.startswith("https://foobar")
 
 
 def test_maven(maven_central: MavenCentralSimulator) -> None:
