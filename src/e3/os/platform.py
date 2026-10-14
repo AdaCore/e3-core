@@ -279,7 +279,7 @@ class SystemInfo:
                         version = "2022"
                     else:
                         version = "2025"
-                elif build_number > WINDOWS_BUILD_11:
+                elif build_number >= WINDOWS_BUILD_11:
                     version = "11"
                     full_version = "11.0"
                 else:
