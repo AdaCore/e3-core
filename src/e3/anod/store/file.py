@@ -268,8 +268,8 @@ class File:
                     id=self.resource_id,
                     path=self.downloaded_as,
                     size=p.stat().st_size,
-                    creation_date=datetime.now(timezone.utc).strftime(
-                        "%Y-%m-%dT%H:%M:%f+00:00"
+                    creation_date=datetime.now(timezone.utc).isoformat(
+                        timespec="milliseconds"
                     ),
                 )
 
