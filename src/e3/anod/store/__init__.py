@@ -8,6 +8,7 @@ import os
 import sqlite3
 import time
 from collections.abc import Sequence
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -248,9 +249,7 @@ class _Store:
             "    build_id TEXT NOT NULL UNIQUE,"
             "    build_date TEXT NOT NULL,"
             "    setup TEXT NOT NULL,"
-            "    creation_date TEXT NOT NULL DEFAULT("
-            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "    ),"
+            "    creation_date TEXT NOT NULL,"
             "    build_version TEXT NOT NULL,"
             "    isready INTEGER NOT NULL DEFAULT 0 CHECK(isready in (0, 1))"
             ")"
@@ -261,9 +260,7 @@ class _Store:
             "    resource_id TEXT NOT NULL UNIQUE,"
             "    path TEXT NOT NULL,"
             "    size INTEGER NOT NULL,"
-            "    creation_date TEXT NOT NULL DEFAULT("
-            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "    )"
+            "    creation_date TEXT NOT NULL"
             ")"
         )
         self.cursor.execute(
@@ -278,9 +275,7 @@ class _Store:
             "    resource_id TEXT NOT NULL,"
             "    revision TEXT NOT NULL,"
             "    metadata TEXT NOT NULL,"
-            "    creation_date TEXT NOT NULL DEFAULT("
-            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "    )"
+            "    creation_date TEXT NOT NULL"
             ")"
         )
         self.cursor.execute(
@@ -313,9 +308,7 @@ class _Store:
             "    version TEXT NOT NULL,"
             "    specname TEXT,"  # Can be Null
             "    build_id TEXT NOT NULL,"
-            "    creation_date TEXT NOT NULL DEFAULT("
-            "        STRFTIME('%Y-%m-%dT%H:%M:%f+00:00', 'now')"
-            "    ),"
+            "    creation_date TEXT NOT NULL,"
             "    is_valid INTEGER NOT NULL DEFAULT 1 CHECK(is_valid in (0, 1)),"
             "    is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published in (0, 1)),"
             # Component has at least one file
@@ -1056,6 +1049,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "version",
                 "specname",
                 "build_id",
+                "creation_date",
                 "is_valid",
                 "is_published",
                 "readme_id",
@@ -1068,6 +1062,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 component_info["version"],
                 component_info.get("specname"),
                 component_build_id,
+                datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
                 int(component_info.get("is_valid", True)),
                 int(component_info.get("is_published", False)),
                 readme_id or None,
@@ -1148,9 +1143,16 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "build_id",
                 "build_date",
                 "setup",
+                "creation_date",
                 "build_version",
             ],
-            [unique_id(), date, setup, version],
+            [
+                unique_id(),
+                date,
+                setup,
+                datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+                version,
+            ],
         )
         self.connection.commit()
         return self._tuple_to_buildinfo(req_tuple)  # type: ignore[arg-type]
@@ -1164,11 +1166,16 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
         req_tuple = self._insert_or_update(
             _Store.TableName.buildinfos,
             f"INSERT INTO {_Store.TableName.buildinfos}("  # noqa: S608
-            "   build_id, build_date, setup, build_version"
+            "   build_id, build_date, setup, creation_date, build_version"
             ") "
-            "  SELECT ?, build_date, ?, build_version"
+            "  SELECT ?, build_date, ?, ?, build_version"
             f"       FROM {_Store.TableName.buildinfos} WHERE build_id=?",
-            [unique_id(), dest_setup, bid],
+            [
+                unique_id(),
+                dest_setup,
+                datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+                bid,
+            ],
         )
         self.connection.commit()
         return self._tuple_to_buildinfo(req_tuple)  # type: ignore[arg-type]
@@ -1272,6 +1279,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             ["resource_id"],  # type: ignore[arg-type]
             [resource_id],
         )
+
         if resource_tmp:
             rid, resource_id, path, *rest = resource_tmp[0]
             # Check if the path is still valid, if not, we got a new valid path,
@@ -1291,11 +1299,12 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
             resource = self._tuple_to_resource(
                 self._insert(  # type: ignore[arg-type]
                     _Store.TableName.resources,
-                    ["resource_id", "path", "size"],  # type: ignore[arg-type]
+                    ["resource_id", "path", "size", "creation_date"],  # type: ignore[arg-type]
                     [
                         resource_id,
                         resource_path,
                         Path(resource_path).stat().st_size,
+                        datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
                     ],
                 )
             )
@@ -1313,6 +1322,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 "resource_id",
                 "revision",
                 "metadata",
+                "creation_date",
             ],
             [
                 unique_id(),
@@ -1324,6 +1334,7 @@ class StoreWriteOnly(_StoreWrite, StoreWriteInterface):
                 resource_id,
                 file_info["revision"],
                 json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}",
+                datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
             ],
         )
         res = self._tuple_to_file(
@@ -2018,7 +2029,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
                 "resource_id",
                 "revision",
                 "metadata",
-                # No creation_date, this is not part of a File representation.
+                "creation_date",
             ],
             [
                 file_info["_id"],
@@ -2030,6 +2041,7 @@ class LocalStore(StoreRW, LocalStoreInterface):
                 resource_id,
                 file_info["revision"],
                 json.dumps(file_info["metadata"]) if file_info["metadata"] else "{}",
+                datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
             ],
         )
         # As get_source_info looks backward the final build id associated  with the
